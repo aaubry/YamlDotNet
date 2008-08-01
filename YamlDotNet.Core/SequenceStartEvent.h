@@ -15,13 +15,18 @@ namespace YamlDotNet {
 			String^ anchor;
 			String^ tag;
 			ScalarStyle style;
+			bool isImplicit;
 
 		internal:
 			SequenceStartEvent(const yaml_event_t* nativeEvent);
 			virtual void CreateEvent(yaml_event_t* nativeEvent) override;
 
 		public:
-			SequenceStartEvent(String^ anchor, String^ tag, ScalarStyle style);
+			SequenceStartEvent();
+			SequenceStartEvent(String^ tag);
+			SequenceStartEvent(String^ tag, String^ anchor);
+			SequenceStartEvent(String^ tag, String^ anchor, ScalarStyle style);
+			SequenceStartEvent(String^ tag, String^ anchor, ScalarStyle style, bool isImplicit);
 			virtual ~SequenceStartEvent();
 
 			virtual property String^ Anchor {

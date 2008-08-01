@@ -9,10 +9,32 @@ namespace YamlDotNet {
 			: YamlEvent(nativeEvent)
 		{
 			style = (ScalarStyle)nativeEvent->data.scalar.style;
+			isPlainImplicit = nativeEvent->data.scalar.plain_implicit != 0;
+			isQuotedImplicit = nativeEvent->data.scalar.quoted_implicit != 0;
 		}
 
-		ScalarEvent::ScalarEvent(String^ _anchor, String^ _tag, String^ _value, ScalarStyle _style)
-			: anchor(_anchor), tag(_tag), value(_value), style(_style)
+		ScalarEvent::ScalarEvent(String^ _value)
+			: value(_value), tag(nullptr), anchor(nullptr), style(ScalarStyle::Plain), isPlainImplicit(true), isQuotedImplicit(true)
+		{
+		}
+
+		ScalarEvent::ScalarEvent(String^ _value, String^ _tag)
+			: value(_value), tag(_tag), anchor(nullptr), style(ScalarStyle::Plain), isPlainImplicit(true), isQuotedImplicit(true)
+		{
+		}
+
+		ScalarEvent::ScalarEvent(String^ _value, String^ _tag, String^ _anchor)
+			: value(_value), tag(_tag), anchor(_anchor), style(ScalarStyle::Plain), isPlainImplicit(true), isQuotedImplicit(true)
+		{
+		}
+
+		ScalarEvent::ScalarEvent(String^ _value, String^ _tag, String^ _anchor, ScalarStyle _style)
+			: value(_value), tag(_tag), anchor(_anchor), style(_style), isPlainImplicit(true), isQuotedImplicit(true)
+		{
+		}
+
+		ScalarEvent::ScalarEvent(String^ _value, String^ _tag, String^ _anchor, ScalarStyle _style, bool _isPlainImplicit, bool _isQuotedImplicit)
+			: value(_value), tag(_tag), anchor(_anchor), style(_style), isPlainImplicit(_isPlainImplicit), isQuotedImplicit(_isQuotedImplicit)
 		{
 		}
 
@@ -50,19 +72,11 @@ namespace YamlDotNet {
 		}
 
 		bool ScalarEvent::IsPlainImplicit::get() {
-			if(NativeEvent != NULL) {
-				return NativeEvent->data.scalar.plain_implicit != 0;
-			} else {
-				return false;
-			}
+			return isPlainImplicit;
 		}
 
 		bool ScalarEvent::IsQuotedImplicit::get() {
-			if(NativeEvent != NULL) {
-				return NativeEvent->data.scalar.quoted_implicit != 0;
-			} else {
-				return false;
-			}
+			return isQuotedImplicit;
 		}
 
 		ScalarStyle ScalarEvent::Style::get() {

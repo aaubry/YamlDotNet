@@ -12,13 +12,16 @@ namespace YamlDotNet {
 		{
 		private:
 			YamlVersion version;
+			bool isImplicit;
 
 		internal:
 			DocumentStartEvent(const yaml_event_t* nativeEvent);
 			virtual void CreateEvent(yaml_event_t* nativeEvent) override;
 
 		public:
+			DocumentStartEvent();
 			DocumentStartEvent(YamlVersion version);
+			DocumentStartEvent(YamlVersion version, bool isImplicit);
 			virtual ~DocumentStartEvent();
 
 			property YamlVersion Version {

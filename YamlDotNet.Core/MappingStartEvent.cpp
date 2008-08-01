@@ -9,10 +9,31 @@ namespace YamlDotNet {
 			: YamlEvent(nativeEvent)
 		{
 			style = (ScalarStyle)nativeEvent->data.mapping_start.style;
+			isImplicit = nativeEvent->data.mapping_start.implicit != 0;
 		}
 
-		MappingStartEvent::MappingStartEvent(String^ _anchor, String^ _tag, ScalarStyle _style)
-			: anchor(_anchor), tag(_tag), style(_style)
+		MappingStartEvent::MappingStartEvent()
+			: tag(nullptr), anchor(nullptr), style(ScalarStyle::Plain), isImplicit(true)
+		{
+		}
+
+		MappingStartEvent::MappingStartEvent(String^ _tag)
+			: tag(_tag), anchor(nullptr), style(ScalarStyle::Plain), isImplicit(true)
+		{
+		}
+
+		MappingStartEvent::MappingStartEvent(String^ _tag, String^ _anchor)
+			: tag(_tag), anchor(_anchor), style(ScalarStyle::Plain), isImplicit(true)
+		{
+		}
+
+		MappingStartEvent::MappingStartEvent(String^ _tag, String^ _anchor, ScalarStyle _style)
+			: tag(_tag), anchor(_anchor), style(_style), isImplicit(true)
+		{
+		}
+
+		MappingStartEvent::MappingStartEvent(String^ _tag, String^ _anchor, ScalarStyle _style, bool _isImplicit)
+			: tag(_tag), anchor(_anchor), style(_style), isImplicit(_isImplicit)
 		{
 		}
 
@@ -35,11 +56,7 @@ namespace YamlDotNet {
 		}
 
 		bool MappingStartEvent::IsImplicit::get() {
-			if(NativeEvent != NULL) {
-				return NativeEvent->data.mapping_start.implicit != 0;
-			} else {
-				return false;
-			}
+			return isImplicit;
 		}
 
 		ScalarStyle MappingStartEvent::Style::get() {

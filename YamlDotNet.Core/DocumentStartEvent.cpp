@@ -10,10 +10,21 @@ namespace YamlDotNet {
 			if(nativeEvent->data.document_start.version_directive != NULL) {
 				version = YamlVersion(nativeEvent->data.document_start.version_directive);
 			}
+			isImplicit = nativeEvent->data.document_start.implicit != 0;
+		}
+
+		DocumentStartEvent::DocumentStartEvent()
+			: version(1, 1), isImplicit(true)
+		{
 		}
 
 		DocumentStartEvent::DocumentStartEvent(YamlVersion _version)
-			: version(_version)
+			: version(_version), isImplicit(true)
+		{
+		}
+
+		DocumentStartEvent::DocumentStartEvent(YamlVersion _version, bool _isImplicit)
+			: version(_version), isImplicit(_isImplicit)
 		{
 		}
 
@@ -26,11 +37,7 @@ namespace YamlDotNet {
 		}
 
 		bool DocumentStartEvent::IsImplicit::get() {
-			if(NativeEvent != NULL) {
-				return NativeEvent->data.document_start.implicit != 0;
-			} else {
-				return false;
-			}
+			return isImplicit;
 		}
 
 		String^ DocumentStartEvent::ToString() {

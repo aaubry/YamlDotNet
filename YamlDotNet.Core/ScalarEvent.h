@@ -16,13 +16,19 @@ namespace YamlDotNet {
 			String^ tag;
 			String^ value;
 			ScalarStyle style;
+			bool isPlainImplicit;
+			bool isQuotedImplicit;
 
 		internal:
 			ScalarEvent(const yaml_event_t* nativeEvent);
 			virtual void CreateEvent(yaml_event_t* nativeEvent) override;
 
 		public:
-			ScalarEvent(String^ anchor, String^ tag, String^ value, ScalarStyle style);
+			ScalarEvent(String^ value);
+			ScalarEvent(String^ value, String^ tag);
+			ScalarEvent(String^ value, String^ tag, String^ anchor);
+			ScalarEvent(String^ value, String^ tag, String^ anchor, ScalarStyle style);
+			ScalarEvent(String^ value, String^ tag, String^ anchor, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit);
 			virtual ~ScalarEvent();
 
 			virtual property String^ Anchor {
