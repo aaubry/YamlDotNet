@@ -9,7 +9,7 @@ namespace YamlDotNet.RepresentationModel
     /// <summary>
     /// Reads events from a sequence of <see cref="YamlEvent" />.
     /// </summary>
-    internal class EventReader : IDisposable
+    internal class EventReader
     {
         private readonly Parser parser;
         private bool endOfStream;
@@ -79,16 +79,5 @@ namespace YamlDotNet.RepresentationModel
                 throw new EndOfStreamException();
             }
         }
-
-        #region IDisposable Members
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            endOfStream = true;
-            GC.SuppressFinalize(this);
-        }
-        #endregion
     }
 }

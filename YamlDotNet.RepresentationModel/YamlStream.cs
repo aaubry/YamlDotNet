@@ -34,16 +34,14 @@ namespace YamlDotNet.RepresentationModel
 
             using (Parser parser = new Parser(input))
             {
-                using (EventReader events = new EventReader(parser))
+				EventReader events = new EventReader(parser);
+                events.Expect<StreamStartEvent>().Dispose();
+                while (!events.Accept<StreamEndEvent>())
                 {
-                    events.Expect<StreamStartEvent>().Dispose();
-                    while (!events.Accept<StreamEndEvent>())
-                    {
-                        YamlDocument document = new YamlDocument(events);
-                        documents.Add(document);
-                    }
-                    events.Expect<StreamEndEvent>().Dispose();
+                    YamlDocument document = new YamlDocument(events);
+                    documents.Add(document);
                 }
+                events.Expect<StreamEndEvent>().Dispose();
             }
         }
 

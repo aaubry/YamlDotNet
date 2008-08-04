@@ -42,8 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />
+    <Compile Include="TestDocuments.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.vcproj">

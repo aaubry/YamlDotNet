@@ -198,15 +198,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			using(Parser parser = new Parser(stream))
 			{
-				using(EventReader reader = new EventReader(parser))
-				{
-					reader.Expect<StreamStartEvent>().Dispose();
-					reader.Expect<DocumentStartEvent>().Dispose();
-					object result = DeserializeValue(reader, serializedType);
-					reader.Expect<DocumentEndEvent>().Dispose();
-					reader.Expect<StreamEndEvent>().Dispose();
-					return result;
-				}
+				EventReader reader = new EventReader(parser);
+				reader.Expect<StreamStartEvent>().Dispose();
+				reader.Expect<DocumentStartEvent>().Dispose();
+				object result = DeserializeValue(reader, serializedType);
+				reader.Expect<DocumentEndEvent>().Dispose();
+				reader.Expect<StreamEndEvent>().Dispose();
+				return result;
 			}
 		}
 
