@@ -3,21 +3,42 @@ using MbUnit.Framework;
 using YamlDotNet.Core;
 using System.IO;
 using System.Text;
+using System.Drawing;
+using YamlDotNet.RepresentationModel.Serialization;
+using System.Reflection;
 
 namespace YamlDotNet.UnitTests.RepresentationModel {
 	[TestFixture]
 	public class YamlStreamTests {
+		private MemoryStream output;
+
+		[SetUp]
+		public void SetUp()
+		{
+			output = new MemoryStream();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			if(output.Length > 0)
+			{
+				output.Position = 0;
+				Console.Write(new StreamReader(output).ReadToEnd());
+			}
+		}
+
 		[Test]
 		public void Test()
 		{
 			const string Document = @"- Mark McGwire
 - Sammy Sosa
 - Ken Griffey
+- !!null
 ";
 
 			using (Parser parser = new Parser(new MemoryStream(Encoding.UTF8.GetBytes(Document))))
 			{
-				MemoryStream output = new MemoryStream();
 				using (Emitter emitter = new Emitter(output))
 				{
 					while (parser.MoveNext())
@@ -27,8 +48,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel {
 						parser.Current.Dispose();
 					}
 				}
-				output.Position = 0;
-				Console.Write(new StreamReader(output).ReadToEnd());
 			}
 		}
 
@@ -47,7 +66,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel {
 			StreamEndEvent
 			*/
 
-			MemoryStream output = new MemoryStream();
 			using (Emitter emitter = new Emitter(output))
 			{
 				emitter.Emit(new StreamStartEvent(Encoding.UTF8));
@@ -60,8 +78,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel {
 				emitter.Emit(new DocumentEndEvent());
 				emitter.Emit(new StreamEndEvent());
 			}
-			output.Position = 0;
-			Console.Write(new StreamReader(output).ReadToEnd());
 		}
 
 		[Test]
@@ -79,7 +95,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel {
 			StreamEndEvent
 			*/
 
-			MemoryStream output = new MemoryStream();
 			using (Emitter emitter = new Emitter(output))
 			{
 				emitter.Emit(new StreamStartEvent(Encoding.UTF8));
@@ -92,8 +107,145 @@ namespace YamlDotNet.UnitTests.RepresentationModel {
 				emitter.Emit(new DocumentEndEvent());
 				emitter.Emit(new StreamEndEvent());
 			}
-			output.Position = 0;
-			Console.Write(new StreamReader(output).ReadToEnd());
+		}
+
+		private class X
+		{
+			private bool myFlag;
+
+			public bool MyFlag
+			{
+				get
+				{
+					return myFlag;
+				}
+				set
+				{
+					myFlag = value;
+				}
+			}
+
+			private string nothing;
+
+			public string Nothing
+			{
+				get
+				{
+					return nothing;
+				}
+				set
+				{
+					nothing = value;
+				}
+			}
+
+			private int myInt = 1234;
+
+			public int MyInt
+			{
+				get
+				{
+					return myInt;
+				}
+				set
+				{
+					myInt = value;
+				}
+			}
+
+			private double myDouble = 6789.1011;
+
+			public double MyDouble
+			{
+				get
+				{
+					return myDouble;
+				}
+				set
+				{
+					myDouble = value;
+				}
+			}
+
+			private string myString = "Hello world";
+
+			public string MyString
+			{
+				get
+				{
+					return myString;
+				}
+				set
+				{
+					myString = value;
+				}
+			}
+
+			private DateTime myDate = DateTime.Now;
+
+			public DateTime MyDate
+			{
+				get
+				{
+					return myDate;
+				}
+				set
+				{
+					myDate = value;
+				}
+			}
+
+			private Point myPoint = new Point(100, 200);
+
+			public Point MyPoint
+			{
+				get
+				{
+					return myPoint;
+				}
+				set
+				{
+					myPoint = value;
+				}
+			}
+	
+		}
+
+		[Test]
+		public void SerializeObject()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(X));
+			serializer.Serialize(output, new X());
+
+			serializer = new YamlSerializer(typeof(X), YamlSerializerOptions.Roundtrip);
+			serializer.Serialize(output, new X());
+		}
+
+		[Test]
+		public void Roundtrip()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerOptions.Roundtrip);
+
+			using(MemoryStream buffer = new MemoryStream())
+			{
+				X original = new X();
+				serializer.Serialize(buffer, original);
+
+				buffer.Position = 0;
+				X copy = (X)serializer.Deserialize(buffer);
+
+				foreach(PropertyInfo property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+				{
+					if(property.CanRead && property.CanWrite)
+					{
+						Assert.AreEqual(
+							property.GetValue(original, null),
+							property.GetValue(copy, null),
+							string.Format("Property '{0}' is incorrect", property.Name)
+						);
+					}
+				}
+			}
 		}
 	}
 }

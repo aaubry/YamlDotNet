@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
+using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -33,7 +34,15 @@ namespace YamlDotNet.RepresentationModel
         {
             if (!Accept<T>())
             {
-                throw new YamlException();
+				// TODO: Throw a better exception
+                throw new YamlException(
+					string.Format(
+						CultureInfo.InvariantCulture,
+						"Expected '{0}', got '{1}'.",
+						typeof(T).Name,
+						parser.Current.GetType().Name
+					)
+				);
             }
             T yamlEvent = (T)parser.Current;
             MoveNext();

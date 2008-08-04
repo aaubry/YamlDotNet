@@ -45,6 +45,8 @@
     <Compile Include="DuplicateAnchorException.cs" />
     <Compile Include="EventReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\YamlSerializer.cs" />
+    <Compile Include="Serialization\YamlSerializerOptions.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />
