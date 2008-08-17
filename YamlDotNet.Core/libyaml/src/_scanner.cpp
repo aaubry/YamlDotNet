@@ -67,7 +67,7 @@
  *
  *      %YAML   1.1
  *      %TAG    !   !foo
- *      %TAG    !yaml!  tag:yaml.org,2002:
+ *      %TAG    !yaml! tag:yaml.org,2002:
  *      ---
  *
  * The correspoding sequence of tokens:

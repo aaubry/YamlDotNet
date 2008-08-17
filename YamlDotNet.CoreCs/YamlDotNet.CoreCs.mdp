@@ -1,0 +1,67 @@
+<Project name="YamlDotNet.CoreCs" fileversion="2.0" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
+  <Configurations active="Debug">
+    <Configuration name="Debug" ctype="DotNetProjectConfiguration">
+      <Output directory="bin/Debug" assembly="YamlDotNet.CoreCs" />
+      <Build debugmode="True" target="Library" />
+      <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" definesymbols="DEBUG" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+    </Configuration>
+    <Configuration name="Release" ctype="DotNetProjectConfiguration">
+      <Output directory="bin/Release" assembly="YamlDotNet.CoreCs" />
+      <Build debugmode="False" target="Library" />
+      <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+    </Configuration>
+  </Configurations>
+  <Contents>
+    <File name="AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="Parser.cs" subtype="Code" buildaction="Compile" />
+    <File name="SimpleKey.cs" subtype="Code" buildaction="Compile" />
+    <File name="ParserState.cs" subtype="Code" buildaction="Compile" />
+    <File name="Mark.cs" subtype="Code" buildaction="Compile" />
+    <File name="ParserException.cs" subtype="Code" buildaction="Compile" />
+    <File name="Scanner.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens" subtype="Directory" buildaction="Compile" />
+    <File name="Tokens/Token.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/Alias.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/Anchor.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/BlockEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/BlockEntry.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/BlockMappingStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/BlockSequenceStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/DocumentEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/DocumentStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/FlowEntry.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/FlowMappingEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/FlowMappingStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/FlowSequenceEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/FlowSequenceStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/Key.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/Scalar.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/StreamEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/StreamStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/Tag.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/TagDirective.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/Value.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/VersionDirective.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/Alias.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/DocumentEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/DocumentStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/Event.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/MappingEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/MappingStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/Scalar.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/SequenceEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/SequenceStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/StreamEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/StreamStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/INodeEvent.cs" subtype="Code" buildaction="Compile" />
+    <File name="SyntaxErrorException.cs" subtype="Code" buildaction="Compile" />
+    <File name="Version.cs" subtype="Code" buildaction="Compile" />
+    <File name="LookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/ScalarStyle.cs" subtype="Code" buildaction="Compile" />
+  </Contents>
+  <References>
+    <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  </References>
+</Project>

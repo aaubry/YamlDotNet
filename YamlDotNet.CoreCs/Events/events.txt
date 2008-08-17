@@ -1,0 +1,41 @@
+    public class AliasEvent : YamlEvent
+
+    public class DocumentEndEvent : YamlEvent
+
+    public class DocumentStartEvent : YamlEvent
+
+    public class Emitter : IDisposable
+
+    public interface INodeEvent
+
+    public class MappingEndEvent : YamlEvent
+
+    public class MappingStartEvent : YamlEvent, INodeEvent
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Mark
+
+    public class Parser : IDisposable
+
+    public class ScalarEvent : YamlEvent, INodeEvent
+
+    public enum ScalarStyle
+
+    public class SequenceEndEvent : YamlEvent
+
+    public class SequenceStartEvent : YamlEvent, INodeEvent
+
+    public class StreamEndEvent : YamlEvent
+
+    public class StreamStartEvent : YamlEvent
+
+    [StructLayout(LayoutKind.Sequential, Size=1), NativeCppClass, DebugInfoInPDB, MiscellaneousBits(0x40)]
+    internal struct StringConverter
+
+    public abstract class YamlEvent : IDisposable
+
+    [Serializable]
+    public class YamlException : Exception
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct YamlVersion
