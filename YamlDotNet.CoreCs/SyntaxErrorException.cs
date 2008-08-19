@@ -7,7 +7,7 @@ namespace YamlDotNet.CoreCs
 	{
 		
 		public SyntaxErrorException(string description, Mark location)
-			: base(string.Format(CultureInfo.InvariantCulture, "{0} On line {1}, column {2}", description, location.Line, location.Column))
+			: base(string.Format(CultureInfo.InvariantCulture, "{0} On line {1}, column {2}", description, location.Line + 1, location.Column + 1))
 		{
 		}
 	}

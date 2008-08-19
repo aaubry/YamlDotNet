@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using  YamlDotNet.UnitTests;
+using YamlDotNet.UnitTests;
 
 namespace Test
 {
@@ -9,7 +9,7 @@ namespace Test
 	{
 		public static void Main() {
 			ScannerTests tests = new ScannerTests();
-			tests.VerifyTokensOnExample7();
+			tests.VerifyTokensOnExample14();
 		}
 	}
 }

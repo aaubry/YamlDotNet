@@ -12,7 +12,7 @@ namespace YamlDotNet.CoreCs
 		private const int MaxVersionNumberLength = 9;
 		
 		private Stack<int> indents = new Stack<int>();
-		private Queue<Token> tokens = new Queue<Token>();
+		private InsertionQueue<Token> tokens = new InsertionQueue<Token>();
 		private Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
 		private bool streamStartProduced = false;
 		private bool streamEndProduced = false;
@@ -70,8 +70,8 @@ namespace YamlDotNet.CoreCs
 		
 		public Scanner(TextReader input) {
 			buffer = new LookAheadBuffer(input, MaxBufferLength);
-			mark.Column = 1;
-			mark.Line = 1;
+			mark.Column = 0;
+			mark.Line = 0;
 		}
 		
 		private Token current;
@@ -140,8 +140,38 @@ namespace YamlDotNet.CoreCs
 			}
 		}
 		
-		private void yaml_parser_stale_simple_keys() {
-			// TODO: To be implemented
+		private bool StartsWith(StringBuilder what, char start) {
+			return what.Length > 0 && what[0] == start;
+		}
+		
+		/*
+		 * Check the list of potential simple keys and remove the positions that
+		 * cannot contain simple keys anymore.
+		 */
+
+		private void yaml_parser_stale_simple_keys()
+		{
+			/* Check for a potential simple key for each flow level. */
+
+			foreach (SimpleKey key in simpleKeys) {
+				/*
+				 * The specification requires that a simple key
+				 *
+				 *  - is limited to a single line,
+				 *  - is shorter than 1024 characters.
+				 */
+
+				if (key.IsPossible && (key.Mark.Line < mark.Line || key.Mark.Index + 1024 < mark.Index)) {
+
+					/* Check if the potential simple key to be removed is required. */
+
+					if (key.IsRequired) {
+						throw new SyntaxErrorException("While scanning a simple key, could not found expected ':'.", mark);
+					}
+
+					key.IsPossible = false;
+				}
+			}
 		}
 		
 		private void yaml_parser_fetch_next_token()
@@ -184,7 +214,7 @@ namespace YamlDotNet.CoreCs
 
 			/* Is it a directive? */
 
-			if (mark.Column == 1 && Check('%')) {
+			if (mark.Column == 0 && Check('%')) {
 				yaml_parser_fetch_directive();
 				return;
 			}
@@ -192,13 +222,13 @@ namespace YamlDotNet.CoreCs
 			/* Is it the document start indicator? */
 
 			bool isDocumentStart =
-				mark.Column == 1 &&
+				mark.Column == 0 &&
 				Check('-', 0) &&
 				Check('-', 1) &&
 				Check('-', 2) &&
 				IsBlankOrBreakOrZero(3);
 				
-			if (IsDocumentIndicator()) {
+			if (isDocumentStart) {
 				yaml_parser_fetch_document_indicator(true);
 				return;
 			}
@@ -206,7 +236,7 @@ namespace YamlDotNet.CoreCs
 			/* Is it the document end indicator? */
 
 			bool isDocumentEnd =
-				mark.Column == 1 &&
+				mark.Column == 0 &&
 				Check('.', 0) &&
 				Check('.', 1) &&
 				Check('.', 2) &&
@@ -394,7 +424,7 @@ namespace YamlDotNet.CoreCs
 		}
 
 		private bool IsDocumentIndicator(int offset) {
-			if (mark.Column == 1 && IsBlankOrBreakOrZero(3)) {
+			if (mark.Column == 0 && IsBlankOrBreakOrZero(3)) {
 				bool isDocumentStart = Check('-', 0) && Check('-', 1) && Check('-', 2);
 				bool isDocumentEnd = Check('.', 0) && Check('.', 1) && Check('.', 2);
 
@@ -629,15 +659,15 @@ namespace YamlDotNet.CoreCs
 		private void SkipLine() {
 			if(IsCrLf()) {
 				mark.Index += 2;
-				mark.Column = 1;
+				mark.Column = 0;
 				++mark.Line;
 				buffer.Skip(2);
 			} else if(IsBreak()) {
 				++mark.Index;
-				mark.Column = 1;
+				mark.Column = 0;
 				++mark.Line;
 				buffer.Skip(1);
-			} else {
+			} else if(!IsZero()) {
 				throw new InvalidOperationException("Not at a break.");
 			}
 		}
@@ -749,8 +779,8 @@ namespace YamlDotNet.CoreCs
 		private void yaml_parser_fetch_stream_end() {
 			/* Force new line. */
 
-			if (mark.Column != 1) {
-				mark.Column = 1;
+			if (mark.Column != 0) {
+				mark.Column = 0;
 				++mark.Line;
 			}
 
@@ -982,20 +1012,219 @@ namespace YamlDotNet.CoreCs
 			}
 		}
 		
-		private void yaml_parser_fetch_flow_entry() {
-			throw new NotImplementedException();
+		/*
+		 * Produce the FLOW-ENTRY token.
+		 */
+
+		private void yaml_parser_fetch_flow_entry()
+		{
+			/* Reset any potential simple keys on the current flow level. */
+
+			yaml_parser_remove_simple_key();
+				
+			/* Simple keys are allowed after ','. */
+
+			simpleKeyAllowed = true;
+
+			/* Consume the token. */
+
+			Mark start = mark;
+			Skip();
+
+			/* Create the FLOW-ENTRY token and append it to the queue. */
+
+			tokens.Enqueue(new FlowEntry(start, mark));
 		}
 
-		private void yaml_parser_fetch_block_entry() {
-			throw new NotImplementedException();
+		/*
+		 * Produce the BLOCK-ENTRY token.
+		 */
+
+		private void yaml_parser_fetch_block_entry()
+		{
+			/* Check if the scanner is in the block context. */
+
+			if (flowLevel == 0)
+			{
+				/* Check if we are allowed to start a new entry. */
+
+				if (!simpleKeyAllowed) {
+					throw new SyntaxErrorException("Block sequence entries are not allowed in this context.", mark);
+				}
+
+				/* Add the BLOCK-SEQUENCE-START token if needed. */
+				yaml_parser_roll_indent(mark.Column, -1, true, mark);
+			}
+			else
+			{
+				/*
+				 * It is an error for the '-' indicator to occur in the flow context,
+				 * but we let the Parser detect and report about it because the Parser
+				 * is able to point to the context.
+				 */
+			}
+
+			/* Reset any potential simple keys on the current flow level. */
+
+			yaml_parser_remove_simple_key();
+
+			/* Simple keys are allowed after '-'. */
+
+			simpleKeyAllowed = true;
+
+			/* Consume the token. */
+
+			Mark start = mark;
+			Skip();
+
+			/* Create the BLOCK-ENTRY token and append it to the queue. */
+
+			tokens.Enqueue(new BlockEntry(start, mark));
 		}
 
-		private void yaml_parser_fetch_key() {
-			throw new NotImplementedException();
+		/*
+		 * Produce the KEY token.
+		 */
+
+		private void yaml_parser_fetch_key()
+		{
+			/* In the block context, additional checks are required. */
+
+			if (flowLevel == 0)
+			{
+				/* Check if we are allowed to start a new key (not nessesary simple). */
+
+				if (!simpleKeyAllowed) {
+					throw new SyntaxErrorException("Mapping keys are not allowed in this context.", mark);
+				}
+
+				/* Add the BLOCK-MAPPING-START token if needed. */
+
+				yaml_parser_roll_indent(mark.Column, -1, false, mark);
+			}
+
+			/* Reset any potential simple keys on the current flow level. */
+
+			yaml_parser_remove_simple_key();
+
+			/* Simple keys are allowed after '?' in the block context. */
+
+			simpleKeyAllowed = flowLevel == 0;
+
+			/* Consume the token. */
+
+			Mark start = mark;
+			Skip();
+			
+			/* Create the KEY token and append it to the queue. */
+
+			tokens.Enqueue(new Key(start, mark));
 		}
 
-		private void yaml_parser_fetch_value() {
-			throw new NotImplementedException();
+		/*
+		 * Produce the VALUE token.
+		 */
+
+		private void yaml_parser_fetch_value()
+		{
+			SimpleKey simpleKey = simpleKeys.Peek();
+
+			/* Have we found a simple key? */
+
+			if (simpleKey.IsPossible)
+			{
+				/* Create the KEY token and insert it into the queue. */
+
+				tokens.Insert(simpleKey.TokenNumber - tokensParsed, new Key(simpleKey.Mark, simpleKey.Mark));
+
+				/* In the block context, we may need to add the BLOCK-MAPPING-START token. */
+
+				yaml_parser_roll_indent(simpleKey.Mark.Column, simpleKey.TokenNumber, false, simpleKey.Mark);
+
+				/* Remove the simple key. */
+
+				simpleKey.IsPossible = false;
+
+				/* A simple key cannot follow another simple key. */
+
+				simpleKeyAllowed = false;
+			}
+			else
+			{
+				/* The ':' indicator follows a complex key. */
+
+				/* In the block context, extra checks are required. */
+
+				if (flowLevel == 0)
+				{
+					/* Check if we are allowed to start a complex value. */
+
+					if (!simpleKeyAllowed) {
+						throw new SyntaxErrorException("Mapping values are not allowed in this context.", mark);
+					}
+
+					/* Add the BLOCK-MAPPING-START token if needed. */
+
+					yaml_parser_roll_indent(mark.Column, -1, false, mark);
+				}
+
+				/* Simple keys after ':' are allowed in the block context. */
+
+				simpleKeyAllowed = flowLevel == 0;
+			}
+
+			/* Consume the token. */
+
+			Mark start = mark;
+			Skip();
+
+			/* Create the VALUE token and append it to the queue. */
+
+			tokens.Enqueue(new Value(start, mark));
+		}
+
+		/*
+		 * Push the current indentation level to the stack and set the new level
+		 * the current column is greater than the indentation level.  In this case,
+		 * append or insert the specified token into the token queue.
+		 * 
+		 */
+
+		private void yaml_parser_roll_indent(int column, int number, bool isSequence, Mark mark)
+		{
+			/* In the flow context, do nothing. */
+
+			if (flowLevel > 0) {
+				return;
+			}
+
+			if (indent < column)
+			{
+				/*
+				 * Push the current indentation level to the stack and set the new
+				 * indentation level.
+				 */
+
+				indents.Push(indent);
+				
+				indent = column;
+
+				/* Create a token and insert it into the queue. */
+
+				Token token;
+				if(isSequence) {
+					token = new BlockSequenceStart(mark, mark);
+				} else {
+					token = new BlockMappingStart(mark, mark);
+				}
+				
+				if (number == -1) {
+					tokens.Enqueue(token);
+				}
+				else {
+					tokens.Insert(number - tokensParsed, token);
+				}
+			}
 		}
 
 		/*
@@ -1160,12 +1389,252 @@ namespace YamlDotNet.CoreCs
 
 			return new Tag(handle, suffix, start, mark);
 		}
-
 			
-		private void yaml_parser_fetch_block_scalar(bool isLiteral) {
-			throw new NotImplementedException();
+		/*
+		 * Produce the SCALAR(...,literal) or SCALAR(...,folded) tokens.
+		 */
+
+		private void yaml_parser_fetch_block_scalar(bool isLiteral)
+		{
+			/* Remove any potential simple keys. */
+
+			yaml_parser_remove_simple_key();
+
+			/* A simple key may follow a block scalar. */
+
+			simpleKeyAllowed = true;
+
+			/* Create the SCALAR token and append it to the queue. */
+
+			tokens.Enqueue(yaml_parser_scan_block_scalar(isLiteral));
 		}
 
+		/*
+		 * Scan a block scalar.
+		 */
+
+		Token yaml_parser_scan_block_scalar(bool isLiteral)
+		{
+			StringBuilder value = new StringBuilder();
+			StringBuilder leadingBreak = new StringBuilder();
+			StringBuilder trailingBreaks = new StringBuilder();
+			
+			int chomping = 0;
+			int increment = 0;
+			int currentIndent = 0;
+			bool leadingBlank = false;
+			bool trailingBlank = false;
+
+			/* Eat the indicator '|' or '>'. */
+
+			Mark start = mark;
+
+			Skip();
+
+			/* Check for a chomping indicator. */
+
+			if (Check("+-"))
+			{
+				/* Set the chomping method and eat the indicator. */
+
+				chomping = Check('+') ? +1 : -1;
+
+				Skip();
+
+				/* Check for an indentation indicator. */
+
+				if (IsDigit())
+				{
+					/* Check that the intendation is greater than 0. */
+
+					if (Check('0')) {
+						throw new SyntaxErrorException("While scanning a block scalar, found an intendation indicator equal to 0.", start);
+					}
+
+					/* Get the intendation level and eat the indicator. */
+
+					increment = AsDigit();
+
+					Skip();
+				}
+			}
+
+			/* Do the same as above, but in the opposite order. */
+
+			else if (IsDigit())
+			{
+				if (Check('0')) {
+					throw new SyntaxErrorException("While scanning a block scalar, found an intendation indicator equal to 0.", start);
+				}
+
+				increment = AsDigit();
+
+				Skip();
+
+				if (Check("+-")) {
+					chomping = Check('+') ? +1 : -1;
+
+					Skip();
+				}
+			}
+
+			/* Eat whitespaces and comments to the end of the line. */
+
+			while (IsBlank()) {
+				Skip();
+			}
+
+			if (Check('#')) {
+				while (!IsBreakOrZero()) {
+					Skip();
+				}
+			}
+
+			/* Check if we are at the end of the line. */
+
+			if (!IsBreakOrZero()) {
+				throw new SyntaxErrorException("While scanning a block scalar, did not found expected comment or line break.", start);
+			}
+
+			/* Eat a line break. */
+
+			if (IsBreak()) {
+				SkipLine();
+			}
+
+			Mark end = mark;
+
+			/* Set the intendation level if it was specified. */
+
+			if (increment != 0) {
+				currentIndent = indent >= 0 ? indent + increment : increment;
+			}
+
+			/* Scan the leading line breaks and determine the indentation level if needed. */
+
+			currentIndent = yaml_parser_scan_block_scalar_breaks(currentIndent, trailingBreaks, start, ref end);
+
+			/* Scan the block scalar content. */
+
+			while (mark.Column == currentIndent && !IsZero())
+			{
+				/*
+				 * We are at the beginning of a non-empty line.
+				 */
+
+				/* Is it a trailing whitespace? */
+
+				trailingBlank = IsBlank();
+
+				/* Check if we need to fold the leading line break. */
+			
+				if (!isLiteral && StartsWith(leadingBreak, '\n') && !leadingBlank && !trailingBlank)
+				{
+					/* Do we need to join the lines by space? */
+
+					if (trailingBreaks.Length == 0) {
+						value.Append(' ');
+					}
+
+					leadingBreak.Length = 0;
+				}
+				else {
+					value.Append(leadingBreak.ToString());
+					leadingBreak.Length = 0;
+				}
+		
+				/* Append the remaining line breaks. */
+
+				value.Append(trailingBreaks.ToString());
+				trailingBreaks.Length = 0;
+
+				/* Is it a leading whitespace? */
+
+				leadingBlank = IsBlank();
+
+				/* Consume the current line. */
+
+				while (!IsBreakOrZero()) {
+					value.Append(ReadCurrentCharacter());
+				}
+
+				/* Consume the line break. */
+
+				leadingBreak.Append(ReadLine());
+
+				/* Eat the following intendation spaces and line breaks. */
+
+				currentIndent = yaml_parser_scan_block_scalar_breaks(currentIndent, trailingBreaks, start, ref end);
+			}
+
+			/* Chomp the tail. */
+
+			if (chomping != -1) {
+				value.Append(leadingBreak);
+			}
+			if (chomping == 1) {
+				value.Append(trailingBreaks);
+			}
+
+			/* Create a token. */
+
+			ScalarStyle style = isLiteral ? ScalarStyle.Literal : ScalarStyle.Folded;
+			return new Scalar(value.ToString(), style, start, end);
+		}
+
+		/*
+		 * Scan intendation spaces and line breaks for a block scalar.  Determine the
+		 * intendation level if needed.
+		 */
+
+		private int yaml_parser_scan_block_scalar_breaks(int currentIndent, StringBuilder breaks, Mark start, ref Mark end)
+		{
+			int maxIndent = 0;
+
+			end = mark;
+
+			/* Eat the intendation spaces and line breaks. */
+
+			for(;;)
+			{
+				/* Eat the intendation spaces. */
+
+				while ((currentIndent == 0 || mark.Column < currentIndent) && IsSpace()) {
+					Skip();
+				}
+
+				if (mark.Column > maxIndent) {
+					maxIndent = mark.Column;
+				}
+
+				/* Check for a tab character messing the intendation. */
+
+				if ((currentIndent == 0 || mark.Column < currentIndent) && IsTab()) {
+					throw new SyntaxErrorException("While scanning a block scalar, found a tab character where an intendation space is expected.", start);
+				}
+
+				/* Have we found a non-empty line? */
+
+				if (!IsBreak()) {
+					break;
+				}
+
+				/* Consume the line break. */
+
+				breaks.Append(ReadLine());
+
+				end = mark;
+			}
+
+			/* Determine the indentation level if needed. */
+
+			if (currentIndent == 0) {
+				currentIndent = Math.Max(maxIndent, Math.Max(indent + 1, 1));
+			}
+
+			return currentIndent;
+		}
+		
 		/*
 		 * Produce the SCALAR(...,single-quoted) or SCALAR(...,double-quoted) tokens.
 		 */
@@ -1367,7 +1836,7 @@ namespace YamlDotNet.CoreCs
 				{
 					/* Do we need to fold line breaks? */
 
-					if (leadingBreak.Length > 0 && leadingBreak[0] == '\n') {
+					if (StartsWith(leadingBreak, '\n')) {
 						if (trailingBreaks.Length == 0) {
 							value.Append(' ');
 						}
@@ -1412,14 +1881,14 @@ namespace YamlDotNet.CoreCs
 
 			/* Create the SCALAR token and append it to the queue. */
 
-				tokens.Enqueue(yaml_parser_scan_plain_scalar());
+			tokens.Enqueue(yaml_parser_scan_plain_scalar());
 		}
 		
 		/*
 		 * Scan a plain scalar.
 		 */
 
-			private Token yaml_parser_scan_plain_scalar()
+		private Token yaml_parser_scan_plain_scalar()
 		{
 			StringBuilder value = new StringBuilder();
 			StringBuilder whitespaces = new StringBuilder();
@@ -1471,7 +1940,7 @@ namespace YamlDotNet.CoreCs
 						{
 							/* Do we need to fold line breaks? */
 
-							if (leadingBreak.Length > 0 && leadingBreak[0] == '\n') {
+							if (StartsWith(leadingBreak, '\n')) {
 								if (trailingBreaks.Length == 0) {
 									value.Append(' ');
 								}
@@ -1517,7 +1986,7 @@ namespace YamlDotNet.CoreCs
 					{
 						/* Check for tab character that abuse intendation. */
 
-						if (hasLeadingBlanks && mark.Column < indent && IsTab()) {
+						if (hasLeadingBlanks && mark.Column < currentIndent && IsTab()) {
 							throw new SyntaxErrorException("While scanning a plain scalar, found a tab character that violate intendation.", start);
 						}
 
@@ -1549,7 +2018,7 @@ namespace YamlDotNet.CoreCs
 
 				/* Check intendation level. */
 
-				if (flowLevel == 0 && mark.Column < indent) {
+				if (flowLevel == 0 && mark.Column < currentIndent) {
 					break;
 				}
 			}

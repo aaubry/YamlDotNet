@@ -4,10 +4,10 @@ namespace YamlDotNet.CoreCs
 {
 	public class SimpleKey
 	{
-		public bool isPossible;
-		public bool isRequired;
-		public int tokenNumber;
-		public Mark mark;
+		private bool isPossible;
+		private bool isRequired;
+		private int tokenNumber;
+		private Mark mark;
 		
 		public bool IsPossible {
 			get {

@@ -202,5 +202,256 @@ namespace YamlDotNet.UnitTests
 			AssertNext(scanner, new StreamEnd());
 			AssertDoesNotHaveNext(scanner);
 		}
+		
+		[Test]
+		public void VerifyTokensOnExample8()
+		{
+			Scanner scanner = CreateScanner(@"
+				[item 1, item 2, item 3]
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new FlowSequenceStart());
+			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
+			AssertNext(scanner, new FlowEntry());
+			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
+			AssertNext(scanner, new FlowEntry());
+			AssertNext(scanner, new Scalar("item 3", ScalarStyle.Plain));
+			AssertNext(scanner, new FlowSequenceEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
+
+		[Test]
+		public void VerifyTokensOnExample9()
+		{
+			Scanner scanner = CreateScanner(@"
+				{
+					a simple key: a value,  # Note that the KEY token is produced.
+					? a complex key: another value,
+				}
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new FlowMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a simple key", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("a value", ScalarStyle.Plain));
+			AssertNext(scanner, new FlowEntry());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a complex key", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("another value", ScalarStyle.Plain));
+			AssertNext(scanner, new FlowEntry());
+			AssertNext(scanner, new FlowMappingEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
+
+		[Test]
+		public void VerifyTokensOnExample10()
+		{
+			Scanner scanner = CreateScanner(@"
+				- item 1
+				- item 2
+				-
+				  - item 3.1
+				  - item 3.2
+				-
+				  key 1: value 1
+				  key 2: value 2
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new BlockSequenceStart());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new BlockSequenceStart());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 3.1", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 3.2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
+	
+		[Test]
+		[Ignore("The original C code also fails this test")]
+		public void VerifyTokensOnExample11()
+		{
+			Scanner scanner = CreateScanner(@"
+				a simple key: a value   # The KEY token is produced here.
+				? a complex key
+				: another value
+				a mapping:
+				  key 1: value 1
+				  key 2: value 2
+				a sequence:
+				  - item 1
+				  - item 2
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a simple key", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("a value", ScalarStyle.Plain));
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a complex key", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("another value", ScalarStyle.Plain));
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a mappint", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a sequence", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new BlockSequenceStart());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
+	
+		[Test]
+		public void VerifyTokensOnExample12()
+		{
+			Scanner scanner = CreateScanner(@"
+				- - item 1
+				  - item 2
+				- key 1: value 1
+				  key 2: value 2
+				- ? complex key
+				  : complex value
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new BlockSequenceStart());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new BlockSequenceStart());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("complex key", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("complex value", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
+			
+		[Test]
+		public void VerifyTokensOnExample13()
+		{
+			Scanner scanner = CreateScanner(@"
+				? a sequence
+				: - item 1
+				  - item 2
+				? a mapping
+				: key 1: value 1
+				  key 2: value 2
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a sequence", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new BlockSequenceStart());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("a mapping", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
+			
+		[Test]
+		[Ignore("The original C code also fails this test")]
+		public void VerifyTokensOnExample14()
+		{
+			Scanner scanner = CreateScanner(@"
+				key:
+				- item 1    # BLOCK-SEQUENCE-START is NOT produced here.
+				- item 2
+			");
+			
+			AssertNext(scanner, new StreamStart());
+			AssertNext(scanner, new BlockMappingStart());
+			AssertNext(scanner, new Key());
+			AssertNext(scanner, new Scalar("key", ScalarStyle.Plain));
+			AssertNext(scanner, new Value());
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEntry());
+			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
+			AssertNext(scanner, new BlockEnd());
+			AssertNext(scanner, new StreamEnd());
+			AssertDoesNotHaveNext(scanner);
+		}
 	}
 }

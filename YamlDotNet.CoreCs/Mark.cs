@@ -20,7 +20,7 @@ namespace YamlDotNet.CoreCs
 			}
 			set {
 				if(value < 0) {
-					throw new ArgumentOutOfRangeException("Index", "Index must be greater or equal to zero.");
+					throw new ArgumentOutOfRangeException("Index", "Index must be greater than or equal to zero.");
 				}
 				index = value;
 			}
@@ -34,8 +34,8 @@ namespace YamlDotNet.CoreCs
 				return line;
 			}
 			set {
-				if(value <= 0) {
-					throw new ArgumentOutOfRangeException("Line", "Line must be greater than zero.");
+				if(value < 0) {
+					throw new ArgumentOutOfRangeException("Line", "Line must be greater than or equal to zero.");
 				}
 				line = value;
 			}
@@ -49,8 +49,8 @@ namespace YamlDotNet.CoreCs
 				return column;
 			}
 			set {
-				if(value <= 0) {
-					throw new ArgumentOutOfRangeException("Column", "Column must be greater than zero.");
+				if(value < 0) {
+					throw new ArgumentOutOfRangeException("Column", "Column must be greater than or equal to zero.");
 				}
 				column = value;
 			}
