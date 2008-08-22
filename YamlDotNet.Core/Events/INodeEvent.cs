@@ -1,7 +1,7 @@
 
 using System;
 
-namespace YamlDotNet.CoreCs.Events
+namespace YamlDotNet.Core.Events
 {
 	public interface INodeEvent
 	{

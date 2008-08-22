@@ -1,7 +1,7 @@
 
 using System;
 
-namespace YamlDotNet.CoreCs.Tokens
+namespace YamlDotNet.Core.Tokens
 {
 	public class BlockSequenceStart : Token {
 		public BlockSequenceStart()

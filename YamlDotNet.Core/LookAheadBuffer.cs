@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace YamlDotNet.CoreCs
+namespace YamlDotNet.Core
 {
 	/// <summary>
 	/// Provides access to a stream and allows to peek at the next characters,

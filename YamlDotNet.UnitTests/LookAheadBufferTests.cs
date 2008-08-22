@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
-using YamlDotNet.CoreCs;
-using YamlDotNet.CoreCs.Events;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.UnitTests
 {

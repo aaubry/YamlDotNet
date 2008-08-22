@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.CoreCs.Tokens
+namespace YamlDotNet.Core.Tokens
 {
 	public class Tag : Token {
 		private string handle;

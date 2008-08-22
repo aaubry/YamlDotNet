@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace YamlDotNet.CoreCs
+namespace YamlDotNet.Core
 {
 	public class SyntaxErrorException : Exception
 	{

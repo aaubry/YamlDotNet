@@ -1,7 +1,7 @@
 
 using System;
 
-namespace YamlDotNet.CoreCs
+namespace YamlDotNet.Core
 {
 	
 	

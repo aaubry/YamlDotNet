@@ -1,7 +1,7 @@
 
 using System;
 
-namespace YamlDotNet.CoreCs.Tokens
+namespace YamlDotNet.Core.Tokens
 {
 	public class TagDirective : Token {
 		private readonly string handle;
@@ -29,6 +29,17 @@ namespace YamlDotNet.CoreCs.Tokens
 		{
 			this.handle = handle;
 			this.prefix = prefix;
+		}
+		
+		public override bool Equals (object o)
+		{
+			TagDirective other = o as TagDirective;
+			return other != null && handle.Equals(other.handle) && prefix.Equals(other.prefix);
+		}
+		
+		public override int GetHashCode ()
+		{
+			return handle.GetHashCode() ^ prefix.GetHashCode();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.CoreCs.Events
+namespace YamlDotNet.Core.Events
 {
     public class SequenceStart : Event, INodeEvent
 	{

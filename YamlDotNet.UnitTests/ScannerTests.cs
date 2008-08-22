@@ -3,32 +3,14 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using NUnit.Framework;
-using YamlDotNet.CoreCs;
-using YamlDotNet.CoreCs.Tokens;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.UnitTests
 {
 	[TestFixture]
-	public class ScannerTests
+	public class ScannerTests : YamlTest
 	{
-		private TextReader YamlFile(string content) {
-			string[] lines = content.Split('\n');
-			StringBuilder buffer = new StringBuilder();
-			int indent = -1;
-			for(int i = 1; i < lines.Length - 1; ++i) {
-				if(indent < 0) {
-					indent = 0;
-					while(lines[i][indent] == '\t') {
-						++indent;
-					}
-				} else {
-					buffer.Append('\n');
-				}
-				buffer.Append(lines[i].Substring(indent));
-			}
-			return new StringReader(buffer.ToString());
-		}
-		
 		[Test]
 		public void MakeSureThatYamlFileWorks() {
 			TextReader file = YamlFile(@"
@@ -41,8 +23,8 @@ namespace YamlDotNet.UnitTests
 			string expected = "%YAML   1.1\n%TAG    !   !foo\n%TAG    !yaml!  tag:yaml.org,2002:\n---";
 			Assert.AreEqual(expected, file.ReadToEnd(), "The YamlFile method does not work properly.");
 		}
-		
-		private Scanner CreateScanner(string content) {
+
+		private static Scanner CreateScanner(string content) {
 			return new Scanner(YamlFile(content));
 		}
 		
@@ -83,7 +65,7 @@ namespace YamlDotNet.UnitTests
 			");
 			
 			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new VersionDirective(new CoreCs.Version(1, 1)));
+			AssertNext(scanner, new VersionDirective(new Core.Version(1, 1)));
 			AssertNext(scanner, new TagDirective("!", "!foo"));
 			AssertNext(scanner, new TagDirective("!yaml!", "tag:yaml.org,2002:"));
 			AssertNext(scanner, new DocumentStart());

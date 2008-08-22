@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.CoreCs
+namespace YamlDotNet.Core
 {
 	public class SimpleKey
 	{

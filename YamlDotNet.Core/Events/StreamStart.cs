@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace YamlDotNet.CoreCs.Events
+namespace YamlDotNet.Core.Events
 {
     public class StreamStart : Event
 	{

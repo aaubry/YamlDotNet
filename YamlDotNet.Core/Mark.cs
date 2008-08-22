@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.CoreCs
+namespace YamlDotNet.Core
 {
 	/// <summary>
 	/// Represents a location inside a file

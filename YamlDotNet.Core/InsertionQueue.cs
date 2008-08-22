@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace YamlDotNet.CoreCs
+namespace YamlDotNet.Core
 {
 	/// <summary>
 	/// Generic queue on which items may be inserted

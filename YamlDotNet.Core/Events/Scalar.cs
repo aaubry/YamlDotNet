@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.CoreCs.Events
+namespace YamlDotNet.Core.Events
 {
     public class Scalar : Event, INodeEvent
 	{
@@ -26,7 +26,12 @@ namespace YamlDotNet.CoreCs.Events
 			this.anchor = anchor;
 			this.tag = tag;
 		}
-		
+	
+		public Scalar(string anchor, string tag)
+			: this(anchor, tag, Mark.Empty, Mark.Empty)
+		{
+		}
+	
 		public Scalar() {
 		}
 	}

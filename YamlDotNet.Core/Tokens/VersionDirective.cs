@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.CoreCs.Tokens
+namespace YamlDotNet.Core.Tokens
 {
 	public class VersionDirective : Token {
 		private readonly Version version;
@@ -20,6 +20,18 @@ namespace YamlDotNet.CoreCs.Tokens
 			: base(start, end)
 		{
 			this.version = version;
+		}
+	
+		
+		public override bool Equals (object o)
+		{
+			VersionDirective other = o as VersionDirective;
+			return other != null && version.Equals(other.version);
+		}
+		
+		public override int GetHashCode ()
+		{
+			return version.GetHashCode();
 		}
 	}
 }

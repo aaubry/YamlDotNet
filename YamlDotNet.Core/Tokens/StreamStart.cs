@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace YamlDotNet.CoreCs.Tokens
+namespace YamlDotNet.Core.Tokens
 {
 	public class StreamStart : Token {
 		public StreamStart()

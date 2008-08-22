@@ -1,5 +1,5 @@
 using System;
-using YamlDotNet.CoreCs;
+using YamlDotNet.Core;
 using NUnit.Framework;
 
 namespace YamlDotNet.UnitTests

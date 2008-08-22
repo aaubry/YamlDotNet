@@ -97,7 +97,7 @@ namespace YamlDotNet {
 
 			static int
 			yaml_parser_parse_document_start(yaml_parser_t *parser, yaml_event_t *event,
-					int implicit);
+					int isImplicit);
 
 			static int
 			yaml_parser_parse_document_content(yaml_parser_t *parser, yaml_event_t *event);
@@ -345,7 +345,7 @@ namespace YamlDotNet {
 
 			static int
 			yaml_parser_parse_document_start(yaml_parser_t *parser, yaml_event_t *event,
-					int implicit)
+					int isImplicit)
 			{
 				yaml_token_t *token;
 				yaml_version_directive_t *version_directive = NULL;
@@ -359,7 +359,7 @@ namespace YamlDotNet {
 
 				/* Parse extra document end indicators. */
 
-				if (!implicit)
+				if (!isImplicit)
 				{
 					while (token->type == YAML_DOCUMENT_END_TOKEN) {
 						SKIP_TOKEN(parser);
@@ -368,9 +368,9 @@ namespace YamlDotNet {
 					}
 				}
 
-				/* Parse an implicit document. */
+				/* Parse an isImplicit document. */
 
-				if (implicit && token->type != YAML_VERSION_DIRECTIVE_TOKEN &&
+				if (isImplicit && token->type != YAML_VERSION_DIRECTIVE_TOKEN &&
 						token->type != YAML_TAG_DIRECTIVE_TOKEN &&
 						token->type != YAML_DOCUMENT_START_TOKEN &&
 						token->type != YAML_STREAM_END_TOKEN)
@@ -476,7 +476,7 @@ namespace YamlDotNet {
 			{
 				yaml_token_t *token;
 				yaml_mark_t start_mark, end_mark;
-				int implicit = 1;
+				int isImplicit = 1;
 
 				token = PEEK_TOKEN(parser);
 				if (!token) return 0;
@@ -486,7 +486,7 @@ namespace YamlDotNet {
 				if (token->type == YAML_DOCUMENT_END_TOKEN) {
 					end_mark = token->end_mark;
 					SKIP_TOKEN(parser);
-					implicit = 0;
+					isImplicit = 0;
 				}
 
 				while (!STACK_EMPTY(parser, parser->tag_directives)) {
@@ -496,7 +496,7 @@ namespace YamlDotNet {
 				}
 
 				parser->state = YAML_PARSE_DOCUMENT_START_STATE;
-				DOCUMENT_END_EVENT_INIT(*event, implicit, start_mark, end_mark);
+				DOCUMENT_END_EVENT_INIT(*event, isImplicit, start_mark, end_mark);
 
 				return 1;
 			}
@@ -540,7 +540,7 @@ namespace YamlDotNet {
 				yaml_char_t *tag_suffix = NULL;
 				yaml_char_t *tag = NULL;
 				yaml_mark_t start_mark, end_mark, tag_mark;
-				int implicit;
+				int isImplicit;
 
 				token = PEEK_TOKEN(parser);
 				if (!token) return 0;
@@ -633,11 +633,11 @@ namespace YamlDotNet {
 						}
 					}
 
-					implicit = (!tag || !*tag);
+					isImplicit = (!tag || !*tag);
 					if (indentless_sequence && token->type == YAML_BLOCK_ENTRY_TOKEN) {
 						end_mark = token->end_mark;
 						parser->state = YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE;
-						SEQUENCE_START_EVENT_INIT(*event, anchor, tag, implicit,
+						SEQUENCE_START_EVENT_INIT(*event, anchor, tag, isImplicit,
 								YAML_BLOCK_SEQUENCE_STYLE, start_mark, end_mark);
 						return 1;
 					}
@@ -664,28 +664,28 @@ namespace YamlDotNet {
 						else if (token->type == YAML_FLOW_SEQUENCE_START_TOKEN) {
 							end_mark = token->end_mark;
 							parser->state = YAML_PARSE_FLOW_SEQUENCE_FIRST_ENTRY_STATE;
-							SEQUENCE_START_EVENT_INIT(*event, anchor, tag, implicit,
+							SEQUENCE_START_EVENT_INIT(*event, anchor, tag, isImplicit,
 									YAML_FLOW_SEQUENCE_STYLE, start_mark, end_mark);
 							return 1;
 						}
 						else if (token->type == YAML_FLOW_MAPPING_START_TOKEN) {
 							end_mark = token->end_mark;
 							parser->state = YAML_PARSE_FLOW_MAPPING_FIRST_KEY_STATE;
-							MAPPING_START_EVENT_INIT(*event, anchor, tag, implicit,
+							MAPPING_START_EVENT_INIT(*event, anchor, tag, isImplicit,
 									YAML_FLOW_MAPPING_STYLE, start_mark, end_mark);
 							return 1;
 						}
 						else if (block && token->type == YAML_BLOCK_SEQUENCE_START_TOKEN) {
 							end_mark = token->end_mark;
 							parser->state = YAML_PARSE_BLOCK_SEQUENCE_FIRST_ENTRY_STATE;
-							SEQUENCE_START_EVENT_INIT(*event, anchor, tag, implicit,
+							SEQUENCE_START_EVENT_INIT(*event, anchor, tag, isImplicit,
 									YAML_BLOCK_SEQUENCE_STYLE, start_mark, end_mark);
 							return 1;
 						}
 						else if (block && token->type == YAML_BLOCK_MAPPING_START_TOKEN) {
 							end_mark = token->end_mark;
 							parser->state = YAML_PARSE_BLOCK_MAPPING_FIRST_KEY_STATE;
-							MAPPING_START_EVENT_INIT(*event, anchor, tag, implicit,
+							MAPPING_START_EVENT_INIT(*event, anchor, tag, isImplicit,
 									YAML_BLOCK_MAPPING_STYLE, start_mark, end_mark);
 							return 1;
 						}
@@ -698,7 +698,7 @@ namespace YamlDotNet {
 							value[0] = '\0';
 							parser->state = POP(parser, parser->states);
 							SCALAR_EVENT_INIT(*event, anchor, tag, value, 0,
-									implicit, 0, YAML_PLAIN_SCALAR_STYLE,
+									isImplicit, 0, YAML_PLAIN_SCALAR_STYLE,
 									start_mark, end_mark);
 							return 1;
 						}

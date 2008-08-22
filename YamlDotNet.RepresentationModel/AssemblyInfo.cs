@@ -1,10 +1,15 @@
+// AssemblyInfo.cs created with MonoDevelop
+// User: aaubry at 10:18 PM 8/21/2008
+//
+// To change standard headers go to Edit->Preferences->Coding->Standard Headers
+//
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
 // Information about this assembly is defined by the following attributes. 
 // Change them to the values specific to your project.
 
-[assembly: AssemblyTitle("YamlDotNet.Core")]
+[assembly: AssemblyTitle("YamlDotNet.RepresentationModel")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
