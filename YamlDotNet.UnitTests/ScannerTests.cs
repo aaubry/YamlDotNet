@@ -134,7 +134,7 @@ namespace YamlDotNet.UnitTests
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new Anchor("A"));
 			AssertNext(scanner, new FlowSequenceStart());
-			AssertNext(scanner, new Alias("A"));
+			AssertNext(scanner, new AnchorAlias("A"));
 			AssertNext(scanner, new FlowSequenceEnd());
 			AssertNext(scanner, new StreamEnd());
 			AssertDoesNotHaveNext(scanner);

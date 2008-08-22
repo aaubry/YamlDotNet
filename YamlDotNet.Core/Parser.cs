@@ -5,49 +5,71 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using YamlDotNet.Core.Tokens;
-using Event = YamlDotNet.Core.Events.Event;
+using Event = YamlDotNet.Core.Events.ParsingEvent;
 
 namespace YamlDotNet.Core
 {
+	/// <summary>
+	/// Parses YAML streams.
+	/// </summary>
 	public class Parser
 	{
-		private class TagDirectiveCollection : KeyedCollection<string, TagDirective> {
+		private class TagDirectiveCollection : KeyedCollection<string, TagDirective>
+		{
 			protected override string GetKeyForItem(TagDirective item)
 			{
 				return item.Handle;
 			}
 		}
-		
+
 		private Stack<ParserState> states = new Stack<ParserState>();
 		private Stack<Mark> marks = new Stack<Mark>();
 		private TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
 		private ParserState state;
-		
+
 		private readonly Scanner scanner;
-		private Event current = null;
-		
-		public Parser(TextReader input) {
+		private Event current;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Parser"/> class.
+		/// </summary>
+		/// <param name="input">The input where the YAML stream is to be read.</param>
+		public Parser(TextReader input)
+		{
 			scanner = new Scanner(input);
 		}
-		
-		public Event Current {
-			get {
+
+		/// <summary>
+		/// Gets the current event.
+		/// </summary>
+		public Event Current
+		{
+			get
+			{
 				return current;
 			}
 		}
-		
-		public bool MoveNext() {
+
+		/// <summary>
+		/// Moves to the next event.
+		/// </summary>
+		/// <returns>Returns true if there are more events available, otherwise returns false.</returns>
+		public bool MoveNext()
+		{
 			/* No events after the end of the stream or error. */
-			if (state == ParserState.YAML_PARSE_END_STATE) {
+			if (state == ParserState.YAML_PARSE_END_STATE)
+			{
 				current = null;
 				return false;
-			} else {
+			}
+			else
+			{
 				/* Generate the next event. */
 				current = yaml_parser_state_machine();
 				return true;
 			}
 		}
-		
+
 		Event yaml_parser_state_machine()
 		{
 			switch (state)
@@ -126,39 +148,46 @@ namespace YamlDotNet.Core
 					throw new NotImplementedException();
 			}
 		}
-		
-		private T Expect<T>() where T : Token {
+
+		private T Expect<T>() where T : Token
+		{
 			Token token = scanner.Current;
 			T t = token as T;
-			if(t == null) {
+			if (t == null)
+			{
 				throw new ParserException(string.Format(CultureInfo.InvariantCulture, "Did not found expected {0}.", typeof(T).Name), token.Start);
-			} else {
+			}
+			else
+			{
 				scanner.MoveNext();
 				return t;
 			}
 		}
-		
-		private void Skip() {
-			if(!scanner.MoveNext()) {
+
+		private void Skip()
+		{
+			if (!scanner.MoveNext())
+			{
 				throw new InvalidOperationException("The scanner should contain more token.");
 			}
 		}
-		
+
 		/*
 		 * Parse the production:
 		 * stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
 		 *              ************
 		 */
 
-		private Event yaml_parser_parse_stream_start() {
+		private Event yaml_parser_parse_stream_start()
+		{
 			Skip();
-			
+
 			Tokens.StreamStart token = Expect<Tokens.StreamStart>();
 
 			state = ParserState.YAML_PARSE_IMPLICIT_DOCUMENT_START_STATE;
 			return new Events.StreamStart(token.Start, token.End);
 		}
-		
+
 		/*
 		 * Parse the productions:
 		 * implicit_document    ::= block_node DOCUMENT-END*
@@ -173,7 +202,8 @@ namespace YamlDotNet.Core
 
 			if (!isImplicit)
 			{
-				while (scanner.Current is Tokens.DocumentEnd) {
+				while (scanner.Current is Tokens.DocumentEnd)
+				{
 					Skip();
 				}
 			}
@@ -185,7 +215,7 @@ namespace YamlDotNet.Core
 				yaml_parser_process_directives(null);
 
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
-				
+
 				state = ParserState.YAML_PARSE_BLOCK_NODE_STATE;
 
 				return new Events.DocumentStart(scanner.Current.Start, scanner.Current.End);
@@ -198,15 +228,16 @@ namespace YamlDotNet.Core
 				Mark start = scanner.Current.Start;
 				List<TagDirective> tagDirectives = new List<TagDirective>();
 				VersionDirective versionDirective = yaml_parser_process_directives(tagDirectives);
-				
-				if(!(scanner.Current is DocumentStart)) {
+
+				if (!(scanner.Current is DocumentStart))
+				{
 					throw new ParserException("Did not found expected <document start>.", scanner.Current.Start);
 				}
-				
+
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
 
 				state = ParserState.YAML_PARSE_DOCUMENT_CONTENT_STATE;
-				
+
 				Event evt = new Events.DocumentStart(versionDirective, tagDirectives, start, scanner.Current.End);
 				Skip();
 				return evt;
@@ -220,13 +251,14 @@ namespace YamlDotNet.Core
 
 				Event evt = new Events.StreamEnd(scanner.Current.Start, scanner.Current.End);
 				// Do not call skip here because that would throw an exception
-				if(scanner.MoveNext()) {
+				if (scanner.MoveNext())
+				{
 					throw new InvalidOperationException("The scanner should contain no more tokens.");
 				}
 				return evt;
 			}
 		}
-		
+
 		/*
 		 * Parse directives.
 		 */
@@ -235,44 +267,55 @@ namespace YamlDotNet.Core
 		{
 			VersionDirective version = null;
 
-			while(true)
+			while (true)
 			{
 				VersionDirective currentVersion;
 				TagDirective tag;
-				
-				if((currentVersion = scanner.Current as VersionDirective) != null) {
-					if(version != null) {
+
+				if ((currentVersion = scanner.Current as VersionDirective) != null)
+				{
+					if (version != null)
+					{
 						throw new ParserException("Found duplicate %YAML directive.", currentVersion.Start);
 					}
-					
-					if(currentVersion.Version.Major != 1 || currentVersion.Version.Minor != 1) {
+
+					if (currentVersion.Version.Major != 1 || currentVersion.Version.Minor != 1)
+					{
 						throw new ParserException("Found incompatible YAML document.", currentVersion.Start);
 					}
 
 					version = currentVersion;
-				} else if((tag = scanner.Current as TagDirective) != null) {
-					if (tagDirectives.Contains(tag.Handle)) {
+				}
+				else if ((tag = scanner.Current as TagDirective) != null)
+				{
+					if (tagDirectives.Contains(tag.Handle))
+					{
 						throw new ParserException("Found duplicate %TAG directive.", tag.Start);
 					}
 					tagDirectives.Add(tag);
-					if(tags != null) {
+					if (tags != null)
+					{
 						tags.Add(tag);
 					}
-				} else {
+				}
+				else
+				{
 					break;
 				}
-				
+
 				Skip();
 			}
-			
-			if(!tagDirectives.Contains("!")) {
+
+			if (!tagDirectives.Contains("!"))
+			{
 				tagDirectives.Add(new TagDirective("!", "!"));
 			}
-			
-			if(!tagDirectives.Contains("!!")) {
+
+			if (!tagDirectives.Contains("!!"))
+			{
 				tagDirectives.Add(new TagDirective("!!", "tag:yaml.org,2002:"));
 			}
-		    
+
 			return version;
 		}
 

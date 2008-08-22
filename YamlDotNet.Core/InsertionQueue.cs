@@ -9,21 +9,37 @@ namespace YamlDotNet.Core
 	public class InsertionQueue<T>
 	{
 		// TODO: Use a more efficient data structure
-		
+
 		private IList<T> items = new List<T>();
-		
-		public int Count {
-			get {
+
+		/// <summary>
+		/// Gets the number of items that are contained by the queue.
+		/// </summary>
+		public int Count
+		{
+			get
+			{
 				return items.Count;
 			}
 		}
-		
-		public void Enqueue(T item) {
+
+		/// <summary>
+		/// Enqueues the specified item.
+		/// </summary>
+		/// <param name="item">The item to be enqueued.</param>
+		public void Enqueue(T item)
+		{
 			items.Add(item);
 		}
-		
-		public T Dequeue() {
-			if(Count == 0) {
+
+		/// <summary>
+		/// Dequeues an item.
+		/// </summary>
+		/// <returns>Returns the item that been dequeued.</returns>
+		public T Dequeue()
+		{
+			if (Count == 0)
+			{
 				throw new InvalidOperationException("The queue is empty");
 			}
 
@@ -31,8 +47,14 @@ namespace YamlDotNet.Core
 			items.RemoveAt(0);
 			return item;
 		}
-		
-		public void Insert(int index, T item) {
+
+		/// <summary>
+		/// Inserts an item at the specified index.
+		/// </summary>
+		/// <param name="index">The index where to insert the item.</param>
+		/// <param name="item">The item to be inserted.</param>
+		public void Insert(int index, T item)
+		{
 			items.Insert(index, item);
 		}
 	}

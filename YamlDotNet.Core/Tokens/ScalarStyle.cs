@@ -2,6 +2,9 @@ using System;
 
 namespace YamlDotNet.Core
 {
+	/// <summary>
+	/// Specifies the style of a YAML scalar.
+	/// </summary>
 	public enum ScalarStyle
 	{
 		/// <summary>

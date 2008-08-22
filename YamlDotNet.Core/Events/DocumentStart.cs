@@ -4,41 +4,77 @@ using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core.Events
 {
-    public class DocumentStart : Event
+	/// <summary>
+	/// Represents a document start event.
+	/// </summary>
+	public class DocumentStart : ParsingEvent
 	{
 		private readonly IList<TagDirective> tags;
 		private readonly VersionDirective version;
-		
-		public IList<TagDirective> Tags {
-			get {
+
+		/// <summary>
+		/// Gets the tags.
+		/// </summary>
+		/// <value>The tags.</value>
+		public IList<TagDirective> Tags
+		{
+			get
+			{
 				return tags;
 			}
 		}
 
-		public VersionDirective Version {
-			get {
+		/// <summary>
+		/// Gets the version.
+		/// </summary>
+		/// <value>The version.</value>
+		public VersionDirective Version
+		{
+			get
+			{
 				return version;
 			}
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DocumentStart"/> class.
+		/// </summary>
+		/// <param name="version">The version.</param>
+		/// <param name="tags">The tags.</param>
+		/// <param name="start">The start position of the event.</param>
+		/// <param name="end">The end position of the event.</param>
 		public DocumentStart(Tokens.VersionDirective version, IList<Tokens.TagDirective> tags, Mark start, Mark end)
 			: base(start, end)
 		{
 			this.version = version;
 			this.tags = tags;
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DocumentStart"/> class.
+		/// </summary>
+		/// <param name="version">The version.</param>
+		/// <param name="tags">The tags.</param>
 		public DocumentStart(Tokens.VersionDirective version, IList<Tokens.TagDirective> tags)
 			: this(version, tags, Mark.Empty, Mark.Empty)
 		{
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DocumentStart"/> class.
+		/// </summary>
+		/// <param name="start">The start position of the event.</param>
+		/// <param name="end">The end position of the event.</param>
 		public DocumentStart(Mark start, Mark end)
 			: this(null, null, start, end)
 		{
 		}
-		
-		public DocumentStart() {
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DocumentStart"/> class.
+		/// </summary>
+		public DocumentStart()
+		{
 		}
 	}
 }

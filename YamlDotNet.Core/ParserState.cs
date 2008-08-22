@@ -3,55 +3,129 @@ using System;
 
 namespace YamlDotNet.Core
 {
-	public enum ParserState
+	/// <summary>
+	/// Defines the YAML parser's state.
+	/// </summary>
+	internal enum ParserState
 	{
-		/** Expect STREAM-START. */
+		/// <summary>
+		/// Expect STREAM-START. 
+		/// </summary>
 		YAML_PARSE_STREAM_START_STATE,
-		/** Expect the beginning of an implicit document. */
+
+		/// <summary>
+		/// Expect the beginning of an implicit document. 
+		/// </summary>
 		YAML_PARSE_IMPLICIT_DOCUMENT_START_STATE,
-		/** Expect DOCUMENT-START. */
+
+		/// <summary>
+		/// Expect DOCUMENT-START. 
+		/// </summary>
 		YAML_PARSE_DOCUMENT_START_STATE,
-		/** Expect the content of a document. */
+
+		/// <summary>
+		/// Expect the content of a document. 
+		/// </summary>
 		YAML_PARSE_DOCUMENT_CONTENT_STATE,
-		/** Expect DOCUMENT-END. */
+
+		/// <summary>
+		/// Expect DOCUMENT-END. 
+		/// </summary>
 		YAML_PARSE_DOCUMENT_END_STATE,
-		/** Expect a block node. */
+
+		/// <summary>
+		/// Expect a block node. 
+		/// </summary>
 		YAML_PARSE_BLOCK_NODE_STATE,
-		/** Expect a block node or indentless sequence. */
+
+		/// <summary>
+		/// Expect a block node or indentless sequence. 
+		/// </summary>
 		YAML_PARSE_BLOCK_NODE_OR_INDENTLESS_SEQUENCE_STATE,
-		/** Expect a flow node. */
+
+		/// <summary>
+		/// Expect a flow node. 
+		/// </summary>
 		YAML_PARSE_FLOW_NODE_STATE,
-		/** Expect the first entry of a block sequence. */
+
+		/// <summary>
+		/// Expect the first entry of a block sequence. 
+		/// </summary>
 		YAML_PARSE_BLOCK_SEQUENCE_FIRST_ENTRY_STATE,
-		/** Expect an entry of a block sequence. */
+
+		/// <summary>
+		/// Expect an entry of a block sequence. 
+		/// </summary>
 		YAML_PARSE_BLOCK_SEQUENCE_ENTRY_STATE,
-		/** Expect an entry of an indentless sequence. */
+
+		/// <summary>
+		/// Expect an entry of an indentless sequence. 
+		/// </summary>
 		YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE,
-		/** Expect the first key of a block mapping. */
+
+		/// <summary>
+		/// Expect the first key of a block mapping. 
+		/// </summary>
 		YAML_PARSE_BLOCK_MAPPING_FIRST_KEY_STATE,
-		/** Expect a block mapping key. */
+
+		/// <summary>
+		/// Expect a block mapping key. 
+		/// </summary>
 		YAML_PARSE_BLOCK_MAPPING_KEY_STATE,
-		/** Expect a block mapping value. */
+
+		/// <summary>
+		/// Expect a block mapping value. 
+		/// </summary>
 		YAML_PARSE_BLOCK_MAPPING_VALUE_STATE,
-		/** Expect the first entry of a flow sequence. */
+
+		/// <summary>
+		/// Expect the first entry of a flow sequence. 
+		/// </summary>
 		YAML_PARSE_FLOW_SEQUENCE_FIRST_ENTRY_STATE,
-		/** Expect an entry of a flow sequence. */
+
+		/// <summary>
+		/// Expect an entry of a flow sequence. 
+		/// </summary>
 		YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE,
-		/** Expect a key of an ordered mapping. */
+
+		/// <summary>
+		/// Expect a key of an ordered mapping. 
+		/// </summary>
 		YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_KEY_STATE,
-		/** Expect a value of an ordered mapping. */
+
+		/// <summary>
+		/// Expect a value of an ordered mapping. 
+		/// </summary>
 		YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_VALUE_STATE,
-		/** Expect the and of an ordered mapping entry. */
+
+		/// <summary>
+		/// Expect the and of an ordered mapping entry. 
+		/// </summary>
 		YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_END_STATE,
-		/** Expect the first key of a flow mapping. */
+
+		/// <summary>
+		/// Expect the first key of a flow mapping. 
+		/// </summary>
 		YAML_PARSE_FLOW_MAPPING_FIRST_KEY_STATE,
-		/** Expect a key of a flow mapping. */
+
+		/// <summary>
+		/// Expect a key of a flow mapping. 
+		/// </summary>
 		YAML_PARSE_FLOW_MAPPING_KEY_STATE,
-		/** Expect a value of a flow mapping. */
+
+		/// <summary>
+		/// Expect a value of a flow mapping. 
+		/// </summary>
 		YAML_PARSE_FLOW_MAPPING_VALUE_STATE,
-		/** Expect an empty value of a flow mapping. */
+
+		/// <summary>
+		/// Expect an empty value of a flow mapping. 
+		/// </summary>
 		YAML_PARSE_FLOW_MAPPING_EMPTY_VALUE_STATE,
-		/** Expect nothing. */
+
+		/// <summary>
+		/// Expect nothing. 
+		/// </summary>
 		YAML_PARSE_END_STATE
 	}
 }

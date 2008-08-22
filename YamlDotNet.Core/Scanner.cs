@@ -17,13 +17,13 @@ namespace YamlDotNet.Core
 		private Stack<int> indents = new Stack<int>();
 		private InsertionQueue<Token> tokens = new InsertionQueue<Token>();
 		private Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
-		private bool streamStartProduced = false;
-		private bool streamEndProduced = false;
+		private bool streamStartProduced;
+		private bool streamEndProduced;
 		private int indent = -1;
 		private bool simpleKeyAllowed;
 		private Mark mark;
-		private int flowLevel = 0;
-		private int tokensParsed = 0;
+		private int flowLevel;
+		private int tokensParsed;
 		
 		private const int MaxBufferLength = 8;
 		private readonly LookAheadBuffer buffer;
@@ -70,7 +70,11 @@ namespace YamlDotNet.Core
 			SkipLine();
 			return nextChar;
 		}
-		
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Scanner"/> class.
+		/// </summary>
+		/// <param name="input">The input.</param>
 		public Scanner(TextReader input) {
 			buffer = new LookAheadBuffer(input, MaxBufferLength);
 			mark.Column = 0;
@@ -78,14 +82,21 @@ namespace YamlDotNet.Core
 		}
 		
 		private Token current;
-		
+
+		/// <summary>
+		/// Gets the current token.
+		/// </summary>
 		public Token Current
 		{
 			get {
 				return current;
 			}
 		}
-		
+
+		/// <summary>
+		/// Moves to the next token.
+		/// </summary>
+		/// <returns></returns>
 		public bool MoveNext() {
 			if(tokens.Count == 0 && !streamEndProduced) {
 				FetchMoreTokens();
@@ -144,7 +155,7 @@ namespace YamlDotNet.Core
 			}
 		}
 		
-		private bool StartsWith(StringBuilder what, char start) {
+		private static bool StartsWith(StringBuilder what, char start) {
 			return what.Length > 0 && what[0] == start;
 		}
 		
@@ -422,13 +433,10 @@ namespace YamlDotNet.Core
 		private bool CheckWhiteSpace() {
 			return Check(' ') || ((flowLevel > 0 || !simpleKeyAllowed) && Check('\t')); 
 		}
-			
-		private bool IsDocumentIndicator() {
-			return IsDocumentIndicator(0);
-		}
 
-		private bool IsDocumentIndicator(int offset) {
-			if (mark.Column == 0 && IsBlankOrBreakOrZero(3)) {
+		private bool IsDocumentIndicator() {
+			if (mark.Column == 0 && IsBlankOrBreakOrZero(3))
+			{
 				bool isDocumentStart = Check('-', 0) && Check('-', 1) && Check('-', 2);
 				bool isDocumentEnd = Check('.', 0) && Check('.', 1) && Check('.', 2);
 
@@ -776,14 +784,13 @@ namespace YamlDotNet.Core
 		
 		/// <summary>
 		/// Scan a YAML-DIRECTIVE or TAG-DIRECTIVE token.
-
+		///
 		/// Scope:
 		///      %YAML    1.1    # a comment \n
 		///      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		///      %TAG    !yaml!  tag:yaml.org,2002:  \n
 		///      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		/// </summary>
-
 		private Token ScanDirective()
 		{
 			// Eat '%'.
@@ -1141,9 +1148,7 @@ namespace YamlDotNet.Core
 		/// Push the current indentation level to the stack and set the new level
 		/// the current column is greater than the indentation level.  In this case,
 		/// append or insert the specified token into the token queue.
-
 		/// </summary>
-
 		private void RollIndent(int column, int number, bool isSequence, Mark mark)
 		{
 			// In the flow context, do nothing.
@@ -1229,7 +1234,7 @@ namespace YamlDotNet.Core
 			// Create a token.
 			
 			if(isAlias) {
-				return new Alias(value.ToString());
+				return new AnchorAlias(value.ToString());
 			}
 			else {
 				return new Anchor(value.ToString());
@@ -1281,7 +1286,7 @@ namespace YamlDotNet.Core
 
 				// Consume the tag value.
 
-				suffix = ScanTagUri(false, null, start);
+				suffix = ScanTagUri(null, start);
 
 				// Check for '>' and eat it.
 
@@ -1307,15 +1312,15 @@ namespace YamlDotNet.Core
 					
 					// Scan the suffix now.
 
-					suffix = ScanTagUri(false, null, start);
+					suffix = ScanTagUri(null, start);
 				}
 				else
 				{
 					// It wasn't a handle after all.  Scan the rest of the tag.
 
-					suffix = ScanTagUri(false, null, start);
+					suffix = ScanTagUri(null, start);
 
-					ScanTagUri(false, firstPart, start);
+					ScanTagUri(firstPart, start);
 
 					// Set the handle to '!'.
 
@@ -2011,14 +2016,13 @@ namespace YamlDotNet.Core
 
 		/// <summary>
 		/// Scan the directive name.
-
+		///
 		/// Scope:
 		///      %YAML   1.1     # a comment \n
 		///       ^^^^
 		///      %TAG    !yaml!  tag:yaml.org,2002:  \n
 		///       ^^^
 		/// </summary>
-
 		private string ScanDirectiveName(Mark start) {
 			StringBuilder name = new StringBuilder();
 
@@ -2060,12 +2064,11 @@ namespace YamlDotNet.Core
 		
 		/// <summary>
 		/// Scan the value of VERSION-DIRECTIVE.
-
+		///
 		/// Scope:
 		///      %YAML   1.1     # a comment \n
 		///           ^^^^^^
 		/// </summary>
-
 		private Token ScanVersionDirectiveValue(Mark start)
 		{
 			SkipWhitespaces();
@@ -2091,12 +2094,11 @@ namespace YamlDotNet.Core
 
 		/// <summary>
 		/// Scan the value of a TAG-DIRECTIVE token.
-
+		///
 		/// Scope:
 		///      %TAG    !yaml!  tag:yaml.org,2002:  \n
 		///          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		/// </summary>
-
 		private Token ScanTagDirectiveValue(Mark start)
 		{
 			SkipWhitespaces();
@@ -2117,7 +2119,7 @@ namespace YamlDotNet.Core
 
 			// Scan a prefix.
 
-			string prefix = ScanTagUri(true, null, start);
+			string prefix = ScanTagUri(null, start);
 			
 			// Expect a whitespace or line break.
 
@@ -2134,7 +2136,7 @@ namespace YamlDotNet.Core
 		/// Scan a tag.
 		/// </summary>
 
-		private string ScanTagUri(bool isDirective, string head, Mark start) {
+		private string ScanTagUri(string head, Mark start) {
 			StringBuilder tag = new StringBuilder();
 			if(head != null && head.Length > 1) {
 				tag.Append(head.Substring(1));
@@ -2290,14 +2292,13 @@ namespace YamlDotNet.Core
 		
 		/// <summary>
 		/// Scan the version number of VERSION-DIRECTIVE.
-
+		///
 		/// Scope:
 		///      %YAML   1.1     # a comment \n
 		///              ^
 		///      %YAML   1.1     # a comment \n
 		///                ^
 		/// </summary>
-
 		private int ScanVersionDirectiveNumber(Mark start)
 		{
 			int value = 0;

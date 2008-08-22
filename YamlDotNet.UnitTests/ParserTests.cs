@@ -25,7 +25,7 @@ namespace YamlDotNet.UnitTests
 			Assert.IsFalse(parser.MoveNext(), "The parser should not contain more events.");
 		}
 	
-		private void AssertCurrent(Parser parser, Event expected) {
+		private void AssertCurrent(Parser parser, ParsingEvent expected) {
 			Console.WriteLine(expected.GetType().Name);
 			Assert.IsInstanceOfType(expected.GetType(), parser.Current, "The event is not of the expected type.");
 			
@@ -62,7 +62,7 @@ namespace YamlDotNet.UnitTests
 			}
 		}
 	
-		private void AssertNext(Parser parser, Event expected) {
+		private void AssertNext(Parser parser, ParsingEvent expected) {
 			AssertHasNext(parser);
 			AssertCurrent(parser, expected);
 		}

@@ -3,13 +3,24 @@ using System;
 
 namespace YamlDotNet.Core.Events
 {
+	/// <summary>
+	/// Specifies the interface that the events related to YAML nodes must implement.
+	/// </summary>
 	public interface INodeEvent
 	{
-		string Anchor {
+		/// <summary>
+		/// Gets the anchor.
+		/// </summary>
+		string Anchor
+		{
 			get;
 		}
-		
-		string Tag {
+
+		/// <summary>
+		/// Gets the tag.
+		/// </summary>
+		string Tag
+		{
 			get;
 		}
 	}
