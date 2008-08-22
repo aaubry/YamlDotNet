@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using YamlDotNet.Core.Tokens;
 using Event = YamlDotNet.Core.Events.ParsingEvent;
+using SequenceStyle = YamlDotNet.Core.Events.SequenceStyle;
 
 namespace YamlDotNet.Core
 {
@@ -29,6 +30,14 @@ namespace YamlDotNet.Core
 
 		private readonly Scanner scanner;
 		private Event current;
+
+		private Token CurrentToken
+		{
+			get
+			{
+				return scanner.Current;
+			}
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Parser"/> class.
@@ -149,21 +158,6 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private T Expect<T>() where T : Token
-		{
-			Token token = scanner.Current;
-			T t = token as T;
-			if (t == null)
-			{
-				throw new ParserException(string.Format(CultureInfo.InvariantCulture, "Did not found expected {0}.", typeof(T).Name), token.Start);
-			}
-			else
-			{
-				scanner.MoveNext();
-				return t;
-			}
-		}
-
 		private void Skip()
 		{
 			if (!scanner.MoveNext())
@@ -177,7 +171,6 @@ namespace YamlDotNet.Core
 		 * stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
 		 *              ************
 		 */
-
 		private Event yaml_parser_parse_stream_start()
 		{
 			Skip();
@@ -195,14 +188,13 @@ namespace YamlDotNet.Core
 		 * explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
 		 *                          *************************
 		 */
-
 		private Event yaml_parser_parse_document_start(bool isImplicit)
 		{
 			/* Parse extra document end indicators. */
 
 			if (!isImplicit)
 			{
-				while (scanner.Current is Tokens.DocumentEnd)
+				while (Token is DocumentEnd)
 				{
 					Skip();
 				}
@@ -210,7 +202,7 @@ namespace YamlDotNet.Core
 
 			/* Parse an isImplicit document. */
 
-			if (isImplicit && !(scanner.Current is VersionDirective || scanner.Current is TagDirective || scanner.Current is DocumentStart || scanner.Current is StreamEnd))
+			if (isImplicit && !(CurrentToken is VersionDirective || CurrentToken is TagDirective || CurrentToken is DocumentStart || CurrentToken is StreamEnd))
 			{
 				yaml_parser_process_directives(null);
 
@@ -218,27 +210,27 @@ namespace YamlDotNet.Core
 
 				state = ParserState.YAML_PARSE_BLOCK_NODE_STATE;
 
-				return new Events.DocumentStart(scanner.Current.Start, scanner.Current.End);
+				return new Events.DocumentStart(CurrentToken.Start, CurrentToken.End);
 			}
 
 			/* Parse an explicit document. */
 
-			else if (!(scanner.Current is StreamEnd))
+			else if (!(CurrentToken is StreamEnd))
 			{
-				Mark start = scanner.Current.Start;
+				Mark start = CurrentToken.Start;
 				List<TagDirective> tagDirectives = new List<TagDirective>();
 				VersionDirective versionDirective = yaml_parser_process_directives(tagDirectives);
 
-				if (!(scanner.Current is DocumentStart))
+				if (!(CurrentToken is DocumentStart))
 				{
-					throw new ParserException("Did not found expected <document start>.", scanner.Current.Start);
+					throw new ParserException("Did not found expected <document start>.", CurrentToken.Start);
 				}
 
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
 
 				state = ParserState.YAML_PARSE_DOCUMENT_CONTENT_STATE;
 
-				Event evt = new Events.DocumentStart(versionDirective, tagDirectives, start, scanner.Current.End);
+				Event evt = new Events.DocumentStart(versionDirective, tagDirectives, start, CurrentToken.End);
 				Skip();
 				return evt;
 			}
@@ -249,7 +241,7 @@ namespace YamlDotNet.Core
 			{
 				state = ParserState.YAML_PARSE_END_STATE;
 
-				Event evt = new Events.StreamEnd(scanner.Current.Start, scanner.Current.End);
+				Event evt = new Events.StreamEnd(CurrentToken.Start, CurrentToken.End);
 				// Do not call skip here because that would throw an exception
 				if (scanner.MoveNext())
 				{
@@ -262,7 +254,6 @@ namespace YamlDotNet.Core
 		/*
 		 * Parse directives.
 		 */
-
 		private VersionDirective yaml_parser_process_directives(IList<TagDirective> tags)
 		{
 			VersionDirective version = null;
@@ -272,7 +263,7 @@ namespace YamlDotNet.Core
 				VersionDirective currentVersion;
 				TagDirective tag;
 
-				if ((currentVersion = scanner.Current as VersionDirective) != null)
+				if ((currentVersion = CurrentToken as VersionDirective) != null)
 				{
 					if (version != null)
 					{
@@ -286,7 +277,7 @@ namespace YamlDotNet.Core
 
 					version = currentVersion;
 				}
-				else if ((tag = scanner.Current as TagDirective) != null)
+				else if ((tag = CurrentToken as TagDirective) != null)
 				{
 					if (tagDirectives.Contains(tag.Handle))
 					{
@@ -319,10 +310,211 @@ namespace YamlDotNet.Core
 			return version;
 		}
 
+		/*
+		 * Parse the productions:
+		 * explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
+		 *                                                    ***********
+		 */
 		private Event yaml_parser_parse_document_content()
 		{
-			throw new NotImplementedException();
+			if (
+				CurrentToken is VersionDirective ||
+				CurrentToken is TagDirective ||
+				CurrentToken is DocumentStart ||
+				CurrentToken is DocumentEnd ||
+				CurrentToken is StreamEnd
+			) {
+				state = states.Pop();
+				return yaml_parser_process_empty_scalar(scanner.CurrentPosition);
+			}
+			else {
+				return yaml_parser_parse_node(true, false);
+			}
 		}
+
+		/*
+		 * Generate an empty scalar event.
+		 */
+		private Event yaml_parser_process_empty_scalar(Mark position)
+		{
+			return new Events.Scalar(string.Empty, string.Empty, ScalarStyle.Plain, position, position);
+		}
+
+		/*
+		 * Parse the productions:
+		 * block_node_or_indentless_sequence    ::=
+		 *                          ALIAS
+		 *                          *****
+		 *                          | properties (block_content | indentless_block_sequence)?
+		 *                            **********  *
+		 *                          | block_content | indentless_block_sequence
+		 *                            *
+		 * block_node           ::= ALIAS
+		 *                          *****
+		 *                          | properties block_content?
+		 *                            ********** *
+		 *                          | block_content
+		 *                            *
+		 * flow_node            ::= ALIAS
+		 *                          *****
+		 *                          | properties flow_content?
+		 *                            ********** *
+		 *                          | flow_content
+		 *                            *
+		 * properties           ::= TAG ANCHOR? | ANCHOR TAG?
+		 *                          *************************
+		 * block_content        ::= block_collection | flow_collection | SCALAR
+		 *                                                               ******
+		 * flow_content         ::= flow_collection | SCALAR
+		 *                                            ******
+		 */
+		private Event yaml_parser_parse_node(bool isBlock, bool isIndentlessSequence)
+		{
+			AnchorAlias alias = CurrentToken as AnchorAlias;
+			if (alias != null)
+			{
+				state = states.Pop();
+				Event evt = new Events.AnchorAlias(alias.Value, alias.Start, alias.End);
+				Skip();
+				return evt;
+			}
+
+			Mark start = CurrentToken.Start;
+			Mark end = start;
+
+			Anchor anchor = null;
+			Tag tag = null;
+
+			// The anchor and the tag can be in any order. This loop repeats at most twice.
+			while(true)
+			{
+				if(anchor == null && (anchor = CurrentToken as Anchor) != null)
+				{
+					Skip();
+					end = anchor.End;
+				}
+				else if(tag == null && (tag = CurrentToken as Tag) != null)
+				{
+					Skip();
+					end = anchor.End;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			string tagName = null;
+			if(tag != null) {
+				if(string.IsNullOrEmpty(tag.Handle)) {
+					tagName = stag.Suffix;
+				} else if(tagDirectives.Contains(tag.Handle)) {
+					tagName = string.Concat(tagDirectives[tag.Handle].Prefix, tag.Suffix);
+				} else {
+					throw new ParserException("While parsing a node, found undefined tag handle.", tag.Start);
+				}
+			}
+			if(string.IsNullOrEmpty(tagName)) {
+				tagName = null;
+			}
+
+			string anchorName = anchor != null ? string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value : null;
+
+			bool isImplicit = string.IsNullOrEmpty(tagName);
+
+			if (isIndentlessSequence && CurrentToken is BlockEntry) {
+				state = ParserState.YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE;
+
+				return new Events.SequenceStart(
+					anchorName,
+					tagName,
+					isImplicit,
+					SequenceStyle.Block,
+					start,
+					CurrentToken.End
+				);
+			}
+			else
+			{
+				Scalar scalar = CurrentToken as Scalar;
+				if(scalar != null) {
+					bool isPlainImplicit = false;
+					bool isQuotedImplicit = false;
+					if((scalar.Style == ScalarStyle.Plain && tagName == null) || tag == "!") {
+						isPlainImplicit = true;
+					} else if(tagName == null) {
+						isQuotedImplicit = true;
+					}
+
+					state = states.Pop();
+					Event evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, start, scalar.End);
+					Skip();
+					return evt;
+				}
+
+				FlowSequenceStart flowSequenceStart = CurrentToken as FlowSequenceStart;
+				if(
+
+
+				else if (token->type == YAML_FLOW_SEQUENCE_START_TOKEN) {
+					end_mark = token->end_mark;
+					parser->state = YAML_PARSE_FLOW_SEQUENCE_FIRST_ENTRY_STATE;
+					SEQUENCE_START_EVENT_INIT(*event, anchor, tag, isImplicit,
+							YAML_FLOW_SEQUENCE_STYLE, start_mark, end_mark);
+					return 1;
+				}
+				else if (token->type == YAML_FLOW_MAPPING_START_TOKEN) {
+					end_mark = token->end_mark;
+					parser->state = YAML_PARSE_FLOW_MAPPING_FIRST_KEY_STATE;
+					MAPPING_START_EVENT_INIT(*event, anchor, tag, isImplicit,
+							YAML_FLOW_MAPPING_STYLE, start_mark, end_mark);
+					return 1;
+				}
+				else if (isBlock && token->type == YAML_BLOCK_SEQUENCE_START_TOKEN) {
+					end_mark = token->end_mark;
+					parser->state = YAML_PARSE_BLOCK_SEQUENCE_FIRST_ENTRY_STATE;
+					SEQUENCE_START_EVENT_INIT(*event, anchor, tag, isImplicit,
+							YAML_BLOCK_SEQUENCE_STYLE, start_mark, end_mark);
+					return 1;
+				}
+				else if (isBlock && token->type == YAML_BLOCK_MAPPING_START_TOKEN) {
+					end_mark = token->end_mark;
+					parser->state = YAML_PARSE_BLOCK_MAPPING_FIRST_KEY_STATE;
+					MAPPING_START_EVENT_INIT(*event, anchor, tag, isImplicit,
+							YAML_BLOCK_MAPPING_STYLE, start_mark, end_mark);
+					return 1;
+				}
+				else if (anchor || tag) {
+					yaml_char_t *value = (yaml_char_t*)yaml_malloc(1);
+					if (!value) {
+						parser->error = YAML_MEMORY_ERROR;
+						goto error;
+					}
+					value[0] = '\0';
+					parser->state = POP(parser, parser->states);
+					SCALAR_EVENT_INIT(*event, anchor, tag, value, 0,
+							isImplicit, 0, YAML_PLAIN_SCALAR_STYLE,
+							start_mark, end_mark);
+					return 1;
+				}
+				else {
+					yaml_parser_set_parser_error_context(parser,
+							(isBlock ? "while parsing a block node"
+							 : "while parsing a flow node"), start_mark,
+							"did not found expected node content", token->start_mark);
+					goto error;
+				}
+			}
+
+		error:
+			yaml_free(anchor);
+			yaml_free(tag_handle);
+			yaml_free(tag_suffix);
+			yaml_free(tag);
+
+			return 0;
+		}
+
 
 		private Event yaml_parser_parse_document_end()
 		{

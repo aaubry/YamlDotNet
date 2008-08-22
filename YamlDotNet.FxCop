@@ -47,6 +47,21 @@
       <Namespaces>
        <Namespace Name="YamlDotNet.Core">
         <Types>
+         <Type Name="InsertionQueue`1">
+          <Messages>
+           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2008-08-22 16:10:39Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>'InsertionQueue&lt;T&gt;'</Item>
+             <Item>Queue</Item>
+            </Issue>
+            <Notes>
+             <User Name="antoine.aubry">
+              <Note Id="3" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="Mark">
           <Messages>
            <Message TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815" Status="Excluded" Created="2008-07-30 18:17:46Z">
@@ -64,49 +79,177 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="YamlVersion">
-          <Messages>
-           <Message TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815" Status="Excluded" Created="2008-07-30 18:17:46Z">
-            <Issue Name="Equals">
-             <Item>'YamlVersion'</Item>
-            </Issue>
-            <Issue Name="op_Equality">
-             <Item>'YamlVersion'</Item>
-            </Issue>
-            <Notes>
-             <User Name="antoine.aubry">
-              <Note Id="1" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
-         </Type>
-        </Types>
-       </Namespace>
-      </Namespaces>
-     </Module>
-    </Modules>
-   </Target>
-   <Target Name="$(ProjectDir)/YamlDotNet.RepresentationModel/bin/Debug/YamlDotNet.RepresentationModel.dll">
-    <Modules>
-     <Module Name="yamldotnet.representationmodel.dll">
-      <Namespaces>
-       <Namespace Name="YamlDotNet.RepresentationModel">
-        <Types>
-         <Type Name="YamlStream">
-          <Messages>
-           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2008-07-30 18:17:46Z">
-            <Issue Name="TypeNoAlternate">
-             <Item>'YamlStream'</Item>
-             <Item>Stream</Item>
-            </Issue>
-            <Notes>
-             <User Name="antoine.aubry">
-              <Note Id="2" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
+         <Type Name="Parser">
+          <Members>
+           <Member Name="#marks">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2008-08-22 16:10:39Z">
+              <Issue>
+               <Item>'Parser.marks'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_block_mapping_key(System.Boolean)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_block_mapping_key(bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isFirst'</Item>
+               <Item>'Parser.yaml_parser_parse_block_mapping_key(bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_block_mapping_value()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_block_mapping_value()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_block_sequence_entry(System.Boolean)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_block_sequence_entry(bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isFirst'</Item>
+               <Item>'Parser.yaml_parser_parse_block_sequence_entry(bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_document_content()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_document_content()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_document_end()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_document_end()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_flow_mapping_key(System.Boolean)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_flow_mapping_key(bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isFirst'</Item>
+               <Item>'Parser.yaml_parser_parse_flow_mapping_key(bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_flow_mapping_value(System.Boolean)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_flow_mapping_value(bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isEmpty" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isEmpty'</Item>
+               <Item>'Parser.yaml_parser_parse_flow_mapping_value(bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_flow_sequence_entry(System.Boolean)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_flow_sequence_entry(bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isFirst'</Item>
+               <Item>'Parser.yaml_parser_parse_flow_sequence_entry(bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_flow_sequence_entry_mapping_end()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_flow_sequence_entry_mapping_end()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_flow_sequence_entry_mapping_key()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_flow_sequence_entry_mapping_key()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_flow_sequence_entry_mapping_value()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_flow_sequence_entry_mapping_value()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_indentless_sequence_entry()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_indentless_sequence_entry()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#yaml_parser_parse_node(System.Boolean,System.Boolean)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'Parser.yaml_parser_parse_node(bool, bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isBlock" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isBlock'</Item>
+               <Item>'Parser.yaml_parser_parse_node(bool, bool)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="isIndentlessSequence" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'isIndentlessSequence'</Item>
+               <Item>'Parser.yaml_parser_parse_node(bool, bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
          </Type>
         </Types>
        </Namespace>
@@ -118,17 +261,25 @@
   <Notes>
    <User Name="antoine.aubry">
     <Note Id="0" Modified="2008-07-31 17:29:43Z">The default implementation is enhough. It is not expected that Marks are compared, anyways.</Note>
-    <Note Id="1" Modified="2008-07-31 17:29:59Z">The default implementation is fine.</Note>
-    <Note Id="2" Modified="2008-07-31 17:51:25Z">This class should be named YamlStream because it represents a YAML stream.</Note>
+    <Note Id="3" Modified="2008-08-22 16:16:29Z">InsertionQueue&lt;T&gt; is a Queue.</Note>
    </User>
   </Notes>
   <Rules>
+   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
+    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
+   </Rule>
    <Rule TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711">
     <Resolution Name="TypeNoAlternate">Rename type name {0} so that it does not end in '{1}'.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
+    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
    </Rule>
    <Rule TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815">
     <Resolution Name="Equals">{0} should override Equals.</Resolution>
     <Resolution Name="op_Equality">{0} should override the equality (==) and inequality (!=) operators.</Resolution>
+   </Rule>
+   <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
+    <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

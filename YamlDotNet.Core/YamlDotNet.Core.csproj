@@ -49,6 +49,7 @@
     <Compile Include="Events\Scalar.cs" />
     <Compile Include="Events\SequenceEnd.cs" />
     <Compile Include="Events\SequenceStart.cs" />
+    <Compile Include="Events\SequenceStyle.cs" />
     <Compile Include="Events\StreamEnd.cs" />
     <Compile Include="Events\StreamStart.cs" />
     <Compile Include="InsertionQueue.cs" />

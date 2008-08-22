@@ -22,6 +22,19 @@ namespace YamlDotNet.Core
 		private int indent = -1;
 		private bool simpleKeyAllowed;
 		private Mark mark;
+
+		/// <summary>
+		/// Gets the current position inside the input stream.
+		/// </summary>
+		/// <value>The current position.</value>
+		public Mark CurrentPosition
+		{
+			get
+			{
+				return mark;
+			}
+		}
+
 		private int flowLevel;
 		private int tokensParsed;
 		
