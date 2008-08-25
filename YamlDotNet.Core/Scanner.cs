@@ -111,12 +111,20 @@ namespace YamlDotNet.Core
 		/// </summary>
 		/// <returns></returns>
 		public bool MoveNext() {
+			if(InternalMoveNext()) {
+				IncrementTokensParsed();
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		internal bool InternalMoveNext() {
 			if(tokens.Count == 0 && !streamEndProduced) {
 				FetchMoreTokens();
 			}
 			if(tokens.Count > 0) {
 				current = tokens.Dequeue();
-				++tokensParsed;
 				return true;
 			} else {
 				current = null;
@@ -124,16 +132,23 @@ namespace YamlDotNet.Core
 			}
 		}
 		
+		internal void IncrementTokensParsed() {
+			++tokensParsed;
+			Console.WriteLine("INCREMENT_TOKENS({0})", tokensParsed);
+			
+			if(tokensParsed == 2) {
+				System.Diagnostics.Debugger.Break();
+			}
+		}
+		
 		private void FetchMoreTokens()
 		{
 			// While we need more tokens to fetch, do it.
 			
-			for(;;)
+			while(true)
 			{
-
 				// Check if we really need to fetch more tokens.
 
-				
 				bool needsMoreTokens = false;
 				
 				if (tokens.Count == 0)
@@ -157,7 +172,6 @@ namespace YamlDotNet.Core
 				}
 				
 				// We are finished.
-				
 				if (!needsMoreTokens) {
 					break;
 				}
@@ -204,6 +218,8 @@ namespace YamlDotNet.Core
 		
 		private void FetchNextToken()
 		{
+			Console.WriteLine("Tokens parsed = {0}", tokensParsed);
+			
 			// Ensure that the buffer is initialized.
 
 			buffer.Cache(1);
@@ -211,7 +227,8 @@ namespace YamlDotNet.Core
 			// Check if we just started scanning.  Fetch STREAM-START then.
 
 			if (!streamStartProduced) {
-				 FetchStreamStart();
+				FetchStreamStart();
+				return;
 			}
 
 			// Eat whitespaces and comments until we reach the next token.
@@ -1105,9 +1122,13 @@ namespace YamlDotNet.Core
 
 			// Have we found a simple key?
 
+			Console.WriteLine("SIMPLE_KEY_POSSIBLE({0}, {1})", simpleKey.IsPossible, simpleKey.TokenNumber);
+			
 			if (simpleKey.IsPossible)
 			{
 				// Create the KEY token and insert it into the queue.
+
+				Console.Write("QUEUE_INSERT({0}, {1})\n", simpleKey.TokenNumber - tokensParsed, simpleKey.TokenNumber);
 
 				tokens.Insert(simpleKey.TokenNumber - tokensParsed, new Key(simpleKey.Mark, simpleKey.Mark));
 
@@ -1194,6 +1215,7 @@ namespace YamlDotNet.Core
 					tokens.Enqueue(token);
 				}
 				else {
+					Console.Write("QUEUE_INSERT({0})\n", number - tokensParsed);
 					tokens.Insert(number - tokensParsed, token);
 				}
 			}
@@ -2373,6 +2395,7 @@ namespace YamlDotNet.Core
 
 			if (simpleKeyAllowed)
 			{
+				Console.WriteLine("PUSH_SIMPLE_KEY({0}, {1})", tokensParsed + tokens.Count, tokensParsed);
 				SimpleKey key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, mark);
 
 				RemoveSimpleKey();

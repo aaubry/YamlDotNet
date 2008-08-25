@@ -7,20 +7,38 @@ namespace YamlDotNet.Core.Events
 	/// </summary>
 	public class DocumentEnd : ParsingEvent
 	{
+		private readonly bool isImplicit;
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DocumentEnd"/> class.
+		/// Gets a value indicating whether this instance is implicit.
 		/// </summary>
-		/// <param name="start">The start position of the event.</param>
-		/// <param name="end">The end position of the event.</param>
-		public DocumentEnd(Mark start, Mark end)
-			: base(start, end)
+		/// <value>
+		/// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
+		/// </value>
+		public bool IsImplicit
 		{
+			get
+			{
+				return isImplicit;
+			}
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DocumentEnd"/> class.
 		/// </summary>
-		public DocumentEnd()
+		/// <param name="start">The start position of the event.</param>
+		/// <param name="end">The end position of the event.</param>
+		public DocumentEnd(bool isImplicit, Mark start, Mark end)
+			: base(start, end)
+		{
+			this.isImplicit = isImplicit;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DocumentEnd"/> class.
+		/// </summary>
+		public DocumentEnd(bool isImplicit)
+			: this(isImplicit, Mark.Empty, Mark.Empty)
 		{
 		}
 	}

@@ -63,6 +63,31 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
+		private readonly bool isPlainImplicit;
+
+		/// <summary>
+		/// Gets a value indicating whether the tag is optional for the plain style.
+		/// </summary>
+		public bool IsPlainImplicit
+		{
+			get
+			{
+				return isPlainImplicit;
+			}
+		}
+
+		private readonly bool isQuotedImplicit;
+
+		/// <summary>
+		/// Gets a value indicating whether the tag is optional for any non-plain style.
+		/// </summary>
+		public bool IsQuotedImplicit
+		{
+			get
+			{
+				return isQuotedImplicit;
+			}
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Scalar"/> class.
@@ -73,12 +98,15 @@ namespace YamlDotNet.Core.Events
 		/// <param name="style">The style.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		public Scalar(string anchor, string tag, string value, ScalarStyle style, Mark start, Mark end)
+		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
 			: base(start, end)
 		{
 			this.anchor = anchor;
 			this.tag = tag;
+			this.value = value;
 			this.style = style;
+			this.isPlainImplicit = isPlainImplicit;
+			this.isQuotedImplicit = isQuotedImplicit;
 		}
 
 		/// <summary>
@@ -87,8 +115,8 @@ namespace YamlDotNet.Core.Events
 		/// <param name="anchor">The anchor.</param>
 		/// <param name="tag">The tag.</param>
 		/// <param name="style">The style.</param>
-		public Scalar(string anchor, string tag, string value, ScalarStyle style)
-			: this(anchor, tag, value, style, Mark.Empty, Mark.Empty)
+		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit)
+			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit, Mark.Empty, Mark.Empty)
 		{
 		}
 

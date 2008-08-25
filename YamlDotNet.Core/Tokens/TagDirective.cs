@@ -1,5 +1,5 @@
-
 using System;
+using System.Globalization;
 
 namespace YamlDotNet.Core.Tokens
 {
@@ -81,6 +81,11 @@ namespace YamlDotNet.Core.Tokens
 		public override int GetHashCode()
 		{
 			return handle.GetHashCode() ^ prefix.GetHashCode();
+		}
+		
+		public override string ToString ()
+		{
+			return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", handle, prefix);
 		}
 	}
 }

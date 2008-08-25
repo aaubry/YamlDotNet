@@ -86,7 +86,8 @@ namespace YamlDotNet.Core.Events
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SequenceStart"/> class.
 		/// </summary>
-		public SequenceStart()
+		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style)
+			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
 		{
 		}
 	}

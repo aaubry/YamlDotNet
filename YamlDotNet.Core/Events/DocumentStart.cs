@@ -9,14 +9,14 @@ namespace YamlDotNet.Core.Events
 	/// </summary>
 	public class DocumentStart : ParsingEvent
 	{
-		private readonly IList<TagDirective> tags;
+		private readonly TagDirectiveCollection tags;
 		private readonly VersionDirective version;
 
 		/// <summary>
 		/// Gets the tags.
 		/// </summary>
 		/// <value>The tags.</value>
-		public IList<TagDirective> Tags
+		public TagDirectiveCollection Tags
 		{
 			get
 			{
@@ -35,6 +35,22 @@ namespace YamlDotNet.Core.Events
 				return version;
 			}
 		}
+		
+		private readonly bool isImplicit;
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is implicit.
+		/// </summary>
+		/// <value>
+		/// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
+		/// </value>
+		public bool IsImplicit
+		{
+			get
+			{
+				return isImplicit;
+			}
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DocumentStart"/> class.
@@ -43,11 +59,12 @@ namespace YamlDotNet.Core.Events
 		/// <param name="tags">The tags.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		public DocumentStart(Tokens.VersionDirective version, IList<Tokens.TagDirective> tags, Mark start, Mark end)
+		public DocumentStart(Tokens.VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
 			: base(start, end)
 		{
 			this.version = version;
 			this.tags = tags;
+			this.isImplicit = isImplicit;
 		}
 
 		/// <summary>
@@ -55,8 +72,8 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		/// <param name="version">The version.</param>
 		/// <param name="tags">The tags.</param>
-		public DocumentStart(Tokens.VersionDirective version, IList<Tokens.TagDirective> tags)
-			: this(version, tags, Mark.Empty, Mark.Empty)
+		public DocumentStart(Tokens.VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
+			: this(version, tags, isImplicit, Mark.Empty, Mark.Empty)
 		{
 		}
 
@@ -66,7 +83,7 @@ namespace YamlDotNet.Core.Events
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
 		public DocumentStart(Mark start, Mark end)
-			: this(null, null, start, end)
+			: this(null, null, true, start, end)
 		{
 		}
 
@@ -74,6 +91,7 @@ namespace YamlDotNet.Core.Events
 		/// Initializes a new instance of the <see cref="DocumentStart"/> class.
 		/// </summary>
 		public DocumentStart()
+			: this(null, null, true, Mark.Empty, Mark.Empty)
 		{
 		}
 	}

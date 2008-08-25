@@ -531,7 +531,7 @@ namespace YamlDotNet {
 			 */
 
 			static int
-			yaml_parser_parse_node(yaml_parser_t *parser, yaml_event_t *event,
+			yaml_parser_parse_nodeyaml_parser_parse_document_end(yaml_parser_t *parser, yaml_event_t *event,
 					int block, int indentless_sequence)
 			{
 				yaml_token_t *token;

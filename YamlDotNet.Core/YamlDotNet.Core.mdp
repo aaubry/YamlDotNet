@@ -14,7 +14,6 @@
     </Configuration>
   </Configurations>
   <Contents>
-    <File name="AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
     <File name="Parser.cs" subtype="Code" buildaction="Compile" />
     <File name="SimpleKey.cs" subtype="Code" buildaction="Compile" />
     <File name="ParserState.cs" subtype="Code" buildaction="Compile" />
@@ -22,7 +21,6 @@
     <File name="ParserException.cs" subtype="Code" buildaction="Compile" />
     <File name="Tokens" subtype="Directory" buildaction="Compile" />
     <File name="Tokens/Token.cs" subtype="Code" buildaction="Compile" />
-    <File name="Tokens/Alias.cs" subtype="Code" buildaction="Compile" />
     <File name="Tokens/Anchor.cs" subtype="Code" buildaction="Compile" />
     <File name="Tokens/BlockEnd.cs" subtype="Code" buildaction="Compile" />
     <File name="Tokens/BlockEntry.cs" subtype="Code" buildaction="Compile" />
@@ -43,10 +41,8 @@
     <File name="Tokens/TagDirective.cs" subtype="Code" buildaction="Compile" />
     <File name="Tokens/Value.cs" subtype="Code" buildaction="Compile" />
     <File name="Tokens/VersionDirective.cs" subtype="Code" buildaction="Compile" />
-    <File name="Events/Alias.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/DocumentEnd.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/DocumentStart.cs" subtype="Code" buildaction="Compile" />
-    <File name="Events/Event.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/MappingEnd.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/MappingStart.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/Scalar.cs" subtype="Code" buildaction="Compile" />
@@ -61,6 +57,14 @@
     <File name="Tokens/ScalarStyle.cs" subtype="Code" buildaction="Compile" />
     <File name="InsertionQueue.cs" subtype="Code" buildaction="Compile" />
     <File name="Scanner.cs" subtype="Code" buildaction="Compile" />
+    <File name="Properties/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="../CommonAssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/AnchorAlias.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/ParsingEvent.cs" subtype="Code" buildaction="Compile" />
+    <File name="Tokens/AnchorAlias.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/MappingStyle.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/SequenceStyle.cs" subtype="Code" buildaction="Compile" />
+    <File name="TagDirectiveCollection.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
