@@ -171,7 +171,7 @@ namespace YamlDotNet.Core
 		{
 			if(currentToken != null) {
 				currentToken = null;
-				scanner.IncrementTokensParsed();
+				scanner.ConsumeCurrent();
 			}
 		}
 

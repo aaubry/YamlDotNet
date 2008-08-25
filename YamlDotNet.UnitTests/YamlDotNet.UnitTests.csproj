@@ -61,7 +61,7 @@
     <Compile Include="YamlTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.mdp">
+    <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.csproj">
       <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
       <Name>YamlDotNet.Core</Name>
     </ProjectReference>

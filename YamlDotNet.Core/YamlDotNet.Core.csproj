@@ -42,6 +42,7 @@
     <Compile Include="Events\AnchorAlias.cs" />
     <Compile Include="Events\DocumentEnd.cs" />
     <Compile Include="Events\DocumentStart.cs" />
+    <Compile Include="Events\MappingStyle.cs" />
     <Compile Include="Events\ParsingEvent.cs" />
     <Compile Include="Events\INodeEvent.cs" />
     <Compile Include="Events\MappingEnd.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Scanner.cs" />
     <Compile Include="SimpleKey.cs" />
     <Compile Include="SyntaxErrorException.cs" />
+    <Compile Include="TagDirectiveCollection.cs" />
     <Compile Include="Tokens\AnchorAlias.cs" />
     <Compile Include="Tokens\Anchor.cs" />
     <Compile Include="Tokens\BlockEnd.cs" />
