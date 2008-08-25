@@ -2165,7 +2165,7 @@ namespace YamlDotNet.Core
 
                         if (!hasLeadingBlanks)
                         {
-                            value.Append(ReadCurrentCharacter());
+                            whitespaces.Append(ReadCurrentCharacter());
                         }
                         else
                         {
