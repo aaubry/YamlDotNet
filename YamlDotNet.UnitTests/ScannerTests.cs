@@ -276,7 +276,6 @@ namespace YamlDotNet.UnitTests
 		}
 	
 		[Test]
-		[Ignore("The original C code also fails this test")]
 		public void VerifyTokensOnExample11()
 		{
 			Scanner scanner = CreateScanner(@"
@@ -302,7 +301,7 @@ namespace YamlDotNet.UnitTests
 			AssertNext(scanner, new Value());
 			AssertNext(scanner, new Scalar("another value", ScalarStyle.Plain));
 			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a mappint", ScalarStyle.Plain));
+			AssertNext(scanner, new Scalar("a mapping", ScalarStyle.Plain));
 			AssertNext(scanner, new Value());
 			AssertNext(scanner, new BlockMappingStart());
 			AssertNext(scanner, new Key());
@@ -414,7 +413,6 @@ namespace YamlDotNet.UnitTests
 		}
 			
 		[Test]
-		[Ignore("The original C code also fails this test")]
 		public void VerifyTokensOnExample14()
 		{
 			Scanner scanner = CreateScanner(@"

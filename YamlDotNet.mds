@@ -3,12 +3,10 @@
     <Configuration name="Debug" ctype="CombineConfiguration">
       <Entry build="True" name="YamlDotNet.Core" configuration="Debug" />
       <Entry build="True" name="YamlDotNet.UnitTests" configuration="Debug" />
-      <Entry build="True" name="Test" configuration="Debug" />
     </Configuration>
     <Configuration name="Release" ctype="CombineConfiguration">
       <Entry build="True" name="YamlDotNet.Core" configuration="Release" />
       <Entry build="True" name="YamlDotNet.UnitTests" configuration="Release" />
-      <Entry build="True" name="Test" configuration="Release" />
     </Configuration>
   </Configurations>
   <StartMode startupentry="YamlDotNet.Core" single="True">
@@ -20,6 +18,5 @@
   <Entries>
     <Entry filename="YamlDotNet.Core/YamlDotNet.Core.mdp" />
     <Entry filename="YamlDotNet.UnitTests/YamlDotNet.UnitTests.mdp" />
-    <Entry filename="Test/Test.mdp" />
   </Entries>
 </Combine>

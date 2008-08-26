@@ -72,7 +72,7 @@ namespace YamlDotNet.Core
 		/// <returns>Returns true if there are more events available, otherwise returns false.</returns>
 		public bool MoveNext()
 		{
-			/* No events after the end of the stream or error. */
+			// No events after the end of the stream or error.
 			if (state == ParserState.YAML_PARSE_END_STATE)
 			{
 				current = null;
@@ -80,7 +80,7 @@ namespace YamlDotNet.Core
 			}
 			else
 			{
-				/* Generate the next event. */
+				// Generate the next event.
 				current = yaml_parser_state_machine();
 				return true;
 			}
@@ -162,7 +162,7 @@ namespace YamlDotNet.Core
 					return yaml_parser_parse_flow_mapping_value(true);
 
 				default:
-					Debug.Assert(false, "Invalid state");      /* Invalid state. */
+					Debug.Assert(false, "Invalid state");      // Invalid state.
 					throw new InvalidOperationException();
 			}
 		}
@@ -175,11 +175,11 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Parse the production:
-		 * stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
-		 *              ************
-		 */
+		/// <summary>
+		/// Parse the production:
+		/// stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
+		///              ************
+		/// </summary>
 		private Event yaml_parser_parse_stream_start()
 		{
 			Tokens.StreamStart streamStart = GetCurrentToken() as Tokens.StreamStart;
@@ -192,16 +192,16 @@ namespace YamlDotNet.Core
 			return new Events.StreamStart(streamStart.Start, streamStart.End);
 		}
 
-		/*
-		 * Parse the productions:
-		 * implicit_document    ::= block_node DOCUMENT-END*
-		 *                          *
-		 * explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
-		 *                          *************************
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// implicit_document    ::= block_node DOCUMENT-END*
+		///                          *
+		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
+		///                          *************************
+		/// </summary>
 		private Event yaml_parser_parse_document_start(bool isImplicit)
 		{
-			/* Parse extra document end indicators. */
+			// Parse extra document end indicators.
 
 			if (!isImplicit)
 			{
@@ -211,7 +211,7 @@ namespace YamlDotNet.Core
 				}
 			}
 
-			/* Parse an isImplicit document. */
+			// Parse an isImplicit document.
 
 			if (isImplicit && !(GetCurrentToken() is VersionDirective || GetCurrentToken() is TagDirective || GetCurrentToken() is DocumentStart || GetCurrentToken() is StreamEnd))
 			{
@@ -225,7 +225,7 @@ namespace YamlDotNet.Core
 				return new Events.DocumentStart(null, tagDirectives, true, GetCurrentToken().Start, GetCurrentToken().End);
 			}
 
-			/* Parse an explicit document. */
+			// Parse an explicit document.
 
 			else if (!(GetCurrentToken() is StreamEnd))
 			{
@@ -247,7 +247,7 @@ namespace YamlDotNet.Core
 				return evt;
 			}
 
-			/* Parse the stream end. */
+			// Parse the stream end.
 
 			else
 			{
@@ -263,9 +263,9 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Parse directives.
-		 */
+		/// <summary>
+		/// Parse directives.
+		/// </summary>
 		private VersionDirective yaml_parser_process_directives(TagDirectiveCollection tags)
 		{
 			VersionDirective version = null;
@@ -330,11 +330,11 @@ namespace YamlDotNet.Core
 			new TagDirective("!!", "tag:yaml.org,2002:"),
 		};
 		
-		/*
-		 * Parse the productions:
-		 * explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
-		 *                                                    ***********
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
+		///                                                    ***********
+		/// </summary>
 		private Event yaml_parser_parse_document_content()
 		{
 			if (
@@ -352,42 +352,42 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Generate an empty scalar event.
-		 */
+		/// <summary>
+		/// Generate an empty scalar event.
+		/// </summary>
 		private Event yaml_parser_process_empty_scalar(Mark position)
 		{
 			return new Events.Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
 		}
 
-		/*
-		 * Parse the productions:
-		 * block_node_or_indentless_sequence    ::=
-		 *                          ALIAS
-		 *                          *****
-		 *                          | properties (block_content | indentless_block_sequence)?
-		 *                            **********  *
-		 *                          | block_content | indentless_block_sequence
-		 *                            *
-		 * block_node           ::= ALIAS
-		 *                          *****
-		 *                          | properties block_content?
-		 *                            ********** *
-		 *                          | block_content
-		 *                            *
-		 * flow_node            ::= ALIAS
-		 *                          *****
-		 *                          | properties flow_content?
-		 *                            ********** *
-		 *                          | flow_content
-		 *                            *
-		 * properties           ::= TAG ANCHOR? | ANCHOR TAG?
-		 *                          *************************
-		 * block_content        ::= block_collection | flow_collection | SCALAR
-		 *                                                               ******
-		 * flow_content         ::= flow_collection | SCALAR
-		 *                                            ******
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// block_node_or_indentless_sequence    ::=
+		///                          ALIAS
+		///                          *****
+		///                          | properties (block_content | indentless_block_sequence)?
+		///                            **********  *
+		///                          | block_content | indentless_block_sequence
+		///                            *
+		/// block_node           ::= ALIAS
+		///                          *****
+		///                          | properties block_content?
+		///                            ********** *
+		///                          | block_content
+		///                            *
+		/// flow_node            ::= ALIAS
+		///                          *****
+		///                          | properties flow_content?
+		///                            ********** *
+		///                          | flow_content
+		///                            *
+		/// properties           ::= TAG ANCHOR? | ANCHOR TAG?
+		///                          *************************
+		/// block_content        ::= block_collection | flow_collection | SCALAR
+		///                                                               ******
+		/// flow_content         ::= flow_collection | SCALAR
+		///                                            ******
+		/// </summary>
 		private Event yaml_parser_parse_node(bool isBlock, bool isIndentlessSequence)
 		{
 			AnchorAlias alias = GetCurrentToken() as AnchorAlias;
@@ -505,13 +505,13 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Parse the productions:
-		 * implicit_document    ::= block_node DOCUMENT-END*
-		 *                                     *************
-		 * explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
-		 *                                                                *************
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// implicit_document    ::= block_node DOCUMENT-END*
+		///                                     *************
+		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
+		///                                                                *************
+		/// </summary>
 
 		private Event yaml_parser_parse_document_end()
 		{
@@ -531,11 +531,11 @@ namespace YamlDotNet.Core
 			return new Events.DocumentEnd(isImplicit, start, end);
 		}
 
-		/*
-		 * Parse the productions:
-		 * block_sequence ::= BLOCK-SEQUENCE-START (BLOCK-ENTRY block_node?)* BLOCK-END
-		 *                    ********************  *********** *             *********
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// block_sequence ::= BLOCK-SEQUENCE-START (BLOCK-ENTRY block_node?)* BLOCK-END
+		///                    ********************  *********** *             *********
+		/// </summary>
 
 		private Event yaml_parser_parse_block_sequence_entry(bool isFirst)
 		{
@@ -573,11 +573,11 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Parse the productions:
-		 * indentless_sequence  ::= (BLOCK-ENTRY block_node?)+
-		 *                           *********** *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// indentless_sequence  ::= (BLOCK-ENTRY block_node?)+
+		///                           *********** *
+		/// </summary>
 		private Event yaml_parser_parse_indentless_sequence_entry()
 		{
 		    if (GetCurrentToken() is BlockEntry)
@@ -601,17 +601,17 @@ namespace YamlDotNet.Core
 		    }
 		}
 		
-		/*
-		 * Parse the productions:
-		 * block_mapping        ::= BLOCK-MAPPING_START
-		 *                          *******************
-		 *                          ((KEY block_node_or_indentless_sequence?)?
-		 *                            *** *
-		 *                          (VALUE block_node_or_indentless_sequence?)?)*
-		 *
-		 *                          BLOCK-END
-		 *                          *********
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// block_mapping        ::= BLOCK-MAPPING_START
+		///                          *******************
+		///                          ((KEY block_node_or_indentless_sequence?)?
+		///                            *** *
+		///                          (VALUE block_node_or_indentless_sequence?)?)*
+		///
+		///                          BLOCK-END
+		///                          *********
+		/// </summary>
 		private Event yaml_parser_parse_block_mapping_key(bool isFirst)
 		{
 			if (isFirst) {
@@ -647,17 +647,17 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Parse the productions:
-		 * block_mapping        ::= BLOCK-MAPPING_START
-		 *
-		 *                          ((KEY block_node_or_indentless_sequence?)?
-		 *
-		 *                          (VALUE block_node_or_indentless_sequence?)?)*
-		 *                           ***** *
-		 *                          BLOCK-END
-		 *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// block_mapping        ::= BLOCK-MAPPING_START
+		///
+		///                          ((KEY block_node_or_indentless_sequence?)?
+		///
+		///                          (VALUE block_node_or_indentless_sequence?)?)*
+		///                           ***** *
+		///                          BLOCK-END
+		///
+		/// </summary>
 		private Event yaml_parser_parse_block_mapping_value()
 		{
 			if (GetCurrentToken() is Value)
@@ -682,19 +682,19 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/*
-		 * Parse the productions:
-		 * flow_sequence        ::= FLOW-SEQUENCE-START
-		 *                          *******************
-		 *                          (flow_sequence_entry FLOW-ENTRY)*
-		 *                           *                   **********
-		 *                          flow_sequence_entry?
-		 *                          *
-		 *                          FLOW-SEQUENCE-END
-		 *                          *****************
-		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-		 *                          *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// flow_sequence        ::= FLOW-SEQUENCE-START
+		///                          *******************
+		///                          (flow_sequence_entry FLOW-ENTRY)*
+		///                           *                   **********
+		///                          flow_sequence_entry?
+		///                          *
+		///                          FLOW-SEQUENCE-END
+		///                          *****************
+		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		///                          *
+		/// </summary>
 		private Event yaml_parser_parse_flow_sequence_entry(bool isFirst)
 		{
 			if (isFirst) {
@@ -731,11 +731,11 @@ namespace YamlDotNet.Core
 			return evt;
 		}
 
-		/*
-		 * Parse the productions:
-		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-		 *                                      *** *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		///                                      *** *
+		/// </summary>
 		private Event yaml_parser_parse_flow_sequence_entry_mapping_key()
 		{
 			if(!(GetCurrentToken() is Value || GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowSequenceEnd)) {
@@ -750,11 +750,11 @@ namespace YamlDotNet.Core
 		    }
 		}
 
-		/*
-		 * Parse the productions:
-		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-		 *                                                      ***** *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		///                                                      ***** *
+		/// </summary>
 		private Event yaml_parser_parse_flow_sequence_entry_mapping_value()
 		{
 		    if (GetCurrentToken() is Value) {
@@ -768,30 +768,30 @@ namespace YamlDotNet.Core
 		    return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
 		}
 
-		/*
-		 * Parse the productions:
-		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-		 *                                                                      *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		///                                                                      *
+		/// </summary>
 		private Event yaml_parser_parse_flow_sequence_entry_mapping_end()
 		{
 		    state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE;
 			return new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
 		}
 
-		/*
-		 * Parse the productions:
-		 * flow_mapping         ::= FLOW-MAPPING-START
-		 *                          ******************
-		 *                          (flow_mapping_entry FLOW-ENTRY)*
-		 *                           *                  **********
-		 *                          flow_mapping_entry?
-		 *                          ******************
-		 *                          FLOW-MAPPING-END
-		 *                          ****************
-		 * flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-		 *                          *           *** *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// flow_mapping         ::= FLOW-MAPPING-START
+		///                          ******************
+		///                          (flow_mapping_entry FLOW-ENTRY)*
+		///                           *                  **********
+		///                          flow_mapping_entry?
+		///                          ******************
+		///                          FLOW-MAPPING-END
+		///                          ****************
+		/// flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		///                          *           *** *
+		/// </summary>
 		private Event yaml_parser_parse_flow_mapping_key(bool isFirst)
 		{
 			if (isFirst) {
@@ -834,11 +834,11 @@ namespace YamlDotNet.Core
 			return evt;
 		}
 
-		/*
-		 * Parse the productions:
-		 * flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-		 *                                   *                  ***** *
-		 */
+		/// <summary>
+		/// Parse the productions:
+		/// flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		///                                   *                  ***** *
+		/// </summary>
 		private Event yaml_parser_parse_flow_mapping_value(bool isEmpty)
 		{
 			if (isEmpty) {
