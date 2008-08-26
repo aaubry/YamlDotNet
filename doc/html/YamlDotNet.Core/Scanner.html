@@ -1,0 +1,204 @@
+<html>
+  <head>
+    <title>YamlDotNet.Core.Scanner</title>
+    <style>
+					a { text-decoration: none }
+				
+					.CollectionTitle { font-weight: bold }
+					.PageTitle { font-size: 150%; font-weight: bold }
+
+					.Summary { }
+					.Signature { }					
+					.Remarks { }
+					.Members { }
+					.Copyright { }
+					
+					.Section { font-size: 125%; font-weight: bold }
+					.SectionBox { margin-left: 2em }
+					.NamespaceName { font-size: 105%; font-weight: bold }
+					.NamespaceSumary { }
+					.MemberName { font-size: 115%; font-weight: bold; margin-top: 1em }
+					.MemberSignature { font-family: monospace; margin-top: 1em; }
+					.MemberBox { }
+					.Subsection { font-size: 105%; font-weight: bold }
+					.SubsectionBox { margin-left: 2em; margin-bottom: 1em }
+
+					.SignatureTable { background-color: #c0c0c0; }
+					.EnumerationsTable th { background-color: #f2f2f2; }
+					.CodeExampleTable { background-color: #f5f5dd; border: thin solid black; padding: .25em; }
+					
+					.MembersListing td { margin: 0px; border: 1px solid black; padding: .25em }
+					
+					.TypesListing td { margin: 0px;  padding: .25em }
+					.InnerSignatureTable tr { background-color: #f2f2f2; }
+					.TypePermissionsTable tr { background-color: #f2f2f2; }
+					
+				</style>
+  </head>
+  <body>
+    <div class="CollectionTitle">
+      <a href="../index.html">YamlDotNet.Core</a>
+			:
+			<a href="index.html">YamlDotNet.Core Namespace</a></div>
+    <h1 class="PageTitle">Scanner  Class</h1>
+    <p class="Summary">
+            Converts a sequence of characters into a sequence of YAML tokens.
+            </p>
+    <div class="Signature">
+      <table class="SignatureTable" cellspacing="0" width="100%">
+        <tr>
+          <td>
+            <table class="InnerSignatureTable" cellpadding="10" cellspacing="0" width="100%">
+              <tr>
+                <td>public class  <b>Scanner</b></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <br>
+      </br>
+    </div>
+    <div class="Remarks">
+      <h4 class="Subsection">Remarks</h4>
+      <div class="SubsectionBox">To be added.</div>
+      <h2 class="Section">Members</h2>
+      <div class="SectionBox">
+        <p>
+						See Also: Inherited members from
+						<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Object">object</a>.
+					</p>
+        <h3>Constructors</h3>
+        <div class="SubsectionBox">
+          <table class="MembersListing">
+            <tr valign="top">
+              <td>
+                <div>
+                  <b>
+                    <a href="#C:YamlDotNet.Core.Scanner(System.IO.TextReader)">Scanner</a>
+                  </b>(<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.IO.TextReader">System.IO.TextReader</a>)</div>
+            Initializes a new instance of the <a href="../YamlDotNet.Core/Scanner.html">YamlDotNet.Core.Scanner</a> class.
+            </td>
+            </tr>
+          </table>
+        </div>
+        <h3>Properties</h3>
+        <div class="SubsectionBox">
+          <table class="MembersListing">
+            <tr valign="top">
+              <td>
+                <b>
+                  <a href="#P:YamlDotNet.Core.Scanner.Current">Current</a>
+                </b>
+					[read-only]
+					<div></div></td>
+              <td>
+                <i>
+                  <a href="../YamlDotNet.Core.Tokens/Token.html">YamlDotNet.Core.Tokens.Token</a>
+                </i>. 
+            Gets the current token.
+            </td>
+            </tr>
+            <tr valign="top">
+              <td>
+                <b>
+                  <a href="#P:YamlDotNet.Core.Scanner.CurrentPosition">CurrentPosition</a>
+                </b>
+					[read-only]
+					<div></div></td>
+              <td>
+                <i>
+                  <a href="../YamlDotNet.Core/Mark.html">Mark</a>
+                </i>. 
+            Gets the current position inside the input stream.
+            </td>
+            </tr>
+          </table>
+        </div>
+        <h3>Methods</h3>
+        <div class="SubsectionBox">
+          <table class="MembersListing">
+            <tr valign="top">
+              <td>
+              </td>
+              <td>
+                <b>
+                  <a href="#M:YamlDotNet.Core.Scanner.MoveNext">MoveNext</a>
+                </b>()<nobr> : <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Boolean">bool</a></nobr><div>
+            Moves to the next token.
+            </div></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="Members">
+      <h2 class="Section">Member Details</h2>
+      <div class="SectionBox">
+        <h3 id="C:YamlDotNet.Core.Scanner(System.IO.TextReader)" class="MemberName">Scanner Constructor</h3>
+        <div class="MemberSignature">public  <b>Scanner</b> (<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.IO.TextReader">System.IO.TextReader</a> input)</div>
+        <div class="MemberBox">
+          <p>
+            Initializes a new instance of the <a href="../YamlDotNet.Core/Scanner.html">YamlDotNet.Core.Scanner</a> class.
+            </p>
+          <h4 class="Subsection">Parameters</h4>
+          <div class="SubsectionBox">
+            <dl>
+              <dt>
+                <i>input</i>
+              </dt>
+              <dd>The input.</dd>
+            </dl>
+          </div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="P:YamlDotNet.Core.Scanner.Current" class="MemberName">Current Property</h3>
+        <div class="MemberSignature">public <a href="../YamlDotNet.Core.Tokens/Token.html">YamlDotNet.Core.Tokens.Token</a> <b>Current</b>  { get; }</div>
+        <div class="MemberBox">
+          <p>
+            Gets the current token.
+            </p>
+          <h4 class="Subsection">Value</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="P:YamlDotNet.Core.Scanner.CurrentPosition" class="MemberName">CurrentPosition Property</h3>
+        <div class="MemberSignature">public <a href="../YamlDotNet.Core/Mark.html">Mark</a> <b>CurrentPosition</b>  { get; }</div>
+        <div class="MemberBox">
+          <p>
+            Gets the current position inside the input stream.
+            </p>
+          <h4 class="Subsection">Value</h4>
+          <div class="SubsectionBox">The current position.</div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="M:YamlDotNet.Core.Scanner.MoveNext" class="MemberName">MoveNext Method</h3>
+        <div class="MemberSignature">public <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Boolean">bool</a> <b>MoveNext</b> ()</div>
+        <div class="MemberBox">
+          <p>
+            Moves to the next token.
+            </p>
+          <h4 class="Subsection">Returns</h4>
+          <div class="SubsectionBox">
+          </div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+      </div>
+    </div>
+    <hr size="1" />
+    <div class="Copyright">
+    </div>
+  </body>
+</html>

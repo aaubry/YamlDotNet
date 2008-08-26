@@ -21,6 +21,7 @@ namespace YamlDotNet.Core.Events
 		/// Initializes a new instance of the <see cref="MappingEnd"/> class.
 		/// </summary>
 		public MappingEnd()
+			: this(Mark.Empty, Mark.Empty)
 		{
 		}
 	}

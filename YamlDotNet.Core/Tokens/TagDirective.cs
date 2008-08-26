@@ -83,6 +83,7 @@ namespace YamlDotNet.Core.Tokens
 			return handle.GetHashCode() ^ prefix.GetHashCode();
 		}
 		
+		/// <summary/>
 		public override string ToString ()
 		{
 			return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", handle, prefix);

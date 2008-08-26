@@ -26,6 +26,7 @@ namespace YamlDotNet.Core.Events
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DocumentEnd"/> class.
 		/// </summary>
+		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
 		public DocumentEnd(bool isImplicit, Mark start, Mark end)
@@ -37,6 +38,7 @@ namespace YamlDotNet.Core.Events
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DocumentEnd"/> class.
 		/// </summary>
+		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
 		public DocumentEnd(bool isImplicit)
 			: this(isImplicit, Mark.Empty, Mark.Empty)
 		{

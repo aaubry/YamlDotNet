@@ -12,6 +12,7 @@ namespace YamlDotNet.Core.Events
 		/// Initializes a new instance of the <see cref="StreamStart"/> class.
 		/// </summary>
 		public StreamStart()
+			: this(Mark.Empty, Mark.Empty)
 		{
 		}
 

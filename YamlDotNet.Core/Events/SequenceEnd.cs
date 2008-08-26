@@ -21,6 +21,7 @@ namespace YamlDotNet.Core.Events
 		/// Initializes a new instance of the <see cref="SequenceEnd"/> class.
 		/// </summary>
 		public SequenceEnd()
+			: this(Mark.Empty, Mark.Empty)
 		{
 		}
 	}

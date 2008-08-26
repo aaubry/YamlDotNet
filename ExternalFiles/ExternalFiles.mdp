@@ -1,0 +1,15 @@
+<Project name="ExternalFiles" fileversion="2.0" ctype="GenericProject">
+  <Configurations active="Default">
+    <Configuration name="Default" ctype="GenericProjectConfiguration">
+      <Output directory="." />
+      <Build debugmode="True" />
+      <Execution runwithwarnings="True" consolepause="True" />
+    </Configuration>
+  </Configurations>
+  <Contents>
+    <File name="../LICENSE" subtype="Code" buildaction="FileCopy" />
+    <File name="../LICENSE-libyaml" subtype="Code" buildaction="FileCopy" />
+    <File name="../README" subtype="Code" buildaction="FileCopy" />
+    <File name="../YamlDotNet.snk" subtype="Code" buildaction="FileCopy" />
+  </Contents>
+</Project>

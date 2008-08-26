@@ -57,6 +57,7 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		/// <param name="version">The version.</param>
 		/// <param name="tags">The tags.</param>
+		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
 		public DocumentStart(Tokens.VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
@@ -72,6 +73,7 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		/// <param name="version">The version.</param>
 		/// <param name="tags">The tags.</param>
+		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
 		public DocumentStart(Tokens.VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
 			: this(version, tags, isImplicit, Mark.Empty, Mark.Empty)
 		{

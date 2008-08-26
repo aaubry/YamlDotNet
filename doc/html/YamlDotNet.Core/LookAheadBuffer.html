@@ -1,0 +1,256 @@
+<html>
+  <head>
+    <title>YamlDotNet.Core.LookAheadBuffer</title>
+    <style>
+					a { text-decoration: none }
+				
+					.CollectionTitle { font-weight: bold }
+					.PageTitle { font-size: 150%; font-weight: bold }
+
+					.Summary { }
+					.Signature { }					
+					.Remarks { }
+					.Members { }
+					.Copyright { }
+					
+					.Section { font-size: 125%; font-weight: bold }
+					.SectionBox { margin-left: 2em }
+					.NamespaceName { font-size: 105%; font-weight: bold }
+					.NamespaceSumary { }
+					.MemberName { font-size: 115%; font-weight: bold; margin-top: 1em }
+					.MemberSignature { font-family: monospace; margin-top: 1em; }
+					.MemberBox { }
+					.Subsection { font-size: 105%; font-weight: bold }
+					.SubsectionBox { margin-left: 2em; margin-bottom: 1em }
+
+					.SignatureTable { background-color: #c0c0c0; }
+					.EnumerationsTable th { background-color: #f2f2f2; }
+					.CodeExampleTable { background-color: #f5f5dd; border: thin solid black; padding: .25em; }
+					
+					.MembersListing td { margin: 0px; border: 1px solid black; padding: .25em }
+					
+					.TypesListing td { margin: 0px;  padding: .25em }
+					.InnerSignatureTable tr { background-color: #f2f2f2; }
+					.TypePermissionsTable tr { background-color: #f2f2f2; }
+					
+				</style>
+  </head>
+  <body>
+    <div class="CollectionTitle">
+      <a href="../index.html">YamlDotNet.Core</a>
+			:
+			<a href="index.html">YamlDotNet.Core Namespace</a></div>
+    <h1 class="PageTitle">LookAheadBuffer  Class</h1>
+    <p class="Summary">
+            Provides access to a stream and allows to peek at the next characters,
+            up to the buffer's capacity.
+            </p>
+    <div class="Signature">
+      <table class="SignatureTable" cellspacing="0" width="100%">
+        <tr>
+          <td>
+            <table class="InnerSignatureTable" cellpadding="10" cellspacing="0" width="100%">
+              <tr>
+                <td>public class  <b>LookAheadBuffer</b></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <br>
+      </br>
+    </div>
+    <div class="Remarks">
+      <h4 class="Subsection">Remarks</h4>
+      <div class="SubsectionBox">
+            This class implements a circular buffer with a fixed capacity.
+            </div>
+      <h2 class="Section">Members</h2>
+      <div class="SectionBox">
+        <p>
+						See Also: Inherited members from
+						<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Object">object</a>.
+					</p>
+        <h3>Constructors</h3>
+        <div class="SubsectionBox">
+          <table class="MembersListing">
+            <tr valign="top">
+              <td>
+                <div>
+                  <b>
+                    <a href="#C:YamlDotNet.Core.LookAheadBuffer(System.IO.TextReader,System.Int32)">LookAheadBuffer</a>
+                  </b>(<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.IO.TextReader">System.IO.TextReader</a>, <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a>)</div>
+            Initializes a new instance of the <a href="../YamlDotNet.Core/LookAheadBuffer.html">YamlDotNet.Core.LookAheadBuffer</a> class.
+            </td>
+            </tr>
+          </table>
+        </div>
+        <h3>Properties</h3>
+        <div class="SubsectionBox">
+          <table class="MembersListing">
+            <tr valign="top">
+              <td>
+                <b>
+                  <a href="#P:YamlDotNet.Core.LookAheadBuffer.EndOfInput">EndOfInput</a>
+                </b>
+					[read-only]
+					<div></div></td>
+              <td>
+                <i>
+                  <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Boolean">bool</a>
+                </i>. 
+            Gets a value indicating whether the end of the input reader has been reached.
+            </td>
+            </tr>
+          </table>
+        </div>
+        <h3>Methods</h3>
+        <div class="SubsectionBox">
+          <table class="MembersListing">
+            <tr valign="top">
+              <td>
+              </td>
+              <td>
+                <b>
+                  <a href="#M:YamlDotNet.Core.LookAheadBuffer.Cache(System.Int32)">Cache</a>
+                </b>(<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a>)<div>
+            Reads characters until at least <i>length</i> characters are in the buffer.
+            </div></td>
+            </tr>
+            <tr valign="top">
+              <td>
+              </td>
+              <td>
+                <b>
+                  <a href="#M:YamlDotNet.Core.LookAheadBuffer.Peek(System.Int32)">Peek</a>
+                </b>(<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a>)<nobr> : <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Char">char</a></nobr><div>
+            Gets the character at thhe specified offset.
+            </div></td>
+            </tr>
+            <tr valign="top">
+              <td>
+              </td>
+              <td>
+                <b>
+                  <a href="#M:YamlDotNet.Core.LookAheadBuffer.Skip(System.Int32)">Skip</a>
+                </b>(<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a>)<div>
+            Skips the next <i>length</i> characters. Those characters must have been
+            obtained first by calling the <a href="../YamlDotNet.Core/LookAheadBuffer.html#M:YamlDotNet.Core.LookAheadBuffer.Peek(System.Int32)">LookAheadBuffer.Peek(int)</a> or <a href="../YamlDotNet.Core/LookAheadBuffer.html#M:YamlDotNet.Core.LookAheadBuffer.Cache(System.Int32)">LookAheadBuffer.Cache(int)</a> methods.
+            </div></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="Members">
+      <h2 class="Section">Member Details</h2>
+      <div class="SectionBox">
+        <h3 id="C:YamlDotNet.Core.LookAheadBuffer(System.IO.TextReader,System.Int32)" class="MemberName">LookAheadBuffer Constructor</h3>
+        <div class="MemberSignature">public  <b>LookAheadBuffer</b> (<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.IO.TextReader">System.IO.TextReader</a> input, <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a> capacity)</div>
+        <div class="MemberBox">
+          <p>
+            Initializes a new instance of the <a href="../YamlDotNet.Core/LookAheadBuffer.html">YamlDotNet.Core.LookAheadBuffer</a> class.
+            </p>
+          <h4 class="Subsection">Parameters</h4>
+          <div class="SubsectionBox">
+            <dl>
+              <dt>
+                <i>input</i>
+              </dt>
+              <dd>The input.</dd>
+              <dt>
+                <i>capacity</i>
+              </dt>
+              <dd>The capacity.</dd>
+            </dl>
+          </div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="M:YamlDotNet.Core.LookAheadBuffer.Cache(System.Int32)" class="MemberName">Cache Method</h3>
+        <div class="MemberSignature">public <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Void">void</a> <b>Cache</b> (<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a> length)</div>
+        <div class="MemberBox">
+          <p>
+            Reads characters until at least <i>length</i> characters are in the buffer.
+            </p>
+          <h4 class="Subsection">Parameters</h4>
+          <div class="SubsectionBox">
+            <dl>
+              <dt>
+                <i>length</i>
+              </dt>
+              <dd>
+            Number of characters to cache.
+            </dd>
+            </dl>
+          </div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="P:YamlDotNet.Core.LookAheadBuffer.EndOfInput" class="MemberName">EndOfInput Property</h3>
+        <div class="MemberSignature">public <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Boolean">bool</a> <b>EndOfInput</b>  { get; }</div>
+        <div class="MemberBox">
+          <p>
+            Gets a value indicating whether the end of the input reader has been reached.
+            </p>
+          <h4 class="Subsection">Value</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="M:YamlDotNet.Core.LookAheadBuffer.Peek(System.Int32)" class="MemberName">Peek Method</h3>
+        <div class="MemberSignature">public <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Char">char</a> <b>Peek</b> (<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a> offset)</div>
+        <div class="MemberBox">
+          <p>
+            Gets the character at thhe specified offset.
+            </p>
+          <h4 class="Subsection">Parameters</h4>
+          <div class="SubsectionBox">
+            <dl>
+              <dt>
+                <i>offset</i>
+              </dt>
+              <dd>To be added.</dd>
+            </dl>
+          </div>
+          <h4 class="Subsection">Returns</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+        <h3 id="M:YamlDotNet.Core.LookAheadBuffer.Skip(System.Int32)" class="MemberName">Skip Method</h3>
+        <div class="MemberSignature">public <a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Void">void</a> <b>Skip</b> (<a href="http://www.go-mono.com/docs/monodoc.ashx?link=T:System.Int32">int</a> length)</div>
+        <div class="MemberBox">
+          <p>
+            Skips the next <i>length</i> characters. Those characters must have been
+            obtained first by calling the <a href="../YamlDotNet.Core/LookAheadBuffer.html#M:YamlDotNet.Core.LookAheadBuffer.Peek(System.Int32)">LookAheadBuffer.Peek(int)</a> or <a href="../YamlDotNet.Core/LookAheadBuffer.html#M:YamlDotNet.Core.LookAheadBuffer.Cache(System.Int32)">LookAheadBuffer.Cache(int)</a> methods.
+            </p>
+          <h4 class="Subsection">Parameters</h4>
+          <div class="SubsectionBox">
+            <dl>
+              <dt>
+                <i>length</i>
+              </dt>
+              <dd>To be added.</dd>
+            </dl>
+          </div>
+          <h4 class="Subsection">Remarks</h4>
+          <div class="SubsectionBox">To be added.</div>
+          <hr size="1">
+          </hr>
+        </div>
+      </div>
+    </div>
+    <hr size="1" />
+    <div class="Copyright">
+    </div>
+  </body>
+</html>

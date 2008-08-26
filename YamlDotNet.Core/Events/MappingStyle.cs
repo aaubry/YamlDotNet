@@ -2,6 +2,9 @@ using System;
 
 namespace YamlDotNet.Core.Events
 {
+	/// <summary>
+	/// Specifies the style of a mapping.
+	/// </summary>
 	public enum MappingStyle
 	{
 		/// <summary>

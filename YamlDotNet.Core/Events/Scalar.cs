@@ -96,6 +96,8 @@ namespace YamlDotNet.Core.Events
 		/// <param name="tag">The tag.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="style">The style.</param>
+		/// <param name="isPlainImplicit">.</param>
+		/// <param name="isQuotedImplicit">.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
 		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
@@ -114,16 +116,12 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		/// <param name="anchor">The anchor.</param>
 		/// <param name="tag">The tag.</param>
+		/// <param name="value">The value.</param>
 		/// <param name="style">The style.</param>
+		/// <param name="isPlainImplicit">.</param>
+		/// <param name="isQuotedImplicit">.</param>
 		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit)
 			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit, Mark.Empty, Mark.Empty)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Scalar"/> class.
-		/// </summary>
-		public Scalar()
 		{
 		}
 	}

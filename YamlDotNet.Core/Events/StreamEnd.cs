@@ -21,6 +21,7 @@ namespace YamlDotNet.Core.Events
 		/// Initializes a new instance of the <see cref="StreamEnd"/> class.
 		/// </summary>
 		public StreamEnd()
+			: this(Mark.Empty, Mark.Empty)
 		{
 		}
 	}

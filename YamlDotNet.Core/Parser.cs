@@ -24,18 +24,6 @@ namespace YamlDotNet.Core
 
 		private Token currentToken;
 		
-		public static void DisplayCaller(int count) {
-			StackFrame callee = new StackFrame(1);
-			Console.Write(callee.GetMethod().Name);
-			
-			for(int i = 0; i < count; ++i) {
-				StackFrame caller = new StackFrame(2 + i);
-				Console.Write(" <= {0}", caller.GetMethod().Name);
-			}
-			Console.WriteLine();
-		}
-		
-		
 		private Token GetCurrentToken()
 		{
 			if(currentToken == null) {
