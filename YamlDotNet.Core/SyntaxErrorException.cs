@@ -9,12 +9,12 @@ namespace YamlDotNet.Core
 	/// Exception that is thrown when a syntax error is detected on a YAML stream.
 	/// </summary>
 	[Serializable]
-	public class SyntaxErrorException : Exception
+	public class SyntaxErrorException : YamlException
 	{
 		private readonly Mark location;
 
 		/// <summary>
-		/// Gets the location where the exception has occured.
+			/// Gets the location where the exception has occured.
 		/// </summary>
 		/// <value>The location.</value>
 		public Mark Location
@@ -29,9 +29,9 @@ namespace YamlDotNet.Core
 		/// Initializes a new instance of the <see cref="SyntaxErrorException"/> class.
 		/// </summary>
 		/// <param name="description">The description.</param>
-		/// <param name="location">The location where the exception has occured.</param>
+			/// <param name="location">The location where the exception has occured.</param>
 		public SyntaxErrorException(string description, Mark location)
-			: base(string.Format(CultureInfo.InvariantCulture, "({0}, {1}): {2}", location.Line + 1, location.Column + 1, description))
+	:          base(string.Format(CultureInfo.InvariantCulture, "({0}, {1}): {2}", location.Line + 1, location.Column + 1, description))
 		{
 			this.location = location;
 		}

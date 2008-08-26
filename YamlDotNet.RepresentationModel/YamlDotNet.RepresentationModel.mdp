@@ -1,5 +1,5 @@
 <Project name="YamlDotNet.RepresentationModel" fileversion="2.0" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
-  <Configurations active="Debug">
+  <Configurations active="Release">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.RepresentationModel" />
       <Build debugmode="True" target="Library" />
@@ -14,7 +14,22 @@
     </Configuration>
   </Configurations>
   <Contents>
-    <File name="AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="." subtype="Directory" buildaction="Compile" />
+    <File name="Properties/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="AnchorNotFoundException.cs" subtype="Code" buildaction="Compile" />
+    <File name="DocumentState.cs" subtype="Code" buildaction="Compile" />
+    <File name="DuplicateAnchorException.cs" subtype="Code" buildaction="Compile" />
+    <File name="EventReader.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlAliasNode.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlDocument.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlMappingNode.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlNode.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlScalarNode.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlSequenceNode.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlStream.cs" subtype="Code" buildaction="Compile" />
+    <File name="../CommonAssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlSerializer.cs" subtype="Code" buildaction="Nothing" />
+    <File name="YamlSerializerOptions.cs" subtype="Code" buildaction="Nothing" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

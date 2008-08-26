@@ -13,12 +13,12 @@ namespace YamlDotNet.Core.Events
 		Any,
 
 		/// <summary>
-		/// The block mapping style. 
+		/// The block mapping style.
 		/// </summary>
 		Block,
-		
+
 		/// <summary>
-		/// The flow mapping style. 
+		/// The flow mapping style.
 		/// </summary>
 		Flow
 	}

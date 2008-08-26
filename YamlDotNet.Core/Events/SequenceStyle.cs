@@ -13,12 +13,12 @@ namespace YamlDotNet.Core.Events
 		Any,
 
 		/// <summary>
-		/// The block sequence style. 
+		/// The block sequence style.
 		/// </summary>
 		Block,
-		
+
 		/// <summary>
-		/// The flow sequence style. 
+		/// The flow sequence style.
 		/// </summary>
 		Flow
 	}

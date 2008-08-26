@@ -5,19 +5,21 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents an alias event.
 	/// </summary>
-    public class AnchorAlias : ParsingEvent
-	{				
+	public class AnchorAlias : ParsingEvent
+	{
 		private readonly string value;
-		
+
 		/// <summary>
 		/// Gets the value of the alias.
 		/// </summary>
-		public string Value {
-			get {
+		public string Value
+		{
+			get
+			{
 				return value;
 			}
 		}
-		
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnchorAlias"/> class.
 		/// </summary>
@@ -29,7 +31,7 @@ namespace YamlDotNet.Core.Events
 		{
 			this.value = value;
 		}
-		
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnchorAlias"/> class.
 		/// </summary>

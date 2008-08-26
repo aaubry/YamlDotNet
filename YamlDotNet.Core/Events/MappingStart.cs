@@ -52,16 +52,18 @@ namespace YamlDotNet.Core.Events
 		}
 
 		private readonly MappingStyle style;
-		
+
 		/// <summary>
 		/// Gets the style of the mapping.
 		/// </summary>
-		public MappingStyle Style {
-			get {
+		public MappingStyle Style
+		{
+			get
+			{
 				return style;
 			}
 		}
-		
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MappingStart"/> class.
 		/// </summary>

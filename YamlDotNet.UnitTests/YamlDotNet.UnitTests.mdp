@@ -14,18 +14,21 @@
     </Configuration>
   </Configurations>
   <Contents>
-    <File name="ParserTests.cs" subtype="Code" buildaction="Compile" />
-    <File name="ScannerTests.cs" subtype="Code" buildaction="Compile" />
-    <File name="LookAheadBufferTests.cs" subtype="Code" buildaction="Compile" />
-    <File name="InsertionQueueTests.cs" subtype="Code" buildaction="Compile" />
-    <File name="YamlTest.cs" subtype="Code" buildaction="Compile" />
     <File name="Properties/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
     <File name="../CommonAssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="Core/InsertionQueueTests.cs" subtype="Code" buildaction="Compile" />
+    <File name="Core/LookAheadBufferTests.cs" subtype="Code" buildaction="Compile" />
+    <File name="Core/ParserTests.cs" subtype="Code" buildaction="Compile" />
+    <File name="Core/ScannerTests.cs" subtype="Code" buildaction="Compile" />
+    <File name="RepresentationModel/SerializationTests.cs" subtype="Code" buildaction="Nothing" />
+    <File name="RepresentationModel/YamlStreamTests.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlTest.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <ProjectReference type="Gac" localcopy="True" refto="nunit.core, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <ProjectReference type="Gac" localcopy="True" refto="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.Core" />
+    <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.RepresentationModel" />
   </References>
 </Project>

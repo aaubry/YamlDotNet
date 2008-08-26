@@ -1,142 +1,64 @@
 using System;
-using MbUnit.Framework;
-using YamlDotNet.Core;
-using System.IO;
-using System.Text;
-using System.Drawing;
-using YamlDotNet.RepresentationModel.Serialization;
-using System.Reflection;
+using NUnit.Framework;
+using YamlDotNet.RepresentationModel;
 
-namespace YamlDotNet.UnitTests.RepresentationModel {
+namespace YamlDotNet.UnitTests
+{
 	[TestFixture]
-	public class YamlStreamTests {
-		private class X
-		{
-			private bool myFlag;
-
-			public bool MyFlag
-			{
-				get
-				{
-					return myFlag;
-				}
-				set
-				{
-					myFlag = value;
-				}
-			}
-
-			private string nothing;
-
-			public string Nothing
-			{
-				get
-				{
-					return nothing;
-				}
-				set
-				{
-					nothing = value;
-				}
-			}
-
-			private int myInt = 1234;
-
-			public int MyInt
-			{
-				get
-				{
-					return myInt;
-				}
-				set
-				{
-					myInt = value;
-				}
-			}
-
-			private double myDouble = 6789.1011;
-
-			public double MyDouble
-			{
-				get
-				{
-					return myDouble;
-				}
-				set
-				{
-					myDouble = value;
-				}
-			}
-
-			private string myString = "Hello world";
-
-			public string MyString
-			{
-				get
-				{
-					return myString;
-				}
-				set
-				{
-					myString = value;
-				}
-			}
-
-			private DateTime myDate = DateTime.Now;
-
-			public DateTime MyDate
-			{
-				get
-				{
-					return myDate;
-				}
-				set
-				{
-					myDate = value;
-				}
-			}
-
-			private Point myPoint = new Point(100, 200);
-
-			public Point MyPoint
-			{
-				get
-				{
-					return myPoint;
-				}
-				set
-				{
-					myPoint = value;
-				}
-			}
-	
-		}
-
+	public class YamlStreamTests : YamlTest
+	{
 		[Test]
-		public void Roundtrip()
-		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerOptions.Roundtrip);
+		public void LoadSimpleDocument() {
+			YamlStream stream = new YamlStream();
+			stream.Load(YamlFile(@"
+				'a scalar'
+			"));
+			
+			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
+			Assert.IsInstanceOfType(typeof(YamlScalarNode), stream.Documents[0].RootNode, "The document should contain a scalar.");
+			Assert.AreEqual("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value, "The value of the node is incorrect.");
+		}
+		
+		[Test]
+		public void BackwardAliasReferenceWorks() {
+			YamlStream stream = new YamlStream();
+			stream.Load(YamlFile(@"
+				- &first a scalar
+				- another scalar
+				- *first
+			"));
+			
+			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
+			Assert.IsInstanceOfType(typeof(YamlSequenceNode), stream.Documents[0].RootNode, "The document should contain a sequence.");
 
-			using(MemoryStream buffer = new MemoryStream())
-			{
-				X original = new X();
-				serializer.Serialize(buffer, original);
+			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			Assert.AreEqual(3, sequence.Children.Count, "The sequence does not contain the correct number of children.");
 
-				buffer.Position = 0;
-				X copy = (X)serializer.Deserialize(buffer);
+			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[0]).Value, "The value of the first node is incorrect.");
+			Assert.AreEqual("another scalar", ((YamlScalarNode)sequence.Children[1]).Value, "The value of the second node is incorrect.");
+			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[2]).Value, "The value of the third node is incorrect.");
+			Assert.AreSame(sequence.Children[0], sequence.Children[2], "The first and third element should be the same.");
+		}
+		
+		[Test]
+		public void ForwardAliasReferenceWorks() {
+			YamlStream stream = new YamlStream();
+			stream.Load(YamlFile(@"
+				- *first
+				- another scalar
+				- &first a scalar
+			"));
+			
+			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
+			Assert.IsInstanceOfType(typeof(YamlSequenceNode), stream.Documents[0].RootNode, "The document should contain a sequence.");
 
-				foreach(PropertyInfo property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-				{
-					if(property.CanRead && property.CanWrite)
-					{
-						Assert.AreEqual(
-							property.GetValue(original, null),
-							property.GetValue(copy, null),
-							string.Format("Property '{0}' is incorrect", property.Name)
-						);
-					}
-				}
-			}
+			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			Assert.AreEqual(3, sequence.Children.Count, "The sequence does not contain the correct number of children.");
+
+			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[0]).Value, "The value of the first node is incorrect.");
+			Assert.AreEqual("another scalar", ((YamlScalarNode)sequence.Children[1]).Value, "The value of the second node is incorrect.");
+			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[2]).Value, "The value of the third node is incorrect.");
+			Assert.AreSame(sequence.Children[0], sequence.Children[2], "The first and third element should be the same.");
 		}
 	}
 }

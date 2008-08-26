@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Globalization;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.RepresentationModel
 {
 	/// <summary>
 	/// Reads and writes objects from and to YAML.
@@ -47,11 +47,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <summary>
 		/// Serializes the specified object.
 		/// </summary>
-		/// <param name="stream">The stream where to serialize the object.</param>
+			/// <param name="stream">The stream where to serialize the object.</param>
 		/// <param name="o">The object to serialize.</param>
 		public void Serialize(Stream stream, object o)
 		{
-			if(stream == null)
+			if (stream == null)
 			{
 				throw new ArgumentNullException("stream", "The stream is null.");
 			}
@@ -76,7 +76,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="o">The o.</param>
 		private void SerializeProperties(Emitter emitter, Type type, object o)
 		{
-			if(Roundtrip && !HasDefaultConstructor(type))
+			if (Roundtrip && !HasDefaultConstructor(type))
 			{
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
@@ -85,9 +85,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			foreach(PropertyInfo property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
-				if(property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
+				if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
 				{
-					if(!Roundtrip || property.CanWrite)
+					if (!Roundtrip || property.CanWrite)
 					{
 						emitter.Emit(new ScalarEvent(property.Name));
 
@@ -137,14 +137,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="value">The value.</param>
 		private void SerializeValue(Emitter emitter, Type type, object value)
 		{
-			if(value == null)
+			if (value == null)
 			{
-				emitter.Emit(new ScalarEvent("", "tag:yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
+				emitter.Emit(new ScalarEvent("", "tag:         yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
 				return;
 			}
 
 			TypeCode typeCode = Type.GetTypeCode(type);
-			switch(typeCode)
+			switch (typeCode)
 			{
 				case TypeCode.Boolean:
 					emitter.Emit(new ScalarEvent(value.ToString(), "tag:yaml.org,2002:bool"));
@@ -211,11 +211,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private object DeserializeValue(EventReader reader, Type type)
 		{
 			ScalarEvent scalar = null;
-			if(reader.Accept<ScalarEvent>())
+			if (reader.Accept<ScalarEvent>())
 			{
 				scalar = reader.Expect<ScalarEvent>();
 
-				if(scalar.Tag == "tag:yaml.org,2002:null")
+				if (scalar.Tag == "tag:yaml.org,2002:null")
 				{
 					scalar.Dispose();
 					return null;
@@ -225,7 +225,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			try
 			{
 				TypeCode typeCode = Type.GetTypeCode(type);
-				switch(typeCode)
+				switch (typeCode)
 				{
 					case TypeCode.Boolean:
 						return bool.Parse(scalar.Value);
@@ -284,7 +284,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 			finally
 			{
-				if(scalar != null)
+				if (scalar != null)
 				{
 					scalar.Dispose();
 				}
@@ -296,7 +296,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			object result = Activator.CreateInstance(type);
 
 			reader.Expect<MappingStartEvent>().Dispose();
-			while(!reader.Accept<MappingEndEvent>())
+			while (!reader.Accept<MappingEndEvent>())
 			{
 				using(ScalarEvent key = reader.Expect<ScalarEvent>())
 				{

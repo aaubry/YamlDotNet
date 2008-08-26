@@ -7,15 +7,15 @@ using System.Security.Permissions;
 namespace YamlDotNet.Core
 {
 	/// <summary>
-	/// Exception that is thrown when the YAML parser encounters a problem.
+	/// Exception that is thrown when a semantic error is detected on a YAML stream.
 	/// </summary>
 	[Serializable]
-	public class ParserException : Exception
+	public class SemanticErrorException : YamlException
 	{
 		private readonly Mark location;
 
 		/// <summary>
-		/// Gets the location where the exception has occured.
+			/// Gets the location where the exception has occured.
 		/// </summary>
 		/// <value>The location.</value>
 		public Mark Location
@@ -25,15 +25,15 @@ namespace YamlDotNet.Core
 				return location;
 			}
 		}
-	
+
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ParserException"/> class.
 		/// </summary>
 		/// <param name="description">The description.</param>
-		/// <param name="location">The location where the exception occured.</param>
-		public ParserException(string description, Mark location)
-			: base(string.Format(CultureInfo.InvariantCulture, "({0}, {1}): {2}", location.Line, location.Column, description))
+			/// <param name="location">The location where the exception occured.</param>
+		public SemanticErrorException(string description, Mark location)
+	:          base(string.Format(CultureInfo.InvariantCulture, "({0}, {1}): {2}", location.Line, location.Column, description))
 		{
 			this.location = location;
 		}
@@ -41,7 +41,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ParserException"/> class.
 		/// </summary>
-		public ParserException()
+		public SemanticErrorException()
 		{
 		}
 
@@ -49,7 +49,7 @@ namespace YamlDotNet.Core
 		/// Initializes a new instance of the <see cref="ParserException"/> class.
 		/// </summary>
 		/// <param name="message">The message.</param>
-		public ParserException(string message)
+		public SemanticErrorException(string message)
 			: base(message)
 		{
 		}
@@ -59,7 +59,7 @@ namespace YamlDotNet.Core
 		/// </summary>
 		/// <param name="message">The message.</param>
 		/// <param name="inner">The inner.</param>
-		public ParserException(string message, Exception inner)
+		public SemanticErrorException(string message, Exception inner)
 			: base(message, inner)
 		{
 		}
@@ -71,7 +71,7 @@ namespace YamlDotNet.Core
 		/// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>
 		/// <exception cref="T:System.ArgumentNullException">The <paramref name="info"/> parameter is null. </exception>
 		/// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"/> is zero (0). </exception>
-		protected ParserException(SerializationInfo info, StreamingContext context)
+		protected SemanticErrorException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 			location = (Mark)info.GetValue("location", typeof(Mark));

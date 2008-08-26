@@ -313,7 +313,6 @@ namespace YamlDotNet.UnitTests
 		}
 	
 		[Test]
-		//[Ignore("The original C code also fails this test")]
 		public void VerifyTokensOnExample11()
 		{
 			Parser parser = CreateParser(@"
@@ -422,7 +421,6 @@ namespace YamlDotNet.UnitTests
 		}
 			
 		[Test]
-		//[Ignore("The original C code also fails this test")]
 		public void VerifyTokensOnExample14()
 		{
 			Parser parser = CreateParser(@"

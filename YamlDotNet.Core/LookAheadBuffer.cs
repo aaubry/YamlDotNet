@@ -5,7 +5,7 @@ namespace YamlDotNet.Core
 {
 	/// <summary>
 	/// Provides access to a stream and allows to peek at the next characters,
-	/// up to the buffer's capacity. 
+	/// up to the buffer's capacity.
 	/// </summary>
 	/// <remarks>
 	/// This class implements a circular buffer with a fixed capacity.

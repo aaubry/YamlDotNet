@@ -51,7 +51,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Inserts an item at the specified index.
 		/// </summary>
-		/// <param name="index">The index where to insert the item.</param>
+			/// <param name="index">The index where to insert the item.</param>
 		/// <param name="item">The item to be inserted.</param>
 		public void Insert(int index, T item)
 		{

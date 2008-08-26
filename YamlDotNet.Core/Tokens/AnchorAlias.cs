@@ -6,18 +6,21 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Represents an alias token.
 	/// </summary>
-	public class AnchorAlias : Token {
+	public class AnchorAlias : Token
+	{
 		private string value;
-		
+
 		/// <summary>
 		/// Gets the value of the alias.
 		/// </summary>
-		public string Value {
-			get {
+		public string Value
+		{
+			get
+			{
 				return value;
 			}
 		}
-		
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnchorAlias"/> class.
 		/// </summary>

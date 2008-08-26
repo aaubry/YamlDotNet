@@ -13,19 +13,22 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TagDirectiveCollection"/> class.
 		/// </summary>
-		public TagDirectiveCollection() {
+		public TagDirectiveCollection()
+		{
 		}
-		
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TagDirectiveCollection"/> class.
 		/// </summary>
 		/// <param name="tagDirectives">Initial content of the collection.</param>
-		public TagDirectiveCollection(IEnumerable<TagDirective> tagDirectives) {
-			foreach (TagDirective tagDirective in tagDirectives) {
+		public TagDirectiveCollection(IEnumerable<TagDirective> tagDirectives)
+		{
+			foreach(TagDirective tagDirective in tagDirectives)
+			{
 				Add(tagDirective);
 			}
 		}
-		
+
 		/// <summary/>
 		protected override string GetKeyForItem(TagDirective item)
 		{

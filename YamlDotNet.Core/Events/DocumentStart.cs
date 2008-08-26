@@ -35,7 +35,7 @@ namespace YamlDotNet.Core.Events
 				return version;
 			}
 		}
-		
+
 		private readonly bool isImplicit;
 
 		/// <summary>

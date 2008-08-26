@@ -11,5 +11,7 @@
     <File name="../LICENSE-libyaml" subtype="Code" buildaction="FileCopy" />
     <File name="../README" subtype="Code" buildaction="FileCopy" />
     <File name="../YamlDotNet.snk" subtype="Code" buildaction="FileCopy" />
+    <File name="../gendoc.sh" subtype="Code" buildaction="Nothing" />
+    <File name="../reformat.sh" subtype="Code" buildaction="Nothing" />
   </Contents>
 </Project>

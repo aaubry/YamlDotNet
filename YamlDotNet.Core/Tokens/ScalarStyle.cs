@@ -21,7 +21,7 @@ namespace YamlDotNet.Core
 		/// The single-quoted scalar style.
 		/// </summary>
 		SingleQuoted,
-		
+
 		/// <summary>
 		/// The double-quoted scalar style.
 		/// </summary>
@@ -31,7 +31,7 @@ namespace YamlDotNet.Core
 		/// The literal scalar style.
 		/// </summary>
 		Literal,
-		
+
 		/// <summary>
 		/// The folded scalar style.
 		/// </summary>
