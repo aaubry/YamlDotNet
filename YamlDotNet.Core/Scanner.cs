@@ -118,9 +118,12 @@ namespace YamlDotNet.Core
         /// <returns></returns>
         public bool MoveNext()
         {
+			if(current != null) {
+				ConsumeCurrent();
+			}
+			
             if (InternalMoveNext())
             {
-                ConsumeCurrent();
                 return true;
             }
             else

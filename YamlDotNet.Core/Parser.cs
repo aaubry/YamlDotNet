@@ -163,7 +163,7 @@ namespace YamlDotNet.Core
 
 				default:
 					Debug.Assert(false, "Invalid state");      /* Invalid state. */
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 			}
 		}
 
@@ -573,11 +573,34 @@ namespace YamlDotNet.Core
 			}
 		}
 
+		/*
+		 * Parse the productions:
+		 * indentless_sequence  ::= (BLOCK-ENTRY block_node?)+
+		 *                           *********** *
+		 */
 		private Event yaml_parser_parse_indentless_sequence_entry()
 		{
-			throw new NotImplementedException();
+		    if (GetCurrentToken() is BlockEntry)
+		    {
+		        Mark mark = GetCurrentToken().End;
+		        Skip();
+		        
+				if(!(GetCurrentToken() is BlockEntry || GetCurrentToken() is Key || GetCurrentToken() is Value || GetCurrentToken() is BlockEnd)) {
+					states.Push(ParserState.YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE);
+		            return yaml_parser_parse_node(true, false);
+		        }
+		        else {
+		            state = ParserState.YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE;
+		            return yaml_parser_process_empty_scalar(mark);
+		        }
+		    }
+		    else
+		    {
+		        state = states.Pop();
+				return new Events.SequenceEnd(GetCurrentToken().Start, GetCurrentToken().End);
+		    }
 		}
-
+		
 		/*
 		 * Parse the productions:
 		 * block_mapping        ::= BLOCK-MAPPING_START
@@ -708,19 +731,52 @@ namespace YamlDotNet.Core
 			return evt;
 		}
 
+		/*
+		 * Parse the productions:
+		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		 *                                      *** *
+		 */
 		private Event yaml_parser_parse_flow_sequence_entry_mapping_key()
 		{
-			throw new NotImplementedException();
+			if(!(GetCurrentToken() is Value || GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowSequenceEnd)) {
+				states.Push(ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_VALUE_STATE);
+		        return yaml_parser_parse_node(false, false);
+		    }
+		    else {
+		        Mark mark = GetCurrentToken().End;
+		        Skip();
+		        state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_VALUE_STATE;
+		        return yaml_parser_process_empty_scalar(mark);
+		    }
 		}
 
+		/*
+		 * Parse the productions:
+		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		 *                                                      ***** *
+		 */
 		private Event yaml_parser_parse_flow_sequence_entry_mapping_value()
 		{
-			throw new NotImplementedException();
+		    if (GetCurrentToken() is Value) {
+		        Skip();
+				if(!(GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowSequenceEnd)) {
+					states.Push(ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_END_STATE);
+		            return yaml_parser_parse_node(false, false);
+		        }
+		    }
+		    state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_END_STATE;
+		    return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
 		}
 
+		/*
+		 * Parse the productions:
+		 * flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
+		 *                                                                      *
+		 */
 		private Event yaml_parser_parse_flow_sequence_entry_mapping_end()
 		{
-			throw new NotImplementedException();
+		    state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE;
+			return new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
 		}
 
 		/*

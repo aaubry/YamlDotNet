@@ -102,7 +102,7 @@ namespace YamlDotNet.UnitTests
 				new TagDirective("!yaml!", "tag:yaml.org,2002:"),
 				new TagDirective("!!", "tag:yaml.org,2002:"),
 			}), false));
-			AssertNext(parser, new Scalar(string.Empty, string.Empty, string.Empty, ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false));
 			AssertNext(parser, new DocumentEnd(true));
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
@@ -313,7 +313,7 @@ namespace YamlDotNet.UnitTests
 		}
 	
 		[Test]
-		[Ignore("The original C code also fails this test")]
+		//[Ignore("The original C code also fails this test")]
 		public void VerifyTokensOnExample11()
 		{
 			Parser parser = CreateParser(@"
@@ -352,114 +352,97 @@ namespace YamlDotNet.UnitTests
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
 		}
-//	
-//		[Test]
-//		public void VerifyTokensOnExample12()
-//		{
-//			Parser parser = CreateParser(@"
-//				- - item 1
-//				  - item 2
-//				- key 1: value 1
-//				  key 2: value 2
-//				- ? complex key
-//				  : complex value
-//			");
-//			
-//			AssertNext(parser, new StreamStart());
-//			AssertNext(parser, new BlockSequenceStart());
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new BlockSequenceStart());
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new Scalar("item 1", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new Scalar("item 2", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new BlockMappingStart());
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("key 1", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new Scalar("value 1", ScalarStyle.Plain));
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("key 2", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new Scalar("value 2", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new BlockMappingStart());
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("complex key", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new Scalar("complex value", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new StreamEnd());
-//			AssertDoesNotHaveNext(parser);
-//		}
-//			
-//		[Test]
-//		public void VerifyTokensOnExample13()
-//		{
-//			Parser parser = CreateParser(@"
-//				? a sequence
-//				: - item 1
-//				  - item 2
-//				? a mapping
-//				: key 1: value 1
-//				  key 2: value 2
-//			");
-//			
-//			AssertNext(parser, new StreamStart());
-//			AssertNext(parser, new BlockMappingStart());
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("a sequence", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new BlockSequenceStart());
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new Scalar("item 1", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new Scalar("item 2", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("a mapping", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new BlockMappingStart());
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("key 1", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new Scalar("value 1", ScalarStyle.Plain));
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("key 2", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new Scalar("value 2", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new StreamEnd());
-//			AssertDoesNotHaveNext(parser);
-//		}
-//			
-//		[Test]
-//		[Ignore("The original C code also fails this test")]
-//		public void VerifyTokensOnExample14()
-//		{
-//			Parser parser = CreateParser(@"
-//				key:
-//				- item 1    # BLOCK-SEQUENCE-START is NOT produced here.
-//				- item 2
-//			");
-//			
-//			AssertNext(parser, new StreamStart());
-//			AssertNext(parser, new BlockMappingStart());
-//			AssertNext(parser, new Key());
-//			AssertNext(parser, new Scalar("key", ScalarStyle.Plain));
-//			AssertNext(parser, new Value());
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new Scalar("item 1", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEntry());
-//			AssertNext(parser, new Scalar("item 2", ScalarStyle.Plain));
-//			AssertNext(parser, new BlockEnd());
-//			AssertNext(parser, new StreamEnd());
-//			AssertDoesNotHaveNext(parser);
-//		}
+	
+		[Test]
+		public void VerifyTokensOnExample12()
+		{
+			Parser parser = CreateParser(@"
+				- - item 1
+				  - item 2
+				- key 1: value 1
+				  key 2: value 2
+				- ? complex key
+				  : complex value
+			");
+			
+			AssertNext(parser, new StreamStart());
+			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
+			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
+			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new SequenceEnd());
+			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "key 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "value 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "key 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "value 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new MappingEnd());
+			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "complex key", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "complex value", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new MappingEnd());
+			AssertNext(parser, new SequenceEnd());
+			AssertNext(parser, new DocumentEnd(true));
+			AssertNext(parser, new StreamEnd());
+			AssertDoesNotHaveNext(parser);
+		}
+			
+		[Test]
+		public void VerifyTokensOnExample13()
+		{
+			Parser parser = CreateParser(@"
+				? a sequence
+				: - item 1
+				  - item 2
+				? a mapping
+				: key 1: value 1
+				  key 2: value 2
+			");
+			
+			AssertNext(parser, new StreamStart());
+			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
+			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "a sequence", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new SequenceEnd());
+			AssertNext(parser, new Scalar(null, null, "a mapping", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "key 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "value 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "key 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "value 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new MappingEnd());
+			AssertNext(parser, new MappingEnd());
+			AssertNext(parser, new DocumentEnd(true));
+			AssertNext(parser, new StreamEnd());
+			AssertDoesNotHaveNext(parser);
+		}
+			
+		[Test]
+		//[Ignore("The original C code also fails this test")]
+		public void VerifyTokensOnExample14()
+		{
+			Parser parser = CreateParser(@"
+				key:
+				- item 1    # BLOCK-SEQUENCE-START is NOT produced here.
+				- item 2
+			");
+			
+			AssertNext(parser, new StreamStart());
+			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
+			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "key", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new SequenceEnd());
+			AssertNext(parser, new MappingEnd());
+			AssertNext(parser, new DocumentEnd(true));
+			AssertNext(parser, new StreamEnd());
+			AssertDoesNotHaveNext(parser);
+		}
 	}
 }
