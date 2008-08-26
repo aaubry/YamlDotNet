@@ -53,22 +53,25 @@ namespace YamlDotNet.RepresentationModel
 				return null;
 			}
 		}
-		
+
 		/// <summary>
 		/// Adds the specified node to the collection of nodes with unresolved aliases.
 		/// </summary>
 		/// <param name="node">
 		/// The <see cref="YamlNode"/> that has unresolved aliases.
 		/// </param>
-		public void AddNodeWithUnresolvedAliases(YamlNode node) {
+		public void AddNodeWithUnresolvedAliases(YamlNode node)
+		{
 			nodesWithUnresolvedAliases[node] = null;
 		}
-		
+
 		/// <summary>
-		/// Resolves the aliases that could not be resolved while loading the document. 
+		/// Resolves the aliases that could not be resolved while loading the document.
 		/// </summary>
-		public void ResolveAliases() {
-			foreach (YamlNode node in nodesWithUnresolvedAliases.Keys) {
+		public void ResolveAliases()
+		{
+			foreach(YamlNode node in nodesWithUnresolvedAliases.Keys)
+			{
 				node.ResolveAliases(this);
 			}
 		}

@@ -10,7 +10,7 @@ namespace YamlDotNet.Core.Events
 		private Mark start;
 
 		/// <summary>
-			/// Gets the position in the input stream where the event start.
+		/// Gets the position in the input stream where the event start.
 		/// </summary>
 		public Mark Start
 		{
@@ -23,7 +23,7 @@ namespace YamlDotNet.Core.Events
 		private Mark end;
 
 		/// <summary>
-			/// Gets the position in the input stream where the event ends.
+		/// Gets the position in the input stream where the event ends.
 		/// </summary>
 		public Mark End
 		{

@@ -15,7 +15,7 @@ namespace YamlDotNet.Core
 		private readonly Mark location;
 
 		/// <summary>
-			/// Gets the location where the exception has occured.
+		/// Gets the location where the exception has occured.
 		/// </summary>
 		/// <value>The location.</value>
 		public Mark Location
@@ -28,25 +28,25 @@ namespace YamlDotNet.Core
 
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ParserException"/> class.
+		/// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
 		/// </summary>
 		/// <param name="description">The description.</param>
-			/// <param name="location">The location where the exception occured.</param>
+		/// <param name="location">The location where the exception occured.</param>
 		public SemanticErrorException(string description, Mark location)
-	:          base(string.Format(CultureInfo.InvariantCulture, "({0}, {1}): {2}", location.Line, location.Column, description))
+			: base(string.Format(CultureInfo.InvariantCulture, "({0}, {1}): {2}", location.Line, location.Column, description))
 		{
 			this.location = location;
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ParserException"/> class.
+		/// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
 		/// </summary>
 		public SemanticErrorException()
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ParserException"/> class.
+		/// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
 		/// </summary>
 		/// <param name="message">The message.</param>
 		public SemanticErrorException(string message)
@@ -55,7 +55,7 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ParserException"/> class.
+		/// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
 		/// </summary>
 		/// <param name="message">The message.</param>
 		/// <param name="inner">The inner.</param>
@@ -65,7 +65,7 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ParserException"/> class.
+		/// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
 		/// </summary>
 		/// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
 		/// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>

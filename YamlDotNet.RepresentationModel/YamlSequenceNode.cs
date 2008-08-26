@@ -43,8 +43,9 @@ namespace YamlDotNet.RepresentationModel
 				children.Add(child);
 				hasUnresolvedAliases |= child is YamlAliasNode;
 			}
-			
-			if(hasUnresolvedAliases) {
+
+			if (hasUnresolvedAliases)
+			{
 				state.AddNodeWithUnresolvedAliases(this);
 			}
 

@@ -41,11 +41,12 @@ namespace YamlDotNet.RepresentationModel
 				YamlNode value = ParseNode(events, state);
 
 				children.Add(key, value);
-				
+
 				hasUnresolvedAliases |= key is YamlAliasNode || value is YamlAliasNode;
 			}
-			
-			if(hasUnresolvedAliases) {
+
+			if (hasUnresolvedAliases)
+			{
 				state.AddNodeWithUnresolvedAliases(this);
 			}
 

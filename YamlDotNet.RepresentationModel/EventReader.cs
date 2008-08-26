@@ -8,7 +8,7 @@ using Event = YamlDotNet.Core.Events.ParsingEvent;
 namespace YamlDotNet.RepresentationModel
 {
 	/// <summary>
-	/// Reads events from a sequence of <see cref=Event" />.
+	/// Reads events from a sequence of <see cref="Event" />.
 	/// </summary>
 	internal class EventReader
 	{
@@ -28,7 +28,7 @@ namespace YamlDotNet.RepresentationModel
 		/// <summary>
 		/// Ensures that the current event is of the specified type, returns it and moves to the next event.
 		/// </summary>
-		/// <typeparam name="T">Type of the <see cref=Event"/>.</typeparam>
+		/// <typeparam name="T">Type of the <see cref="Event"/>.</typeparam>
 		/// <returns>Returns the current event.</returns>
 		/// <exception cref="YamlException">If the current event is not of the specified type.</exception>
 		public T Expect<T>() where T : Event

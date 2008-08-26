@@ -39,7 +39,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Parser"/> class.
 		/// </summary>
-			/// <param name="input">The input where the YAML stream is to be read.</param>
+		/// <param name="input">The input where the YAML stream is to be read.</param>
 		public Parser(TextReader input)
 		{
 			scanner = new Scanner(input);

@@ -47,7 +47,7 @@ namespace YamlDotNet.RepresentationModel
 		/// <summary>
 		/// Serializes the specified object.
 		/// </summary>
-			/// <param name="stream">The stream where to serialize the object.</param>
+		/// <param name="stream">The stream where to serialize the object.</param>
 		/// <param name="o">The object to serialize.</param>
 		public void Serialize(Stream stream, object o)
 		{
@@ -139,7 +139,7 @@ namespace YamlDotNet.RepresentationModel
 		{
 			if (value == null)
 			{
-				emitter.Emit(new ScalarEvent("", "tag:         yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
+				emitter.Emit(new ScalarEvent("", "tag:            yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
 				return;
 			}
 
