@@ -11,21 +11,8 @@ namespace YamlDotNet.UnitTests
 	[TestFixture]
 	public class ScannerTests : YamlTest
 	{
-		[Test]
-		public void MakeSureThatYamlFileWorks() {
-			TextReader file = YamlFile(@"
-				%YAML   1.1
-				%TAG    !   !foo
-				%TAG    !yaml!  tag:yaml.org,2002:
-				---
-			");
-			
-			string expected = "%YAML   1.1\n%TAG    !   !foo\n%TAG    !yaml!  tag:yaml.org,2002:\n---";
-			Assert.AreEqual(expected, file.ReadToEnd(), "The YamlFile method does not work properly.");
-		}
-
-		private static Scanner CreateScanner(string content) {
-			return new Scanner(YamlFile(content));
+		private static Scanner CreateScanner(string name) {
+			return new Scanner(YamlFile(name));
 		}
 		
 		private void AssertHasNext(Scanner scanner) {
@@ -58,12 +45,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample1()
 		{
-			Scanner scanner = CreateScanner(@"
-				%YAML   1.1
-				%TAG    !   !foo
-				%TAG    !yaml!  tag:yaml.org,2002:
-				---
-			");
+			Scanner scanner = CreateScanner("test1.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new VersionDirective(new Core.Version(1, 1)));
@@ -77,9 +59,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample2()
 		{
-			Scanner scanner = CreateScanner(@"
-				'a scalar'
-			");
+			Scanner scanner = CreateScanner("test2.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new Scalar("a scalar", ScalarStyle.SingleQuoted));
@@ -90,11 +70,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample3()
 		{
-			Scanner scanner = CreateScanner(@"
-				---
-				'a scalar'
-				...
-			");
+			Scanner scanner = CreateScanner("test3.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new DocumentStart());
@@ -107,13 +83,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample4()
 		{
-			Scanner scanner = CreateScanner(@"
-				'a scalar'
-				---
-				'another scalar'
-				---
-				'yet another scalar'
-			");
+			Scanner scanner = CreateScanner("test4.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new Scalar("a scalar", ScalarStyle.SingleQuoted));
@@ -128,9 +98,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample5()
 		{
-			Scanner scanner = CreateScanner(@"
-				&A [ *A ]
-			");
+			Scanner scanner = CreateScanner("test5.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new Anchor("A"));
@@ -144,9 +112,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample6()
 		{
-			Scanner scanner = CreateScanner(@"
-				!!float ""3.14""  # A good approximation.
-			");
+			Scanner scanner = CreateScanner("test6.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new Tag("!!", "float"));
@@ -158,17 +124,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample7()
 		{
-			Scanner scanner = CreateScanner(@"
-				--- # Implicit empty plain scalars do not produce tokens.
-				--- a plain scalar
-				--- 'a single-quoted scalar'
-				--- ""a double-quoted scalar""
-				--- |-
-				  a literal scalar
-				--- >-
-				  a folded
-				  scalar
-			");
+			Scanner scanner = CreateScanner("test7.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new DocumentStart());
@@ -189,9 +145,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample8()
 		{
-			Scanner scanner = CreateScanner(@"
-				[item 1, item 2, item 3]
-			");
+			Scanner scanner = CreateScanner("test8.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new FlowSequenceStart());
@@ -208,12 +162,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample9()
 		{
-			Scanner scanner = CreateScanner(@"
-				{
-					a simple key: a value,  # Note that the KEY token is produced.
-					? a complex key: another value,
-				}
-			");
+			Scanner scanner = CreateScanner("test9.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new FlowMappingStart());
@@ -235,16 +184,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample10()
 		{
-			Scanner scanner = CreateScanner(@"
-				- item 1
-				- item 2
-				-
-				  - item 3.1
-				  - item 3.2
-				-
-				  key 1: value 1
-				  key 2: value 2
-			");
+			Scanner scanner = CreateScanner("test10.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new BlockSequenceStart());
@@ -278,17 +218,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample11()
 		{
-			Scanner scanner = CreateScanner(@"
-				a simple key: a value   # The KEY token is produced here.
-				? a complex key
-				: another value
-				a mapping:
-				  key 1: value 1
-				  key 2: value 2
-				a sequence:
-				  - item 1
-				  - item 2
-			");
+			Scanner scanner = CreateScanner("test11.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new BlockMappingStart());
@@ -330,14 +260,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample12()
 		{
-			Scanner scanner = CreateScanner(@"
-				- - item 1
-				  - item 2
-				- key 1: value 1
-				  key 2: value 2
-				- ? complex key
-				  : complex value
-			");
+			Scanner scanner = CreateScanner("test12.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new BlockSequenceStart());
@@ -374,14 +297,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample13()
 		{
-			Scanner scanner = CreateScanner(@"
-				? a sequence
-				: - item 1
-				  - item 2
-				? a mapping
-				: key 1: value 1
-				  key 2: value 2
-			");
+			Scanner scanner = CreateScanner("test13.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new BlockMappingStart());
@@ -415,11 +331,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample14()
 		{
-			Scanner scanner = CreateScanner(@"
-				key:
-				- item 1    # BLOCK-SEQUENCE-START is NOT produced here.
-				- item 2
-			");
+			Scanner scanner = CreateScanner("test14.yaml");
 			
 			AssertNext(scanner, new StreamStart());
 			AssertNext(scanner, new BlockMappingStart());

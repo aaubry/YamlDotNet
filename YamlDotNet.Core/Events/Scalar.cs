@@ -5,33 +5,14 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a scalar event.
 	/// </summary>
-	public class Scalar : ParsingEvent, INodeEvent
+	public class Scalar : NodeEvent
 	{
-		private readonly string anchor;
-
 		/// <summary>
-		/// Gets the anchor.
+		/// Gets the event type, which allows for simpler type comparisons.
 		/// </summary>
-		/// <value></value>
-		public string Anchor
-		{
-			get
-			{
-				return anchor;
-			}
-		}
-
-		private readonly string tag;
-
-		/// <summary>
-		/// Gets the tag.
-		/// </summary>
-		/// <value></value>
-		public string Tag
-		{
-			get
-			{
-				return tag;
+		internal override EventType Type {
+			get {
+				return EventType.YAML_SCALAR_EVENT;
 			}
 		}
 
@@ -88,6 +69,12 @@ namespace YamlDotNet.Core.Events
 				return isQuotedImplicit;
 			}
 		}
+		
+		internal override bool IsCanonical {
+			get {
+				return !isPlainImplicit && !isQuotedImplicit;
+			}
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Scalar"/> class.
@@ -101,10 +88,8 @@ namespace YamlDotNet.Core.Events
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
 		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
-			: base(start, end)
+			: base(anchor, tag, start, end)
 		{
-			this.anchor = anchor;
-			this.tag = tag;
 			this.value = value;
 			this.style = style;
 			this.isPlainImplicit = isPlainImplicit;

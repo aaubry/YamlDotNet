@@ -1,16 +1,16 @@
 <Project name="YamlDotNet.UnitTests" fileversion="2.0" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
-  <Configurations active="Release">
+  <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.UnitTests" />
-      <Build debugmode="True" target="Library" />
+      <Build debugmode="True" target="Exe" />
       <Execution runwithwarnings="True" consolepause="True" runtime="MsNet" clr-version="Net_2_0" />
-      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" definesymbols="DEBUG" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="YamlDotNet.UnitTests.Runner" definesymbols="DEBUG" generatexmldocumentation="False" win32Icon="." ctype="CSharpCompilerParameters" />
     </Configuration>
     <Configuration name="Release" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Release" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.UnitTests" />
-      <Build debugmode="False" target="Library" />
+      <Build debugmode="False" target="Exe" />
       <Execution runwithwarnings="True" consolepause="True" runtime="MsNet" clr-version="Net_2_0" />
-      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" mainclass="YamlDotNet.UnitTests.Runner" generatexmldocumentation="False" win32Icon="." ctype="CSharpCompilerParameters" />
     </Configuration>
   </Configurations>
   <Contents>
@@ -23,6 +23,23 @@
     <File name="RepresentationModel/SerializationTests.cs" subtype="Code" buildaction="Nothing" />
     <File name="RepresentationModel/YamlStreamTests.cs" subtype="Code" buildaction="Compile" />
     <File name="YamlTest.cs" subtype="Code" buildaction="Compile" />
+    <File name="Core/EmitterTests.cs" subtype="Code" buildaction="Compile" />
+    <File name="test1.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test2.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test3.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test4.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test5.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test6.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test7.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test8.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test9.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test10.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test11.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test12.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test13.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="test14.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="empty.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="Runner.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

@@ -50,7 +50,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="yamlEvent">The event.</param>
 		/// <param name="state">The state of the document.</param>
-		internal void Load(INodeEvent yamlEvent, DocumentState state)
+		internal void Load(NodeEvent yamlEvent, DocumentState state)
 		{
 			tag = yamlEvent.Tag;
 			if (yamlEvent.Anchor != null)

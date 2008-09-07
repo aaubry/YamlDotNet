@@ -34,5 +34,12 @@ namespace YamlDotNet.Core
 		{
 			return item.Handle;
 		}
+		
+		/// <summary>
+		/// Gets a value indicating whether the collection contains a directive with the same handle
+		/// </summary>
+		public new bool Contains(TagDirective directive) {
+			return Contains(GetKeyForItem(directive));
+		}
 	}
 }

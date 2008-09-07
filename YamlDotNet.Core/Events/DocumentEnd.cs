@@ -7,6 +7,15 @@ namespace YamlDotNet.Core.Events
 	/// </summary>
 	public class DocumentEnd : ParsingEvent
 	{
+		/// <summary>
+		/// Gets the event type, which allows for simpler type comparisons.
+		/// </summary>
+		internal override EventType Type {
+			get {
+				return EventType.YAML_DOCUMENT_END_EVENT;
+			}
+		}
+		
 		private readonly bool isImplicit;
 
 		/// <summary>

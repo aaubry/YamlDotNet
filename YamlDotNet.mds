@@ -1,5 +1,5 @@
 <Combine name="YamlDotNet" fileversion="2.0">
-  <Configurations active="Release">
+  <Configurations active="Debug">
     <Configuration name="Debug" ctype="CombineConfiguration">
       <Entry build="True" name="YamlDotNet.Core" configuration="Debug" />
       <Entry build="True" name="YamlDotNet.UnitTests" configuration="Debug" />

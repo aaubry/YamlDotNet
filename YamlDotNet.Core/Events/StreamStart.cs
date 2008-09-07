@@ -9,6 +9,15 @@ namespace YamlDotNet.Core.Events
 	public class StreamStart : ParsingEvent
 	{
 		/// <summary>
+		/// Gets the event type, which allows for simpler type comparisons.
+		/// </summary>
+		internal override EventType Type {
+			get {
+				return EventType.YAML_STREAM_START_EVENT;
+			}
+		}
+		
+		/// <summary>
 		/// Initializes a new instance of the <see cref="StreamStart"/> class.
 		/// </summary>
 		public StreamStart()

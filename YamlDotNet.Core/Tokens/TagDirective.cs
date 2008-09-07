@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core.Tokens
 {
@@ -45,6 +46,8 @@ namespace YamlDotNet.Core.Tokens
 		{
 		}
 
+		private static readonly Regex tagHandleValidator = new Regex(@"^!([0-9A-Za-z_\-]*!)?$", RegexOptions.Compiled);
+		
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TagDirective"/> class.
 		/// </summary>
@@ -55,7 +58,20 @@ namespace YamlDotNet.Core.Tokens
 		public TagDirective(string handle, string prefix, Mark start, Mark end)
 			: base(start, end)
 		{
+			if(string.IsNullOrEmpty(handle)) {
+				throw new ArgumentNullException("handle", "Tag handle must not be empty.");
+			}
+			
+			if(!tagHandleValidator.IsMatch(handle)) {
+				throw new ArgumentException("Tag handle must start and end with '!' and contain alphanumerical characters only.", "handle");
+			}
+			
 			this.handle = handle;
+
+			if(string.IsNullOrEmpty(prefix)) {
+				throw new ArgumentNullException("prefix", "Tag prefix must not be empty.");
+			}
+			
 			this.prefix = prefix;
 		}
 

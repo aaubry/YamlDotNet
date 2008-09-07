@@ -13,8 +13,8 @@ namespace YamlDotNet.UnitTests
 	[TestFixture]
 	public class ParserTests : YamlTest
 	{	
-		private static Parser CreateParser(string content) {
-			return new Parser(YamlFile(content));
+		private static Parser CreateParser(string name) {
+			return new Parser(YamlFile(name));
 		}
 			
 		private void AssertHasNext(Parser parser) {
@@ -74,7 +74,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void EmptyDocument()
 		{
-			Parser parser = CreateParser(@"");
+			Parser parser = CreateParser("empty.yaml");
 
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new StreamEnd());
@@ -89,12 +89,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyEventsOnExample1()
 		{
-			Parser parser = CreateParser(@"
-				%YAML   1.1
-				%TAG    !   !foo
-				%TAG    !yaml!  tag:yaml.org,2002:
-				---
-			");
+			Parser parser = CreateParser("test1.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(new VersionDirective(new Core.Version(1, 1)), new TagDirectiveCollection(new TagDirective[] {
@@ -111,9 +106,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample2()
 		{
-			Parser parser = CreateParser(@"
-				'a scalar'
-			");
+			Parser parser = CreateParser("test2.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -126,11 +119,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample3()
 		{
-			Parser parser = CreateParser(@"
-				---
-				'a scalar'
-				...
-			");
+			Parser parser = CreateParser("test3.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -143,13 +132,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample4()
 		{
-			Parser parser = CreateParser(@"
-				'a scalar'
-				---
-				'another scalar'
-				---
-				'yet another scalar'
-			");
+			Parser parser = CreateParser("test4.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -168,9 +151,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample5()
 		{
-			Parser parser = CreateParser(@"
-				&A [ *A ]
-			");
+			Parser parser = CreateParser("test5.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -185,9 +166,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample6()
 		{
-			Parser parser = CreateParser(@"
-				!!float ""3.14""  # A good approximation.
-			");
+			Parser parser = CreateParser("test6.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -200,17 +179,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample7()
 		{
-			Parser parser = CreateParser(@"
-				--- # Implicit empty plain scalars do not produce tokens.
-				--- a plain scalar
-				--- 'a single-quoted scalar'
-				--- ""a double-quoted scalar""
-				--- |-
-				  a literal scalar
-				--- >-
-				  a folded
-				  scalar
-			");
+			Parser parser = CreateParser("test7.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -238,9 +207,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample8()
 		{
-			Parser parser = CreateParser(@"
-				[item 1, item 2, item 3]
-			");
+			Parser parser = CreateParser("test8.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -257,12 +224,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample9()
 		{
-			Parser parser = CreateParser(@"
-				{
-					a simple key: a value,  # Note that the KEY token is produced.
-					? a complex key: another value,
-				}
-			");
+			Parser parser = CreateParser("test9.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -280,16 +242,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample10()
 		{
-			Parser parser = CreateParser(@"
-				- item 1
-				- item 2
-				-
-				  - item 3.1
-				  - item 3.2
-				-
-				  key 1: value 1
-				  key 2: value 2
-			");
+			Parser parser = CreateParser("test10.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -315,17 +268,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample11()
 		{
-			Parser parser = CreateParser(@"
-				a simple key: a value   # The KEY token is produced here.
-				? a complex key
-				: another value
-				a mapping:
-				  key 1: value 1
-				  key 2: value 2
-				a sequence:
-				  - item 1
-				  - item 2
-			");
+			Parser parser = CreateParser("test11.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -355,14 +298,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample12()
 		{
-			Parser parser = CreateParser(@"
-				- - item 1
-				  - item 2
-				- key 1: value 1
-				  key 2: value 2
-				- ? complex key
-				  : complex value
-			");
+			Parser parser = CreateParser("test12.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -390,14 +326,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample13()
 		{
-			Parser parser = CreateParser(@"
-				? a sequence
-				: - item 1
-				  - item 2
-				? a mapping
-				: key 1: value 1
-				  key 2: value 2
-			");
+			Parser parser = CreateParser("test13.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -423,11 +352,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void VerifyTokensOnExample14()
 		{
-			Parser parser = CreateParser(@"
-				key:
-				- item 1    # BLOCK-SEQUENCE-START is NOT produced here.
-				- item 2
-			");
+			Parser parser = CreateParser("test14.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));

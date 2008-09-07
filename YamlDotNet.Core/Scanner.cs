@@ -39,7 +39,7 @@ namespace YamlDotNet.Core
 		private int tokensParsed;
 
 		private const int MaxBufferLength = 8;
-		private readonly LookAheadBuffer buffer;
+		private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
 		private bool tokenAvailable;
 
 		private static readonly IDictionary<char, char> simpleEscapeCodes = InitializeSimpleEscapeCodes();
@@ -70,20 +70,20 @@ namespace YamlDotNet.Core
 
 		private char ReadCurrentCharacter()
 		{
-			char currentCharacter = buffer.Peek(0);
+			char currentCharacter = analyzer.Peek(0);
 			Skip();
 			return currentCharacter;
 		}
 
 		private char ReadLine()
 		{
-			if (Check("\r\n\x85")) // CR LF -> LF  --- CR|LF|NEL -> LF
+			if (analyzer.Check("\r\n\x85")) // CR LF -> LF  --- CR|LF|NEL -> LF
 			{
 				SkipLine();
 				return '\n';
 			}
 
-			char nextChar = buffer.Peek(0); // LS|PS -> LS|PS
+			char nextChar = analyzer.Peek(0); // LS|PS -> LS|PS
 			SkipLine();
 			return nextChar;
 		}
@@ -94,7 +94,7 @@ namespace YamlDotNet.Core
 		/// <param name="input">The input.</param>
 		public Scanner(TextReader input)
 		{
-			buffer = new LookAheadBuffer(input, MaxBufferLength);
+			analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
 			mark.Column = 0;
 			mark.Line = 0;
 		}
@@ -160,7 +160,6 @@ namespace YamlDotNet.Core
 			++tokensParsed;
 			tokenAvailable = false;
 			current = null;
-			Console.WriteLine("INCREMENT_TOKENS({0})", tokensParsed);
 		}
 
 		private void FetchMoreTokens()
@@ -248,12 +247,6 @@ namespace YamlDotNet.Core
 
 		private void FetchNextToken()
 		{
-			Console.WriteLine("Tokens parsed = {0}", tokensParsed);
-
-			// Ensure that the buffer is initialized.
-
-			buffer.Cache(1);
-
 			// Check if we just started scanning.  Fetch STREAM-START then.
 
 			if (!streamStartProduced)
@@ -279,11 +272,11 @@ namespace YamlDotNet.Core
 			// of the longest indicators ('--- ' and '... ').
 
 
-			buffer.Cache(4);
+			analyzer.Buffer.Cache(4);
 
 			// Is it the end of the stream?
 
-			if (buffer.EndOfInput)
+			if (analyzer.Buffer.EndOfInput)
 			{
 				FetchStreamEnd();
 				return;
@@ -291,7 +284,7 @@ namespace YamlDotNet.Core
 
 			// Is it a directive?
 
-			if (mark.Column == 0 && Check('%'))
+			if (mark.Column == 0 && analyzer.Check('%'))
 			{
 				FetchDirective();
 				return;
@@ -301,10 +294,10 @@ namespace YamlDotNet.Core
 
 			bool isDocumentStart =
 			    mark.Column == 0 &&
-			    Check('-', 0) &&
-			    Check('-', 1) &&
-			    Check('-', 2) &&
-			    IsBlankOrBreakOrZero(3);
+			    analyzer.Check('-', 0) &&
+			    analyzer.Check('-', 1) &&
+			    analyzer.Check('-', 2) &&
+			    analyzer.IsBlankOrBreakOrZero(3);
 
 			if (isDocumentStart)
 			{
@@ -316,10 +309,10 @@ namespace YamlDotNet.Core
 
 			bool isDocumentEnd =
 			    mark.Column == 0 &&
-			    Check('.', 0) &&
-			    Check('.', 1) &&
-			    Check('.', 2) &&
-			    IsBlankOrBreakOrZero(3);
+			    analyzer.Check('.', 0) &&
+			    analyzer.Check('.', 1) &&
+			    analyzer.Check('.', 2) &&
+			    analyzer.IsBlankOrBreakOrZero(3);
 
 			if (isDocumentEnd)
 			{
@@ -329,7 +322,7 @@ namespace YamlDotNet.Core
 
 			// Is it the flow sequence start indicator?
 
-			if (Check('['))
+			if (analyzer.Check('['))
 			{
 				FetchFlowCollectionStart(true);
 				return;
@@ -337,7 +330,7 @@ namespace YamlDotNet.Core
 
 			// Is it the flow mapping start indicator?
 
-			if (Check('{'))
+			if (analyzer.Check('{'))
 			{
 				FetchFlowCollectionStart(false);
 				return;
@@ -345,7 +338,7 @@ namespace YamlDotNet.Core
 
 			// Is it the flow sequence end indicator?
 
-			if (Check(']'))
+			if (analyzer.Check(']'))
 			{
 				FetchFlowCollectionEnd(true);
 				return;
@@ -353,7 +346,7 @@ namespace YamlDotNet.Core
 
 			// Is it the flow mapping end indicator?
 
-			if (Check('}'))
+			if (analyzer.Check('}'))
 			{
 				FetchFlowCollectionEnd(false);
 				return;
@@ -361,7 +354,7 @@ namespace YamlDotNet.Core
 
 			// Is it the flow entry indicator?
 
-			if (Check(','))
+			if (analyzer.Check(','))
 			{
 				FetchFlowEntry();
 				return;
@@ -369,7 +362,7 @@ namespace YamlDotNet.Core
 
 			// Is it the block entry indicator?
 
-			if (Check('-') && IsBlankOrBreakOrZero(1))
+			if (analyzer.Check('-') && analyzer.IsBlankOrBreakOrZero(1))
 			{
 				FetchBlockEntry();
 				return;
@@ -377,7 +370,7 @@ namespace YamlDotNet.Core
 
 			// Is it the key indicator?
 
-			if (Check('?') && (flowLevel > 0 || IsBlankOrBreakOrZero(1)))
+			if (analyzer.Check('?') && (flowLevel > 0 || analyzer.IsBlankOrBreakOrZero(1)))
 			{
 				FetchKey();
 				return;
@@ -385,7 +378,7 @@ namespace YamlDotNet.Core
 
 			// Is it the value indicator?
 
-			if (Check(':') && (flowLevel > 0 || IsBlankOrBreakOrZero(1)))
+			if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsBlankOrBreakOrZero(1)))
 			{
 				FetchValue();
 				return;
@@ -393,7 +386,7 @@ namespace YamlDotNet.Core
 
 			// Is it an alias?
 
-			if (Check('*'))
+			if (analyzer.Check('*'))
 			{
 				FetchAnchor(true);
 				return;
@@ -401,7 +394,7 @@ namespace YamlDotNet.Core
 
 			// Is it an anchor?
 
-			if (Check('&'))
+			if (analyzer.Check('&'))
 			{
 				FetchAnchor(false);
 				return;
@@ -409,7 +402,7 @@ namespace YamlDotNet.Core
 
 			// Is it a tag?
 
-			if (Check('!'))
+			if (analyzer.Check('!'))
 			{
 				FetchTag();
 				return;
@@ -417,7 +410,7 @@ namespace YamlDotNet.Core
 
 			// Is it a literal scalar?
 
-			if (Check('|') && flowLevel == 0)
+			if (analyzer.Check('|') && flowLevel == 0)
 			{
 				FetchBlockScalar(true);
 				return;
@@ -425,7 +418,7 @@ namespace YamlDotNet.Core
 
 			// Is it a folded scalar?
 
-			if (Check('>') && flowLevel == 0)
+			if (analyzer.Check('>') && flowLevel == 0)
 			{
 				FetchBlockScalar(false);
 				return;
@@ -433,7 +426,7 @@ namespace YamlDotNet.Core
 
 			// Is it a single-quoted scalar?
 
-			if (Check('\''))
+			if (analyzer.Check('\''))
 			{
 				FetchFlowScalar(true);
 				return;
@@ -441,7 +434,7 @@ namespace YamlDotNet.Core
 
 			// Is it a double-quoted scalar?
 
-			if (Check('"'))
+			if (analyzer.Check('"'))
 			{
 				FetchFlowScalar(false);
 				return;
@@ -466,12 +459,12 @@ namespace YamlDotNet.Core
 			// The last rule is more restrictive than the specification requires.
 
 
-			bool isInvalidPlainScalarCharacter = IsBlankOrBreakOrZero() || Check("-?:,[]{}#&*!|>'\"%@`");
+			bool isInvalidPlainScalarCharacter = analyzer.IsBlankOrBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
 
 			bool isPlainScalar =
 			    !isInvalidPlainScalarCharacter ||
-			    (Check('-') && !IsBlank(1)) ||
-			    (flowLevel == 0 && (Check("?:")) && !IsBlankOrBreakOrZero(1));
+			    (analyzer.Check('-') && !analyzer.IsBlank(1)) ||
+			    (flowLevel == 0 && (analyzer.Check("?:")) && !analyzer.IsBlankOrBreakOrZero(1));
 
 			if (isPlainScalar)
 			{
@@ -486,48 +479,17 @@ namespace YamlDotNet.Core
 			throw new SyntaxErrorException("While scanning for the next token, found character that cannot start any token.", mark);
 		}
 
-		private bool Check(char expected)
-		{
-			return Check(expected, 0);
-		}
-
-		private bool Check(char expected, int offset)
-		{
-			return buffer.Peek(offset) == expected;
-		}
-
-		private bool Check(string expectedCharacters)
-		{
-			return Check(expectedCharacters, 0);
-		}
-
-		private bool Check(string expectedCharacters, int offset)
-		{
-			Debug.Assert(expectedCharacters.Length > 1, "Use Check(char, int) instead.");
-
-			char character = buffer.Peek(offset);
-
-			foreach(char expected in expectedCharacters)
-			{
-				if (expected == character)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
 		private bool CheckWhiteSpace()
 		{
-			return Check(' ') || ((flowLevel > 0 || !simpleKeyAllowed) && Check('\t'));
+			return analyzer.Check(' ') || ((flowLevel > 0 || !simpleKeyAllowed) && analyzer.Check('\t'));
 		}
 
 		private bool IsDocumentIndicator()
 		{
-			if (mark.Column == 0 && IsBlankOrBreakOrZero(3))
+			if (mark.Column == 0 && analyzer.IsBlankOrBreakOrZero(3))
 			{
-				bool isDocumentStart = Check('-', 0) && Check('-', 1) && Check('-', 2);
-				bool isDocumentEnd = Check('.', 0) && Check('.', 1) && Check('.', 2);
+				bool isDocumentStart = analyzer.Check('-', 0) && analyzer.Check('-', 1) && analyzer.Check('-', 2);
+				bool isDocumentEnd = analyzer.Check('.', 0) && analyzer.Check('.', 1) && analyzer.Check('.', 2);
 
 				return isDocumentStart || isDocumentEnd;
 			}
@@ -537,225 +499,30 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/// <summary>
-		/// Check if the character at the specified position is an alphabetical
-		/// character, a digit, '_', or '-'.
-		/// </summary>
-
-		private bool IsAlpha(int offset)
-		{
-			char character = buffer.Peek(offset);
-
-			return
-			    (character >= '0' && character <= '9') ||
-			    (character >= 'A' && character <= 'Z') ||
-			    (character >= 'a' && character <= 'z') ||
-			    character == '_' ||
-			    character == '-';
-
-		}
-
-		private bool IsAlpha()
-		{
-			return IsAlpha(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is a digit.
-		/// </summary>
-
-		private bool IsDigit(int offset)
-		{
-			char character = buffer.Peek(offset);
-			return character >= '0' && character <= '9';
-		}
-
-		private bool IsDigit()
-		{
-			return IsDigit(0);
-		}
-
-		/// <summary>
-		/// Get the value of a digit.
-		/// </summary>
-
-		private int AsDigit(int offset)
-		{
-			return buffer.Peek(offset) - '0';
-		}
-
-		private int AsDigit()
-		{
-			return AsDigit(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is a hex-digit.
-		/// </summary>
-
-		private bool IsHex(int offset)
-		{
-			char character = buffer.Peek(offset);
-			return
-			    (character >= '0' && character <= '9') ||
-			    (character >= 'A' && character <= 'F') ||
-			    (character >= 'a' && character <= 'f');
-		}
-
-		/// <summary>
-		/// Get the value of a hex-digit.
-		/// </summary>
-
-		private int AsHex(int offset)
-		{
-			char character = buffer.Peek(offset);
-
-			if (character <= '9')
-			{
-				return character - '0';
-			}
-			else if (character <= 'F')
-			{
-				return character - 'A' + 10;
-			}
-			else
-			{
-				return character - 'a' + 10;
-			}
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is NUL.
-		/// </summary>
-
-		private bool IsZero(int offset)
-		{
-			return Check('\0', offset);
-		}
-
-		private bool IsZero()
-		{
-			return IsZero(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is space.
-		/// </summary>
-
-		private bool IsSpace(int offset)
-		{
-			return Check(' ', offset);
-		}
-
-		private bool IsSpace()
-		{
-			return IsSpace(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is tab.
-		/// </summary>
-
-		private bool IsTab(int offset)
-		{
-			return Check('\t', offset);
-		}
-
-		private bool IsTab()
-		{
-			return IsTab(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is blank (space or tab).
-		/// </summary>
-
-		private bool IsBlank(int offset)
-		{
-			return IsSpace(offset) || IsTab(offset);
-		}
-
-		private bool IsBlank()
-		{
-			return IsBlank(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is a line break.
-		/// </summary>
-
-		private bool IsBreak(int offset)
-		{
-			return Check("\r\n\x85\x2028\x2029", offset);
-		}
-
-		private bool IsBreak()
-		{
-			return IsBreak(0);
-		}
-
-		private bool IsCrLf(int offset)
-		{
-			return Check('\r', offset) && Check('\n', offset + 1);
-		}
-
-		private bool IsCrLf()
-		{
-			return IsCrLf(0);
-		}
-
-		/// <summary>
-		/// Check if the character is a line break or NUL.
-		/// </summary>
-
-		private bool IsBreakOrZero(int offset)
-		{
-			return IsBreak(offset) || IsZero(offset);
-		}
-
-		private bool IsBreakOrZero()
-		{
-			return IsBreakOrZero(0);
-		}
-
-		/// <summary>
-		/// Check if the character is a line break, space, tab, or NUL.
-		/// </summary>
-
-		private bool IsBlankOrBreakOrZero(int offset)
-		{
-			return IsBlank(offset) || IsBreakOrZero(offset);
-		}
-
-		private bool IsBlankOrBreakOrZero()
-		{
-			return IsBlankOrBreakOrZero(0);
-		}
-
 		private void Skip()
 		{
 			++mark.Index;
 			++mark.Column;
-			buffer.Skip(1);
+			analyzer.Buffer.Skip(1);
 		}
 
 		private void SkipLine()
 		{
-			if (IsCrLf())
+			if (analyzer.IsCrLf())
 			{
 				mark.Index += 2;
 				mark.Column = 0;
 				++mark.Line;
-				buffer.Skip(2);
+				analyzer.Buffer.Skip(2);
 			}
-			else if (IsBreak())
+			else if (analyzer.IsBreak())
 			{
 				++mark.Index;
 				mark.Column = 0;
 				++mark.Line;
-				buffer.Skip(1);
+				analyzer.Buffer.Skip(1);
 			}
-			else if (!IsZero())
+			else if (!analyzer.IsZero())
 			{
 				throw new InvalidOperationException("Not at a break.");
 			}
@@ -777,30 +544,25 @@ namespace YamlDotNet.Core
 				//  after '-', '?', or ':' (complex value).
 
 
-				buffer.Cache(1);
-
 				while (CheckWhiteSpace())
 				{
 					Skip();
-					buffer.Cache(1);
 				}
 
 				// Eat a comment until a line break.
 
-				if (Check('#'))
+				if (analyzer.Check('#'))
 				{
-					while (!IsBreakOrZero())
+					while (!analyzer.IsBreakOrZero())
 					{
 						Skip();
-						buffer.Cache(1);
 					}
 				}
 
 				// If it is a line break, eat it.
 
-				if (IsBreak())
+				if (analyzer.IsBreak())
 				{
-					buffer.Cache(2);
 					SkipLine();
 
 					// In the block context, a new line may start a simple key.
@@ -957,35 +719,30 @@ namespace YamlDotNet.Core
 
 			// Eat the rest of the line including any comments.
 
-			buffer.Cache(1);
-
-			while (IsBlank())
+			while (analyzer.IsBlank())
 			{
 				Skip();
-				buffer.Cache(1);
 			}
 
-			if (Check('#'))
+			if (analyzer.Check('#'))
 			{
-				while (!IsBreakOrZero())
+				while (!analyzer.IsBreakOrZero())
 				{
 					Skip();
-					buffer.Cache(1);
 				}
 			}
 
 			// Check if we are at the end of the line.
 
-			if (!IsBreakOrZero())
+			if (!analyzer.IsBreakOrZero())
 			{
 				throw new SyntaxErrorException("While scanning a directive, did not found expected comment or line break.", start);
 			}
 
 			// Eat a line break.
 
-			if (IsBreak())
+			if (analyzer.IsBreak())
 			{
-				buffer.Cache(2);
 				SkipLine();
 			}
 
@@ -1244,13 +1001,9 @@ namespace YamlDotNet.Core
 
 			// Have we found a simple key?
 
-			Console.WriteLine("SIMPLE_KEY_POSSIBLE({0}, {1})", simpleKey.IsPossible, simpleKey.TokenNumber);
-
 			if (simpleKey.IsPossible)
 			{
 				// Create the KEY token and insert it into the queue.
-
-				Console.Write("QUEUE_INSERT({0}, {1})\n", simpleKey.TokenNumber - tokensParsed, simpleKey.TokenNumber);
 
 				tokens.Insert(simpleKey.TokenNumber - tokensParsed, new Key(simpleKey.Mark, simpleKey.Mark));
 
@@ -1344,7 +1097,6 @@ namespace YamlDotNet.Core
 				}
 				else
 				{
-					Console.Write("QUEUE_INSERT({0})\n", number - tokensParsed);
 					tokens.Insert(number - tokensParsed, token);
 				}
 			}
@@ -1380,7 +1132,7 @@ namespace YamlDotNet.Core
 			// Consume the value.
 
 			StringBuilder value = new StringBuilder();
-			while (IsAlpha())
+			while (analyzer.IsAlpha())
 			{
 				value.Append(ReadCurrentCharacter());
 			}
@@ -1392,7 +1144,7 @@ namespace YamlDotNet.Core
 			//      '?', ':', ',', ']', '}', '%', '@', '`'.
 
 
-			if (value.Length == 0 || !(IsBlankOrBreakOrZero() || Check("?:,]}%@`")))
+			if (value.Length == 0 || !(analyzer.IsBlankOrBreakOrZero() || analyzer.Check("?:,]}%@`")))
 			{
 				throw new SyntaxErrorException("While scanning an anchor or alias, did not find expected alphabetic or numeric character.", start);
 			}
@@ -1441,7 +1193,7 @@ namespace YamlDotNet.Core
 			string handle;
 			string suffix;
 
-			if (Check('<', 1))
+			if (analyzer.Check('<', 1))
 			{
 				// Set the handle to ''
 
@@ -1458,7 +1210,7 @@ namespace YamlDotNet.Core
 
 				// Check for '>' and eat it.
 
-				if (!Check('>'))
+				if (!analyzer.Check('>'))
 				{
 					throw new SyntaxErrorException("While scanning a tag, did not find the expected '>'.", start);
 				}
@@ -1510,7 +1262,7 @@ namespace YamlDotNet.Core
 
 			// Check the character which ends the tag.
 
-			if (!IsBlankOrBreakOrZero())
+			if (!analyzer.IsBlankOrBreakOrZero())
 			{
 				throw new SyntaxErrorException("While scanning a tag, did not found expected whitespace or line break.", start);
 			}
@@ -1563,28 +1315,28 @@ namespace YamlDotNet.Core
 
 			// Check for a chomping indicator.
 
-			if (Check("+-"))
+			if (analyzer.Check("+-"))
 			{
 				// Set the chomping method and eat the indicator.
 
-				chomping = Check('+') ? + 1 : -1;
+				chomping = analyzer.Check('+') ? + 1 : -1;
 
 				Skip();
 
 				// Check for an indentation indicator.
 
-				if (IsDigit())
+				if (analyzer.IsDigit())
 				{
 					// Check that the intendation is greater than 0.
 
-					if (Check('0'))
+					if (analyzer.Check('0'))
 					{
 						throw new SyntaxErrorException("While scanning a block scalar, found an intendation indicator equal to 0.", start);
 					}
 
 					// Get the intendation level and eat the indicator.
 
-					increment = AsDigit();
+					increment = analyzer.AsDigit();
 
 					Skip();
 				}
@@ -1592,20 +1344,20 @@ namespace YamlDotNet.Core
 
 			// Do the same as above, but in the opposite order.
 
-			else if (IsDigit())
+			else if (analyzer.IsDigit())
 			{
-				if (Check('0'))
+				if (analyzer.Check('0'))
 				{
 					throw new SyntaxErrorException("While scanning a block scalar, found an intendation indicator equal to 0.", start);
 				}
 
-				increment = AsDigit();
+				increment = analyzer.AsDigit();
 
 				Skip();
 
-				if (Check("+-"))
+				if (analyzer.Check("+-"))
 				{
-					chomping = Check('+') ? + 1 : -1;
+					chomping = analyzer.Check('+') ? + 1 : -1;
 
 					Skip();
 				}
@@ -1613,14 +1365,14 @@ namespace YamlDotNet.Core
 
 			// Eat whitespaces and comments to the end of the line.
 
-			while (IsBlank())
+			while (analyzer.IsBlank())
 			{
 				Skip();
 			}
 
-			if (Check('#'))
+			if (analyzer.Check('#'))
 			{
-				while (!IsBreakOrZero())
+				while (!analyzer.IsBreakOrZero())
 				{
 					Skip();
 				}
@@ -1628,14 +1380,14 @@ namespace YamlDotNet.Core
 
 			// Check if we are at the end of the line.
 
-			if (!IsBreakOrZero())
+			if (!analyzer.IsBreakOrZero())
 			{
 				throw new SyntaxErrorException("While scanning a block scalar, did not found expected comment or line break.", start);
 			}
 
 			// Eat a line break.
 
-			if (IsBreak())
+			if (analyzer.IsBreak())
 			{
 				SkipLine();
 			}
@@ -1655,7 +1407,7 @@ namespace YamlDotNet.Core
 
 			// Scan the block scalar content.
 
-			while (mark.Column == currentIndent && !IsZero())
+			while (mark.Column == currentIndent && !analyzer.IsZero())
 			{
 
 				// We are at the beginning of a non-empty line.
@@ -1663,7 +1415,7 @@ namespace YamlDotNet.Core
 
 				// Is it a trailing whitespace?
 
-				trailingBlank = IsBlank();
+				trailingBlank = analyzer.IsBlank();
 
 				// Check if we need to fold the leading line break.
 
@@ -1691,11 +1443,11 @@ namespace YamlDotNet.Core
 
 				// Is it a leading whitespace?
 
-				leadingBlank = IsBlank();
+				leadingBlank = analyzer.IsBlank();
 
 				// Consume the current line.
 
-				while (!IsBreakOrZero())
+				while (!analyzer.IsBreakOrZero())
 				{
 					value.Append(ReadCurrentCharacter());
 				}
@@ -1743,7 +1495,7 @@ namespace YamlDotNet.Core
 			{
 				// Eat the intendation spaces.
 
-				while ((currentIndent == 0 || mark.Column < currentIndent) && IsSpace())
+				while ((currentIndent == 0 || mark.Column < currentIndent) && analyzer.IsSpace())
 				{
 					Skip();
 				}
@@ -1755,14 +1507,14 @@ namespace YamlDotNet.Core
 
 				// Check for a tab character messing the intendation.
 
-				if ((currentIndent == 0 || mark.Column < currentIndent) && IsTab())
+				if ((currentIndent == 0 || mark.Column < currentIndent) && analyzer.IsTab())
 				{
 						throw new SyntaxErrorException("While scanning a block scalar, found a tab character where an intendation space is expected.", start);
 				}
 
 				// Have we found a non-empty line?
 
-				if (!IsBreak())
+				if (!analyzer.IsBreak())
 				{
 					break;
 				}
@@ -1825,8 +1577,6 @@ namespace YamlDotNet.Core
 			{
 				// Check that there are no document indicators at the beginning of the line.
 
-				buffer.Cache(4);
-
 				if (IsDocumentIndicator())
 				{
 					throw new SyntaxErrorException("While scanning a quoted scalar, found unexpected document indicator.", start);
@@ -1834,7 +1584,7 @@ namespace YamlDotNet.Core
 
 				// Check for EOF.
 
-				if (IsZero())
+				if (analyzer.IsZero())
 				{
 					throw new SyntaxErrorException("While scanning a quoted scalar, found unexpected end of stream.", start);
 				}
@@ -1843,11 +1593,11 @@ namespace YamlDotNet.Core
 
 				bool hasLeadingBlanks = false;
 
-				while (!IsBlankOrBreakOrZero())
+				while (!analyzer.IsBlankOrBreakOrZero())
 				{
 					// Check for an escaped single quote.
 
-					if (isSingleQuoted && Check('\'', 0) && Check('\'', 1))
+					if (isSingleQuoted && analyzer.Check('\'', 0) && analyzer.Check('\'', 1))
 					{
 						value.Append('\'');
 						Skip();
@@ -1856,14 +1606,14 @@ namespace YamlDotNet.Core
 
 					// Check for the right quote.
 
-					else if (Check(isSingleQuoted ? '\'' :          '"'))
+					else if (analyzer.Check(isSingleQuoted ? '\'' : '"'))
 					{
 						break;
 					}
 
 					// Check for an escaped line break.
 
-					else if (!isSingleQuoted && Check('\\') && IsBreak(1))
+					else if (!isSingleQuoted && analyzer.Check('\\') && analyzer.IsBreak(1))
 					{
 						Skip();
 						SkipLine();
@@ -1873,13 +1623,13 @@ namespace YamlDotNet.Core
 
 					// Check for an escape sequence.
 
-					else if (!isSingleQuoted && Check('\\'))
+					else if (!isSingleQuoted && analyzer.Check('\\'))
 					{
 						int codeLength = 0;
 
 						// Check the escape character.
 
-						char escapeCharacter = buffer.Peek(1);
+						char escapeCharacter = analyzer.Peek(1);
 						switch (escapeCharacter)
 						{
 							case 'x':
@@ -1920,11 +1670,11 @@ namespace YamlDotNet.Core
 
 							for (int k = 0; k < codeLength; ++k)
 							{
-								if (!IsHex(k))
+								if (!analyzer.IsHex(k))
 								{
 									throw new SyntaxErrorException("While parsing a quoted scalar, did not find expected hexdecimal number.", start);
 								}
-								character = (uint)((character << 4) + AsHex(k));
+								character = (uint)((character << 4) + analyzer.AsHex(k));
 							}
 
 							// Check the value and write the character.
@@ -1954,14 +1704,14 @@ namespace YamlDotNet.Core
 
 				// Check if we are at the end of the scalar.
 
-				if (Check(isSingleQuoted ? '\'' : '"'))
+				if (analyzer.Check(isSingleQuoted ? '\'' : '"'))
 					break;
 
 				// Consume blank characters.
 
-				while (IsBlank() || IsBreak())
+				while (analyzer.IsBlank() || analyzer.IsBreak())
 				{
-					if (IsBlank())
+					if (analyzer.IsBlank())
 					{
 						// Consume a space or a tab character.
 
@@ -2079,24 +1829,24 @@ namespace YamlDotNet.Core
 
 				// Check for a comment.
 
-				if (Check('#'))
+				if (analyzer.Check('#'))
 				{
 					break;
 				}
 
 				// Consume non-blank characters.
-				while (!IsBlankOrBreakOrZero())
+				while (!analyzer.IsBlankOrBreakOrZero())
 				{
 					// Check for 'x:x' in the flow context. TODO: Fix the test "spec-08-13".
 
-					if (flowLevel > 0 && Check(':') && !IsBlankOrBreakOrZero(1))
+					if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsBlankOrBreakOrZero(1))
 					{
 						throw new SyntaxErrorException("While scanning a plain scalar, found unexpected ':'.", start);
 					}
 
 					// Check for indicators that may end a plain scalar.
 
-					if ((Check(':') && IsBlankOrBreakOrZero(1)) || (flowLevel > 0 && Check(",:?[]{}")))
+					if ((analyzer.Check(':') && analyzer.IsBlankOrBreakOrZero(1)) || (flowLevel > 0 && analyzer.Check(",:?[]{}")))
 					{
 						break;
 					}
@@ -2147,20 +1897,20 @@ namespace YamlDotNet.Core
 
 				// Is it the end?
 
-				if (!(IsBlank() || IsBreak()))
+				if (!(analyzer.IsBlank() || analyzer.IsBreak()))
 				{
 					break;
 				}
 
 				// Consume blank characters.
 
-				while (IsBlank() || IsBreak())
+				while (analyzer.IsBlank() || analyzer.IsBreak())
 				{
-					if (IsBlank())
+					if (analyzer.IsBlank())
 					{
 						// Check for tab character that abuse intendation.
 
-						if (hasLeadingBlanks && mark.Column < currentIndent && IsTab())
+						if (hasLeadingBlanks && mark.Column < currentIndent && analyzer.IsTab())
 						{
 							throw new SyntaxErrorException("While scanning a plain scalar, found a tab character that violate intendation.", start);
 						}
@@ -2249,12 +1999,9 @@ namespace YamlDotNet.Core
 
 			// Consume the directive name.
 
-			buffer.Cache(1);
-
-			while (IsAlpha())
+			while (analyzer.IsAlpha())
 			{
 				name.Append(ReadCurrentCharacter());
-				buffer.Cache(1);
 			}
 
 			// Check if the name is empty.
@@ -2266,7 +2013,7 @@ namespace YamlDotNet.Core
 
 			// Check for an blank character after the name.
 
-			if (!IsBlankOrBreakOrZero())
+			if (!analyzer.IsBlankOrBreakOrZero())
 			{
 				throw new SyntaxErrorException("While scanning a directive, found unexpected non-alphabetical character.", start);
 			}
@@ -2278,12 +2025,9 @@ namespace YamlDotNet.Core
 		{
 			// Eat whitespaces.
 
-			buffer.Cache(1);
-
-			while (IsBlank())
+			while (analyzer.IsBlank())
 			{
 				Skip();
-				buffer.Cache(1);
 			}
 		}
 
@@ -2304,7 +2048,7 @@ namespace YamlDotNet.Core
 
 			// Eat '.'.
 
-			if (!Check('.'))
+			if (!analyzer.Check('.'))
 			{
 				throw new SyntaxErrorException("While scanning a %YAML directive, did not find expected digit or '.' character.", start);
 			}
@@ -2335,9 +2079,7 @@ namespace YamlDotNet.Core
 
 			// Expect a whitespace.
 
-			buffer.Cache(1);
-
-			if (!IsBlank())
+			if (!analyzer.IsBlank())
 			{
 				throw new SyntaxErrorException("While scanning a %TAG directive, did not find expected whitespace.", start);
 			}
@@ -2350,9 +2092,7 @@ namespace YamlDotNet.Core
 
 			// Expect a whitespace or line break.
 
-			buffer.Cache(1);
-
-			if (!IsBlankOrBreakOrZero())
+			if (!analyzer.IsBlankOrBreakOrZero())
 			{
 				throw new SyntaxErrorException("While scanning a %TAG directive, did not find expected whitespace or line break.", start);
 			}
@@ -2374,9 +2114,6 @@ namespace YamlDotNet.Core
 
 			// Scan the tag.
 
-			buffer.Cache(1);
-
-
 			// The set of characters that may appear in URI is as follows:
 
 			//      '0'-'9', 'A'-'Z', 'a'-'z', '_', '-', ';', '/', '?', ':', '@', '&',
@@ -2384,11 +2121,11 @@ namespace YamlDotNet.Core
 			//      '%'.
 
 
-			while (IsAlpha() || Check(";/?:@&=+$,.!~*'()[]%"))
+			while (analyzer.IsAlpha() || analyzer.Check(";/?:@&=+$,.!~*'()[]%"))
 			{
 				// Check if it is a URI-escape sequence.
 
-				if (Check('%'))
+				if (analyzer.Check('%'))
 				{
 					tag.Append(ScanUriEscapes(start));
 				}
@@ -2396,8 +2133,6 @@ namespace YamlDotNet.Core
 				{
 					tag.Append(ReadCurrentCharacter());
 				}
-
-				buffer.Cache(1);
 			}
 
 			// Check if the tag is non-empty.
@@ -2424,16 +2159,14 @@ namespace YamlDotNet.Core
 			{
 				// Check for a URI-escaped octet.
 
-				buffer.Cache(3);
-
-				if (!(Check('%') && IsHex(1) && IsHex(2)))
+				if (!(analyzer.Check('%') && analyzer.IsHex(1) && analyzer.IsHex(2)))
 				{
 					throw new SyntaxErrorException("While parsing a tag, did not find URI escaped octet.", start);
 				}
 
 				// Get the octet.
 
-				int octet = (AsHex(1) << 4) + AsHex(2);
+				int octet = (analyzer.AsHex(1) << 4) + analyzer.AsHex(2);
 
 				// If it is the leading octet, determine the length of the UTF-8 sequence.
 
@@ -2488,9 +2221,7 @@ namespace YamlDotNet.Core
 
 			// Check the initial '!' character.
 
-			buffer.Cache(1);
-
-			if (!Check('!'))
+			if (!analyzer.Check('!'))
 			{
 				throw new SyntaxErrorException("While scanning a tag, did not find expected '!'.", start);
 			}
@@ -2502,16 +2233,14 @@ namespace YamlDotNet.Core
 
 			// Copy all subsequent alphabetical and numerical characters.
 
-			buffer.Cache(1);
-			while (IsAlpha())
+			while (analyzer.IsAlpha())
 			{
 				tagHandle.Append(ReadCurrentCharacter());
-				buffer.Cache(1);
 			}
 
 			// Check if the trailing character is '!' and copy it.
 
-			if (Check('!'))
+			if (analyzer.Check('!'))
 			{
 				tagHandle.Append(ReadCurrentCharacter());
 			}
@@ -2548,9 +2277,7 @@ namespace YamlDotNet.Core
 
 			// Repeat while the next character is digit.
 
-			buffer.Cache(1);
-
-			while (IsDigit())
+			while (analyzer.IsDigit())
 			{
 				// Check if the number is too long.
 
@@ -2559,11 +2286,9 @@ namespace YamlDotNet.Core
 					throw new SyntaxErrorException("While scanning a %YAML directive, found extremely long version number.", start);
 				}
 
-				value = value * 10 + AsDigit();
+				value = value * 10 + analyzer.AsDigit();
 
 				Skip();
-
-				buffer.Cache(1);
 			}
 
 			// Check if the number was present.
@@ -2604,7 +2329,6 @@ namespace YamlDotNet.Core
 
 			if (simpleKeyAllowed)
 			{
-				Console.WriteLine("PUSH_SIMPLE_KEY({0}, {1})", tokensParsed + tokens.Count, tokensParsed);
 				SimpleKey key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, mark);
 
 				RemoveSimpleKey();

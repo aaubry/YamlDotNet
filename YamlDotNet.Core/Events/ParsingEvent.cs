@@ -7,6 +7,13 @@ namespace YamlDotNet.Core.Events
 	/// </summary>
 	public abstract class ParsingEvent
 	{
+		/// <summary>
+		/// Gets the event type, which allows for simpler type comparisons.
+		/// </summary>
+		internal abstract EventType Type {
+			get;
+		}
+		
 		private Mark start;
 
 		/// <summary>
@@ -38,7 +45,7 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		protected ParsingEvent(Mark start, Mark end)
+		internal ParsingEvent(Mark start, Mark end)
 		{
 			this.start = start;
 			this.end = end;

@@ -78,8 +78,6 @@ namespace YamlDotNet.Core
 
 		Event yaml_parser_state_machine()
 		{
-			Console.WriteLine("STATE({0}) {1}", (int)state, state);
-
 			switch (state)
 			{
 				case ParserState.YAML_PARSE_STREAM_START_STATE: return yaml_parser_parse_stream_start();
@@ -273,7 +271,7 @@ namespace YamlDotNet.Core
 						throw new SemanticErrorException("Found duplicate %YAML directive.", currentVersion.Start);
 					}
 
-					if (currentVersion.Version.Major != 1 || currentVersion.Version.Minor != 1)
+					if (currentVersion.Version.Major != Constants.MajorVersion || currentVersion.Version.Minor != Constants.MinorVersion)
 					{
 						throw new SemanticErrorException("Found incompatible YAML document.", currentVersion.Start);
 					}
@@ -311,20 +309,14 @@ namespace YamlDotNet.Core
 
 		private static void AddDefaultTagDirectives(TagDirectiveCollection directives)
 		{
-			foreach(TagDirective directive in defaultTagDirectives)
+			foreach(TagDirective directive in Constants.DefaultTagDirectives)
 			{
-				if (!directives.Contains(directive.Handle))
+				if (!directives.Contains(directive))
 				{
 					directives.Add(directive);
 				}
 			}
 		}
-
-		private static readonly TagDirective[] defaultTagDirectives = new TagDirective[]
-		{
-			new TagDirective("!", "!"),
-			new TagDirective("!!", "tag:yaml.org,2002:"),
-		};
 
 		/// <summary>
 		/// Parse the productions:
@@ -464,7 +456,7 @@ namespace YamlDotNet.Core
 				{
 					bool isPlainImplicit = false;
 					bool isQuotedImplicit = false;
-					if ((scalar.Style == ScalarStyle.Plain && tagName == null) || tagName == "!")
+					if ((scalar.Style == ScalarStyle.Plain && tagName == null) || tagName == Constants.DefaultHandle)
 					{
 						isPlainImplicit = true;
 					}

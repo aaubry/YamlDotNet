@@ -5,33 +5,14 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a sequence start event.
 	/// </summary>
-	public class SequenceStart : ParsingEvent, INodeEvent
+	public class SequenceStart : NodeEvent
 	{
-		private string anchor;
-
 		/// <summary>
-		/// Gets the anchor.
+		/// Gets the event type, which allows for simpler type comparisons.
 		/// </summary>
-		/// <value></value>
-		public string Anchor
-		{
-			get
-			{
-				return anchor;
-			}
-		}
-
-		private string tag;
-
-		/// <summary>
-		/// Gets the tag.
-		/// </summary>
-		/// <value></value>
-		public string Tag
-		{
-			get
-			{
-				return tag;
+		internal override EventType Type {
+			get {
+				return EventType.YAML_SEQUENCE_START_EVENT;
 			}
 		}
 
@@ -48,6 +29,12 @@ namespace YamlDotNet.Core.Events
 			get
 			{
 				return isImplicit;
+			}
+		}
+		
+		internal override bool IsCanonical {
+			get {
+				return !isImplicit;
 			}
 		}
 
@@ -75,10 +62,8 @@ namespace YamlDotNet.Core.Events
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
 		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
-			: base(start, end)
+			: base(anchor, tag, start, end)
 		{
-			this.anchor = anchor;
-			this.tag = tag;
 			this.isImplicit = isImplicit;
 			this.style = style;
 		}

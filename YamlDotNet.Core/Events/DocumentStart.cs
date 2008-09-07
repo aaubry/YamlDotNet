@@ -9,6 +9,15 @@ namespace YamlDotNet.Core.Events
 	/// </summary>
 	public class DocumentStart : ParsingEvent
 	{
+		/// <summary>
+		/// Gets the event type, which allows for simpler type comparisons.
+		/// </summary>
+		internal override EventType Type {
+			get {
+				return EventType.YAML_DOCUMENT_START_EVENT;
+			}
+		}
+		
 		private readonly TagDirectiveCollection tags;
 		private readonly VersionDirective version;
 

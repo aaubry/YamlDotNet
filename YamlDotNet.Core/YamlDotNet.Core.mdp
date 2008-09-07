@@ -1,5 +1,5 @@
 <Project name="YamlDotNet.Core" fileversion="2.0" DefaultNamespace="YamlDotNet.Core" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
-  <Configurations active="Release">
+  <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.Core" />
       <Build debugmode="True" target="Library" />
@@ -50,7 +50,6 @@
     <File name="Events/SequenceStart.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/StreamEnd.cs" subtype="Code" buildaction="Compile" />
     <File name="Events/StreamStart.cs" subtype="Code" buildaction="Compile" />
-    <File name="Events/INodeEvent.cs" subtype="Code" buildaction="Compile" />
     <File name="SyntaxErrorException.cs" subtype="Code" buildaction="Compile" />
     <File name="Version.cs" subtype="Code" buildaction="Compile" />
     <File name="LookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
@@ -66,6 +65,15 @@
     <File name="Events/SequenceStyle.cs" subtype="Code" buildaction="Compile" />
     <File name="TagDirectiveCollection.cs" subtype="Code" buildaction="Compile" />
     <File name="YamlException.cs" subtype="Code" buildaction="Compile" />
+    <File name="Emitter.cs" subtype="Code" buildaction="Compile" />
+    <File name="EmitterState.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/EventType.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/NodeEvent.cs" subtype="Code" buildaction="Compile" />
+    <File name="Constants.cs" subtype="Code" buildaction="Compile" />
+    <File name="FakeList.cs" subtype="Code" buildaction="Compile" />
+    <File name="ILookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
+    <File name="CharacterAnalyzer.cs" subtype="Code" buildaction="Compile" />
+    <File name="StringLookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

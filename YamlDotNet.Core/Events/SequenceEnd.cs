@@ -8,6 +8,15 @@ namespace YamlDotNet.Core.Events
 	public class SequenceEnd : ParsingEvent
 	{
 		/// <summary>
+		/// Gets the event type, which allows for simpler type comparisons.
+		/// </summary>
+		internal override EventType Type {
+			get {
+				return EventType.YAML_SEQUENCE_END_EVENT;
+			}
+		}
+		
+		/// <summary>
 		/// Initializes a new instance of the <see cref="SequenceEnd"/> class.
 		/// </summary>
 		/// <param name="start">The start position of the event.</param>

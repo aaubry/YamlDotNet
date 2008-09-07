@@ -1,5 +1,5 @@
-
 using System;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core.Tokens
 {
