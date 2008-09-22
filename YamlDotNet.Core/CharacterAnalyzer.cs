@@ -261,7 +261,7 @@ namespace YamlDotNet.Core
 
 			char character = buffer.Peek(offset);
 
-			foreach(char expected in expectedCharacters)
+			foreach(var expected in expectedCharacters)
 			{
 				if (expected == character)
 				{

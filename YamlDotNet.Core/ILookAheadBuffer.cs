@@ -19,7 +19,7 @@ namespace YamlDotNet.Core
 
 		/// <summary>
 		/// Skips the next <paramref name="length"/> characters. Those characters must have been
-		/// obtained first by calling the <see cref="Peek"/> or <see cref="Cache"/> methods.
+		/// obtained first by calling the <see cref="Peek"/> method.
 		/// </summary>
 		void Skip(int length);
 	}

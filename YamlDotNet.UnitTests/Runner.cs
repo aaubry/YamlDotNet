@@ -6,8 +6,10 @@ namespace YamlDotNet.UnitTests
 	{
 		public static void Main()
 		{
-			EmitterTests test = new EmitterTests();
-			test.EmitExample1();
+			YamlStreamTests test = new YamlStreamTests();
+			test.BackwardAliasReferenceWorks();
+			test.ForwardAliasReferenceWorks();
+			test.LoadSimpleDocument();
 		}
 	}
 }

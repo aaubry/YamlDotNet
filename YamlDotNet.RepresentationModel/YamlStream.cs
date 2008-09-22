@@ -45,12 +45,20 @@ namespace YamlDotNet.RepresentationModel
 			events.Expect<StreamEnd>();
 		}
 
-		//public void Save(Stream output)
-		//{
-		//    using(Emitter emitter = new Emitter(output))
-		//    {
-		//        //emitter.Emit();
-		//    }
-		//}
+		/// <summary>
+		/// Saves the stream to the specified output.
+		/// </summary>
+		/// <param name="output">The output.</param>
+		public void Save(TextWriter output)
+		{
+		    Emitter emitter = new Emitter(output);
+			emitter.Emit(new StreamStart());
+			
+			foreach (var document in documents) {
+				document.Save(emitter);
+			}
+			
+			emitter.Emit(new StreamEnd());
+		}
 	}
 }

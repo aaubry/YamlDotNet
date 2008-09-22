@@ -22,9 +22,14 @@ namespace YamlDotNet.RepresentationModel
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>
-		internal override void ResolveAliases(DocumentState state)
+		internal override void ResolveAliases(DocumentLoadingState state)
 		{
 			throw new NotSupportedException("Resolving an alias on an alias node does not make sense");
+		}
+		
+		internal override void Save(Emitter emitter)
+		{
+			throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be saved.");
 		}
 	}
 }

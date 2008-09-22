@@ -17,7 +17,7 @@
     <File name="." subtype="Directory" buildaction="Compile" />
     <File name="Properties/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
     <File name="AnchorNotFoundException.cs" subtype="Code" buildaction="Compile" />
-    <File name="DocumentState.cs" subtype="Code" buildaction="Compile" />
+    <File name="DocumentLoadingState.cs" subtype="Code" buildaction="Compile" />
     <File name="DuplicateAnchorException.cs" subtype="Code" buildaction="Compile" />
     <File name="EventReader.cs" subtype="Code" buildaction="Compile" />
     <File name="YamlAliasNode.cs" subtype="Code" buildaction="Compile" />

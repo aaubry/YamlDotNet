@@ -10,9 +10,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void LoadSimpleDocument() {
 			YamlStream stream = new YamlStream();
-			stream.Load(YamlFile(@"
-				'a scalar'
-			"));
+			stream.Load(YamlFile("test2.yaml"));
 			
 			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
 			Assert.IsInstanceOfType(typeof(YamlScalarNode), stream.Documents[0].RootNode, "The document should contain a scalar.");
@@ -22,11 +20,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void BackwardAliasReferenceWorks() {
 			YamlStream stream = new YamlStream();
-			stream.Load(YamlFile(@"
-				- &first a scalar
-				- another scalar
-				- *first
-			"));
+			stream.Load(YamlFile("backwardsAlias.yaml"));
 			
 			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
 			Assert.IsInstanceOfType(typeof(YamlSequenceNode), stream.Documents[0].RootNode, "The document should contain a sequence.");
@@ -43,11 +37,7 @@ namespace YamlDotNet.UnitTests
 		[Test]
 		public void ForwardAliasReferenceWorks() {
 			YamlStream stream = new YamlStream();
-			stream.Load(YamlFile(@"
-				- *first
-				- another scalar
-				- &first a scalar
-			"));
+			stream.Load(YamlFile("forwardAlias.yaml"));
 			
 			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
 			Assert.IsInstanceOfType(typeof(YamlSequenceNode), stream.Documents[0].RootNode, "The document should contain a sequence.");

@@ -23,7 +23,7 @@ namespace YamlDotNet.Core
 		/// <param name="tagDirectives">Initial content of the collection.</param>
 		public TagDirectiveCollection(IEnumerable<TagDirective> tagDirectives)
 		{
-			foreach(TagDirective tagDirective in tagDirectives)
+			foreach(var tagDirective in tagDirectives)
 			{
 				Add(tagDirective);
 			}

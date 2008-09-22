@@ -4,18 +4,26 @@ using System.Collections.Generic;
 namespace YamlDotNet.Core
 {
 	/// <summary>
-	/// Implements an indexer through an IEnumerator<T>
+	/// Implements an indexer through an IEnumerator&lt;T&gt;.
 	/// </summary>
 	public class FakeList<T>
 	{
 		private readonly IEnumerator<T> collection;
 		private int currentIndex = -1;
 		
+		/// <summary>
+		/// Initializes a new instance of FakeList&lt;T&gt;.
+		/// </summary>
+		/// <param name="collection">The enumerator to use to implement the indexer.</param>
 		public FakeList(IEnumerator<T> collection)
 		{
 			this.collection = collection; 
 		}
 		
+		/// <summary>
+		/// Initializes a new instance of FakeList&lt;T&gt;.
+		/// </summary>
+		/// <param name="collection">The collection to use to implement the indexer.</param>
 		public FakeList(IEnumerable<T> collection)
 			: this(collection.GetEnumerator())
 		{

@@ -29,7 +29,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="events">The events.</param>
 		/// <param name="state">The state.</param>
-		internal YamlMappingNode(EventReader events, DocumentState state)
+		internal YamlMappingNode(EventReader events, DocumentLoadingState state)
 		{
 			MappingStart mapping = events.Expect<MappingStart>();
 			Load(mapping, state);
@@ -57,10 +57,10 @@ namespace YamlDotNet.RepresentationModel
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>
-		internal override void ResolveAliases(DocumentState state)
+		internal override void ResolveAliases(DocumentLoadingState state)
 		{
 			Dictionary<YamlNode, YamlNode> keysToUpdate = null;
-			foreach(KeyValuePair<YamlNode, YamlNode> entry in children)
+			foreach(var entry in children)
 			{
 				if (entry.Key is YamlAliasNode)
 				{
@@ -77,13 +77,31 @@ namespace YamlDotNet.RepresentationModel
 			}
 			if (keysToUpdate != null)
 			{
-				foreach(KeyValuePair<YamlNode, YamlNode> entry in keysToUpdate)
+				foreach(var entry in keysToUpdate)
 				{
 					YamlNode value = children[entry.Key];
 					children.Remove(entry.Key);
 					children.Add(entry.Value, value);
 				}
 			}
+		}
+		
+		internal override IEnumerator<YamlNode> GetEnumerator()
+		{
+			foreach (var child in children) {
+				yield return child.Key;
+				yield return child.Value;
+			}
+		}
+		
+		internal override void Save(Emitter emitter)
+		{
+			emitter.Emit(new MappingStart(Anchor, Tag, true, MappingStyle.Any));
+			foreach (var entry in children) {
+				entry.Key.Save(emitter);
+				entry.Value.Save(emitter);
+			}
+			emitter.Emit(new MappingEnd());
 		}
 	}
 }

@@ -29,14 +29,14 @@ namespace YamlDotNet.UnitTests
 			Console.WriteLine(expected.GetType().Name);
 			Assert.IsInstanceOfType(expected.GetType(), parser.Current, "The event is not of the expected type.");
 			
-			foreach (PropertyInfo property in expected.GetType().GetProperties()) {
+			foreach (var property in expected.GetType().GetProperties()) {
 				if(property.PropertyType != typeof(Mark) && property.CanRead) {
 					object value = property.GetValue(parser.Current, null);
 					object expectedValue = property.GetValue(expected, null);
 					if(expectedValue != null && Type.GetTypeCode(expectedValue.GetType()) == TypeCode.Object && expectedValue is IEnumerable) {
 						Console.Write("\t{0} = {{", property.Name);
 						bool isFirst = true;
-						foreach(object item in (IEnumerable)value) {
+						foreach(var item in (IEnumerable)value) {
 							if(isFirst) {
 								isFirst = false;
 							} else {

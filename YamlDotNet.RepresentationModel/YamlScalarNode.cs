@@ -52,7 +52,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="events">The events.</param>
 		/// <param name="state">The state.</param>
-		internal YamlScalarNode(EventReader events, DocumentState state)
+		internal YamlScalarNode(EventReader events, DocumentLoadingState state)
 		{
 			Scalar scalar = events.Expect<Scalar>();
 			Load(scalar, state);
@@ -64,9 +64,14 @@ namespace YamlDotNet.RepresentationModel
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>
-		internal override void ResolveAliases(DocumentState state)
+		internal override void ResolveAliases(DocumentLoadingState state)
 		{
 			throw new NotSupportedException("Resolving an alias on a scalar node does not make sense");
+		}
+		
+		internal override void Save(Emitter emitter)
+		{
+			emitter.Emit(new Scalar(Anchor, Tag, Value, ScalarStyle.Any, false, false));
 		}
 	}
 }

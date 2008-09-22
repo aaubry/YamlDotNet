@@ -184,7 +184,7 @@ namespace YamlDotNet.Core
 
 					StaleSimpleKeys();
 
-					foreach(SimpleKey simpleKey in simpleKeys)
+					foreach(var simpleKey in simpleKeys)
 					{
 						if (simpleKey.IsPossible && simpleKey.TokenNumber == tokensParsed)
 						{
@@ -221,7 +221,7 @@ namespace YamlDotNet.Core
 		{
 			// Check for a potential simple key for each flow level.
 
-			foreach(SimpleKey key in simpleKeys)
+			foreach(var key in simpleKeys)
 			{
 
 				// The specification requires that a simple key

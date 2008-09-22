@@ -309,7 +309,7 @@ namespace YamlDotNet.Core
 
 		private static void AddDefaultTagDirectives(TagDirectiveCollection directives)
 		{
-			foreach(TagDirective directive in Constants.DefaultTagDirectives)
+			foreach(var directive in Constants.DefaultTagDirectives)
 			{
 				if (!directives.Contains(directive))
 				{

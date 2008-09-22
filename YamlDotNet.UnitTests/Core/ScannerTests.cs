@@ -28,7 +28,7 @@ namespace YamlDotNet.UnitTests
 			Assert.IsNotNull(scanner.Current, "The current token is null.");
 			Assert.IsInstanceOfType(expected.GetType(), scanner.Current, "The token is not of the expected type.");
 			
-			foreach (PropertyInfo property in expected.GetType().GetProperties()) {
+			foreach (var property in expected.GetType().GetProperties()) {
 				if(property.PropertyType != typeof(Mark) && property.CanRead) {
 					object value = property.GetValue(scanner.Current, null);
 					Console.WriteLine("\t{0} = {1}", property.Name, value);

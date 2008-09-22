@@ -83,7 +83,7 @@ namespace YamlDotNet.RepresentationModel
 
 			emitter.Emit(new MappingStartEvent());
 
-			foreach(PropertyInfo property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+			foreach(var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
 				if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
 				{

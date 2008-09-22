@@ -7,7 +7,7 @@ namespace YamlDotNet.RepresentationModel
 	/// <summary>
 	/// Manages the state of a <see cref="YamlDocument" /> while it is loading.
 	/// </summary>
-	internal class DocumentState
+	internal class DocumentLoadingState
 	{
 		private IDictionary<string, YamlNode> anchors = new Dictionary<string, YamlNode>();
 		private IDictionary<YamlNode, object> nodesWithUnresolvedAliases = new Dictionary<YamlNode, object>();
@@ -70,7 +70,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		public void ResolveAliases()
 		{
-			foreach(YamlNode node in nodesWithUnresolvedAliases.Keys)
+			foreach(var node in nodesWithUnresolvedAliases.Keys)
 			{
 				node.ResolveAliases(this);
 			}

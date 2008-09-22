@@ -127,7 +127,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				buffer.Position = 0;
 				X copy = (X)serializer.Deserialize(buffer);
 
-				foreach(PropertyInfo property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+				foreach(var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 				{
 					if (property.CanRead && property.CanWrite)
 					{

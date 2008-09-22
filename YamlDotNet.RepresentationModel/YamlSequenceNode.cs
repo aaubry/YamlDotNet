@@ -31,7 +31,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="events">The events.</param>
 		/// <param name="state">The state.</param>
-		internal YamlSequenceNode(EventReader events, DocumentState state)
+		internal YamlSequenceNode(EventReader events, DocumentLoadingState state)
 		{
 			SequenceStart sequence = events.Expect<SequenceStart>();
 			Load(sequence, state);
@@ -56,7 +56,7 @@ namespace YamlDotNet.RepresentationModel
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>
-		internal override void ResolveAliases(DocumentState state)
+		internal override void ResolveAliases(DocumentLoadingState state)
 		{
 			for (int i = 0; i < children.Count; ++i)
 			{
@@ -65,6 +65,20 @@ namespace YamlDotNet.RepresentationModel
 					children[i] = state.GetNode(children[i].Anchor, true);
 				}
 			}
+		}
+		
+		internal override IEnumerator<YamlNode> GetEnumerator()
+		{
+			return children.GetEnumerator();
+		}
+		
+		internal override void Save(Emitter emitter)
+		{
+			emitter.Emit(new SequenceStart(Anchor, Tag, true, SequenceStyle.Any));
+			foreach (var node in children) {
+				node.Save(emitter);
+			}
+			emitter.Emit(new SequenceEnd());
 		}
 	}
 }
