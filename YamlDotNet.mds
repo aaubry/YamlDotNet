@@ -5,12 +5,14 @@
       <Entry build="True" name="YamlDotNet.UnitTests" configuration="Debug" />
       <Entry build="True" name="ExternalFiles" configuration="Default" />
       <Entry build="True" name="YamlDotNet.RepresentationModel" configuration="Debug" />
+      <Entry build="True" name="YamlDotNet.Converters" configuration="Debug" />
     </Configuration>
     <Configuration name="Release" ctype="CombineConfiguration">
       <Entry build="True" name="YamlDotNet.Core" configuration="Release" />
       <Entry build="True" name="YamlDotNet.UnitTests" configuration="Release" />
       <Entry build="True" name="ExternalFiles" configuration="Default" />
       <Entry build="True" name="YamlDotNet.RepresentationModel" configuration="Release" />
+      <Entry build="True" name="YamlDotNet.Converters" configuration="Release" />
     </Configuration>
   </Configurations>
   <StartMode startupentry="YamlDotNet.Core" single="True">
@@ -20,11 +22,13 @@
     <Execute type="None" entry="Test" />
     <Execute type="None" entry="ExternalFiles" />
     <Execute type="None" entry="YamlDotNet.RepresentationModel" />
+    <Execute type="None" entry="YamlDotNet.Converters" />
   </StartMode>
   <Entries>
     <Entry filename="YamlDotNet.Core/YamlDotNet.Core.mdp" />
     <Entry filename="YamlDotNet.UnitTests/YamlDotNet.UnitTests.mdp" />
     <Entry filename="ExternalFiles/ExternalFiles.mdp" />
     <Entry filename="YamlDotNet.RepresentationModel/YamlDotNet.RepresentationModel.mdp" />
+    <Entry filename="YamlDotNet.Converters/YamlDotNet.Converters.mdp" />
   </Entries>
 </Combine>

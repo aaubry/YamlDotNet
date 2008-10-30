@@ -103,5 +103,15 @@ namespace YamlDotNet.RepresentationModel
 			}
 			emitter.Emit(new MappingEnd());
 		}
+		
+		/// <summary>
+		/// Accepts the specified visitor by calling the appropriate Visit method on it.
+		/// </summary>
+		/// <param name="visitor">
+		/// A <see cref="IYamlVisitor"/>.
+		/// </param>
+		public override void Accept(IYamlVisitor visitor) {
+			visitor.Visit(this);
+		}
 	}
 }

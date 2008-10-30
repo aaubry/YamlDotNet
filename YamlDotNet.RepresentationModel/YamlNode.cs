@@ -119,6 +119,12 @@ namespace YamlDotNet.RepresentationModel
 				}
 			}
 			
+			object IEnumerator.Current {
+				get {
+					return null;
+				}
+			}
+			
 			public bool MoveNext() {
 				return false;
 			}
@@ -135,5 +141,13 @@ namespace YamlDotNet.RepresentationModel
 		internal virtual IEnumerator<YamlNode> GetEnumerator() {
 			return EmptyEnumerator.Instance;
 		}
+		
+		/// <summary>
+		/// Accepts the specified visitor by calling the appropriate Visit method on it.
+		/// </summary>
+		/// <param name="visitor">
+		/// A <see cref="IYamlVisitor"/>.
+		/// </param>
+		public abstract void Accept(IYamlVisitor visitor);
 	}
 }

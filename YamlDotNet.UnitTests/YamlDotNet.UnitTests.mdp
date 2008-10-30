@@ -42,6 +42,9 @@
     <File name="Runner.cs" subtype="Code" buildaction="Compile" />
     <File name="backwardsAlias.yaml" subtype="Code" buildaction="EmbedAsResource" />
     <File name="forwardAlias.yaml" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="Converters" subtype="Directory" buildaction="Compile" />
+    <File name="Converters/Xml" subtype="Directory" buildaction="Compile" />
+    <File name="Converters/Xml/XmlConverterTests.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
@@ -49,5 +52,8 @@
     <ProjectReference type="Gac" localcopy="True" refto="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.Core" />
     <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.RepresentationModel" />
+    <ProjectReference type="Gac" localcopy="True" refto="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.Converters" />
+    <ProjectReference type="Gac" localcopy="True" refto="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   </References>
 </Project>

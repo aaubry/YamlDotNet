@@ -31,5 +31,15 @@ namespace YamlDotNet.RepresentationModel
 		{
 			throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be saved.");
 		}
+		
+		/// <summary>
+		/// Accepts the specified visitor by calling the appropriate Visit method on it.
+		/// </summary>
+		/// <param name="visitor">
+		/// A <see cref="IYamlVisitor"/>.
+		/// </param>
+		public override void Accept(IYamlVisitor visitor) {
+			throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be visited.");
+		}
 	}
 }

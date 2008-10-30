@@ -73,5 +73,15 @@ namespace YamlDotNet.RepresentationModel
 		{
 			emitter.Emit(new Scalar(Anchor, Tag, Value, ScalarStyle.Any, false, false));
 		}
+		
+		/// <summary>
+		/// Accepts the specified visitor by calling the appropriate Visit method on it.
+		/// </summary>
+		/// <param name="visitor">
+		/// A <see cref="IYamlVisitor"/>.
+		/// </param>
+		public override void Accept(IYamlVisitor visitor) {
+			visitor.Visit(this);
+		}
 	}
 }

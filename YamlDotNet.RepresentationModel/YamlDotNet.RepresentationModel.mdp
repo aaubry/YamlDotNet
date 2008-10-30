@@ -30,6 +30,8 @@
     <File name="../CommonAssemblyInfo.cs" subtype="Code" buildaction="Compile" />
     <File name="YamlSerializer.cs" subtype="Code" buildaction="Nothing" />
     <File name="YamlSerializerOptions.cs" subtype="Code" buildaction="Nothing" />
+    <File name="IYamlVisitor.cs" subtype="Code" buildaction="Compile" />
+    <File name="YamlVisitor.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
