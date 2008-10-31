@@ -1,15 +1,13 @@
 ﻿using System;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {
 	/// <summary>
 	/// Represents a single node in the YAML document.
 	/// </summary>
-	public abstract class YamlNode : IEnumerable<YamlNode>
+	public abstract class YamlNode
 	{
 		private string anchor;
 		private string tag;
@@ -101,47 +99,6 @@ namespace YamlDotNet.RepresentationModel
 		
 		internal abstract void Save(Emitter emitter);
 
-		IEnumerator<YamlNode> IEnumerable<YamlNode>.GetEnumerator() {
-			return GetEnumerator();
-		}
-		
-		IEnumerator IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
-		
-		private class EmptyEnumerator : IEnumerator<YamlNode> {
-			public void Reset() {
-			}
-			
-			public YamlNode Current {
-				get {
-					return null;
-				}
-			}
-			
-			object IEnumerator.Current {
-				get {
-					return null;
-				}
-			}
-			
-			public bool MoveNext() {
-				return false;
-			}
-			
-			public void Dispose() {
-			}
-			
-			private EmptyEnumerator() {
-			}
-			
-			public static EmptyEnumerator Instance = new EmptyEnumerator();
-		}
-		
-		internal virtual IEnumerator<YamlNode> GetEnumerator() {
-			return EmptyEnumerator.Instance;
-		}
-		
 		/// <summary>
 		/// Accepts the specified visitor by calling the appropriate Visit method on it.
 		/// </summary>

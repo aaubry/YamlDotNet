@@ -40,21 +40,25 @@ namespace YamlDotNet.Core
 		private bool isWhitespace;
 		private bool isIndentation;
 		
-		private const int MaxBufferLength = 8;
+		//private const int MaxBufferLength = 8;
 		
 		private struct AnchorData {
 			public string anchor;
+
+			// Field is never assigned
+#pragma warning disable 0649
 			public bool isAlias;
+#pragma warning restore 0649
 		}
 		
-		private AnchorData anchorData = new AnchorData(); 
+		private AnchorData anchorData; 
 		
 		private struct TagData {
 			public string handle;
 			public string suffix;
 		}
 		
-		private TagData tagData = new TagData();
+		private TagData tagData;
 		
 		private struct ScalarData {
 			public string value;

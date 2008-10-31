@@ -1,10 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core", "YamlDotNet.Core\YamlDotNet.Core.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.UnitTests", "YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj", "{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{7BB532F1-A667-41E6-9CE7-4006046C1AA5}"
 	ProjectSection(SolutionItems) = preProject
 		Dependencies\nunit.framework.dll = Dependencies\nunit.framework.dll
@@ -15,7 +11,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		YamlDotNet.snk = YamlDotNet.snk
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core", "YamlDotNet.Core\YamlDotNet.Core.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.UnitTests", "YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj", "{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.RepresentationModel", "YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj", "{21CA0077-E15C-446D-9C43-F6D3F9D09687}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Converters", "YamlDotNet.Converters\YamlDotNet.Converters.csproj", "{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

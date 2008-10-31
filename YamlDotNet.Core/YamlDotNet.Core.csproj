@@ -1,8 +1,8 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -11,6 +11,27 @@
     <AssemblyName>YamlDotNet.Core</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <PublishUrl>http://localhost/YamlDotNet.Core/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,6 +53,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -39,12 +63,17 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="CharacterAnalyzer.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Emitter.cs" />
+    <Compile Include="EmitterState.cs" />
     <Compile Include="Events\AnchorAlias.cs" />
     <Compile Include="Events\DocumentEnd.cs" />
     <Compile Include="Events\DocumentStart.cs" />
+    <Compile Include="Events\EventType.cs" />
     <Compile Include="Events\MappingStyle.cs" />
+    <Compile Include="Events\NodeEvent.cs" />
     <Compile Include="Events\ParsingEvent.cs" />
-    <Compile Include="Events\INodeEvent.cs" />
     <Compile Include="Events\MappingEnd.cs" />
     <Compile Include="Events\MappingStart.cs" />
     <Compile Include="Events\Scalar.cs" />
@@ -53,15 +82,18 @@
     <Compile Include="Events\SequenceStyle.cs" />
     <Compile Include="Events\StreamEnd.cs" />
     <Compile Include="Events\StreamStart.cs" />
+    <Compile Include="FakeList.cs" />
+    <Compile Include="ILookAheadBuffer.cs" />
     <Compile Include="InsertionQueue.cs" />
     <Compile Include="LookAheadBuffer.cs" />
     <Compile Include="Mark.cs" />
     <Compile Include="Parser.cs" />
-    <Compile Include="ParserException.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scanner.cs" />
+    <Compile Include="SemanticErrorException.cs" />
     <Compile Include="SimpleKey.cs" />
+    <Compile Include="StringLookAheadBuffer.cs" />
     <Compile Include="SyntaxErrorException.cs" />
     <Compile Include="TagDirectiveCollection.cs" />
     <Compile Include="Tokens\AnchorAlias.cs" />
@@ -88,6 +120,24 @@
     <Compile Include="Tokens\Value.cs" />
     <Compile Include="Tokens\VersionDirective.cs" />
     <Compile Include="Version.cs" />
+    <Compile Include="YamlException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,9 +1,8 @@
 using System;
+using System.Drawing;
 using NUnit.Framework;
 using YamlDotNet.Core;
 using System.IO;
-using System.Text;
-using System.Drawing;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
 
@@ -119,13 +118,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerOptions.Roundtrip);
 
-			using(MemoryStream buffer = new MemoryStream())
+			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X();
 				serializer.Serialize(buffer, original);
 
-				buffer.Position = 0;
-				X copy = (X)serializer.Deserialize(buffer);
+				X copy = (X)serializer.Deserialize(new StringReader(buffer.ToString()));
 
 				foreach(var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 				{

@@ -78,5 +78,13 @@ namespace YamlDotNet.Core.Events
 			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
 		{
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MappingStart"/> class.
+		/// </summary>
+		public MappingStart()
+			: this(null, null, true, MappingStyle.Any, Mark.Empty, Mark.Empty)
+		{
+		}
 	}
 }

@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text;
-using YamlDotNet.Core;
 
 namespace YamlDotNet.UnitTests
 {
@@ -10,7 +8,10 @@ namespace YamlDotNet.UnitTests
 	{
 		protected static TextReader YamlFile(string name)
 		{
-			Stream resource = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
+			Stream resource =
+				Assembly.GetExecutingAssembly().GetManifestResourceStream(name) ??
+				Assembly.GetExecutingAssembly().GetManifestResourceStream("YamlDotNet.UnitTests." + name);
+
 			return new StreamReader(resource);
 		}
 	}

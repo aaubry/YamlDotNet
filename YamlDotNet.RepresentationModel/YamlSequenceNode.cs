@@ -67,11 +67,6 @@ namespace YamlDotNet.RepresentationModel
 			}
 		}
 		
-		internal override IEnumerator<YamlNode> GetEnumerator()
-		{
-			return children.GetEnumerator();
-		}
-		
 		internal override void Save(Emitter emitter)
 		{
 			emitter.Emit(new SequenceStart(Anchor, Tag, true, SequenceStyle.Any));

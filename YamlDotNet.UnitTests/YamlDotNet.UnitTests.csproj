@@ -1,8 +1,8 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -11,6 +11,27 @@
     <AssemblyName>YamlDotNet.UnitTests</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <PublishUrl>http://localhost/YamlDotNet.UnitTests/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,25 +67,80 @@
       <HintPath>..\Dependencies\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="InsertionQueueTests.cs" />
-    <Compile Include="LookAheadBufferTests.cs" />
-    <Compile Include="ParserTests.cs" />
+    <Compile Include="Converters\Xml\XmlConverterTests.cs" />
+    <Compile Include="Core\EmitterTests.cs" />
+    <Compile Include="Core\InsertionQueueTests.cs" />
+    <Compile Include="Core\LookAheadBufferTests.cs" />
+    <Compile Include="Core\ParserTests.cs" />
+    <Compile Include="Core\ScannerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScannerTests.cs" />
+    <Compile Include="RepresentationModel\SerializationTests.cs" />
+    <Compile Include="RepresentationModel\YamlStreamTests.cs" />
+    <Compile Include="Runner.cs" />
     <Compile Include="YamlTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\YamlDotNet.Converters\YamlDotNet.Converters.csproj">
+      <Project>{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}</Project>
+      <Name>YamlDotNet.Converters</Name>
+    </ProjectReference>
     <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.csproj">
       <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
       <Name>YamlDotNet.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj">
+      <Project>{21CA0077-E15C-446D-9C43-F6D3F9D09687}</Project>
+      <Name>YamlDotNet.RepresentationModel</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="empty.yaml" />
+    <EmbeddedResource Include="test1.yaml" />
+    <EmbeddedResource Include="test10.yaml" />
+    <EmbeddedResource Include="test11.yaml" />
+    <EmbeddedResource Include="test12.yaml" />
+    <EmbeddedResource Include="test13.yaml" />
+    <EmbeddedResource Include="test14.yaml" />
+    <EmbeddedResource Include="test2.yaml" />
+    <EmbeddedResource Include="test3.yaml" />
+    <EmbeddedResource Include="test4.yaml" />
+    <EmbeddedResource Include="test5.yaml" />
+    <EmbeddedResource Include="test6.yaml" />
+    <EmbeddedResource Include="test7.yaml" />
+    <EmbeddedResource Include="test8.yaml" />
+    <EmbeddedResource Include="test9.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="backwardsAlias.yaml" />
+    <EmbeddedResource Include="forwardAlias.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

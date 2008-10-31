@@ -109,5 +109,24 @@ namespace YamlDotNet.Core.Events
 			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit, Mark.Empty, Mark.Empty)
 		{
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Scalar"/> class.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		public Scalar(string value)
+			: this(null, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Scalar"/> class.
+		/// </summary>
+		/// <param name="tag">The tag.</param>
+		/// <param name="value">The value.</param>
+		public Scalar(string tag, string value)
+			: this(tag, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+		{
+		}
 	}
 }

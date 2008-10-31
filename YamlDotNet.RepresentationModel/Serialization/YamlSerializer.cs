@@ -4,8 +4,9 @@ using YamlDotNet.Core;
 using System.Text;
 using System.Reflection;
 using System.Globalization;
+using YamlDotNet.Core.Events;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
 	/// Reads and writes objects from and to YAML.
@@ -47,25 +48,24 @@ namespace YamlDotNet.RepresentationModel
 		/// <summary>
 		/// Serializes the specified object.
 		/// </summary>
-		/// <param name="stream">The stream where to serialize the object.</param>
+		/// <param name="output">The writer where to serialize the object.</param>
 		/// <param name="o">The object to serialize.</param>
-		public void Serialize(Stream stream, object o)
+		public void Serialize(TextWriter output, object o)
 		{
-			if (stream == null)
+			if (output == null)
 			{
-				throw new ArgumentNullException("stream", "The stream is null.");
+				throw new ArgumentNullException("output", "The output is null.");
 			}
 
-			using(Emitter emitter = new Emitter(stream))
-			{
-				emitter.Emit(new StreamStartEvent(Encoding.UTF8));
-				emitter.Emit(new DocumentStartEvent());
+			Emitter emitter = new Emitter(output);
 
-				SerializeValue(emitter, serializedType, o);
+			emitter.Emit(new StreamStart());
+			emitter.Emit(new DocumentStart());
 
-				emitter.Emit(new DocumentEndEvent());
-				emitter.Emit(new StreamEndEvent());
-			}
+			SerializeValue(emitter, serializedType, o);
+
+			emitter.Emit(new DocumentEnd(true));
+			emitter.Emit(new StreamEnd());
 		}
 
 		/// <summary>
@@ -81,7 +81,7 @@ namespace YamlDotNet.RepresentationModel
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
-			emitter.Emit(new MappingStartEvent());
+			emitter.Emit(new MappingStart());
 
 			foreach(var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
@@ -89,7 +89,7 @@ namespace YamlDotNet.RepresentationModel
 				{
 					if (!Roundtrip || property.CanWrite)
 					{
-						emitter.Emit(new ScalarEvent(property.Name));
+						emitter.Emit(new Scalar(property.Name));
 
 						object value = property.GetValue(o, null);
 						SerializeValue(emitter, property.PropertyType, value);
@@ -97,7 +97,7 @@ namespace YamlDotNet.RepresentationModel
 				}
 			}
 
-			emitter.Emit(new MappingEndEvent());
+			emitter.Emit(new MappingEnd());
 		}
 
 		/// <summary>
@@ -139,7 +139,7 @@ namespace YamlDotNet.RepresentationModel
 		{
 			if (value == null)
 			{
-				emitter.Emit(new ScalarEvent("", "tag:            yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
+				emitter.Emit(new Scalar("", "tag:            yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
 				return;
 			}
 
@@ -147,7 +147,7 @@ namespace YamlDotNet.RepresentationModel
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
-					emitter.Emit(new ScalarEvent(value.ToString(), "tag:yaml.org,2002:bool"));
+					emitter.Emit(new Scalar("tag:yaml.org,2002:bool", value.ToString()));
 					break;
 
 				case TypeCode.Byte:
@@ -158,22 +158,22 @@ namespace YamlDotNet.RepresentationModel
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
 				case TypeCode.UInt64:
-					emitter.Emit(new ScalarEvent(Convert.ToString(value, numberFormat), "tag:yaml.org,2002:int"));
+					emitter.Emit(new Scalar("tag:yaml.org,2002:int", Convert.ToString(value, numberFormat)));
 					break;
 
 				case TypeCode.Single:
 				case TypeCode.Double:
 				case TypeCode.Decimal:
-					emitter.Emit(new ScalarEvent(Convert.ToString(value, numberFormat), "tag:yaml.org,2002:float"));
+					emitter.Emit(new Scalar("tag:yaml.org,2002:float", Convert.ToString(value, numberFormat)));
 					break;
 
 				case TypeCode.String:
 				case TypeCode.Char:
-					emitter.Emit(new ScalarEvent(value.ToString(), "tag:yaml.org,2002:str"));
+					emitter.Emit(new Scalar("tag:yaml.org,2002:str", value.ToString()));
 					break;
 
 				case TypeCode.DateTime:
-					emitter.Emit(new ScalarEvent(((DateTime)value).ToString("o"), "tag:yaml.org,2002:timestamp"));
+					emitter.Emit(new Scalar("tag:yaml.org,2002:timestamp", ((DateTime)value).ToString("o")));
 					break;
 
 				case TypeCode.DBNull:
@@ -192,102 +192,90 @@ namespace YamlDotNet.RepresentationModel
 		/// <summary>
 		/// Deserializes an object from the specified stream.
 		/// </summary>
-		/// <param name="stream">The stream.</param>
+		/// <param name="input">The input.</param>
 		/// <returns></returns>
-		public object Deserialize(Stream stream)
+		public object Deserialize(TextReader input)
 		{
-			using(Parser parser = new Parser(stream))
-			{
-				EventReader reader = new EventReader(parser);
-				reader.Expect<StreamStartEvent>().Dispose();
-				reader.Expect<DocumentStartEvent>().Dispose();
-				object result = DeserializeValue(reader, serializedType);
-				reader.Expect<DocumentEndEvent>().Dispose();
-				reader.Expect<StreamEndEvent>().Dispose();
-				return result;
-			}
+			Parser parser = new Parser(input);
+			
+			EventReader reader = new EventReader(parser);
+			reader.Expect<StreamStart>();
+			reader.Expect<DocumentStart>();
+			object result = DeserializeValue(reader, serializedType);
+			reader.Expect<DocumentEnd>();
+			reader.Expect<StreamEnd>();
+			return result;
 		}
 
 		private object DeserializeValue(EventReader reader, Type type)
 		{
-			ScalarEvent scalar = null;
-			if (reader.Accept<ScalarEvent>())
+			Scalar scalar = null;
+			if (reader.Accept<Scalar>())
 			{
-				scalar = reader.Expect<ScalarEvent>();
+				scalar = reader.Expect<Scalar>();
 
 				if (scalar.Tag == "tag:yaml.org,2002:null")
 				{
-					scalar.Dispose();
 					return null;
 				}
 			}
 
-			try
+			TypeCode typeCode = Type.GetTypeCode(type);
+			switch (typeCode)
 			{
-				TypeCode typeCode = Type.GetTypeCode(type);
-				switch (typeCode)
-				{
-					case TypeCode.Boolean:
-						return bool.Parse(scalar.Value);
+				case TypeCode.Boolean:
+					return bool.Parse(scalar.Value);
 
-					case TypeCode.Byte:
-						return Byte.Parse(scalar.Value, numberFormat);
+				case TypeCode.Byte:
+					return Byte.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.Int16:
-						return Int16.Parse(scalar.Value, numberFormat);
+				case TypeCode.Int16:
+					return Int16.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.Int32:
-						return Int32.Parse(scalar.Value, numberFormat);
+				case TypeCode.Int32:
+					return Int32.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.Int64:
-						return Int64.Parse(scalar.Value, numberFormat);
+				case TypeCode.Int64:
+					return Int64.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.SByte:
-						return SByte.Parse(scalar.Value, numberFormat);
+				case TypeCode.SByte:
+					return SByte.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.UInt16:
-						return UInt16.Parse(scalar.Value, numberFormat);
+				case TypeCode.UInt16:
+					return UInt16.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.UInt32:
-						return UInt32.Parse(scalar.Value, numberFormat);
+				case TypeCode.UInt32:
+					return UInt32.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.UInt64:
-						return UInt64.Parse(scalar.Value, numberFormat);
+				case TypeCode.UInt64:
+					return UInt64.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.Single:
-						return Single.Parse(scalar.Value, numberFormat);
+				case TypeCode.Single:
+					return Single.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.Double:
-						return Double.Parse(scalar.Value, numberFormat);
+				case TypeCode.Double:
+					return Double.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.Decimal:
-						return Decimal.Parse(scalar.Value, numberFormat);
+				case TypeCode.Decimal:
+					return Decimal.Parse(scalar.Value, numberFormat);
 
-					case TypeCode.String:
-						return scalar.Value;
+				case TypeCode.String:
+					return scalar.Value;
 
-					case TypeCode.Char:
-						return scalar.Value[0];
+				case TypeCode.Char:
+					return scalar.Value[0];
 
-					case TypeCode.DateTime:
-						// TODO: This is probably incorrect. Use the correct regular expression.
-						return DateTime.Parse(scalar.Value);
+				case TypeCode.DateTime:
+					// TODO: This is probably incorrect. Use the correct regular expression.
+					return DateTime.Parse(scalar.Value);
 
-					case TypeCode.DBNull:
-					case TypeCode.Empty:
-						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+				case TypeCode.DBNull:
+				case TypeCode.Empty:
+					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
-					case TypeCode.Object:
-					default:
-						return DeserializeProperties(reader, type);
-				}
-			}
-			finally
-			{
-				if (scalar != null)
-				{
-					scalar.Dispose();
-				}
+				case TypeCode.Object:
+				default:
+					return DeserializeProperties(reader, type);
 			}
 		}
 
@@ -295,16 +283,14 @@ namespace YamlDotNet.RepresentationModel
 		{
 			object result = Activator.CreateInstance(type);
 
-			reader.Expect<MappingStartEvent>().Dispose();
-			while (!reader.Accept<MappingEndEvent>())
+			reader.Expect<MappingStart>();
+			while (!reader.Accept<MappingEnd>())
 			{
-				using(ScalarEvent key = reader.Expect<ScalarEvent>())
-				{
-					PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
-					property.SetValue(result, DeserializeValue(reader, property.PropertyType), null);
-				}
+				Scalar key = reader.Expect<Scalar>();
+				PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
+				property.SetValue(result, DeserializeValue(reader, property.PropertyType), null);
 			}
-			reader.Expect<MappingEndEvent>().Dispose();
+			reader.Expect<MappingEnd>();
 
 			return result;
 		}

@@ -86,14 +86,6 @@ namespace YamlDotNet.RepresentationModel
 			}
 		}
 		
-		internal override IEnumerator<YamlNode> GetEnumerator()
-		{
-			foreach (var child in children) {
-				yield return child.Key;
-				yield return child.Value;
-			}
-		}
-		
 		internal override void Save(Emitter emitter)
 		{
 			emitter.Emit(new MappingStart(Anchor, Tag, true, MappingStyle.Any));

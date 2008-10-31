@@ -90,7 +90,7 @@ namespace YamlDotNet.Converters.Xml
 		}
 		
 		public YamlDocument FromXml(XmlDocument document) {
-			
+			return null;
 		}
 	}
 }
