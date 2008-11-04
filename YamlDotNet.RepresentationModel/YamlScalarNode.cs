@@ -60,6 +60,22 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlScalarNode"/> class.
+		/// </summary>
+		public YamlScalarNode()
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlScalarNode"/> class.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		public YamlScalarNode(string value)
+		{
+			this.value = value;
+		}
+
+		/// <summary>
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>

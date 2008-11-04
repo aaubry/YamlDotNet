@@ -53,6 +53,13 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSequenceNode"/> class.
+		/// </summary>
+		public YamlSequenceNode()
+		{
+		}
+
+		/// <summary>
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>

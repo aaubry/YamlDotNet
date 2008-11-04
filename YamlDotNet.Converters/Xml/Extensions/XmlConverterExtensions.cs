@@ -12,10 +12,10 @@ namespace YamlDotNet.Converters.Xml.Extensions {
 		/// <summary>
 		/// Invokes <see cref="XmlConverter.ToXml"/>.
 		/// </summary>
-		public static XmlDocument ToXml(this YamlDocument document, string rootElementName)
+		public static XmlDocument ToXml(this YamlDocument document, XmlConverterOptions options)
 		{
-			XmlConverter converter = new XmlConverter();
-			return converter.ToXml(document, rootElementName);
+			XmlConverter converter = new XmlConverter(options);
+			return converter.ToXml(document);
 		}
 
 		/// <summary>
@@ -23,7 +23,8 @@ namespace YamlDotNet.Converters.Xml.Extensions {
 		/// </summary>
 		public static XmlDocument ToXml(this YamlDocument document)
 		{
-			return document.ToXml("root");
+			XmlConverter converter = new XmlConverter();
+			return converter.ToXml(document);
 		}
 	}
 }

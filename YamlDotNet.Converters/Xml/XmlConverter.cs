@@ -1,7 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Xml;
 using YamlDotNet.RepresentationModel;
+using System.Globalization;
+using System.Diagnostics;
 
 namespace YamlDotNet.Converters.Xml
 {
@@ -10,90 +11,315 @@ namespace YamlDotNet.Converters.Xml
 	/// </summary>
 	public class XmlConverter
 	{
-		private class YamlToXmlDocumentVisitor : YamlVisitor {
+		#region YamlToXmlDocumentVisitor
+		private class YamlToXmlDocumentVisitor : YamlVisitor
+		{
 			private XmlDocument myDocument;
 			private XmlNode current;
-			private readonly Stack<string> states = new Stack<string>();
-			
-			public XmlDocument Document {
-				get {
+			private readonly XmlConverterOptions options;
+
+			public XmlDocument Document
+			{
+				get
+				{
 					return myDocument;
 				}
 			}
-			
-			private XmlNode AddNode() {
-				XmlNode newNode = myDocument.CreateElement(states.Peek());
+
+			private void PushNode(string elementName)
+			{
+				XmlNode newNode = myDocument.CreateElement(elementName);
 				current.AppendChild(newNode);
-				return newNode;
+				current = newNode;
 			}
-			
-			private void PushNode(string childElementName) {
-				current = AddNode();
-				states.Push(childElementName);
-			}
-			
-			private void PopNode() {
+
+			private void PopNode()
+			{
 				current = current.ParentNode;
-				states.Pop();
 			}
-			
-			public YamlToXmlDocumentVisitor(string rootElementName) {
-				states.Push(rootElementName);
+
+			public YamlToXmlDocumentVisitor(XmlConverterOptions options)
+			{
+				this.options = options;
 			}
-			
+
 			protected override void Visit(YamlDocument document)
 			{
 				myDocument = new XmlDocument();
-				current = myDocument; 
+				current = myDocument;
+				PushNode(options.RootElementName);
 			}
 
 			protected override void Visit(YamlScalarNode scalar)
 			{
-				XmlNode scalarNode = AddNode();
-				scalarNode.AppendChild(myDocument.CreateTextNode(scalar.Value));
+				current.AppendChild(myDocument.CreateTextNode(scalar.Value));
 			}
-			
+
 			protected override void Visit(YamlSequenceNode sequence)
 			{
-				PushNode("sequence"); 
+				PushNode(options.SequenceElementName);
 			}
-			
+
 			protected override void Visited(YamlSequenceNode sequence)
 			{
 				PopNode();
 			}
-			
+
+			protected override void VisitChildren(YamlSequenceNode sequence)
+			{
+				foreach (var item in sequence.Children)
+				{
+					PushNode(options.SequenceItemElementName);
+					item.Accept(this);
+					PopNode();
+				}
+			}
+
 			protected override void Visit(YamlMappingNode mapping)
 			{
-				PushNode("mapping");
+				PushNode(options.MappingElementName);
 			}
-			
+
 			protected override void Visited(YamlMappingNode mapping)
 			{
 				PopNode();
 			}
-			
-			protected override void VisitChildren (YamlMappingNode mapping)
+
+			protected override void VisitChildren(YamlMappingNode mapping)
 			{
-				foreach (var pair in mapping.Children) {
-					PushNode("key");
+				foreach (var pair in mapping.Children)
+				{
+					PushNode(options.MappingEntryElementName);
+
+					PushNode(options.MappingKeyElementName);
 					pair.Key.Accept(this);
-					states.Pop();
-					states.Push("value");
+					PopNode();
+
+					PushNode(options.MappingValueElementName);
 					pair.Value.Accept(this);
+					PopNode();
+
 					PopNode();
 				}
 			}
+		}
+		#endregion
+
+		#region XmlToYamlConverter
+		private class XmlToYamlConverter : IDisposable
+		{
+			private readonly XmlConverterOptions options;
+			private readonly XmlDocument document;
+			private XmlNode current;
+			private XmlNode currentParent;
+
+			public XmlToYamlConverter(XmlDocument document, XmlConverterOptions options)
+			{
+				this.document = document;
+				this.options = options;
+			}
+
+			public YamlDocument ParseDocument()
+			{
+				currentParent = document;
+				current = document.DocumentElement;
+				using (ExpectElement(options.RootElementName))
+				{
+					YamlDocument yaml = new YamlDocument();
+					yaml.RootNode = ParseNode();
+					return yaml;
+				}
+			}
+
+			private YamlNode ParseNode()
+			{
+				if(AcceptText())
+				{
+					return ParseScalar();
+				}
+
+				if (AcceptElement(options.SequenceElementName))
+				{
+					return ParseSequence();
+				}
+
+				if (AcceptElement(options.MappingElementName))
+				{
+					return ParseMapping();
+				}
+
+				throw new InvalidOperationException("Expected sequence, mapping or scalar.");
+			}
+
+			private YamlNode ParseMapping()
+			{
+				using(ExpectElement(options.MappingElementName))
+				{
+					YamlMappingNode mapping = new YamlMappingNode();
+					while (AcceptElement(options.MappingEntryElementName))
+					{
+						using(ExpectElement(options.MappingEntryElementName))
+						{
+							YamlNode key;
+							using(ExpectElement(options.MappingKeyElementName))
+							{
+								key = ParseNode();
+							}
+
+							YamlNode value;
+							using(ExpectElement(options.MappingValueElementName))
+							{
+								value = ParseNode();
+							}
+							
+							mapping.Children.Add(key, value);
+						}
+					}
+					return mapping;
+				}
+			}
+
+			private YamlNode ParseSequence()
+			{
+				using (ExpectElement(options.SequenceElementName))
+				{
+					YamlSequenceNode sequence = new YamlSequenceNode();
+					while (AcceptElement(options.SequenceItemElementName))
+					{
+						using(ExpectElement(options.SequenceItemElementName))
+						{
+							sequence.Children.Add(ParseNode());
+						}
+					}
+					return sequence;
+				}
+			}
+
+			private YamlNode ParseScalar()
+			{
+				string text = ExpectText();
+				Exit();
+				return new YamlScalarNode(text);
+			}
+
+			#region Navigation methods
+			private bool Accept(XmlNodeType nodeType, string elementName)
+			{
+				if (current == null)
+				{
+					return false;
+				}
+
+				if (current.NodeType != nodeType)
+				{
+					return false;
+				}
+
+				if (nodeType == XmlNodeType.Element)
+				{
+					if (current.LocalName != elementName)
+					{
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			private bool AcceptText()
+			{
+				return Accept(XmlNodeType.Text, null);
+			}
+
+			private bool AcceptElement(string elementName)
+			{
+				return Accept(XmlNodeType.Element, elementName);
+			}
+
+			private XmlNode Expect(XmlNodeType nodeType, string elementName)
+			{
+				if(!Accept(nodeType, elementName))
+				{
+					if (nodeType == XmlNodeType.Text)
+					{
+						throw new InvalidOperationException(string.Format(
+							CultureInfo.InvariantCulture,
+							"Expected node type '{0}', got '{1}'.",
+							nodeType,
+							current.NodeType
+						));
+					}
+					else
+					{
+						throw new InvalidOperationException(string.Format(
+							CultureInfo.InvariantCulture,
+							"Expected element '{0}', got '{1}'.",
+							elementName,
+							current.LocalName
+						));
+					}
+				}
+
+				currentParent = current;
+				current = current.FirstChild;
+				return currentParent;
+			}
+
+			private IDisposable ExpectElement(string elementName)
+			{
+				Expect(XmlNodeType.Element, elementName);
+				return this;
+			}
+
+			private string ExpectText()
+			{
+				return Expect(XmlNodeType.Text, null).Value;
+			}
+
+			private void Exit()
+			{
+				Debug.Assert(current == null);
+				current = currentParent.NextSibling;
+				currentParent = currentParent.ParentNode;
+			}
+			#endregion
+
+			#region IDisposable Members
+			void IDisposable.Dispose()
+			{
+				Exit();
+			}
+			#endregion
+		}
+		#endregion
+
+		private readonly XmlConverterOptions options;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XmlConverter"/> class.
+		/// </summary>
+		/// <param name="options">The options.</param>
+		public XmlConverter(XmlConverterOptions options)
+		{
+			this.options = options.IsReadonly ? options : options.AsReadonly();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XmlConverter"/> class.
+		/// </summary>
+		public XmlConverter()
+			: this(XmlConverterOptions.Default)
+		{
 		}
 
 		/// <summary>
 		/// Converts a <see cref="YamlDocument"/> to <see cref="XmlDocument"/>.
 		/// </summary>
 		/// <param name="document">The YAML document to convert.</param>
-		/// <param name="rootElementName">Name of the root element.</param>
 		/// <returns></returns>
-		public XmlDocument ToXml(YamlDocument document, string rootElementName) {
-			YamlToXmlDocumentVisitor visitor = new YamlToXmlDocumentVisitor(rootElementName);
+		public XmlDocument ToXml(YamlDocument document)
+		{
+			YamlToXmlDocumentVisitor visitor = new YamlToXmlDocumentVisitor(options);
 			document.Accept(visitor);
 			return visitor.Document;
 		}
@@ -103,8 +329,10 @@ namespace YamlDotNet.Converters.Xml
 		/// </summary>
 		/// <param name="document">The XML document to convert.</param>
 		/// <returns></returns>
-		public YamlDocument FromXml(XmlDocument document) {
-			return null;
+		public YamlDocument FromXml(XmlDocument document)
+		{
+			XmlToYamlConverter converter = new XmlToYamlConverter(document, options);
+			return converter.ParseDocument();
 		}
 	}
 }

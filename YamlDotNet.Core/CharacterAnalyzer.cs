@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace YamlDotNet.Core
 {
-	internal struct CharacterAnalyzer<TBuffer> where TBuffer : ILookAheadBuffer
+	internal class CharacterAnalyzer<TBuffer> where TBuffer : ILookAheadBuffer
 	{
 		private readonly TBuffer buffer;
 		

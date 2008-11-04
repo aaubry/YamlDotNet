@@ -2,7 +2,7 @@ using System;
 
 namespace YamlDotNet.Core
 {
-	internal struct StringLookAheadBuffer : ILookAheadBuffer
+	internal class StringLookAheadBuffer : ILookAheadBuffer
 	{
 		private readonly string value;
 		private int currentIndex;

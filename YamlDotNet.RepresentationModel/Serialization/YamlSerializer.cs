@@ -4,7 +4,6 @@ using YamlDotNet.Core;
 using System.Reflection;
 using System.Globalization;
 using YamlDotNet.Core.Events;
-using System.Diagnostics;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -180,7 +179,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				case TypeCode.Empty:
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
-				case TypeCode.Object:
 				default:
 					SerializeProperties(emitter, type, value);
 					break;
@@ -209,7 +207,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private object DeserializeValue(EventReader reader, Type type)
 		{
-			Scalar scalar = null;
+			Scalar scalar;
 			if (reader.Accept<Scalar>())
 			{
 				scalar = reader.Expect<Scalar>();
@@ -219,8 +217,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					return null;
 				}
 			}
-
-			Debug.Assert(scalar != null, "scalar is never null here because reader.Accept would have thrown an exception.");
+			else
+			{
+				return DeserializeProperties(reader, type);
+			}
 
 			TypeCode typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
@@ -271,13 +271,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					// TODO: This is probably incorrect. Use the correct regular expression.
 					return DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
 
-				case TypeCode.DBNull:
-				case TypeCode.Empty:
-					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
-
-				case TypeCode.Object:
 				default:
-					return DeserializeProperties(reader, type);
+					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 		}
 
