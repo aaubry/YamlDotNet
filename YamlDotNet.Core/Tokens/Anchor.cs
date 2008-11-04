@@ -1,5 +1,4 @@
 using System;
-using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core.Tokens
 {
@@ -8,7 +7,7 @@ namespace YamlDotNet.Core.Tokens
 	/// </summary>
 	public class Anchor : Token
 	{
-		private string value;
+		private readonly string value;
 
 		/// <summary>
 		/// Gets the value.

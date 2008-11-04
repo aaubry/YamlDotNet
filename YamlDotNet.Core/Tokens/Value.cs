@@ -1,4 +1,3 @@
-
 using System;
 
 namespace YamlDotNet.Core.Tokens

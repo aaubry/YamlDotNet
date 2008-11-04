@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace YamlDotNet.Core.Events
 {
@@ -74,6 +75,24 @@ namespace YamlDotNet.Core.Events
 		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style)
 			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
 		{
+		}
+
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override string ToString()
+		{
+			return string.Format(
+				CultureInfo.InvariantCulture,
+				"Sequence start [anchor = {0}, tag = {1}, isImplicit = {2}, style = {3}]",
+				Anchor,
+				Tag,
+				isImplicit,
+				style
+			);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace YamlDotNet.Core.Events
 {
@@ -85,6 +86,24 @@ namespace YamlDotNet.Core.Events
 		public MappingStart()
 			: this(null, null, true, MappingStyle.Any, Mark.Empty, Mark.Empty)
 		{
+		}
+
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override string ToString()
+		{
+			return string.Format(
+				CultureInfo.InvariantCulture,
+				"Mapping start [anchor = {0}, tag = {1}, isImplicit = {2}, style = {3}]",
+				Anchor,
+				Tag,
+				isImplicit,
+				style
+			);
 		}
 	}
 }

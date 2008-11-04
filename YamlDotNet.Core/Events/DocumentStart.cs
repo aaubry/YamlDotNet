@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core.Events
@@ -69,7 +69,7 @@ namespace YamlDotNet.Core.Events
 		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		public DocumentStart(Tokens.VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
+		public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
 			: base(start, end)
 		{
 			this.version = version;
@@ -83,7 +83,7 @@ namespace YamlDotNet.Core.Events
 		/// <param name="version">The version.</param>
 		/// <param name="tags">The tags.</param>
 		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
-		public DocumentStart(Tokens.VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
+		public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
 			: this(version, tags, isImplicit, Mark.Empty, Mark.Empty)
 		{
 		}
@@ -104,6 +104,21 @@ namespace YamlDotNet.Core.Events
 		public DocumentStart()
 			: this(null, null, true, Mark.Empty, Mark.Empty)
 		{
+		}
+
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override string ToString()
+		{
+			return string.Format(
+				CultureInfo.InvariantCulture,
+				"Document start [isImplicit = {0}]",
+				isImplicit
+			);
 		}
 	}
 }

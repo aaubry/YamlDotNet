@@ -18,7 +18,7 @@ namespace YamlDotNet.UnitTests
 				Emitter emitter = new Emitter(output, 2, int.MaxValue, false);
 				while(parser.MoveNext()) {
 					//Console.WriteLine(parser.Current.GetType().Name);
-					
+					Console.Error.WriteLine(parser.Current);
 					emitter.Emit(parser.Current);
 				}
 				

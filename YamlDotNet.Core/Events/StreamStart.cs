@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 
 namespace YamlDotNet.Core.Events
 {
@@ -33,6 +32,17 @@ namespace YamlDotNet.Core.Events
 		public StreamStart(Mark start, Mark end)
 			: base(start, end)
 		{
+		}
+
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override string ToString()
+		{
+			return "Stream start";
 		}
 	}
 }

@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet.Core.Events
 {
 	/// <summary>
 	/// Defines the event types. This allows for simpler type comparisons.

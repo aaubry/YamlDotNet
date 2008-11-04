@@ -1,6 +1,5 @@
 using System;
 using YamlDotNet.Core;
-using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {

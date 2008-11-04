@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using YamlDotNet.Core;
-using System.Text;
 using System.Reflection;
 using System.Globalization;
 using YamlDotNet.Core.Events;
+using System.Diagnostics;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -29,7 +29,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="serializedType">Type of the serialized.</param>
 		public YamlSerializer(Type serializedType)
-			: this(serializedType, YamlSerializerOptions.Default)
+			: this(serializedType, YamlSerializerOptions.None)
 		{
 		}
 
@@ -81,7 +81,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
-			emitter.Emit(new MappingStart());
+			emitter.Emit(new MappingStart(null, null, true, MappingStyle.Block));
 
 			foreach(var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
@@ -89,7 +89,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				{
 					if (!Roundtrip || property.CanWrite)
 					{
-						emitter.Emit(new Scalar(property.Name));
+						emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle.Plain, false, true));
 
 						object value = property.GetValue(o, null);
 						SerializeValue(emitter, property.PropertyType, value);
@@ -112,19 +112,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return type.IsValueType || type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null) != null;
 		}
 
-		private static NumberFormatInfo numberFormat = CreateNumberFormatInfo();
+		private static readonly NumberFormatInfo numberFormat = CreateNumberFormatInfo();
 
 		private static NumberFormatInfo CreateNumberFormatInfo()
 		{
 			NumberFormatInfo format = new NumberFormatInfo();
 			format.CurrencyDecimalSeparator = ".";
 			format.CurrencyGroupSeparator = "_";
-			format.CurrencyGroupSizes = new int[] { 3 };
+			format.CurrencyGroupSizes = new[] { 3 };
 			format.CurrencySymbol = string.Empty;
 			format.CurrencyDecimalDigits = 99;
 			format.NumberDecimalSeparator = ".";
 			format.NumberGroupSeparator = "_";
-			format.NumberGroupSizes = new int[] { 3 };
+			format.NumberGroupSizes = new[] { 3 };
 			format.NumberDecimalDigits = 99;
 			return format;
 		}
@@ -139,7 +139,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			if (value == null)
 			{
-				emitter.Emit(new Scalar("", "tag:            yaml.org,2002:null", null, ScalarStyle.Plain, false, false));
+				emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
 				return;
 			}
 
@@ -173,7 +173,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					break;
 
 				case TypeCode.DateTime:
-					emitter.Emit(new Scalar("tag:yaml.org,2002:timestamp", ((DateTime)value).ToString("o")));
+					emitter.Emit(new Scalar("tag:yaml.org,2002:timestamp", ((DateTime)value).ToString("o", CultureInfo.InvariantCulture)));
 					break;
 
 				case TypeCode.DBNull:
@@ -219,6 +219,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					return null;
 				}
 			}
+
+			Debug.Assert(scalar != null, "scalar is never null here because reader.Accept would have thrown an exception.");
 
 			TypeCode typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
@@ -267,7 +269,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				case TypeCode.DateTime:
 					// TODO: This is probably incorrect. Use the correct regular expression.
-					return DateTime.Parse(scalar.Value);
+					return DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
 
 				case TypeCode.DBNull:
 				case TypeCode.Empty:

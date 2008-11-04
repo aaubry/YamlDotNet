@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.Converters
+namespace YamlDotNet.Converters.Xml
 {
 	/// <summary>
 	/// Specifies how a <see cref="XmlConverter"/> behaves. 

@@ -9,8 +9,8 @@ namespace YamlDotNet.RepresentationModel
 	/// </summary>
 	internal class DocumentLoadingState
 	{
-		private IDictionary<string, YamlNode> anchors = new Dictionary<string, YamlNode>();
-		private IDictionary<YamlNode, object> nodesWithUnresolvedAliases = new Dictionary<YamlNode, object>();
+		private readonly IDictionary<string, YamlNode> anchors = new Dictionary<string, YamlNode>();
+		private readonly IDictionary<YamlNode, object> nodesWithUnresolvedAliases = new Dictionary<YamlNode, object>();
 
 		/// <summary>
 		/// Adds the specified node to the anchor list.

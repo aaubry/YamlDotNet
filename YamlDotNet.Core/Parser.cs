@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using YamlDotNet.Core.Tokens;
 using Event = YamlDotNet.Core.Events.ParsingEvent;
@@ -16,7 +15,7 @@ namespace YamlDotNet.Core
 	public class Parser
 	{
 		private readonly Stack<ParserState> states = new Stack<ParserState>();
-		private TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
+		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
 		private ParserState state;
 
 		private readonly Scanner scanner;
@@ -170,7 +169,7 @@ namespace YamlDotNet.Core
 		/// </summary>
 		private Event yaml_parser_parse_stream_start()
 		{
-			Tokens.StreamStart streamStart = GetCurrentToken() as Tokens.StreamStart;
+			StreamStart streamStart = GetCurrentToken() as StreamStart;
 			if (streamStart == null)
 			{
 				throw new SemanticErrorException("Did not found expected <stream-start>.", GetCurrentToken().Start);
@@ -204,14 +203,14 @@ namespace YamlDotNet.Core
 
 			if (isImplicit && !(GetCurrentToken() is VersionDirective || GetCurrentToken() is TagDirective || GetCurrentToken() is DocumentStart || GetCurrentToken() is StreamEnd))
 			{
-				TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
-				yaml_parser_process_directives(tagDirectives);
+				TagDirectiveCollection directives = new TagDirectiveCollection();
+				yaml_parser_process_directives(directives);
 
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
 
 				state = ParserState.YAML_PARSE_BLOCK_NODE_STATE;
 
-				return new Events.DocumentStart(null, tagDirectives, true, GetCurrentToken().Start, GetCurrentToken().End);
+				return new Events.DocumentStart(null, directives, true, GetCurrentToken().Start, GetCurrentToken().End);
 			}
 
 			// Parse an explicit document.
@@ -219,8 +218,8 @@ namespace YamlDotNet.Core
 			else if (!(GetCurrentToken() is StreamEnd))
 			{
 				Mark start = GetCurrentToken().Start;
-				TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
-				VersionDirective versionDirective = yaml_parser_process_directives(tagDirectives);
+				TagDirectiveCollection directives = new TagDirectiveCollection();
+				VersionDirective versionDirective = yaml_parser_process_directives(directives);
 
 				if (!(GetCurrentToken() is DocumentStart))
 				{
@@ -231,7 +230,7 @@ namespace YamlDotNet.Core
 
 				state = ParserState.YAML_PARSE_DOCUMENT_CONTENT_STATE;
 
-				Event evt = new Events.DocumentStart(versionDirective, tagDirectives, false, start, GetCurrentToken().End);
+				Event evt = new Events.DocumentStart(versionDirective, directives, false, start, GetCurrentToken().End);
 				Skip();
 				return evt;
 			}
@@ -345,7 +344,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Generate an empty scalar event.
 		/// </summary>
-		private Event yaml_parser_process_empty_scalar(Mark position)
+		private static Event yaml_parser_process_empty_scalar(Mark position)
 		{
 			return new Events.Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
 		}

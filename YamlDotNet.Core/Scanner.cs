@@ -14,9 +14,9 @@ namespace YamlDotNet.Core
 	{
 		private const int MaxVersionNumberLength = 9;
 
-		private Stack<int> indents = new Stack<int>();
-		private InsertionQueue<Token> tokens = new InsertionQueue<Token>();
-		private Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
+		private readonly Stack<int> indents = new Stack<int>();
+		private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
+		private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
 		private bool streamStartProduced;
 		private bool streamEndProduced;
 		private int indent = -1;
@@ -123,14 +123,7 @@ namespace YamlDotNet.Core
 				ConsumeCurrent();
 			}
 
-			if (InternalMoveNext())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return InternalMoveNext();
 		}
 
 		internal bool InternalMoveNext()
@@ -1059,7 +1052,7 @@ namespace YamlDotNet.Core
 		/// the current column is greater than the indentation level.  In this case,
 		/// append or insert the specified token into the token queue.
 		/// </summary>
-		private void RollIndent(int column, int number, bool isSequence, Mark mark)
+		private void RollIndent(int column, int number, bool isSequence, Mark position)
 		{
 			// In the flow context, do nothing.
 
@@ -1084,11 +1077,11 @@ namespace YamlDotNet.Core
 				Token token;
 				if (isSequence)
 				{
-					token = new BlockSequenceStart(mark, mark);
+					token = new BlockSequenceStart(position, position);
 				}
 				else
 				{
-					token = new BlockMappingStart(mark, mark);
+					token = new BlockMappingStart(position, position);
 				}
 
 				if (number == -1)
@@ -1305,7 +1298,6 @@ namespace YamlDotNet.Core
 			int increment = 0;
 			int currentIndent = 0;
 			bool leadingBlank = false;
-			bool trailingBlank = false;
 
 			// Eat the indicator '|' or '>'.
 
@@ -1415,7 +1407,7 @@ namespace YamlDotNet.Core
 
 				// Is it a trailing whitespace?
 
-				trailingBlank = analyzer.IsBlank();
+				bool trailingBlank = analyzer.IsBlank();
 
 				// Check if we need to fold the leading line break.
 

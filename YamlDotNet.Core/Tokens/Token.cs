@@ -7,7 +7,7 @@ namespace YamlDotNet.Core.Tokens
 	/// </summary>
 	public abstract class Token
 	{
-		private Mark start;
+		private readonly Mark start;
 
 		/// <summary>
 		/// Gets the start of the token in the input stream.
@@ -20,7 +20,7 @@ namespace YamlDotNet.Core.Tokens
 			}
 		}
 
-		private Mark end;
+		private readonly Mark end;
 
 		/// <summary>
 		/// Gets the end of the token in the input stream.

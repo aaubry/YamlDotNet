@@ -2,7 +2,6 @@
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using System.Diagnostics;
-using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {

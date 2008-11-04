@@ -8,7 +8,7 @@ namespace YamlDotNet.Core.Tokens
 	/// </summary>
 	public class AnchorAlias : Token
 	{
-		private string value;
+		private readonly string value;
 
 		/// <summary>
 		/// Gets the value of the alias.

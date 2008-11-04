@@ -14,7 +14,7 @@ namespace YamlDotNet.Core.Events
 			get;
 		}
 		
-		private Mark start;
+		private readonly Mark start;
 
 		/// <summary>
 		/// Gets the position in the input stream where the event start.
@@ -27,7 +27,7 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
-		private Mark end;
+		private readonly Mark end;
 
 		/// <summary>
 		/// Gets the position in the input stream where the event ends.

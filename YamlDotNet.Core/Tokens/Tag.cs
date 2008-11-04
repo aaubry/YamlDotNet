@@ -7,8 +7,8 @@ namespace YamlDotNet.Core.Tokens
 	/// </summary>
 	public class Tag : Token
 	{
-		private string handle;
-		private string suffix;
+		private readonly string handle;
+		private readonly string suffix;
 
 		/// <summary>
 		/// Gets the handle.

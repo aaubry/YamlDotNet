@@ -21,6 +21,7 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
+  <Target Name="$(ProjectDir)/YamlDotNet.Converters/bin/Debug/YamlDotNet.Converters.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/YamlDotNet.Core/bin/debug/YamlDotNet.Core.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/YamlDotNet.RepresentationModel/bin/Debug/YamlDotNet.RepresentationModel.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
@@ -40,7 +41,98 @@
   <Settings />
  </Rules>
  <FxCopReport Version="1.36">
+  <Namespaces>
+   <Namespace Name="YamlDotNet.RepresentationModel.Serialization">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2008-11-04 15:07:46Z">
+      <Issue>
+       <Item>YamlDotNet.RepresentationModel.Serialization</Item>
+      </Issue>
+     </Message>
+    </Messages>
+   </Namespace>
+  </Namespaces>
   <Targets>
+   <Target Name="$(ProjectDir)/YamlDotNet.Converters/bin/Debug/YamlDotNet.Converters.dll">
+    <Modules>
+     <Module Name="yamldotnet.converters.dll">
+      <Namespaces>
+       <Namespace Name="YamlDotNet.Converters.Xml">
+        <Types>
+         <Type Name="XmlConverter">
+          <Members>
+           <Member Name="#FromXml(System.Xml.XmlDocument)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-11-04 15:07:46Z" FixCategory="DependsOnFix">
+              <Issue>
+               <Item>'XmlConverter.FromXml(XmlDocument)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
+              <Issue Name="Xml">
+               <Item>'XmlConverter.FromXml(XmlDocument)'</Item>
+               <Item>'XmlDocument'</Item>
+              </Issue>
+             </Message>
+             <Message Id="document" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-11-04 15:07:46Z" FixCategory="DependsOnFix">
+              <Issue>
+               <Item>'document'</Item>
+               <Item>'XmlConverter.FromXml(XmlDocument)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument,System.String)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-11-04 15:07:46Z" FixCategory="DependsOnFix">
+              <Issue>
+               <Item>'XmlConverter.ToXml(YamlDocument, string)'</Item>
+              </Issue>
+             </Message>
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
+              <Issue Name="Xml">
+               <Item>'XmlConverter.ToXml(YamlDocument, string)'</Item>
+               <Item>'XmlDocument'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="YamlDotNet.Converters.Xml.Extensions">
+        <Types>
+         <Type Name="XmlConverterExtensions">
+          <Members>
+           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument)">
+            <Messages>
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
+              <Issue Name="Xml">
+               <Item>'XmlConverterExtensions.ToXml(this YamlDocument)'</Item>
+               <Item>'XmlDocument'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument,System.String)">
+            <Messages>
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
+              <Issue Name="Xml">
+               <Item>'XmlConverterExtensions.ToXml(this YamlDocument, string)'</Item>
+               <Item>'XmlDocument'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
    <Target Name="$(ProjectDir)/YamlDotNet.Core/bin/debug/YamlDotNet.Core.dll">
     <Modules>
      <Module Name="yamldotnet.core.dll">
@@ -79,173 +171,51 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="Parser">
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
+   <Target Name="$(ProjectDir)/YamlDotNet.RepresentationModel/bin/Debug/YamlDotNet.RepresentationModel.dll">
+    <Modules>
+     <Module Name="yamldotnet.representationmodel.dll">
+      <Namespaces>
+       <Namespace Name="YamlDotNet.RepresentationModel">
+        <Types>
+         <Type Name="YamlStream">
+          <Messages>
+           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2008-11-04 15:07:46Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>'YamlStream'</Item>
+             <Item>Stream</Item>
+            </Issue>
+            <Notes>
+             <User Name="antoine.aubry">
+              <Note Id="2" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="YamlDotNet.RepresentationModel.Serialization">
+        <Types>
+         <Type Name="YamlSerializer">
           <Members>
-           <Member Name="#marks">
+           <Member Name="#Serialize(System.IO.TextWriter,System.Object)">
             <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2008-08-22 16:10:39Z">
-              <Issue>
-               <Item>'Parser.marks'</Item>
+             <Message Id="o" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-04 15:07:46Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'YamlSerializer.Serialize(TextWriter, object)'</Item>
+               <Item>'o'</Item>
               </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_block_mapping_key(System.Boolean)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_block_mapping_key(bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isFirst'</Item>
-               <Item>'Parser.yaml_parser_parse_block_mapping_key(bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_block_mapping_value()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_block_mapping_value()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_block_sequence_entry(System.Boolean)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_block_sequence_entry(bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isFirst'</Item>
-               <Item>'Parser.yaml_parser_parse_block_sequence_entry(bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_document_content()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_document_content()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_document_end()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_document_end()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_flow_mapping_key(System.Boolean)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_flow_mapping_key(bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isFirst'</Item>
-               <Item>'Parser.yaml_parser_parse_flow_mapping_key(bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_flow_mapping_value(System.Boolean)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_flow_mapping_value(bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isEmpty" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isEmpty'</Item>
-               <Item>'Parser.yaml_parser_parse_flow_mapping_value(bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_flow_sequence_entry(System.Boolean)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_flow_sequence_entry(bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isFirst" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isFirst'</Item>
-               <Item>'Parser.yaml_parser_parse_flow_sequence_entry(bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_flow_sequence_entry_mapping_end()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_flow_sequence_entry_mapping_end()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_flow_sequence_entry_mapping_key()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_flow_sequence_entry_mapping_key()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_flow_sequence_entry_mapping_value()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_flow_sequence_entry_mapping_value()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_indentless_sequence_entry()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_indentless_sequence_entry()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#yaml_parser_parse_node(System.Boolean,System.Boolean)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Parser.yaml_parser_parse_node(bool, bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isBlock" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isBlock'</Item>
-               <Item>'Parser.yaml_parser_parse_node(bool, bool)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="isIndentlessSequence" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-08-22 16:10:39Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'isIndentlessSequence'</Item>
-               <Item>'Parser.yaml_parser_parse_node(bool, bool)'</Item>
-              </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
@@ -261,18 +231,26 @@
   <Notes>
    <User Name="antoine.aubry">
     <Note Id="0" Modified="2008-07-31 17:29:43Z">The default implementation is enhough. It is not expected that Marks are compared, anyways.</Note>
+    <Note Id="1" Modified="2008-11-04 15:10:40Z">This is the same name as in the XmlSerializer.Serialize method.</Note>
+    <Note Id="2" Modified="2008-11-04 15:12:11Z">This name matches the YAML specification.</Note>
     <Note Id="3" Modified="2008-08-22 16:16:29Z">InsertionQueue&lt;T&gt; is a Queue.</Note>
    </User>
   </Notes>
   <Rules>
-   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
-    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
+   <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
+    <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
+   </Rule>
+   <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
+    <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711">
     <Resolution Name="TypeNoAlternate">Rename type name {0} so that it does not end in '{1}'.</Resolution>
    </Rule>
    <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
     <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
+   </Rule>
+   <Rule TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059">
+    <Resolution Name="Xml">Modify member {0} so that it no longer exposes the concrete type {1}. Use IXPathNavigable to represent XML data sources.</Resolution>
    </Rule>
    <Rule TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815">
     <Resolution Name="Equals">{0} should override Equals.</Resolution>

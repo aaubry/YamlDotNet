@@ -2,8 +2,8 @@
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using System.Diagnostics;
-using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -86,7 +86,7 @@ namespace YamlDotNet.RepresentationModel
 						string anchor;
 						do
 						{
-							anchor = random.Next().ToString();
+							anchor = random.Next().ToString(CultureInfo.InvariantCulture);
 						} while (existingAnchors.ContainsKey(anchor));
 						existingAnchors.Add(anchor, false);
 
@@ -95,7 +95,7 @@ namespace YamlDotNet.RepresentationModel
 				}
 			}
 
-			private void Visit(YamlNode node)
+			private void VisitNode(YamlNode node)
 			{
 				if (string.IsNullOrEmpty(node.Anchor))
 				{
@@ -120,17 +120,17 @@ namespace YamlDotNet.RepresentationModel
 
 			protected override void Visit(YamlScalarNode scalar)
 			{
-				Visit(scalar);
+				VisitNode(scalar);
 			}
 
 			protected override void Visit(YamlMappingNode mapping)
 			{
-				Visit(mapping);
+				VisitNode(mapping);
 			}
 
 			protected override void Visit(YamlSequenceNode sequence)
 			{
-				Visit(sequence);
+				VisitNode(sequence);
 			}
 		}
 

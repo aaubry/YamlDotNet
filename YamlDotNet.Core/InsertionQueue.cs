@@ -10,7 +10,7 @@ namespace YamlDotNet.Core
 	{
 		// TODO: Use a more efficient data structure
 
-		private IList<T> items = new List<T>();
+		private readonly IList<T> items = new List<T>();
 
 		/// <summary>
 		/// Gets the number of items that are contained by the queue.

@@ -1,4 +1,6 @@
 using System;
+using YamlDotNet.Core;
+using System.IO;
 
 namespace YamlDotNet.UnitTests
 {
@@ -12,7 +14,7 @@ namespace YamlDotNet.UnitTests
 			test.ForwardAliasReferenceWorks();
 			test.LoadSimpleDocument();
 			*/
-			
+			/*
 			XmlConverterTests test = new XmlConverterTests();
 			test.ScalarToXml();
 			Console.WriteLine();
@@ -26,6 +28,10 @@ namespace YamlDotNet.UnitTests
 			test.SequenceOfMappingAndSequencesToXml();
 			Console.WriteLine();
 			Console.WriteLine("---");
+			*/
+
+			YamlDotNet.UnitTests.RepresentationModel.YamlStreamTests tests = new YamlDotNet.UnitTests.RepresentationModel.YamlStreamTests();
+			tests.Test2();
 		}
 	}
 }

@@ -8,7 +8,7 @@ namespace YamlDotNet.Core.Tokens
 	/// </summary>
 	public class Scalar : Token
 	{
-		private string value;
+		private readonly string value;
 
 		/// <summary>
 		/// Gets the value.
@@ -22,6 +22,8 @@ namespace YamlDotNet.Core.Tokens
 			}
 		}
 
+		private readonly ScalarStyle style;
+
 		/// <summary>
 		/// Gets the style.
 		/// </summary>
@@ -33,8 +35,6 @@ namespace YamlDotNet.Core.Tokens
 				return style;
 			}
 		}
-
-		private ScalarStyle style;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Scalar"/> class.

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace YamlDotNet.Core.Events
 {
@@ -125,8 +126,28 @@ namespace YamlDotNet.Core.Events
 		/// <param name="tag">The tag.</param>
 		/// <param name="value">The value.</param>
 		public Scalar(string tag, string value)
-			: this(tag, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+			: this(null, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
 		{
+		}
+
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override string ToString()
+		{
+			return string.Format(
+				CultureInfo.InvariantCulture,
+				"Scalar [anchor = {0}, tag = {1}, value = {2}, style = {3}, isPlainImplicit = {4}, isQuotedImplicit = {5}]",
+				Anchor,
+				Tag,
+				value,
+				style,
+				isPlainImplicit,
+				isQuotedImplicit
+			);
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace YamlDotNet.Core.Events
 	{
 		internal static readonly Regex anchorValidator = new Regex(@"^[0-9a-zA-Z_\-]+$", RegexOptions.Compiled);
 
-		private string anchor;
+		private readonly string anchor;
 
 		/// <summary>
 		/// Gets the anchor.
@@ -24,7 +24,7 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
-		private string tag;
+		private readonly string tag;
 
 		/// <summary>
 		/// Gets the tag.
@@ -49,7 +49,7 @@ namespace YamlDotNet.Core.Events
 		/// <param name="tag">The tag.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		public NodeEvent(string anchor, string tag, Mark start, Mark end)
+		protected NodeEvent(string anchor, string tag, Mark start, Mark end)
 			: base(start, end)
 		{
 			if(anchor != null) {
@@ -73,7 +73,7 @@ namespace YamlDotNet.Core.Events
 		/// <summary>
 		/// Initializes a new instance of the <see cref="NodeEvent"/> class.
 		/// </summary>
-		public NodeEvent(string anchor, string tag)
+		protected NodeEvent(string anchor, string tag)
 			: this(anchor, tag, Mark.Empty, Mark.Empty)
 		{
 		}

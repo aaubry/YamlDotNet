@@ -8,7 +8,7 @@ namespace YamlDotNet.Core
 	/// </summary>
 	internal static class Constants
 	{
-		public static readonly TagDirective[] DefaultTagDirectives = new TagDirective[]
+		public static readonly TagDirective[] DefaultTagDirectives = new[]
 		{
 			new TagDirective("!", "!"),
 			new TagDirective("!!", "tag:yaml.org,2002:"),

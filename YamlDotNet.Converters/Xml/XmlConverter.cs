@@ -8,18 +8,18 @@ namespace YamlDotNet.Converters.Xml
 	public class XmlConverter
 	{
 		private class YamlToXmlDocumentVisitor : YamlVisitor {
-			private XmlDocument document;
+			private XmlDocument myDocument;
 			private XmlNode current;
-			private Stack<string> states = new Stack<string>();
+			private readonly Stack<string> states = new Stack<string>();
 			
 			public XmlDocument Document {
 				get {
-					return document;
+					return myDocument;
 				}
 			}
 			
 			private XmlNode AddNode() {
-				XmlNode newNode = document.CreateElement(states.Peek());
+				XmlNode newNode = myDocument.CreateElement(states.Peek());
 				current.AppendChild(newNode);
 				return newNode;
 			}
@@ -40,14 +40,14 @@ namespace YamlDotNet.Converters.Xml
 			
 			protected override void Visit(YamlDocument document)
 			{
-				this.document = new XmlDocument();
-				current = this.document; 
+				myDocument = new XmlDocument();
+				current = myDocument; 
 			}
 
 			protected override void Visit(YamlScalarNode scalar)
 			{
 				XmlNode scalarNode = AddNode();
-				scalarNode.AppendChild(document.CreateTextNode(scalar.Value));
+				scalarNode.AppendChild(myDocument.CreateTextNode(scalar.Value));
 			}
 			
 			protected override void Visit(YamlSequenceNode sequence)

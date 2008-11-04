@@ -5,7 +5,7 @@ namespace YamlDotNet.Core
 {
 	internal struct CharacterAnalyzer<TBuffer> where TBuffer : ILookAheadBuffer
 	{
-		private TBuffer buffer;
+		private readonly TBuffer buffer;
 		
 		public CharacterAnalyzer(TBuffer buffer)
 		{
@@ -239,7 +239,8 @@ namespace YamlDotNet.Core
 		public bool IsBlankOrBreakOrZero()
 		{
 			return IsBlankOrBreakOrZero(0);
-		}
+		}
+
 		public bool Check(char expected)
 		{
 			return Check(expected, 0);
