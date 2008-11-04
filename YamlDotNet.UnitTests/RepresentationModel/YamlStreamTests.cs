@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.UnitTests.RepresentationModel
 {
 	[TestFixture]
 	public class YamlStreamTests : YamlTest

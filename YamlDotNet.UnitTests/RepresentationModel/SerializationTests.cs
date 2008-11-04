@@ -1,16 +1,14 @@
 using System;
 using System.Drawing;
 using NUnit.Framework;
-using YamlDotNet.Core;
 using System.IO;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
-using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
 	[TestFixture]
-	public class YamlStreamTests
+	public class SerializationTests
 	{
 		private class X
 		{
@@ -142,71 +140,56 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		[Test]
-		public void Test()
+		private class Y
 		{
-			string text = @"
-MyFlag: False
-Nothing: !!null ''
-MyInt: 1234
-MyDouble: 6789.1011
-MyString: Hello world
-MyDate: 2008-10-31T15:38:41.9189216+00:00
-MyPoint:
-  'X': '100'
-  'Y': '200'
-";
+			private Y child;
 
-			Parser parser = new Parser(new StringReader(text));
-			Emitter emitter = new Emitter(Console.Error, 2, 80, false);
-
-			while (parser.MoveNext())
+			public Y Child
 			{
-				emitter.Emit(parser.Current);
-				Console.WriteLine(parser.Current);
+				get
+				{
+					return child;
+				}
+				set
+				{
+					child = value;
+				}
+			}
+
+			private Y child2;
+
+			public Y Child2
+			{
+				get
+				{
+					return child2;
+				}
+				set
+				{
+					child2 = value;
+				}
 			}
 		}
 
+
 		[Test]
-		public void Test2()
+		public void CircularReference()
 		{
-			Console.WriteLine("###################");
-			bool canonical = false;
-			for (int i = 0; i < 2; ++i)
+			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerOptions.Roundtrip);
+
+			using (StringWriter buffer = new StringWriter())
 			{
-				Emitter emitter = new Emitter(Console.Out, 2, 80, canonical);
+				Y original = new Y();
+				original.Child = new Y
+             	{
+             		Child = original,
+             		Child2 = original
+             	};
 
-				emitter.Emit(new StreamStart());
-				emitter.Emit(new DocumentStart(null, null, true));
-				emitter.Emit(new MappingStart(null, null, true, MappingStyle.Any));
-				emitter.Emit(new Scalar("key"));
-				emitter.Emit(new Scalar("value"));
-				emitter.Emit(new Scalar("key2"));
-				emitter.Emit(new Scalar("value2"));
-				emitter.Emit(new MappingEnd());
-				//emitter.Emit(new Scalar(null, null, "Hello", ScalarStyle.Any, true, false));
-				emitter.Emit(new DocumentEnd(true));
-				emitter.Emit(new StreamEnd());
+				serializer.Serialize(buffer, original);
 
-				Console.WriteLine("###################");
-
-				canonical = true;
+				Console.WriteLine(buffer.ToString());
 			}
-
-			/*
-			Stream start
-			Document start [isImplicit = True]
-			Mapping start [anchor = , tag = , isImplicit = True, style = Block]
-			Scalar [anchor = , tag = , value = MyFlag, style = Plain, isPlainImplicit = True, isQuotedImplicit = False]
-			Scalar [anchor = , tag = , value = False, style = Plain, isPlainImplicit = True, isQuotedImplicit = False]
-			Scalar [anchor = , tag = , value = MyInt, style = Plain, isPlainImplicit = True, isQuotedImplicit = False]
-			Scalar [anchor = , tag = , value = 1234, style = Plain, isPlainImplicit = True, isQuotedImplicit = False]
-			Mapping end
-			Document end [isImplicit = True]
-			Stream end
-
-			 */
-
 		}
 	}
 }

@@ -4,6 +4,7 @@ using YamlDotNet.Core;
 using System.Reflection;
 using System.Globalization;
 using YamlDotNet.Core.Events;
+using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -15,11 +16,27 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private readonly YamlSerializerOptions options;
 		private readonly Type serializedType;
 
+		private class ObjectInfo
+		{
+			public string anchor;
+			public bool serialized;
+		}
+
+		private readonly Dictionary<object, ObjectInfo> anchors;
+
 		private bool Roundtrip
 		{
 			get
 			{
 				return (options & YamlSerializerOptions.Roundtrip) != 0;
+			}
+		}
+
+		private bool DisableAliases
+		{
+			get
+			{
+				return (options & YamlSerializerOptions.DisableAliases) != 0;
 			}
 		}
 
@@ -41,6 +58,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			this.serializedType = serializedType;
 			this.options = options;
+
+			if (!DisableAliases)
+			{
+				anchors = new Dictionary<object, ObjectInfo>();
+			}
 		}
 
 		#region Serialization
@@ -56,6 +78,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new ArgumentNullException("output", "The output is null.");
 			}
 
+			if (!DisableAliases)
+			{
+				anchors.Clear();
+				int nextId = 0;
+				LoadAliases(serializedType, o, ref nextId);
+			}
+
 			Emitter emitter = new Emitter(output);
 
 			emitter.Emit(new StreamStart());
@@ -67,36 +96,68 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			emitter.Emit(new StreamEnd());
 		}
 
+		private void LoadAliases(Type type, object o, ref int nextId)
+		{
+			if(anchors.ContainsKey(o))
+			{
+				if(anchors[o] == null)
+				{
+					anchors[o] = new ObjectInfo { anchor = string.Format(CultureInfo.InvariantCulture, "o{0}", nextId++) };
+				}
+			}
+			else
+			{
+				anchors.Add(o, null);
+				foreach (var property in GetProperties(type))
+				{
+					object value = property.GetValue(o, null);
+					if(value != null && value.GetType().IsClass)
+					{
+						LoadAliases(property.PropertyType, value, ref nextId);
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Serializes the properties of the specified object into a mapping.
 		/// </summary>
 		/// <param name="emitter">The emitter.</param>
 		/// <param name="type">The type of the object.</param>
 		/// <param name="o">The o.</param>
-		private void SerializeProperties(Emitter emitter, Type type, object o)
+		/// <param name="anchor">The anchor.</param>
+		private void SerializeProperties(Emitter emitter, Type type, object o, string anchor)
 		{
 			if (Roundtrip && !HasDefaultConstructor(type))
 			{
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
-			emitter.Emit(new MappingStart(null, null, true, MappingStyle.Block));
+			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Block));
 
-			foreach(var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+			foreach (var property in GetProperties(type))
+			{
+				emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle.Plain, true, false));
+
+				object value = property.GetValue(o, null);
+				SerializeValue(emitter, property.PropertyType, value);
+			}
+
+			emitter.Emit(new MappingEnd());
+		}
+
+		private IEnumerable<PropertyInfo> GetProperties(Type type)
+		{
+			foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
 				if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
 				{
 					if (!Roundtrip || property.CanWrite)
 					{
-						emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle.Plain, false, true));
-
-						object value = property.GetValue(o, null);
-						SerializeValue(emitter, property.PropertyType, value);
+						yield return property;
 					}
 				}
 			}
-
-			emitter.Emit(new MappingEnd());
 		}
 
 		/// <summary>
@@ -142,11 +203,26 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return;
 			}
 
+			string anchor = null;
+			ObjectInfo info;
+			if(!DisableAliases && anchors.TryGetValue(value, out info) && info != null)
+			{
+				if (info.serialized)
+				{
+					emitter.Emit(new AnchorAlias(info.anchor));
+					return;
+				}
+
+				info.serialized = true;
+				anchor = info.anchor;
+			}
+
+
 			TypeCode typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
-					emitter.Emit(new Scalar("tag:yaml.org,2002:bool", value.ToString()));
+					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:bool", value.ToString()));
 					break;
 
 				case TypeCode.Byte:
@@ -157,22 +233,22 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
 				case TypeCode.UInt64:
-					emitter.Emit(new Scalar("tag:yaml.org,2002:int", Convert.ToString(value, numberFormat)));
+					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:int", Convert.ToString(value, numberFormat)));
 					break;
 
 				case TypeCode.Single:
 				case TypeCode.Double:
 				case TypeCode.Decimal:
-					emitter.Emit(new Scalar("tag:yaml.org,2002:float", Convert.ToString(value, numberFormat)));
+					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:float", Convert.ToString(value, numberFormat)));
 					break;
 
 				case TypeCode.String:
 				case TypeCode.Char:
-					emitter.Emit(new Scalar("tag:yaml.org,2002:str", value.ToString()));
+					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:str", value.ToString()));
 					break;
 
 				case TypeCode.DateTime:
-					emitter.Emit(new Scalar("tag:yaml.org,2002:timestamp", ((DateTime)value).ToString("o", CultureInfo.InvariantCulture)));
+					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:timestamp", ((DateTime)value).ToString("o", CultureInfo.InvariantCulture)));
 					break;
 
 				case TypeCode.DBNull:
@@ -180,7 +256,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
 				default:
-					SerializeProperties(emitter, type, value);
+					SerializeProperties(emitter, type, value, anchor);
 					break;
 			}
 		}
@@ -195,7 +271,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public object Deserialize(TextReader input)
 		{
 			Parser parser = new Parser(input);
-			
+
 			EventReader reader = new EventReader(parser);
 			reader.Expect<StreamStart>();
 			reader.Expect<DocumentStart>();

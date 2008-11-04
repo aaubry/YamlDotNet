@@ -131,6 +131,17 @@ namespace YamlDotNet.Core.Events
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="Scalar"/> class.
+		/// </summary>
+		/// <param name="alias">The alias.</param>
+		/// <param name="tag">The tag.</param>
+		/// <param name="value">The value.</param>
+		public Scalar(string alias, string tag, string value)
+			: this(alias, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		/// <summary>
 		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
 		/// </summary>
 		/// <returns>

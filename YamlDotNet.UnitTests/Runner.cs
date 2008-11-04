@@ -1,6 +1,7 @@
 using System;
 using YamlDotNet.Core;
 using System.IO;
+using YamlDotNet.UnitTests.RepresentationModel;
 
 namespace YamlDotNet.UnitTests
 {
@@ -30,8 +31,6 @@ namespace YamlDotNet.UnitTests
 			Console.WriteLine("---");
 			*/
 
-			YamlDotNet.UnitTests.RepresentationModel.YamlStreamTests tests = new YamlDotNet.UnitTests.RepresentationModel.YamlStreamTests();
-			tests.Test2();
 		}
 	}
 }
