@@ -1,13 +1,13 @@
-<Project name="YamlDotNet.Core" fileversion="2.0" DefaultNamespace="YamlDotNet.Core" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
+<Project name="YamlDotNet.Core" fileversion="2.0" language="C#" DefaultNamespace="YamlDotNet.Core" clr-version="Net_2_0" ctype="DotNetProject">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
-      <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.Core" />
+      <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="/home/aaubry/Work/yamldotnet/trunk/YamlDotNet.snk" assembly="YamlDotNet.Core" />
       <Build debugmode="True" target="Library" />
       <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
       <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" definesymbols="DEBUG" generatexmldocumentation="True" ctype="CSharpCompilerParameters" />
     </Configuration>
     <Configuration name="Release" ctype="DotNetProjectConfiguration">
-      <Output directory="bin/Release" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.Core" />
+      <Output directory="bin/Release" signAssembly="True" assemblyKeyFile="/home/aaubry/Work/yamldotnet/trunk/YamlDotNet.snk" assembly="YamlDotNet.Core" />
       <Build debugmode="False" target="Library" />
       <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
       <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
@@ -53,7 +53,6 @@
     <File name="SyntaxErrorException.cs" subtype="Code" buildaction="Compile" />
     <File name="Version.cs" subtype="Code" buildaction="Compile" />
     <File name="LookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
-    <File name="Tokens/ScalarStyle.cs" subtype="Code" buildaction="Compile" />
     <File name="InsertionQueue.cs" subtype="Code" buildaction="Compile" />
     <File name="Scanner.cs" subtype="Code" buildaction="Compile" />
     <File name="Properties/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
@@ -74,9 +73,11 @@
     <File name="ILookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
     <File name="CharacterAnalyzer.cs" subtype="Code" buildaction="Compile" />
     <File name="StringLookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
+    <File name="ScalarStyle.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   </References>
   <Deployment.LinuxDeployData scriptName="yamldotnet.corecs" />
+  <GtkDesignInfo />
 </Project>

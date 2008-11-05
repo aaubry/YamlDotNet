@@ -1,13 +1,13 @@
 <Project name="YamlDotNet.RepresentationModel" fileversion="2.0" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
-      <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.RepresentationModel" />
+      <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="/home/aaubry/Work/yamldotnet/trunk/YamlDotNet.snk" assembly="YamlDotNet.RepresentationModel" />
       <Build debugmode="True" target="Library" />
       <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
       <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" definesymbols="DEBUG" generatexmldocumentation="True" ctype="CSharpCompilerParameters" />
     </Configuration>
     <Configuration name="Release" ctype="DotNetProjectConfiguration">
-      <Output directory="bin/Release" signAssembly="True" assemblyKeyFile="../YamlDotNet.snk" assembly="YamlDotNet.RepresentationModel" />
+      <Output directory="bin/Release" signAssembly="True" assemblyKeyFile="/home/aaubry/Work/yamldotnet/trunk/YamlDotNet.snk" assembly="YamlDotNet.RepresentationModel" />
       <Build debugmode="False" target="Library" />
       <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
       <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
@@ -28,13 +28,14 @@
     <File name="YamlSequenceNode.cs" subtype="Code" buildaction="Compile" />
     <File name="YamlStream.cs" subtype="Code" buildaction="Compile" />
     <File name="../CommonAssemblyInfo.cs" subtype="Code" buildaction="Compile" />
-    <File name="YamlSerializer.cs" subtype="Code" buildaction="Nothing" />
-    <File name="YamlSerializerOptions.cs" subtype="Code" buildaction="Nothing" />
     <File name="IYamlVisitor.cs" subtype="Code" buildaction="Compile" />
     <File name="YamlVisitor.cs" subtype="Code" buildaction="Compile" />
+    <File name="Serialization/YamlSerializer.cs" subtype="Code" buildaction="Compile" />
+    <File name="Serialization/YamlSerializerOptions.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.Core" />
   </References>
+  <GtkDesignInfo />
 </Project>
