@@ -32,7 +32,6 @@ namespace YamlDotNet.Core
 		public StringLookAheadBuffer(string value)
 		{
 			this.value = value;
-			currentIndex = 0;
 		}
 
 		public char Peek(int offset)

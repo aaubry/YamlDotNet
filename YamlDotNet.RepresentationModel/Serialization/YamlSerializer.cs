@@ -1,10 +1,13 @@
 using System;
 using System.IO;
+using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using System.Reflection;
 using System.Globalization;
 using YamlDotNet.Core.Events;
 using System.Collections.Generic;
+using System.Collections;
+using System.Diagnostics;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -38,6 +41,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{
 				return (options & YamlSerializerOptions.DisableAliases) != 0;
 			}
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
+		/// </summary>
+		/// <remarks>
+		/// When deserializing, the stream must contain type information for the root element.
+		/// </remarks>
+		public YamlSerializer()
+			: this(typeof(object), YamlSerializerOptions.None)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
+		/// </summary>
+		/// <param name="options">The options the specify the behavior of the serializer.</param>
+		/// <remarks>
+		/// When deserializing, the stream must contain type information for the root element.
+		/// </remarks>
+		public YamlSerializer(YamlSerializerOptions options)
+			: this(typeof(object), options)
+		{
 		}
 
 		/// <summary>
@@ -98,11 +124,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private void LoadAliases(Type type, object o, ref int nextId)
 		{
-			if(anchors.ContainsKey(o))
+			if (anchors.ContainsKey(o))
 			{
-				if(anchors[o] == null)
+				if (anchors[o] == null)
 				{
-					anchors[o] = new ObjectInfo { anchor = string.Format(CultureInfo.InvariantCulture, "o{0}", nextId++) };
+					anchors[o] = new ObjectInfo
+					{
+						anchor = string.Format(CultureInfo.InvariantCulture, "o{0}", nextId++)
+					};
 				}
 			}
 			else
@@ -111,7 +140,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				foreach (var property in GetProperties(type))
 				{
 					object value = property.GetValue(o, null);
-					if(value != null && value.GetType().IsClass)
+					if (value != null && value.GetType().IsClass)
 					{
 						LoadAliases(property.PropertyType, value, ref nextId);
 					}
@@ -205,7 +234,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			string anchor = null;
 			ObjectInfo info;
-			if(!DisableAliases && anchors.TryGetValue(value, out info) && info != null)
+			if (!DisableAliases && anchors.TryGetValue(value, out info) && info != null)
 			{
 				if (info.serialized)
 				{
@@ -283,20 +312,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private object DeserializeValue(EventReader reader, Type type)
 		{
-			Scalar scalar;
-			if (reader.Accept<Scalar>())
-			{
-				scalar = reader.Expect<Scalar>();
-
-				if (scalar.Tag == "tag:yaml.org,2002:null")
-				{
-					return null;
-				}
-			}
-			else
+			if (!reader.Accept<Scalar>())
 			{
 				return DeserializeProperties(reader, type);
 			}
+
+			Scalar scalar = reader.Expect<Scalar>();
+			if (scalar.Tag == "tag:yaml.org,2002:null")
+			{
+				return null;
+			}
+
+			type = GetType(scalar.Tag, type);
 
 			TypeCode typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
@@ -348,24 +375,86 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					return DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
 
 				default:
+					// Default to string
+					if (type == typeof(object))
+					{
+						return scalar.Value;
+					}
+
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 		}
 
 		private object DeserializeProperties(EventReader reader, Type type)
 		{
+			MappingStart mapping = reader.Expect<MappingStart>();
+
+			type = GetType(mapping.Tag, type);
 			object result = Activator.CreateInstance(type);
 
-			reader.Expect<MappingStart>();
-			while (!reader.Accept<MappingEnd>())
+			IDictionary dictionary = result as IDictionary;
+			if (dictionary != null)
 			{
-				Scalar key = reader.Expect<Scalar>();
-				PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
-				property.SetValue(result, DeserializeValue(reader, property.PropertyType), null);
+				Type keyType = typeof(object);
+				Type valueType = typeof(object);
+
+				foreach (var interfaceType in result.GetType().GetInterfaces())
+				{
+					if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+					{
+						Type[] genericArguments = interfaceType.GetGenericArguments();
+						Debug.Assert(genericArguments.Length == 2, "IDictionary<,> must contain two generic arguments.");
+						keyType = genericArguments[0];
+						valueType = genericArguments[1];
+						break;
+					}
+				}
+
+				while (!reader.Accept<MappingEnd>())
+				{
+					object key = DeserializeValue(reader, keyType);
+					object value = DeserializeValue(reader, valueType);
+					dictionary.Add(key, value);
+				}
+			}
+			else
+			{
+				while (!reader.Accept<MappingEnd>())
+				{
+					Scalar key = reader.Expect<Scalar>();
+					PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
+					property.SetValue(result, DeserializeValue(reader, property.PropertyType), null);
+				}
 			}
 			reader.Expect<MappingEnd>();
 
 			return result;
+		}
+
+		private static readonly Dictionary<string, Type> predefinedTypes = new Dictionary<string, Type>
+		{
+			{ "tag:yaml.org,2002:map", typeof(Dictionary<object, object>) },
+			{ "tag:yaml.org,2002:bool", typeof(bool) },
+			{ "tag:yaml.org,2002:float", typeof(double) },
+			{ "tag:yaml.org,2002:int", typeof(int) },
+			{ "tag:yaml.org,2002:str", typeof(string) },
+			{ "tag:yaml.org,2002:timestamp", typeof(DateTime) },
+		};
+
+		private static Type GetType(string tag, Type defaultType)
+		{
+			if (tag == null)
+			{
+				return defaultType;
+			}
+
+			Type predefinedType;
+			if (predefinedTypes.TryGetValue(tag, out predefinedType))
+			{
+				return predefinedType;
+			}
+
+			return Type.GetType(tag.Substring(1), true);
 		}
 		#endregion
 	}

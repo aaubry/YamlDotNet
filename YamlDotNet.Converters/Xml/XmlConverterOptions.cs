@@ -7,7 +7,7 @@ namespace YamlDotNet.Converters.Xml
 	/// </summary>
 	public class XmlConverterOptions
 	{
-		private bool isReadonly = false;
+		private bool isReadOnly;
 
 		/// <summary>
 		/// Gets a value indicating whether this instance is readonly.
@@ -15,17 +15,17 @@ namespace YamlDotNet.Converters.Xml
 		/// <value>
 		/// 	<c>true</c> if this instance is readonly; otherwise, <c>false</c>.
 		/// </value>
-		public bool IsReadonly
+		public bool IsReadOnly
 		{
 			get
 			{
-				return isReadonly;
+				return isReadOnly;
 			}
 		}
 
 		private void EnsureIsNotReadonly()
 		{
-			if(isReadonly)
+			if(isReadOnly)
 			{
 				throw new InvalidOperationException("This object cannot be modified.");
 			}
@@ -197,16 +197,16 @@ namespace YamlDotNet.Converters.Xml
 		/// Gets a read-only copy of the current object.
 		/// </summary>
 		/// <returns></returns>
-		public XmlConverterOptions AsReadonly()
+		public XmlConverterOptions AsReadOnly()
 		{
 			XmlConverterOptions copy = (XmlConverterOptions)MemberwiseClone();
-			copy.isReadonly = true;
+			copy.isReadOnly = true;
 			return copy;
 		}
 
 		/// <summary>
 		/// The default options.
 		/// </summary>
-		public static readonly XmlConverterOptions Default = new XmlConverterOptions().AsReadonly();
+		public static readonly XmlConverterOptions Default = new XmlConverterOptions().AsReadOnly();
 	}
 }

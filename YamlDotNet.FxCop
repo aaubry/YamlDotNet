@@ -21,6 +21,7 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
+  <Target Name="$(ProjectDir)/YamlDotNet.Configuration/bin/Debug/YamlDotNet.Configuration.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/YamlDotNet.Converters/bin/Debug/YamlDotNet.Converters.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/YamlDotNet.Core/bin/debug/YamlDotNet.Core.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/YamlDotNet.RepresentationModel/bin/Debug/YamlDotNet.RepresentationModel.dll" Analyze="True" AnalyzeAllChildren="True" />
@@ -53,6 +54,37 @@
    </Namespace>
   </Namespaces>
   <Targets>
+   <Target Name="$(ProjectDir)/YamlDotNet.Configuration/bin/Debug/YamlDotNet.Configuration.dll">
+    <Modules>
+     <Module Name="yamldotnet.configuration.dll">
+      <Namespaces>
+       <Namespace Name="YamlDotNet.Configuration">
+        <Types>
+         <Type Name="ConfigurationLoader">
+          <Members>
+           <Member Name="#Instance">
+            <Messages>
+             <Message TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104" Status="Excluded" Created="2008-11-05 19:00:04Z">
+              <Issue>
+               <Item>'ConfigurationLoader.Instance'</Item>
+               <Item>'ConfigurationLoader'</Item>
+              </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
    <Target Name="$(ProjectDir)/YamlDotNet.Converters/bin/Debug/YamlDotNet.Converters.dll">
     <Modules>
      <Module Name="yamldotnet.converters.dll">
@@ -63,37 +95,50 @@
           <Members>
            <Member Name="#FromXml(System.Xml.XmlDocument)">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-11-04 15:07:46Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'XmlConverter.FromXml(XmlDocument)'</Item>
-              </Issue>
-             </Message>
              <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
               <Issue Name="Xml">
                <Item>'XmlConverter.FromXml(XmlDocument)'</Item>
                <Item>'XmlDocument'</Item>
               </Issue>
-             </Message>
-             <Message Id="document" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2008-11-04 15:07:46Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'document'</Item>
-               <Item>'XmlConverter.FromXml(XmlDocument)'</Item>
-              </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="6" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument,System.String)">
+           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument)">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2008-11-04 15:07:46Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'XmlConverter.ToXml(YamlDocument, string)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-05 19:00:04Z">
               <Issue Name="Xml">
-               <Item>'XmlConverter.ToXml(YamlDocument, string)'</Item>
+               <Item>'XmlConverter.ToXml(YamlDocument)'</Item>
                <Item>'XmlDocument'</Item>
               </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="6" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="XmlConverterOptions">
+          <Members>
+           <Member Name="#Default">
+            <Messages>
+             <Message TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104" Status="Excluded" Created="2008-11-05 19:00:04Z">
+              <Issue>
+               <Item>'XmlConverterOptions.Default'</Item>
+               <Item>'XmlConverterOptions'</Item>
+              </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="5" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
@@ -112,16 +157,26 @@
                <Item>'XmlConverterExtensions.ToXml(this YamlDocument)'</Item>
                <Item>'XmlDocument'</Item>
               </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="6" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument,System.String)">
+           <Member Name="#ToXml(YamlDotNet.RepresentationModel.YamlDocument,YamlDotNet.Converters.Xml.XmlConverterOptions)">
             <Messages>
-             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-04 15:07:46Z">
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Created="2008-11-05 19:00:04Z">
               <Issue Name="Xml">
-               <Item>'XmlConverterExtensions.ToXml(this YamlDocument, string)'</Item>
+               <Item>'XmlConverterExtensions.ToXml(this YamlDocument, XmlConverterOptions)'</Item>
                <Item>'XmlDocument'</Item>
               </Issue>
+              <Notes>
+               <User Name="antoine.aubry">
+                <Note Id="6" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
@@ -234,11 +289,17 @@
     <Note Id="1" Modified="2008-11-04 15:10:40Z">This is the same name as in the XmlSerializer.Serialize method.</Note>
     <Note Id="2" Modified="2008-11-04 15:12:11Z">This name matches the YAML specification.</Note>
     <Note Id="3" Modified="2008-08-22 16:16:29Z">InsertionQueue&lt;T&gt; is a Queue.</Note>
+    <Note Id="4" Modified="2008-11-05 19:11:04Z">Altough ConfigurationLoader is mutable, it makes sense to make the reference readonly, because we want that reference to always point to the same instance.</Note>
+    <Note Id="5" Modified="2008-11-05 19:12:02Z">That specific instance of XmlConverterOptions is immutable.</Note>
+    <Note Id="6" Modified="2008-11-05 19:14:04Z">It seems that XmlDocument is more appropriate for this task.</Note>
    </User>
   </Notes>
   <Rules>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104">
+    <Resolution Name="Default">Remove the read-only designation from {0} or change the field to one that is an immutable reference type. If the reference type {1} is, in fact, immutable, exclude this message.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
@@ -246,18 +307,12 @@
    <Rule TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711">
     <Resolution Name="TypeNoAlternate">Rename type name {0} so that it does not end in '{1}'.</Resolution>
    </Rule>
-   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
-    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
-   </Rule>
    <Rule TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059">
     <Resolution Name="Xml">Modify member {0} so that it no longer exposes the concrete type {1}. Use IXPathNavigable to represent XML data sources.</Resolution>
    </Rule>
    <Rule TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815">
     <Resolution Name="Equals">{0} should override Equals.</Resolution>
     <Resolution Name="op_Equality">{0} should override the equality (==) and inequality (!=) operators.</Resolution>
-   </Rule>
-   <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
-    <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

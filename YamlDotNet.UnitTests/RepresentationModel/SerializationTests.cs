@@ -4,11 +4,12 @@ using NUnit.Framework;
 using System.IO;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
 	[TestFixture]
-	public class SerializationTests
+	public class SerializationTests : YamlTest
 	{
 		private class X
 		{
@@ -190,6 +191,51 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 			}
+		}
+
+		public class Z
+		{
+			public string aaa
+			{
+				get;
+				set;
+			}
+		}
+
+		[Test]
+		public void ExplicitType()
+		{
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("explicitType.yaml"));
+			
+			Assert.IsInstanceOfType(typeof(Z), result, "The deserializer should have used the correct type.");
+			Assert.AreEqual("bbb", ((Z)result).aaa, "The property has the wrong value.");
+		}
+
+		[Test]
+		public void DeserializeDictionary()
+		{
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("dictionary.yaml"));
+
+			Assert.IsInstanceOfType(typeof(IDictionary<object, object>), result, "The deserialized object has the wrong type.");
+
+			IDictionary<object, object> dictionary = (IDictionary<object, object>)result;
+			Assert.AreEqual("value1", dictionary["key1"]);
+			Assert.AreEqual("value2", dictionary["key2"]);
+		}
+
+		[Test]
+		public void DeserializeExplicitDictionary()
+		{
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
+
+			Assert.IsInstanceOfType(typeof(IDictionary<string, int>), result, "The deserialized object has the wrong type.");
+
+			IDictionary<string, int> dictionary = (IDictionary<string, int>)result;
+			Assert.AreEqual(1, dictionary["key1"]);
+			Assert.AreEqual(2, dictionary["key2"]);
 		}
 	}
 }

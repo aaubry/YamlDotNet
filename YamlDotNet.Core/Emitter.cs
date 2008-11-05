@@ -671,9 +671,22 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the document content is an empty scalar.
 		/// </summary>
-		private static bool yaml_emitter_check_empty_document()
+		private bool yaml_emitter_check_empty_document()
 		{
-			// TODO: This method should be implemented
+			int index = 0;
+			foreach (var parsingEvent in events)
+			{
+				if(++index == 2)
+				{
+					Scalar scalar = parsingEvent as Scalar;
+					if(scalar != null)
+					{
+						return string.IsNullOrEmpty(scalar.Value);
+					}
+					break;
+				}
+			}
+
 			return false;
 		}
 		

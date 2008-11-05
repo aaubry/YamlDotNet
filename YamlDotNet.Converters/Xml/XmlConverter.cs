@@ -106,8 +106,25 @@ namespace YamlDotNet.Converters.Xml
 		#endregion
 
 		#region XmlToYamlConverter
-		private class XmlToYamlConverter : IDisposable
+		private class XmlToYamlConverter
 		{
+			private struct ExitCaller : IDisposable
+			{
+				private readonly XmlToYamlConverter owner;
+
+				public ExitCaller(XmlToYamlConverter owner)
+				{
+					this.owner = owner;
+				}
+
+				#region IDisposable Members
+				public void Dispose()
+				{
+					owner.Exit();
+				}
+				#endregion
+			}
+
 			private readonly XmlConverterOptions options;
 			private readonly XmlDocument document;
 			private XmlNode current;
@@ -268,7 +285,7 @@ namespace YamlDotNet.Converters.Xml
 			private IDisposable ExpectElement(string elementName)
 			{
 				Expect(XmlNodeType.Element, elementName);
-				return this;
+				return new ExitCaller(this);
 			}
 
 			private string ExpectText()
@@ -283,13 +300,6 @@ namespace YamlDotNet.Converters.Xml
 				currentParent = currentParent.ParentNode;
 			}
 			#endregion
-
-			#region IDisposable Members
-			void IDisposable.Dispose()
-			{
-				Exit();
-			}
-			#endregion
 		}
 		#endregion
 
@@ -301,7 +311,7 @@ namespace YamlDotNet.Converters.Xml
 		/// <param name="options">The options.</param>
 		public XmlConverter(XmlConverterOptions options)
 		{
-			this.options = options.IsReadonly ? options : options.AsReadonly();
+			this.options = options.IsReadOnly ? options : options.AsReadOnly();
 		}
 
 		/// <summary>

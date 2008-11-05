@@ -86,7 +86,7 @@ namespace YamlDotNet.RepresentationModel
 		
 		internal override void Save(Emitter emitter)
 		{
-			emitter.Emit(new Scalar(Anchor, Tag, Value, ScalarStyle.Any, false, false));
+			emitter.Emit(new Scalar(Anchor, Tag, Value, ScalarStyle.Any, true, false));
 		}
 		
 		/// <summary>
