@@ -30,8 +30,6 @@ namespace YamlDotNet.Core
 		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
 		private int indent;
 		private int flowLevel;
-		//private bool isRootContext;
-		//private bool isSequenceContext;
 		private bool isMappingContext;
 		private bool isSimpleKeyContext;
 		
@@ -40,15 +38,9 @@ namespace YamlDotNet.Core
 		private bool isWhitespace;
 		private bool isIndentation;
 		
-		//private const int MaxBufferLength = 8;
-		
 		private struct AnchorData {
 			public string anchor;
-
-			// Field is never assigned
-#pragma warning disable 0649
 			public bool isAlias;
-#pragma warning restore 0649
 		}
 		
 		private AnchorData anchorData; 
@@ -165,12 +157,12 @@ namespace YamlDotNet.Core
 		public void Emit(Event @event) {
 			events.Enqueue(@event);
 
-			while (!yaml_emitter_need_more_events()) {
+			while (!NeedMoreEvents()) {
 				Event current = events.Peek();
-				yaml_emitter_analyze_event(current);
-				yaml_emitter_state_machine(current);
+				AnalyzeEvent(current);
+				StateMachine(current);
 
-				// Only dequeue after calling yaml_emitter_state_machine because it checks how many events are in the queue.
+				// Only dequeue after calling state_machine because it checks how many events are in the queue.
 				events.Dequeue();
 			}
 		}
@@ -183,7 +175,7 @@ namespace YamlDotNet.Core
 		///  - 2 events for SEQUENCE-START
 		///  - 3 events for MAPPING-START
 		/// </summary>
-		private bool yaml_emitter_need_more_events()
+		private bool NeedMoreEvents()
 		{
 			if(events.Count == 0) {
 				return true;
@@ -234,7 +226,7 @@ namespace YamlDotNet.Core
 			return true;
 		}
 		
-		private void yaml_emitter_analyze_anchor(string anchor, bool isAlias)
+		private void AnalyzeAnchor(string anchor, bool isAlias)
 		{
 			anchorData.anchor = anchor;
 			anchorData.isAlias = isAlias;
@@ -243,7 +235,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the evt data is valid.
 		/// </summary>
-		private void yaml_emitter_analyze_event(Event evt)
+		private void AnalyzeEvent(Event evt)
 		{
 			anchorData.anchor = null;
 			tagData.handle = null;
@@ -251,7 +243,7 @@ namespace YamlDotNet.Core
 			
 			AnchorAlias alias = evt as AnchorAlias;
 			if(alias != null) {
-				yaml_emitter_analyze_anchor(alias.Value, true);
+				AnalyzeAnchor(alias.Value, true);
 				return;
 			}
 			
@@ -259,13 +251,13 @@ namespace YamlDotNet.Core
 			if(nodeEvent != null) {
 				Scalar scalar = evt as Scalar;
 				if(scalar != null) {
-					yaml_emitter_analyze_scalar(scalar.Value);
+					AnalyzeScalar(scalar.Value);
 				}
 
-				yaml_emitter_analyze_anchor(nodeEvent.Anchor, false);
+				AnalyzeAnchor(nodeEvent.Anchor, false);
 			
 				if(!string.IsNullOrEmpty(nodeEvent.Tag) && (isCanonical || nodeEvent.IsCanonical)) {
-					yaml_emitter_analyze_tag(nodeEvent.Tag);
+					AnalyzeTag(nodeEvent.Tag);
 				}
 				return;
 			}
@@ -274,7 +266,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if a scalar is valid.
 		/// </summary>
-		private void yaml_emitter_analyze_scalar(string value)
+		private void AnalyzeScalar(string value)
 		{
 			bool block_indicators = false;
 			bool flow_indicators = false;
@@ -490,7 +482,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if a tag is valid.
 		/// </summary>
-		private void yaml_emitter_analyze_tag(string tag)
+		private void AnalyzeTag(string tag)
 		{
 			tagData.handle = tag;
 			foreach (var tagDirective in tagDirectives) {
@@ -505,76 +497,76 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// State dispatcher.
 		/// </summary>
-		private void yaml_emitter_state_machine(Event evt)
+		private void StateMachine(Event evt)
 		{
 			switch (state)
 			{
 				case EmitterState.YAML_EMIT_STREAM_START_STATE:
-					yaml_emitter_emit_stream_start(evt);
+					EmitStreamStart(evt);
 					break;
 
 				case EmitterState.YAML_EMIT_FIRST_DOCUMENT_START_STATE:
-					yaml_emitter_emit_document_start(evt, true);
+					EmitDocumentStart(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_DOCUMENT_START_STATE:
-					yaml_emitter_emit_document_start(evt, false);
+					EmitDocumentStart(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_DOCUMENT_CONTENT_STATE:
-					yaml_emitter_emit_document_content(evt);
+					EmitDocumentContent(evt);
 					break;
 
 				case EmitterState.YAML_EMIT_DOCUMENT_END_STATE:
-					yaml_emitter_emit_document_end(evt);
+					EmitDocumentEnd(evt);
 					break;
 
 				case EmitterState.YAML_EMIT_FLOW_SEQUENCE_FIRST_ITEM_STATE:
-					yaml_emitter_emit_flow_sequence_item(evt, true);
+					EmitFlowSequenceItem(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_FLOW_SEQUENCE_ITEM_STATE:
-					yaml_emitter_emit_flow_sequence_item(evt, false);
+					EmitFlowSequenceItem(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_FLOW_MAPPING_FIRST_KEY_STATE:
-					yaml_emitter_emit_flow_mapping_key(evt, true);
+					EmitFlowMappingKey(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_FLOW_MAPPING_KEY_STATE:
-					yaml_emitter_emit_flow_mapping_key(evt, false);
+					EmitFlowMappingKey(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_FLOW_MAPPING_SIMPLE_VALUE_STATE:
-					yaml_emitter_emit_flow_mapping_value(evt, true);
+					EmitFlowMappingValue(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_FLOW_MAPPING_VALUE_STATE:
-					yaml_emitter_emit_flow_mapping_value(evt, false);
+					EmitFlowMappingValue(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_BLOCK_SEQUENCE_FIRST_ITEM_STATE:
-					yaml_emitter_emit_block_sequence_item(evt, true);
+					EmitBlockSequenceItem(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_BLOCK_SEQUENCE_ITEM_STATE:
-					yaml_emitter_emit_block_sequence_item(evt, false);
+					EmitBlockSequenceItem(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_BLOCK_MAPPING_FIRST_KEY_STATE:
-					yaml_emitter_emit_block_mapping_key(evt, true);
+					EmitBlockMappingKey(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_BLOCK_MAPPING_KEY_STATE:
-					yaml_emitter_emit_block_mapping_key(evt, false);
+					EmitBlockMappingKey(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_BLOCK_MAPPING_SIMPLE_VALUE_STATE:
-					yaml_emitter_emit_block_mapping_value(evt, true);
+					EmitBlockMappingValue(evt, true);
 					break;
 
 				case EmitterState.YAML_EMIT_BLOCK_MAPPING_VALUE_STATE:
-					yaml_emitter_emit_block_mapping_value(evt, false);
+					EmitBlockMappingValue(evt, false);
 					break;
 
 				case EmitterState.YAML_EMIT_END_STATE:
@@ -589,7 +581,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect STREAM-START.
 		/// </summary>
-		private void yaml_emitter_emit_stream_start(Event evt)
+		private void EmitStreamStart(Event evt)
 		{
 			if(evt.Type != EventType.YAML_STREAM_START_EVENT) {
 				throw new ArgumentException("Expected STREAM-START.", "evt");
@@ -607,7 +599,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect DOCUMENT-START or STREAM-END.
 		/// </summary>
-		private void yaml_emitter_emit_document_start(Event evt, bool isFirst)
+		private void EmitDocumentStart(Event evt, bool isFirst)
 		{
 			DocumentStart documentStart = evt as DocumentStart;
 			if (documentStart != null)
@@ -615,45 +607,45 @@ namespace YamlDotNet.Core
 				bool isImplicit = documentStart.IsImplicit && isFirst && !isCanonical;
 
 				if(documentStart.Version != null) {
-					yaml_emitter_analyze_version_directive(documentStart.Version);
+					AnalyzeVersionDirective(documentStart.Version);
 
 					isImplicit = false;
-					yaml_emitter_write_indicator("%YAML", true, false, false);
-					yaml_emitter_write_indicator(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Constants.MajorVersion, Constants.MinorVersion), true, false, false);
-					yaml_emitter_write_indent();
+					WriteIndicator("%YAML", true, false, false);
+					WriteIndicator(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Constants.MajorVersion, Constants.MinorVersion), true, false, false);
+					WriteIndent();
 				}
 
 				if (documentStart.Tags != null)
 				{
 					foreach (var tagDirective in documentStart.Tags)
 					{
-						yaml_emitter_append_tag_directive(tagDirective, false);
+						AppendTagDirective(tagDirective, false);
 					}
 				}
 
 				foreach (var tagDirective in Constants.DefaultTagDirectives) {
-					yaml_emitter_append_tag_directive(tagDirective, true);
+					AppendTagDirective(tagDirective, true);
 				}
 
 				if(documentStart.Tags != null && documentStart.Tags.Count != 0) {
 					isImplicit = false;
 					foreach (var tagDirective in documentStart.Tags) {
-						yaml_emitter_write_indicator("%TAG", true, false, false);
-						yaml_emitter_write_tag_handle(tagDirective.Handle);
-						yaml_emitter_write_tag_content(tagDirective.Prefix, true);
-						yaml_emitter_write_indent();
+						WriteIndicator("%TAG", true, false, false);
+						WriteTagHandle(tagDirective.Handle);
+						WriteTagContent(tagDirective.Prefix, true);
+						WriteIndent();
 					}
 				}
 
-				if (yaml_emitter_check_empty_document()) {
+				if (CheckEmptyDocument()) {
 					isImplicit = false;
 				}
 
 				if (!isImplicit) {
-					yaml_emitter_write_indent();
-					yaml_emitter_write_indicator("---", true, false, false);
+					WriteIndent();
+					WriteIndicator("---", true, false, false);
 					if (isCanonical) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 				}
 
@@ -671,7 +663,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the document content is an empty scalar.
 		/// </summary>
-		private bool yaml_emitter_check_empty_document()
+		private bool CheckEmptyDocument()
 		{
 			int index = 0;
 			foreach (var parsingEvent in events)
@@ -690,7 +682,7 @@ namespace YamlDotNet.Core
 			return false;
 		}
 		
-		private void yaml_emitter_write_tag_handle(string value)
+		private void WriteTagHandle(string value)
 		{
 			if (!isWhitespace) {
 				Write(' ');
@@ -702,7 +694,7 @@ namespace YamlDotNet.Core
 			isIndentation = false;
 		}
 
-		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[]", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]", RegexOptions.Compiled | RegexOptions.Singleline);
 		
 		private static string UrlEncode(string text) {
 			return uriReplacer.Replace(text, delegate(Match match) {
@@ -714,7 +706,7 @@ namespace YamlDotNet.Core
 			});
 		}
 		
-		private void yaml_emitter_write_tag_content(string value, bool needsWhitespace)
+		private void WriteTagContent(string value, bool needsWhitespace)
 		{
 			if (needsWhitespace && !isWhitespace) {
 				Write(' ');
@@ -729,7 +721,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Append a directive to the directives stack.
 		/// </summary>
-		private void yaml_emitter_append_tag_directive(TagDirective value, bool allowDuplicates)
+		private void AppendTagDirective(TagDirective value, bool allowDuplicates)
 		{
 			if(tagDirectives.Contains(value)) {
 				if(allowDuplicates) {
@@ -745,14 +737,14 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if a %YAML directive is valid.
 		/// </summary>
-		private static void yaml_emitter_analyze_version_directive(VersionDirective versionDirective)
+		private static void AnalyzeVersionDirective(VersionDirective versionDirective)
 		{
 			if(versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor != Constants.MinorVersion) {
 				throw new YamlException("Incompatible %YAML directive");
 			}
 		}
 
-		private void yaml_emitter_write_indicator(string indicator, bool needWhitespace, bool whitespace, bool indentation)
+		private void WriteIndicator(string indicator, bool needWhitespace, bool whitespace, bool indentation)
 		{
 			if (needWhitespace && !isWhitespace) {
 				Write(' ');
@@ -764,7 +756,7 @@ namespace YamlDotNet.Core
 			isIndentation &= indentation;
 		}
 		
-		private void yaml_emitter_write_indent()
+		private void WriteIndent()
 		{
 			int currentIndent = Math.Max(indent, 0);
 
@@ -783,16 +775,16 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect the root node.
 		/// </summary>
-		private void yaml_emitter_emit_document_content(Event evt)
+		private void EmitDocumentContent(Event evt)
 		{
 			states.Push(EmitterState.YAML_EMIT_DOCUMENT_END_STATE);
-			yaml_emitter_emit_node(evt, false, false);
+			EmitNode(evt, false, false);
 		}
 
 		/// <summary>
 		/// Expect a node.
 		/// </summary>
-		private void yaml_emitter_emit_node(ParsingEvent evt, bool isMapping, bool isSimpleKey)
+		private void EmitNode(ParsingEvent evt, bool isMapping, bool isSimpleKey)
 		{
 			isMappingContext = isMapping;
 			isSimpleKeyContext = isSimpleKey;
@@ -800,19 +792,19 @@ namespace YamlDotNet.Core
 			switch (evt.Type)
 			{
 				case EventType.YAML_ALIAS_EVENT:
-					yaml_emitter_emit_alias();
+					EmitAlias();
 					break;
 
 				case EventType.YAML_SCALAR_EVENT:
-					yaml_emitter_emit_scalar(evt);
+					EmitScalar(evt);
 					break;
 
 				case EventType.YAML_SEQUENCE_START_EVENT:
-					yaml_emitter_emit_sequence_start(evt);
+					EmitSequenceStart(evt);
 					break;
 
 				case EventType.YAML_MAPPING_START_EVENT:
-					yaml_emitter_emit_mapping_start(evt);
+					EmitMappingStart(evt);
 					break;
 
 				default:
@@ -823,14 +815,14 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect SEQUENCE-START.
 		/// </summary>
-		private void yaml_emitter_emit_sequence_start(Event evt)
+		private void EmitSequenceStart(Event evt)
 		{
-			yaml_emitter_process_anchor();
-			yaml_emitter_process_tag();
+			ProcessAnchor();
+			ProcessTag();
 
 			SequenceStart sequenceStart = (SequenceStart)evt;
 			
-			if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || yaml_emitter_check_empty_sequence()) {
+			if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || CheckEmptySequence()) {
 				state = EmitterState.YAML_EMIT_FLOW_SEQUENCE_FIRST_ITEM_STATE;
 			}
 			else {
@@ -841,7 +833,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the next events represent an empty sequence.
 		/// </summary>
-		private bool yaml_emitter_check_empty_sequence()
+		private bool CheckEmptySequence()
 		{
 			if (events.Count < 2) {
 				return false;
@@ -854,7 +846,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the next events represent an empty mapping.
 		/// </summary>
-		private bool yaml_emitter_check_empty_mapping()
+		private bool CheckEmptyMapping()
 		{
 			if (events.Count < 2) {
 				return false;
@@ -867,7 +859,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Write a tag.
 		/// </summary>
-		private void yaml_emitter_process_tag()
+		private void ProcessTag()
 		{
 			if(tagData.handle == null && tagData.suffix == null) {
 				return;
@@ -875,30 +867,30 @@ namespace YamlDotNet.Core
 
 			if (tagData.handle != null)
 			{
-				yaml_emitter_write_tag_handle(tagData.handle);
+				WriteTagHandle(tagData.handle);
 				if(tagData.suffix != null) {
-					yaml_emitter_write_tag_content(tagData.suffix, false);
+					WriteTagContent(tagData.suffix, false);
 				}
 			}
 			else
 			{
-				yaml_emitter_write_indicator("!<", true, false, false);
-				yaml_emitter_write_tag_content(tagData.suffix, false);
-				yaml_emitter_write_indicator(">", false, false, false);
+				WriteIndicator("!<", true, false, false);
+				WriteTagContent(tagData.suffix, false);
+				WriteIndicator(">", false, false, false);
 			}
 		}
 
 		/// <summary>
 		/// Expect MAPPING-START.
 		/// </summary>
-		private void yaml_emitter_emit_mapping_start(Event evt)
+		private void EmitMappingStart(Event evt)
 		{
-			yaml_emitter_process_anchor();
-			yaml_emitter_process_tag();
+			ProcessAnchor();
+			ProcessTag();
 
 			MappingStart mappingStart = (MappingStart)evt;
 
-			if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || yaml_emitter_check_empty_mapping()) {
+			if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || CheckEmptyMapping()) {
 				state = EmitterState.YAML_EMIT_FLOW_MAPPING_FIRST_KEY_STATE;
 			}
 			else {
@@ -909,13 +901,13 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect SCALAR.
 		/// </summary>
-		private void yaml_emitter_emit_scalar(Event evt)
+		private void EmitScalar(Event evt)
 		{
-			yaml_emitter_select_scalar_style(evt);
-			yaml_emitter_process_anchor();
-			yaml_emitter_process_tag();
-			yaml_emitter_increase_indent(true, false);
-			yaml_emitter_process_scalar();
+			SelectScalarStyle(evt);
+			ProcessAnchor();
+			ProcessTag();
+			IncreaseIndent(true, false);
+			ProcessScalar();
 			
 			indent = indents.Pop();
 			state = states.Pop();
@@ -924,28 +916,28 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Write a scalar.
 		/// </summary>
-		private void yaml_emitter_process_scalar()
+		private void ProcessScalar()
 		{
 			switch (scalarData.style)
 			{
 				case ScalarStyle.Plain:
-					yaml_emitter_write_plain_scalar(scalarData.value, !isSimpleKeyContext);
+					WritePlainScalar(scalarData.value, !isSimpleKeyContext);
 					break;
 
 				case ScalarStyle.SingleQuoted:
-					yaml_emitter_write_single_quoted_scalar(scalarData.value, !isSimpleKeyContext);
+					WriteSingleQuotedScalar(scalarData.value, !isSimpleKeyContext);
 					break;
 
 				case ScalarStyle.DoubleQuoted:
-					yaml_emitter_write_double_quoted_scalar(scalarData.value, !isSimpleKeyContext);
+					WriteDoubleQuotedScalar(scalarData.value, !isSimpleKeyContext);
 					break;
 
 				case ScalarStyle.Literal:
-					yaml_emitter_write_literal_scalar(scalarData.value);
+					WriteLiteralScalar(scalarData.value);
 					break;
 
 				case ScalarStyle.Folded:
-					yaml_emitter_write_folded_scalar(scalarData.value);
+					WriteFoldedScalar(scalarData.value);
 					break;
 
 				default:
@@ -977,14 +969,14 @@ namespace YamlDotNet.Core
 				(character >= '\xE000' && character <= '\xFFFD');
 		}
 
-		private void yaml_emitter_write_folded_scalar(string value)
+		private void WriteFoldedScalar(string value)
 		{
-			int chomp = yaml_emitter_determine_chomping(value);
+			int chomp = DetermineChomping(value);
 			bool breaks = true;
 			bool leadingSpaces = false;
 
-			yaml_emitter_write_indicator(chomp == -1 ? ">-" : chomp == +1 ? ">+" : ">", true, false, false);
-			yaml_emitter_write_indent();
+			WriteIndicator(chomp == -1 ? ">-" : chomp == +1 ? ">+" : ">", true, false, false);
+			WriteIndent();
 
 			for(int i = 0; i < value.Length; ++i) {
 				char character = value[i];
@@ -1006,11 +998,11 @@ namespace YamlDotNet.Core
 				else
 				{
 					if (breaks) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 						leadingSpaces = character == ' ';
 					}
 					if (!breaks && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 					else {
 						Write(character);
@@ -1021,7 +1013,7 @@ namespace YamlDotNet.Core
 			}
 		}
 	
-		private static int yaml_emitter_determine_chomping(string value)
+		private static int DetermineChomping(string value)
 		{
 			// TODO: Understand the reason for this method
 			if(value.Length == 0) {
@@ -1046,13 +1038,13 @@ namespace YamlDotNet.Core
 			return 1;
 		}
 
-		private void yaml_emitter_write_literal_scalar(string value)
+		private void WriteLiteralScalar(string value)
 		{
-			int chomp = yaml_emitter_determine_chomping(value);
+			int chomp = DetermineChomping(value);
 			bool breaks = false;
 
-			yaml_emitter_write_indicator(chomp == -1 ? "|-" : chomp == +1 ? "|+" : "|", true, false, false);
-			yaml_emitter_write_indent();
+			WriteIndicator(chomp == -1 ? "|-" : chomp == +1 ? "|+" : "|", true, false, false);
+			WriteIndent();
 
 			foreach (var character in value) {
 				if(IsBreak(character)) {
@@ -1062,7 +1054,7 @@ namespace YamlDotNet.Core
 				}
 				else {
 					if(breaks) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 					Write(character);
 					isIndentation = false;
@@ -1071,9 +1063,9 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private void yaml_emitter_write_double_quoted_scalar(string value, bool allowBreaks)
+		private void WriteDoubleQuotedScalar(string value, bool allowBreaks)
 		{
-			yaml_emitter_write_indicator("\"", true, false, false);
+			WriteIndicator("\"", true, false, false);
 
 			bool spaces = false;
 			for (int index = 0; index < value.Length; ++index) {
@@ -1167,7 +1159,7 @@ namespace YamlDotNet.Core
 				else if (character == ' ')
 				{
 					if (allowBreaks && !spaces && column > bestWidth && index > 0 && index + 1 < value.Length) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 						if(value[index + 1] == ' ') {
 							Write('\\');
 						}
@@ -1184,15 +1176,15 @@ namespace YamlDotNet.Core
 				}
 			}
 
-			yaml_emitter_write_indicator("\"", false, false, false);
+			WriteIndicator("\"", false, false, false);
 
 			isWhitespace = false;
 			isIndentation = false;
 		}
 
-		private void yaml_emitter_write_single_quoted_scalar(string value, bool allowBreaks)
+		private void WriteSingleQuotedScalar(string value, bool allowBreaks)
 		{
-			yaml_emitter_write_indicator("'", true, false, false);
+			WriteIndicator("'", true, false, false);
 
 			bool spaces = false;
 			bool breaks = false;
@@ -1203,7 +1195,7 @@ namespace YamlDotNet.Core
 				if (character == ' ')
 				{
 					if (allowBreaks && !spaces && column > bestWidth && index != 0 && index + 1 < value.Length && value[index + 1] != ' ') {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 					else {
 						Write(character);
@@ -1222,7 +1214,7 @@ namespace YamlDotNet.Core
 				else
 				{
 					if (breaks) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 					if (character == '\'') {
 						Write(character);
@@ -1234,13 +1226,13 @@ namespace YamlDotNet.Core
 				}
 			}
 
-			yaml_emitter_write_indicator("'", false, false, false);
+			WriteIndicator("'", false, false, false);
 
 			isWhitespace = false;
 			isIndentation = false;
 		}
 		
-		private void yaml_emitter_write_plain_scalar(string value, bool allowBreaks)
+		private void WritePlainScalar(string value, bool allowBreaks)
 		{
 			if (!isWhitespace) {
 				Write(' ');
@@ -1253,7 +1245,7 @@ namespace YamlDotNet.Core
 
 				if(IsSpace(character)) {
 					if(allowBreaks && !spaces && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ') {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 					else {
 						Write(character);
@@ -1272,7 +1264,7 @@ namespace YamlDotNet.Core
 				else
 				{
 					if (breaks) {
-						yaml_emitter_write_indent();
+						WriteIndent();
 					}
 					Write(character);
 					isIndentation = false;
@@ -1288,7 +1280,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Increase the indentation level.
 		/// </summary>
-		private void yaml_emitter_increase_indent(bool isFlow, bool isIndentless)
+		private void IncreaseIndent(bool isFlow, bool isIndentless)
 		{
 			indents.Push(indent);
 
@@ -1303,7 +1295,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Determine an acceptable scalar style.
 		/// </summary>
-		private void yaml_emitter_select_scalar_style(Event evt)
+		private void SelectScalarStyle(Event evt)
 		{
 			Scalar scalar = (Scalar)evt;
 			
@@ -1365,25 +1357,25 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect ALIAS.
 		/// </summary>
-		private void yaml_emitter_emit_alias()
+		private void EmitAlias()
 		{
-			yaml_emitter_process_anchor();
+			ProcessAnchor();
 			state = states.Pop();
 		}
 		
 		/// <summary>
 		/// Write an achor.
 		/// </summary>
-		private void yaml_emitter_process_anchor()
+		private void ProcessAnchor()
 		{
 			if (anchorData.anchor != null)
 			{
-				yaml_emitter_write_indicator(anchorData.isAlias ? "*" : "&", true, false, false);
-				yaml_emitter_write_anchor(anchorData.anchor);
+				WriteIndicator(anchorData.isAlias ? "*" : "&", true, false, false);
+				WriteAnchor(anchorData.anchor);
 			}
 		}
 
-		private void yaml_emitter_write_anchor(string value)
+		private void WriteAnchor(string value)
 		{
 			Write(value);
 
@@ -1394,15 +1386,15 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect DOCUMENT-END.
 		/// </summary>
-		private void yaml_emitter_emit_document_end(Event evt)
+		private void EmitDocumentEnd(Event evt)
 		{
 			DocumentEnd documentEnd = evt as DocumentEnd;
 			if (documentEnd != null)
 			{
-				yaml_emitter_write_indent();
+				WriteIndent();
 				if(!documentEnd.IsImplicit) {
-					yaml_emitter_write_indicator("...", true, false, false);
-					yaml_emitter_write_indent();
+					WriteIndicator("...", true, false, false);
+					WriteIndent();
 				}
 
 				state = EmitterState.YAML_EMIT_DOCUMENT_START_STATE;
@@ -1418,12 +1410,12 @@ namespace YamlDotNet.Core
 		/// Expect a flow item node.
 		/// </summary>
 
-		private void yaml_emitter_emit_flow_sequence_item(Event evt, bool isFirst)
+		private void EmitFlowSequenceItem(Event evt, bool isFirst)
 		{
 			if (isFirst)
 			{
-				yaml_emitter_write_indicator("[", true, true, false);
-				yaml_emitter_increase_indent(true, false);
+				WriteIndicator("[", true, true, false);
+				IncreaseIndent(true, false);
 				++flowLevel;
 			}
 
@@ -1432,36 +1424,36 @@ namespace YamlDotNet.Core
 				--flowLevel;
 				indent = indents.Pop();
 				if (isCanonical && !isFirst) {
-					yaml_emitter_write_indicator(",", false, false, false);
-					yaml_emitter_write_indent();
+					WriteIndicator(",", false, false, false);
+					WriteIndent();
 				}
-				yaml_emitter_write_indicator("]", false, false, false);
+				WriteIndicator("]", false, false, false);
 				state = states.Pop();
 				return;
 			}
 
 			if (!isFirst) {
-				yaml_emitter_write_indicator(",", false, false, false);
+				WriteIndicator(",", false, false, false);
 			}
 
 			if (isCanonical ||  column > bestWidth) {
-				yaml_emitter_write_indent();
+				WriteIndent();
 			}
 			
 			states.Push(EmitterState.YAML_EMIT_FLOW_SEQUENCE_ITEM_STATE);
 
-			yaml_emitter_emit_node(evt, false, false);
+			EmitNode(evt, false, false);
 		}
 
 		/// <summary>
 		/// Expect a flow key node.
 		/// </summary>
-		private void yaml_emitter_emit_flow_mapping_key(Event evt, bool isFirst)
+		private void EmitFlowMappingKey(Event evt, bool isFirst)
 		{
 			if (isFirst)
 			{
-				yaml_emitter_write_indicator("{", true, true, false);
-				yaml_emitter_increase_indent(true, false);
+				WriteIndicator("{", true, true, false);
+				IncreaseIndent(true, false);
 				++flowLevel;
 			}
 
@@ -1470,31 +1462,31 @@ namespace YamlDotNet.Core
 				--flowLevel;
 				indent = indents.Pop();
 				if (isCanonical && !isFirst) {
-					yaml_emitter_write_indicator(",", false, false, false);
-					yaml_emitter_write_indent();
+					WriteIndicator(",", false, false, false);
+					WriteIndent();
 				}
-				yaml_emitter_write_indicator("}", false, false, false);
+				WriteIndicator("}", false, false, false);
 				state = states.Pop();
 				return;
 			}
 
 			if (!isFirst) {
-				yaml_emitter_write_indicator(",", false, false, false);
+				WriteIndicator(",", false, false, false);
 			}
 			if (isCanonical || column > bestWidth) {
-				yaml_emitter_write_indent();
+				WriteIndent();
 			}
 
-			if (!isCanonical && yaml_emitter_check_simple_key())
+			if (!isCanonical && CheckSimpleKey())
 			{
 				states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_SIMPLE_VALUE_STATE);
-				yaml_emitter_emit_node(evt, true, true);
+				EmitNode(evt, true, true);
 			}
 			else
 			{
-				yaml_emitter_write_indicator("?", true, false, false);
+				WriteIndicator("?", true, false, false);
 				states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_VALUE_STATE);
-				yaml_emitter_emit_node(evt, true, false);
+				EmitNode(evt, true, false);
 			}
 		}
 
@@ -1507,7 +1499,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the next node can be expressed as a simple key.
 		/// </summary>
-		private bool yaml_emitter_check_simple_key()
+		private bool CheckSimpleKey()
 		{
 			if(events.Count < 1) {
 				return false;
@@ -1533,7 +1525,7 @@ namespace YamlDotNet.Core
 					break;
 
 				case EventType.YAML_SEQUENCE_START_EVENT:
-					if (!yaml_emitter_check_empty_sequence()) {
+					if (!CheckEmptySequence()) {
 						return false;
 					}
 					length =
@@ -1543,7 +1535,7 @@ namespace YamlDotNet.Core
 					break;
 
 				case EventType.YAML_MAPPING_START_EVENT:
-					if (!yaml_emitter_check_empty_sequence()) {
+					if (!CheckEmptySequence()) {
 						return false;
 					}
 					length =
@@ -1562,28 +1554,28 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a flow value node.
 		/// </summary>
-		private void yaml_emitter_emit_flow_mapping_value(Event evt, bool isSimple)
+		private void EmitFlowMappingValue(Event evt, bool isSimple)
 		{
 			if (isSimple) {
-				yaml_emitter_write_indicator(":", false, false, false);
+				WriteIndicator(":", false, false, false);
 			}
 			else {
 				if (isCanonical || column > bestWidth) {
-					yaml_emitter_write_indent();
+					WriteIndent();
 				}
-				yaml_emitter_write_indicator(":", true, false, false);
+				WriteIndicator(":", true, false, false);
 			}
 			states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_KEY_STATE);
-			yaml_emitter_emit_node(evt, true, false);
+			EmitNode(evt, true, false);
 		}
 
 		/// <summary>
 		/// Expect a block item node.
 		/// </summary>
-		private void yaml_emitter_emit_block_sequence_item(Event evt, bool isFirst)
+		private void EmitBlockSequenceItem(Event evt, bool isFirst)
 		{
 			if (isFirst) {
-				yaml_emitter_increase_indent(false, (isMappingContext && !isIndentation));
+				IncreaseIndent(false, (isMappingContext && !isIndentation));
 			}
 
 			if (evt.Type == EventType.YAML_SEQUENCE_END_EVENT)
@@ -1593,21 +1585,21 @@ namespace YamlDotNet.Core
 				return;
 			}
 
-			yaml_emitter_write_indent();
-			yaml_emitter_write_indicator("-", true, false, true);
+			WriteIndent();
+			WriteIndicator("-", true, false, true);
 			states.Push(EmitterState.YAML_EMIT_BLOCK_SEQUENCE_ITEM_STATE);
 
-			yaml_emitter_emit_node(evt, false, false);
+			EmitNode(evt, false, false);
 		}
 		
 		/// <summary>
 		/// Expect a block key node.
 		/// </summary>
-		private void yaml_emitter_emit_block_mapping_key(Event evt, bool isFirst)
+		private void EmitBlockMappingKey(Event evt, bool isFirst)
 		{
 			if (isFirst)
 			{
-				yaml_emitter_increase_indent(false, false);
+				IncreaseIndent(false, false);
 			}
 
 			if (evt.Type == EventType.YAML_MAPPING_END_EVENT)
@@ -1617,35 +1609,35 @@ namespace YamlDotNet.Core
 				return;
 			}
 
-			yaml_emitter_write_indent();
+			WriteIndent();
 
-			if (yaml_emitter_check_simple_key())
+			if (CheckSimpleKey())
 			{
 				states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_SIMPLE_VALUE_STATE);
-				yaml_emitter_emit_node(evt, true, true);
+				EmitNode(evt, true, true);
 			}
 			else
 			{
-				yaml_emitter_write_indicator("?", true, false, true);
+				WriteIndicator("?", true, false, true);
 				states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_VALUE_STATE);
-				yaml_emitter_emit_node(evt, true, false);
+				EmitNode(evt, true, false);
 			}
 		}
 
 		/// <summary>
 		/// Expect a block value node.
 		/// </summary>
-		private void yaml_emitter_emit_block_mapping_value(Event evt, bool isSimple)
+		private void EmitBlockMappingValue(Event evt, bool isSimple)
 		{
 			if (isSimple) {
-				yaml_emitter_write_indicator(":", false, false, false);
+				WriteIndicator(":", false, false, false);
 			}
 			else {
-				yaml_emitter_write_indent();
-				yaml_emitter_write_indicator(":", true, false, true);
+				WriteIndent();
+				WriteIndicator(":", true, false, true);
 			}
 			states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_KEY_STATE);
-			yaml_emitter_emit_node(evt, true, false);
+			EmitNode(evt, true, false);
 		}
 	}
 }

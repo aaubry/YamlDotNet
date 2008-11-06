@@ -70,82 +70,82 @@ namespace YamlDotNet.Core
 			else
 			{
 				// Generate the next event.
-				current = yaml_parser_state_machine();
+				current = StateMachine();
 				return true;
 			}
 		}
 
-		Event yaml_parser_state_machine()
+		private Event StateMachine()
 		{
 			switch (state)
 			{
-				case ParserState.YAML_PARSE_STREAM_START_STATE: return yaml_parser_parse_stream_start();
+				case ParserState.YAML_PARSE_STREAM_START_STATE: return ParseStreamStart();
 
 				case ParserState.YAML_PARSE_IMPLICIT_DOCUMENT_START_STATE:
-					return yaml_parser_parse_document_start(true);
+					return ParseDocumentStart(true);
 
 				case ParserState.YAML_PARSE_DOCUMENT_START_STATE:
-					return yaml_parser_parse_document_start(false);
+					return ParseDocumentStart(false);
 
 				case ParserState.YAML_PARSE_DOCUMENT_CONTENT_STATE:
-					return yaml_parser_parse_document_content();
+					return ParseDocumentContent();
 
 				case ParserState.YAML_PARSE_DOCUMENT_END_STATE:
-					return yaml_parser_parse_document_end();
+					return ParseDocumentEnd();
 
 				case ParserState.YAML_PARSE_BLOCK_NODE_STATE:
-					return yaml_parser_parse_node(true, false);
+					return ParseNode(true, false);
 
 				case ParserState.YAML_PARSE_BLOCK_NODE_OR_INDENTLESS_SEQUENCE_STATE:
-					return yaml_parser_parse_node(true, true);
+					return ParseNode(true, true);
 
 				case ParserState.YAML_PARSE_FLOW_NODE_STATE:
-					return yaml_parser_parse_node(false, false);
+					return ParseNode(false, false);
 
 				case ParserState.YAML_PARSE_BLOCK_SEQUENCE_FIRST_ENTRY_STATE:
-					return yaml_parser_parse_block_sequence_entry(true);
+					return ParseBlockSequenceEntry(true);
 
 				case ParserState.YAML_PARSE_BLOCK_SEQUENCE_ENTRY_STATE:
-					return yaml_parser_parse_block_sequence_entry(false);
+					return ParseBlockSequenceEntry(false);
 
 				case ParserState.YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE:
-					return yaml_parser_parse_indentless_sequence_entry();
+					return ParseIndentlessSequenceEntry();
 
 				case ParserState.YAML_PARSE_BLOCK_MAPPING_FIRST_KEY_STATE:
-					return yaml_parser_parse_block_mapping_key(true);
+					return ParseBlockMappingKey(true);
 
 				case ParserState.YAML_PARSE_BLOCK_MAPPING_KEY_STATE:
-					return yaml_parser_parse_block_mapping_key(false);
+					return ParseBlockMappingKey(false);
 
 				case ParserState.YAML_PARSE_BLOCK_MAPPING_VALUE_STATE:
-					return yaml_parser_parse_block_mapping_value();
+					return ParseBlockMappingValue();
 
 				case ParserState.YAML_PARSE_FLOW_SEQUENCE_FIRST_ENTRY_STATE:
-					return yaml_parser_parse_flow_sequence_entry(true);
+					return ParseFlowSequenceEntry(true);
 
 				case ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE:
-					return yaml_parser_parse_flow_sequence_entry(false);
+					return ParseFlowSequenceEntry(false);
 
 				case ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_KEY_STATE:
-					return yaml_parser_parse_flow_sequence_entry_mapping_key();
+					return ParseFlowSequenceEntryMappingKey();
 
 				case ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_VALUE_STATE:
-					return yaml_parser_parse_flow_sequence_entry_mapping_value();
+					return ParseFlowSequenceEntryMappingValue();
 
 				case ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_END_STATE:
-					return yaml_parser_parse_flow_sequence_entry_mapping_end();
+					return ParseFlowSequenceEntryMappingEnd();
 
 				case ParserState.YAML_PARSE_FLOW_MAPPING_FIRST_KEY_STATE:
-					return yaml_parser_parse_flow_mapping_key(true);
+					return ParseFlowMappingKey(true);
 
 				case ParserState.YAML_PARSE_FLOW_MAPPING_KEY_STATE:
-					return yaml_parser_parse_flow_mapping_key(false);
+					return ParseFlowMappingKey(false);
 
 				case ParserState.YAML_PARSE_FLOW_MAPPING_VALUE_STATE:
-					return yaml_parser_parse_flow_mapping_value(false);
+					return ParseFlowMappingValue(false);
 
 				case ParserState.YAML_PARSE_FLOW_MAPPING_EMPTY_VALUE_STATE:
-					return yaml_parser_parse_flow_mapping_value(true);
+					return ParseFlowMappingValue(true);
 
 				default:
 					Debug.Assert(false, "Invalid state");      // Invalid state.
@@ -167,7 +167,7 @@ namespace YamlDotNet.Core
 		/// stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
 		///              ************
 		/// </summary>
-		private Event yaml_parser_parse_stream_start()
+		private Event ParseStreamStart()
 		{
 			StreamStart streamStart = GetCurrentToken() as StreamStart;
 			if (streamStart == null)
@@ -187,7 +187,7 @@ namespace YamlDotNet.Core
 		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
 		///                          *************************
 		/// </summary>
-		private Event yaml_parser_parse_document_start(bool isImplicit)
+		private Event ParseDocumentStart(bool isImplicit)
 		{
 			// Parse extra document end indicators.
 
@@ -204,7 +204,7 @@ namespace YamlDotNet.Core
 			if (isImplicit && !(GetCurrentToken() is VersionDirective || GetCurrentToken() is TagDirective || GetCurrentToken() is DocumentStart || GetCurrentToken() is StreamEnd))
 			{
 				TagDirectiveCollection directives = new TagDirectiveCollection();
-				yaml_parser_process_directives(directives);
+				ProcessDirectives(directives);
 
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
 
@@ -219,7 +219,7 @@ namespace YamlDotNet.Core
 			{
 				Mark start = GetCurrentToken().Start;
 				TagDirectiveCollection directives = new TagDirectiveCollection();
-				VersionDirective versionDirective = yaml_parser_process_directives(directives);
+				VersionDirective versionDirective = ProcessDirectives(directives);
 
 				if (!(GetCurrentToken() is DocumentStart))
 				{
@@ -254,7 +254,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Parse directives.
 		/// </summary>
-		private VersionDirective yaml_parser_process_directives(TagDirectiveCollection tags)
+		private VersionDirective ProcessDirectives(TagDirectiveCollection tags)
 		{
 			VersionDirective version = null;
 
@@ -322,7 +322,7 @@ namespace YamlDotNet.Core
 		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
 		///                                                    ***********
 		/// </summary>
-		private Event yaml_parser_parse_document_content()
+		private Event ParseDocumentContent()
 		{
 			if (
 			    GetCurrentToken() is VersionDirective ||
@@ -333,18 +333,18 @@ namespace YamlDotNet.Core
 			)
 			{
 				state = states.Pop();
-				return yaml_parser_process_empty_scalar(scanner.CurrentPosition);
+				return ProcessEmptyScalar(scanner.CurrentPosition);
 			}
 			else
 			{
-				return yaml_parser_parse_node(true, false);
+				return ParseNode(true, false);
 			}
 		}
 
 		/// <summary>
 		/// Generate an empty scalar event.
 		/// </summary>
-		private static Event yaml_parser_process_empty_scalar(Mark position)
+		private static Event ProcessEmptyScalar(Mark position)
 		{
 			return new Events.Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
 		}
@@ -377,7 +377,7 @@ namespace YamlDotNet.Core
 		/// flow_content         ::= flow_collection | SCALAR
 		///                                            ******
 		/// </summary>
-		private Event yaml_parser_parse_node(bool isBlock, bool isIndentlessSequence)
+		private Event ParseNode(bool isBlock, bool isIndentlessSequence)
 		{
 			AnchorAlias alias = GetCurrentToken() as AnchorAlias;
 			if (alias != null)
@@ -431,7 +431,7 @@ namespace YamlDotNet.Core
 				tagName = null;
 			}
 
-		string anchorName = anchor != null ? string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value : null;
+			string anchorName = anchor != null ? string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value : null;
 
 			bool isImplicit = string.IsNullOrEmpty(tagName);
 
@@ -520,7 +520,7 @@ namespace YamlDotNet.Core
 		///                                                                *************
 		/// </summary>
 
-		private Event yaml_parser_parse_document_end()
+		private Event ParseDocumentEnd()
 		{
 			bool isImplicit = true;
 			Mark start = GetCurrentToken().Start;
@@ -545,7 +545,7 @@ namespace YamlDotNet.Core
 		///                    ********************  *********** *             *********
 		/// </summary>
 
-		private Event yaml_parser_parse_block_sequence_entry(bool isFirst)
+		private Event ParseBlockSequenceEntry(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -561,12 +561,12 @@ namespace YamlDotNet.Core
 				if (!(GetCurrentToken() is BlockEntry || GetCurrentToken() is BlockEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_BLOCK_SEQUENCE_ENTRY_STATE);
-					return yaml_parser_parse_node(true, false);
+					return ParseNode(true, false);
 				}
 				else
 				{
 					state = ParserState.YAML_PARSE_BLOCK_SEQUENCE_ENTRY_STATE;
-					return yaml_parser_process_empty_scalar(mark);
+					return ProcessEmptyScalar(mark);
 				}
 			}
 
@@ -589,7 +589,7 @@ namespace YamlDotNet.Core
 		/// indentless_sequence  ::= (BLOCK-ENTRY block_node?)+
 		///                           *********** *
 		/// </summary>
-		private Event yaml_parser_parse_indentless_sequence_entry()
+		private Event ParseIndentlessSequenceEntry()
 		{
 			if (GetCurrentToken() is BlockEntry)
 			{
@@ -599,12 +599,12 @@ namespace YamlDotNet.Core
 				if (!(GetCurrentToken() is BlockEntry || GetCurrentToken() is Key || GetCurrentToken() is Value || GetCurrentToken() is BlockEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE);
-					return yaml_parser_parse_node(true, false);
+					return ParseNode(true, false);
 				}
 				else
 				{
 					state = ParserState.YAML_PARSE_INDENTLESS_SEQUENCE_ENTRY_STATE;
-					return yaml_parser_process_empty_scalar(mark);
+					return ProcessEmptyScalar(mark);
 				}
 			}
 			else
@@ -625,7 +625,7 @@ namespace YamlDotNet.Core
 		///                          BLOCK-END
 		///                          *********
 		/// </summary>
-		private Event yaml_parser_parse_block_mapping_key(bool isFirst)
+		private Event ParseBlockMappingKey(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -640,12 +640,12 @@ namespace YamlDotNet.Core
 				if (!(GetCurrentToken() is Key || GetCurrentToken() is Value || GetCurrentToken() is BlockEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_BLOCK_MAPPING_VALUE_STATE);
-					return yaml_parser_parse_node(true, true);
+					return ParseNode(true, true);
 				}
 				else
 				{
 					state = ParserState.YAML_PARSE_BLOCK_MAPPING_VALUE_STATE;
-					return yaml_parser_process_empty_scalar(mark);
+					return ProcessEmptyScalar(mark);
 				}
 			}
 
@@ -674,7 +674,7 @@ namespace YamlDotNet.Core
 		///                          BLOCK-END
 		///
 		/// </summary>
-		private Event yaml_parser_parse_block_mapping_value()
+		private Event ParseBlockMappingValue()
 		{
 			if (GetCurrentToken() is Value)
 			{
@@ -684,19 +684,19 @@ namespace YamlDotNet.Core
 				if (!(GetCurrentToken() is Key || GetCurrentToken() is Value || GetCurrentToken() is BlockEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_BLOCK_MAPPING_KEY_STATE);
-					return yaml_parser_parse_node(true, true);
+					return ParseNode(true, true);
 				}
 				else
 				{
 					state = ParserState.YAML_PARSE_BLOCK_MAPPING_KEY_STATE;
-					return yaml_parser_process_empty_scalar(mark);
+					return ProcessEmptyScalar(mark);
 				}
 			}
 
 			else
 			{
 				state = ParserState.YAML_PARSE_BLOCK_MAPPING_KEY_STATE;
-				return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
+				return ProcessEmptyScalar(GetCurrentToken().Start);
 			}
 		}
 
@@ -713,7 +713,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                          *
 		/// </summary>
-		private Event yaml_parser_parse_flow_sequence_entry(bool isFirst)
+		private Event ParseFlowSequenceEntry(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -746,7 +746,7 @@ namespace YamlDotNet.Core
 				else if (!(GetCurrentToken() is FlowSequenceEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE);
-					return yaml_parser_parse_node(false, false);
+					return ParseNode(false, false);
 				}
 			}
 
@@ -761,19 +761,19 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                      *** *
 		/// </summary>
-		private Event yaml_parser_parse_flow_sequence_entry_mapping_key()
+		private Event ParseFlowSequenceEntryMappingKey()
 		{
 			if (!(GetCurrentToken() is Value || GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowSequenceEnd))
 			{
 				states.Push(ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_VALUE_STATE);
-				return yaml_parser_parse_node(false, false);
+				return ParseNode(false, false);
 			}
 			else
 			{
 				Mark mark = GetCurrentToken().End;
 				Skip();
 				state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_VALUE_STATE;
-				return yaml_parser_process_empty_scalar(mark);
+				return ProcessEmptyScalar(mark);
 			}
 		}
 
@@ -782,7 +782,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                                      ***** *
 		/// </summary>
-		private Event yaml_parser_parse_flow_sequence_entry_mapping_value()
+		private Event ParseFlowSequenceEntryMappingValue()
 		{
 			if (GetCurrentToken() is Value)
 			{
@@ -790,11 +790,11 @@ namespace YamlDotNet.Core
 				if (!(GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowSequenceEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_END_STATE);
-					return yaml_parser_parse_node(false, false);
+					return ParseNode(false, false);
 				}
 			}
 			state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_END_STATE;
-			return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
+			return ProcessEmptyScalar(GetCurrentToken().Start);
 		}
 
 		/// <summary>
@@ -802,7 +802,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                                                      *
 		/// </summary>
-		private Event yaml_parser_parse_flow_sequence_entry_mapping_end()
+		private Event ParseFlowSequenceEntryMappingEnd()
 		{
 			state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE;
 			return new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
@@ -821,7 +821,7 @@ namespace YamlDotNet.Core
 		/// flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                          *           *** *
 		/// </summary>
-		private Event yaml_parser_parse_flow_mapping_key(bool isFirst)
+		private Event ParseFlowMappingKey(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -850,18 +850,18 @@ namespace YamlDotNet.Core
 					if (!(GetCurrentToken() is Value || GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowMappingEnd))
 					{
 						states.Push(ParserState.YAML_PARSE_FLOW_MAPPING_VALUE_STATE);
-						return yaml_parser_parse_node(false, false);
+						return ParseNode(false, false);
 					}
 					else
 					{
 						state = ParserState.YAML_PARSE_FLOW_MAPPING_VALUE_STATE;
-						return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
+						return ProcessEmptyScalar(GetCurrentToken().Start);
 					}
 				}
 				else if (!(GetCurrentToken() is FlowMappingEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_FLOW_MAPPING_EMPTY_VALUE_STATE);
-					return yaml_parser_parse_node(false, false);
+					return ParseNode(false, false);
 				}
 			}
 
@@ -876,12 +876,12 @@ namespace YamlDotNet.Core
 		/// flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                   *                  ***** *
 		/// </summary>
-		private Event yaml_parser_parse_flow_mapping_value(bool isEmpty)
+		private Event ParseFlowMappingValue(bool isEmpty)
 		{
 			if (isEmpty)
 			{
 				state = ParserState.YAML_PARSE_FLOW_MAPPING_KEY_STATE;
-				return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
+				return ProcessEmptyScalar(GetCurrentToken().Start);
 			}
 
 			if (GetCurrentToken() is Value)
@@ -890,12 +890,12 @@ namespace YamlDotNet.Core
 				if (!(GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowMappingEnd))
 				{
 					states.Push(ParserState.YAML_PARSE_FLOW_MAPPING_KEY_STATE);
-					return yaml_parser_parse_node(false, false);
+					return ParseNode(false, false);
 				}
 			}
 
 			state = ParserState.YAML_PARSE_FLOW_MAPPING_KEY_STATE;
-			return yaml_parser_process_empty_scalar(GetCurrentToken().Start);
+			return ProcessEmptyScalar(GetCurrentToken().Start);
 		}
 	}
 }
