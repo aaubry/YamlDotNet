@@ -67,6 +67,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Emitter.cs" />
     <Compile Include="EmitterState.cs" />
+    <Compile Include="EventReader.cs" />
     <Compile Include="Events\AnchorAlias.cs" />
     <Compile Include="Events\DocumentEnd.cs" />
     <Compile Include="Events\DocumentStart.cs" />

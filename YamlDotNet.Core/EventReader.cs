@@ -4,12 +4,12 @@ using YamlDotNet.Core;
 using System.Globalization;
 using Event = YamlDotNet.Core.Events.ParsingEvent;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.Core
 {
 	/// <summary>
 	/// Reads events from a sequence of <see cref="Event" />.
 	/// </summary>
-	internal class EventReader
+	public class EventReader
 	{
 		private readonly Parser parser;
 		private bool endOfStream;
