@@ -5,7 +5,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a stream end event.
 	/// </summary>
-	public class StreamEnd : ParsingEvent
+	public class StreamEnd : ParsingEvent, IStreamEnd
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

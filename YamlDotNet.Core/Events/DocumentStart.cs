@@ -7,7 +7,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a document start event.
 	/// </summary>
-	public class DocumentStart : ParsingEvent
+	public class DocumentStart : ParsingEvent, IDocumentStart
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

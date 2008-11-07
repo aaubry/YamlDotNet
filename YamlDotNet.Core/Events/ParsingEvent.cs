@@ -5,7 +5,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Base class for parsing events.
 	/// </summary>
-	public abstract class ParsingEvent
+	public abstract class ParsingEvent : IParsingEvent
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

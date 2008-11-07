@@ -6,7 +6,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a mapping start event.
 	/// </summary>
-	public class MappingStart : NodeEvent
+	public class MappingStart : NodeEvent, IMappingStart
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.
@@ -32,8 +32,12 @@ namespace YamlDotNet.Core.Events
 				return isImplicit;
 			}
 		}
-		
-		internal override bool IsCanonical {
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is canonical.
+		/// </summary>
+		/// <value></value>
+		public override bool IsCanonical {
 			get {
 				return !isImplicit;
 			}

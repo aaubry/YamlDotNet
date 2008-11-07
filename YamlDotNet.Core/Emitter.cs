@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core.Events;
-using Event = YamlDotNet.Core.Events.ParsingEvent;
+using Event = YamlDotNet.Core.Events.IParsingEvent;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
 
@@ -166,7 +166,62 @@ namespace YamlDotNet.Core
 				events.Dequeue();
 			}
 		}
-		
+
+		private static EventType GetEventType(IParsingEvent @event)
+		{
+			if(@event is IAnchorAlias)
+			{
+				return EventType.YAML_ALIAS_EVENT;
+			}
+
+			if (@event is IDocumentEnd)
+			{
+				return EventType.YAML_DOCUMENT_END_EVENT;
+			}
+
+			if (@event is IDocumentStart)
+			{
+				return EventType.YAML_DOCUMENT_START_EVENT;
+			}
+
+			if (@event is IMappingEnd)
+			{
+				return EventType.YAML_MAPPING_END_EVENT;
+			}
+
+			if (@event is IMappingStart)
+			{
+				return EventType.YAML_MAPPING_START_EVENT;
+			}
+
+			if (@event is IScalar)
+			{
+				return EventType.YAML_SCALAR_EVENT;
+			}
+
+			if (@event is ISequenceEnd)
+			{
+				return EventType.YAML_SEQUENCE_END_EVENT;
+			}
+
+			if (@event is ISequenceStart)
+			{
+				return EventType.YAML_SEQUENCE_START_EVENT;
+			}
+
+			if(@event is IStreamEnd)
+			{
+				return EventType.YAML_STREAM_END_EVENT;
+			}
+
+			if(@event is IStreamStart)
+			{
+				return EventType.YAML_STREAM_START_EVENT;
+			}
+
+			throw new ArgumentException("The specified event is of the wrong type.");
+		}
+
 		/// <summary>
 		/// Check if we need to accumulate more events before emitting.
 		/// 
@@ -182,7 +237,7 @@ namespace YamlDotNet.Core
 			}
 
 			int accumulate;
-			switch (events.Peek().Type) {
+			switch (GetEventType(events.Peek())) {
 				case EventType.YAML_DOCUMENT_START_EVENT:
 					accumulate = 1;
 					break;
@@ -205,7 +260,7 @@ namespace YamlDotNet.Core
 
 			int level = 0;
 			foreach (var evt in events) {
-				switch(evt.Type) {
+				switch(GetEventType(evt)) {
 					case EventType.YAML_DOCUMENT_START_EVENT:
 					case EventType.YAML_SEQUENCE_START_EVENT:
 					case EventType.YAML_MAPPING_START_EVENT:
@@ -583,7 +638,7 @@ namespace YamlDotNet.Core
 		/// </summary>
 		private void EmitStreamStart(Event evt)
 		{
-			if(evt.Type != EventType.YAML_STREAM_START_EVENT) {
+			if(!(evt is IStreamStart)) {
 				throw new ArgumentException("Expected STREAM-START.", "evt");
 			}
 			
@@ -652,7 +707,7 @@ namespace YamlDotNet.Core
 				state = EmitterState.YAML_EMIT_DOCUMENT_CONTENT_STATE;
 			}
 
-			else if (evt.Type == EventType.YAML_STREAM_END_EVENT)
+			else if (!(evt is IStreamEnd))
 			{
 				state = EmitterState.YAML_EMIT_END_STATE;
 			} else {
@@ -784,12 +839,12 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a node.
 		/// </summary>
-		private void EmitNode(ParsingEvent evt, bool isMapping, bool isSimpleKey)
+		private void EmitNode(IParsingEvent evt, bool isMapping, bool isSimpleKey)
 		{
 			isMappingContext = isMapping;
 			isSimpleKeyContext = isSimpleKey;
 
-			switch (evt.Type)
+			switch (GetEventType(evt))
 			{
 				case EventType.YAML_ALIAS_EVENT:
 					EmitAlias();
@@ -840,7 +895,7 @@ namespace YamlDotNet.Core
 			}
 
 			FakeList<Event> eventList = new FakeList<Event>(events);
-			return eventList[0].Type == EventType.YAML_SEQUENCE_START_EVENT && eventList[1].Type == EventType.YAML_SEQUENCE_END_EVENT;
+			return eventList[0] is ISequenceStart && eventList[1] is ISequenceEnd;
 		}
 
 		/// <summary>
@@ -853,7 +908,7 @@ namespace YamlDotNet.Core
 			}
 
 			FakeList<Event> eventList = new FakeList<Event>(events);
-			return eventList[0].Type == EventType.YAML_MAPPING_START_EVENT && eventList[1].Type == EventType.YAML_MAPPING_END_EVENT;
+			return eventList[0] is IMappingStart && eventList[1] is IMappingEnd;
 		}
 		
 		/// <summary>
@@ -1419,7 +1474,7 @@ namespace YamlDotNet.Core
 				++flowLevel;
 			}
 
-			if (evt.Type == EventType.YAML_SEQUENCE_END_EVENT)
+			if (evt is ISequenceEnd)
 			{
 				--flowLevel;
 				indent = indents.Pop();
@@ -1457,7 +1512,7 @@ namespace YamlDotNet.Core
 				++flowLevel;
 			}
 
-			if (evt.Type == EventType.YAML_MAPPING_END_EVENT)
+			if (evt is IMappingEnd)
 			{
 				--flowLevel;
 				indent = indents.Pop();
@@ -1506,7 +1561,7 @@ namespace YamlDotNet.Core
 			}
 			
 			int length;
-			switch (events.Peek().Type)
+			switch (GetEventType(events.Peek()))
 			{
 				case EventType.YAML_ALIAS_EVENT:
 					length = SafeStringLength(anchorData.anchor);
@@ -1578,7 +1633,7 @@ namespace YamlDotNet.Core
 				IncreaseIndent(false, (isMappingContext && !isIndentation));
 			}
 
-			if (evt.Type == EventType.YAML_SEQUENCE_END_EVENT)
+			if (evt is ISequenceEnd)
 			{
 				indent = indents.Pop();
 				state = states.Pop();
@@ -1602,7 +1657,7 @@ namespace YamlDotNet.Core
 				IncreaseIndent(false, false);
 			}
 
-			if (evt.Type == EventType.YAML_MAPPING_END_EVENT)
+			if (evt is IMappingEnd)
 			{
 				indent = indents.Pop();
 				state = states.Pop();

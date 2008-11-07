@@ -6,7 +6,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Contains the behavior that is common between node events.
 	/// </summary>
-	public abstract class NodeEvent : ParsingEvent
+	public abstract class NodeEvent : ParsingEvent, INodeEvent
 	{
 		internal static readonly Regex anchorValidator = new Regex(@"^[0-9a-zA-Z_\-]+$", RegexOptions.Compiled);
 
@@ -37,8 +37,12 @@ namespace YamlDotNet.Core.Events
 				return tag;
 			}
 		}
-		
-		internal abstract bool IsCanonical {
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is canonical.
+		/// </summary>
+		/// <value></value>
+		public abstract bool IsCanonical {
 			get;
 		}
 

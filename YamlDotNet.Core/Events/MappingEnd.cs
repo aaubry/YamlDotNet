@@ -5,7 +5,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a mapping end event.
 	/// </summary>
-	public class MappingEnd : ParsingEvent
+	public class MappingEnd : ParsingEvent, IMappingEnd
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

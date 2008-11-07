@@ -5,7 +5,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a stream start event.
 	/// </summary>
-	public class StreamStart : ParsingEvent
+	public class StreamStart : ParsingEvent, IStreamStart
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

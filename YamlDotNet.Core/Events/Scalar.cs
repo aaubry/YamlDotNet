@@ -6,7 +6,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a scalar event.
 	/// </summary>
-	public class Scalar : NodeEvent
+	public class Scalar : NodeEvent, IScalar
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.
@@ -70,8 +70,12 @@ namespace YamlDotNet.Core.Events
 				return isQuotedImplicit;
 			}
 		}
-		
-		internal override bool IsCanonical {
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is canonical.
+		/// </summary>
+		/// <value></value>
+		public override bool IsCanonical {
 			get {
 				return !isPlainImplicit && !isQuotedImplicit;
 			}

@@ -5,7 +5,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a sequence end event.
 	/// </summary>
-	public class SequenceEnd : ParsingEvent
+	public class SequenceEnd : ParsingEvent, ISequenceEnd
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

@@ -6,7 +6,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents an alias event.
 	/// </summary>
-	public class AnchorAlias : ParsingEvent
+	public class AnchorAlias : ParsingEvent, IAnchorAlias
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

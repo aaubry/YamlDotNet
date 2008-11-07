@@ -6,7 +6,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a document end event.
 	/// </summary>
-	public class DocumentEnd : ParsingEvent
+	public class DocumentEnd : ParsingEvent, IDocumentEnd
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.

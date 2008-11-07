@@ -6,7 +6,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a sequence start event.
 	/// </summary>
-	public class SequenceStart : NodeEvent
+	public class SequenceStart : NodeEvent, ISequenceStart
 	{
 		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.
@@ -32,8 +32,12 @@ namespace YamlDotNet.Core.Events
 				return isImplicit;
 			}
 		}
-		
-		internal override bool IsCanonical {
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is canonical.
+		/// </summary>
+		/// <value></value>
+		public override bool IsCanonical {
 			get {
 				return !isImplicit;
 			}
