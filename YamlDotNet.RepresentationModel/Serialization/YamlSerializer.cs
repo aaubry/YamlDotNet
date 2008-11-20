@@ -299,14 +299,40 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns></returns>
 		public object Deserialize(TextReader input)
 		{
-			Parser parser = new Parser(input);
+			return Deserialize(new EventReader(new Parser(input)));
+		}
 
-			EventReader reader = new EventReader(parser);
-			reader.Expect<StreamStart>();
-			reader.Expect<DocumentStart>();
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <returns></returns>
+		public object Deserialize(EventReader reader)
+		{
+			bool hasStreamStart = reader.Accept<StreamStart>();
+			if(hasStreamStart)
+			{
+				reader.Expect<StreamStart>();
+			}
+
+			bool hasDocumentStart = reader.Accept<DocumentStart>();
+			if (hasDocumentStart)
+			{
+				reader.Expect<DocumentStart>();
+			}
+
 			object result = DeserializeValue(reader, serializedType);
-			reader.Expect<DocumentEnd>();
-			reader.Expect<StreamEnd>();
+
+			if (hasDocumentStart)
+			{
+				reader.Expect<DocumentEnd>();
+			}
+
+			if (hasStreamStart)
+			{
+				reader.Expect<StreamEnd>();
+			}
+
 			return result;
 		}
 

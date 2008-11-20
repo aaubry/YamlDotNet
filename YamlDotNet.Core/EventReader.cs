@@ -3,6 +3,7 @@ using System.IO;
 using YamlDotNet.Core;
 using System.Globalization;
 using Event = YamlDotNet.Core.Events.ParsingEvent;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core
 {
@@ -67,6 +68,29 @@ namespace YamlDotNet.Core
 			EnsureNotAtEndOfStream();
 
 			return parser.Current is T;
+		}
+
+		/// <summary>
+		/// Skips the current event and any "child" event.
+		/// </summary>
+		public void Skip()
+		{
+			int depth = 0;
+
+			do
+			{
+				if (Accept<SequenceStart>() || Accept<MappingStart>() || Accept<StreamStart>() || Accept<DocumentStart>())
+				{
+					++depth;
+				}
+				else if(Accept<SequenceEnd>() || Accept<MappingEnd>() || Accept<StreamEnd>() || Accept<DocumentEnd>())
+				{
+					--depth;
+				}
+
+				MoveNext();
+			}
+			while(depth > 0);
 		}
 
 		/// <summary>
