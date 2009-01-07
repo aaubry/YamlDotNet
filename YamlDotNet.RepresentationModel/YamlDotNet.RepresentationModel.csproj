@@ -68,6 +68,7 @@
     <Compile Include="DuplicateAnchorException.cs" />
     <Compile Include="IYamlVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />

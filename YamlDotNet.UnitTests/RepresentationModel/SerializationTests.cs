@@ -237,5 +237,20 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual(1, dictionary["key1"]);
 			Assert.AreEqual(2, dictionary["key2"]);
 		}
+
+		[Test]
+		public void DeserializeListOfDictionaries()
+		{
+			var serializer = new YamlSerializer<IList<IDictionary<string, string>>>();
+			object result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"));
+
+			Assert.IsInstanceOfType(typeof(IList<IDictionary<string, string>>), result, "The deserialized object has the wrong type.");
+
+			var list = (IList<IDictionary<string, string>>)result;
+			Assert.AreEqual("conn1", list[0]["connection"]);
+			Assert.AreEqual("path1", list[0]["path"]);
+			Assert.AreEqual("conn2", list[1]["connection"]);
+			Assert.AreEqual("path2", list[1]["path"]);
+		}
 	}
 }

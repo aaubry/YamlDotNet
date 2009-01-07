@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{7BB532F1-A667-41E6-9CE7-4006046C1AA5}"
 	ProjectSection(SolutionItems) = preProject
+		IntegrationTests.testrunconfig = IntegrationTests.testrunconfig
 		Dependencies\nunit.framework.dll = Dependencies\nunit.framework.dll
 	EndProjectSection
 EndProject
@@ -20,6 +21,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Converters", "YamlDotNet.Converters\YamlDotNet.Converters.csproj", "{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Configuration", "YamlDotNet.Configuration\YamlDotNet.Configuration.csproj", "{A0178805-DC16-46B6-BEDF-AA201207C17E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dumper", "Dumper\Dumper.csproj", "{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YAMLLanguage", "YAMLLanguage\YAMLLanguage.csproj", "{7F0A3477-79B7-4425-B0DB-0EF7DD7E37C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +52,14 @@ Global
 		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F0A3477-79B7-4425-B0DB-0EF7DD7E37C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F0A3477-79B7-4425-B0DB-0EF7DD7E37C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F0A3477-79B7-4425-B0DB-0EF7DD7E37C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F0A3477-79B7-4425-B0DB-0EF7DD7E37C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

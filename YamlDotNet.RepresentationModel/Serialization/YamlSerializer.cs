@@ -25,6 +25,38 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			public bool serialized;
 		}
 
+		/// <summary>
+		/// Contains additional information about a deserialization.
+		/// </summary>
+		private class DeserializationContext : IDeserializationContext
+		{
+			private readonly IDictionary<object, string> anchors;
+
+			/// <summary>
+			/// Initializes a new instance of the <see cref="DeserializationContext"/> class.
+			/// </summary>
+			/// <param name="anchors">The anchors.</param>
+			internal DeserializationContext(IDictionary<object, string> anchors)
+			{
+				this.anchors = anchors;
+			}
+
+			/// <summary>
+			/// Gets the anchor of the specified object.
+			/// </summary>
+			/// <param name="value">The object that has an anchor.</param>
+			/// <returns>Returns the anchor of the object, or null if no anchor was defined.</returns>
+			public string GetAnchor(object value)
+			{
+				string anchor;
+				if (anchors.TryGetValue(value, out anchor))
+				{
+					return anchor;
+				}
+				return null;
+			}
+		}
+
 		private readonly Dictionary<object, ObjectInfo> anchors;
 
 		private bool Roundtrip
@@ -296,6 +328,32 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes an object from the specified stream.
 		/// </summary>
 		/// <param name="input">The input.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public object Deserialize(TextReader input, out IDeserializationContext context)
+		{
+			object result = Deserialize(input);
+			context = new DeserializationContext(deserializedAnchors);
+			return result;
+		}
+
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public object Deserialize(EventReader reader, out IDeserializationContext context)
+		{
+			object result = Deserialize(reader);
+			context = new DeserializationContext(deserializedAnchors);
+			return result;
+		}
+			
+		/// <summary>
+		/// Deserializes an object from the specified stream.
+		/// </summary>
+		/// <param name="input">The input.</param>
 		/// <returns></returns>
 		public object Deserialize(TextReader input)
 		{
@@ -309,8 +367,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns></returns>
 		public object Deserialize(EventReader reader)
 		{
+			IDictionary<object, string> deserializedAnchors = new Dictionary<object, string>();
+
 			bool hasStreamStart = reader.Accept<StreamStart>();
-			if(hasStreamStart)
+			if (hasStreamStart)
 			{
 				reader.Expect<StreamStart>();
 			}
@@ -338,9 +398,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private object DeserializeValue(EventReader reader, Type type)
 		{
-			if (!reader.Accept<Scalar>())
+			if (reader.Accept<MappingStart>())
 			{
 				return DeserializeProperties(reader, type);
+			}
+
+			if (reader.Accept<SequenceStart>())
+			{
+				return DeserializeList(reader, type);
 			}
 
 			Scalar scalar = reader.Expect<Scalar>();
@@ -409,6 +474,68 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
+		}
+
+		private static Type GetGenericInterface(Type implementorType, Type interfaceType)
+		{
+			foreach (var currentInterfaceType in implementorType.GetInterfaces())
+			{
+				if (currentInterfaceType.IsGenericType && currentInterfaceType.GetGenericTypeDefinition() == interfaceType)
+				{
+					return currentInterfaceType;
+				}
+			}
+			return null;
+		}
+
+		private static void AddAdapter<T>(ICollection<T> list, object value)
+		{
+			list.Add((T)value);
+		}
+
+		private object DeserializeList(EventReader reader, Type type)
+		{
+			SequenceStart sequence = reader.Expect<SequenceStart>();
+
+			type = GetType(sequence.Tag, type);
+			object result = Activator.CreateInstance(type);
+
+			Type iCollection = GetGenericInterface(type, typeof(ICollection<>));
+			if (iCollection != null)
+			{
+				Type[] iCollectionArguments = iCollection.GetGenericArguments();
+				Debug.Assert(iCollectionArguments.Length == 1, "ICollection<> must have one generic argument.");
+
+
+
+
+
+
+				//DeserializeListInternal(reader, type, iListArguments[0], MakeAddMethod());
+			}
+
+
+
+			IList list = result as IList;
+			if (list != null)
+			{
+				while (!reader.Accept<SequenceEnd>())
+				{
+					list.Add(DeserializeValue(reader, typeof(object)));
+				}
+			}
+			reader.Expect<SequenceEnd>();
+
+			return result;
+		}
+
+		private void DeserializeListInternal(EventReader reader, Type type, object result, Action<object, object> add)
+		{
+			while (!reader.Accept<SequenceEnd>())
+			{
+				add(result, DeserializeValue(reader, typeof(object)));
+			}
+			reader.Expect<SequenceEnd>();
 		}
 
 		private object DeserializeProperties(EventReader reader, Type type)
@@ -483,5 +610,50 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return Type.GetType(tag.Substring(1), true);
 		}
 		#endregion
+	}
+
+	/// <summary>
+	/// Extension of the <see cref="YamlSerializer"/> type that avoida the need for casting
+	/// on the user's code.
+	/// </summary>
+	/// <typeparam name="TSerialized">The type of the serialized.</typeparam>
+	public class YamlSerializer<TSerialized> : YamlSerializer
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSerializer&lt;TSerialized&gt;"/> class.
+		/// </summary>
+		public YamlSerializer()
+			: base(typeof(TSerialized))
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSerializer&lt;TSerialized&gt;"/> class.
+		/// </summary>
+		/// <param name="options">The options.</param>
+		public YamlSerializer(YamlSerializerOptions options)
+			: base(typeof(TSerialized), options)
+		{
+		}
+
+		/// <summary>
+		/// Deserializes an object from the specified stream.
+		/// </summary>
+		/// <param name="input">The input.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(TextReader input)
+		{
+			return (TSerialized)base.Deserialize(input);
+		}
+
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(EventReader reader)
+		{
+			return (TSerialized)base.Deserialize(reader);
+		}
 	}
 }
