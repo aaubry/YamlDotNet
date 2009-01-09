@@ -40,6 +40,7 @@ namespace Company.YAMLLanguage
     // package has a load key embedded in its resources.
     [ProvideLoadKey("Standard", "1.0", "YAML Language", "Company", 1)]
 	[ProvideService(typeof(YAMLLanguageService), ServiceName = "YAML Language")]
+	[ProvideLanguageService(typeof(YAMLLanguageService), "YAML Language", 106, MatchBracesAtCaret = true, EnableCommenting = true, DefaultToInsertSpaces = true, ShowMatchingBrace = true, RequestStockColors = false)]
 	[ProvideLanguageExtension(typeof(YAMLLanguageService), ".yaml")]
     [Guid(GuidList.guidYAMLLanguagePkgString)]
     public sealed class YAMLLanguagePackage : Package

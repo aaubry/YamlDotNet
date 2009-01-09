@@ -30,13 +30,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		private class DeserializationContext : IDeserializationContext
 		{
-			private readonly IDictionary<object, string> anchors;
+			private readonly ObjectAnchorCollection anchors;
 
 			/// <summary>
 			/// Initializes a new instance of the <see cref="DeserializationContext"/> class.
 			/// </summary>
 			/// <param name="anchors">The anchors.</param>
-			internal DeserializationContext(IDictionary<object, string> anchors)
+			internal DeserializationContext(ObjectAnchorCollection anchors)
 			{
 				this.anchors = anchors;
 			}
@@ -49,7 +49,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			public string GetAnchor(object value)
 			{
 				string anchor;
-				if (anchors.TryGetValue(value, out anchor))
+				if (anchors.TryGetAnchor(value, out anchor))
 				{
 					return anchor;
 				}
@@ -332,24 +332,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns></returns>
 		public object Deserialize(TextReader input, out IDeserializationContext context)
 		{
-			object result = Deserialize(input);
-			context = new DeserializationContext(deserializedAnchors);
-			return result;
+			return Deserialize(new EventReader(new Parser(input)), out context);
 		}
 
-		/// <summary>
-		/// Deserializes the specified reader.
-		/// </summary>
-		/// <param name="reader">The reader.</param>
-		/// <param name="context">Returns additional information about the deserialization process.</param>
-		/// <returns></returns>
-		public object Deserialize(EventReader reader, out IDeserializationContext context)
-		{
-			object result = Deserialize(reader);
-			context = new DeserializationContext(deserializedAnchors);
-			return result;
-		}
-			
 		/// <summary>
 		/// Deserializes an object from the specified stream.
 		/// </summary>
@@ -367,7 +352,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns></returns>
 		public object Deserialize(EventReader reader)
 		{
-			IDictionary<object, string> deserializedAnchors = new Dictionary<object, string>();
+			IDeserializationContext context;
+			return Deserialize(reader, out context);
+		}
+
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public object Deserialize(EventReader reader, out IDeserializationContext context)
+		{
+			ObjectAnchorCollection deserializedAnchors = new ObjectAnchorCollection();
 
 			bool hasStreamStart = reader.Accept<StreamStart>();
 			if (hasStreamStart)
@@ -381,7 +378,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				reader.Expect<DocumentStart>();
 			}
 
-			object result = DeserializeValue(reader, serializedType);
+			object result = DeserializeValue(reader, serializedType, deserializedAnchors);
 
 			if (hasDocumentStart)
 			{
@@ -393,86 +390,129 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				reader.Expect<StreamEnd>();
 			}
 
+			context = new DeserializationContext(deserializedAnchors);
+
 			return result;
 		}
 
-		private object DeserializeValue(EventReader reader, Type type)
+		private object DeserializeValue(EventReader reader, Type type, ObjectAnchorCollection deserializedAnchors)
 		{
+			if(reader.Accept<AnchorAlias>())
+			{
+				return deserializedAnchors[reader.Expect<AnchorAlias>().Value];
+			}
+
 			if (reader.Accept<MappingStart>())
 			{
-				return DeserializeProperties(reader, type);
+				return DeserializeProperties(reader, type, deserializedAnchors);
 			}
 
 			if (reader.Accept<SequenceStart>())
 			{
-				return DeserializeList(reader, type);
+				return DeserializeList(reader, type, deserializedAnchors);
 			}
 
+			return DeserializeScalar(reader, type, deserializedAnchors);
+		}
+
+		private static object DeserializeScalar(EventReader reader, Type type, ObjectAnchorCollection deserializedAnchors)
+		{
 			Scalar scalar = reader.Expect<Scalar>();
+
+			object result;
 			if (scalar.Tag == "tag:yaml.org,2002:null")
 			{
-				return null;
+				result = null;
+			}
+			else
+			{
+				type = GetType(scalar.Tag, type);
+
+				TypeCode typeCode = Type.GetTypeCode(type);
+				switch (typeCode)
+				{
+					case TypeCode.Boolean:
+						result = bool.Parse(scalar.Value);
+						break;
+
+					case TypeCode.Byte:
+						result = Byte.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Int16:
+						result = Int16.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Int32:
+						result = Int32.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Int64:
+						result = Int64.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.SByte:
+						result = SByte.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.UInt16:
+						result = UInt16.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.UInt32:
+						result = UInt32.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.UInt64:
+						result = UInt64.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Single:
+						result = Single.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Double:
+						result = Double.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Decimal:
+						result = Decimal.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.String:
+						result = scalar.Value;
+						break;
+
+					case TypeCode.Char:
+						result = scalar.Value[0];
+						break;
+
+					case TypeCode.DateTime:
+						// TODO: This is probably incorrect. Use the correct regular expression.
+						result = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
+						break;
+
+					default:
+						// Default to string
+						if (type != typeof(object))
+						{
+							throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+						}
+						result = scalar.Value;
+						break;
+				}
 			}
 
-			type = GetType(scalar.Tag, type);
+			AddAnchoredObject(scalar, result, deserializedAnchors);
 
-			TypeCode typeCode = Type.GetTypeCode(type);
-			switch (typeCode)
+			return result;
+		}
+
+		private static void AddAnchoredObject(INodeEvent node, object value, ObjectAnchorCollection deserializedAnchors)
+		{
+			if(!string.IsNullOrEmpty(node.Anchor))
 			{
-				case TypeCode.Boolean:
-					return bool.Parse(scalar.Value);
-
-				case TypeCode.Byte:
-					return Byte.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.Int16:
-					return Int16.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.Int32:
-					return Int32.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.Int64:
-					return Int64.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.SByte:
-					return SByte.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.UInt16:
-					return UInt16.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.UInt32:
-					return UInt32.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.UInt64:
-					return UInt64.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.Single:
-					return Single.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.Double:
-					return Double.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.Decimal:
-					return Decimal.Parse(scalar.Value, numberFormat);
-
-				case TypeCode.String:
-					return scalar.Value;
-
-				case TypeCode.Char:
-					return scalar.Value[0];
-
-				case TypeCode.DateTime:
-					// TODO: This is probably incorrect. Use the correct regular expression.
-					return DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
-
-				default:
-					// Default to string
-					if (type == typeof(object))
-					{
-						return scalar.Value;
-					}
-
-					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+				deserializedAnchors.Add(node.Anchor, value);
 			}
 		}
 
@@ -488,12 +528,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return null;
 		}
 
-		private static void AddAdapter<T>(ICollection<T> list, object value)
+		private static void AddAdapter<T>(object list, object value)
 		{
-			list.Add((T)value);
+			((ICollection<T>)list).Add((T)value);
 		}
 
-		private object DeserializeList(EventReader reader, Type type)
+		private static readonly MethodInfo addAdapterGeneric = typeof(YamlSerializer).GetMethod("AddAdapter", BindingFlags.Static | BindingFlags.NonPublic);
+
+		private object DeserializeList(EventReader reader, Type type, ObjectAnchorCollection deserializedAnchors)
 		{
 			SequenceStart sequence = reader.Expect<SequenceStart>();
 
@@ -506,39 +548,38 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				Type[] iCollectionArguments = iCollection.GetGenericArguments();
 				Debug.Assert(iCollectionArguments.Length == 1, "ICollection<> must have one generic argument.");
 
-
-
-
-
-
-				//DeserializeListInternal(reader, type, iListArguments[0], MakeAddMethod());
+				MethodInfo addAdapter = addAdapterGeneric.MakeGenericMethod(iCollectionArguments);
+				Action<object, object> addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
+				DeserializeGenericListInternal(reader, iCollectionArguments[0], result, addAdapterDelegate, deserializedAnchors);
 			}
-
-
-
-			IList list = result as IList;
-			if (list != null)
+			else
 			{
-				while (!reader.Accept<SequenceEnd>())
+				IList list = result as IList;
+				if(list != null)
 				{
-					list.Add(DeserializeValue(reader, typeof(object)));
+					while(!reader.Accept<SequenceEnd>())
+					{
+						list.Add(DeserializeValue(reader, typeof(object), deserializedAnchors));
+					}
 				}
+				reader.Expect<SequenceEnd>();
 			}
-			reader.Expect<SequenceEnd>();
+
+			AddAnchoredObject(sequence, result, deserializedAnchors);
 
 			return result;
 		}
 
-		private void DeserializeListInternal(EventReader reader, Type type, object result, Action<object, object> add)
+		private void DeserializeGenericListInternal(EventReader reader, Type itemType, object list, Action<object, object> addAdapterDelegate, ObjectAnchorCollection deserializedAnchors)
 		{
 			while (!reader.Accept<SequenceEnd>())
 			{
-				add(result, DeserializeValue(reader, typeof(object)));
+				addAdapterDelegate(list, DeserializeValue(reader, itemType, deserializedAnchors));
 			}
 			reader.Expect<SequenceEnd>();
 		}
 
-		private object DeserializeProperties(EventReader reader, Type type)
+		private object DeserializeProperties(EventReader reader, Type type, ObjectAnchorCollection deserializedAnchors)
 		{
 			MappingStart mapping = reader.Expect<MappingStart>();
 
@@ -565,8 +606,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				while (!reader.Accept<MappingEnd>())
 				{
-					object key = DeserializeValue(reader, keyType);
-					object value = DeserializeValue(reader, valueType);
+					object key = DeserializeValue(reader, keyType, deserializedAnchors);
+					object value = DeserializeValue(reader, valueType, deserializedAnchors);
 					dictionary.Add(key, value);
 				}
 			}
@@ -576,10 +617,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				{
 					Scalar key = reader.Expect<Scalar>();
 					PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
-					property.SetValue(result, DeserializeValue(reader, property.PropertyType), null);
+					property.SetValue(result, DeserializeValue(reader, property.PropertyType, deserializedAnchors), null);
 				}
 			}
 			reader.Expect<MappingEnd>();
+
+			AddAnchoredObject(mapping, result, deserializedAnchors);
 
 			return result;
 		}
@@ -647,6 +690,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		}
 
 		/// <summary>
+		/// Deserializes an object from the specified stream.
+		/// </summary>
+		/// <param name="input">The input.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(TextReader input, out IDeserializationContext context)
+		{
+			return (TSerialized)base.Deserialize(input, out context);
+		}
+
+		/// <summary>
 		/// Deserializes the specified reader.
 		/// </summary>
 		/// <param name="reader">The reader.</param>
@@ -654,6 +708,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public new TSerialized Deserialize(EventReader reader)
 		{
 			return (TSerialized)base.Deserialize(reader);
+		}
+
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(EventReader reader, out IDeserializationContext context)
+		{
+			return (TSerialized)base.Deserialize(reader, out context);
 		}
 	}
 }
