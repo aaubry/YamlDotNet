@@ -3,6 +3,10 @@ using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using YamlDotNet.Core;
+using System.IO;
+using YamlDotNet.Core.Tokens;
+using System.Diagnostics;
 
 namespace Company.YAMLLanguage
 {
@@ -49,59 +53,70 @@ namespace Company.YAMLLanguage
 
 		public bool ScanTokenAndProvideInfoAboutIt(TokenInfo tokenInfo, ref int state)
 		{
-			char? current = PeekNextChar();
-			if(current == null)
+			if(scannedTokens.Count > 0)
 			{
-				return false;
+				TokenInfo token = scannedTokens.Dequeue();
+				tokenInfo.StartIndex = token.StartIndex;
+				tokenInfo.EndIndex = token.EndIndex;
+				tokenInfo.Type = token.Type;
+				tokenInfo.Color = token.Color;
+				return true;
 			}
+			return false;
 
-			if (current.Value == '%' && currentOffset == 0)
-			{
-				ScanDirectiveToken(tokenInfo);
-			}
-			else
-			{
-				switch(current.Value)
-				{
-					case '-':
-					case ':':
-						ScanDelimiterToken(tokenInfo);
-						break;
+			//char? current = PeekNextChar();
+			//if(current == null)
+			//{
+			//    return false;
+			//}
 
-					case '[':
-					case ']':
-					case '{':
-					case '}':
-						ScanPairedDelimiterToken(tokenInfo);
-						break;
+			//if (current.Value == '%' && currentOffset == 0)
+			//{
+			//    ScanDirectiveToken(tokenInfo);
+			//}
+			//else
+			//{
+			//    switch(current.Value)
+			//    {
+			//        case '-':
+			//        case ':':
+			//            ScanDelimiterToken(tokenInfo);
+			//            break;
 
-					case ' ':
-					case '\t':
-						ScanWhitespaceToken(tokenInfo);
-						break;
+			//        case '[':
+			//        case ']':
+			//        case '{':
+			//        case '}':
+			//            ScanPairedDelimiterToken(tokenInfo);
+			//            break;
 
-					case '&':
-						ScanAnchorToken(tokenInfo);
-						break;
+			//        case ' ':
+			//        case '\t':
+			//            ScanWhitespaceToken(tokenInfo);
+			//            break;
 
-					case '*':
-						ScanAnchorReferenceToken(tokenInfo);
-						break;
+			//        case '&':
+			//            ScanAnchorToken(tokenInfo);
+			//            break;
 
-					case '!':
-						ScanTagToken(tokenInfo);
-						break;
+			//        case '*':
+			//            ScanAnchorReferenceToken(tokenInfo);
+			//            break;
 
-					case '#':
-						ScanCommentToken(tokenInfo);
-						break;
+			//        case '!':
+			//            ScanTagToken(tokenInfo);
+			//            break;
 
-					default:
-						ScanTextToken(tokenInfo);
-						break;
-				}
-			}
-			return true;
+			//        case '#':
+			//            ScanCommentToken(tokenInfo);
+			//            break;
+
+			//        default:
+			//            ScanTextToken(tokenInfo);
+			//            break;
+			//    }
+			//}
+			//return true;
 		}
 
 		private void ScanTagToken(TokenInfo tokenInfo)
@@ -185,10 +200,44 @@ namespace Company.YAMLLanguage
 			tokenInfo.EndIndex = match.Index + match.Length - 1;
 		}
 
+		private readonly Queue<TokenInfo> scannedTokens = new Queue<TokenInfo>();
+
 		public void SetSource(string source, int offset)
 		{
-			currentSource = source;
-			currentOffset = offset;
+			if(offset > 0)
+			{
+				source = source.Substring(offset);
+			}
+
+			Scanner scanner = new Scanner(new StringReader(source));
+			try
+			{
+				List<Token> tokens = new
+
+				int currentOffset = 0;
+				Token previous = null;
+				while(scanner.MoveNext())
+				{
+					Token token = scanner.Current;
+					Debug.WriteLine(token.GetType().Name);
+					if(token.Start.Index != token.End.Index)
+					{
+						TokenInfoParsed(token, TokenType.String, ColorIndex.Text);
+						currentOffset = token.End.Index;
+						previous = token;
+					}
+				}
+			}
+			catch(YamlException)
+			{
+			}
+		}
+
+		private void TokenInfoParsed(Token token, TokenType type, ColorIndex color)
+		{
+			TokenInfo info = new TokenInfo(token.Start.Index, token.End.Index - 1, type);
+			info.Color = (TokenColor)color;
+			scannedTokens.Enqueue(info);
 		}
 		#endregion
 	}

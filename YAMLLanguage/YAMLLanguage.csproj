@@ -78,6 +78,12 @@
   <ItemGroup>
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.csproj">
+      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
+      <Name>YamlDotNet.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <!--
     To specify a different registry root to register your package, uncomment the TargetRegistryRoot
