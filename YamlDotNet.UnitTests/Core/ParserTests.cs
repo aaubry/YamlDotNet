@@ -27,7 +27,7 @@ namespace YamlDotNet.UnitTests
 	
 		private void AssertCurrent(Parser parser, ParsingEvent expected) {
 			Console.WriteLine(expected.GetType().Name);
-			Assert.IsInstanceOfType(expected.GetType(), parser.Current, "The event is not of the expected type.");
+			Assert.IsTrue(expected.GetType().IsAssignableFrom(parser.Current.GetType()), "The event is not of the expected type.");
 			
 			foreach (var property in expected.GetType().GetProperties()) {
 				if(property.PropertyType != typeof(Mark) && property.CanRead) {

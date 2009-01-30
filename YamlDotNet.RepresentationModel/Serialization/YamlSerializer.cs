@@ -180,6 +180,32 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
+		private void SerializeObject(Emitter emitter, Type type, object value, string anchor) {
+			if (Roundtrip && !HasDefaultConstructor(type))
+			{
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
+			}
+
+			if(typeof(IEnumerable).IsAssignableFrom(type)) {
+				SerializeList(emitter, type, value, anchor);
+			} else {
+				SerializeProperties(emitter, type, value, anchor);
+			}
+		}
+		
+		private void SerializeList(Emitter emitter, Type type, object value, string anchor)
+		{
+			Type itemType = GetItemType(type, typeof(IEnumerable<>));
+
+			emitter.Emit(new SequenceStart(anchor, null, true, SequenceStyle.Any));
+
+			foreach(object item in (IEnumerable)value) {
+				SerializeValue(emitter, itemType, item);
+			}
+			
+			emitter.Emit(new SequenceEnd());
+		}
+		
 		/// <summary>
 		/// Serializes the properties of the specified object into a mapping.
 		/// </summary>
@@ -264,6 +290,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return;
 			}
 
+			IYamlSerializable serializable = value as IYamlSerializable;
+			if(serializable != null) {
+				serializable.WriteYaml(emitter);
+				return;
+			}
+
 			string anchor = null;
 			ObjectInfo info;
 			if (!DisableAliases && anchors.TryGetValue(value, out info) && info != null)
@@ -317,7 +349,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
 				default:
-					SerializeProperties(emitter, type, value, anchor);
+					SerializeObject(emitter, type, value, anchor);
 					break;
 			}
 		}
@@ -402,6 +434,21 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return deserializedAnchors[reader.Expect<AnchorAlias>().Value];
 			}
 
+			NodeEvent nodeEvent = (NodeEvent)reader.Parser.Current;
+
+			if (nodeEvent.Tag == "tag:yaml.org,2002:null")
+			{
+				reader.Expect<NodeEvent>();
+				AddAnchoredObject(nodeEvent, null, deserializedAnchors);
+				return null;
+			}
+
+			type = GetType(nodeEvent.Tag, type);
+			
+			if(typeof(IYamlSerializable).IsAssignableFrom(type)) {
+				return DeserializeYamlSerializable(reader, type);
+			}
+			
 			if (reader.Accept<MappingStart>())
 			{
 				return DeserializeProperties(reader, type, deserializedAnchors);
@@ -412,7 +459,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return DeserializeList(reader, type, deserializedAnchors);
 			}
 
-			return DeserializeScalar(reader, type, deserializedAnchors);
+			if(reader.Accept<Scalar>()) {
+				return DeserializeScalar(reader, type, deserializedAnchors);
+			}
+
+			throw new InvalidOperationException("Expected scalar, mapping or sequence.");
 		}
 
 		private static object DeserializeScalar(EventReader reader, Type type, ObjectAnchorCollection deserializedAnchors)
@@ -420,87 +471,80 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			Scalar scalar = reader.Expect<Scalar>();
 
 			object result;
-			if (scalar.Tag == "tag:yaml.org,2002:null")
+			type = GetType(scalar.Tag, type);
+
+			TypeCode typeCode = Type.GetTypeCode(type);
+			switch (typeCode)
 			{
-				result = null;
-			}
-			else
-			{
-				type = GetType(scalar.Tag, type);
+				case TypeCode.Boolean:
+					result = bool.Parse(scalar.Value);
+					break;
 
-				TypeCode typeCode = Type.GetTypeCode(type);
-				switch (typeCode)
-				{
-					case TypeCode.Boolean:
-						result = bool.Parse(scalar.Value);
-						break;
+				case TypeCode.Byte:
+					result = Byte.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Byte:
-						result = Byte.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.Int16:
+					result = Int16.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Int16:
-						result = Int16.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.Int32:
+					result = Int32.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Int32:
-						result = Int32.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.Int64:
+					result = Int64.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Int64:
-						result = Int64.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.SByte:
+					result = SByte.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.SByte:
-						result = SByte.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.UInt16:
+					result = UInt16.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.UInt16:
-						result = UInt16.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.UInt32:
+					result = UInt32.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.UInt32:
-						result = UInt32.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.UInt64:
+					result = UInt64.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.UInt64:
-						result = UInt64.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.Single:
+					result = Single.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Single:
-						result = Single.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.Double:
+					result = Double.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Double:
-						result = Double.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.Decimal:
+					result = Decimal.Parse(scalar.Value, numberFormat);
+					break;
 
-					case TypeCode.Decimal:
-						result = Decimal.Parse(scalar.Value, numberFormat);
-						break;
+				case TypeCode.String:
+					result = scalar.Value;
+					break;
 
-					case TypeCode.String:
-						result = scalar.Value;
-						break;
+				case TypeCode.Char:
+					result = scalar.Value[0];
+					break;
 
-					case TypeCode.Char:
-						result = scalar.Value[0];
-						break;
+				case TypeCode.DateTime:
+					// TODO: This is probably incorrect. Use the correct regular expression.
+					result = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
+					break;
 
-					case TypeCode.DateTime:
-						// TODO: This is probably incorrect. Use the correct regular expression.
-						result = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
-						break;
-
-					default:
-						// Default to string
-						if (type != typeof(object))
-						{
-							throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
-						}
-						result = scalar.Value;
-						break;
-				}
+				default:
+					// Default to string
+					if (type != typeof(object))
+					{
+						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+					}
+					result = scalar.Value;
+					break;
 			}
 
 			AddAnchoredObject(scalar, result, deserializedAnchors);
@@ -540,6 +584,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			SequenceStart sequence = reader.Expect<SequenceStart>();
 
 			type = GetType(sequence.Tag, type);
+			
+			// Choose a default list type in case there was no specific type specified.
+			if(type == typeof(object)) {
+				type = typeof(ArrayList);
+			}
+			
 			object result = Activator.CreateInstance(type);
 
 			Type iCollection = GetGenericInterface(type, typeof(ICollection<>));
@@ -577,6 +627,22 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				addAdapterDelegate(list, DeserializeValue(reader, itemType, deserializedAnchors));
 			}
 			reader.Expect<SequenceEnd>();
+		}
+
+		private Type GetItemType(Type type, Type genericType) {
+			foreach(Type interfacetype in type.GetInterfaces()) {
+				if(interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericType) {
+					return interfacetype.GetGenericArguments()[0];
+				}
+			}
+			return typeof(object);
+		}
+
+		private object DeserializeYamlSerializable(EventReader reader, Type type)
+		{
+			IYamlSerializable result = (IYamlSerializable)Activator.CreateInstance(type);
+			result.ReadYaml(reader.Parser);
+			return result;
 		}
 
 		private object DeserializeProperties(EventReader reader, Type type, ObjectAnchorCollection deserializedAnchors)
@@ -617,6 +683,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				{
 					Scalar key = reader.Expect<Scalar>();
 					PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
+					if(property == null) {
+						Console.WriteLine(key);
+						
+						throw new SerializationException(
+							string.Format(
+								CultureInfo.InvariantCulture,
+								"Property '{0}' not found on type '{1}'",
+								key.Value,
+								type.FullName
+							)
+						);
+					}
 					property.SetValue(result, DeserializeValue(reader, property.PropertyType, deserializedAnchors), null);
 				}
 			}
@@ -663,7 +741,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	public class YamlSerializer<TSerialized> : YamlSerializer
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="YamlSerializer&lt;TSerialized&gt;"/> class.
+		/// Initializes a new instance of the <see cref="YamlSerializer{TSerialized}"/> class.
 		/// </summary>
 		public YamlSerializer()
 			: base(typeof(TSerialized))
@@ -671,7 +749,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="YamlSerializer&lt;TSerialized&gt;"/> class.
+		/// Initializes a new instance of the <see cref="YamlSerializer{TSerialized}"/> class.
 		/// </summary>
 		/// <param name="options">The options.</param>
 		public YamlSerializer(YamlSerializerOptions options)

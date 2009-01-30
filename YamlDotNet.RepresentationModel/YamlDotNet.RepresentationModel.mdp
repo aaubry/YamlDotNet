@@ -1,4 +1,4 @@
-<Project name="YamlDotNet.RepresentationModel" fileversion="2.0" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
+<Project name="YamlDotNet.RepresentationModel" fileversion="2.0" language="C#" clr-version="Net_2_0" targetFramework="3.5" ctype="DotNetProject">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="/home/aaubry/Work/yamldotnet/trunk/YamlDotNet.snk" assembly="YamlDotNet.RepresentationModel" />
@@ -32,10 +32,15 @@
     <File name="YamlVisitor.cs" subtype="Code" buildaction="Compile" />
     <File name="Serialization/YamlSerializer.cs" subtype="Code" buildaction="Compile" />
     <File name="Serialization/YamlSerializerOptions.cs" subtype="Code" buildaction="Compile" />
+    <File name="Serialization/IYamlSerializable.cs" subtype="Code" buildaction="Compile" />
+    <File name="Serialization/LazyDeserializationValue.cs" subtype="Code" buildaction="Compile" />
+    <File name="Serialization/DeserializationContext.cs" subtype="Code" buildaction="Compile" />
+    <File name="Serialization/ObjectAnchorCollection.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <ProjectReference type="Project" localcopy="True" refto="YamlDotNet.Core" />
+    <ProjectReference type="Gac" localcopy="True" refto="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   </References>
   <GtkDesignInfo />
 </Project>

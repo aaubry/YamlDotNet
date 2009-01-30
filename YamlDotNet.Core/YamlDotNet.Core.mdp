@@ -1,4 +1,4 @@
-<Project name="YamlDotNet.Core" fileversion="2.0" language="C#" DefaultNamespace="YamlDotNet.Core" clr-version="Net_2_0" ctype="DotNetProject">
+<Project name="YamlDotNet.Core" fileversion="2.0" language="C#" DefaultNamespace="YamlDotNet.Core" clr-version="Net_2_0" targetFramework="3.5" ctype="DotNetProject">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Debug" signAssembly="True" assemblyKeyFile="/home/aaubry/Work/yamldotnet/trunk/YamlDotNet.snk" assembly="YamlDotNet.Core" />
@@ -74,6 +74,18 @@
     <File name="CharacterAnalyzer.cs" subtype="Code" buildaction="Compile" />
     <File name="StringLookAheadBuffer.cs" subtype="Code" buildaction="Compile" />
     <File name="ScalarStyle.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IAnchorAlias.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IDocumentEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IDocumentStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IMappingEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IMappingStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/INodeEvent.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IParsingEvent.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IScalar.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/ISequenceEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/ISequenceStart.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IStreamEnd.cs" subtype="Code" buildaction="Compile" />
+    <File name="Events/IStreamStart.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

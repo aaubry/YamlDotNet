@@ -8,6 +8,15 @@ namespace YamlDotNet.Core.Events
 	public abstract class ParsingEvent : IParsingEvent
 	{
 		/// <summary>
+		/// Gets a value indicating the variation of depth caused by this event.
+		/// The value can be either -1, 0 or 1. For start events, it will be 1,
+		/// for end events, it will be -1, and for the remaining events, it will be 0.
+		/// </summary>
+		public abstract int NestingIncrease {
+			get;
+		}
+
+		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.
 		/// </summary>
 		internal abstract EventType Type {

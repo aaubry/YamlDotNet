@@ -230,7 +230,7 @@ namespace YamlDotNet.Core
 
 					if (key.IsRequired)
 					{
-						throw new SyntaxErrorException("While scanning a simple key, could not found expected ':'.", mark);
+						throw new SyntaxErrorException("While scanning a simple key, could not find expected ':'.", mark);
 					}
 
 					key.IsPossible = false;
@@ -469,7 +469,7 @@ namespace YamlDotNet.Core
 			// If we don't determine the token type so far, it is an error.
 
 
-			throw new SyntaxErrorException("While scanning for the next token, found character that cannot start any token.", mark);
+			throw new SyntaxErrorException("While scanning for the next token, find character that cannot start any token.", mark);
 		}
 
 		private bool CheckWhiteSpace()
@@ -523,7 +523,7 @@ namespace YamlDotNet.Core
 
 		private void ScanToNextToken()
 		{
-			// Until the next token is not found.
+			// Until the next token is not find.
 
 			for (; ;)
 			{
@@ -567,7 +567,7 @@ namespace YamlDotNet.Core
 				}
 				else
 				{
-					// We have found a token.
+					// We have find a token.
 
 					break;
 				}
@@ -707,7 +707,7 @@ namespace YamlDotNet.Core
 					break;
 
 				default:
-					throw new SyntaxErrorException("While scanning a directive, found uknown directive name.", start);
+					throw new SyntaxErrorException("While scanning a directive, find uknown directive name.", start);
 			}
 
 			// Eat the rest of the line including any comments.
@@ -729,7 +729,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a directive, did not found expected comment or line break.", start);
+				throw new SyntaxErrorException("While scanning a directive, did not find expected comment or line break.", start);
 			}
 
 			// Eat a line break.
@@ -992,7 +992,7 @@ namespace YamlDotNet.Core
 		{
 			SimpleKey simpleKey = simpleKeys.Peek();
 
-			// Have we found a simple key?
+			// Have we find a simple key?
 
 			if (simpleKey.IsPossible)
 			{
@@ -1257,7 +1257,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a tag, did not found expected whitespace or line break.", start);
+				throw new SyntaxErrorException("While scanning a tag, did not find expected whitespace or line break.", start);
 			}
 
 			// Create a token.
@@ -1323,7 +1323,7 @@ namespace YamlDotNet.Core
 
 					if (analyzer.Check('0'))
 					{
-						throw new SyntaxErrorException("While scanning a block scalar, found an intendation indicator equal to 0.", start);
+						throw new SyntaxErrorException("While scanning a block scalar, find an intendation indicator equal to 0.", start);
 					}
 
 					// Get the intendation level and eat the indicator.
@@ -1340,7 +1340,7 @@ namespace YamlDotNet.Core
 			{
 				if (analyzer.Check('0'))
 				{
-					throw new SyntaxErrorException("While scanning a block scalar, found an intendation indicator equal to 0.", start);
+					throw new SyntaxErrorException("While scanning a block scalar, find an intendation indicator equal to 0.", start);
 				}
 
 				increment = analyzer.AsDigit();
@@ -1374,7 +1374,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a block scalar, did not found expected comment or line break.", start);
+				throw new SyntaxErrorException("While scanning a block scalar, did not find expected comment or line break.", start);
 			}
 
 			// Eat a line break.
@@ -1501,10 +1501,10 @@ namespace YamlDotNet.Core
 
 				if ((currentIndent == 0 || mark.Column < currentIndent) && analyzer.IsTab())
 				{
-						throw new SyntaxErrorException("While scanning a block scalar, found a tab character where an intendation space is expected.", start);
+						throw new SyntaxErrorException("While scanning a block scalar, find a tab character where an intendation space is expected.", start);
 				}
 
-				// Have we found a non-empty line?
+				// Have we find a non-empty line?
 
 				if (!analyzer.IsBreak())
 				{
@@ -1571,14 +1571,14 @@ namespace YamlDotNet.Core
 
 				if (IsDocumentIndicator())
 				{
-					throw new SyntaxErrorException("While scanning a quoted scalar, found unexpected document indicator.", start);
+					throw new SyntaxErrorException("While scanning a quoted scalar, find unexpected document indicator.", start);
 				}
 
 				// Check for EOF.
 
 				if (analyzer.IsZero())
 				{
-					throw new SyntaxErrorException("While scanning a quoted scalar, found unexpected end of stream.", start);
+					throw new SyntaxErrorException("While scanning a quoted scalar, find unexpected end of stream.", start);
 				}
 
 				// Consume non-blank characters.
@@ -1644,7 +1644,7 @@ namespace YamlDotNet.Core
 								}
 								else
 								{
-									throw new SyntaxErrorException("While parsing a quoted scalar, found unknown escape character.", start);
+									throw new SyntaxErrorException("While parsing a quoted scalar, find unknown escape character.", start);
 								}
 								break;
 						}
@@ -1673,7 +1673,7 @@ namespace YamlDotNet.Core
 
 							if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
 							{
-								throw new SyntaxErrorException("While parsing a quoted scalar, found invalid Unicode character escape code.", start);
+								throw new SyntaxErrorException("While parsing a quoted scalar, find invalid Unicode character escape code.", start);
 							}
 
 							value.Append((char)character);
@@ -1833,7 +1833,7 @@ namespace YamlDotNet.Core
 
 					if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsBlankOrBreakOrZero(1))
 					{
-						throw new SyntaxErrorException("While scanning a plain scalar, found unexpected ':'.", start);
+						throw new SyntaxErrorException("While scanning a plain scalar, find unexpected ':'.", start);
 					}
 
 					// Check for indicators that may end a plain scalar.
@@ -1904,7 +1904,7 @@ namespace YamlDotNet.Core
 
 						if (hasLeadingBlanks && mark.Column < currentIndent && analyzer.IsTab())
 						{
-							throw new SyntaxErrorException("While scanning a plain scalar, found a tab character that violate intendation.", start);
+							throw new SyntaxErrorException("While scanning a plain scalar, find a tab character that violate intendation.", start);
 						}
 
 						// Consume a space or a tab character.
@@ -1968,7 +1968,7 @@ namespace YamlDotNet.Core
 			{
 				// If the key is required, it is an error.
 
-				throw new SyntaxErrorException("While scanning a simple key, could not found expected ':'.", key.Mark);
+				throw new SyntaxErrorException("While scanning a simple key, could not find expected ':'.", key.Mark);
 			}
 
 			// Remove the key from the stack.
@@ -2007,7 +2007,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a directive, found unexpected non-alphabetical character.", start);
+				throw new SyntaxErrorException("While scanning a directive, find unexpected non-alphabetical character.", start);
 			}
 
 			return name.ToString();
@@ -2171,7 +2171,7 @@ namespace YamlDotNet.Core
 
 					if (width == 0)
 					{
-						throw new SyntaxErrorException("While parsing a tag, found an incorrect leading UTF-8 octet.", start);
+						throw new SyntaxErrorException("While parsing a tag, find an incorrect leading UTF-8 octet.", start);
 					}
 				}
 				else
@@ -2180,7 +2180,7 @@ namespace YamlDotNet.Core
 
 					if ((octet & 0xC0) != 0x80)
 					{
-						throw new SyntaxErrorException("While parsing a tag, found an incorrect trailing UTF-8 octet.", start);
+						throw new SyntaxErrorException("While parsing a tag, find an incorrect trailing UTF-8 octet.", start);
 					}
 				}
 
@@ -2198,7 +2198,7 @@ namespace YamlDotNet.Core
 
 			if (characters.Length != 1)
 			{
-				throw new SyntaxErrorException("While parsing a tag, found an incorrect UTF-8 sequence.", start);
+				throw new SyntaxErrorException("While parsing a tag, find an incorrect UTF-8 sequence.", start);
 			}
 
 			return characters[0];
@@ -2275,7 +2275,7 @@ namespace YamlDotNet.Core
 
 				if (++length > MaxVersionNumberLength)
 				{
-					throw new SyntaxErrorException("While scanning a %YAML directive, found extremely long version number.", start);
+					throw new SyntaxErrorException("While scanning a %YAML directive, find extremely long version number.", start);
 				}
 
 				value = value * 10 + analyzer.AsDigit();

@@ -9,6 +9,17 @@ namespace YamlDotNet.Core.Events
 	public class Scalar : NodeEvent, IScalar
 	{
 		/// <summary>
+		/// Gets a value indicating the variation of depth caused by this event.
+		/// The value can be either -1, 0 or 1. For start events, it will be 1,
+		/// for end events, it will be -1, and for the remaining events, it will be 0.
+		/// </summary>
+		public override int NestingIncrease {
+			get {
+				return 0;
+			}
+		}
+
+		/// <summary>
 		/// Gets the event type, which allows for simpler type comparisons.
 		/// </summary>
 		internal override EventType Type {
@@ -79,7 +90,7 @@ namespace YamlDotNet.Core.Events
 			get {
 				return !isPlainImplicit && !isQuotedImplicit;
 			}
-		}
+		}	
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Scalar"/> class.

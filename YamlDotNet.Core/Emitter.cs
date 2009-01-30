@@ -32,6 +32,7 @@ namespace YamlDotNet.Core
 		private int flowLevel;
 		private bool isMappingContext;
 		private bool isSimpleKeyContext;
+		private bool isRootContext;
 
 		private int line;
 		private int column;
@@ -352,17 +353,15 @@ namespace YamlDotNet.Core
 			bool line_breaks = false;
 			bool special_characters = false;
 
-			bool leading_spaces = false;
-			bool leading_breaks = false;
-			bool trailing_spaces = false;
-			bool trailing_breaks = false;
-			bool inline_breaks_spaces = false;
-			bool mixed_breaks_spaces = false;
+			bool leading_space = false;
+			bool leading_break = false;
+			bool trailing_space = false;
+			bool trailing_break = false;
+			bool break_space = false;
+			bool space_break = false;
 
-			bool spaces = false;
-			bool breaks = false;
-			bool mixed = false;
-			bool leading = false;
+			bool previous_space = false;
+			bool previous_break = false;
 
 			scalarData.value = value;
 
@@ -382,10 +381,10 @@ namespace YamlDotNet.Core
 				flow_indicators = true;
 			}
 
-			bool preceeded_by_space = true;
+			bool preceeded_by_whitespace = true;
 
 			CharacterAnalyzer<StringLookAheadBuffer> buffer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
-			bool followed_by_space = buffer.IsBlankOrBreakOrZero(1);
+			bool followed_by_whitespace = buffer.IsBlankOrBreakOrZero(1);
 
 			bool isFirst = true;
 			while (!buffer.EndOfInput)
@@ -401,13 +400,13 @@ namespace YamlDotNet.Core
 					if (buffer.Check("?:"))
 					{
 						flow_indicators = true;
-						if (followed_by_space)
+						if (followed_by_whitespace)
 						{
 							block_indicators = true;
 						}
 					}
 
-					if (buffer.Check('-') && followed_by_space)
+					if (buffer.Check('-') && followed_by_whitespace)
 					{
 						flow_indicators = true;
 						block_indicators = true;
@@ -423,13 +422,13 @@ namespace YamlDotNet.Core
 					if (buffer.Check(':'))
 					{
 						flow_indicators = true;
-						if (followed_by_space)
+						if (followed_by_whitespace)
 						{
 							block_indicators = true;
 						}
 					}
 
-					if (buffer.Check('#') && preceeded_by_space)
+					if (buffer.Check('#') && preceeded_by_whitespace)
 					{
 						flow_indicators = true;
 						block_indicators = true;
@@ -449,94 +448,51 @@ namespace YamlDotNet.Core
 
 				if (buffer.IsSpace())
 				{
-					spaces = true;
-					if (isFirst)
+					if(isFirst)
 					{
-						leading = true;
+						leading_space = true;
 					}
+					if(buffer.Buffer.Position >= buffer.Buffer.Length - 1)
+					{
+						trailing_space = true;
+					}
+					if(previous_break) {
+						break_space = true;
+					}
+					
+					previous_space = true;
+					previous_break = false;
 				}
 
 				else if (buffer.IsBreak())
 				{
-					if (spaces)
+					if(isFirst)
 					{
-						mixed = true;
+						leading_break = true;
 					}
-					breaks = true;
-					if (isFirst)
+					if(buffer.Buffer.Position >= buffer.Buffer.Length - 1)
 					{
-						leading = true;
+						trailing_break = true;
 					}
+					
+					if (previous_space)
+					{
+						space_break = true;
+					}
+					previous_space = false;
+					previous_break = true;
 				}
-
-				else if (spaces || breaks)
+				else
 				{
-					if (leading)
-					{
-						if (spaces && breaks)
-						{
-							mixed_breaks_spaces = true;
-						}
-						else if (spaces)
-						{
-							leading_spaces = true;
-						}
-						else if (breaks)
-						{
-							leading_breaks = true;
-						}
-					}
-					else
-					{
-						if (mixed)
-						{
-							mixed_breaks_spaces = true;
-						}
-						else if (spaces && breaks)
-						{
-							inline_breaks_spaces = true;
-						}
-						else if (spaces)
-						{
-							//inline_spaces = true;
-						}
-						else if (breaks)
-						{
-							//inline_breaks = true;
-						}
-					}
-					spaces = breaks = mixed = leading = false;
+					previous_space = false;
+					previous_break = false;
 				}
 
-				if ((spaces || breaks) && buffer.Buffer.Position == buffer.Buffer.Length - 1)
-				{
-					if (spaces && breaks)
-					{
-						mixed_breaks_spaces = true;
-					}
-					else if (spaces)
-					{
-						if (leading)
-						{
-							leading_spaces = true;
-						}
-						trailing_spaces = true;
-					}
-					else if (breaks)
-					{
-						if (leading)
-						{
-							leading_breaks = true;
-						}
-						trailing_breaks = true;
-					}
-				}
-
-				preceeded_by_space = buffer.IsBlankOrBreakOrZero();
+				preceeded_by_whitespace = buffer.IsBlankOrBreakOrZero();
 				buffer.Skip(1);
 				if (!buffer.EndOfInput)
 				{
-					followed_by_space = buffer.IsBlankOrBreakOrZero(1);
+					followed_by_whitespace = buffer.IsBlankOrBreakOrZero(1);
 				}
 				isFirst = false;
 			}
@@ -548,27 +504,25 @@ namespace YamlDotNet.Core
 			scalarData.isSingleQuotedAllowed = true;
 			scalarData.isBlockAllowed = true;
 
-			if (leading_spaces || leading_breaks || trailing_spaces)
+			if (leading_space || leading_break || trailing_space || trailing_break)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
+			}
+
+			if(trailing_space)
+			{
 				scalarData.isBlockAllowed = false;
 			}
-
-			if (trailing_breaks)
-			{
-				scalarData.isFlowPlainAllowed = false;
-				scalarData.isBlockPlainAllowed = false;
-			}
-
-			if (inline_breaks_spaces)
+			
+			if (break_space)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
 				scalarData.isSingleQuotedAllowed = false;
 			}
 
-			if (mixed_breaks_spaces || special_characters)
+			if (space_break || special_characters)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
@@ -783,7 +737,7 @@ namespace YamlDotNet.Core
 				state = EmitterState.YAML_EMIT_DOCUMENT_CONTENT_STATE;
 			}
 
-			else if (!(evt is IStreamEnd))
+			else if (evt is IStreamEnd)
 			{
 				if (isOpenEnded)
 				{
@@ -906,6 +860,7 @@ namespace YamlDotNet.Core
 
 			isWhitespace = whitespace;
 			isIndentation &= indentation;
+			isOpenEnded = false;
 		}
 
 		private void WriteIndent()
@@ -932,14 +887,15 @@ namespace YamlDotNet.Core
 		private void EmitDocumentContent(Event evt)
 		{
 			states.Push(EmitterState.YAML_EMIT_DOCUMENT_END_STATE);
-			EmitNode(evt, false, false);
+			EmitNode(evt, true, false, false);
 		}
 
 		/// <summary>
 		/// Expect a node.
 		/// </summary>
-		private void EmitNode(IParsingEvent evt, bool isMapping, bool isSimpleKey)
+		private void EmitNode(IParsingEvent evt, bool isRoot, bool isMapping, bool isSimpleKey)
 		{
+			isRootContext = isRoot;
 			isMappingContext = isMapping;
 			isSimpleKeyContext = isSimpleKey;
 
@@ -1135,12 +1091,15 @@ namespace YamlDotNet.Core
 
 		private void WriteFoldedScalar(string value)
 		{
-			int chomp = DetermineChomping(value);
-			bool breaks = true;
-			bool leadingSpaces = false;
+			bool previous_break = true;
+			bool leadingSpaces = true;
 
-			WriteIndicator(chomp == -1 ? ">-" : chomp == +1 ? ">+" : ">", true, false, false);
-			WriteIndent();
+			WriteIndicator(">", true, false, false);
+			WriteBlockScalarHints(value);
+			WriteBreak();
+
+			isIndentation = true;
+			isWhitespace = true;
 
 			for (int i = 0; i < value.Length; ++i)
 			{
@@ -1148,30 +1107,30 @@ namespace YamlDotNet.Core
 
 				if (IsBreak(character))
 				{
-					if (!breaks && !leadingSpaces && character == '\n')
+					if (!previous_break && !leadingSpaces && character == '\n')
 					{
 						do
 						{
 							++i;
 						} while (i < value.Length && IsBreak(value[i]));
 
-						if (i < value.Length && value[i] != ' ')
+						if (i >= value.Length || value[i] != ' ')
 						{
 							WriteBreak();
 						}
 					}
 					WriteBreak();
 					isIndentation = true;
-					breaks = true;
+					previous_break = true;
 				}
 				else
 				{
-					if (breaks)
+					if (previous_break)
 					{
 						WriteIndent();
 						leadingSpaces = character == ' ';
 					}
-					if (!breaks && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
+					if (!previous_break && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
 					{
 						WriteIndent();
 					}
@@ -1180,23 +1139,21 @@ namespace YamlDotNet.Core
 						Write(character);
 					}
 					isIndentation = false;
-					breaks = false;
+					previous_break = false;
 				}
 			}
 		}
 
-		private void write_block_scalar_hints(string value)
-		{
-
-		}
-
 		private void WriteLiteralScalar(string value)
 		{
-			int chomp = DetermineChomping(value);
-			bool breaks = false;
+			bool previous_break = true;
 
-			WriteIndicator(chomp == -1 ? "|-" : chomp == +1 ? "|+" : "|", true, false, false);
-			WriteIndent();
+			WriteIndicator("|", true, false, false);
+			WriteBlockScalarHints(value);
+			WriteBreak();
+
+			isIndentation = true;
+			isWhitespace = true;
 
 			foreach (var character in value)
 			{
@@ -1204,17 +1161,17 @@ namespace YamlDotNet.Core
 				{
 					WriteBreak();
 					isIndentation = true;
-					breaks = true;
+					previous_break = true;
 				}
 				else
 				{
-					if (breaks)
+					if (previous_break)
 					{
 						WriteIndent();
 					}
 					Write(character);
 					isIndentation = false;
-					breaks = false;
+					previous_break = false;
 				}
 			}
 		}
@@ -1223,7 +1180,7 @@ namespace YamlDotNet.Core
 		{
 			WriteIndicator("\"", true, false, false);
 
-			bool spaces = false;
+			bool previous_space = false;
 			for (int index = 0; index < value.Length; ++index)
 			{
 				char character = value[index];
@@ -1313,11 +1270,11 @@ namespace YamlDotNet.Core
 							//}
 							break;
 					}
-					spaces = false;
+					previous_space = false;
 				}
 				else if (character == ' ')
 				{
-					if (allowBreaks && !spaces && column > bestWidth && index > 0 && index + 1 < value.Length)
+					if (allowBreaks && !previous_space && column > bestWidth && index > 0 && index + 1 < value.Length)
 					{
 						WriteIndent();
 						if (value[index + 1] == ' ')
@@ -1329,12 +1286,12 @@ namespace YamlDotNet.Core
 					{
 						Write(character);
 					}
-					spaces = true;
+					previous_space = true;
 				}
 				else
 				{
 					Write(character);
-					spaces = false;
+					previous_space = false;
 				}
 			}
 
@@ -1348,8 +1305,8 @@ namespace YamlDotNet.Core
 		{
 			WriteIndicator("'", true, false, false);
 
-			bool spaces = false;
-			bool breaks = false;
+			bool previous_space = false;
+			bool previous_break = false;
 
 			for (int index = 0; index < value.Length; ++index)
 			{
@@ -1357,7 +1314,7 @@ namespace YamlDotNet.Core
 
 				if (character == ' ')
 				{
-					if (allowBreaks && !spaces && column > bestWidth && index != 0 && index + 1 < value.Length && value[index + 1] != ' ')
+					if (allowBreaks && !previous_space && column > bestWidth && index != 0 && index + 1 < value.Length && value[index + 1] != ' ')
 					{
 						WriteIndent();
 					}
@@ -1365,21 +1322,21 @@ namespace YamlDotNet.Core
 					{
 						Write(character);
 					}
-					spaces = true;
+					previous_space = true;
 				}
 				else if (IsBreak(character))
 				{
-					if (!breaks && character == '\n')
+					if (!previous_break && character == '\n')
 					{
 						WriteBreak();
 					}
 					WriteBreak();
 					isIndentation = true;
-					breaks = true;
+					previous_break = true;
 				}
 				else
 				{
-					if (breaks)
+					if (previous_break)
 					{
 						WriteIndent();
 					}
@@ -1389,8 +1346,8 @@ namespace YamlDotNet.Core
 					}
 					Write(character);
 					isIndentation = false;
-					spaces = false;
-					breaks = false;
+					previous_space = false;
+					previous_break = false;
 				}
 			}
 
@@ -1407,15 +1364,15 @@ namespace YamlDotNet.Core
 				Write(' ');
 			}
 
-			bool spaces = false;
-			bool breaks = false;
+			bool previous_space = false;
+			bool previous_break = false;
 			for (int index = 0; index < value.Length; ++index)
 			{
 				char character = value[index];
 
 				if (IsSpace(character))
 				{
-					if (allowBreaks && !spaces && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ')
+					if (allowBreaks && !previous_space && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ')
 					{
 						WriteIndent();
 					}
@@ -1423,33 +1380,38 @@ namespace YamlDotNet.Core
 					{
 						Write(character);
 					}
-					spaces = true;
+					previous_space = true;
 				}
 				else if (IsBreak(character))
 				{
-					if (!breaks && character == '\n')
+					if (!previous_break && character == '\n')
 					{
 						WriteBreak();
 					}
 					WriteBreak();
 					isIndentation = true;
-					breaks = true;
+					previous_break = true;
 				}
 				else
 				{
-					if (breaks)
+					if (previous_break)
 					{
 						WriteIndent();
 					}
 					Write(character);
 					isIndentation = false;
-					spaces = false;
-					breaks = false;
+					previous_space = false;
+					previous_break = false;
 				}
 			}
 
 			isWhitespace = false;
 			isIndentation = false;
+
+			if(isRootContext)
+			{
+				isOpenEnded = true;
+			}
 		}
 
 		/// <summary>
@@ -1634,7 +1596,7 @@ namespace YamlDotNet.Core
 
 			states.Push(EmitterState.YAML_EMIT_FLOW_SEQUENCE_ITEM_STATE);
 
-			EmitNode(evt, false, false);
+			EmitNode(evt, false, false, false);
 		}
 
 		/// <summary>
@@ -1675,13 +1637,13 @@ namespace YamlDotNet.Core
 			if (!isCanonical && CheckSimpleKey())
 			{
 				states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_SIMPLE_VALUE_STATE);
-				EmitNode(evt, true, true);
+				EmitNode(evt, false, true, true);
 			}
 			else
 			{
 				WriteIndicator("?", true, false, false);
 				states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_VALUE_STATE);
-				EmitNode(evt, true, false);
+				EmitNode(evt, false, true, false);
 			}
 		}
 
@@ -1769,7 +1731,7 @@ namespace YamlDotNet.Core
 				WriteIndicator(":", true, false, false);
 			}
 			states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_KEY_STATE);
-			EmitNode(evt, true, false);
+			EmitNode(evt, false, true, false);
 		}
 
 		/// <summary>
@@ -1793,7 +1755,7 @@ namespace YamlDotNet.Core
 			WriteIndicator("-", true, false, true);
 			states.Push(EmitterState.YAML_EMIT_BLOCK_SEQUENCE_ITEM_STATE);
 
-			EmitNode(evt, false, false);
+			EmitNode(evt, false, false, false);
 		}
 
 		/// <summary>
@@ -1818,13 +1780,13 @@ namespace YamlDotNet.Core
 			if (CheckSimpleKey())
 			{
 				states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_SIMPLE_VALUE_STATE);
-				EmitNode(evt, true, true);
+				EmitNode(evt, false, true, true);
 			}
 			else
 			{
 				WriteIndicator("?", true, false, true);
 				states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_VALUE_STATE);
-				EmitNode(evt, true, false);
+				EmitNode(evt, false, true, false);
 			}
 		}
 
@@ -1843,7 +1805,37 @@ namespace YamlDotNet.Core
 				WriteIndicator(":", true, false, true);
 			}
 			states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_KEY_STATE);
-			EmitNode(evt, true, false);
+			EmitNode(evt, false, true, false);
+		}
+
+		private void WriteBlockScalarHints(string value)
+		{
+			var analyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
+
+			if(analyzer.IsSpace() || analyzer.IsBreak()) {
+				string indent_hint = string.Format(CultureInfo.InvariantCulture, "{0}\0", bestIndent);
+				WriteIndicator(indent_hint, false, false, false);
+			}
+
+			isOpenEnded = false;
+
+			string chomp_hint = null;
+			if(value.Length == 0) {
+				chomp_hint = "-";
+			}
+			else {
+				if(analyzer.IsBreak(value.Length - 1)) {
+					chomp_hint = "-";
+				}
+				else if(value.Length < 2 || analyzer.IsBreak(value.Length - 2)) {
+					chomp_hint = "+";
+					isOpenEnded = true;
+				}
+			}
+
+			if(chomp_hint != null){
+				WriteIndicator(chomp_hint, false, false, false);
+			}
 		}
 	}
 }

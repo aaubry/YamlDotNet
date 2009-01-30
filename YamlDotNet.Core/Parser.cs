@@ -172,7 +172,7 @@ namespace YamlDotNet.Core
 			StreamStart streamStart = GetCurrentToken() as StreamStart;
 			if (streamStart == null)
 			{
-				throw new SemanticErrorException("Did not found expected <stream-start>.", GetCurrentToken().Start);
+				throw new SemanticErrorException("Did not find expected <stream-start>.", GetCurrentToken().Start);
 			}
 			Skip();
 
@@ -223,7 +223,7 @@ namespace YamlDotNet.Core
 
 				if (!(GetCurrentToken() is DocumentStart))
 				{
-					throw new SemanticErrorException("Did not found expected <document start>.", GetCurrentToken().Start);
+					throw new SemanticErrorException("Did not find expected <document start>.", GetCurrentToken().Start);
 				}
 
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
@@ -423,7 +423,7 @@ namespace YamlDotNet.Core
 				}
 				else
 				{
-					throw new SemanticErrorException("While parsing a node, found undefined tag handle.", tag.Start);
+					throw new SemanticErrorException("While parsing a node, find undefined tag handle.", tag.Start);
 				}
 			}
 			if (string.IsNullOrEmpty(tagName))
@@ -508,7 +508,7 @@ namespace YamlDotNet.Core
 					return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, isImplicit, false, start, GetCurrentToken().End);
 				}
 
-				throw new SemanticErrorException("While parsing a node, did not found expected node content.", GetCurrentToken().Start);
+				throw new SemanticErrorException("While parsing a node, did not find expected node content.", GetCurrentToken().Start);
 			}
 		}
 
@@ -580,7 +580,7 @@ namespace YamlDotNet.Core
 
 			else
 			{
-				throw new SemanticErrorException("While parsing a block collection, did not found expected '-' indicator.", GetCurrentToken().Start);
+				throw new SemanticErrorException("While parsing a block collection, did not find expected '-' indicator.", GetCurrentToken().Start);
 			}
 		}
 
@@ -659,7 +659,7 @@ namespace YamlDotNet.Core
 
 			else
 			{
-				throw new SemanticErrorException("While parsing a block mapping, did not found expected key.", GetCurrentToken().Start);
+				throw new SemanticErrorException("While parsing a block mapping, did not find expected key.", GetCurrentToken().Start);
 			}
 		}
 
@@ -732,7 +732,7 @@ namespace YamlDotNet.Core
 					}
 					else
 					{
-						throw new SemanticErrorException("While parsing a flow sequence, did not found expected ',' or ']'.", GetCurrentToken().Start);
+						throw new SemanticErrorException("While parsing a flow sequence, did not find expected ',' or ']'.", GetCurrentToken().Start);
 					}
 				}
 
@@ -839,7 +839,7 @@ namespace YamlDotNet.Core
 					}
 					else
 					{
-						throw new SemanticErrorException("While parsing a flow mapping,  did not found expected ',' or '}'.", GetCurrentToken().Start);
+						throw new SemanticErrorException("While parsing a flow mapping,  did not find expected ',' or '}'.", GetCurrentToken().Start);
 					}
 				}
 

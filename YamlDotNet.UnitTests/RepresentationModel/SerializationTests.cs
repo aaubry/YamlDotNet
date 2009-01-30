@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.IO;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
@@ -208,7 +209,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"));
 			
-			Assert.IsInstanceOfType(typeof(Z), result, "The deserializer should have used the correct type.");
+			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
 			Assert.AreEqual("bbb", ((Z)result).aaa, "The property has the wrong value.");
 		}
 
@@ -218,7 +219,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("dictionary.yaml"));
 
-			Assert.IsInstanceOfType(typeof(IDictionary<object, object>), result, "The deserialized object has the wrong type.");
+			Assert.IsTrue(typeof(IDictionary<object, object>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
 
 			IDictionary<object, object> dictionary = (IDictionary<object, object>)result;
 			Assert.AreEqual("value1", dictionary["key1"]);
@@ -231,7 +232,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
 
-			Assert.IsInstanceOfType(typeof(IDictionary<string, int>), result, "The deserialized object has the wrong type.");
+			Assert.IsTrue(typeof(IDictionary<string, int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
 
 			IDictionary<string, int> dictionary = (IDictionary<string, int>)result;
 			Assert.AreEqual(1, dictionary["key1"]);
@@ -251,6 +252,57 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("path1", list[0]["path"]);
 			Assert.AreEqual("conn2", list[1]["connection"]);
 			Assert.AreEqual("path2", list[1]["path"]);
+		}
+
+		[Test]
+		public void DeserializeList() {
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("list.yaml"));
+
+			Assert.IsTrue(typeof(IList).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
+
+			IList list = (IList)result;
+			Assert.AreEqual("one", list[0]);
+			Assert.AreEqual("two", list[1]);
+			Assert.AreEqual("three", list[2]);
+		}
+
+		[Test]
+		public void DeserializeExplicitList() {
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
+
+			Assert.IsTrue(typeof(IList<int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
+
+			IList<int> list = (IList<int>)result;
+			Assert.AreEqual(3, list[0]);
+			Assert.AreEqual(4, list[1]);
+			Assert.AreEqual(5, list[2]);
+		}
+		
+		[Test]
+		public void RoundtripList()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerOptions.Roundtrip);
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				List<int> original = new List<int>();
+				original.Add(2);
+				original.Add(4);
+				original.Add(6);
+				serializer.Serialize(buffer, original);
+
+				Console.WriteLine(buffer.ToString());
+
+				List<int> copy = (List<int>)serializer.Deserialize(new StringReader(buffer.ToString()));
+
+				Assert.AreEqual(original.Count, copy.Count, "The lists do not have the same number of items.");
+				
+				for(int i = 0; i < original.Count; ++i) {
+					Assert.AreEqual(original[i], copy[i]);
+				}
+			}
 		}
 	}
 }
