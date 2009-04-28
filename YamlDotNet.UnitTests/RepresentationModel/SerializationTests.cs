@@ -6,6 +6,7 @@ using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -304,5 +305,19 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				}
 			}
 		}
+
+		
+		[Test]
+		public void Overrides()
+		{
+			DeserializationOverrides overrides = new DeserializationOverrides();
+			overrides.Add(typeof(Z), "aaa", (t, reader) => ((Z)t).aaa = reader.Expect<Scalar>().Value.ToUpperInvariant());
+
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), overrides);
+			
+			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
+			Assert.AreEqual("BBB", ((Z)result).aaa, "The property has the wrong value.");
+}
 	}
 }

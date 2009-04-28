@@ -26,6 +26,18 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
+		/// Gets the underlying parser.
+		/// </summary>
+		/// <value>The parser.</value>
+		public Parser Parser
+		{
+			get
+			{
+				return parser;
+			}
+		}
+
+		/// <summary>
 		/// Ensures that the current event is of the specified type, returns it and moves to the next event.
 		/// </summary>
 		/// <typeparam name="T">Type of the <see cref="Event"/>.</typeparam>
