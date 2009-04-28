@@ -537,78 +537,87 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			object result;
 			type = GetType(scalar.Tag, type);
 
-			TypeCode typeCode = Type.GetTypeCode(type);
-			switch (typeCode)
+			if (type.IsEnum)
 			{
-				case TypeCode.Boolean:
-					result = bool.Parse(scalar.Value);
-					break;
+				result = Enum.Parse(type, scalar.Value);
+			}
+			else
+			{
+				TypeCode typeCode = Type.GetTypeCode(type);
+				switch(typeCode)
+				{
+					case TypeCode.Boolean:
+						result = bool.Parse(scalar.Value);
+						break;
 
-				case TypeCode.Byte:
-					result = Byte.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Byte:
+						result = Byte.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.Int16:
-					result = Int16.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Int16:
+						result = Int16.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.Int32:
-					result = Int32.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Int32:
+						result = Int32.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.Int64:
-					result = Int64.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Int64:
+						result = Int64.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.SByte:
-					result = SByte.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.SByte:
+						result = SByte.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.UInt16:
-					result = UInt16.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.UInt16:
+						result = UInt16.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.UInt32:
-					result = UInt32.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.UInt32:
+						result = UInt32.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.UInt64:
-					result = UInt64.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.UInt64:
+						result = UInt64.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.Single:
-					result = Single.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Single:
+						result = Single.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.Double:
-					result = Double.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Double:
+						result = Double.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.Decimal:
-					result = Decimal.Parse(scalar.Value, numberFormat);
-					break;
+					case TypeCode.Decimal:
+						result = Decimal.Parse(scalar.Value, numberFormat);
+						break;
 
-				case TypeCode.String:
-					result = scalar.Value;
-					break;
+					case TypeCode.String:
+						result = scalar.Value;
+						break;
 
-				case TypeCode.Char:
-					result = scalar.Value[0];
-					break;
+					case TypeCode.Char:
+						result = scalar.Value[0];
+						break;
 
-				case TypeCode.DateTime:
-					// TODO: This is probably incorrect. Use the correct regular expression.
-					result = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
-					break;
+					case TypeCode.DateTime:
+						// TODO: This is probably incorrect. Use the correct regular expression.
+						result = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
+						break;
 
-				default:
-					// Default to string
-					if (type != typeof(object))
-					{
-						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
-					}
-					result = scalar.Value;
-					break;
+					default:
+						// Default to string
+						if(type != typeof(object))
+						{
+							throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture,
+								"TypeCode.{0} is not supported.",
+								typeCode));
+						}
+						result = scalar.Value;
+						break;
+				}
 			}
 
 			AddAnchoredObject(scalar, result, context.Anchors);

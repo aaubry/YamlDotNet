@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -155,6 +155,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="listOfDictionaries.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="list.yaml" />
+    <EmbeddedResource Include="listExplicit.yaml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

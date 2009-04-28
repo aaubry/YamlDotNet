@@ -306,7 +306,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		
 		[Test]
 		public void Overrides()
 		{
@@ -318,6 +317,21 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			
 			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
 			Assert.AreEqual("BBB", ((Z)result).aaa, "The property has the wrong value.");
-}
+		}
+
+		[Test]
+		public void Enums()
+		{
+			YamlSerializer<StringFormatFlags> serializer = new YamlSerializer<StringFormatFlags>();
+
+			StringFormatFlags flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
+
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, flags);
+
+			StringFormatFlags deserialized = serializer.Deserialize(new StringReader(buffer.ToString()));
+
+			Assert.AreEqual(flags, deserialized, "The value is incorrect.");
+		}
 	}
 }
