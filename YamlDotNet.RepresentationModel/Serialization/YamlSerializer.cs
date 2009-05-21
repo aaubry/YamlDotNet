@@ -16,7 +16,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class YamlSerializer
 	{
-		private readonly YamlSerializerOptions options;
+		private readonly YamlSerializerMode mode;
 		private readonly Type serializedType;
 
 		private class ObjectInfo
@@ -40,23 +40,23 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				}
 			}
 
-			private readonly DeserializationOverrides overrides;
+			private readonly DeserializationOptions options;
 
-			internal DeserializationOverrides Overrides
+			internal DeserializationOptions Options
 			{
 				get
 				{
-					return overrides;
+					return options;
 				}
 			}
 
 			/// <summary>
 			/// Initializes a new instance of the <see cref="DeserializationContext"/> class.
 			/// </summary>
-			/// <param name="overrides">The overrides.</param>
-			internal DeserializationContext(DeserializationOverrides overrides)
+			/// <param name="options">The mode.</param>
+			internal DeserializationContext(DeserializationOptions options)
 			{
-				this.overrides = overrides;
+				this.options = options ?? new DeserializationOptions();
 			}
 
 			/// <summary>
@@ -81,7 +81,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			get
 			{
-				return (options & YamlSerializerOptions.Roundtrip) != 0;
+				return (mode & YamlSerializerMode.Roundtrip) != 0;
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			get
 			{
-				return (options & YamlSerializerOptions.DisableAliases) != 0;
+				return (mode & YamlSerializerMode.DisableAliases) != 0;
 			}
 		}
 
@@ -100,19 +100,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
 		public YamlSerializer()
-			: this(typeof(object), YamlSerializerOptions.None)
+			: this(typeof(object), YamlSerializerMode.None)
 		{
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
 		/// </summary>
-		/// <param name="options">The options the specify the behavior of the serializer.</param>
+		/// <param name="mode">The options the specify the behavior of the serializer.</param>
 		/// <remarks>
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
-		public YamlSerializer(YamlSerializerOptions options)
-			: this(typeof(object), options)
+		public YamlSerializer(YamlSerializerMode mode)
+			: this(typeof(object), mode)
 		{
 		}
 
@@ -121,7 +121,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="serializedType">Type of the serialized.</param>
 		public YamlSerializer(Type serializedType)
-			: this(serializedType, YamlSerializerOptions.None)
+			: this(serializedType, YamlSerializerMode.None)
 		{
 		}
 
@@ -129,11 +129,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
 		/// </summary>
 		/// <param name="serializedType">Type of the serialized.</param>
-		/// <param name="options">The options the specify the behavior of the serializer.</param>
-		public YamlSerializer(Type serializedType, YamlSerializerOptions options)
+		/// <param name="mode">The options the specify the behavior of the serializer.</param>
+		public YamlSerializer(Type serializedType, YamlSerializerMode mode)
 		{
 			this.serializedType = serializedType;
-			this.options = options;
+			this.mode = mode;
 
 			if (!DisableAliases)
 			{
@@ -389,12 +389,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes an object from the specified stream.
 		/// </summary>
 		/// <param name="input">The input.</param>
-		/// <param name="overrides">The deserialization overrides.</param>
+		/// <param name="options">The mode.</param>
 		/// <param name="context">Returns additional information about the deserialization process.</param>
 		/// <returns></returns>
-		public object Deserialize(TextReader input, DeserializationOverrides overrides, out IDeserializationContext context)
+		public object Deserialize(TextReader input, DeserializationOptions options, out IDeserializationContext context)
 		{
-			return Deserialize(new EventReader(new Parser(input)), overrides, out context);
+			return Deserialize(new EventReader(new Parser(input)), options, out context);
 		}
 
 		/// <summary>
@@ -411,11 +411,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes an object from the specified stream.
 		/// </summary>
 		/// <param name="input">The input.</param>
-		/// <param name="overrides">The deserialization overrides.</param>
+		/// <param name="options">The mode.</param>
 		/// <returns></returns>
-		public object Deserialize(TextReader input, DeserializationOverrides overrides)
+		public object Deserialize(TextReader input, DeserializationOptions options)
 		{
-			return Deserialize(new EventReader(new Parser(input)), overrides);
+			return Deserialize(new EventReader(new Parser(input)), options);
 		}
 
 		/// <summary>
@@ -432,12 +432,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes the specified reader.
 		/// </summary>
 		/// <param name="reader">The reader.</param>
-		/// <param name="overrides">The deserialization overrides.</param>
+		/// <param name="options">The mode.</param>
 		/// <returns></returns>
-		public object Deserialize(EventReader reader, DeserializationOverrides overrides)
+		public object Deserialize(EventReader reader, DeserializationOptions options)
 		{
 			IDeserializationContext context;
-			return Deserialize(reader, overrides, out context);
+			return Deserialize(reader, options, out context);
 		}
 
 		/// <summary>
@@ -455,12 +455,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes the specified reader.
 		/// </summary>
 		/// <param name="reader">The reader.</param>
-		/// <param name="overrides">The deserialization overrides.</param>
+		/// <param name="options">The mode.</param>
 		/// <param name="context">Returns additional information about the deserialization process.</param>
 		/// <returns></returns>
-		public object Deserialize(EventReader reader, DeserializationOverrides overrides, out IDeserializationContext context)
+		public object Deserialize(EventReader reader, DeserializationOptions options, out IDeserializationContext context)
 		{
-			var internalContext = new DeserializationContext(overrides);
+			var internalContext = new DeserializationContext(options);
 
 			bool hasStreamStart = reader.Accept<StreamStart>();
 			if (hasStreamStart)
@@ -491,7 +491,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return result;
 		}
 
-		private object DeserializeValue(EventReader reader, Type type, DeserializationContext context)
+		private object DeserializeValue(EventReader reader, Type expectedType, DeserializationContext context)
 		{
 			if(reader.Accept<AnchorAlias>())
 			{
@@ -507,7 +507,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return null;
 			}
 
-			type = GetType(nodeEvent.Tag, type);
+			object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
+
+			if(!expectedType.IsAssignableFrom(result.GetType()))
+			{
+				result = Convert.ChangeType(result, expectedType, CultureInfo.InvariantCulture);
+			}
+
+			return result;
+		}
+
+		private object DeserializeValueNotNull(EventReader reader, DeserializationContext context, INodeEvent nodeEvent, Type expectedType)
+		{
+			Type type = GetType(nodeEvent.Tag, expectedType, context.Options.Mappings);
 			
 			if(typeof(IYamlSerializable).IsAssignableFrom(type)) {
 				return DeserializeYamlSerializable(reader, type);
@@ -535,7 +547,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			Scalar scalar = reader.Expect<Scalar>();
 
 			object result;
-			type = GetType(scalar.Tag, type);
+			type = GetType(scalar.Tag, type, context.Options.Mappings);
 
 			if (type.IsEnum)
 			{
@@ -659,7 +671,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			SequenceStart sequence = reader.Expect<SequenceStart>();
 
-			type = GetType(sequence.Tag, type);
+			type = GetType(sequence.Tag, type, context.Options.Mappings);
 			
 			// Choose a default list type in case there was no specific type specified.
 			if(type == typeof(object)) {
@@ -725,7 +737,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			MappingStart mapping = reader.Expect<MappingStart>();
 
-			type = GetType(mapping.Tag, type);
+			type = GetType(mapping.Tag, type, context.Options.Mappings);
 			object result = Activator.CreateInstance(type);
 
 			IDictionary dictionary = result as IDictionary;
@@ -760,9 +772,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					Scalar key = reader.Expect<Scalar>();
 
 					bool isOverriden = false;
-					if(context.Overrides != null)
+					if(context.Options != null)
 					{
-						var deserializer = context.Overrides.GetOverride(type, key.Value);
+						var deserializer = context.Options.Overrides.GetOverride(type, key.Value);
 						if(deserializer != null)
 						{
 							isOverriden = true;
@@ -807,15 +819,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{ "tag:yaml.org,2002:timestamp", typeof(DateTime) },
 		};
 
-		private static Type GetType(string tag, Type defaultType)
+		private static Type GetType(string tag, Type defaultType, TagMappings mappings)
 		{
 			if (tag == null)
 			{
 				return defaultType;
 			}
 
-			Type predefinedType;
-			if (predefinedTypes.TryGetValue(tag, out predefinedType))
+			Type predefinedType = mappings.GetMapping(tag);
+			if (predefinedType != null || predefinedTypes.TryGetValue(tag, out predefinedType))
 			{
 				return predefinedType;
 			}
@@ -843,9 +855,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSerializer{TSerialized}"/> class.
 		/// </summary>
-		/// <param name="options">The options.</param>
-		public YamlSerializer(YamlSerializerOptions options)
-			: base(typeof(TSerialized), options)
+		/// <param name="mode">The options.</param>
+		public YamlSerializer(YamlSerializerMode mode)
+			: base(typeof(TSerialized), mode)
 		{
 		}
 
@@ -863,11 +875,34 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes an object from the specified stream.
 		/// </summary>
 		/// <param name="input">The input.</param>
+		/// <param name="options">The options.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(TextReader input, DeserializationOptions options)
+		{
+			return (TSerialized)base.Deserialize(input, options);
+		}
+
+		/// <summary>
+		/// Deserializes an object from the specified stream.
+		/// </summary>
+		/// <param name="input">The input.</param>
 		/// <param name="context">Returns additional information about the deserialization process.</param>
 		/// <returns></returns>
 		public new TSerialized Deserialize(TextReader input, out IDeserializationContext context)
 		{
 			return (TSerialized)base.Deserialize(input, out context);
+		}
+
+		/// <summary>
+		/// Deserializes an object from the specified stream.
+		/// </summary>
+		/// <param name="input">The input.</param>
+		/// <param name="options">The options.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(TextReader input, DeserializationOptions options, out IDeserializationContext context)
+		{
+			return (TSerialized)base.Deserialize(input, options, out context);
 		}
 
 		/// <summary>
@@ -884,11 +919,34 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Deserializes the specified reader.
 		/// </summary>
 		/// <param name="reader">The reader.</param>
+		/// <param name="options">The options.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(EventReader reader, DeserializationOptions options)
+		{
+			return (TSerialized)base.Deserialize(reader, options);
+		}
+
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
 		/// <param name="context">Returns additional information about the deserialization process.</param>
 		/// <returns></returns>
 		public new TSerialized Deserialize(EventReader reader, out IDeserializationContext context)
 		{
 			return (TSerialized)base.Deserialize(reader, out context);
+		}
+
+		/// <summary>
+		/// Deserializes the specified reader.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="options">The options.</param>
+		/// <param name="context">Returns additional information about the deserialization process.</param>
+		/// <returns></returns>
+		public new TSerialized Deserialize(EventReader reader, DeserializationOptions options, out IDeserializationContext context)
+		{
+			return (TSerialized)base.Deserialize(reader, options, out context);
 		}
 	}
 }

@@ -6,7 +6,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// Specifies the behavior of the <see cref="YamlSerializer"/>.
 	/// </summary>
 	[Flags]
-	public enum YamlSerializerOptions
+	public enum YamlSerializerMode
 	{
 		/// <summary>
 		/// Serializes using the default options

@@ -69,10 +69,12 @@
     <Compile Include="IYamlVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
+    <Compile Include="Serialization\DeserializationOptions.cs" />
     <Compile Include="Serialization\DeserializationOverrides.cs" />
     <Compile Include="Serialization\IYamlSerializable.cs" />
     <Compile Include="Serialization\LazyDeserializationValue.cs" />
     <Compile Include="Serialization\ObjectAnchorCollection.cs" />
+    <Compile Include="Serialization\TagMappings.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />
@@ -80,7 +82,7 @@
     <Compile Include="YamlScalarNode.cs" />
     <Compile Include="YamlSequenceNode.cs" />
     <Compile Include="Serialization\YamlSerializer.cs" />
-    <Compile Include="Serialization\YamlSerializerOptions.cs" />
+    <Compile Include="Serialization\YamlSerializerMode.cs" />
     <Compile Include="YamlStream.cs" />
     <Compile Include="YamlVisitor.cs" />
   </ItemGroup>

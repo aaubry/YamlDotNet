@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core.Events;
+using System.Globalization;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -118,7 +119,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void Roundtrip()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerOptions.Roundtrip);
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerMode.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -178,7 +179,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void CircularReference()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerOptions.Roundtrip);
+			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerMode.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -284,7 +285,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void RoundtripList()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerOptions.Roundtrip);
+			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerMode.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -309,11 +310,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void Overrides()
 		{
-			DeserializationOverrides overrides = new DeserializationOverrides();
-			overrides.Add(typeof(Z), "aaa", (t, reader) => ((Z)t).aaa = reader.Expect<Scalar>().Value.ToUpperInvariant());
+			DeserializationOptions options = new DeserializationOptions();
+			options.Overrides.Add(typeof(Z), "aaa", (t, reader) => ((Z)t).aaa = reader.Expect<Scalar>().Value.ToUpperInvariant());
 
 			YamlSerializer serializer = new YamlSerializer();
-			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), overrides);
+			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), options);
 			
 			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
 			Assert.AreEqual("BBB", ((Z)result).aaa, "The property has the wrong value.");
@@ -332,6 +333,139 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			StringFormatFlags deserialized = serializer.Deserialize(new StringReader(buffer.ToString()));
 
 			Assert.AreEqual(flags, deserialized, "The value is incorrect.");
+		}
+
+		[Test]
+		public void CustomTags()
+		{
+			DeserializationOptions options = new DeserializationOptions();
+			options.Mappings.Add("tag:yaml.org,2002:point", typeof(Point));
+
+			YamlSerializer serializer = new YamlSerializer();
+			object result = serializer.Deserialize(YamlFile("tags.yaml"), options);
+
+			Assert.AreEqual(typeof(Point), result.GetType(), "The deserializer should have used the correct type.");
+
+			Point value = (Point)result;
+			Assert.AreEqual(10, value.X, "The property X has the wrong value.");
+			Assert.AreEqual(20, value.Y, "The property Y has the wrong value.");
+		}
+
+		[Test]
+		public void DeserializeConvertible()
+		{
+			YamlSerializer<Z> serializer = new YamlSerializer<Z>();
+			object result = serializer.Deserialize(YamlFile("convertible.yaml"));
+
+			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
+			Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+		}
+
+		public class Convertible : IConvertible
+		{
+			public string Left
+			{
+				get;
+				set;
+			}
+
+			public string Right
+			{
+				get;
+				set;
+			}
+
+			#region IConvertible Members
+
+			public TypeCode GetTypeCode()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool ToBoolean(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public byte ToByte(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public char ToChar(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public DateTime ToDateTime(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public decimal ToDecimal(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public double ToDouble(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public short ToInt16(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public int ToInt32(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public long ToInt64(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public sbyte ToSByte(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public float ToSingle(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public string ToString(IFormatProvider provider)
+			{
+				Assert.AreEqual(CultureInfo.InvariantCulture, provider);
+
+				return string.Format(provider, "[{0}, {1}]", Left, Right);
+			}
+
+			public object ToType(Type conversionType, IFormatProvider provider)
+			{
+				Assert.AreEqual(typeof(string), conversionType);
+				return ToString(provider);
+			}
+
+			public ushort ToUInt16(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public uint ToUInt32(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			public ulong ToUInt64(IFormatProvider provider)
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
 		}
 	}
 }
