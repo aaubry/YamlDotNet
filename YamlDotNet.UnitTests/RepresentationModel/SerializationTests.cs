@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core.Events;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -361,6 +362,25 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
 		}
 
+		public class Converter : TypeConverter
+		{
+			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+			{
+				return sourceType == typeof(string);
+			}
+
+			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			{
+				string[] parts = ((string)value).Split(' ');
+				return new Convertible
+				{
+					Left = parts[0],
+					Right = parts[1]
+				};
+			}
+		}
+
+		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
 			public string Left
@@ -467,5 +487,16 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			#endregion
 		}
+
+		[Test]
+		public void DeserializeTypeConverter()
+		{
+			YamlSerializer<Z> serializer = new YamlSerializer<Z>();
+			object result = serializer.Deserialize(YamlFile("converter.yaml"));
+
+			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
+			Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+		}
+
 	}
 }

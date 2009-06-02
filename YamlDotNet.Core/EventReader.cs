@@ -51,9 +51,11 @@ namespace YamlDotNet.Core
 				throw new YamlException(
 				    string.Format(
 				        CultureInfo.InvariantCulture,
-				        "Expected '{0}', got '{1}'.",
+				        "Expected '{0}', got '{1}' (at line {2}, character {3}).",
 				        typeof(T).Name,
-				        parser.Current.GetType().Name
+				        parser.Current.GetType().Name,
+						parser.Current.Start.Line,
+						parser.Current.Start.Column
 				    )
 				);
 			}

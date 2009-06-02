@@ -74,6 +74,7 @@
     <Compile Include="Serialization\IYamlSerializable.cs" />
     <Compile Include="Serialization\LazyDeserializationValue.cs" />
     <Compile Include="Serialization\ObjectAnchorCollection.cs" />
+    <Compile Include="Serialization\ObjectConverter.cs" />
     <Compile Include="Serialization\TagMappings.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />

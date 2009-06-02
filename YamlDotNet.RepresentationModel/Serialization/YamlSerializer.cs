@@ -8,6 +8,7 @@ using YamlDotNet.Core.Events;
 using System.Collections.Generic;
 using System.Collections;
 using System.Diagnostics;
+using System.ComponentModel;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -198,32 +199,37 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
-		private void SerializeObject(Emitter emitter, Type type, object value, string anchor) {
+		private void SerializeObject(Emitter emitter, Type type, object value, string anchor)
+		{
 			if (Roundtrip && !HasDefaultConstructor(type))
 			{
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
-			if(typeof(IEnumerable).IsAssignableFrom(type)) {
+			if (typeof(IEnumerable).IsAssignableFrom(type))
+			{
 				SerializeList(emitter, type, value, anchor);
-			} else {
+			}
+			else
+			{
 				SerializeProperties(emitter, type, value, anchor);
 			}
 		}
-		
+
 		private void SerializeList(Emitter emitter, Type type, object value, string anchor)
 		{
 			Type itemType = GetItemType(type, typeof(IEnumerable<>));
 
 			emitter.Emit(new SequenceStart(anchor, null, true, SequenceStyle.Any));
 
-			foreach(object item in (IEnumerable)value) {
+			foreach (object item in (IEnumerable)value)
+			{
 				SerializeValue(emitter, itemType, item);
 			}
-			
+
 			emitter.Emit(new SequenceEnd());
 		}
-		
+
 		/// <summary>
 		/// Serializes the properties of the specified object into a mapping.
 		/// </summary>
@@ -309,7 +315,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 
 			IYamlSerializable serializable = value as IYamlSerializable;
-			if(serializable != null) {
+			if (serializable != null)
+			{
 				serializable.WriteYaml(emitter);
 				return;
 			}
@@ -493,7 +500,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private object DeserializeValue(EventReader reader, Type expectedType, DeserializationContext context)
 		{
-			if(reader.Accept<AnchorAlias>())
+			if (reader.Accept<AnchorAlias>())
 			{
 				return context.Anchors[reader.Expect<AnchorAlias>().Value];
 			}
@@ -508,23 +515,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 
 			object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
-
-			if(!expectedType.IsAssignableFrom(result.GetType()))
-			{
-				result = Convert.ChangeType(result, expectedType, CultureInfo.InvariantCulture);
-			}
-
-			return result;
+			return ObjectConverter.Convert(result, expectedType);
 		}
 
 		private object DeserializeValueNotNull(EventReader reader, DeserializationContext context, INodeEvent nodeEvent, Type expectedType)
 		{
 			Type type = GetType(nodeEvent.Tag, expectedType, context.Options.Mappings);
-			
-			if(typeof(IYamlSerializable).IsAssignableFrom(type)) {
+
+			if (typeof(IYamlSerializable).IsAssignableFrom(type))
+			{
 				return DeserializeYamlSerializable(reader, type);
 			}
-			
+
 			if (reader.Accept<MappingStart>())
 			{
 				return DeserializeProperties(reader, type, context);
@@ -535,7 +537,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return DeserializeList(reader, type, context);
 			}
 
-			if(reader.Accept<Scalar>()) {
+			if (reader.Accept<Scalar>())
+			{
 				return DeserializeScalar(reader, type, context);
 			}
 
@@ -556,7 +559,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			else
 			{
 				TypeCode typeCode = Type.GetTypeCode(type);
-				switch(typeCode)
+				switch (typeCode)
 				{
 					case TypeCode.Boolean:
 						result = bool.Parse(scalar.Value);
@@ -620,14 +623,23 @@ namespace YamlDotNet.RepresentationModel.Serialization
 						break;
 
 					default:
-						// Default to string
-						if(type != typeof(object))
+						if (type == typeof(object))
 						{
-							throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture,
-								"TypeCode.{0} is not supported.",
-								typeCode));
+							// Default to string
+							result = scalar.Value;
 						}
-						result = scalar.Value;
+						else
+						{
+							TypeConverter converter = TypeDescriptor.GetConverter(type);
+							if(converter != null && converter.CanConvertFrom(typeof(string)))
+							{
+								result = converter.ConvertFromInvariantString(scalar.Value);
+							}
+							else
+							{
+								result = Convert.ChangeType(scalar.Value, type, CultureInfo.InvariantCulture);
+							}
+						}
 						break;
 				}
 			}
@@ -639,7 +651,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private static void AddAnchoredObject(INodeEvent node, object value, ObjectAnchorCollection deserializedAnchors)
 		{
-			if(!string.IsNullOrEmpty(node.Anchor))
+			if (!string.IsNullOrEmpty(node.Anchor))
 			{
 				deserializedAnchors.Add(node.Anchor, value);
 			}
@@ -672,12 +684,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			SequenceStart sequence = reader.Expect<SequenceStart>();
 
 			type = GetType(sequence.Tag, type, context.Options.Mappings);
-			
+
 			// Choose a default list type in case there was no specific type specified.
-			if(type == typeof(object)) {
+			if (type == typeof(object))
+			{
 				type = typeof(ArrayList);
 			}
-			
+
 			object result = Activator.CreateInstance(type);
 
 			Type iCollection = GetGenericInterface(type, typeof(ICollection<>));
@@ -693,9 +706,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			else
 			{
 				IList list = result as IList;
-				if(list != null)
+				if (list != null)
 				{
-					while(!reader.Accept<SequenceEnd>())
+					while (!reader.Accept<SequenceEnd>())
 					{
 						list.Add(DeserializeValue(reader, typeof(object), context));
 					}
@@ -717,9 +730,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			reader.Expect<SequenceEnd>();
 		}
 
-		private static Type GetItemType(Type type, Type genericType) {
-			foreach(Type interfacetype in type.GetInterfaces()) {
-				if(interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericType) {
+		private static Type GetItemType(Type type, Type genericType)
+		{
+			foreach (Type interfacetype in type.GetInterfaces())
+			{
+				if (interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericType)
+				{
 					return interfacetype.GetGenericArguments()[0];
 				}
 			}
@@ -772,10 +788,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					Scalar key = reader.Expect<Scalar>();
 
 					bool isOverriden = false;
-					if(context.Options != null)
+					if (context.Options != null)
 					{
 						var deserializer = context.Options.Overrides.GetOverride(type, key.Value);
-						if(deserializer != null)
+						if (deserializer != null)
 						{
 							isOverriden = true;
 							deserializer(result, reader);
@@ -785,7 +801,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					if (!isOverriden)
 					{
 						PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
-						if(property == null)
+						if (property == null)
 						{
 							Console.WriteLine(key);
 
@@ -795,8 +811,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 									"Property '{0}' not found on type '{1}'",
 									key.Value,
 									type.FullName
-									)
-								);
+								)
+							);
 						}
 						property.SetValue(result, DeserializeValue(reader, property.PropertyType, context), null);
 					}
@@ -819,7 +835,31 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{ "tag:yaml.org,2002:timestamp", typeof(DateTime) },
 		};
 
+		private static readonly Dictionary<Type, Type> defaultInterfaceImplementations = new Dictionary<Type, Type>
+		{
+			{ typeof(IEnumerable<>), typeof(List<>) },
+			{ typeof(ICollection<>), typeof(List<>) },
+			{ typeof(IList<>), typeof(List<>) },
+			{ typeof(IDictionary<,>), typeof(Dictionary<,>) },
+		};
+
 		private static Type GetType(string tag, Type defaultType, TagMappings mappings)
+		{
+			Type actualType = GetTypeFromTag(tag, defaultType, mappings);
+
+			if (actualType.IsInterface)
+			{
+				Type implementationType;
+				if (defaultInterfaceImplementations.TryGetValue(actualType.GetGenericTypeDefinition(), out implementationType))
+				{
+					return implementationType.MakeGenericType(actualType.GetGenericArguments());
+				}
+			}
+
+			return actualType;
+		}
+
+		private static Type GetTypeFromTag(string tag, Type defaultType, TagMappings mappings)
 		{
 			if (tag == null)
 			{
