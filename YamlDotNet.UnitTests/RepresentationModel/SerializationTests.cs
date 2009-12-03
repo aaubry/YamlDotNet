@@ -352,15 +352,15 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual(20, value.Y, "The property Y has the wrong value.");
 		}
 
-		[Test]
-		public void DeserializeConvertible()
-		{
-			YamlSerializer<Z> serializer = new YamlSerializer<Z>();
-			object result = serializer.Deserialize(YamlFile("convertible.yaml"));
+		//[Test]
+		//public void DeserializeConvertible()
+		//{
+		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
+		//    object result = serializer.Deserialize(YamlFile("convertible.yaml"));
 
-			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
-			Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
-		}
+		//    Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
+		//    Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+		//}
 
 		public class Converter : TypeConverter
 		{
@@ -488,15 +488,39 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			#endregion
 		}
 
+		//[Test]
+		//public void DeserializeTypeConverter()
+		//{
+		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
+		//    object result = serializer.Deserialize(YamlFile("converter.yaml"));
+
+		//    Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
+		//    Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+		//}
+
 		[Test]
-		public void DeserializeTypeConverter()
+		public void RoundtripDictionary()
 		{
-			YamlSerializer<Z> serializer = new YamlSerializer<Z>();
-			object result = serializer.Deserialize(YamlFile("converter.yaml"));
+			Dictionary<string, string> entries = new Dictionary<string, string>
+			{
+				{ "key1", "value1" },
+				{ "key2", "value2" },
+				{ "key3", "value3" },
+			};
 
-			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
-			Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+			var serializer = YamlSerializer.Create(entries, YamlSerializerMode.Roundtrip | YamlSerializerMode.DisableAliases);
+
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, entries);
+
+			Console.WriteLine(buffer.ToString());
+
+			var deserialized = serializer.Deserialize(new StringReader(buffer.ToString()));
+
+			foreach(var pair in deserialized)
+			{
+				Assert.AreEqual(entries[pair.Key], pair.Value);
+			}
 		}
-
 	}
 }

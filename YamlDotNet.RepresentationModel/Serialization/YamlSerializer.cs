@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Linq.Expressions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -142,6 +143,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
+		/// <summary>
+		/// Creates a new instance of <see cref="YamlSerializer{TSerialized}"/>.
+		/// </summary>
+		/// <typeparam name="TSerialized">The type of the serialized.</typeparam>
+		/// <param name="serialized">An object of the serialized type. This parameter is necessary to allow type inference.</param>
+		/// <returns></returns>
+		public static YamlSerializer<TSerialized> Create<TSerialized>(TSerialized serialized)
+		{
+			return new YamlSerializer<TSerialized>();
+		}
+
+		/// <summary>
+		/// Creates a new instance of <see cref="YamlSerializer{TSerialized}"/>.
+		/// </summary>
+		/// <typeparam name="TSerialized">The type of the serialized.</typeparam>
+		/// <param name="serialized">An object of the serialized type. This parameter is necessary to allow type inference.</param>
+		/// <param name="mode">The mode.</param>
+		/// <returns></returns>
+		public static YamlSerializer<TSerialized> Create<TSerialized>(TSerialized serialized, YamlSerializerMode mode)
+		{
+			return new YamlSerializer<TSerialized>(mode);
+		}
+
 		#region Serialization
 		/// <summary>
 		/// Serializes the specified object.
@@ -206,14 +230,81 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
+			if (typeof(IDictionary).IsAssignableFrom(type))
+			{
+				SerializeDictionary(emitter, value, anchor);
+				return;
+			}
+
+			Type iDictionaryType = GetImplementedGenericInterface(type, typeof(IDictionary<,>));
+			if(iDictionaryType != null)
+			{
+				SerializeGenericDictionary(emitter, iDictionaryType, type, value, anchor);
+				return;
+			}
+			
 			if (typeof(IEnumerable).IsAssignableFrom(type))
 			{
 				SerializeList(emitter, type, value, anchor);
+				return;
 			}
-			else
+
+			SerializeProperties(emitter, type, value, anchor);
+		}
+
+		private void SerializeGenericDictionary(Emitter emitter, Type iDictionaryType, Type type, object value, string anchor)
+		{
+			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Any));
+
+			Func<object, object> getKey = MakeKeyValuePairGetter(iDictionaryType, "Key");
+			Func<object, object> getValue = MakeKeyValuePairGetter(iDictionaryType, "Value");
+
+			foreach (object entry in (IEnumerable)value)
 			{
-				SerializeProperties(emitter, type, value, anchor);
+				var entryKey = getKey(entry);
+				SerializeValue(emitter, entryKey.GetType(), entryKey);
+
+				var entryValue = getValue(entry);
+				SerializeValue(emitter, entryValue.GetType(), entryValue);
 			}
+
+			emitter.Emit(new SequenceEnd());
+		}
+
+		private Func<object, object> MakeKeyValuePairGetter(Type iDictionaryType, string propertyName)
+		{
+			var getKeyValuePairKeyGeneric = GetType().GetMethod("GetKeyValuePair" + propertyName, BindingFlags.Static | BindingFlags.NonPublic);
+			var getKeyValuePairKey = getKeyValuePairKeyGeneric.MakeGenericMethod(iDictionaryType.GetGenericArguments()[0].GetGenericArguments());
+			return (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object, object>), getKeyValuePairKey);
+		}
+
+		// ReSharper disable UnusedPrivateMember
+		// This methid is invoked using reflection.
+		private static object GetKeyValuePairKey<T, U>(object pair)
+		{
+			return ((KeyValuePair<T, U>)pair).Key;
+		}
+		// ReSharper restore UnusedPrivateMember
+
+		// ReSharper disable UnusedPrivateMember
+		// This methid is invoked using reflection.
+		private static object GetKeyValuePairValue<T, U>(object pair)
+		{
+			return ((KeyValuePair<T, U>)pair).Value;
+		}
+		// ReSharper restore UnusedPrivateMember
+
+		private void SerializeDictionary(Emitter emitter, object value, string anchor)
+		{
+			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Any));
+
+			foreach(DictionaryEntry entry in (IDictionary)value)
+			{
+				SerializeValue(emitter, GetObjectType(entry.Key), entry.Key);
+				SerializeValue(emitter, GetObjectType(entry.Value), entry.Value);
+			}
+
+			emitter.Emit(new MappingEnd());
 		}
 
 		private void SerializeList(Emitter emitter, Type type, object value, string anchor)
@@ -227,7 +318,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				SerializeValue(emitter, itemType, item);
 			}
 
-			emitter.Emit(new SequenceEnd());
+			emitter.Emit(new MappingEnd());
 		}
 
 		/// <summary>
@@ -730,16 +821,27 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			reader.Expect<SequenceEnd>();
 		}
 
-		private static Type GetItemType(Type type, Type genericType)
+		private static Type GetImplementedGenericInterface(Type type, Type genericInterfaceType)
 		{
 			foreach (Type interfacetype in type.GetInterfaces())
 			{
-				if (interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericType)
+				if (interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericInterfaceType)
 				{
-					return interfacetype.GetGenericArguments()[0];
+					return interfacetype;
 				}
 			}
-			return typeof(object);
+			return null;
+		}
+
+		private static Type GetItemType(Type type, Type genericInterfaceType)
+		{
+			var implementedInterface = GetImplementedGenericInterface(type, genericInterfaceType);
+			return implementedInterface != null ? implementedInterface.GetGenericArguments()[0] : typeof(object);
+		}
+
+		private static Type GetObjectType(object value)
+		{
+			return value != null ? value.GetType() : typeof(object);
 		}
 
 		private static object DeserializeYamlSerializable(EventReader reader, Type type)
