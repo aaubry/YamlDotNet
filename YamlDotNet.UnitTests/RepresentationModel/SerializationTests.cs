@@ -121,7 +121,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void Roundtrip()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerMode.Roundtrip);
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -181,7 +181,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void CircularReference()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerMode.Roundtrip);
+			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerModes.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -287,7 +287,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Test]
 		public void RoundtripList()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerMode.Roundtrip);
+			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerModes.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -509,7 +509,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				{ "key3", "value3" },
 			};
 
-			var serializer = YamlSerializer.Create(entries, YamlSerializerMode.Roundtrip | YamlSerializerMode.DisableAliases);
+			var serializer = YamlSerializer.Create(entries, YamlSerializerModes.Roundtrip | YamlSerializerModes.DisableAliases);
 
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, entries);

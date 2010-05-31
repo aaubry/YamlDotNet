@@ -44,17 +44,5 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return objectsByAnchor[anchor];
 			}
 		}
-
-		/// <summary>
-		/// Gets the anchor of the specified object.
-		/// </summary>
-		/// <value></value>
-		public string this[object @object]
-		{
-			get
-			{
-				return anchorsByObject[@object];
-			}
-		}
 	}
 }

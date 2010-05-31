@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using YamlDotNet.Core;
 
@@ -23,9 +24,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Initializes a new instance of the <see cref="DeserializationOverrides"/> class.
 		/// </summary>
 		/// <param name="overrides">The overrides.</param>
-		public DeserializationOverrides(IDictionary<Type, Dictionary<string, Action<object, EventReader>>> overrides)
+		public DeserializationOverrides(IEnumerable<DeserializationOverride> overrides)
 		{
-			this.overrides = new Dictionary<Type, Dictionary<string, Action<object, EventReader>>>(overrides);
+			var overridesByType = from over in overrides
+								  group over by over.DeserializedType into byType
+								  select new
+								  {
+									  Type = byType.Key,
+									  Overrides = byType.ToDictionary(o => o.DeserializedPropertyName, o => o.Deserializer),
+								  };
+
+			this.overrides = overridesByType.ToDictionary(o => o.Type, o => o.Overrides);
 		}
 
 		/// <summary>
@@ -37,6 +46,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public void Add<TDeserialized>(string deserializedPropertyName, Action<TDeserialized, EventReader> deserializer)
 		{
 			Add(typeof(TDeserialized), deserializedPropertyName, (target, reader) => deserializer((TDeserialized)target, reader));
+		}
+
+		/// <summary>
+		/// Adds an override for the specified property.
+		/// </summary>
+		/// <param name="over">The override.</param>
+		public void Add(DeserializationOverride over)
+		{
+			Add(over.DeserializedType, over.DeserializedPropertyName, over.Deserializer);
 		}
 
 		/// <summary>

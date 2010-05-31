@@ -1,15 +1,14 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
-using System.Reflection;
-using System.Globalization;
 using YamlDotNet.Core.Events;
-using System.Collections.Generic;
-using System.Collections;
-using System.Diagnostics;
-using System.ComponentModel;
-using System.Linq.Expressions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -18,7 +17,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class YamlSerializer
 	{
-		private readonly YamlSerializerMode mode;
+		private readonly YamlSerializerModes mode;
 		private readonly Type serializedType;
 
 		private class ObjectInfo
@@ -83,7 +82,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			get
 			{
-				return (mode & YamlSerializerMode.Roundtrip) != 0;
+				return (mode & YamlSerializerModes.Roundtrip) != 0;
 			}
 		}
 
@@ -91,7 +90,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			get
 			{
-				return (mode & YamlSerializerMode.DisableAliases) != 0;
+				return (mode & YamlSerializerModes.DisableAliases) != 0;
 			}
 		}
 
@@ -102,7 +101,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
 		public YamlSerializer()
-			: this(typeof(object), YamlSerializerMode.None)
+			: this(typeof(object), YamlSerializerModes.None)
 		{
 		}
 
@@ -113,7 +112,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <remarks>
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
-		public YamlSerializer(YamlSerializerMode mode)
+		public YamlSerializer(YamlSerializerModes mode)
 			: this(typeof(object), mode)
 		{
 		}
@@ -123,7 +122,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="serializedType">Type of the serialized.</param>
 		public YamlSerializer(Type serializedType)
-			: this(serializedType, YamlSerializerMode.None)
+			: this(serializedType, YamlSerializerModes.None)
 		{
 		}
 
@@ -132,7 +131,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="serializedType">Type of the serialized.</param>
 		/// <param name="mode">The options the specify the behavior of the serializer.</param>
-		public YamlSerializer(Type serializedType, YamlSerializerMode mode)
+		public YamlSerializer(Type serializedType, YamlSerializerModes mode)
 		{
 			this.serializedType = serializedType;
 			this.mode = mode;
@@ -161,7 +160,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="serialized">An object of the serialized type. This parameter is necessary to allow type inference.</param>
 		/// <param name="mode">The mode.</param>
 		/// <returns></returns>
-		public static YamlSerializer<TSerialized> Create<TSerialized>(TSerialized serialized, YamlSerializerMode mode)
+		public static YamlSerializer<TSerialized> Create<TSerialized>(TSerialized serialized, YamlSerializerModes mode)
 		{
 			return new YamlSerializer<TSerialized>(mode);
 		}
@@ -239,7 +238,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			Type iDictionaryType = GetImplementedGenericInterface(type, typeof(IDictionary<,>));
 			if(iDictionaryType != null)
 			{
-				SerializeGenericDictionary(emitter, iDictionaryType, type, value, anchor);
+				SerializeGenericDictionary(emitter, iDictionaryType, value, anchor);
 				return;
 			}
 			
@@ -252,7 +251,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			SerializeProperties(emitter, type, value, anchor);
 		}
 
-		private void SerializeGenericDictionary(Emitter emitter, Type iDictionaryType, Type type, object value, string anchor)
+		private void SerializeGenericDictionary(Emitter emitter, Type iDictionaryType, object value, string anchor)
 		{
 			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Any));
 
@@ -998,7 +997,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Initializes a new instance of the <see cref="YamlSerializer{TSerialized}"/> class.
 		/// </summary>
 		/// <param name="mode">The options.</param>
-		public YamlSerializer(YamlSerializerMode mode)
+		public YamlSerializer(YamlSerializerModes mode)
 			: base(typeof(TSerialized), mode)
 		{
 		}

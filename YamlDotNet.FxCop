@@ -187,21 +187,31 @@
           <Members>
            <Member Name="#Accept`1()">
             <Messages>
-             <Message TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004" Created="2008-11-06 18:56:51Z">
+             <Message TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004" Status="Excluded" Created="2008-11-06 18:56:51Z">
               <Issue>
                <Item>'EventReader.Accept&lt;T&gt;()'</Item>
                <Item>'T'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="0" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Expect`1()">
             <Messages>
-             <Message TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004" Created="2008-11-06 18:56:51Z">
+             <Message TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004" Status="Excluded" Created="2008-11-06 18:56:51Z">
               <Issue>
                <Item>'EventReader.Expect&lt;T&gt;()'</Item>
                <Item>'T'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="0" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
@@ -305,19 +315,6 @@
       <Namespaces>
        <Namespace Name="YamlDotNet.RepresentationModel">
         <Types>
-         <Type Name="LazyDeserializationValue`1">
-          <Members>
-           <Member Name="#value">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2009-05-21 13:52:16Z">
-              <Issue>
-               <Item>'LazyDeserializationValue&lt;T&gt;.value'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="YamlStream">
           <Messages>
            <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2008-11-04 15:07:46Z">
@@ -337,108 +334,109 @@
        </Namespace>
        <Namespace Name="YamlDotNet.RepresentationModel.Serialization">
         <Types>
-         <Type Name="DeserializationOptions">
+         <Type Name="ObjectConverter">
           <Members>
-           <Member Name="#.ctor(System.Collections.Generic.IDictionary`2&lt;System.Type,System.Collections.Generic.Dictionary`2&lt;System.String,System.Action`2&lt;System.Object,YamlDotNet.Core.EventReader&gt;&gt;&gt;,System.Collections.Generic.IDictionary`2&lt;System.String,System.Type&gt;)">
+           <Member Name="#Convert`2(!!0)">
             <Messages>
-             <Message TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006" Created="2009-05-21 13:52:16Z">
+             <Message TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004" Created="2010-05-31 19:33:55Z">
               <Issue>
-               <Item>'DeserializationOptions.DeserializationOptions(IDictionary&lt;Type, Dictionary&lt;string, Action&lt;object, EventReader&gt;&gt;&gt;, IDictionary&lt;string, Type&gt;)'</Item>
-               <Item>'IDictionary&lt;Type, Dictionary&lt;string, Action&lt;object, EventReader&gt;&gt;&gt;'</Item>
+               <Item>'ObjectConverter.Convert&lt;TFrom, TTo&gt;(TFrom)'</Item>
+               <Item>'TTo'</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
           </Members>
          </Type>
-         <Type Name="DeserializationOverrides">
+         <Type Name="StreamFragment">
           <Members>
-           <Member Name="#.ctor(System.Collections.Generic.IDictionary`2&lt;System.Type,System.Collections.Generic.Dictionary`2&lt;System.String,System.Action`2&lt;System.Object,YamlDotNet.Core.EventReader&gt;&gt;&gt;)">
+           <Member Name="#YamlDotNet.RepresentationModel.IYamlSerializable.ReadYaml(YamlDotNet.Core.Parser)">
             <Messages>
-             <Message TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006" Created="2009-05-21 13:52:16Z">
+             <Message TypeName="InterfaceMethodsShouldBeCallableByChildTypes" Category="Microsoft.Design" CheckId="CA1033" Created="2010-05-31 19:33:55Z">
               <Issue>
-               <Item>'DeserializationOverrides.DeserializationOverrides(IDictionary&lt;Type, Dictionary&lt;string, Action&lt;object, EventReader&gt;&gt;&gt;)'</Item>
-               <Item>'IDictionary&lt;Type, Dictionary&lt;string, Action&lt;object, EventReader&gt;&gt;&gt;'</Item>
+               <Item>'StreamFragment'</Item>
+               <Item>'IYamlSerializable.ReadYaml(Parser)'</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#Add(System.Type,System.String,System.Action`2&lt;System.Object,YamlDotNet.Core.EventReader&gt;)">
+           <Member Name="#YamlDotNet.RepresentationModel.IYamlSerializable.WriteYaml(YamlDotNet.Core.Emitter)">
             <Messages>
-             <Message Id="deserializer" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2009-05-21 13:52:16Z">
-              <Issue Name="MemberParameter">
-               <Item>'DeserializationOverrides.Add(Type, string, Action&lt;object, EventReader&gt;)'</Item>
-               <Item>deserializer</Item>
-               <Item>'deserializer'</Item>
+             <Message TypeName="InterfaceMethodsShouldBeCallableByChildTypes" Category="Microsoft.Design" CheckId="CA1033" Created="2010-05-31 19:33:55Z">
+              <Issue>
+               <Item>'StreamFragment'</Item>
+               <Item>'IYamlSerializable.WriteYaml(Emitter)'</Item>
               </Issue>
              </Message>
             </Messages>
-           </Member>
-           <Member Name="#Add`1(System.String,System.Action`2&lt;!!0,YamlDotNet.Core.EventReader&gt;)">
-            <Messages>
-             <Message Id="deserializer" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2009-05-21 13:52:16Z">
-              <Issue Name="MemberParameter">
-               <Item>'DeserializationOverrides.Add&lt;TDeserialized&gt;(string, Action&lt;TDeserialized, EventReader&gt;)'</Item>
-               <Item>deserializer</Item>
-               <Item>'deserializer'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="ObjectAnchorCollection">
-          <Members>
-           <Member Name="#Item[System.Object]">
-            <Accessors>
-             <Accessor Name="#get_Item(System.Object)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-05-21 13:52:16Z">
-                <Issue>
-                 <Item>'ObjectAnchorCollection.this.get(object)'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
            </Member>
           </Members>
          </Type>
          <Type Name="YamlSerializer">
           <Members>
+           <Member Name="#Create`1(!!0)">
+            <Messages>
+             <Message Id="serialized" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2010-05-31 19:33:55Z" FixCategory="DependsOnFix">
+              <Issue>
+               <Item>'serialized'</Item>
+               <Item>'YamlSerializer.Create&lt;TSerialized&gt;(TSerialized)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#Deserialize(System.IO.TextReader,YamlDotNet.RepresentationModel.Serialization.DeserializationOptions,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Deserialize(System.IO.TextReader,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Deserialize(YamlDotNet.Core.EventReader,YamlDotNet.RepresentationModel.Serialization.DeserializationOptions,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Deserialize(YamlDotNet.Core.EventReader,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
@@ -463,50 +461,61 @@
           <Members>
            <Member Name="#Deserialize(System.IO.TextReader,YamlDotNet.RepresentationModel.Serialization.DeserializationOptions,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Deserialize(System.IO.TextReader,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Deserialize(YamlDotNet.Core.EventReader,YamlDotNet.RepresentationModel.Serialization.DeserializationOptions,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
            <Member Name="#Deserialize(YamlDotNet.Core.EventReader,YamlDotNet.RepresentationModel.Serialization.IDeserializationContext&amp;)">
             <Messages>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-05-21 13:52:16Z">
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Status="Excluded" Created="2009-05-21 13:52:16Z">
               <Issue>
                <Item>'context'</Item>
               </Issue>
+              <Notes>
+               <User Name="Antoine">
+                <Note Id="1" />
+               </User>
+              </Notes>
              </Message>
             </Messages>
            </Member>
           </Members>
-         </Type>
-         <Type Name="YamlSerializerMode">
-          <Messages>
-           <Message TypeName="FlagsEnumsShouldHavePluralNames" Category="Microsoft.Naming" CheckId="CA1714" Created="2009-05-21 13:52:16Z">
-            <Issue>
-             <Item>'YamlSerializerMode'</Item>
-            </Issue>
-           </Message>
-          </Messages>
          </Type>
         </Types>
        </Namespace>
@@ -516,6 +525,10 @@
    </Target>
   </Targets>
   <Notes>
+   <User Name="Antoine">
+    <Note Id="0" Modified="2010-05-31 19:40:00Z">This pattern allows to avoid having to specify the type twice (typeof and cast).</Note>
+    <Note Id="1" Modified="2010-05-31 20:01:35Z">This is necessary to allow advances scenarios that need the context, while keeping usual scenarios simple.</Note>
+   </User>
    <User Name="antoine.aubry">
     <Note Id="0" Modified="2008-07-31 17:29:43Z">The default implementation is enhough. It is not expected that Marks are compared, anyways.</Note>
     <Note Id="1" Modified="2008-11-04 15:10:40Z">This is the same name as in the XmlSerializer.Serialize method.</Note>
@@ -533,26 +546,13 @@
    <Rule TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021">
     <Resolution Name="Default">Consider a design that does not require that {0} be an out parameter.</Resolution>
    </Rule>
-   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
-    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
-   </Rule>
-   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
-    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
-   </Rule>
    <Rule TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104">
     <Resolution Name="Default">Remove the read-only designation from {0} or change the field to one that is an immutable reference type. If the reference type {1} is, in fact, immutable, exclude this message.</Resolution>
-   </Rule>
-   <Rule TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006">
-    <Resolution Name="Default">Consider a design where {0} doesn't nest generic type {1}.</Resolution>
-   </Rule>
-   <Rule TypeName="FlagsEnumsShouldHavePluralNames" Category="Microsoft.Naming" CheckId="CA1714">
-    <Resolution Name="Default">If enumeration name {0} is singular, change it to a plural form.</Resolution>
    </Rule>
    <Rule TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004">
     <Resolution Name="Default">Consider a design where {0} doesn't require explicit type parameter {1} in any call to it.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
-    <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711">
@@ -561,12 +561,18 @@
    <Rule TypeName="IdentifiersShouldNotMatchKeywords" Category="Microsoft.Naming" CheckId="CA1716">
     <Resolution Name="Member">Rename virtual/interface member {0} so that it no longer conflicts with the reserved language keyword '{1}'. Using a reserved keyword as the name of a virtual/interface member makes it harder for consumers in other languages to override/implement the member.</Resolution>
    </Rule>
+   <Rule TypeName="InterfaceMethodsShouldBeCallableByChildTypes" Category="Microsoft.Design" CheckId="CA1033">
+    <Resolution Name="Default">Make {0} sealed (a breaking change if this class has previously shipped), implement the method non-explicitly, or implement a new method that exposes the functionality of {1} and is visible to derived classes.</Resolution>
+   </Rule>
    <Rule TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059">
     <Resolution Name="Xml">Modify member {0} so that it no longer exposes the concrete type {1}. Use IXPathNavigable to represent XML data sources.</Resolution>
    </Rule>
    <Rule TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815">
     <Resolution Name="Equals">{0} should override Equals.</Resolution>
     <Resolution Name="op_Equality">{0} should override the equality (==) and inequality (!=) operators.</Resolution>
+   </Rule>
+   <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
+    <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>
