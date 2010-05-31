@@ -318,7 +318,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				SerializeValue(emitter, itemType, item);
 			}
 
-			emitter.Emit(new MappingEnd());
+			emitter.Emit(new SequenceEnd());
 		}
 
 		/// <summary>
