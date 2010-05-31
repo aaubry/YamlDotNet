@@ -25,8 +25,13 @@ namespace YamlDotNet.RepresentationModel
 		{
 			throw new NotSupportedException("Resolving an alias on an alias node does not make sense");
 		}
-		
-		internal override void Save(Emitter emitter)
+
+		/// <summary>
+		/// Saves the current node to the specified emitter.
+		/// </summary>
+		/// <param name="emitter">The emitter where the node is to be saved.</param>
+		/// <param name="state">The state.</param>
+		internal override void Emit(Emitter emitter, EmitterState state)
 		{
 			throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be saved.");
 		}

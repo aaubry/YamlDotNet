@@ -61,18 +61,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">
-      <Link>CommonAssemblyInfo.cs</Link>
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AnchorNotFoundException.cs" />
     <Compile Include="DocumentLoadingState.cs" />
     <Compile Include="DuplicateAnchorException.cs" />
+    <Compile Include="EmitterState.cs" />
     <Compile Include="IYamlVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="Serialization\DeserializationOptions.cs" />
     <Compile Include="Serialization\DeserializationOverrides.cs" />
     <Compile Include="Serialization\IYamlSerializable.cs" />
-    <Compile Include="Serialization\LazyDeserializationValue.cs" />
+    <None Include="Serialization\LazyDeserializationValue.cs" />
     <Compile Include="Serialization\ObjectAnchorCollection.cs" />
     <Compile Include="Serialization\ObjectConverter.cs" />
     <Compile Include="Serialization\TagMappings.cs" />

@@ -253,5 +253,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			RoundtripTest("test14.yaml");
 		}
+
+		[Test]
+		public void RoundtripBackreference()
+		{
+			RoundtripTest("backreference.yaml");
+		}
 	}
 }

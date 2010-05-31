@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -68,7 +68,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		private class AnchorAssigningVisitor : YamlVisitor
 		{
-			private readonly Dictionary<string, bool> existingAnchors = new Dictionary<string, bool>();
+			private readonly HashSet<string> existingAnchors = new HashSet<string>();
 			private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>();
 
 			public void AssignAnchors(YamlDocument document)
@@ -87,8 +87,8 @@ namespace YamlDotNet.RepresentationModel
 						do
 						{
 							anchor = random.Next().ToString(CultureInfo.InvariantCulture);
-						} while (existingAnchors.ContainsKey(anchor));
-						existingAnchors.Add(anchor, false);
+						} while (existingAnchors.Contains(anchor));
+						existingAnchors.Add(anchor);
 
 						visitedNode.Key.Anchor = anchor;
 					}
@@ -114,7 +114,7 @@ namespace YamlDotNet.RepresentationModel
 				}
 				else
 				{
-					existingAnchors.Add(node.Anchor, false);
+					existingAnchors.Add(node.Anchor);
 				}
 			}
 
@@ -143,7 +143,7 @@ namespace YamlDotNet.RepresentationModel
 			AssignAnchors();
 			
 			emitter.Emit(new DocumentStart());
-			rootNode.Save(emitter);
+			rootNode.Save(emitter, new EmitterState());
 			emitter.Emit(new DocumentEnd(false));
 		}
 		

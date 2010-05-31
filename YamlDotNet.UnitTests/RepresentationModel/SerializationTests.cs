@@ -13,6 +13,7 @@ using System.ComponentModel;
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
 	[TestFixture]
+	[CLSCompliant(false)]
 	public class SerializationTests : YamlTest
 	{
 		private class X

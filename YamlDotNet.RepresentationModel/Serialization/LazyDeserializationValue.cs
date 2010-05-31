@@ -13,11 +13,18 @@ namespace YamlDotNet.RepresentationModel
 	{
 		private T value;
 		private List<ParsingEvent> events;
-		
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LazyDeserializationValue&lt;T&gt;"/> class.
+		/// </summary>
 		public LazyDeserializationValue()
 		{
 		}
 
+		/// <summary>
+		/// Reads this object's state from a YAML parser.
+		/// </summary>
+		/// <param name="parser"></param>
 		public void ReadYaml(Parser parser) {
 			events = new List<ParsingEvent>();
 			
@@ -33,7 +40,11 @@ namespace YamlDotNet.RepresentationModel
 
 			Debug.Assert(depth == 0);
 		}
-		
+
+		/// <summary>
+		/// Writes this object's state to a YAML emitter.
+		/// </summary>
+		/// <param name="emitter"></param>
 		public void WriteYaml(Emitter emitter) {
 		}
 	}

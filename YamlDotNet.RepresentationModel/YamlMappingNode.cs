@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using YamlDotNet.Core.Events;
+﻿using System.Collections.Generic;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -92,13 +91,18 @@ namespace YamlDotNet.RepresentationModel
 				}
 			}
 		}
-		
-		internal override void Save(Emitter emitter)
+
+		/// <summary>
+		/// Saves the current node to the specified emitter.
+		/// </summary>
+		/// <param name="emitter">The emitter where the node is to be saved.</param>
+		/// <param name="state">The state.</param>
+		internal override void Emit(Emitter emitter, EmitterState state)
 		{
 			emitter.Emit(new MappingStart(Anchor, Tag, true, MappingStyle.Any));
 			foreach (var entry in children) {
-				entry.Key.Save(emitter);
-				entry.Value.Save(emitter);
+				entry.Key.Save(emitter, state);
+				entry.Value.Save(emitter, state);
 			}
 			emitter.Emit(new MappingEnd());
 		}

@@ -96,8 +96,30 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="state">The state of the document.</param>
 		internal abstract void ResolveAliases(DocumentLoadingState state);
-		
-		internal abstract void Save(Emitter emitter);
+
+		/// <summary>
+		/// Saves the current node to the specified emitter.
+		/// </summary>
+		/// <param name="emitter">The emitter where the node is to be saved.</param>
+		/// <param name="state">The state.</param>
+		internal void Save(Emitter emitter, EmitterState state)
+		{
+			if (!string.IsNullOrEmpty(anchor) && !state.EmittedAnchors.Add(anchor))
+			{
+				emitter.Emit(new AnchorAlias(anchor));
+			}
+			else
+			{
+				Emit(emitter, state);
+			}
+		}
+
+		/// <summary>
+		/// Saves the current node to the specified emitter.
+		/// </summary>
+		/// <param name="emitter">The emitter where the node is to be saved.</param>
+		/// <param name="state">The state.</param>
+		internal abstract void Emit(Emitter emitter, EmitterState state);
 
 		/// <summary>
 		/// Accepts the specified visitor by calling the appropriate Visit method on it.

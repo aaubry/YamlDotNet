@@ -73,12 +73,17 @@ namespace YamlDotNet.RepresentationModel
 				}
 			}
 		}
-		
-		internal override void Save(Emitter emitter)
+
+		/// <summary>
+		/// Saves the current node to the specified emitter.
+		/// </summary>
+		/// <param name="emitter">The emitter where the node is to be saved.</param>
+		/// <param name="state">The state.</param>
+		internal override void Emit(Emitter emitter, EmitterState state)
 		{
 			emitter.Emit(new SequenceStart(Anchor, Tag, true, SequenceStyle.Any));
 			foreach (var node in children) {
-				node.Save(emitter);
+				node.Save(emitter, state);
 			}
 			emitter.Emit(new SequenceEnd());
 		}
