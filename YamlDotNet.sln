@@ -9,6 +9,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69EE9636-55BA-49C2-827E-D5684221C345}"
 	ProjectSection(SolutionItems) = preProject
 		CustomDictionary.xml = CustomDictionary.xml
+		LICENSE = LICENSE
 		YamlDotNet.FxCop = YamlDotNet.FxCop
 		YamlDotNet.snk = YamlDotNet.snk
 	EndProjectSection
