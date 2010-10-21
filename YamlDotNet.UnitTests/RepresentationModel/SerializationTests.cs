@@ -380,7 +380,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				};
 			}
 		}
-
+		
+		[CLSCompliant(false)]
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{

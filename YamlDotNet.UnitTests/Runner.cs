@@ -9,7 +9,7 @@ namespace YamlDotNet.UnitTests
 	{
 		public static void Main()
 		{
-			new SerializationTests().DeserializeList();
+			new YamlStreamTests().RoundtripSample();
 		}
 	}
 }

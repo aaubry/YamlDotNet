@@ -259,5 +259,16 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			RoundtripTest("backreference.yaml");
 		}
+
+		[Test]
+		public void RoundtripSample()
+		{
+			YamlStream original = new YamlStream();
+			original.Load(YamlFile("sample.yaml"));
+
+			original.Accept(new TracingVisitor());
+			
+			//RoundtripTest("sample.yaml");
+		}
 	}
 }

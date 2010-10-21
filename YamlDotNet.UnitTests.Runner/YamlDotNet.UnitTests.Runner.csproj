@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}</ProjectGuid>
+    <ProjectGuid>{6EEB3F45-C386-47EF-878F-E32654B4612D}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dumper</RootNamespace>
-    <AssemblyName>Dumper</AssemblyName>
+    <RootNamespace>YamlDotNet.UnitTests.Runner</RootNamespace>
+    <AssemblyName>YamlDotNet.UnitTests.Runner</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -56,6 +56,12 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -64,9 +70,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.csproj">
-      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
-      <Name>YamlDotNet.Core</Name>
+    <ProjectReference Include="..\YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj">
+      <Project>{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}</Project>
+      <Name>YamlDotNet.UnitTests</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

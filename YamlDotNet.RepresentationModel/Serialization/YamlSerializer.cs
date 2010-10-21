@@ -211,15 +211,59 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			else
 			{
 				anchors.Add(o, null);
-				foreach (var property in GetProperties(type))
+
+				if (typeof(IDictionary).IsAssignableFrom(type))
 				{
-					object value = property.GetValue(o, null);
-					if (value != null && value.GetType().IsClass)
-					{
-						LoadAliases(property.PropertyType, value, ref nextId);
-					}
+					LoadDictionaryAliases(type, (IDictionary)o, ref nextId);
+					return;
+				}
+
+				Type iDictionaryType = GetImplementedGenericInterface(type, typeof(IDictionary<,>));
+				if (iDictionaryType != null)
+				{
+					LoadGenericDictionaryAliases(type, iDictionaryType, o, ref nextId);
+					return;
+				}
+
+				if (typeof(IEnumerable).IsAssignableFrom(type))
+				{
+					LoadListAliases(type, (IEnumerable)o, ref nextId);
+					return;
+				}
+
+
+				LoadObjectAliases(type, o, ref nextId);
+			}
+		}
+
+		private void LoadObjectAliases(Type type, object o, ref int nextId)
+		{
+			foreach (var property in GetProperties(type))
+			{
+				object value = property.GetValue(o, null);
+				if (value != null && value.GetType().IsClass && !(value is string))
+				{
+					LoadAliases(property.PropertyType, value, ref nextId);
 				}
 			}
+		}
+
+		private void LoadListAliases(Type type, IEnumerable list, ref int nextId)
+		{
+			foreach (var item in list)
+			{
+				LoadAliases(item.GetType(), item, ref nextId);
+			}
+		}
+
+		private void LoadGenericDictionaryAliases(Type type, Type iDictionaryType, object o, ref int nextId)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void LoadDictionaryAliases(Type type, IDictionary iDictionary, ref int nextId)
+		{
+			throw new NotImplementedException();
 		}
 
 		private void SerializeObject(Emitter emitter, Type type, object value, string anchor)
