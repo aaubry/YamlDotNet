@@ -94,6 +94,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
+		private bool EmitDefaults
+		{
+			get
+			{
+				return (mode & YamlSerializerModes.EmitDefaults) != 0;
+			}
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
 		/// </summary>
@@ -198,6 +206,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private void LoadAliases(Type type, object o, ref int nextId)
 		{
+			if (type.IsValueType)
+			{
+				return;
+			}
+
 			if (anchors.ContainsKey(o))
 			{
 				if (anchors[o] == null)
@@ -231,7 +244,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					return;
 				}
 
-
 				LoadObjectAliases(type, o, ref nextId);
 			}
 		}
@@ -252,18 +264,31 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			foreach (var item in list)
 			{
-				LoadAliases(item.GetType(), item, ref nextId);
+				if (item != null)
+				{
+					LoadAliases(item.GetType(), item, ref nextId);
+				}
 			}
 		}
 
 		private void LoadGenericDictionaryAliases(Type type, Type iDictionaryType, object o, ref int nextId)
 		{
-			throw new NotImplementedException();
+			foreach (var item in (IEnumerable)o)
+			{
+				LoadObjectAliases(item.GetType(), item, ref nextId);
+			}
 		}
 
-		private void LoadDictionaryAliases(Type type, IDictionary iDictionary, ref int nextId)
+		private void LoadDictionaryAliases(Type type, IDictionary dictionary, ref int nextId)
 		{
-			throw new NotImplementedException();
+			foreach (DictionaryEntry item in dictionary)
+			{
+				LoadAliases(item.Key.GetType(), item.Key, ref nextId);
+				if (item.Value != null)
+				{
+					LoadAliases(item.Value.GetType(), item.Value, ref nextId);
+				}
+			}
 		}
 
 		private void SerializeObject(Emitter emitter, Type type, object value, string anchor)
@@ -311,13 +336,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				SerializeValue(emitter, entryValue.GetType(), entryValue);
 			}
 
-			emitter.Emit(new SequenceEnd());
+			emitter.Emit(new MappingEnd());
 		}
 
 		private Func<object, object> MakeKeyValuePairGetter(Type iDictionaryType, string propertyName)
 		{
-			var getKeyValuePairKeyGeneric = GetType().GetMethod("GetKeyValuePair" + propertyName, BindingFlags.Static | BindingFlags.NonPublic);
-			var getKeyValuePairKey = getKeyValuePairKeyGeneric.MakeGenericMethod(iDictionaryType.GetGenericArguments()[0].GetGenericArguments());
+			var getKeyValuePairKeyGeneric = typeof(YamlSerializer).GetMethod("GetKeyValuePair" + propertyName, BindingFlags.Static | BindingFlags.NonPublic);
+			var getKeyValuePairKey = getKeyValuePairKeyGeneric.MakeGenericMethod(iDictionaryType.GetGenericArguments());
 			return (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object, object>), getKeyValuePairKey);
 		}
 
@@ -354,7 +379,20 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			Type itemType = GetItemType(type, typeof(IEnumerable<>));
 
-			emitter.Emit(new SequenceStart(anchor, null, true, SequenceStyle.Any));
+			SequenceStyle sequenceStyle;
+			switch (Type.GetTypeCode(itemType))
+			{
+				case TypeCode.String:
+				case TypeCode.Object:
+					sequenceStyle = SequenceStyle.Any;
+					break;
+
+				default:
+					sequenceStyle = SequenceStyle.Flow;
+					break;
+			}
+
+			emitter.Emit(new SequenceStart(anchor, null, true, sequenceStyle));
 
 			foreach (object item in (IEnumerable)value)
 			{
@@ -382,10 +420,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			foreach (var property in GetProperties(type))
 			{
-				emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle.Plain, true, false));
-
 				object value = property.GetValue(o, null);
-				SerializeValue(emitter, property.PropertyType, value);
+				var propertyType = property.PropertyType;
+				if (!EmitDefaults && (value == null || (propertyType.IsValueType && value.Equals(Activator.CreateInstance(propertyType)))))
+				{
+					continue;
+				}
+
+				emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle.Plain, true, false));
+				SerializeValue(emitter, propertyType, value);
 			}
 
 			emitter.Emit(new MappingEnd());
@@ -791,18 +834,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
-		private static Type GetGenericInterface(Type implementorType, Type interfaceType)
-		{
-			foreach (var currentInterfaceType in implementorType.GetInterfaces())
-			{
-				if (currentInterfaceType.IsGenericType && currentInterfaceType.GetGenericTypeDefinition() == interfaceType)
-				{
-					return currentInterfaceType;
-				}
-			}
-			return null;
-		}
-
 		// Called through reflection
 		// ReSharper disable UnusedPrivateMember
 		private static void AddAdapter<T>(object list, object value)
@@ -827,7 +858,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			object result = Activator.CreateInstance(type);
 
-			Type iCollection = GetGenericInterface(type, typeof(ICollection<>));
+			Type iCollection = GetImplementedGenericInterface(type, typeof(ICollection<>));
 			if (iCollection != null)
 			{
 				Type[] iCollectionArguments = iCollection.GetGenericArguments();
@@ -866,7 +897,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private static Type GetImplementedGenericInterface(Type type, Type genericInterfaceType)
 		{
-			foreach (Type interfacetype in type.GetInterfaces())
+			foreach (Type interfacetype in GetImplementedInterfaces(type))
 			{
 				if (interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericInterfaceType)
 				{
@@ -874,6 +905,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				}
 			}
 			return null;
+		}
+
+		private static IEnumerable<Type> GetImplementedInterfaces(Type type)
+		{
+			if (type.IsInterface)
+			{
+				yield return type;
+			}
+
+			foreach (var implementedInterface in type.GetInterfaces())
+			{
+				yield return implementedInterface;
+			}
 		}
 
 		private static Type GetItemType(Type type, Type genericInterfaceType)

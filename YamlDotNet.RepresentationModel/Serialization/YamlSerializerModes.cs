@@ -29,5 +29,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// object graph must be walked twice.
 		/// </remarks>
 		DisableAliases = 2,
+
+		/// <summary>
+		/// Forces every value to be serialized, even if it is the default value for that type.
+		/// </summary>
+		EmitDefaults = 4,
 	}
 }
