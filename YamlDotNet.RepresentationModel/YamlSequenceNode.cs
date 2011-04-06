@@ -97,5 +97,43 @@ namespace YamlDotNet.RepresentationModel
 		public override void Accept(IYamlVisitor visitor) {
 			visitor.Visit(this);
 		}
+			
+		/// <summary />
+		public override bool Equals(object other)
+		{
+			var obj = other as YamlSequenceNode;
+			if(obj == null || !Equals(obj) || children.Count != obj.children.Count)
+			{
+				return false;
+			}
+			
+			for(int i = 0; i < children.Count; ++i)
+			{
+				if(!SafeEquals(children[i], obj.children[i]))
+				{
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		/// <summary>
+		/// Serves as a hash function for a particular type.
+		/// </summary>
+		/// <returns>
+		/// A hash code for the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override int GetHashCode()
+		{
+			var hashCode = base.GetHashCode();
+			
+			foreach (var item in children)
+			{
+				hashCode = CombineHashCodes(hashCode, GetHashCode(item));
+			}
+			return hashCode;
+		}
+
 	}
 }

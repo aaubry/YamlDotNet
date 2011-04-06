@@ -42,8 +42,27 @@ namespace YamlDotNet.RepresentationModel
 		/// <param name="visitor">
 		/// A <see cref="IYamlVisitor"/>.
 		/// </param>
-		public override void Accept(IYamlVisitor visitor) {
+		public override void Accept(IYamlVisitor visitor)
+		{
 			throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be visited.");
+		}
+		
+		/// <summary />
+		public override bool Equals(object other)
+		{
+			var obj = other as YamlAliasNode;
+			return obj != null && Equals(obj);
+		}
+		
+		/// <summary>
+		/// Serves as a hash function for a particular type.
+		/// </summary>
+		/// <returns>
+		/// A hash code for the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
 		}
 	}
 }

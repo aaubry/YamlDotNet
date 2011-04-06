@@ -103,5 +103,29 @@ namespace YamlDotNet.RepresentationModel
 		public override void Accept(IYamlVisitor visitor) {
 			visitor.Visit(this);
 		}
+		
+		/// <summary />
+		public override bool Equals(object other)
+		{
+			var obj = other as YamlScalarNode;
+			return obj != null && Equals(obj) && SafeEquals(value, obj.value) && style.Equals(obj.style);
+		}
+			
+		/// <summary>
+		/// Serves as a hash function for a particular type.
+		/// </summary>
+		/// <returns>
+		/// A hash code for the current <see cref="T:System.Object"/>.
+		/// </returns>
+		public override int GetHashCode()
+		{
+			return CombineHashCodes(
+				base.GetHashCode(),
+				CombineHashCodes(
+					GetHashCode(value),
+					style.GetHashCode()
+				)
+			);
+		}
 	}
 }
