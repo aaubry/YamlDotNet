@@ -108,7 +108,7 @@ namespace YamlDotNet.RepresentationModel
 		public override bool Equals(object other)
 		{
 			var obj = other as YamlScalarNode;
-			return obj != null && Equals(obj) && SafeEquals(value, obj.value) && style.Equals(obj.style);
+			return obj != null && Equals(obj) && SafeEquals(value, obj.value);
 		}
 			
 		/// <summary>
@@ -121,10 +121,7 @@ namespace YamlDotNet.RepresentationModel
 		{
 			return CombineHashCodes(
 				base.GetHashCode(),
-				CombineHashCodes(
-					GetHashCode(value),
-					style.GetHashCode()
-				)
+				GetHashCode(value)
 			);
 		}
 	}

@@ -4,7 +4,7 @@
 	<!-- This build file requires .NET 4.0 and nant 0.91 alpha 2 or higher -->
 	<property name="nant.settings.currentframework" value="net-4.0"/>
 
-	<property name="version" value="1.1" />
+	<property name="version" value="1.1.1" />
 
 	<fileset id="binaries">
 		<include name="YamlDotNet.Core/bin/Release/YamlDotNet.Core.dll" />
@@ -96,8 +96,25 @@
 		<delete dir="tmp" />
 	</target>
 
-	<!--<target name="package-nuget" depends="build">-->
-	<target name="package-nuget">
+	<target name="publish-nuget" depends="package-nuget" description="Builds NuGet packages and publishes them to the NuGet repository.">
+		<foreach item="File" property="nuspec-file">
+			<in>
+				<items>
+					<include name="release/${version}/*.nupkg" />
+				</items>
+			</in>
+			<do>
+				<exec program="support/nuget/NuGet.exe" workingdir="release/${version}">
+					<arg value="push" />
+					<arg value="-source" />
+					<arg value="http://packages.nuget.org/v1/" />
+					<arg value="${path::get-file-name(nuspec-file)}" />
+				</exec>
+			</do>
+		</foreach>
+	</target>
+
+	<target name="package-nuget" depends="build">
 		<foreach item="File" property="nuspec-file">
 			<in>
 				<items>
