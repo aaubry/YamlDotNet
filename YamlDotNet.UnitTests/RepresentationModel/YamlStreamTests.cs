@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using YamlDotNet.RepresentationModel;
 using System.Text;
 using System.IO;
@@ -8,26 +8,28 @@ using System.Diagnostics;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[TestFixture]
+	[TestClass]
 	public class YamlStreamTests : YamlTest
 	{
-		[Test]
+		public TestContext TestContext { get; set; }
+
+		[TestMethod]
 		public void LoadSimpleDocument() {
 			YamlStream stream = new YamlStream();
 			stream.Load(YamlFile("test2.yaml"));
 			
 			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
-			Assert.IsInstanceOfType(typeof(YamlScalarNode), stream.Documents[0].RootNode, "The document should contain a scalar.");
+			Assert.IsInstanceOfType(stream.Documents[0].RootNode, typeof(YamlScalarNode), "The document should contain a scalar.");
 			Assert.AreEqual("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value, "The value of the node is incorrect.");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void BackwardAliasReferenceWorks() {
 			YamlStream stream = new YamlStream();
 			stream.Load(YamlFile("backwardsAlias.yaml"));
 			
 			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
-			Assert.IsInstanceOfType(typeof(YamlSequenceNode), stream.Documents[0].RootNode, "The document should contain a sequence.");
+			Assert.IsInstanceOfType(stream.Documents[0].RootNode, typeof(YamlSequenceNode), "The document should contain a sequence.");
 
 			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			Assert.AreEqual(3, sequence.Children.Count, "The sequence does not contain the correct number of children.");
@@ -38,13 +40,13 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreSame(sequence.Children[0], sequence.Children[2], "The first and third element should be the same.");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void ForwardAliasReferenceWorks() {
 			YamlStream stream = new YamlStream();
 			stream.Load(YamlFile("forwardAlias.yaml"));
 			
 			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
-			Assert.IsInstanceOfType(typeof(YamlSequenceNode), stream.Documents[0].RootNode, "The document should contain a sequence.");
+			Assert.IsInstanceOfType(stream.Documents[0].RootNode, typeof(YamlSequenceNode), "The document should contain a sequence.");
 
 			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			Assert.AreEqual(3, sequence.Children.Count, "The sequence does not contain the correct number of children.");
@@ -145,6 +147,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			StringBuilder buffer = new StringBuilder();
 			original.Save(new StringWriter(buffer));
 
+			TestContext.WriteLine(buffer.ToString());
+
 			YamlStream final = new YamlStream();
 			final.Load(new StringReader(buffer.ToString()));
 
@@ -170,97 +174,97 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample1()
 		{
 			RoundtripTest("test1.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample2()
 		{
 			RoundtripTest("test2.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample3()
 		{
 			RoundtripTest("test3.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample4()
 		{
 			RoundtripTest("test4.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample5()
 		{
 			RoundtripTest("test6.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample6()
 		{
 			RoundtripTest("test6.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample7()
 		{
 			RoundtripTest("test7.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample8()
 		{
 			RoundtripTest("test8.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample9()
 		{
 			RoundtripTest("test9.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample10()
 		{
 			RoundtripTest("test10.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample11()
 		{
 			RoundtripTest("test11.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample12()
 		{
 			RoundtripTest("test12.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample13()
 		{
 			RoundtripTest("test13.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripExample14()
 		{
 			RoundtripTest("test14.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripBackreference()
 		{
 			RoundtripTest("backreference.yaml");
 		}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripSample()
 		{
 			YamlStream original = new YamlStream();
@@ -270,5 +274,14 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			
 			//RoundtripTest("sample.yaml");
 		}
+
+		[TestMethod]
+		public void FailBackreference()
+		{
+			//YamlStream original = new YamlStream();
+			//original.Load(YamlFile("fail-backreference.yaml"));
+			RoundtripTest("fail-backreference.yaml");
+		}
+
 	}
 }

@@ -142,9 +142,7 @@ namespace YamlDotNet.Converters.Xml
 				current = document.DocumentElement;
 				using (ExpectElement(options.RootElementName))
 				{
-					YamlDocument yaml = new YamlDocument();
-					yaml.RootNode = ParseNode();
-					return yaml;
+					return new YamlDocument(ParseNode());
 				}
 			}
 

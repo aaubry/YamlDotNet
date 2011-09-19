@@ -1,20 +1,20 @@
 using System;
 using System.IO;
 using System.Reflection;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestFixture]
+	[TestClass]
 	public class LookAheadBufferTests
 	{
 		private static LookAheadBuffer CreateBuffer(string text, int capacity) {
 			return new LookAheadBuffer(new StringReader(text), capacity);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void ReadingWorks()
 		{
 			LookAheadBuffer buffer = CreateBuffer("abcdefghi", 4);

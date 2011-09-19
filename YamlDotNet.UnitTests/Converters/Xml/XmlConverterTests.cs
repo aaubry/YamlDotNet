@@ -1,6 +1,6 @@
 using System;
 using System.Xml;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Converters.Xml;
 using YamlDotNet.Converters.Xml.Extensions;
@@ -8,7 +8,7 @@ using System.IO;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestFixture]
+	[TestClass]
 	public class XmlConverterTests : YamlTest
 	{
 		private static YamlDocument GetDocument(string name) {
@@ -18,7 +18,7 @@ namespace YamlDotNet.UnitTests
 			return stream.Documents[0];
 		}
 		
-		[Test]
+		[TestMethod]
 		public void ScalarToXml() {
 			YamlDocument yaml = GetDocument("test2.yaml");
 			
@@ -28,7 +28,7 @@ namespace YamlDotNet.UnitTests
 			xml.Save(Console.Out);
 		}			
 		
-		[Test]
+		[TestMethod]
 		public void SequenceOfScalarsToXml() {
 			YamlDocument yaml = GetDocument("test8.yaml");
 			
@@ -38,7 +38,7 @@ namespace YamlDotNet.UnitTests
 			xml.Save(Console.Out);
 		}			
 		
-		[Test]
+		[TestMethod]
 		public void MappingOfScalarsToXml() {
 			YamlDocument yaml = GetDocument("test9.yaml");
 
@@ -48,7 +48,7 @@ namespace YamlDotNet.UnitTests
 			xml.Save(Console.Out);
 		}			
 		
-		[Test]
+		[TestMethod]
 		public void SequenceOfMappingAndSequencesToXml() {
 			YamlDocument yaml = GetDocument("test10.yaml");
 			
@@ -58,14 +58,14 @@ namespace YamlDotNet.UnitTests
 			xml.Save(Console.Out);
 		}			
 		
-		[Test]
+		[TestMethod]
 		public void ToXmlUsingExtension() {
 			YamlDocument yaml = GetDocument("test10.yaml");
 			XmlDocument xml = yaml.ToXml();
 			xml.Save(Console.Out);
 		}			
 
-		[Test]
+		[TestMethod]
 		public void Roundtrip()
 		{
 			YamlDocument yaml = GetDocument("test10.yaml");

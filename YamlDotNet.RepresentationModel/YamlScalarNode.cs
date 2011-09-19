@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Diagnostics;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -11,40 +11,17 @@ namespace YamlDotNet.RepresentationModel
 	[DebuggerDisplay("{Value}")]
 	public class YamlScalarNode : YamlNode
 	{
-		private string value;
-		private ScalarStyle style;
-
 		/// <summary>
 		/// Gets or sets the value of the node.
 		/// </summary>
 		/// <value>The value.</value>
-		public string Value
-		{
-			get
-			{
-				return value;
-			}
-			set
-			{
-				this.value = value;
-			}
-		}
+		public string Value { get; set; }
 
 		/// <summary>
 		/// Gets or sets the style of the node.
 		/// </summary>
 		/// <value>The style.</value>
-		public ScalarStyle Style
-		{
-			get
-			{
-				return style;
-			}
-			set
-			{
-				style = value;
-			}
-		}
+		public ScalarStyle Style { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlScalarNode"/> class.
@@ -55,8 +32,8 @@ namespace YamlDotNet.RepresentationModel
 		{
 			Scalar scalar = events.Expect<Scalar>();
 			Load(scalar, state);
-			value = scalar.Value;
-			style = scalar.Style;
+			Value = scalar.Value;
+			Style = scalar.Style;
 		}
 
 		/// <summary>
@@ -72,7 +49,7 @@ namespace YamlDotNet.RepresentationModel
 		/// <param name="value">The value.</param>
 		public YamlScalarNode(string value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		/// <summary>
@@ -108,7 +85,7 @@ namespace YamlDotNet.RepresentationModel
 		public override bool Equals(object other)
 		{
 			var obj = other as YamlScalarNode;
-			return obj != null && Equals(obj) && SafeEquals(value, obj.value);
+			return obj != null && Equals(obj) && SafeEquals(Value, obj.Value);
 		}
 			
 		/// <summary>
@@ -121,8 +98,28 @@ namespace YamlDotNet.RepresentationModel
 		{
 			return CombineHashCodes(
 				base.GetHashCode(),
-				GetHashCode(value)
+				GetHashCode(Value)
 			);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="System.String"/> to <see cref="YamlDotNet.RepresentationModel.YamlScalarNode"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator YamlScalarNode(string value)
+		{
+			return new YamlScalarNode(value);
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="YamlDotNet.RepresentationModel.YamlScalarNode"/> to <see cref="System.String"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static explicit operator string(YamlScalarNode value)
+		{
+			return value.Value;
 		}
 	}
 }

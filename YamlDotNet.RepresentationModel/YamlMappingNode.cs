@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -7,7 +8,7 @@ namespace YamlDotNet.RepresentationModel
 	/// <summary>
 	/// Represents a mapping node in the YAML document.
 	/// </summary>
-	public class YamlMappingNode : YamlNode
+	public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>
 	{
 		private readonly IDictionary<YamlNode, YamlNode> children = new Dictionary<YamlNode, YamlNode>();
 
@@ -60,13 +61,103 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
+		/// </summary>
+		public YamlMappingNode(params KeyValuePair<YamlNode, YamlNode>[] children)
+			: this((IEnumerable<KeyValuePair<YamlNode, YamlNode>>)children)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
+		/// </summary>
+		public YamlMappingNode(IEnumerable<KeyValuePair<YamlNode, YamlNode>> children)
+		{
+			foreach (var child in children)
+			{
+				this.children.Add(child);
+			}
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
+		/// </summary>
+		/// <param name="children">A sequence of <see cref="YamlNode"/> where even elements are keys and odd elements are values.</param>
+		public YamlMappingNode(params YamlNode[] children)
+			: this((IEnumerable<YamlNode>)children)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
+		/// </summary>
+		/// <param name="children">A sequence of <see cref="YamlNode"/> where even elements are keys and odd elements are values.</param>
+		public YamlMappingNode(IEnumerable<YamlNode> children)
+		{
+			using (var enumerator = children.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					var key = enumerator.Current;
+					if (!enumerator.MoveNext())
+					{
+						throw new ArgumentException("When constructing a mapping node with a sequence, the number of elements of the sequence must be even.");
+					}
+
+					Add(key, enumerator.Current);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Adds the specified mapping to the <see cref="Children"/> collection.
+		/// </summary>
+		/// <param name="key">The key node.</param>
+		/// <param name="value">The value node.</param>
+		public void Add(YamlNode key, YamlNode value)
+		{
+			children.Add(key, value);
+		}
+
+		/// <summary>
+		/// Adds the specified mapping to the <see cref="Children"/> collection.
+		/// </summary>
+		/// <param name="key">The key node.</param>
+		/// <param name="value">The value node.</param>
+		public void Add(string key, YamlNode value)
+		{
+			children.Add(new YamlScalarNode(key), value);
+		}
+
+		/// <summary>
+		/// Adds the specified mapping to the <see cref="Children"/> collection.
+		/// </summary>
+		/// <param name="key">The key node.</param>
+		/// <param name="value">The value node.</param>
+		public void Add(YamlNode key, string value)
+		{
+			children.Add(key, new YamlScalarNode(value));
+		}
+
+		/// <summary>
+		/// Adds the specified mapping to the <see cref="Children"/> collection.
+		/// </summary>
+		/// <param name="key">The key node.</param>
+		/// <param name="value">The value node.</param>
+		public void Add(string key, string value)
+		{
+			children.Add(new YamlScalarNode(key), new YamlScalarNode(value));
+		}
+
+		/// <summary>
 		/// Resolves the aliases that could not be resolved when the node was created.
 		/// </summary>
 		/// <param name="state">The state of the document.</param>
 		internal override void ResolveAliases(DocumentLoadingState state)
 		{
 			Dictionary<YamlNode, YamlNode> keysToUpdate = null;
-			foreach(var entry in children)
+			Dictionary<YamlNode, YamlNode> valuesToUpdate = null;
+			foreach (var entry in children)
 			{
 				if (entry.Key is YamlAliasNode)
 				{
@@ -78,12 +169,23 @@ namespace YamlDotNet.RepresentationModel
 				}
 				if (entry.Value is YamlAliasNode)
 				{
-					children[entry.Key] = state.GetNode(entry.Value.Anchor, true);
+					if (valuesToUpdate == null)
+					{
+						valuesToUpdate = new Dictionary<YamlNode, YamlNode>();
+					}
+					valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor, true));
+				}
+			}
+			if (valuesToUpdate != null)
+			{
+				foreach (var entry in valuesToUpdate)
+				{
+					children[entry.Key] = entry.Value;
 				}
 			}
 			if (keysToUpdate != null)
 			{
-				foreach(var entry in keysToUpdate)
+				foreach (var entry in keysToUpdate)
 				{
 					YamlNode value = children[entry.Key];
 					children.Remove(entry.Key);
@@ -156,5 +258,24 @@ namespace YamlDotNet.RepresentationModel
 			return hashCode;
 		}
 
+
+		#region IEnumerable<KeyValuePair<YamlNode,YamlNode>> Members
+
+		/// <summary />
+		public IEnumerator<KeyValuePair<YamlNode, YamlNode>> GetEnumerator()
+		{
+			return children.GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerable Members
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		#endregion
 	}
 }

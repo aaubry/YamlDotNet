@@ -1,8 +1,7 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Diagnostics;
-using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -10,7 +9,7 @@ namespace YamlDotNet.RepresentationModel
 	/// Represents a sequence node in the YAML document.
 	/// </summary>
 	[DebuggerDisplay("Count = {children.Count}")]
-	public class YamlSequenceNode : YamlNode
+	public class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>
 	{
 		private readonly IList<YamlNode> children = new List<YamlNode>();
 
@@ -57,6 +56,43 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		public YamlSequenceNode()
 		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSequenceNode"/> class.
+		/// </summary>
+		public YamlSequenceNode(params YamlNode[] children)
+			: this((IEnumerable<YamlNode>)children)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSequenceNode"/> class.
+		/// </summary>
+		public YamlSequenceNode(IEnumerable<YamlNode> children)
+		{
+			foreach (var child in children)
+			{
+				this.children.Add(child);
+			}
+		}
+
+		/// <summary>
+		/// Adds the specified child to the <see cref="Children"/> collection.
+		/// </summary>
+		/// <param name="child">The child.</param>
+		public void Add(YamlNode child)
+		{
+			children.Add(child);
+		}
+
+		/// <summary>
+		/// Adds a scalar node to the <see cref="Children"/> collection.
+		/// </summary>
+		/// <param name="child">The child.</param>
+		public void Add(string child)
+		{
+			children.Add(new YamlScalarNode(child));
 		}
 
 		/// <summary>
@@ -135,5 +171,24 @@ namespace YamlDotNet.RepresentationModel
 			return hashCode;
 		}
 
+
+		#region IEnumerable<YamlNode> Members
+
+		/// <summary />
+		public IEnumerator<YamlNode> GetEnumerator()
+		{
+			return Children.GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerable Members
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		#endregion
 	}
 }

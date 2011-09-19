@@ -12,29 +12,26 @@ namespace YamlDotNet.RepresentationModel
 	/// </summary>
 	public class YamlDocument
 	{
-		private YamlNode rootNode;
-
 		/// <summary>
 		/// Gets or sets the root node.
 		/// </summary>
 		/// <value>The root node.</value>
-		public YamlNode RootNode
-		{
-			get
-			{
-				return rootNode;
-			}
-			set
-			{
-				rootNode = value;
-			}
-		}
+		public YamlNode RootNode { get; private set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlDocument"/> class.
 		/// </summary>
-		public YamlDocument()
+		public YamlDocument(YamlNode rootNode)
 		{
+			RootNode = rootNode;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlDocument"/> class with a single scalar node.
+		/// </summary>
+		public YamlDocument(string rootNode)
+		{
+			RootNode = new YamlScalarNode(rootNode);
 		}
 
 		/// <summary>
@@ -49,10 +46,10 @@ namespace YamlDotNet.RepresentationModel
 
 			while (!events.Accept<DocumentEnd>())
 			{
-				Debug.Assert(rootNode == null);
-				rootNode = YamlNode.ParseNode(events, state);
+				Debug.Assert(RootNode == null);
+				RootNode = YamlNode.ParseNode(events, state);
 
-				if (rootNode is YamlAliasNode)
+				if (RootNode is YamlAliasNode)
 				{
 					throw new YamlException();
 				}
@@ -134,26 +131,29 @@ namespace YamlDotNet.RepresentationModel
 			}
 		}
 
-		private void AssignAnchors() {
+		private void AssignAnchors()
+		{
 			AnchorAssigningVisitor visitor = new AnchorAssigningVisitor();
 			visitor.AssignAnchors(this);
 		}
-		
-		internal void Save(Emitter emitter) {
-			AssignAnchors();
-			
+
+		internal void Save(Emitter emitter)
+		{
+			//AssignAnchors();
+
 			emitter.Emit(new DocumentStart());
-			rootNode.Save(emitter, new EmitterState());
+			RootNode.Save(emitter, new EmitterState());
 			emitter.Emit(new DocumentEnd(false));
 		}
-		
+
 		/// <summary>
 		/// Accepts the specified visitor by calling the appropriate Visit method on it.
 		/// </summary>
 		/// <param name="visitor">
 		/// A <see cref="IYamlVisitor"/>.
 		/// </param>
-		public void Accept(IYamlVisitor visitor) {
+		public void Accept(IYamlVisitor visitor)
+		{
 			visitor.Visit(this);
 		}
 	}

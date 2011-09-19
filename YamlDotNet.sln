@@ -10,13 +10,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		CustomDictionary.xml = CustomDictionary.xml
 		LICENSE = LICENSE
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+		YamlDotNet.build = YamlDotNet.build
+		YamlDotNet.Converters.nuspec = YamlDotNet.Converters.nuspec
+		YamlDotNet.Core.nuspec = YamlDotNet.Core.nuspec
 		YamlDotNet.FxCop = YamlDotNet.FxCop
+		YamlDotNet.RepresentationModel.nuspec = YamlDotNet.RepresentationModel.nuspec
 		YamlDotNet.snk = YamlDotNet.snk
+		YamlDotNet.vsmdi = YamlDotNet.vsmdi
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core", "YamlDotNet.Core\YamlDotNet.Core.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.UnitTests", "YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj", "{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.RepresentationModel", "YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj", "{21CA0077-E15C-446D-9C43-F6D3F9D09687}"
 EndProject
@@ -26,9 +31,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Configuration", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dumper", "Dumper\Dumper.csproj", "{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.UnitTests.Runner", "YamlDotNet.UnitTests.Runner\YamlDotNet.UnitTests.Runner.csproj", "{6EEB3F45-C386-47EF-878F-E32654B4612D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.UnitTests", "YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj", "{7F023CAC-A942-4E6B-BBC1-9E42C16F176E}"
 EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = YamlDotNet.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -38,10 +46,6 @@ Global
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{894DA4C7-9FA7-4126-AFE1-B9769BEE7D43}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,10 +62,10 @@ Global
 		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6EEB3F45-C386-47EF-878F-E32654B4612D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EEB3F45-C386-47EF-878F-E32654B4612D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6EEB3F45-C386-47EF-878F-E32654B4612D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EEB3F45-C386-47EF-878F-E32654B4612D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F023CAC-A942-4E6B-BBC1-9E42C16F176E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F023CAC-A942-4E6B-BBC1-9E42C16F176E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F023CAC-A942-4E6B-BBC1-9E42C16F176E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F023CAC-A942-4E6B-BBC1-9E42C16F176E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

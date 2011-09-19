@@ -1,13 +1,13 @@
 using System;
 using YamlDotNet.Core;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestFixture]
+	[TestClass]
 	public class InsertionQueueTests
 	{
-		[Test]
+		[TestMethod]
 		public void QueueWorks() {
 			InsertionQueue<int> queue = new InsertionQueue<int>();
 			
@@ -36,7 +36,7 @@ namespace YamlDotNet.UnitTests
 			}
 		}
 
-		[Test]
+		[TestMethod]
 		public void InsertWorks() {
 			InsertionQueue<int> queue = new InsertionQueue<int>();
 		
@@ -80,7 +80,7 @@ namespace YamlDotNet.UnitTests
 			}
 		}
 			
-		[Test]
+		[TestMethod]
 		[ExpectedException(typeof(InvalidOperationException))]
 		public void Dequeue_ThrowsExceptionWhenEmpty() {
 			InsertionQueue<int> queue = new InsertionQueue<int>();

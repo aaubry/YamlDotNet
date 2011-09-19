@@ -1,6 +1,6 @@
 using System;
 using System.Drawing;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
@@ -12,7 +12,7 @@ using System.ComponentModel;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[TestFixture]
+	[TestClass]
 	[CLSCompliant(false)]
 	public class SerializationTests : YamlTest
 	{
@@ -118,7 +118,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 		}
 
-		[Test]
+		[TestMethod]
 		public void Roundtrip()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
@@ -178,7 +178,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 
-		[Test]
+		[TestMethod]
 		public void CircularReference()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerModes.Roundtrip);
@@ -207,7 +207,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		[Test]
+		[TestMethod]
 		public void ExplicitType()
 		{
 			YamlSerializer serializer = new YamlSerializer();
@@ -217,7 +217,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("bbb", ((Z)result).aaa, "The property has the wrong value.");
 		}
 
-		[Test]
+		[TestMethod]
 		public void DeserializeDictionary()
 		{
 			YamlSerializer serializer = new YamlSerializer();
@@ -230,7 +230,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("value2", dictionary["key2"]);
 		}
 
-		[Test]
+		[TestMethod]
 		public void DeserializeExplicitDictionary()
 		{
 			YamlSerializer serializer = new YamlSerializer();
@@ -243,13 +243,13 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual(2, dictionary["key2"]);
 		}
 
-		[Test]
+		[TestMethod]
 		public void DeserializeListOfDictionaries()
 		{
 			var serializer = new YamlSerializer<List<Dictionary<string, string>>>();
 			object result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"));
 
-			Assert.IsInstanceOfType(typeof(List<Dictionary<string, string>>), result, "The deserialized object has the wrong type.");
+			Assert.IsInstanceOfType(result, typeof(List<Dictionary<string, string>>), "The deserialized object has the wrong type.");
 
 			var list = (List<Dictionary<string, string>>)result;
 			Assert.AreEqual("conn1", list[0]["connection"]);
@@ -258,7 +258,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("path2", list[1]["path"]);
 		}
 
-		[Test]
+		[TestMethod]
 		public void DeserializeList() {
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("list.yaml"));
@@ -271,7 +271,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("three", list[2]);
 		}
 
-		[Test]
+		[TestMethod]
 		public void DeserializeExplicitList() {
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
@@ -284,7 +284,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual(5, list[2]);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void RoundtripList()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerModes.Roundtrip);
@@ -309,7 +309,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		[Test]
+		[TestMethod]
 		public void Overrides()
 		{
 			DeserializationOptions options = new DeserializationOptions();
@@ -322,7 +322,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual("BBB", ((Z)result).aaa, "The property has the wrong value.");
 		}
 
-		[Test]
+		[TestMethod]
 		public void Enums()
 		{
 			YamlSerializer<StringFormatFlags> serializer = new YamlSerializer<StringFormatFlags>();
@@ -337,7 +337,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual(flags, deserialized, "The value is incorrect.");
 		}
 
-		[Test]
+		[TestMethod]
 		public void CustomTags()
 		{
 			DeserializationOptions options = new DeserializationOptions();
@@ -353,7 +353,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.AreEqual(20, value.Y, "The property Y has the wrong value.");
 		}
 
-		//[Test]
+		//[TestMethod]
 		//public void DeserializeConvertible()
 		//{
 		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
@@ -490,7 +490,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			#endregion
 		}
 
-		//[Test]
+		//[TestMethod]
 		//public void DeserializeTypeConverter()
 		//{
 		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
@@ -500,7 +500,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		//    Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
 		//}
 
-		[Test]
+		[TestMethod]
 		public void RoundtripDictionary()
 		{
 			Dictionary<string, string> entries = new Dictionary<string, string>

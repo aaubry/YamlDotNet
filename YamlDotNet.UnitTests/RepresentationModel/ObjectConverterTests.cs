@@ -1,14 +1,14 @@
 ﻿using System;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 using YamlDotNet.RepresentationModel.Serialization;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[TestFixture]
+	[TestClass]
 	public class ObjectConverterTests
 	{
-		[Test]
+		[TestMethod]
 		public void StringToColor()
 		{
 			Color color = ObjectConverter.Convert<string, Color>("white");

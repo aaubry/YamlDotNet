@@ -1494,10 +1494,11 @@ namespace YamlDotNet.Core
 				}
 			}
 
-			if (noTag && !scalar.IsQuotedImplicit && style != ScalarStyle.Plain)
-			{
-				tagData.handle = "!";
-			}
+			// TODO: What is this code supposed to mean?
+			//if (noTag && !scalar.IsQuotedImplicit && style != ScalarStyle.Plain)
+			//{
+			//    tagData.handle = "!";
+			//}
 
 			scalarData.style = style;
 		}

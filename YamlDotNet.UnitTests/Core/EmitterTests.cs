@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestFixture]
+	[TestClass]
 	public class EmitterTests : YamlTest
 	{
 		private void ParseAndEmit(string name) {
@@ -67,85 +67,85 @@ namespace YamlDotNet.UnitTests
 			}
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample1()
 		{
 			ParseAndEmit("test1.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample2()
 		{
 			ParseAndEmit("test2.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample3()
 		{
 			ParseAndEmit("test3.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample4()
 		{
 			ParseAndEmit("test4.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample5()
 		{
 			ParseAndEmit("test5.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample6()
 		{
 			ParseAndEmit("test6.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample7()
 		{
 			ParseAndEmit("test7.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample8()
 		{
 			ParseAndEmit("test8.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample9()
 		{
 			ParseAndEmit("test9.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample10()
 		{
 			ParseAndEmit("test10.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample11()
 		{
 			ParseAndEmit("test11.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample12()
 		{
 			ParseAndEmit("test12.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample13()
 		{
 			ParseAndEmit("test13.yaml");
 		}
 		
-		[Test]
+		[TestMethod]
 		public void EmitExample14()
 		{
 			ParseAndEmit("test14.yaml");

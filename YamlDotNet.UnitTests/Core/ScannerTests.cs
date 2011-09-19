@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestFixture]
+	[TestClass]
 	public class ScannerTests : YamlTest
 	{
 		private static Scanner CreateScanner(string name) {
@@ -42,7 +42,7 @@ namespace YamlDotNet.UnitTests
 			AssertCurrent(scanner, expected);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample1()
 		{
 			Scanner scanner = CreateScanner("test1.yaml");
@@ -56,7 +56,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample2()
 		{
 			Scanner scanner = CreateScanner("test2.yaml");
@@ -67,7 +67,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample3()
 		{
 			Scanner scanner = CreateScanner("test3.yaml");
@@ -80,7 +80,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}		
  		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample4()
 		{
 			Scanner scanner = CreateScanner("test4.yaml");
@@ -95,7 +95,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}		
  		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample5()
 		{
 			Scanner scanner = CreateScanner("test5.yaml");
@@ -109,7 +109,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
  		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample6()
 		{
 			Scanner scanner = CreateScanner("test6.yaml");
@@ -121,7 +121,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample7()
 		{
 			Scanner scanner = CreateScanner("test7.yaml");
@@ -142,7 +142,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 		
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample8()
 		{
 			Scanner scanner = CreateScanner("test8.yaml");
@@ -159,7 +159,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample9()
 		{
 			Scanner scanner = CreateScanner("test9.yaml");
@@ -181,7 +181,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample10()
 		{
 			Scanner scanner = CreateScanner("test10.yaml");
@@ -215,7 +215,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 	
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample11()
 		{
 			Scanner scanner = CreateScanner("test11.yaml");
@@ -257,7 +257,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 	
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample12()
 		{
 			Scanner scanner = CreateScanner("test12.yaml");
@@ -294,7 +294,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 			
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample13()
 		{
 			Scanner scanner = CreateScanner("test13.yaml");
@@ -328,7 +328,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(scanner);
 		}
 			
-		[Test]
+		[TestMethod]
 		public void VerifyTokensOnExample14()
 		{
 			Scanner scanner = CreateScanner("test14.yaml");
