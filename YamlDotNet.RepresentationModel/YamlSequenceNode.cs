@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using System.Text;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -47,6 +49,18 @@ namespace YamlDotNet.RepresentationModel
 			{
 				state.AddNodeWithUnresolvedAliases(this);
 			}
+#if DEBUG
+			else
+			{
+				foreach (var child in children)
+				{
+					if (child is YamlAliasNode)
+					{
+						throw new InvalidOperationException("Error in alias resolution.");
+					}
+				}
+			}
+#endif
 
 			events.Expect<SequenceEnd>();
 		}
@@ -118,42 +132,44 @@ namespace YamlDotNet.RepresentationModel
 		internal override void Emit(Emitter emitter, EmitterState state)
 		{
 			emitter.Emit(new SequenceStart(Anchor, Tag, true, SequenceStyle.Any));
-			foreach (var node in children) {
+			foreach (var node in children)
+			{
 				node.Save(emitter, state);
 			}
 			emitter.Emit(new SequenceEnd());
 		}
-		
+
 		/// <summary>
 		/// Accepts the specified visitor by calling the appropriate Visit method on it.
 		/// </summary>
 		/// <param name="visitor">
 		/// A <see cref="IYamlVisitor"/>.
 		/// </param>
-		public override void Accept(IYamlVisitor visitor) {
+		public override void Accept(IYamlVisitor visitor)
+		{
 			visitor.Visit(this);
 		}
-			
+
 		/// <summary />
 		public override bool Equals(object other)
 		{
 			var obj = other as YamlSequenceNode;
-			if(obj == null || !Equals(obj) || children.Count != obj.children.Count)
+			if (obj == null || !Equals(obj) || children.Count != obj.children.Count)
 			{
 				return false;
 			}
-			
-			for(int i = 0; i < children.Count; ++i)
+
+			for (int i = 0; i < children.Count; ++i)
 			{
-				if(!SafeEquals(children[i], obj.children[i]))
+				if (!SafeEquals(children[i], obj.children[i]))
 				{
 					return false;
 				}
 			}
-			
+
 			return true;
 		}
-		
+
 		/// <summary>
 		/// Serves as a hash function for a particular type.
 		/// </summary>
@@ -163,7 +179,7 @@ namespace YamlDotNet.RepresentationModel
 		public override int GetHashCode()
 		{
 			var hashCode = base.GetHashCode();
-			
+
 			foreach (var item in children)
 			{
 				hashCode = CombineHashCodes(hashCode, GetHashCode(item));
@@ -171,6 +187,47 @@ namespace YamlDotNet.RepresentationModel
 			return hashCode;
 		}
 
+		/// <summary>
+		/// Gets all nodes from the document, starting on the current node.
+		/// </summary>
+		public override IEnumerable<YamlNode> AllNodes
+		{
+			get
+			{
+				yield return this;
+				foreach (var child in children)
+				{
+					foreach (var node in child.AllNodes)
+					{
+						yield return node;
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
+		public override string ToString()
+		{
+			var text = new StringBuilder("[ ");
+
+			foreach (var child in children)
+			{
+				if(text.Length > 2)
+				{
+					text.Append(", ");
+				}
+				text.Append(child);
+			}
+
+			text.Append(" ]");
+
+			return text.ToString();
+		}
 
 		#region IEnumerable<YamlNode> Members
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.RepresentationModel
@@ -51,7 +52,7 @@ namespace YamlDotNet.RepresentationModel
 		public override bool Equals(object other)
 		{
 			var obj = other as YamlAliasNode;
-			return obj != null && Equals(obj);
+			return obj != null && Equals(obj) && SafeEquals(Anchor, obj.Anchor);
 		}
 		
 		/// <summary>
@@ -63,6 +64,25 @@ namespace YamlDotNet.RepresentationModel
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
+		}
+
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
+		public override string ToString()
+		{
+			return "*" + Anchor;
+		}
+
+		/// <summary>
+		/// Gets all nodes from the document, starting on the current node.
+		/// </summary>
+		public override IEnumerable<YamlNode> AllNodes
+		{
+			get { yield return this; }
 		}
 	}
 }

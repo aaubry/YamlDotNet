@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -10,7 +11,7 @@ namespace YamlDotNet.RepresentationModel
 	internal class DocumentLoadingState
 	{
 		private readonly IDictionary<string, YamlNode> anchors = new Dictionary<string, YamlNode>();
-		private readonly IDictionary<YamlNode, object> nodesWithUnresolvedAliases = new Dictionary<YamlNode, object>();
+		private readonly IList<YamlNode> nodesWithUnresolvedAliases = new List<YamlNode>();
 
 		/// <summary>
 		/// Adds the specified node to the anchor list.
@@ -62,7 +63,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </param>
 		public void AddNodeWithUnresolvedAliases(YamlNode node)
 		{
-			nodesWithUnresolvedAliases[node] = null;
+			nodesWithUnresolvedAliases.Add(node);
 		}
 
 		/// <summary>
@@ -70,9 +71,19 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		public void ResolveAliases()
 		{
-			foreach(var node in nodesWithUnresolvedAliases.Keys)
+			foreach(var node in nodesWithUnresolvedAliases)
 			{
 				node.ResolveAliases(this);
+
+#if DEBUG
+				foreach (var child in node.AllNodes)
+				{
+					if (child is YamlAliasNode)
+					{
+						throw new InvalidOperationException("Error in alias resolution.");
+					}
+				}
+#endif
 			}
 		}
 	}

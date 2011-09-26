@@ -57,6 +57,16 @@ namespace YamlDotNet.RepresentationModel
 
 			state.ResolveAliases();
 
+#if DEBUG
+			foreach (var node in AllNodes)
+			{
+				if (node is YamlAliasNode)
+				{
+					throw new InvalidOperationException("Error in alias resolution.");
+				}
+			}
+#endif
+
 			events.Expect<DocumentEnd>();
 		}
 
@@ -155,6 +165,17 @@ namespace YamlDotNet.RepresentationModel
 		public void Accept(IYamlVisitor visitor)
 		{
 			visitor.Visit(this);
+		}
+
+		/// <summary>
+		/// Gets all nodes from the document.
+		/// </summary>
+		public IEnumerable<YamlNode> AllNodes
+		{
+			get
+			{
+				return RootNode.AllNodes;
+			}
 		}
 	}
 }

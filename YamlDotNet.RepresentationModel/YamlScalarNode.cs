@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -120,6 +121,25 @@ namespace YamlDotNet.RepresentationModel
 		public static explicit operator string(YamlScalarNode value)
 		{
 			return value.Value;
+		}
+
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
+		public override string ToString()
+		{
+			return Value;
+		}
+
+		/// <summary>
+		/// Gets all nodes from the document, starting on the current node.
+		/// </summary>
+		public override IEnumerable<YamlNode> AllNodes
+		{
+			get { yield return this; }
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -160,6 +161,14 @@ namespace YamlDotNet.RepresentationModel
 		protected static int CombineHashCodes(int h1, int h2)
 		{
 			return unchecked(((h1 << 5) + h1) ^ h2);
+		}
+
+		/// <summary>
+		/// Gets all nodes from the document, starting on the current node.
+		/// </summary>
+		public abstract IEnumerable<YamlNode> AllNodes
+		{
+			get;
 		}
 	}
 }
