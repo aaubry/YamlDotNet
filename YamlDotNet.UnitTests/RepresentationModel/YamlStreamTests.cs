@@ -296,7 +296,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			{
 				original.Accept(visitor);
 			}
-			catch (NotSupportedException err)
+			catch (NotSupportedException)
 			{
 				foreach (var node in visitor.CurrentPath)
 				{

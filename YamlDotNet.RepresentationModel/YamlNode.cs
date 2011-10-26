@@ -23,6 +23,16 @@ namespace YamlDotNet.RepresentationModel
 		public string Tag { get; set; }
 
 		/// <summary>
+		/// Gets the position in the input stream where the event that originated the node starts.
+		/// </summary>
+		public Mark Start { get; private set; }
+
+		/// <summary>
+		/// Gets the position in the input stream where the event that originated the node ends.
+		/// </summary>
+		public Mark End { get; private set; }
+
+		/// <summary>
 		/// Loads the specified event.
 		/// </summary>
 		/// <param name="yamlEvent">The event.</param>
@@ -35,6 +45,8 @@ namespace YamlDotNet.RepresentationModel
 				Anchor = yamlEvent.Anchor;
 				state.AddAnchor(this);
 			}
+			Start = yamlEvent.Start;
+			End = yamlEvent.End;
 		}
 
 		/// <summary>
@@ -63,7 +75,7 @@ namespace YamlDotNet.RepresentationModel
 			if (events.Accept<AnchorAlias>())
 			{
 				AnchorAlias alias = events.Expect<AnchorAlias>();
-				return state.GetNode(alias.Value, false) ?? new YamlAliasNode(alias.Value);
+				return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
 			}
 
 			throw new ArgumentException("The current event is of an unsupported type.", "events");

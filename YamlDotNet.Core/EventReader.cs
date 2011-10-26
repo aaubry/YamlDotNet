@@ -49,6 +49,8 @@ namespace YamlDotNet.Core
 			{
 				// TODO: Throw a better exception
 				throw new YamlException(
+					parser.Current.Start,
+					parser.Current.End,
 				    string.Format(
 				        CultureInfo.InvariantCulture,
 				        "Expected '{0}', got '{1}' (at line {2}, character {3}).",

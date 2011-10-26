@@ -230,7 +230,7 @@ namespace YamlDotNet.Core
 
 					if (key.IsRequired)
 					{
-						throw new SyntaxErrorException("While scanning a simple key, could not find expected ':'.", mark);
+						throw new SyntaxErrorException(mark, mark, "While scanning a simple key, could not find expected ':'.");
 					}
 
 					key.IsPossible = false;
@@ -465,11 +465,8 @@ namespace YamlDotNet.Core
 				return;
 			}
 
-
 			// If we don't determine the token type so far, it is an error.
-
-
-			throw new SyntaxErrorException("While scanning for the next token, find character that cannot start any token.", mark);
+			throw new SyntaxErrorException(mark, mark, "While scanning for the next token, find character that cannot start any token.");
 		}
 
 		private bool CheckWhiteSpace()
@@ -707,7 +704,7 @@ namespace YamlDotNet.Core
 					break;
 
 				default:
-					throw new SyntaxErrorException("While scanning a directive, find uknown directive name.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a directive, find uknown directive name.");
 			}
 
 			// Eat the rest of the line including any comments.
@@ -729,7 +726,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a directive, did not find expected comment or line break.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a directive, did not find expected comment or line break.");
 			}
 
 			// Eat a line break.
@@ -911,7 +908,7 @@ namespace YamlDotNet.Core
 
 				if (!simpleKeyAllowed)
 				{
-					throw new SyntaxErrorException("Block sequence entries are not allowed in this context.", mark);
+					throw new SyntaxErrorException(mark, mark, "Block sequence entries are not allowed in this context.");
 				}
 
 				// Add the BLOCK-SEQUENCE-START token if needed.
@@ -958,7 +955,7 @@ namespace YamlDotNet.Core
 
 				if (!simpleKeyAllowed)
 				{
-					throw new SyntaxErrorException("Mapping keys are not allowed in this context.", mark);
+					throw new SyntaxErrorException(mark, mark, "Mapping keys are not allowed in this context.");
 				}
 
 				// Add the BLOCK-MAPPING-START token if needed.
@@ -1024,7 +1021,7 @@ namespace YamlDotNet.Core
 
 					if (!simpleKeyAllowed)
 					{
-						throw new SyntaxErrorException("Mapping values are not allowed in this context.", mark);
+						throw new SyntaxErrorException(mark, mark, "Mapping values are not allowed in this context.");
 					}
 
 					// Add the BLOCK-MAPPING-START token if needed.
@@ -1139,7 +1136,7 @@ namespace YamlDotNet.Core
 
 			if (value.Length == 0 || !(analyzer.IsBlankOrBreakOrZero() || analyzer.Check("?:,]}%@`")))
 			{
-				throw new SyntaxErrorException("While scanning an anchor or alias, did not find expected alphabetic or numeric character.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning an anchor or alias, did not find expected alphabetic or numeric character.");
 			}
 
 			// Create a token.
@@ -1205,7 +1202,7 @@ namespace YamlDotNet.Core
 
 				if (!analyzer.Check('>'))
 				{
-					throw new SyntaxErrorException("While scanning a tag, did not find the expected '>'.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a tag, did not find the expected '>'.");
 				}
 
 				Skip();
@@ -1257,7 +1254,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a tag, did not find expected whitespace or line break.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a tag, did not find expected whitespace or line break.");
 			}
 
 			// Create a token.
@@ -1323,7 +1320,7 @@ namespace YamlDotNet.Core
 
 					if (analyzer.Check('0'))
 					{
-						throw new SyntaxErrorException("While scanning a block scalar, find an intendation indicator equal to 0.", start);
+						throw new SyntaxErrorException(start, mark, "While scanning a block scalar, find an intendation indicator equal to 0.");
 					}
 
 					// Get the intendation level and eat the indicator.
@@ -1340,7 +1337,7 @@ namespace YamlDotNet.Core
 			{
 				if (analyzer.Check('0'))
 				{
-					throw new SyntaxErrorException("While scanning a block scalar, find an intendation indicator equal to 0.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a block scalar, find an intendation indicator equal to 0.");
 				}
 
 				increment = analyzer.AsDigit();
@@ -1374,7 +1371,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a block scalar, did not find expected comment or line break.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a block scalar, did not find expected comment or line break.");
 			}
 
 			// Eat a line break.
@@ -1501,7 +1498,7 @@ namespace YamlDotNet.Core
 
 				if ((currentIndent == 0 || mark.Column < currentIndent) && analyzer.IsTab())
 				{
-						throw new SyntaxErrorException("While scanning a block scalar, find a tab character where an intendation space is expected.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a block scalar, find a tab character where an intendation space is expected.");
 				}
 
 				// Have we find a non-empty line?
@@ -1571,14 +1568,14 @@ namespace YamlDotNet.Core
 
 				if (IsDocumentIndicator())
 				{
-					throw new SyntaxErrorException("While scanning a quoted scalar, find unexpected document indicator.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a quoted scalar, find unexpected document indicator.");
 				}
 
 				// Check for EOF.
 
 				if (analyzer.IsZero())
 				{
-					throw new SyntaxErrorException("While scanning a quoted scalar, find unexpected end of stream.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a quoted scalar, find unexpected end of stream.");
 				}
 
 				// Consume non-blank characters.
@@ -1644,7 +1641,7 @@ namespace YamlDotNet.Core
 								}
 								else
 								{
-									throw new SyntaxErrorException("While parsing a quoted scalar, find unknown escape character.", start);
+									throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, find unknown escape character.");
 								}
 								break;
 						}
@@ -1664,7 +1661,7 @@ namespace YamlDotNet.Core
 							{
 								if (!analyzer.IsHex(k))
 								{
-									throw new SyntaxErrorException("While parsing a quoted scalar, did not find expected hexdecimal number.", start);
+									throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, did not find expected hexdecimal number.");
 								}
 								character = (uint)((character << 4) + analyzer.AsHex(k));
 							}
@@ -1673,7 +1670,7 @@ namespace YamlDotNet.Core
 
 							if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
 							{
-								throw new SyntaxErrorException("While parsing a quoted scalar, find invalid Unicode character escape code.", start);
+								throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, find invalid Unicode character escape code.");
 							}
 
 							value.Append((char)character);
@@ -1833,7 +1830,7 @@ namespace YamlDotNet.Core
 
 					if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsBlankOrBreakOrZero(1))
 					{
-						throw new SyntaxErrorException("While scanning a plain scalar, find unexpected ':'.", start);
+						throw new SyntaxErrorException(start, mark, "While scanning a plain scalar, find unexpected ':'.");
 					}
 
 					// Check for indicators that may end a plain scalar.
@@ -1904,7 +1901,7 @@ namespace YamlDotNet.Core
 
 						if (hasLeadingBlanks && mark.Column < currentIndent && analyzer.IsTab())
 						{
-							throw new SyntaxErrorException("While scanning a plain scalar, find a tab character that violate intendation.", start);
+							throw new SyntaxErrorException(start, mark, "While scanning a plain scalar, find a tab character that violate intendation.");
 						}
 
 						// Consume a space or a tab character.
@@ -1968,7 +1965,7 @@ namespace YamlDotNet.Core
 			{
 				// If the key is required, it is an error.
 
-				throw new SyntaxErrorException("While scanning a simple key, could not find expected ':'.", key.Mark);
+				throw new SyntaxErrorException(key.Mark, key.Mark, "While scanning a simple key, could not find expected ':'.");
 			}
 
 			// Remove the key from the stack.
@@ -2000,14 +1997,14 @@ namespace YamlDotNet.Core
 
 			if (name.Length == 0)
 			{
-				throw new SyntaxErrorException("While scanning a directive, could not find expected directive name.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a directive, could not find expected directive name.");
 			}
 
 			// Check for an blank character after the name.
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a directive, find unexpected non-alphabetical character.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a directive, find unexpected non-alphabetical character.");
 			}
 
 			return name.ToString();
@@ -2042,7 +2039,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.Check('.'))
 			{
-				throw new SyntaxErrorException("While scanning a %YAML directive, did not find expected digit or '.' character.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a %YAML directive, did not find expected digit or '.' character.");
 			}
 
 			Skip();
@@ -2073,7 +2070,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlank())
 			{
-				throw new SyntaxErrorException("While scanning a %TAG directive, did not find expected whitespace.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a %TAG directive, did not find expected whitespace.");
 			}
 
 			SkipWhitespaces();
@@ -2086,7 +2083,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException("While scanning a %TAG directive, did not find expected whitespace or line break.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a %TAG directive, did not find expected whitespace or line break.");
 			}
 
 			return new TagDirective(handle, prefix, start, start);
@@ -2131,7 +2128,7 @@ namespace YamlDotNet.Core
 
 			if (tag.Length == 0)
 			{
-				throw new SyntaxErrorException("While parsing a tag, did not find expected tag URI.", start);
+				throw new SyntaxErrorException(start, mark, "While parsing a tag, did not find expected tag URI.");
 			}
 
 			return tag.ToString();
@@ -2153,7 +2150,7 @@ namespace YamlDotNet.Core
 
 				if (!(analyzer.Check('%') && analyzer.IsHex(1) && analyzer.IsHex(2)))
 				{
-					throw new SyntaxErrorException("While parsing a tag, did not find URI escaped octet.", start);
+					throw new SyntaxErrorException(start, mark, "While parsing a tag, did not find URI escaped octet.");
 				}
 
 				// Get the octet.
@@ -2171,7 +2168,7 @@ namespace YamlDotNet.Core
 
 					if (width == 0)
 					{
-						throw new SyntaxErrorException("While parsing a tag, find an incorrect leading UTF-8 octet.", start);
+						throw new SyntaxErrorException(start, mark, "While parsing a tag, find an incorrect leading UTF-8 octet.");
 					}
 				}
 				else
@@ -2180,7 +2177,7 @@ namespace YamlDotNet.Core
 
 					if ((octet & 0xC0) != 0x80)
 					{
-						throw new SyntaxErrorException("While parsing a tag, find an incorrect trailing UTF-8 octet.", start);
+						throw new SyntaxErrorException(start, mark, "While parsing a tag, find an incorrect trailing UTF-8 octet.");
 					}
 				}
 
@@ -2198,7 +2195,7 @@ namespace YamlDotNet.Core
 
 			if (characters.Length != 1)
 			{
-				throw new SyntaxErrorException("While parsing a tag, find an incorrect UTF-8 sequence.", start);
+				throw new SyntaxErrorException(start, mark, "While parsing a tag, find an incorrect UTF-8 sequence.");
 			}
 
 			return characters[0];
@@ -2215,7 +2212,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.Check('!'))
 			{
-				throw new SyntaxErrorException("While scanning a tag, did not find expected '!'.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a tag, did not find expected '!'.");
 			}
 
 			// Copy the '!' character.
@@ -2246,7 +2243,7 @@ namespace YamlDotNet.Core
 
 				if (isDirective && (tagHandle.Length != 1 || tagHandle[0] != '!'))
 				{
-					throw new SyntaxErrorException("While parsing a tag directive, did not find expected '!'.", start);
+					throw new SyntaxErrorException(start, mark, "While parsing a tag directive, did not find expected '!'.");
 				}
 			}
 
@@ -2275,7 +2272,7 @@ namespace YamlDotNet.Core
 
 				if (++length > MaxVersionNumberLength)
 				{
-					throw new SyntaxErrorException("While scanning a %YAML directive, find extremely long version number.", start);
+					throw new SyntaxErrorException(start, mark, "While scanning a %YAML directive, find extremely long version number.");
 				}
 
 				value = value * 10 + analyzer.AsDigit();
@@ -2287,7 +2284,7 @@ namespace YamlDotNet.Core
 
 			if (length == 0)
 			{
-				throw new SyntaxErrorException("While scanning a %YAML directive, did not find expected version number.", start);
+				throw new SyntaxErrorException(start, mark, "While scanning a %YAML directive, did not find expected version number.");
 			}
 
 			return value;

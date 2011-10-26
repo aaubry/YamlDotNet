@@ -1,6 +1,6 @@
 using System;
-using YamlDotNet.Core;
 using System.Runtime.Serialization;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -23,6 +23,14 @@ namespace YamlDotNet.RepresentationModel
 		/// <param name="message">The message.</param>
 		public AnchorNotFoundException(string message)
 			: base(message)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
+		/// </summary>
+		public AnchorNotFoundException(Mark start, Mark end, string message)
+			: base(start, end, message)
 		{
 		}
 

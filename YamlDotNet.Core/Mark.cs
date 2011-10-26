@@ -73,5 +73,16 @@ namespace YamlDotNet.Core
 		/// Gets a <see cref="Mark"/> with empty values.
 		/// </summary>
 		public static readonly Mark Empty;
+
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String"/> that represents this instance.
+		/// </returns>
+		public override string ToString()
+		{
+			return string.Format("Lin: {0}, Col: {1}, Chr: {2}", line, column, index);
+		}
 	}
 }

@@ -76,7 +76,7 @@ namespace YamlDotNet.RepresentationModel
 		private class AnchorAssigningVisitor : YamlVisitor
 		{
 			private readonly HashSet<string> existingAnchors = new HashSet<string>();
-			private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>();
+			private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>(new YamlNodeIdentityEqualityComparer());
 
 			public void AssignAnchors(YamlDocument document)
 			{
@@ -149,7 +149,7 @@ namespace YamlDotNet.RepresentationModel
 
 		internal void Save(Emitter emitter)
 		{
-			//AssignAnchors();
+			AssignAnchors();
 
 			emitter.Emit(new DocumentStart());
 			RootNode.Save(emitter, new EmitterState());

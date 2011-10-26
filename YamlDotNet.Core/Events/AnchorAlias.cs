@@ -51,11 +51,11 @@ namespace YamlDotNet.Core.Events
 			: base(start, end)
 		{
 			if(string.IsNullOrEmpty(value)) {
-				throw new YamlException("Anchor value must not be empty.");
+				throw new YamlException(start, end, "Anchor value must not be empty.");
 			}
 
 			if(!NodeEvent.anchorValidator.IsMatch(value)) {
-				throw new YamlException("Anchor value must contain alphanumerical characters only.");
+				throw new YamlException(start, end, "Anchor value must contain alphanumerical characters only.");
 			}
 			
 			this.value = value;

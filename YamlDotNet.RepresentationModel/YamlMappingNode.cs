@@ -182,7 +182,7 @@ namespace YamlDotNet.RepresentationModel
 					{
 						keysToUpdate = new Dictionary<YamlNode, YamlNode>();
 					}
-					keysToUpdate.Add(entry.Key, state.GetNode(entry.Key.Anchor, true));
+					keysToUpdate.Add(entry.Key, state.GetNode(entry.Key.Anchor, true, entry.Key.Start, entry.Key.End));
 				}
 				if (entry.Value is YamlAliasNode)
 				{
@@ -190,7 +190,7 @@ namespace YamlDotNet.RepresentationModel
 					{
 						valuesToUpdate = new Dictionary<YamlNode, YamlNode>();
 					}
-					valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor, true));
+					valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor, true, entry.Value.Start, entry.Value.End));
 				}
 			}
 			if (valuesToUpdate != null)

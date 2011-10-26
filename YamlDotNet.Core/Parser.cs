@@ -172,7 +172,8 @@ namespace YamlDotNet.Core
 			StreamStart streamStart = GetCurrentToken() as StreamStart;
 			if (streamStart == null)
 			{
-				throw new SemanticErrorException("Did not find expected <stream-start>.", GetCurrentToken().Start);
+				var current = GetCurrentToken();
+				throw new SemanticErrorException(current.Start, current.End, "Did not find expected <stream-start>.");
 			}
 			Skip();
 
@@ -221,16 +222,17 @@ namespace YamlDotNet.Core
 				TagDirectiveCollection directives = new TagDirectiveCollection();
 				VersionDirective versionDirective = ProcessDirectives(directives);
 
-				if (!(GetCurrentToken() is DocumentStart))
+				var current = GetCurrentToken();
+				if (!(current is DocumentStart))
 				{
-					throw new SemanticErrorException("Did not find expected <document start>.", GetCurrentToken().Start);
+					throw new SemanticErrorException(current.Start, current.End, "Did not find expected <document start>.");
 				}
 
 				states.Push(ParserState.YAML_PARSE_DOCUMENT_END_STATE);
 
 				state = ParserState.YAML_PARSE_DOCUMENT_CONTENT_STATE;
 
-				Event evt = new Events.DocumentStart(versionDirective, directives, false, start, GetCurrentToken().End);
+				Event evt = new Events.DocumentStart(versionDirective, directives, false, start, current.End);
 				Skip();
 				return evt;
 			}
@@ -267,12 +269,12 @@ namespace YamlDotNet.Core
 				{
 					if (version != null)
 					{
-						throw new SemanticErrorException("Found duplicate %YAML directive.", currentVersion.Start);
+						throw new SemanticErrorException(currentVersion.Start, currentVersion.End, "Found duplicate %YAML directive.");
 					}
 
 					if (currentVersion.Version.Major != Constants.MajorVersion || currentVersion.Version.Minor != Constants.MinorVersion)
 					{
-						throw new SemanticErrorException("Found incompatible YAML document.", currentVersion.Start);
+						throw new SemanticErrorException(currentVersion.Start, currentVersion.End, "Found incompatible YAML document.");
 					}
 
 					version = currentVersion;
@@ -281,7 +283,7 @@ namespace YamlDotNet.Core
 				{
 					if (tagDirectives.Contains(tag.Handle))
 					{
-						throw new SemanticErrorException("Found duplicate %TAG directive.", tag.Start);
+						throw new SemanticErrorException(tag.Start, tag.End, "Found duplicate %TAG directive.");
 					}
 					tagDirectives.Add(tag);
 					if (tags != null)
@@ -423,7 +425,7 @@ namespace YamlDotNet.Core
 				}
 				else
 				{
-					throw new SemanticErrorException("While parsing a node, find undefined tag handle.", tag.Start);
+					throw new SemanticErrorException(tag.Start, tag.End, "While parsing a node, find undefined tag handle.");
 				}
 			}
 			if (string.IsNullOrEmpty(tagName))
@@ -508,7 +510,8 @@ namespace YamlDotNet.Core
 					return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, isImplicit, false, start, GetCurrentToken().End);
 				}
 
-				throw new SemanticErrorException("While parsing a node, did not find expected node content.", GetCurrentToken().Start);
+				var current = GetCurrentToken();
+				throw new SemanticErrorException(current.Start, current.End, "While parsing a node, did not find expected node content.");
 			}
 		}
 
@@ -580,7 +583,8 @@ namespace YamlDotNet.Core
 
 			else
 			{
-				throw new SemanticErrorException("While parsing a block collection, did not find expected '-' indicator.", GetCurrentToken().Start);
+				var current = GetCurrentToken();
+				throw new SemanticErrorException(current.Start, current.End, "While parsing a block collection, did not find expected '-' indicator.");
 			}
 		}
 
@@ -659,7 +663,8 @@ namespace YamlDotNet.Core
 
 			else
 			{
-				throw new SemanticErrorException("While parsing a block mapping, did not find expected key.", GetCurrentToken().Start);
+				var current = GetCurrentToken();
+				throw new SemanticErrorException(current.Start, current.End, "While parsing a block mapping, did not find expected key.");
 			}
 		}
 
@@ -732,7 +737,8 @@ namespace YamlDotNet.Core
 					}
 					else
 					{
-						throw new SemanticErrorException("While parsing a flow sequence, did not find expected ',' or ']'.", GetCurrentToken().Start);
+						var current = GetCurrentToken();
+						throw new SemanticErrorException(current.Start, current.End, "While parsing a flow sequence, did not find expected ',' or ']'.");
 					}
 				}
 
@@ -839,7 +845,8 @@ namespace YamlDotNet.Core
 					}
 					else
 					{
-						throw new SemanticErrorException("While parsing a flow mapping,  did not find expected ',' or '}'.", GetCurrentToken().Start);
+						var current = GetCurrentToken();
+						throw new SemanticErrorException(current.Start, current.End, "While parsing a flow mapping,  did not find expected ',' or '}'.");
 					}
 				}
 

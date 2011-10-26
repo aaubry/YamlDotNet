@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Diagnostics;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -26,7 +26,7 @@ namespace YamlDotNet.RepresentationModel
 
 			if (anchors.ContainsKey(node.Anchor))
 			{
-				throw new DuplicateAnchorException(string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' already exists", node.Anchor));
+				throw new DuplicateAnchorException(node.Start, node.End, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' already exists", node.Anchor));
 			}
 
 			anchors.Add(node.Anchor, node);
@@ -37,8 +37,10 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="anchor">The anchor.</param>
 		/// <param name="throwException">if set to <c>true</c>, the method should throw an exception if there is no node with that anchor.</param>
+		/// <param name="start">The start position.</param>
+		/// <param name="end">The end position.</param>
 		/// <returns></returns>
-		public YamlNode GetNode(string anchor, bool throwException)
+		public YamlNode GetNode(string anchor, bool throwException, Mark start, Mark end)
 		{
 			YamlNode target;
 			if (anchors.TryGetValue(anchor, out target))
@@ -47,7 +49,7 @@ namespace YamlDotNet.RepresentationModel
 			}
 			else if (throwException)
 			{
-				throw new AnchorNotFoundException(string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
+				throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
 			}
 			else
 			{

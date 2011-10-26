@@ -119,7 +119,7 @@ namespace YamlDotNet.RepresentationModel
 			{
 				if (children[i] is YamlAliasNode)
 				{
-					children[i] = state.GetNode(children[i].Anchor, true);
+					children[i] = state.GetNode(children[i].Anchor, true, children[i].Start, children[i].End);
 				}
 			}
 		}

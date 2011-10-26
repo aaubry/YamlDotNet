@@ -26,7 +26,7 @@ namespace YamlDotNet.Core.Events
 		private readonly Mark start;
 
 		/// <summary>
-		/// Gets the position in the input stream where the event start.
+		/// Gets the position in the input stream where the event starts.
 		/// </summary>
 		public Mark Start
 		{

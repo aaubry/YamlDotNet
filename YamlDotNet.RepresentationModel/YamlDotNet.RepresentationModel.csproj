@@ -86,6 +86,7 @@
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />
     <Compile Include="YamlNode.cs" />
+    <Compile Include="YamlNodeIdentityEqualityComparer.cs" />
     <Compile Include="YamlScalarNode.cs" />
     <Compile Include="YamlSequenceNode.cs" />
     <Compile Include="Serialization\YamlSerializer.cs" />
