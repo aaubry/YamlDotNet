@@ -41,7 +41,14 @@ namespace YamlDotNet.RepresentationModel
 				YamlNode key = ParseNode(events, state);
 				YamlNode value = ParseNode(events, state);
 
-				children.Add(key, value);
+				try
+				{
+					children.Add(key, value);
+				}
+				catch (ArgumentException err)
+				{
+					throw new YamlException(key.Start, key.End, "Duplicate key", err);
+				}
 
 				hasUnresolvedAliases |= key is YamlAliasNode || value is YamlAliasNode;
 			}

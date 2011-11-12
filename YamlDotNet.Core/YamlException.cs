@@ -40,7 +40,15 @@ namespace YamlDotNet.Core
 		/// Initializes a new instance of the <see cref="YamlException"/> class.
 		/// </summary>
 		public YamlException(Mark start, Mark end, string message)
-			: base(string.Format("({0}) - ({1}): {2}", start, end, message))
+			: this(start, end, message, null)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlException"/> class.
+		/// </summary>
+		public YamlException(Mark start, Mark end, string message, Exception innerException)
+			: base(string.Format("({0}) - ({1}): {2}", start, end, message), innerException)
 		{
 			Start = start;
 			End = end;
