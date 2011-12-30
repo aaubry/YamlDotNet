@@ -25,6 +25,12 @@ namespace YamlDotNet.RepresentationModel
 			}
 		}
 
+        /// <summary>
+		/// Gets or sets the style of the node.
+		/// </summary>
+		/// <value>The style.</value>
+		public MappingStyle Style { get; set; }
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
 		/// </summary>
@@ -225,7 +231,7 @@ namespace YamlDotNet.RepresentationModel
 		/// <param name="state">The state.</param>
 		internal override void Emit(Emitter emitter, EmitterState state)
 		{
-			emitter.Emit(new MappingStart(Anchor, Tag, true, MappingStyle.Any));
+            emitter.Emit(new MappingStart(Anchor, Tag, true, Style));
 			foreach (var entry in children)
 			{
 				entry.Key.Save(emitter, state);

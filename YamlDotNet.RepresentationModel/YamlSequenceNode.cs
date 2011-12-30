@@ -27,6 +27,13 @@ namespace YamlDotNet.RepresentationModel
 			}
 		}
 
+        /// <summary>
+        /// Gets or sets the style of the node.
+        /// </summary>
+        /// <value>The style.</value>
+        public SequenceStyle Style { get; set; }
+
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSequenceNode"/> class.
 		/// </summary>
@@ -131,7 +138,7 @@ namespace YamlDotNet.RepresentationModel
 		/// <param name="state">The state.</param>
 		internal override void Emit(Emitter emitter, EmitterState state)
 		{
-			emitter.Emit(new SequenceStart(Anchor, Tag, true, SequenceStyle.Any));
+            emitter.Emit(new SequenceStart(Anchor, Tag, true, Style));
 			foreach (var node in children)
 			{
 				node.Save(emitter, state);
