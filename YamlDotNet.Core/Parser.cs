@@ -100,7 +100,8 @@ namespace YamlDotNet.Core
 		{
 			switch (state)
 			{
-				case ParserState.YAML_PARSE_STREAM_START_STATE: return ParseStreamStart();
+				case ParserState.YAML_PARSE_STREAM_START_STATE:
+					return ParseStreamStart();
 
 				case ParserState.YAML_PARSE_IMPLICIT_DOCUMENT_START_STATE:
 					return ParseDocumentStart(true);

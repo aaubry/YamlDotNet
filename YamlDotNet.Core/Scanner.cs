@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011 Antoine Aubry
-    
+	
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+	
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+	
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -307,11 +307,11 @@ namespace YamlDotNet.Core
 			// Is it the document start indicator?
 
 			bool isDocumentStart =
-			    mark.Column == 0 &&
-			    analyzer.Check('-', 0) &&
-			    analyzer.Check('-', 1) &&
-			    analyzer.Check('-', 2) &&
-			    analyzer.IsBlankOrBreakOrZero(3);
+				mark.Column == 0 &&
+				analyzer.Check('-', 0) &&
+				analyzer.Check('-', 1) &&
+				analyzer.Check('-', 2) &&
+				analyzer.IsBlankOrBreakOrZero(3);
 
 			if (isDocumentStart)
 			{
@@ -322,11 +322,11 @@ namespace YamlDotNet.Core
 			// Is it the document end indicator?
 
 			bool isDocumentEnd =
-			    mark.Column == 0 &&
-			    analyzer.Check('.', 0) &&
-			    analyzer.Check('.', 1) &&
-			    analyzer.Check('.', 2) &&
-			    analyzer.IsBlankOrBreakOrZero(3);
+				mark.Column == 0 &&
+				analyzer.Check('.', 0) &&
+				analyzer.Check('.', 1) &&
+				analyzer.Check('.', 2) &&
+				analyzer.IsBlankOrBreakOrZero(3);
 
 			if (isDocumentEnd)
 			{
@@ -476,9 +476,9 @@ namespace YamlDotNet.Core
 			bool isInvalidPlainScalarCharacter = analyzer.IsBlankOrBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
 
 			bool isPlainScalar =
-			    !isInvalidPlainScalarCharacter ||
-			    (analyzer.Check('-') && !analyzer.IsBlank(1)) ||
-			    (flowLevel == 0 && (analyzer.Check("?:")) && !analyzer.IsBlankOrBreakOrZero(1));
+				!isInvalidPlainScalarCharacter ||
+				(analyzer.Check('-') && !analyzer.IsBlank(1)) ||
+				(flowLevel == 0 && (analyzer.Check("?:")) && !analyzer.IsBlankOrBreakOrZero(1));
 
 			if (isPlainScalar)
 			{
@@ -1250,9 +1250,7 @@ namespace YamlDotNet.Core
 				{
 					// It wasn't a handle after all.  Scan the rest of the tag.
 
-					suffix = ScanTagUri(null, start);
-
-					ScanTagUri(firstPart, start);
+					suffix = ScanTagUri(firstPart, start);
 
 					// Set the handle to '!'.
 
@@ -2183,9 +2181,9 @@ namespace YamlDotNet.Core
 				if (width == 0)
 				{
 					width = (octet & 0x80) == 0x00 ? 1 :
-					        (octet & 0xE0) == 0xC0 ? 2 :
-					        (octet & 0xF0) == 0xE0 ? 3 :
-					        (octet & 0xF8) == 0xF0 ? 4 : 0;
+							(octet & 0xE0) == 0xC0 ? 2 :
+							(octet & 0xF0) == 0xE0 ? 3 :
+							(octet & 0xF8) == 0xF0 ? 4 : 0;
 
 					if (width == 0)
 					{

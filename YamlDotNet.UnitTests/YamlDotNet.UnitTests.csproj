@@ -56,6 +56,7 @@
     <Compile Include="Core\ScannerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepresentationModel\ObjectConverterTests.cs" />
+    <Compile Include="RepresentationModel\Samples.cs" />
     <Compile Include="RepresentationModel\SerializationTests.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />
     <Compile Include="Runner.cs" />
@@ -160,6 +161,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="invalid-reference.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="local-tags.yaml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

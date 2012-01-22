@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011 Antoine Aubry
-    
+	
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+	
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+	
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -48,7 +48,7 @@ namespace YamlDotNet.UnitTests
 	
 		private void AssertCurrent(Parser parser, ParsingEvent expected) {
 			Console.WriteLine(expected.GetType().Name);
-			Assert.IsTrue(expected.GetType().IsAssignableFrom(parser.Current.GetType()), "The event is not of the expected type.");
+			Assert.IsTrue(expected.GetType().IsAssignableFrom(parser.Current.GetType()), string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
 			
 			foreach (var property in expected.GetType().GetProperties()) {
 				if(property.PropertyType != typeof(Mark) && property.CanRead) {
@@ -149,7 +149,7 @@ namespace YamlDotNet.UnitTests
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
 		}		
- 		
+		
 		[TestMethod]
 		public void VerifyTokensOnExample4()
 		{
@@ -168,7 +168,7 @@ namespace YamlDotNet.UnitTests
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
 		}		
- 		
+		
 		[TestMethod]
 		public void VerifyTokensOnExample5()
 		{
@@ -183,7 +183,7 @@ namespace YamlDotNet.UnitTests
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
 		}
- 		
+		
 		[TestMethod]
 		public void VerifyTokensOnExample6()
 		{
@@ -383,6 +383,26 @@ namespace YamlDotNet.UnitTests
 			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
 			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
 			AssertNext(parser, new SequenceEnd());
+			AssertNext(parser, new MappingEnd());
+			AssertNext(parser, new DocumentEnd(true));
+			AssertNext(parser, new StreamEnd());
+			AssertDoesNotHaveNext(parser);
+		}
+
+		[TestMethod]
+		public void VerifyTokenWithLocalTags()
+		{
+			Parser parser = CreateParser("local-tags.yaml");
+
+			AssertNext(parser, new StreamStart());
+			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
+			AssertNext(parser, new MappingStart(null, "!MyObject", false, MappingStyle.Block));
+			AssertNext(parser, new Scalar(null, null, "a", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "1.0", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "b", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "42", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "c", ScalarStyle.Plain, true, false));
+			AssertNext(parser, new Scalar(null, null, "-7", ScalarStyle.Plain, true, false));
 			AssertNext(parser, new MappingEnd());
 			AssertNext(parser, new DocumentEnd(true));
 			AssertNext(parser, new StreamEnd());
