@@ -77,6 +77,7 @@
     <Compile Include="Serialization\DeserializationOptions.cs" />
     <Compile Include="Serialization\DeserializationOverride.cs" />
     <Compile Include="Serialization\DeserializationOverrides.cs" />
+    <Compile Include="Serialization\IYamlTypeConverter.cs" />
     <Compile Include="Serialization\IYamlSerializable.cs" />
     <Compile Include="Serialization\StreamFragment.cs" />
     <Compile Include="Serialization\ObjectAnchorCollection.cs" />

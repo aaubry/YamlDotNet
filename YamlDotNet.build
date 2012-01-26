@@ -4,7 +4,7 @@
 	<!-- This build file requires .NET 4.0 and nant 0.91 alpha 2 or higher -->
 	<property name="nant.settings.currentframework" value="net-4.0"/>
 
-	<property name="version" value="1.1.10" />
+	<property name="version" value="1.1.11" />
 
 	<fileset id="binaries">
 		<include name="YamlDotNet.Core/bin/Release/YamlDotNet.Core.dll" />
@@ -43,6 +43,8 @@
 		<zip zipfile="release/${version}/YamlDotNet-bin-${version}.zip">
 			<fileset basedir="tmp">
 				<include name="*" />
+				<include name="../LICENSE" />
+				<include name="../LICENSE-libyaml" />
 			</fileset>
 		</zip>
 

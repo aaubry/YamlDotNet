@@ -545,5 +545,67 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				Assert.AreEqual(entries[pair.Key], pair.Value);
 			}
 		}
+
+		[TestMethod]
+		public void SerializeAnonymousType()
+		{
+			var data = new { Key = 3 };
+
+			//var serializer = new YamlSerializer(YamlSerializerModes.DisableAliases);
+			var serializer = new YamlSerializer(YamlSerializerModes.DisableAliases);
+
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, data);
+
+			Console.WriteLine(buffer.ToString());
+		}
+
+		[TestMethod]
+		public void SerializationIncludesNullWhenAsked()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults);
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X { MyString = null };
+				serializer.Serialize(buffer, original);
+
+				Console.WriteLine(buffer.ToString());
+
+				Assert.IsTrue(buffer.ToString().Contains("MyString"));
+			}
+		}
+
+		[TestMethod]
+		public void SerializationDoesNotIncludeNullWhenNotAsked()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.None);
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X { MyString = null };
+				serializer.Serialize(buffer, original);
+
+				Console.WriteLine(buffer.ToString());
+
+				Assert.IsFalse(buffer.ToString().Contains("MyString"));
+			}
+		}
+
+		[TestMethod]
+		public void SerializationOfNullWorksInJson()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible);
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X { MyString = null };
+				serializer.Serialize(buffer, original);
+
+				Console.WriteLine(buffer.ToString());
+
+				Assert.IsTrue(buffer.ToString().Contains("MyString"));
+			}
+		}
 	}
 }

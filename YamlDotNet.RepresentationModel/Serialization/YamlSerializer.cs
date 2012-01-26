@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011 Antoine Aubry
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,6 +26,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
@@ -40,6 +41,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	{
 		private readonly YamlSerializerModes mode;
 		private readonly Type serializedType;
+
+		private readonly IList<IYamlTypeConverter> converters = new List<IYamlTypeConverter>();
 
 		private class ObjectInfo
 		{
@@ -123,6 +126,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
+		private bool JsonCompatible
+		{
+			get
+			{
+				return (mode & YamlSerializerModes.JsonCompatible) != 0;
+			}
+		}
+
+		private MappingStyle MappingStyle
+		{
+			get { return JsonCompatible ? MappingStyle.Flow : MappingStyle.Any; }
+		}
+
+		private SequenceStyle SequenceStyle
+		{
+			get { return JsonCompatible ? SequenceStyle.Flow : SequenceStyle.Any; }
+		}
+
+		private ScalarStyle ScalarStyle
+		{
+			get { return JsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain; }
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
 		/// </summary>
@@ -142,7 +168,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
 		public YamlSerializer(YamlSerializerModes mode)
-			: this(typeof(object), mode)
+			: this(null, mode)
 		{
 		}
 
@@ -194,6 +220,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return new YamlSerializer<TSerialized>(mode);
 		}
 
+		/// <summary>
+		/// Registers a type converter to be used to serialize and deserialize specific types.
+		/// </summary>
+		public void RegisterTypeConverter(IYamlTypeConverter converter)
+		{
+			converters.Add(converter);
+		}
+
 		#region Serialization
 		/// <summary>
 		/// Serializes the specified object.
@@ -207,11 +241,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new ArgumentNullException("output", "The output is null.");
 			}
 
+			var type = serializedType ?? o.GetType();
+
 			if (!DisableAliases)
 			{
 				anchors.Clear();
 				int nextId = 0;
-				LoadAliases(serializedType, o, ref nextId);
+				LoadAliases(type, o, ref nextId);
 			}
 
 			Emitter emitter = new Emitter(output);
@@ -219,7 +255,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart());
 
-			SerializeValue(emitter, serializedType, o);
+			SerializeValue(emitter, type, o);
 
 			emitter.Emit(new DocumentEnd(true));
 			emitter.Emit(new StreamEnd());
@@ -326,12 +362,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 
 			Type iDictionaryType = GetImplementedGenericInterface(type, typeof(IDictionary<,>));
-			if(iDictionaryType != null)
+			if (iDictionaryType != null)
 			{
 				SerializeGenericDictionary(emitter, iDictionaryType, value, anchor);
 				return;
 			}
-			
+
 			if (typeof(IEnumerable).IsAssignableFrom(type))
 			{
 				SerializeList(emitter, type, value, anchor);
@@ -343,7 +379,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private void SerializeGenericDictionary(Emitter emitter, Type iDictionaryType, object value, string anchor)
 		{
-			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Any));
+			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle));
 
 			Func<object, object> getKey = MakeKeyValuePairGetter(iDictionaryType, "Key");
 			Func<object, object> getValue = MakeKeyValuePairGetter(iDictionaryType, "Value");
@@ -385,9 +421,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private void SerializeDictionary(Emitter emitter, object value, string anchor)
 		{
-			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Any));
+			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle));
 
-			foreach(DictionaryEntry entry in (IDictionary)value)
+			foreach (DictionaryEntry entry in (IDictionary)value)
 			{
 				SerializeValue(emitter, GetObjectType(entry.Key), entry.Key);
 				SerializeValue(emitter, GetObjectType(entry.Value), entry.Value);
@@ -405,7 +441,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{
 				case TypeCode.String:
 				case TypeCode.Object:
-					sequenceStyle = SequenceStyle.Any;
+					sequenceStyle = SequenceStyle;
 					break;
 
 				default:
@@ -437,7 +473,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
-			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle.Block));
+			emitter.Emit(new MappingStart(anchor, null, true, JsonCompatible ? MappingStyle.Flow : MappingStyle.Block));
 
 			foreach (var property in GetProperties(type))
 			{
@@ -448,7 +484,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					continue;
 				}
 
-				emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle.Plain, true, false));
+				emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle, true, false));
 				SerializeValue(emitter, propertyType, value);
 			}
 
@@ -508,7 +544,21 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			if (value == null)
 			{
-				emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
+				if (JsonCompatible)
+				{
+					emitter.Emit(new Scalar(null, null, "null", ScalarStyle.Plain, true, false));
+				}
+				else
+				{
+					emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
+				}
+				return;
+			}
+
+			var converter = converters.FirstOrDefault(c => c.Accepts(type));
+			if (converter != null)
+			{
+				converter.WriteYaml(emitter, type, value);
 				return;
 			}
 
@@ -533,12 +583,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				anchor = info.anchor;
 			}
 
+			string scalarTag = null;
+			string scalarValue = null;
+			ScalarStyle scalarStyle = ScalarStyle;
 
 			TypeCode typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
-					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:bool", value.ToString()));
+					scalarTag = "tag:yaml.org,2002:bool";
+					scalarValue = value.Equals(true) ? "true" : "false";
+					scalarStyle = ScalarStyle.Plain;
 					break;
 
 				case TypeCode.Byte:
@@ -549,22 +604,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
 				case TypeCode.UInt64:
-					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:int", Convert.ToString(value, numberFormat)));
+					scalarTag = "tag:yaml.org,2002:int";
+					scalarValue = Convert.ToString(value, numberFormat);
+					scalarStyle = ScalarStyle.Plain;
 					break;
 
 				case TypeCode.Single:
 				case TypeCode.Double:
 				case TypeCode.Decimal:
-					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:float", Convert.ToString(value, numberFormat)));
+					scalarTag = "tag:yaml.org,2002:float";
+					scalarValue = Convert.ToString(value, numberFormat);
+					scalarStyle = ScalarStyle.Plain;
 					break;
 
 				case TypeCode.String:
 				case TypeCode.Char:
-					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:str", value.ToString()));
+					scalarTag = "tag:yaml.org,2002:str";
+					scalarValue = value.ToString();
 					break;
 
 				case TypeCode.DateTime:
-					emitter.Emit(new Scalar(anchor, "tag:yaml.org,2002:timestamp", ((DateTime)value).ToString("o", CultureInfo.InvariantCulture)));
+					scalarTag = "tag:yaml.org,2002:timestamp";
+					scalarValue = ((DateTime)value).ToString("o", CultureInfo.InvariantCulture);
+					scalarStyle = ScalarStyle.Plain;
 					break;
 
 				case TypeCode.DBNull:
@@ -573,7 +635,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				default:
 					SerializeObject(emitter, type, value, anchor);
-					break;
+					return;
+			}
+
+			if (JsonCompatible)
+			{
+				emitter.Emit(new Scalar(anchor, null, scalarValue, scalarStyle, true, false));
+			}
+			else
+			{
+				emitter.Emit(new Scalar(anchor, scalarTag, scalarValue));
 			}
 		}
 		#endregion
@@ -665,6 +736,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns></returns>
 		public object Deserialize(EventReader reader, DeserializationOptions options, out IDeserializationContext context)
 		{
+			if (serializedType == null)
+			{
+				throw new InvalidOperationException("Cannot deserialize when the serialized type is not specified in the constructor.");
+			}
+
 			var internalContext = new DeserializationContext(options);
 
 			bool hasStreamStart = reader.Accept<StreamStart>();
@@ -719,6 +795,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private object DeserializeValueNotNull(EventReader reader, DeserializationContext context, INodeEvent nodeEvent, Type expectedType)
 		{
 			Type type = GetType(nodeEvent.Tag, expectedType, context.Options.Mappings);
+
+			var converter = converters.FirstOrDefault(c => c.Accepts(type));
+			if (converter != null)
+			{
+				return DeserializeWithYamlTypeConverter(reader, type, converter);
+			}
 
 			if (typeof(IYamlSerializable).IsAssignableFrom(type))
 			{
@@ -829,7 +911,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 						else
 						{
 							TypeConverter converter = TypeDescriptor.GetConverter(type);
-							if(converter != null && converter.CanConvertFrom(typeof(string)))
+							if (converter != null && converter.CanConvertFrom(typeof(string)))
 							{
 								result = converter.ConvertFromInvariantString(scalar.Value);
 							}
@@ -950,6 +1032,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private static Type GetObjectType(object value)
 		{
 			return value != null ? value.GetType() : typeof(object);
+		}
+
+		private object DeserializeWithYamlTypeConverter(EventReader reader, Type type, IYamlTypeConverter converter)
+		{
+			return converter.ReadYaml(reader.Parser, type);
 		}
 
 		private static object DeserializeYamlSerializable(EventReader reader, Type type)

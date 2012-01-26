@@ -1,16 +1,16 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011 Antoine Aubry
-    
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012 Antoine Aubry
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,45 +20,28 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
-	/// Specifies the behavior of the <see cref="YamlSerializer"/>.
+	/// Allows to customize how a type is serialized and deserialized.
 	/// </summary>
-	[Flags]
-	public enum YamlSerializerModes
+	public interface IYamlTypeConverter
 	{
 		/// <summary>
-		/// Serializes using the default options
+		/// Gets a value indicating whether the current converter supports converting the specified type.
 		/// </summary>
-		None = 0,
+		bool Accepts(Type type);
 
 		/// <summary>
-		/// Ensures that it will be possible to deserialize the serialized objects.
+		/// Reads an object's state from a YAML parser.
 		/// </summary>
-		Roundtrip = 1,
+		object ReadYaml(Parser parser, Type type);
 
 		/// <summary>
-		/// If this flag is specified, if the same object appears more than once in the
-		/// serialization graph, it will be serialized each time instead of just once.
+		/// Writes the specified object's state to a YAML emitter.
 		/// </summary>
-		/// <remarks>
-		/// If the serialization graph contains circular references and this flag is set,
-		/// a <see cref="StackOverflowException" /> will be thrown.
-		/// If this flag is not set, there is a performance penalty because the entire
-		/// object graph must be walked twice.
-		/// </remarks>
-		DisableAliases = 2,
-
-		/// <summary>
-		/// Forces every value to be serialized, even if it is the default value for that type.
-		/// </summary>
-		EmitDefaults = 4,
-
-		/// <summary>
-		/// Ensures that the result of the serialization is valid JSON.
-		/// </summary>
-		JsonCompatible = 8,
+		void WriteYaml(Emitter emitter, Type type, object value);
 	}
 }
