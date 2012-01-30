@@ -30,7 +30,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// An object that contains part of a YAML stream.
 	/// </summary>
-	public class StreamFragment : IYamlSerializable
+	public sealed class StreamFragment : IYamlSerializable
 	{
 		private readonly List<ParsingEvent> events = new List<ParsingEvent>();
 

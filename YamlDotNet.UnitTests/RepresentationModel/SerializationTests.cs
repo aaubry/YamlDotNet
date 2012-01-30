@@ -607,5 +607,23 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				Assert.IsTrue(buffer.ToString().Contains("MyString"));
 			}
 		}
+
+		[TestMethod]
+		public void DeserializationOfNullWorksInJson()
+		{
+			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X { MyString = null };
+				serializer.Serialize(buffer, original);
+
+				Console.WriteLine(buffer.ToString());
+
+				X copy = (X)serializer.Deserialize(new StringReader(buffer.ToString()));
+
+				Assert.IsNull(copy.MyString);
+			}
+		}
 	}
 }

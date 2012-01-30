@@ -781,7 +781,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			NodeEvent nodeEvent = (NodeEvent)reader.Parser.Current;
 
-			if (nodeEvent.Tag == "tag:yaml.org,2002:null")
+			if (IsNull(nodeEvent))
 			{
 				reader.Expect<NodeEvent>();
 				AddAnchoredObject(nodeEvent, null, context.Anchors);
@@ -790,6 +790,25 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
 			return ObjectConverter.Convert(result, expectedType);
+		}
+
+		private bool IsNull(NodeEvent nodeEvent)
+		{
+			if (nodeEvent.Tag == "tag:yaml.org,2002:null")
+			{
+				return true;
+			}
+
+			if (JsonCompatible)
+			{
+				var scalar = nodeEvent as Scalar;
+				if (scalar != null && scalar.Style == Core.ScalarStyle.Plain && scalar.Value == "null")
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private object DeserializeValueNotNull(EventReader reader, DeserializationContext context, INodeEvent nodeEvent, Type expectedType)
@@ -1051,7 +1070,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			MappingStart mapping = reader.Expect<MappingStart>();
 
 			type = GetType(mapping.Tag, type, context.Options.Mappings);
-			object result = Activator.CreateInstance(type);
+			object result;
+			try
+			{
+				result = Activator.CreateInstance(type);
+			}
+			catch (MissingMethodException err)
+			{
+				var message = string.Format("Failed to create an instance of type '{0}'.", type);
+				throw new InvalidOperationException(message, err);
+			}
 
 			IDictionary dictionary = result as IDictionary;
 			if (dictionary != null)
