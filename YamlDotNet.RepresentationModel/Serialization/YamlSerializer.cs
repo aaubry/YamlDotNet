@@ -31,6 +31,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using System.Linq.Expressions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -43,12 +44,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private readonly Type serializedType;
 
 		private readonly IList<IYamlTypeConverter> converters = new List<IYamlTypeConverter>();
-
-		private class ObjectInfo
-		{
-			public string anchor;
-			public bool serialized;
-		}
 
 		/// <summary>
 		/// Contains additional information about a deserialization.
@@ -100,7 +95,23 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
-		private readonly Dictionary<object, ObjectInfo> anchors;
+		private class SerializationContext
+		{
+			public SerializationContext(ICollection<ISerializationBehavior> serializationBehaviors)
+			{
+				this.serializationBehaviors = serializationBehaviors;
+			}
+
+			private readonly ICollection<ISerializationBehavior> serializationBehaviors;
+
+			public void InvokeBehaviors(Action<ISerializationBehavior> invoke)
+			{
+				foreach (var serializationBehavior in serializationBehaviors)
+				{
+					invoke(serializationBehavior);
+				}
+			}
+		}
 
 		private bool Roundtrip
 		{
@@ -149,6 +160,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			get { return JsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain; }
 		}
 
+
+
+		private readonly IEnumerable<ISerializationBehaviorFactory> serializationBehaviorFactories;
+
+
+
+		private readonly IObjectGraphTraversalStrategy traversalStrategy;
+
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
 		/// </summary>
@@ -191,9 +211,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.serializedType = serializedType;
 			this.mode = mode;
 
-			if (!DisableAliases)
+			if((mode & YamlSerializerModes.Roundtrip) != 0)
 			{
-				anchors = new Dictionary<object, ObjectInfo>();
+				traversalStrategy = new RoundtripObjectGraphTraversalStrategy();
+			}
+			else
+			{
+				traversalStrategy = new FullObjectGraphTraversalStrategy();
 			}
 		}
 
@@ -233,420 +257,177 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Serializes the specified object.
 		/// </summary>
 		/// <param name="output">The writer where to serialize the object.</param>
-		/// <param name="o">The object to serialize.</param>
-		public void Serialize(TextWriter output, object o)
+		/// <param name="graph">The object to serialize.</param>
+		public void Serialize(TextWriter output, object graph)
 		{
 			if (output == null)
 			{
 				throw new ArgumentNullException("output", "The output is null.");
 			}
 
-			var type = serializedType ?? o.GetType();
+			var type = serializedType ?? graph.GetType();
 
-			if (!DisableAliases)
-			{
-				anchors.Clear();
-				int nextId = 0;
-				LoadAliases(type, o, ref nextId);
-			}
 
-			Emitter emitter = new Emitter(output);
+			var behaviors = serializationBehaviorFactories.Select(f => f.Create()).ToList();
+			var context = new SerializationContext(behaviors);
+
+
+			context.InvokeBehaviors(b => b.SerializationStarting(type, graph));
+
+			var emitter = new Emitter(output);
 
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart());
 
-			SerializeValue(emitter, type, o);
-
+			var visitor = new SerializationVisitor(emitter, this);
+			traversalStrategy.Traverse(graph, type, visitor);
+			
 			emitter.Emit(new DocumentEnd(true));
 			emitter.Emit(new StreamEnd());
 		}
 
-		private void LoadAliases(Type type, object o, ref int nextId)
+		private class SerializationVisitor : IObjectGraphVisitor
 		{
-			if (type.IsValueType)
+			private readonly Emitter emitter;
+			private readonly YamlSerializer serializer;
+
+			public SerializationVisitor(Emitter emitter, YamlSerializer serializer)
 			{
-				return;
+				this.emitter = emitter;
+				this.serializer = serializer;
 			}
 
-			if (anchors.ContainsKey(o))
+			bool IObjectGraphVisitor.Enter(object value, Type type)
 			{
-				if (anchors[o] == null)
+				return true;
+			}
+
+			bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
+			{
+				return true;
+			}
+
+			void IObjectGraphVisitor.VisitScalar(object value, Type type)
+			{
+				if (value == null)
 				{
-					anchors[o] = new ObjectInfo
+					if (serializer.JsonCompatible)
 					{
-						anchor = string.Format(CultureInfo.InvariantCulture, "o{0}", nextId++)
-					};
-				}
-			}
-			else
-			{
-				anchors.Add(o, null);
-
-				if (typeof(IDictionary).IsAssignableFrom(type))
-				{
-					LoadDictionaryAliases(type, (IDictionary)o, ref nextId);
-					return;
-				}
-
-				Type iDictionaryType = GetImplementedGenericInterface(type, typeof(IDictionary<,>));
-				if (iDictionaryType != null)
-				{
-					LoadGenericDictionaryAliases(type, iDictionaryType, o, ref nextId);
-					return;
-				}
-
-				if (typeof(IEnumerable).IsAssignableFrom(type))
-				{
-					LoadListAliases(type, (IEnumerable)o, ref nextId);
-					return;
-				}
-
-				LoadObjectAliases(type, o, ref nextId);
-			}
-		}
-
-		private void LoadObjectAliases(Type type, object o, ref int nextId)
-		{
-			foreach (var property in GetProperties(type))
-			{
-				object value = property.GetValue(o, null);
-				if (value != null && value.GetType().IsClass && !(value is string))
-				{
-					LoadAliases(property.PropertyType, value, ref nextId);
-				}
-			}
-		}
-
-		private void LoadListAliases(Type type, IEnumerable list, ref int nextId)
-		{
-			foreach (var item in list)
-			{
-				if (item != null)
-				{
-					LoadAliases(item.GetType(), item, ref nextId);
-				}
-			}
-		}
-
-		private void LoadGenericDictionaryAliases(Type type, Type iDictionaryType, object o, ref int nextId)
-		{
-			foreach (var item in (IEnumerable)o)
-			{
-				LoadObjectAliases(item.GetType(), item, ref nextId);
-			}
-		}
-
-		private void LoadDictionaryAliases(Type type, IDictionary dictionary, ref int nextId)
-		{
-			foreach (DictionaryEntry item in dictionary)
-			{
-				LoadAliases(item.Key.GetType(), item.Key, ref nextId);
-				if (item.Value != null)
-				{
-					LoadAliases(item.Value.GetType(), item.Value, ref nextId);
-				}
-			}
-		}
-
-		private void SerializeObject(Emitter emitter, Type type, object value, string anchor)
-		{
-			if (Roundtrip && !HasDefaultConstructor(type))
-			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
-			}
-
-			if (typeof(IDictionary).IsAssignableFrom(type))
-			{
-				SerializeDictionary(emitter, value, anchor);
-				return;
-			}
-
-			Type iDictionaryType = GetImplementedGenericInterface(type, typeof(IDictionary<,>));
-			if (iDictionaryType != null)
-			{
-				SerializeGenericDictionary(emitter, iDictionaryType, value, anchor);
-				return;
-			}
-
-			if (typeof(IEnumerable).IsAssignableFrom(type))
-			{
-				SerializeList(emitter, type, value, anchor);
-				return;
-			}
-
-			SerializeProperties(emitter, type, value, anchor);
-		}
-
-		private void SerializeGenericDictionary(Emitter emitter, Type iDictionaryType, object value, string anchor)
-		{
-			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle));
-
-			Func<object, object> getKey = MakeKeyValuePairGetter(iDictionaryType, "Key");
-			Func<object, object> getValue = MakeKeyValuePairGetter(iDictionaryType, "Value");
-
-			foreach (object entry in (IEnumerable)value)
-			{
-				var entryKey = getKey(entry);
-				SerializeValue(emitter, entryKey.GetType(), entryKey);
-
-				var entryValue = getValue(entry);
-				SerializeValue(emitter, entryValue.GetType(), entryValue);
-			}
-
-			emitter.Emit(new MappingEnd());
-		}
-
-		private Func<object, object> MakeKeyValuePairGetter(Type iDictionaryType, string propertyName)
-		{
-			var getKeyValuePairKeyGeneric = typeof(YamlSerializer).GetMethod("GetKeyValuePair" + propertyName, BindingFlags.Static | BindingFlags.NonPublic);
-			var getKeyValuePairKey = getKeyValuePairKeyGeneric.MakeGenericMethod(iDictionaryType.GetGenericArguments());
-			return (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object, object>), getKeyValuePairKey);
-		}
-
-		// ReSharper disable UnusedPrivateMember
-		// This methid is invoked using reflection.
-		private static object GetKeyValuePairKey<T, U>(object pair)
-		{
-			return ((KeyValuePair<T, U>)pair).Key;
-		}
-		// ReSharper restore UnusedPrivateMember
-
-		// ReSharper disable UnusedPrivateMember
-		// This methid is invoked using reflection.
-		private static object GetKeyValuePairValue<T, U>(object pair)
-		{
-			return ((KeyValuePair<T, U>)pair).Value;
-		}
-		// ReSharper restore UnusedPrivateMember
-
-		private void SerializeDictionary(Emitter emitter, object value, string anchor)
-		{
-			emitter.Emit(new MappingStart(anchor, null, true, MappingStyle));
-
-			foreach (DictionaryEntry entry in (IDictionary)value)
-			{
-				SerializeValue(emitter, GetObjectType(entry.Key), entry.Key);
-				SerializeValue(emitter, GetObjectType(entry.Value), entry.Value);
-			}
-
-			emitter.Emit(new MappingEnd());
-		}
-
-		private void SerializeList(Emitter emitter, Type type, object value, string anchor)
-		{
-			Type itemType = GetItemType(type, typeof(IEnumerable<>));
-
-			SequenceStyle sequenceStyle;
-			switch (Type.GetTypeCode(itemType))
-			{
-				case TypeCode.String:
-				case TypeCode.Object:
-					sequenceStyle = SequenceStyle;
-					break;
-
-				default:
-					sequenceStyle = SequenceStyle.Flow;
-					break;
-			}
-
-			emitter.Emit(new SequenceStart(anchor, null, true, sequenceStyle));
-
-			foreach (object item in (IEnumerable)value)
-			{
-				SerializeValue(emitter, itemType, item);
-			}
-
-			emitter.Emit(new SequenceEnd());
-		}
-
-		/// <summary>
-		/// Serializes the properties of the specified object into a mapping.
-		/// </summary>
-		/// <param name="emitter">The emitter.</param>
-		/// <param name="type">The type of the object.</param>
-		/// <param name="o">The o.</param>
-		/// <param name="anchor">The anchor.</param>
-		private void SerializeProperties(Emitter emitter, Type type, object o, string anchor)
-		{
-			if (Roundtrip && !HasDefaultConstructor(type))
-			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
-			}
-
-			emitter.Emit(new MappingStart(anchor, null, true, JsonCompatible ? MappingStyle.Flow : MappingStyle.Block));
-
-			foreach (var property in GetProperties(type))
-			{
-				object value = property.GetValue(o, null);
-				var propertyType = property.PropertyType;
-				if (!EmitDefaults && (value == null || (propertyType.IsValueType && value.Equals(Activator.CreateInstance(propertyType)))))
-				{
-					continue;
-				}
-
-				emitter.Emit(new Scalar(null, null, property.Name, ScalarStyle, true, false));
-				SerializeValue(emitter, propertyType, value);
-			}
-
-			emitter.Emit(new MappingEnd());
-		}
-
-		private IEnumerable<PropertyInfo> GetProperties(Type type)
-		{
-			foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-			{
-				if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
-				{
-					if (!Roundtrip || property.CanWrite)
-					{
-						yield return property;
+						emitter.Emit(new Scalar(null, null, "null", ScalarStyle.Plain, true, false));
 					}
+					else
+					{
+						emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
+					}
+					return;
 				}
-			}
-		}
 
-		/// <summary>
-		/// Determines whether the specified type has a default constructor.
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <returns>
-		/// 	<c>true</c> if the type has a default constructor; otherwise, <c>false</c>.
-		/// </returns>
-		private static bool HasDefaultConstructor(Type type)
-		{
-			return type.IsValueType || type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null) != null;
-		}
+				string scalarTag;
+				string scalarValue;
+				var scalarStyle = serializer.ScalarStyle;
 
-		private static readonly NumberFormatInfo numberFormat = CreateNumberFormatInfo();
-
-		private static NumberFormatInfo CreateNumberFormatInfo()
-		{
-			NumberFormatInfo format = new NumberFormatInfo();
-			format.CurrencyDecimalSeparator = ".";
-			format.CurrencyGroupSeparator = "_";
-			format.CurrencyGroupSizes = new[] { 3 };
-			format.CurrencySymbol = string.Empty;
-			format.CurrencyDecimalDigits = 99;
-			format.NumberDecimalSeparator = ".";
-			format.NumberGroupSeparator = "_";
-			format.NumberGroupSizes = new[] { 3 };
-			format.NumberDecimalDigits = 99;
-			return format;
-		}
-
-		/// <summary>
-		/// Serializes the specified value.
-		/// </summary>
-		/// <param name="emitter">The emitter.</param>
-		/// <param name="type">The type.</param>
-		/// <param name="value">The value.</param>
-		private void SerializeValue(Emitter emitter, Type type, object value)
-		{
-			if (value == null)
-			{
-				if (JsonCompatible)
+				var typeCode = Type.GetTypeCode(type);
+				switch (typeCode)
 				{
-					emitter.Emit(new Scalar(null, null, "null", ScalarStyle.Plain, true, false));
+					case TypeCode.Boolean:
+						scalarTag = "tag:yaml.org,2002:bool";
+						scalarValue = value.Equals(true) ? "true" : "false";
+						scalarStyle = ScalarStyle.Plain;
+						break;
+
+					case TypeCode.Byte:
+					case TypeCode.Int16:
+					case TypeCode.Int32:
+					case TypeCode.Int64:
+					case TypeCode.SByte:
+					case TypeCode.UInt16:
+					case TypeCode.UInt32:
+					case TypeCode.UInt64:
+						scalarTag = "tag:yaml.org,2002:int";
+						scalarValue = Convert.ToString(value, numberFormat);
+						scalarStyle = ScalarStyle.Plain;
+						break;
+
+					case TypeCode.Single:
+					case TypeCode.Double:
+					case TypeCode.Decimal:
+						scalarTag = "tag:yaml.org,2002:float";
+						scalarValue = Convert.ToString(value, numberFormat);
+						scalarStyle = ScalarStyle.Plain;
+						break;
+
+					case TypeCode.String:
+					case TypeCode.Char:
+						scalarTag = "tag:yaml.org,2002:str";
+						scalarValue = value.ToString();
+						break;
+
+					case TypeCode.DateTime:
+						scalarTag = "tag:yaml.org,2002:timestamp";
+						scalarValue = ((DateTime)value).ToString("o", CultureInfo.InvariantCulture);
+						scalarStyle = ScalarStyle.Plain;
+						break;
+
+					default:
+						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+				}
+
+				if (serializer.JsonCompatible)
+				{
+					emitter.Emit(new Scalar(null /* TODO anchor */, null, scalarValue, scalarStyle, true, false));
 				}
 				else
 				{
-					emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
+					emitter.Emit(new Scalar(null /* TODO anchor */, scalarTag, scalarValue));
 				}
-				return;
 			}
 
-			var converter = converters.FirstOrDefault(c => c.Accepts(type));
-			if (converter != null)
+			void IObjectGraphVisitor.VisitMappingStart(Type keyType, Type valueType)
 			{
-				converter.WriteYaml(emitter, type, value);
-				return;
+				emitter.Emit(new MappingStart(null /* TODO anchor */, null, true, serializer.MappingStyle));
 			}
 
-			IYamlSerializable serializable = value as IYamlSerializable;
-			if (serializable != null)
+			void IObjectGraphVisitor.VisitMappingEnd()
 			{
-				serializable.WriteYaml(emitter);
-				return;
+				emitter.Emit(new MappingEnd());
 			}
 
-			string anchor = null;
-			ObjectInfo info;
-			if (!DisableAliases && anchors.TryGetValue(value, out info) && info != null)
+			void IObjectGraphVisitor.VisitSequenceStart(Type elementType)
 			{
-				if (info.serialized)
+				SequenceStyle sequenceStyle;
+				switch (Type.GetTypeCode(elementType))
 				{
-					emitter.Emit(new AnchorAlias(info.anchor));
-					return;
+					case TypeCode.String:
+					case TypeCode.Object:
+						sequenceStyle = serializer.SequenceStyle;
+						break;
+
+					default:
+						sequenceStyle = SequenceStyle.Flow;
+						break;
 				}
 
-				info.serialized = true;
-				anchor = info.anchor;
+				emitter.Emit(new SequenceStart(null /* TODO anchor */, null, true, sequenceStyle));
 			}
 
-			string scalarTag = null;
-			string scalarValue = null;
-			ScalarStyle scalarStyle = ScalarStyle;
-
-			TypeCode typeCode = Type.GetTypeCode(type);
-			switch (typeCode)
+			void IObjectGraphVisitor.VisitSequenceEnd()
 			{
-				case TypeCode.Boolean:
-					scalarTag = "tag:yaml.org,2002:bool";
-					scalarValue = value.Equals(true) ? "true" : "false";
-					scalarStyle = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.Byte:
-				case TypeCode.Int16:
-				case TypeCode.Int32:
-				case TypeCode.Int64:
-				case TypeCode.SByte:
-				case TypeCode.UInt16:
-				case TypeCode.UInt32:
-				case TypeCode.UInt64:
-					scalarTag = "tag:yaml.org,2002:int";
-					scalarValue = Convert.ToString(value, numberFormat);
-					scalarStyle = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.Single:
-				case TypeCode.Double:
-				case TypeCode.Decimal:
-					scalarTag = "tag:yaml.org,2002:float";
-					scalarValue = Convert.ToString(value, numberFormat);
-					scalarStyle = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.String:
-				case TypeCode.Char:
-					scalarTag = "tag:yaml.org,2002:str";
-					scalarValue = value.ToString();
-					break;
-
-				case TypeCode.DateTime:
-					scalarTag = "tag:yaml.org,2002:timestamp";
-					scalarValue = ((DateTime)value).ToString("o", CultureInfo.InvariantCulture);
-					scalarStyle = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.DBNull:
-				case TypeCode.Empty:
-					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
-
-				default:
-					SerializeObject(emitter, type, value, anchor);
-					return;
-			}
-
-			if (JsonCompatible)
-			{
-				emitter.Emit(new Scalar(anchor, null, scalarValue, scalarStyle, true, false));
-			}
-			else
-			{
-				emitter.Emit(new Scalar(anchor, scalarTag, scalarValue));
+				emitter.Emit(new SequenceEnd());
 			}
 		}
+
+		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
+		{
+			CurrencyDecimalSeparator = ".",
+			CurrencyGroupSeparator = "_",
+			CurrencyGroupSizes = new[] { 3 },
+			CurrencySymbol = string.Empty,
+			CurrencyDecimalDigits = 99,
+			NumberDecimalSeparator = ".",
+			NumberGroupSeparator = "_",
+			NumberGroupSizes = new[] { 3 },
+			NumberDecimalDigits = 99
+		};
 		#endregion
 
 		#region Deserialization
@@ -980,7 +761,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			object result = Activator.CreateInstance(type);
 
-			Type iCollection = GetImplementedGenericInterface(type, typeof(ICollection<>));
+			Type iCollection = ReflectionUtility.GetImplementedGenericInterface(type, typeof(ICollection<>));
 			if (iCollection != null)
 			{
 				Type[] iCollectionArguments = iCollection.GetGenericArguments();
@@ -1017,34 +798,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			reader.Expect<SequenceEnd>();
 		}
 
-		private static Type GetImplementedGenericInterface(Type type, Type genericInterfaceType)
-		{
-			foreach (Type interfacetype in GetImplementedInterfaces(type))
-			{
-				if (interfacetype.IsGenericType && interfacetype.GetGenericTypeDefinition() == genericInterfaceType)
-				{
-					return interfacetype;
-				}
-			}
-			return null;
-		}
-
-		private static IEnumerable<Type> GetImplementedInterfaces(Type type)
-		{
-			if (type.IsInterface)
-			{
-				yield return type;
-			}
-
-			foreach (var implementedInterface in type.GetInterfaces())
-			{
-				yield return implementedInterface;
-			}
-		}
-
 		private static Type GetItemType(Type type, Type genericInterfaceType)
 		{
-			var implementedInterface = GetImplementedGenericInterface(type, genericInterfaceType);
+			var implementedInterface = ReflectionUtility.GetImplementedGenericInterface(type, genericInterfaceType);
 			return implementedInterface != null ? implementedInterface.GetGenericArguments()[0] : typeof(object);
 		}
 
