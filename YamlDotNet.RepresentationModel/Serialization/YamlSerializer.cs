@@ -31,7 +31,6 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Linq.Expressions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -167,6 +166,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 
 		private readonly IObjectGraphTraversalStrategy traversalStrategy;
+		private readonly IEventEmitter eventEmissionStrategy;
 
 
 		/// <summary>
@@ -213,11 +213,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			if((mode & YamlSerializerModes.Roundtrip) != 0)
 			{
-				traversalStrategy = new RoundtripObjectGraphTraversalStrategy();
+				traversalStrategy = new RoundtripObjectGraphTraversalStrategy(50);
 			}
 			else
 			{
-				traversalStrategy = new FullObjectGraphTraversalStrategy();
+				traversalStrategy = new FullObjectGraphTraversalStrategy(50);
 			}
 		}
 
@@ -268,18 +268,24 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			var type = serializedType ?? graph.GetType();
 
 
-			var behaviors = serializationBehaviorFactories.Select(f => f.Create()).ToList();
-			var context = new SerializationContext(behaviors);
+			//var behaviors = serializationBehaviorFactories.Select(f => f.Create()).ToList();
+			//var context = new SerializationContext(behaviors);
 
 
-			context.InvokeBehaviors(b => b.SerializationStarting(type, graph));
+			//context.InvokeBehaviors(b => b.SerializationStarting(type, graph));
 
 			var emitter = new Emitter(output);
 
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart());
 
-			var visitor = new SerializationVisitor(emitter, this);
+
+
+			var eventEmitter = new TypeAssigningEventEmitter(
+				new EndEventEmitter(emitter)
+			);
+
+			var visitor = new SerializationVisitor(eventEmitter);
 			traversalStrategy.Traverse(graph, type, visitor);
 			
 			emitter.Emit(new DocumentEnd(true));
@@ -288,146 +294,188 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private class SerializationVisitor : IObjectGraphVisitor
 		{
-			private readonly Emitter emitter;
-			private readonly YamlSerializer serializer;
+			private readonly IEventEmitter eventEmitter;
 
-			public SerializationVisitor(Emitter emitter, YamlSerializer serializer)
+			public SerializationVisitor(IEventEmitter eventEmitter)
 			{
-				this.emitter = emitter;
-				this.serializer = serializer;
+				this.eventEmitter = eventEmitter;
 			}
 
 			bool IObjectGraphVisitor.Enter(object value, Type type)
 			{
+				// TODO
 				return true;
 			}
 
 			bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
 			{
+				// TODO
 				return true;
 			}
 
-			void IObjectGraphVisitor.VisitScalar(object value, Type type)
+			void IObjectGraphVisitor.VisitScalar(object scalar, Type scalarType)
 			{
-				if (value == null)
-				{
-					if (serializer.JsonCompatible)
-					{
-						emitter.Emit(new Scalar(null, null, "null", ScalarStyle.Plain, true, false));
-					}
-					else
-					{
-						emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
-					}
-					return;
-				}
-
-				string scalarTag;
-				string scalarValue;
-				var scalarStyle = serializer.ScalarStyle;
-
-				var typeCode = Type.GetTypeCode(type);
-				switch (typeCode)
-				{
-					case TypeCode.Boolean:
-						scalarTag = "tag:yaml.org,2002:bool";
-						scalarValue = value.Equals(true) ? "true" : "false";
-						scalarStyle = ScalarStyle.Plain;
-						break;
-
-					case TypeCode.Byte:
-					case TypeCode.Int16:
-					case TypeCode.Int32:
-					case TypeCode.Int64:
-					case TypeCode.SByte:
-					case TypeCode.UInt16:
-					case TypeCode.UInt32:
-					case TypeCode.UInt64:
-						scalarTag = "tag:yaml.org,2002:int";
-						scalarValue = Convert.ToString(value, numberFormat);
-						scalarStyle = ScalarStyle.Plain;
-						break;
-
-					case TypeCode.Single:
-					case TypeCode.Double:
-					case TypeCode.Decimal:
-						scalarTag = "tag:yaml.org,2002:float";
-						scalarValue = Convert.ToString(value, numberFormat);
-						scalarStyle = ScalarStyle.Plain;
-						break;
-
-					case TypeCode.String:
-					case TypeCode.Char:
-						scalarTag = "tag:yaml.org,2002:str";
-						scalarValue = value.ToString();
-						break;
-
-					case TypeCode.DateTime:
-						scalarTag = "tag:yaml.org,2002:timestamp";
-						scalarValue = ((DateTime)value).ToString("o", CultureInfo.InvariantCulture);
-						scalarStyle = ScalarStyle.Plain;
-						break;
-
-					default:
-						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
-				}
-
-				if (serializer.JsonCompatible)
-				{
-					emitter.Emit(new Scalar(null /* TODO anchor */, null, scalarValue, scalarStyle, true, false));
-				}
-				else
-				{
-					emitter.Emit(new Scalar(null /* TODO anchor */, scalarTag, scalarValue));
-				}
+				eventEmitter.Emit(new ScalarEventInfo(scalar, scalarType));
 			}
 
-			void IObjectGraphVisitor.VisitMappingStart(Type keyType, Type valueType)
+			void IObjectGraphVisitor.VisitMappingStart(object mapping, Type mappingType, Type type, Type valueType1)
 			{
-				emitter.Emit(new MappingStart(null /* TODO anchor */, null, true, serializer.MappingStyle));
+				eventEmitter.Emit(new MappingStartEventInfo(mapping, mappingType));
 			}
 
-			void IObjectGraphVisitor.VisitMappingEnd()
+			void IObjectGraphVisitor.VisitMappingEnd(object mapping, Type mappingType)
 			{
-				emitter.Emit(new MappingEnd());
+				eventEmitter.Emit(new MappingEndEventInfo(mapping, mappingType));
 			}
 
-			void IObjectGraphVisitor.VisitSequenceStart(Type elementType)
+			void IObjectGraphVisitor.VisitSequenceStart(object sequence, Type sequenceType, Type elementType)
 			{
-				SequenceStyle sequenceStyle;
-				switch (Type.GetTypeCode(elementType))
-				{
-					case TypeCode.String:
-					case TypeCode.Object:
-						sequenceStyle = serializer.SequenceStyle;
-						break;
-
-					default:
-						sequenceStyle = SequenceStyle.Flow;
-						break;
-				}
-
-				emitter.Emit(new SequenceStart(null /* TODO anchor */, null, true, sequenceStyle));
+				eventEmitter.Emit(new SequenceStartEventInfo(sequence, sequenceType));
 			}
 
-			void IObjectGraphVisitor.VisitSequenceEnd()
+			void IObjectGraphVisitor.VisitSequenceEnd(object sequence, Type sequenceType)
 			{
-				emitter.Emit(new SequenceEnd());
+				eventEmitter.Emit(new SequenceEndEventInfo(sequence, sequenceType));
 			}
 		}
 
-		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
-		{
-			CurrencyDecimalSeparator = ".",
-			CurrencyGroupSeparator = "_",
-			CurrencyGroupSizes = new[] { 3 },
-			CurrencySymbol = string.Empty,
-			CurrencyDecimalDigits = 99,
-			NumberDecimalSeparator = ".",
-			NumberGroupSeparator = "_",
-			NumberGroupSizes = new[] { 3 },
-			NumberDecimalDigits = 99
-		};
+		//private class SerializationVisitor : IObjectGraphVisitor
+		//{
+		//    private readonly Emitter emitter;
+		//    private readonly YamlSerializer serializer;
+		//    private readonly IEventEmitter eventEmitter;
+
+		//    public SerializationVisitor(Emitter emitter, YamlSerializer serializer, IEventEmitter eventEmitter)
+		//    {
+		//        this.emitter = emitter;
+		//        this.serializer = serializer;
+		//        this.eventEmitter = eventEmitter;
+		//    }
+
+		//    bool IObjectGraphVisitor.Enter(object value, Type type)
+		//    {
+		//        return true;
+		//    }
+
+		//    bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
+		//    {
+		//        return true;
+		//    }
+
+		//    void IObjectGraphVisitor.VisitScalar(object value, Type type)
+		//    {
+		//        eventEmitter.Emit(new ScalarEventInfo(value));
+
+		//        //if (value == null)
+		//        //{
+		//        //    eventEmitter.Emit(eventInfo);
+
+		//        //    if (serializer.JsonCompatible)
+		//        //    {
+		//        //        emitter.Emit(new Scalar(null, null, "null", ScalarStyle.Plain, true, false));
+		//        //    }
+		//        //    else
+		//        //    {
+		//        //        emitter.Emit(new Scalar(null, "tag:yaml.org,2002:null", "", ScalarStyle.Plain, false, false));
+		//        //    }
+		//        //    return;
+		//        //}
+
+		//        //string scalarTag;
+		//        //string scalarValue;
+		//        //var scalarStyle = serializer.ScalarStyle;
+
+		//        //var typeCode = Type.GetTypeCode(type);
+		//        //switch (typeCode)
+		//        //{
+		//        //    case TypeCode.Boolean:
+		//        //        scalarTag = "tag:yaml.org,2002:bool";
+		//        //        scalarValue = value.Equals(true) ? "true" : "false";
+		//        //        scalarStyle = ScalarStyle.Plain;
+		//        //        break;
+
+		//        //    case TypeCode.Byte:
+		//        //    case TypeCode.Int16:
+		//        //    case TypeCode.Int32:
+		//        //    case TypeCode.Int64:
+		//        //    case TypeCode.SByte:
+		//        //    case TypeCode.UInt16:
+		//        //    case TypeCode.UInt32:
+		//        //    case TypeCode.UInt64:
+		//        //        scalarTag = "tag:yaml.org,2002:int";
+		//        //        scalarValue = Convert.ToString(value, numberFormat);
+		//        //        scalarStyle = ScalarStyle.Plain;
+		//        //        break;
+
+		//        //    case TypeCode.Single:
+		//        //    case TypeCode.Double:
+		//        //    case TypeCode.Decimal:
+		//        //        scalarTag = "tag:yaml.org,2002:float";
+		//        //        scalarValue = Convert.ToString(value, numberFormat);
+		//        //        scalarStyle = ScalarStyle.Plain;
+		//        //        break;
+
+		//        //    case TypeCode.String:
+		//        //    case TypeCode.Char:
+		//        //        scalarTag = "tag:yaml.org,2002:str";
+		//        //        scalarValue = value.ToString();
+		//        //        break;
+
+		//        //    case TypeCode.DateTime:
+		//        //        scalarTag = "tag:yaml.org,2002:timestamp";
+		//        //        scalarValue = ((DateTime)value).ToString("o", CultureInfo.InvariantCulture);
+		//        //        scalarStyle = ScalarStyle.Plain;
+		//        //        break;
+
+		//        //    default:
+		//        //        throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+		//        //}
+
+		//        //if (serializer.JsonCompatible)
+		//        //{
+		//        //    emitter.Emit(new Scalar(null /* TODO anchor */, null, scalarValue, scalarStyle, true, false));
+		//        //}
+		//        //else
+		//        //{
+		//        //    emitter.Emit(new Scalar(null /* TODO anchor */, scalarTag, scalarValue));
+		//        //}
+		//    }
+
+		//    void IObjectGraphVisitor.VisitMappingStart(Type keyType, Type valueType)
+		//    {
+		//        eventEmitter.Emit(new MappingStartEventInfo(source));
+		//        //emitter.Emit(new MappingStart(null /* TODO anchor */, null, true, serializer.MappingStyle));
+		//    }
+
+		//    void IObjectGraphVisitor.VisitMappingEnd()
+		//    {
+		//        emitter.Emit(new MappingEnd());
+		//    }
+
+		//    void IObjectGraphVisitor.VisitSequenceStart(Type elementType)
+		//    {
+		//        SequenceStyle sequenceStyle;
+		//        switch (Type.GetTypeCode(elementType))
+		//        {
+		//            case TypeCode.String:
+		//            case TypeCode.Object:
+		//                sequenceStyle = serializer.SequenceStyle;
+		//                break;
+
+		//            default:
+		//                sequenceStyle = SequenceStyle.Flow;
+		//                break;
+		//        }
+
+		//        emitter.Emit(new SequenceStart(null /* TODO anchor */, null, true, sequenceStyle));
+		//    }
+
+		//    void IObjectGraphVisitor.VisitSequenceEnd()
+		//    {
+		//        emitter.Emit(new SequenceEnd());
+		//    }
+		//}
+
 		#endregion
 
 		#region Deserialization
@@ -560,7 +608,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return context.Anchors[reader.Expect<AnchorAlias>().Value];
 			}
 
-			NodeEvent nodeEvent = (NodeEvent)reader.Parser.Current;
+			var nodeEvent = (NodeEvent)reader.Parser.Current;
 
 			if (IsNull(nodeEvent))
 			{
@@ -728,6 +776,20 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			return result;
 		}
+
+		// TODO: Remove this:
+		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
+		{
+			CurrencyDecimalSeparator = ".",
+			CurrencyGroupSeparator = "_",
+			CurrencyGroupSizes = new[] { 3 },
+			CurrencySymbol = string.Empty,
+			CurrencyDecimalDigits = 99,
+			NumberDecimalSeparator = ".",
+			NumberGroupSeparator = "_",
+			NumberGroupSizes = new[] { 3 },
+			NumberDecimalDigits = 99
+		};
 
 		private static void AddAnchoredObject(INodeEvent node, object value, ObjectAnchorCollection deserializedAnchors)
 		{
@@ -1070,4 +1132,267 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return (TSerialized)base.Deserialize(reader, options, out context);
 		}
 	}
+
+	public interface IEventEmitter
+	{
+		void Emit(ScalarEventInfo eventInfo);
+		void Emit(MappingStartEventInfo eventInfo);
+		void Emit(MappingEndEventInfo eventInfo);
+		void Emit(SequenceStartEventInfo eventInfo);
+		void Emit(SequenceEndEventInfo eventInfo);
+	}
+
+	public class EndEventEmitter : IEventEmitter
+	{
+		private readonly Emitter emitter;
+
+		public EndEventEmitter(Emitter emitter)
+		{
+			this.emitter = emitter;
+		}
+
+		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
+		{
+			emitter.Emit(new Scalar(eventInfo.Alias, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
+		}
+
+		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)
+		{
+			emitter.Emit(new MappingStart(eventInfo.Alias, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
+		}
+
+		void IEventEmitter.Emit(MappingEndEventInfo eventInfo)
+		{
+			emitter.Emit(new MappingEnd());
+		}
+
+		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo)
+		{
+			emitter.Emit(new SequenceStart(eventInfo.Alias, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
+		}
+
+		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo)
+		{
+			emitter.Emit(new SequenceEnd());
+		}
+	}
+
+	/// <summary>
+	/// Provided the base implementation for an IEventEmitter that is a
+	/// decorator for another IEventEmitter.
+	/// </summary>
+	public abstract class ChainedEventEmitter : IEventEmitter
+	{
+		private readonly IEventEmitter nextEmitter;
+
+		protected ChainedEventEmitter(IEventEmitter nextEmitter)
+		{
+			if (nextEmitter == null)
+			{
+				throw new ArgumentNullException("nextEmitter");
+			}
+
+			this.nextEmitter = nextEmitter;
+		}
+
+		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
+		{
+			Process(eventInfo);
+			nextEmitter.Emit(eventInfo);
+		}
+
+		protected virtual void Process(ScalarEventInfo eventInfo)
+		{
+		}
+
+		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)
+		{
+			Process(eventInfo);
+			nextEmitter.Emit(eventInfo);
+		}
+
+		protected virtual void Process(MappingStartEventInfo eventInfo)
+		{
+		}
+
+		void IEventEmitter.Emit(MappingEndEventInfo eventInfo)
+		{
+			Process(eventInfo);
+			nextEmitter.Emit(eventInfo);
+		}
+
+		protected virtual void Process(MappingEndEventInfo eventInfo)
+		{
+		}
+
+		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo)
+		{
+			Process(eventInfo);
+			nextEmitter.Emit(eventInfo);
+		}
+
+		protected virtual void Process(SequenceStartEventInfo eventInfo)
+		{
+		}
+
+		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo)
+		{
+			Process(eventInfo);
+			nextEmitter.Emit(eventInfo);
+		}
+
+		protected virtual void Process(SequenceEndEventInfo eventInfo)
+		{
+		}
+	}
+
+	public class TypeAssigningEventEmitter : ChainedEventEmitter
+	{
+		public TypeAssigningEventEmitter(IEventEmitter nextEmitter)
+			: base(nextEmitter)
+		{
+		}
+
+		protected override void Process(ScalarEventInfo eventInfo)
+		{
+			if (eventInfo.SourceValue == null)
+			{
+				eventInfo.Tag = "tag:yaml.org,2002:null";
+				eventInfo.RenderedValue = "";
+				eventInfo.Style = ScalarStyle.Plain;
+				return;
+			}
+
+			eventInfo.IsPlainImplicit = true;
+
+			var typeCode = Type.GetTypeCode(eventInfo.SourceType);
+			switch (typeCode)
+			{
+				case TypeCode.Boolean:
+					eventInfo.Tag = "tag:yaml.org,2002:bool";
+					eventInfo.RenderedValue = eventInfo.SourceValue.Equals(true) ? "true" : "false";
+					eventInfo.Style = ScalarStyle.Plain;
+					break;
+
+				case TypeCode.Byte:
+				case TypeCode.Int16:
+				case TypeCode.Int32:
+				case TypeCode.Int64:
+				case TypeCode.SByte:
+				case TypeCode.UInt16:
+				case TypeCode.UInt32:
+				case TypeCode.UInt64:
+					eventInfo.Tag = "tag:yaml.org,2002:int";
+					eventInfo.RenderedValue = Convert.ToString(eventInfo.SourceValue, numberFormat);
+					eventInfo.Style = ScalarStyle.Plain;
+					break;
+
+				case TypeCode.Single:
+				case TypeCode.Double:
+				case TypeCode.Decimal:
+					eventInfo.Tag = "tag:yaml.org,2002:float";
+					eventInfo.RenderedValue = Convert.ToString(eventInfo.SourceValue, numberFormat);
+					eventInfo.Style = ScalarStyle.Plain;
+					break;
+
+				case TypeCode.String:
+				case TypeCode.Char:
+					eventInfo.Tag = "tag:yaml.org,2002:str";
+					eventInfo.RenderedValue = eventInfo.SourceValue.ToString();
+					break;
+
+				case TypeCode.DateTime:
+					eventInfo.Tag = "tag:yaml.org,2002:timestamp";
+					eventInfo.RenderedValue = ((DateTime)eventInfo.SourceValue).ToString("o", CultureInfo.InvariantCulture);
+					eventInfo.Style = ScalarStyle.Plain;
+					break;
+
+				default:
+					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+			}
+		}
+
+		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
+		{
+			CurrencyDecimalSeparator = ".",
+			CurrencyGroupSeparator = "_",
+			CurrencyGroupSizes = new[] { 3 },
+			CurrencySymbol = string.Empty,
+			CurrencyDecimalDigits = 99,
+			NumberDecimalSeparator = ".",
+			NumberGroupSeparator = "_",
+			NumberGroupSizes = new[] { 3 },
+			NumberDecimalDigits = 99
+		};
+	}
+
+	public abstract class EventInfo
+	{
+		public object SourceValue { get; private set; }
+		public Type SourceType { get; private set; }
+
+		protected EventInfo(object sourceValue, Type sourceType)
+		{
+			SourceValue = sourceValue;
+			SourceType = sourceType;
+		}
+	}
+
+	public sealed class ScalarEventInfo : EventInfo
+	{
+		public ScalarEventInfo(object sourceValue, Type sourceType)
+			: base(sourceValue, sourceType)
+		{
+		}
+
+		public string Alias { get; set; }
+		public string Tag { get; set; }
+		public string RenderedValue { get; set; }
+		public ScalarStyle Style { get; set; }
+		public bool IsPlainImplicit { get; set; }
+		public bool IsQuotedImplicit { get; set; }
+	}
+
+	public sealed class MappingStartEventInfo : EventInfo
+	{
+		public MappingStartEventInfo(object sourceValue, Type sourceType)
+			: base(sourceValue, sourceType)
+		{
+		}
+
+		public string Alias { get; set; }
+		public string Tag { get; set; }
+		public bool IsImplicit { get; set; }
+		public MappingStyle Style { get; set; }
+	}
+
+	public sealed class MappingEndEventInfo : EventInfo
+	{
+		public MappingEndEventInfo(object sourceValue, Type sourceType)
+			: base(sourceValue, sourceType)
+		{
+		}
+	}
+
+	public sealed class SequenceStartEventInfo : EventInfo
+	{
+		public SequenceStartEventInfo(object sourceValue, Type sourceType)
+			: base(sourceValue, sourceType)
+		{
+		}
+
+		public string Alias { get; set; }
+		public string Tag { get; set; }
+		public bool IsImplicit { get; set; }
+		public SequenceStyle Style { get; set; }
+	}
+
+	public sealed class SequenceEndEventInfo : EventInfo
+	{
+		public SequenceEndEventInfo(object sourceValue, Type sourceType)
+			: base(sourceValue, sourceType)
+		{
+		}
+	}
+
 }

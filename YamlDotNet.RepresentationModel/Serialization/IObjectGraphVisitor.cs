@@ -30,31 +30,39 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <summary>
 		/// Notifies the visitor that a scalar value has been encountered.
 		/// </summary>
-		/// <param name="value">The value of the scalar.</param>
-		/// <param name="type">The static type of <paramref name="value"/>.</param>
-		void VisitScalar(object value, Type type);
+		/// <param name="scalar">The value of the scalar.</param>
+		/// <param name="scalarType">The static type of <paramref name="scalar"/>.</param>
+		void VisitScalar(object scalar, Type scalarType);
 
 		/// <summary>
 		/// Notifies the visitor that the traversal of a mapping is about to begin.
 		/// </summary>
+		/// <param name="mapping">The value that corresponds to the mapping.</param>
+		/// <param name="mappingType">The static type of the mapping.</param>
 		/// <param name="keyType">The static type of the keys of the mapping.</param>
 		/// <param name="valueType">The static type of the values of the mapping.</param>
-		void VisitMappingStart(Type keyType, Type valueType);
+		void VisitMappingStart(object mapping, Type mappingType, Type keyType, Type valueType);
 
 		/// <summary>
 		/// Notifies the visitor that the traversal of a mapping has ended.
 		/// </summary>
-		void VisitMappingEnd();
+		/// <param name="mapping">The value that corresponds to the mapping.</param>
+		/// <param name="mappingType">The static type of the mapping.</param>
+		void VisitMappingEnd(object mapping, Type mappingType);
 
 		/// <summary>
 		/// Notifies the visitor that the traversal of a sequence is about to begin.
 		/// </summary>
+		/// <param name="sequence">The value that corresponds to the sequence.</param>
+		/// <param name="sequenceType">The static type of the mapping.</param>
 		/// <param name="elementType">The static type of the elements of the sequence.</param>
-		void VisitSequenceStart(Type elementType);
+		void VisitSequenceStart(object sequence, Type sequenceType, Type elementType);
 
 		/// <summary>
 		/// Notifies the visitor that the traversal of a sequence has ended.
 		/// </summary>
-		void VisitSequenceEnd();
+		/// <param name="sequence">The value that corresponds to the sequence.</param>
+		/// <param name="sequenceType">The static type of the mapping.</param>
+		void VisitSequenceEnd(object sequence, Type sequenceType);
 	}
 }

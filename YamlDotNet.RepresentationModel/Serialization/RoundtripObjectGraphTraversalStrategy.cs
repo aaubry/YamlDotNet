@@ -22,14 +22,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		//    base.TraverseObject(value, type, visitor);
 		//}
 
-		protected override void SerializeProperties(object value, Type type, IObjectGraphVisitor visitor)
+		public RoundtripObjectGraphTraversalStrategy(int maxRecursion)
+			: base(maxRecursion)
+		{
+		}
+
+		protected override void SerializeProperties(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
 		{
 			if (!ReflectionUtility.HasDefaultConstructor(type))
 			{
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
 			}
 
-			base.SerializeProperties(value, type, visitor);
+			base.SerializeProperties(value, type, visitor, currentDepth);
 		}
 
 		protected override bool IsTraversableProperty(PropertyInfo property)

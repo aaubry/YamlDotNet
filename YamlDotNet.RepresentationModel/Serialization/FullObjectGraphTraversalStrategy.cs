@@ -13,13 +13,30 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
 	{
-		void IObjectGraphTraversalStrategy.Traverse(object graph, Type type, IObjectGraphVisitor visitor)
+		private readonly int maxRecursion;
+
+		public FullObjectGraphTraversalStrategy(int maxRecursion)
 		{
-			Traverse(graph, type, visitor);
+			if(maxRecursion <= 0)
+			{
+				throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
+			}
+
+			this.maxRecursion = maxRecursion;
 		}
 
-		protected virtual void Traverse(object value, Type type, IObjectGraphVisitor visitor)
+		void IObjectGraphTraversalStrategy.Traverse(object graph, Type type, IObjectGraphVisitor visitor)
 		{
+			Traverse(graph, type, visitor, 0);
+		}
+
+		protected virtual void Traverse(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
+		{
+			if (++currentDepth > maxRecursion)
+			{
+				throw new InvalidOperationException("Too much recursion when traversing the object graph");
+			}
+
 			if(!visitor.Enter(value, type))
 			{
 				return;
@@ -60,39 +77,39 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					}
 					else
 					{
-						TraverseObject(value, type, visitor);
+						TraverseObject(value, type, visitor, currentDepth);
 					}
 					break;
 			}
 		}
 
-		protected virtual void TraverseObject(object value, Type type, IObjectGraphVisitor visitor)
+		protected virtual void TraverseObject(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
 		{
 			if (typeof(IDictionary).IsAssignableFrom(type))
 			{
-				TraverseDictionary(value, visitor);
+				TraverseDictionary(value, type, visitor, currentDepth);
 				return;
 			}
 
 			var dictionaryType = ReflectionUtility.GetImplementedGenericInterface(type, typeof(IDictionary<,>));
 			if (dictionaryType != null)
 			{
-				TraverseGenericDictionary(value, dictionaryType, visitor);
+				TraverseGenericDictionary(value, type, dictionaryType, visitor);
 				return;
 			}
 
 			if (typeof(IEnumerable).IsAssignableFrom(type))
 			{
-				SerializeList(value, type, visitor);
+				SerializeList(value, type, visitor, currentDepth);
 				return;
 			}
 
-			SerializeProperties(value, type, visitor);
+			SerializeProperties(value, type, visitor, currentDepth);
 		}
 
-		protected virtual void TraverseDictionary(object value, IObjectGraphVisitor visitor)
+		protected virtual void TraverseDictionary(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
 		{
-			visitor.VisitMappingStart(typeof(object), typeof(object));
+			visitor.VisitMappingStart(value, type, typeof(object), typeof(object));
 
 			foreach (DictionaryEntry entry in (IDictionary)value)
 			{
@@ -100,67 +117,66 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				var valueType = GetObjectType(entry.Value);
 				if (visitor.EnterMapping(entry.Key, keyType, entry.Value, valueType))
 				{
-					Traverse(entry.Key, keyType, visitor);
-					Traverse(entry.Value, valueType, visitor);
+					Traverse(entry.Key, keyType, visitor, currentDepth);
+					Traverse(entry.Value, valueType, visitor, currentDepth);
 				}
 			}
 
-			visitor.VisitMappingEnd();
+			visitor.VisitMappingEnd(value, type);
 		}
 
-		private void TraverseGenericDictionary(object value, Type dictionaryType, IObjectGraphVisitor visitor)
+		private void TraverseGenericDictionary(object value, Type type, Type dictionaryType, IObjectGraphVisitor visitor)
 		{
 			var entryTypes = dictionaryType.GetGenericArguments();
 
 			// dictionaryType is IDictionary<TKey, TValue>
-			visitor.VisitMappingStart(entryTypes[0], entryTypes[1]);
+			visitor.VisitMappingStart(value, type, entryTypes[0], entryTypes[1]);
 
 			// Invoke TraverseGenericDictionaryHelper<,>
 			traverseGenericDictionaryHelperGeneric
 				.MakeGenericMethod(entryTypes)
 				.Invoke(null, new object[] { this, value, visitor });
 
-			visitor.VisitMappingEnd();
+			visitor.VisitMappingEnd(value, type);
 		}
 
 		private static readonly MethodInfo traverseGenericDictionaryHelperGeneric =
-			ReflectionUtility.GetMethod(() => TraverseGenericDictionaryHelper<int, int>(null, null, null));
+			ReflectionUtility.GetMethod(() => TraverseGenericDictionaryHelper<int, int>(null, null, null, 0));
 
 		private static void TraverseGenericDictionaryHelper<TKey, TValue>(
 			// "this" is passed as parameter so that we can cache the generic method definition
 			FullObjectGraphTraversalStrategy self,
 			IDictionary<TKey, TValue> value,
-			IObjectGraphVisitor visitor
-			)
+			IObjectGraphVisitor visitor, int currentDepth)
 		{
 			foreach (var entry in value)
 			{
 				if (visitor.EnterMapping(entry.Key, typeof(TKey), entry.Value, typeof(TValue)))
 				{
-					self.Traverse(entry.Key, typeof (TKey), visitor);
-					self.Traverse(entry.Value, typeof (TValue), visitor);
+					self.Traverse(entry.Key, typeof(TKey), visitor, currentDepth);
+					self.Traverse(entry.Value, typeof(TValue), visitor, currentDepth);
 				}
 			}
 		}
 
-		private void SerializeList(object value, Type type, IObjectGraphVisitor visitor)
+		private void SerializeList(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
 		{
 			var enumerableType = ReflectionUtility.GetImplementedGenericInterface(type, typeof(IEnumerable<>));
 			var itemType = enumerableType != null ? enumerableType.GetGenericArguments()[0] : typeof(object);
 
-			visitor.VisitSequenceStart(itemType);
+			visitor.VisitSequenceStart(value, type, itemType);
 
 			foreach (var item in (IEnumerable)value)
 			{
-				Traverse(item, itemType, visitor);
+				Traverse(item, itemType, visitor, currentDepth);
 			}
 
-			visitor.VisitSequenceEnd();
+			visitor.VisitSequenceEnd(value, type);
 		}
 
-		protected virtual void SerializeProperties(object value, Type type, IObjectGraphVisitor visitor)
+		protected virtual void SerializeProperties(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
 		{
-			visitor.VisitMappingStart(typeof(string), typeof(object));
+			visitor.VisitMappingStart(value, type, typeof(string), typeof(object));
 
 			foreach (var property in GetTraversableProperties(type))
 			{
@@ -169,12 +185,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				if(visitor.EnterMapping(property.Name, typeof(string), propertyValue, propertyType))
 				{
-					Traverse(property.Name, typeof(string), visitor);
-					Traverse(propertyValue, propertyType, visitor);
+					Traverse(property.Name, typeof(string), visitor, currentDepth);
+					Traverse(propertyValue, propertyType, visitor, currentDepth);
 				}
 			}
 
-			visitor.VisitMappingEnd();
+			visitor.VisitMappingEnd(value, type);
 		}
 
 		private IEnumerable<PropertyInfo> GetTraversableProperties(Type type)
