@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011 Antoine Aubry
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012 Antoine Aubry
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -94,48 +94,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
-		private class SerializationContext
-		{
-			public SerializationContext(ICollection<ISerializationBehavior> serializationBehaviors)
-			{
-				this.serializationBehaviors = serializationBehaviors;
-			}
-
-			private readonly ICollection<ISerializationBehavior> serializationBehaviors;
-
-			public void InvokeBehaviors(Action<ISerializationBehavior> invoke)
-			{
-				foreach (var serializationBehavior in serializationBehaviors)
-				{
-					invoke(serializationBehavior);
-				}
-			}
-		}
-
-		private bool Roundtrip
-		{
-			get
-			{
-				return (mode & YamlSerializerModes.Roundtrip) != 0;
-			}
-		}
-
-		private bool DisableAliases
-		{
-			get
-			{
-				return (mode & YamlSerializerModes.DisableAliases) != 0;
-			}
-		}
-
-		private bool EmitDefaults
-		{
-			get
-			{
-				return (mode & YamlSerializerModes.EmitDefaults) != 0;
-			}
-		}
-
 		private bool JsonCompatible
 		{
 			get
@@ -143,26 +101,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return (mode & YamlSerializerModes.JsonCompatible) != 0;
 			}
 		}
-
-		private MappingStyle MappingStyle
-		{
-			get { return JsonCompatible ? MappingStyle.Flow : MappingStyle.Any; }
-		}
-
-		private SequenceStyle SequenceStyle
-		{
-			get { return JsonCompatible ? SequenceStyle.Flow : SequenceStyle.Any; }
-		}
-
-		private ScalarStyle ScalarStyle
-		{
-			get { return JsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain; }
-		}
-
-
-
-		private readonly IEnumerable<ISerializationBehaviorFactory> serializationBehaviorFactories;
-
 
 
 		private readonly IObjectGraphTraversalStrategy traversalStrategy;
@@ -211,7 +149,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.serializedType = serializedType;
 			this.mode = mode;
 
-			if((mode & YamlSerializerModes.Roundtrip) != 0)
+			if ((mode & YamlSerializerModes.Roundtrip) != 0)
 			{
 				traversalStrategy = new RoundtripObjectGraphTraversalStrategy(50);
 			}
@@ -268,75 +206,41 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			var type = serializedType ?? graph.GetType();
 
 
-			//var behaviors = serializationBehaviorFactories.Select(f => f.Create()).ToList();
-			//var context = new SerializationContext(behaviors);
-
-
-			//context.InvokeBehaviors(b => b.SerializationStarting(type, graph));
-
 			var emitter = new Emitter(output);
+
+			IEventEmitter eventEmitter = new WriterEventEmitter(emitter);
+
+			if ((mode & YamlSerializerModes.JsonCompatible) != 0)
+			{
+				eventEmitter = new JsonEventEmitter(eventEmitter);
+			}
+			else
+			{
+				eventEmitter = new TypeAssigningEventEmitter(eventEmitter);
+			}
+
+			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
+
+			if ((mode & YamlSerializerModes.DisableAliases) == 0)
+			{
+				var anchorAssigner = new AnchorAssigner();
+				traversalStrategy.Traverse(graph, type, anchorAssigner);
+
+				emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
+			}
+
+			if ((mode & YamlSerializerModes.EmitDefaults) == 0)
+			{
+				emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
+			}
 
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart());
 
+			traversalStrategy.Traverse(graph, type, emittingVisitor);
 
-
-			var eventEmitter = new TypeAssigningEventEmitter(
-				new EndEventEmitter(emitter)
-			);
-
-			var visitor = new SerializationVisitor(eventEmitter);
-			traversalStrategy.Traverse(graph, type, visitor);
-			
 			emitter.Emit(new DocumentEnd(true));
 			emitter.Emit(new StreamEnd());
-		}
-
-		private class SerializationVisitor : IObjectGraphVisitor
-		{
-			private readonly IEventEmitter eventEmitter;
-
-			public SerializationVisitor(IEventEmitter eventEmitter)
-			{
-				this.eventEmitter = eventEmitter;
-			}
-
-			bool IObjectGraphVisitor.Enter(object value, Type type)
-			{
-				// TODO
-				return true;
-			}
-
-			bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
-			{
-				// TODO
-				return true;
-			}
-
-			void IObjectGraphVisitor.VisitScalar(object scalar, Type scalarType)
-			{
-				eventEmitter.Emit(new ScalarEventInfo(scalar, scalarType));
-			}
-
-			void IObjectGraphVisitor.VisitMappingStart(object mapping, Type mappingType, Type type, Type valueType1)
-			{
-				eventEmitter.Emit(new MappingStartEventInfo(mapping, mappingType));
-			}
-
-			void IObjectGraphVisitor.VisitMappingEnd(object mapping, Type mappingType)
-			{
-				eventEmitter.Emit(new MappingEndEventInfo(mapping, mappingType));
-			}
-
-			void IObjectGraphVisitor.VisitSequenceStart(object sequence, Type sequenceType, Type elementType)
-			{
-				eventEmitter.Emit(new SequenceStartEventInfo(sequence, sequenceType));
-			}
-
-			void IObjectGraphVisitor.VisitSequenceEnd(object sequence, Type sequenceType)
-			{
-				eventEmitter.Emit(new SequenceEndEventInfo(sequence, sequenceType));
-			}
 		}
 
 		//private class SerializationVisitor : IObjectGraphVisitor
@@ -1132,267 +1036,4 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return (TSerialized)base.Deserialize(reader, options, out context);
 		}
 	}
-
-	public interface IEventEmitter
-	{
-		void Emit(ScalarEventInfo eventInfo);
-		void Emit(MappingStartEventInfo eventInfo);
-		void Emit(MappingEndEventInfo eventInfo);
-		void Emit(SequenceStartEventInfo eventInfo);
-		void Emit(SequenceEndEventInfo eventInfo);
-	}
-
-	public class EndEventEmitter : IEventEmitter
-	{
-		private readonly Emitter emitter;
-
-		public EndEventEmitter(Emitter emitter)
-		{
-			this.emitter = emitter;
-		}
-
-		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
-		{
-			emitter.Emit(new Scalar(eventInfo.Alias, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
-		}
-
-		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)
-		{
-			emitter.Emit(new MappingStart(eventInfo.Alias, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
-		}
-
-		void IEventEmitter.Emit(MappingEndEventInfo eventInfo)
-		{
-			emitter.Emit(new MappingEnd());
-		}
-
-		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo)
-		{
-			emitter.Emit(new SequenceStart(eventInfo.Alias, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
-		}
-
-		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo)
-		{
-			emitter.Emit(new SequenceEnd());
-		}
-	}
-
-	/// <summary>
-	/// Provided the base implementation for an IEventEmitter that is a
-	/// decorator for another IEventEmitter.
-	/// </summary>
-	public abstract class ChainedEventEmitter : IEventEmitter
-	{
-		private readonly IEventEmitter nextEmitter;
-
-		protected ChainedEventEmitter(IEventEmitter nextEmitter)
-		{
-			if (nextEmitter == null)
-			{
-				throw new ArgumentNullException("nextEmitter");
-			}
-
-			this.nextEmitter = nextEmitter;
-		}
-
-		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
-		{
-			Process(eventInfo);
-			nextEmitter.Emit(eventInfo);
-		}
-
-		protected virtual void Process(ScalarEventInfo eventInfo)
-		{
-		}
-
-		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)
-		{
-			Process(eventInfo);
-			nextEmitter.Emit(eventInfo);
-		}
-
-		protected virtual void Process(MappingStartEventInfo eventInfo)
-		{
-		}
-
-		void IEventEmitter.Emit(MappingEndEventInfo eventInfo)
-		{
-			Process(eventInfo);
-			nextEmitter.Emit(eventInfo);
-		}
-
-		protected virtual void Process(MappingEndEventInfo eventInfo)
-		{
-		}
-
-		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo)
-		{
-			Process(eventInfo);
-			nextEmitter.Emit(eventInfo);
-		}
-
-		protected virtual void Process(SequenceStartEventInfo eventInfo)
-		{
-		}
-
-		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo)
-		{
-			Process(eventInfo);
-			nextEmitter.Emit(eventInfo);
-		}
-
-		protected virtual void Process(SequenceEndEventInfo eventInfo)
-		{
-		}
-	}
-
-	public class TypeAssigningEventEmitter : ChainedEventEmitter
-	{
-		public TypeAssigningEventEmitter(IEventEmitter nextEmitter)
-			: base(nextEmitter)
-		{
-		}
-
-		protected override void Process(ScalarEventInfo eventInfo)
-		{
-			if (eventInfo.SourceValue == null)
-			{
-				eventInfo.Tag = "tag:yaml.org,2002:null";
-				eventInfo.RenderedValue = "";
-				eventInfo.Style = ScalarStyle.Plain;
-				return;
-			}
-
-			eventInfo.IsPlainImplicit = true;
-
-			var typeCode = Type.GetTypeCode(eventInfo.SourceType);
-			switch (typeCode)
-			{
-				case TypeCode.Boolean:
-					eventInfo.Tag = "tag:yaml.org,2002:bool";
-					eventInfo.RenderedValue = eventInfo.SourceValue.Equals(true) ? "true" : "false";
-					eventInfo.Style = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.Byte:
-				case TypeCode.Int16:
-				case TypeCode.Int32:
-				case TypeCode.Int64:
-				case TypeCode.SByte:
-				case TypeCode.UInt16:
-				case TypeCode.UInt32:
-				case TypeCode.UInt64:
-					eventInfo.Tag = "tag:yaml.org,2002:int";
-					eventInfo.RenderedValue = Convert.ToString(eventInfo.SourceValue, numberFormat);
-					eventInfo.Style = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.Single:
-				case TypeCode.Double:
-				case TypeCode.Decimal:
-					eventInfo.Tag = "tag:yaml.org,2002:float";
-					eventInfo.RenderedValue = Convert.ToString(eventInfo.SourceValue, numberFormat);
-					eventInfo.Style = ScalarStyle.Plain;
-					break;
-
-				case TypeCode.String:
-				case TypeCode.Char:
-					eventInfo.Tag = "tag:yaml.org,2002:str";
-					eventInfo.RenderedValue = eventInfo.SourceValue.ToString();
-					break;
-
-				case TypeCode.DateTime:
-					eventInfo.Tag = "tag:yaml.org,2002:timestamp";
-					eventInfo.RenderedValue = ((DateTime)eventInfo.SourceValue).ToString("o", CultureInfo.InvariantCulture);
-					eventInfo.Style = ScalarStyle.Plain;
-					break;
-
-				default:
-					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
-			}
-		}
-
-		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
-		{
-			CurrencyDecimalSeparator = ".",
-			CurrencyGroupSeparator = "_",
-			CurrencyGroupSizes = new[] { 3 },
-			CurrencySymbol = string.Empty,
-			CurrencyDecimalDigits = 99,
-			NumberDecimalSeparator = ".",
-			NumberGroupSeparator = "_",
-			NumberGroupSizes = new[] { 3 },
-			NumberDecimalDigits = 99
-		};
-	}
-
-	public abstract class EventInfo
-	{
-		public object SourceValue { get; private set; }
-		public Type SourceType { get; private set; }
-
-		protected EventInfo(object sourceValue, Type sourceType)
-		{
-			SourceValue = sourceValue;
-			SourceType = sourceType;
-		}
-	}
-
-	public sealed class ScalarEventInfo : EventInfo
-	{
-		public ScalarEventInfo(object sourceValue, Type sourceType)
-			: base(sourceValue, sourceType)
-		{
-		}
-
-		public string Alias { get; set; }
-		public string Tag { get; set; }
-		public string RenderedValue { get; set; }
-		public ScalarStyle Style { get; set; }
-		public bool IsPlainImplicit { get; set; }
-		public bool IsQuotedImplicit { get; set; }
-	}
-
-	public sealed class MappingStartEventInfo : EventInfo
-	{
-		public MappingStartEventInfo(object sourceValue, Type sourceType)
-			: base(sourceValue, sourceType)
-		{
-		}
-
-		public string Alias { get; set; }
-		public string Tag { get; set; }
-		public bool IsImplicit { get; set; }
-		public MappingStyle Style { get; set; }
-	}
-
-	public sealed class MappingEndEventInfo : EventInfo
-	{
-		public MappingEndEventInfo(object sourceValue, Type sourceType)
-			: base(sourceValue, sourceType)
-		{
-		}
-	}
-
-	public sealed class SequenceStartEventInfo : EventInfo
-	{
-		public SequenceStartEventInfo(object sourceValue, Type sourceType)
-			: base(sourceValue, sourceType)
-		{
-		}
-
-		public string Alias { get; set; }
-		public string Tag { get; set; }
-		public bool IsImplicit { get; set; }
-		public SequenceStyle Style { get; set; }
-	}
-
-	public sealed class SequenceEndEventInfo : EventInfo
-	{
-		public SequenceEndEventInfo(object sourceValue, Type sourceType)
-			: base(sourceValue, sourceType)
-		{
-		}
-	}
-
 }
