@@ -13,13 +13,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		bool IObjectGraphVisitor.Enter(object value, Type type)
 		{
-			// TODO
 			return true;
 		}
 
 		bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
 		{
-			// TODO
 			return true;
 		}
 

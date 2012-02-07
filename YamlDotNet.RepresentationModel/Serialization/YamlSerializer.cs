@@ -221,6 +221,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
+			emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, converters);
+
 			if ((mode & YamlSerializerModes.DisableAliases) == 0)
 			{
 				var anchorAssigner = new AnchorAssigner();

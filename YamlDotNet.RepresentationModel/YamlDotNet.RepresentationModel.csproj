@@ -79,6 +79,7 @@
     <Compile Include="Serialization\AnchorAssigningObjectGraphVisitor.cs" />
     <Compile Include="Serialization\ChainedEventEmitter.cs" />
     <Compile Include="Serialization\ChainedObjectGraphVisitor.cs" />
+    <Compile Include="Serialization\CustomSerializationObjectGraphVisitor.cs" />
     <Compile Include="Serialization\DefaultExclusiveObjectGraphVisitor.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="Serialization\DeserializationOptions.cs" />
