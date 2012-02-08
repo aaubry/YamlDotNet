@@ -23,7 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
@@ -31,7 +31,6 @@ using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestClass]
 	public class ParserTests : YamlTest
 	{	
 		private static Parser CreateParser(string name) {
@@ -39,16 +38,16 @@ namespace YamlDotNet.UnitTests
 		}
 			
 		private void AssertHasNext(Parser parser) {
-			Assert.IsTrue(parser.MoveNext(), "The parser does not contain more events.");
+			Assert.True(parser.MoveNext());
 		}
 		
 		private void AssertDoesNotHaveNext(Parser parser) {
-			Assert.IsFalse(parser.MoveNext(), "The parser should not contain more events.");
+			Assert.False(parser.MoveNext());
 		}
 	
 		private void AssertCurrent(Parser parser, ParsingEvent expected) {
 			Console.WriteLine(expected.GetType().Name);
-			Assert.IsTrue(expected.GetType().IsAssignableFrom(parser.Current.GetType()), string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
+			Assert.True(expected.GetType().IsAssignableFrom(parser.Current.GetType()), string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
 			
 			foreach (var property in expected.GetType().GetProperties()) {
 				if(property.PropertyType != typeof(Mark) && property.CanRead) {
@@ -68,20 +67,20 @@ namespace YamlDotNet.UnitTests
 						Console.WriteLine("}");
 						
 						if(expectedValue is ICollection && value is ICollection) {
-							Assert.AreEqual(((ICollection)expectedValue).Count, ((ICollection)value).Count, "The collection does not contain the correct number of items.");
+							Assert.Equal(((ICollection)expectedValue).Count, ((ICollection)value).Count);
 						}
 						
 						IEnumerator values = ((IEnumerable)value).GetEnumerator();
 						IEnumerator expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
 						while(expectedValues.MoveNext()) {
-							Assert.IsTrue(values.MoveNext(), "The property does not contain enough items.");
-							Assert.AreEqual(expectedValues.Current, values.Current, string.Format("The property '{0}' is incorrect.", property.Name));
+							Assert.True(values.MoveNext());
+							Assert.Equal(expectedValues.Current, values.Current);
 						}
 						
-						Assert.IsFalse(values.MoveNext(), "The property contains too many items.");
+						Assert.False(values.MoveNext());
 					} else {
 						Console.WriteLine("\t{0} = {1}", property.Name, value);
-						Assert.AreEqual(expectedValue, value, string.Format("The property '{0}' is incorrect.", property.Name));
+						Assert.Equal(expectedValue, value);
 					}
 				}
 			}
@@ -92,7 +91,7 @@ namespace YamlDotNet.UnitTests
 			AssertCurrent(parser, expected);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void EmptyDocument()
 		{
 			Parser parser = CreateParser("empty.yaml");
@@ -107,7 +106,7 @@ namespace YamlDotNet.UnitTests
 			new TagDirective("!!", "tag:yaml.org,2002:"),
 		});
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyEventsOnExample1()
 		{
 			Parser parser = CreateParser("test1.yaml");
@@ -124,7 +123,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample2()
 		{
 			Parser parser = CreateParser("test2.yaml");
@@ -137,7 +136,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample3()
 		{
 			Parser parser = CreateParser("test3.yaml");
@@ -150,7 +149,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}		
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample4()
 		{
 			Parser parser = CreateParser("test4.yaml");
@@ -169,7 +168,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}		
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample5()
 		{
 			Parser parser = CreateParser("test5.yaml");
@@ -184,7 +183,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample6()
 		{
 			Parser parser = CreateParser("test6.yaml");
@@ -197,7 +196,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample7()
 		{
 			Parser parser = CreateParser("test7.yaml");
@@ -225,7 +224,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample8()
 		{
 			Parser parser = CreateParser("test8.yaml");
@@ -242,7 +241,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample9()
 		{
 			Parser parser = CreateParser("test9.yaml");
@@ -260,7 +259,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample10()
 		{
 			Parser parser = CreateParser("test10.yaml");
@@ -286,7 +285,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 	
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample11()
 		{
 			Parser parser = CreateParser("test11.yaml");
@@ -316,7 +315,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 	
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample12()
 		{
 			Parser parser = CreateParser("test12.yaml");
@@ -344,7 +343,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 			
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample13()
 		{
 			Parser parser = CreateParser("test13.yaml");
@@ -370,7 +369,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 			
-		[TestMethod]
+		[Fact]
 		public void VerifyTokensOnExample14()
 		{
 			Parser parser = CreateParser("test14.yaml");
@@ -389,7 +388,7 @@ namespace YamlDotNet.UnitTests
 			AssertDoesNotHaveNext(parser);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void VerifyTokenWithLocalTags()
 		{
 			Parser parser = CreateParser("local-tags.yaml");

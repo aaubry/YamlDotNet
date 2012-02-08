@@ -3,19 +3,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>
-    </ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7F023CAC-A942-4E6B-BBC1-9E42C16F176E}</ProjectGuid>
+    <ProjectGuid>{114910D8-5B05-4FDC-BDA0-0DF7A29892DC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>YamlDotNet.UnitTests</RootNamespace>
     <AssemblyName>YamlDotNet.UnitTests</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,7 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -43,6 +41,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
+    <Reference Include="xunit">
+      <HintPath>..\Dependencies\xUnit\xunit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">
@@ -78,25 +79,25 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="empty.yaml" />
-    <EmbeddedResource Include="test1.yaml" />
-    <EmbeddedResource Include="test10.yaml" />
-    <EmbeddedResource Include="test11.yaml" />
-    <EmbeddedResource Include="test12.yaml" />
-    <EmbeddedResource Include="test13.yaml" />
-    <EmbeddedResource Include="test14.yaml" />
-    <EmbeddedResource Include="test2.yaml" />
-    <EmbeddedResource Include="test3.yaml" />
-    <EmbeddedResource Include="test4.yaml" />
-    <EmbeddedResource Include="test5.yaml" />
-    <EmbeddedResource Include="test6.yaml" />
-    <EmbeddedResource Include="test7.yaml" />
-    <EmbeddedResource Include="test8.yaml" />
-    <EmbeddedResource Include="test9.yaml" />
+    <EmbeddedResource Include="files\empty.yaml" />
+    <EmbeddedResource Include="files\test1.yaml" />
+    <EmbeddedResource Include="files\test10.yaml" />
+    <EmbeddedResource Include="files\test11.yaml" />
+    <EmbeddedResource Include="files\test12.yaml" />
+    <EmbeddedResource Include="files\test13.yaml" />
+    <EmbeddedResource Include="files\test14.yaml" />
+    <EmbeddedResource Include="files\test2.yaml" />
+    <EmbeddedResource Include="files\test3.yaml" />
+    <EmbeddedResource Include="files\test4.yaml" />
+    <EmbeddedResource Include="files\test5.yaml" />
+    <EmbeddedResource Include="files\test6.yaml" />
+    <EmbeddedResource Include="files\test7.yaml" />
+    <EmbeddedResource Include="files\test8.yaml" />
+    <EmbeddedResource Include="files\test9.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="backwardsAlias.yaml" />
-    <EmbeddedResource Include="forwardAlias.yaml" />
+    <EmbeddedResource Include="files\backwardsAlias.yaml" />
+    <EmbeddedResource Include="files\forwardAlias.yaml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -126,44 +127,44 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="explicitType.yaml" />
+    <EmbeddedResource Include="files\explicitType.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="dictionary.yaml" />
+    <EmbeddedResource Include="files\dictionary.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="dictionaryExplicit.yaml" />
+    <EmbeddedResource Include="files\dictionaryExplicit.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="listOfDictionaries.yaml" />
+    <EmbeddedResource Include="files\listOfDictionaries.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="list.yaml" />
-    <EmbeddedResource Include="listExplicit.yaml" />
+    <EmbeddedResource Include="files\list.yaml" />
+    <EmbeddedResource Include="files\listExplicit.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="tags.yaml" />
+    <EmbeddedResource Include="files\tags.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="convertible.yaml" />
+    <EmbeddedResource Include="files\convertible.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="converter.yaml" />
+    <EmbeddedResource Include="files\converter.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="sample.yaml" />
+    <EmbeddedResource Include="files\sample.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="backreference.yaml" />
+    <EmbeddedResource Include="files\backreference.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="fail-backreference.yaml" />
+    <EmbeddedResource Include="files\fail-backreference.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="invalid-reference.yaml" />
+    <EmbeddedResource Include="files\invalid-reference.yaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="local-tags.yaml" />
+    <EmbeddedResource Include="files\local-tags.yaml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -171,6 +172,15 @@
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
+  </Target>
+  -->
+  <!--
+  <UsingTask
+    AssemblyFile="..\Dependencies\xunit\xunit.runner.msbuild.dll"
+    TaskName="Xunit.Runner.MSBuild.xunit"/>
+
+  <Target Name="AfterBuild">
+    <xunit Assembly="$(TargetPath)" />
   </Target>
   -->
 </Project>

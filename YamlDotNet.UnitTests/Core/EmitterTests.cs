@@ -22,13 +22,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestClass]
 	public class EmitterTests : YamlTest
 	{
 		private void ParseAndEmit(string name) {
@@ -83,90 +82,90 @@ namespace YamlDotNet.UnitTests
 					Console.WriteLine();
 				}
 				
-				Assert.AreEqual(testText, result, "The emitter did not generate the correct text.");
+				Assert.Equal(testText, result);
 				*/
 			}
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample1()
 		{
 			ParseAndEmit("test1.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample2()
 		{
 			ParseAndEmit("test2.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample3()
 		{
 			ParseAndEmit("test3.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample4()
 		{
 			ParseAndEmit("test4.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample5()
 		{
 			ParseAndEmit("test5.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample6()
 		{
 			ParseAndEmit("test6.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample7()
 		{
 			ParseAndEmit("test7.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample8()
 		{
 			ParseAndEmit("test8.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample9()
 		{
 			ParseAndEmit("test9.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample10()
 		{
 			ParseAndEmit("test10.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample11()
 		{
 			ParseAndEmit("test11.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample12()
 		{
 			ParseAndEmit("test12.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample13()
 		{
 			ParseAndEmit("test13.yaml");
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void EmitExample14()
 		{
 			ParseAndEmit("test14.yaml");

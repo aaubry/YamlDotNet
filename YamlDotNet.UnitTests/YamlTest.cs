@@ -31,7 +31,7 @@ namespace YamlDotNet.UnitTests
 		{
 			Stream resource =
 				Assembly.GetExecutingAssembly().GetManifestResourceStream(name) ??
-				Assembly.GetExecutingAssembly().GetManifestResourceStream("YamlDotNet.UnitTests." + name);
+				Assembly.GetExecutingAssembly().GetManifestResourceStream("YamlDotNet.UnitTests.files." + name);
 
 			return new StreamReader(resource);
 		}

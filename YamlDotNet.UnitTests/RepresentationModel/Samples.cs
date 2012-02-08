@@ -2,15 +2,14 @@
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[TestClass]
 	public class Program
 	{
-		[TestMethod]
+		[Fact]
 		public void LoadYamlStream()
 		{
 			// Setup the input

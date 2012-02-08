@@ -21,7 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using YamlDotNet.RepresentationModel;
 using System.Text;
 using System.IO;
@@ -29,53 +29,51 @@ using System.Diagnostics;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[TestClass]
 	public class YamlStreamTests : YamlTest
 	{
-		public TestContext TestContext { get; set; }
 
-		[TestMethod]
+		[Fact]
 		public void LoadSimpleDocument() {
 			YamlStream stream = new YamlStream();
 			stream.Load(YamlFile("test2.yaml"));
 			
-			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
-			Assert.IsInstanceOfType(stream.Documents[0].RootNode, typeof(YamlScalarNode), "The document should contain a scalar.");
-			Assert.AreEqual("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value, "The value of the node is incorrect.");
+			Assert.Equal(1, stream.Documents.Count);
+			Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
+			Assert.Equal("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void BackwardAliasReferenceWorks() {
 			YamlStream stream = new YamlStream();
 			stream.Load(YamlFile("backwardsAlias.yaml"));
 			
-			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
-			Assert.IsInstanceOfType(stream.Documents[0].RootNode, typeof(YamlSequenceNode), "The document should contain a sequence.");
+			Assert.Equal(1, stream.Documents.Count);
+			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
 			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-			Assert.AreEqual(3, sequence.Children.Count, "The sequence does not contain the correct number of children.");
+			Assert.Equal(3, sequence.Children.Count);
 
-			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[0]).Value, "The value of the first node is incorrect.");
-			Assert.AreEqual("another scalar", ((YamlScalarNode)sequence.Children[1]).Value, "The value of the second node is incorrect.");
-			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[2]).Value, "The value of the third node is incorrect.");
-			Assert.AreSame(sequence.Children[0], sequence.Children[2], "The first and third element should be the same.");
+			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[0]).Value);
+			Assert.Equal("another scalar", ((YamlScalarNode)sequence.Children[1]).Value);
+			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[2]).Value);
+			Assert.Same(sequence.Children[0], sequence.Children[2]);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void ForwardAliasReferenceWorks() {
 			YamlStream stream = new YamlStream();
 			stream.Load(YamlFile("forwardAlias.yaml"));
 			
-			Assert.AreEqual(1, stream.Documents.Count, "The stream should contain exactly one document.");
-			Assert.IsInstanceOfType(stream.Documents[0].RootNode, typeof(YamlSequenceNode), "The document should contain a sequence.");
+			Assert.Equal(1, stream.Documents.Count);
+			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
 			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-			Assert.AreEqual(3, sequence.Children.Count, "The sequence does not contain the correct number of children.");
+			Assert.Equal(3, sequence.Children.Count);
 
-			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[0]).Value, "The value of the first node is incorrect.");
-			Assert.AreEqual("another scalar", ((YamlScalarNode)sequence.Children[1]).Value, "The value of the second node is incorrect.");
-			Assert.AreEqual("a scalar", ((YamlScalarNode)sequence.Children[2]).Value, "The value of the third node is incorrect.");
-			Assert.AreSame(sequence.Children[0], sequence.Children[2], "The first and third element should be the same.");
+			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[0]).Value);
+			Assert.Equal("another scalar", ((YamlScalarNode)sequence.Children[1]).Value);
+			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[2]).Value);
+			Assert.Same(sequence.Children[0], sequence.Children[2]);
 		}
 
 		private enum YamlNodeEventType
@@ -168,7 +166,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			StringBuilder buffer = new StringBuilder();
 			original.Save(new StringWriter(buffer));
 
-			TestContext.WriteLine(buffer.ToString());
+			Console.WriteLine(buffer.ToString());
 
 			YamlStream final = new YamlStream();
 			final.Load(new StringReader(buffer.ToString()));
@@ -181,111 +179,111 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			Console.WriteLine("The original document produced {0} events.", originalBuilder.Events.Count);
 			Console.WriteLine("The final document produced {0} events.", finalBuilder.Events.Count);
-			Assert.AreEqual(originalBuilder.Events.Count, finalBuilder.Events.Count, "The two documents should have the same structure.");
+			Assert.Equal(originalBuilder.Events.Count, finalBuilder.Events.Count);
 
 			for (int i = 0; i < originalBuilder.Events.Count; ++i)
 			{
 				YamlNodeEvent originalEvent = originalBuilder.Events[i];
 				YamlNodeEvent finalEvent = finalBuilder.Events[i];
 
-				Assert.AreEqual(originalEvent.Type, finalEvent.Type, "The type of the events should be the same.");
-				//Assert.AreEqual(originalEvent.Tag, finalEvent.Tag, "The tag of the events should be the same.");
-				//Assert.AreEqual(originalEvent.Anchor, finalEvent.Anchor, "The anchor of the events should be the same.");
-				Assert.AreEqual(originalEvent.Value, finalEvent.Value, "The value of the events should be the same.");
+				Assert.Equal(originalEvent.Type, finalEvent.Type);
+				//Assert.Equal(originalEvent.Tag, finalEvent.Tag);
+				//Assert.Equal(originalEvent.Anchor, finalEvent.Anchor);
+				Assert.Equal(originalEvent.Value, finalEvent.Value);
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample1()
 		{
 			RoundtripTest("test1.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample2()
 		{
 			RoundtripTest("test2.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample3()
 		{
 			RoundtripTest("test3.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample4()
 		{
 			RoundtripTest("test4.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample5()
 		{
 			RoundtripTest("test6.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample6()
 		{
 			RoundtripTest("test6.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample7()
 		{
 			RoundtripTest("test7.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample8()
 		{
 			RoundtripTest("test8.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample9()
 		{
 			RoundtripTest("test9.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample10()
 		{
 			RoundtripTest("test10.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample11()
 		{
 			RoundtripTest("test11.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample12()
 		{
 			RoundtripTest("test12.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample13()
 		{
 			RoundtripTest("test13.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripExample14()
 		{
 			RoundtripTest("test14.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripBackreference()
 		{
 			RoundtripTest("backreference.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripSample()
 		{
 			YamlStream original = new YamlStream();
@@ -296,7 +294,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			//RoundtripTest("sample.yaml");
 		}
 
-		[TestMethod]
+		[Fact]
 		public void FailBackreference()
 		{
 			//YamlStream original = new YamlStream();
@@ -304,8 +302,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			RoundtripTest("fail-backreference.yaml");
 		}
 
-		[TestMethod]
-		[ExpectedException(typeof(AnchorNotFoundException))]
+		[Fact]
 		public void AllAliasesMustBeResolved()
 		{
 			YamlStream original = new YamlStream();
@@ -315,16 +312,16 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			try
 			{
-				original.Accept(visitor);
+				Assert.Throws<AnchorNotFoundException>(() => original.Accept(visitor));
 			}
 			catch (NotSupportedException)
 			{
 				foreach (var node in visitor.CurrentPath)
 				{
-					TestContext.WriteLine(node.ToString());
+					Console.WriteLine(node.ToString());
 				}
 
-				Assert.Fail();
+				Assert.True(false);
 			}
 		}
 

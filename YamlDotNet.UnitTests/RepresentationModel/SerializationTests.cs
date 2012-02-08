@@ -21,7 +21,7 @@
 
 using System;
 using System.Drawing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System.IO;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
@@ -33,7 +33,6 @@ using System.ComponentModel;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[TestClass]
 	[CLSCompliant(false)]
 	public class SerializationTests : YamlTest
 	{
@@ -139,7 +138,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Roundtrip()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
@@ -157,10 +156,9 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				{
 					if (property.CanRead && property.CanWrite)
 					{
-						Assert.AreEqual(
+						Assert.Equal(
 							property.GetValue(original, null),
-							property.GetValue(copy, null),
-							string.Format("Property '{0}' is incorrect", property.Name)
+							property.GetValue(copy, null)
 						);
 					}
 				}
@@ -199,7 +197,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 
-		[TestMethod]
+		[Fact]
 		public void CircularReference()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerModes.Roundtrip);
@@ -228,84 +226,84 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void ExplicitType()
 		{
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"));
 			
-			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
-			Assert.AreEqual("bbb", ((Z)result).aaa, "The property has the wrong value.");
+			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
+			Assert.Equal("bbb", ((Z)result).aaa);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void DeserializeDictionary()
 		{
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("dictionary.yaml"));
 
-			Assert.IsTrue(typeof(IDictionary<object, object>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
+			Assert.True(typeof(IDictionary<object, object>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
 
 			IDictionary<object, object> dictionary = (IDictionary<object, object>)result;
-			Assert.AreEqual("value1", dictionary["key1"]);
-			Assert.AreEqual("value2", dictionary["key2"]);
+			Assert.Equal("value1", dictionary["key1"]);
+			Assert.Equal("value2", dictionary["key2"]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void DeserializeExplicitDictionary()
 		{
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
 
-			Assert.IsTrue(typeof(IDictionary<string, int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
+			Assert.True(typeof(IDictionary<string, int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
 
 			IDictionary<string, int> dictionary = (IDictionary<string, int>)result;
-			Assert.AreEqual(1, dictionary["key1"]);
-			Assert.AreEqual(2, dictionary["key2"]);
+			Assert.Equal(1, dictionary["key1"]);
+			Assert.Equal(2, dictionary["key2"]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void DeserializeListOfDictionaries()
 		{
 			var serializer = new YamlSerializer<List<Dictionary<string, string>>>();
 			object result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"));
 
-			Assert.IsInstanceOfType(result, typeof(List<Dictionary<string, string>>), "The deserialized object has the wrong type.");
+			Assert.IsType<List<Dictionary<string, string>>>(result);
 
 			var list = (List<Dictionary<string, string>>)result;
-			Assert.AreEqual("conn1", list[0]["connection"]);
-			Assert.AreEqual("path1", list[0]["path"]);
-			Assert.AreEqual("conn2", list[1]["connection"]);
-			Assert.AreEqual("path2", list[1]["path"]);
+			Assert.Equal("conn1", list[0]["connection"]);
+			Assert.Equal("path1", list[0]["path"]);
+			Assert.Equal("conn2", list[1]["connection"]);
+			Assert.Equal("path2", list[1]["path"]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void DeserializeList() {
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("list.yaml"));
 
-			Assert.IsTrue(typeof(IList).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
+			Assert.True(typeof(IList).IsAssignableFrom(result.GetType()));
 
 			IList list = (IList)result;
-			Assert.AreEqual("one", list[0]);
-			Assert.AreEqual("two", list[1]);
-			Assert.AreEqual("three", list[2]);
+			Assert.Equal("one", list[0]);
+			Assert.Equal("two", list[1]);
+			Assert.Equal("three", list[2]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void DeserializeExplicitList() {
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
 
-			Assert.IsTrue(typeof(IList<int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
+			Assert.True(typeof(IList<int>).IsAssignableFrom(result.GetType()));
 
 			IList<int> list = (IList<int>)result;
-			Assert.AreEqual(3, list[0]);
-			Assert.AreEqual(4, list[1]);
-			Assert.AreEqual(5, list[2]);
+			Assert.Equal(3, list[0]);
+			Assert.Equal(4, list[1]);
+			Assert.Equal(5, list[2]);
 		}
 		
-		[TestMethod]
+		[Fact]
 		public void RoundtripList()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerModes.Roundtrip);
@@ -322,15 +320,15 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				List<int> copy = (List<int>)serializer.Deserialize(new StringReader(buffer.ToString()));
 
-				Assert.AreEqual(original.Count, copy.Count, "The lists do not have the same number of items.");
+				Assert.Equal(original.Count, copy.Count);
 				
 				for(int i = 0; i < original.Count; ++i) {
-					Assert.AreEqual(original[i], copy[i]);
+					Assert.Equal(original[i], copy[i]);
 				}
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Overrides()
 		{
 			DeserializationOptions options = new DeserializationOptions();
@@ -339,11 +337,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), options);
 			
-			Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
-			Assert.AreEqual("BBB", ((Z)result).aaa, "The property has the wrong value.");
+			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
+			Assert.Equal("BBB", ((Z)result).aaa);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Enums()
 		{
 			YamlSerializer<StringFormatFlags> serializer = new YamlSerializer<StringFormatFlags>();
@@ -355,10 +353,10 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			StringFormatFlags deserialized = serializer.Deserialize(new StringReader(buffer.ToString()));
 
-			Assert.AreEqual(flags, deserialized, "The value is incorrect.");
+			Assert.Equal(flags, deserialized);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void CustomTags()
 		{
 			DeserializationOptions options = new DeserializationOptions();
@@ -367,21 +365,21 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("tags.yaml"), options);
 
-			Assert.AreEqual(typeof(Point), result.GetType(), "The deserializer should have used the correct type.");
+			Assert.Equal(typeof(Point), result.GetType());
 
 			Point value = (Point)result;
-			Assert.AreEqual(10, value.X, "The property X has the wrong value.");
-			Assert.AreEqual(20, value.Y, "The property Y has the wrong value.");
+			Assert.Equal(10, value.X);
+			Assert.Equal(20, value.Y);
 		}
 
-		//[TestMethod]
+		//[Fact]
 		//public void DeserializeConvertible()
 		//{
 		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
 		//    object result = serializer.Deserialize(YamlFile("convertible.yaml"));
 
-		//    Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
-		//    Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+		//    Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
+		//    Assert.Equal("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
 		//}
 
 		public class Converter : TypeConverter
@@ -482,14 +480,14 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			public string ToString(IFormatProvider provider)
 			{
-				Assert.AreEqual(CultureInfo.InvariantCulture, provider);
+				Assert.Equal(CultureInfo.InvariantCulture, provider);
 
 				return string.Format(provider, "[{0}, {1}]", Left, Right);
 			}
 
 			public object ToType(Type conversionType, IFormatProvider provider)
 			{
-				Assert.AreEqual(typeof(string), conversionType);
+				Assert.Equal(typeof(string), conversionType);
 				return ToString(provider);
 			}
 
@@ -511,17 +509,17 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			#endregion
 		}
 
-		//[TestMethod]
+		//[Fact]
 		//public void DeserializeTypeConverter()
 		//{
 		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
 		//    object result = serializer.Deserialize(YamlFile("converter.yaml"));
 
-		//    Assert.IsTrue(typeof(Z).IsAssignableFrom(result.GetType()), "The deserializer should have used the correct type.");
-		//    Assert.AreEqual("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
+		//    Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
+		//    Assert.Equal("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
 		//}
 
-		[TestMethod]
+		[Fact]
 		public void RoundtripDictionary()
 		{
 			Dictionary<string, string> entries = new Dictionary<string, string>
@@ -542,11 +540,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			foreach(var pair in deserialized)
 			{
-				Assert.AreEqual(entries[pair.Key], pair.Value);
+				Assert.Equal(entries[pair.Key], pair.Value);
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void SerializeAnonymousType()
 		{
 			var data = new { Key = 3 };
@@ -560,7 +558,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Console.WriteLine(buffer.ToString());
 		}
 
-		[TestMethod]
+		[Fact]
 		public void SerializationIncludesNullWhenAsked()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults);
@@ -572,11 +570,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				Assert.IsTrue(buffer.ToString().Contains("MyString"));
+				Assert.True(buffer.ToString().Contains("MyString"));
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void SerializationDoesNotIncludeNullWhenNotAsked()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.None);
@@ -588,11 +586,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				Assert.IsFalse(buffer.ToString().Contains("MyString"));
+				Assert.False(buffer.ToString().Contains("MyString"));
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void SerializationOfNullWorksInJson()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible);
@@ -604,11 +602,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				Assert.IsTrue(buffer.ToString().Contains("MyString"));
+				Assert.True(buffer.ToString().Contains("MyString"));
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void DeserializationOfNullWorksInJson()
 		{
 			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
@@ -622,7 +620,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				X copy = (X)serializer.Deserialize(new StringReader(buffer.ToString()));
 
-				Assert.IsNull(copy.MyString);
+				Assert.Null(copy.MyString);
 			}
 		}
 	}

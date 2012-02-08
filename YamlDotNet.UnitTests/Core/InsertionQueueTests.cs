@@ -21,14 +21,13 @@
 
 using System;
 using YamlDotNet.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace YamlDotNet.UnitTests
 {
-	[TestClass]
 	public class InsertionQueueTests
 	{
-		[TestMethod]
+		[Fact]
 		public void QueueWorks() {
 			InsertionQueue<int> queue = new InsertionQueue<int>();
 			
@@ -37,7 +36,7 @@ namespace YamlDotNet.UnitTests
 			}
 			
 			for (int i = 0; i < 100; ++i) {
-				Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(i, queue.Dequeue());
 			}
 
 			for (int i = 0; i < 50; ++i) {
@@ -45,7 +44,7 @@ namespace YamlDotNet.UnitTests
 			}
 
 			for (int i = 0; i < 10; ++i) {
-				Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(i, queue.Dequeue());
 			}		
 
 			for (int i = 50; i < 100; ++i) {
@@ -53,11 +52,11 @@ namespace YamlDotNet.UnitTests
 			}
 
 			for (int i = 10; i < 100; ++i) {
-				Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(i, queue.Dequeue());
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void InsertWorks() {
 			InsertionQueue<int> queue = new InsertionQueue<int>();
 		
@@ -69,13 +68,13 @@ namespace YamlDotNet.UnitTests
 				queue.Insert(5, 99);
 				
 				for (int i = 0; i < 5; ++i) {
-					Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+					Assert.Equal(i, queue.Dequeue());
 				}
 
-				Assert.AreEqual(99, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(99, queue.Dequeue());
 			
 				for (int i = 5; i < 10; ++i) {
-					Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+					Assert.Equal(i, queue.Dequeue());
 				}
 			}
 			
@@ -91,18 +90,17 @@ namespace YamlDotNet.UnitTests
 			queue.Insert(5, 99);
 
 			for (int i = 0; i < 5; ++i) {
-				Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(i, queue.Dequeue());
 			}
 			
-			Assert.AreEqual(99, queue.Dequeue(), "The queue order is wrong");
+			Assert.Equal(99, queue.Dequeue());
 			
 			for (int i = 5; i < 20; ++i) {
-				Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(i, queue.Dequeue());
 			}
 		}
 			
-		[TestMethod]
-		[ExpectedException(typeof(InvalidOperationException))]
+		[Fact]
 		public void Dequeue_ThrowsExceptionWhenEmpty() {
 			InsertionQueue<int> queue = new InsertionQueue<int>();
 
@@ -111,10 +109,10 @@ namespace YamlDotNet.UnitTests
 			}
 			
 			for (int i = 0; i < 10; ++i) {
-				Assert.AreEqual(i, queue.Dequeue(), "The queue order is wrong");
+				Assert.Equal(i, queue.Dequeue());
 			}
 			
-			queue.Dequeue();
+			Assert.Throws<InvalidOperationException>(() => queue.Dequeue());
 		}
 	}
 }
