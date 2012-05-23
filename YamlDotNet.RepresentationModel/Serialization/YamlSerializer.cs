@@ -114,7 +114,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
 		public YamlSerializer()
-			: this(null, YamlSerializerModes.None)
+			: this(YamlSerializerModes.None)
 		{
 		}
 
@@ -126,7 +126,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// When deserializing, the stream must contain type information for the root element.
 		/// </remarks>
 		public YamlSerializer(YamlSerializerModes mode)
-			: this(null, mode)
+			: this(typeof(object), mode)
 		{
 		}
 
