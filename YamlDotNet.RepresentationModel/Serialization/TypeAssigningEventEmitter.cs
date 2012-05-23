@@ -22,13 +22,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			eventInfo.IsPlainImplicit = true;
 			eventInfo.Style = ScalarStyle.Plain;
 
-			if (eventInfo.SourceValue == null)
-			{
-				eventInfo.RenderedValue = "null";
-				return;
-			}
+			var typeCode = eventInfo.SourceValue != null
+				? Type.GetTypeCode(eventInfo.SourceType)
+				: TypeCode.Empty;
 
-			var typeCode = Type.GetTypeCode(eventInfo.SourceType);
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
@@ -57,6 +54,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				case TypeCode.DateTime:
 					eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.SourceValue);
+					break;
+
+				case TypeCode.Empty:
+					eventInfo.RenderedValue = "null";
 					break;
 
 				default:

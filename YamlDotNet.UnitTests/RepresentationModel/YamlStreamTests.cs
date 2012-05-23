@@ -306,57 +306,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void AllAliasesMustBeResolved()
 		{
 			YamlStream original = new YamlStream();
-			original.Load(YamlFile("invalid-reference.yaml"));
-
-			var visitor = new AliasFindingVisitor();
-
-			try
-			{
-				Assert.Throws<AnchorNotFoundException>(() => original.Accept(visitor));
-			}
-			catch (NotSupportedException)
-			{
-				foreach (var node in visitor.CurrentPath)
-				{
-					Console.WriteLine(node.ToString());
-				}
-
-				Assert.True(false);
-			}
+			Assert.Throws<AnchorNotFoundException>(() => original.Load(YamlFile("invalid-reference.yaml")));
 		}
-
-		private class AliasFindingVisitor : YamlVisitor
-		{
-			private readonly Stack<string> _currentPath = new Stack<string>();
-
-			protected override void Visit(YamlMappingNode mapping)
-			{
-				base.Visit(mapping);
-			}
-
-			protected override void VisitChildren(YamlSequenceNode sequence)
-			{
-				int index = 0;
-				foreach (var child in sequence.Children)
-				{
-					_currentPath.Push(string.Format("seq[{0}]", index.ToString()));
-					child.Accept(this);
-					_currentPath.Pop();
-				}
-			}
-
-			protected override void VisitChildren(YamlMappingNode mapping)
-			{
-				foreach (var child in mapping.Children)
-				{
-					_currentPath.Push(string.Format("map[{0}]", child.Key.ToString()));
-					child.Value.Accept(this);
-					_currentPath.Pop();
-				}
-			}
-
-			public IEnumerable<string> CurrentPath { get { return _currentPath; } }
-		}
-
 	}
 }
