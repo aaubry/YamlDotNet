@@ -141,16 +141,17 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void Roundtrip()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
+			var serializer = new Serializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X();
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, SerializationOptions.Roundtrip);
 
 				Console.WriteLine(buffer.ToString());
 
-				X copy = (X)serializer.Deserialize(new StringReader(buffer.ToString()));
+				var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
+				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 				foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 				{
@@ -200,7 +201,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void CircularReference()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(Y), YamlSerializerModes.Roundtrip);
+			var serializer = new Serializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -211,7 +212,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 					Child2 = original
 				};
 
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, typeof(Y), SerializationOptions.Roundtrip);
 
 				Console.WriteLine(buffer.ToString());
 			}
@@ -306,7 +307,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void RoundtripList()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(List<int>), YamlSerializerModes.Roundtrip);
+			var serializer = new Serializer();
+			var deserializer = new YamlSerializer(typeof(List<int>), YamlSerializerModes.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -314,11 +316,11 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				original.Add(2);
 				original.Add(4);
 				original.Add(6);
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, typeof(List<int>), SerializationOptions.Roundtrip);
 
 				Console.WriteLine(buffer.ToString());
 
-				List<int> copy = (List<int>)serializer.Deserialize(new StringReader(buffer.ToString()));
+				List<int> copy = (List<int>)deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 				Assert.Equal(original.Count, copy.Count);
 				
@@ -344,14 +346,15 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void Enums()
 		{
-			YamlSerializer<StringFormatFlags> serializer = new YamlSerializer<StringFormatFlags>();
+			var serializer = new Serializer();
+			YamlSerializer<StringFormatFlags> deserializer = new YamlSerializer<StringFormatFlags>();
 
 			StringFormatFlags flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
 
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, flags);
 
-			StringFormatFlags deserialized = serializer.Deserialize(new StringReader(buffer.ToString()));
+			StringFormatFlags deserialized = deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 			Assert.Equal(flags, deserialized);
 		}
@@ -529,14 +532,15 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				{ "key3", "value3" },
 			};
 
-			var serializer = YamlSerializer.Create(entries, YamlSerializerModes.Roundtrip | YamlSerializerModes.DisableAliases);
+			var serializer = new Serializer();
+			var deserializer = YamlSerializer.Create(entries, YamlSerializerModes.Roundtrip | YamlSerializerModes.DisableAliases);
 
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, entries);
 
 			Console.WriteLine(buffer.ToString());
 
-			var deserialized = serializer.Deserialize(new StringReader(buffer.ToString()));
+			var deserialized = deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 			foreach(var pair in deserialized)
 			{
@@ -549,24 +553,29 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			var data = new { Key = 3 };
 
-			//var serializer = new YamlSerializer(YamlSerializerModes.DisableAliases);
-			var serializer = new YamlSerializer(YamlSerializerModes.DisableAliases);
+			var serializer = new Serializer();
 
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, data);
 
 			Console.WriteLine(buffer.ToString());
+
+			var deserializer = new YamlSerializer<Dictionary<string, string>>();
+			var parsed = deserializer.Deserialize(new StringReader(buffer.ToString()));
+
+			Assert.NotNull(parsed);
+			Assert.Equal(1, parsed.Count);
 		}
 
 		[Fact]
 		public void SerializationIncludesNullWhenAsked()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults);
+			var serializer = new Serializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.EmitDefaults);
 
 				Console.WriteLine(buffer.ToString());
 
@@ -577,12 +586,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void SerializationDoesNotIncludeNullWhenNotAsked()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.None);
+			var serializer = new Serializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.None);
 
 				Console.WriteLine(buffer.ToString());
 
@@ -593,12 +602,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void SerializationOfNullWorksInJson()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible);
+			var serializer = new Serializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible);
 
 				Console.WriteLine(buffer.ToString());
 
@@ -609,19 +618,26 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializationOfNullWorksInJson()
 		{
-			YamlSerializer serializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
+			var serializer = new Serializer();
+			YamlSerializer deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original);
+				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip);
 
 				Console.WriteLine(buffer.ToString());
 
-				X copy = (X)serializer.Deserialize(new StringReader(buffer.ToString()));
+				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 				Assert.Null(copy.MyString);
 			}
 		}
+
+		//[Fact]
+		//public void DeserializationIgnoresUnknownProperties()
+		//{
+		//	var serializer = new YamlSerializer(typeof(X));
+		//}
 	}
 }

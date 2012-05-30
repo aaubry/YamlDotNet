@@ -66,7 +66,8 @@ namespace YamlDotNet.Core
 		/// <exception cref="YamlException">If the current event is not of the specified type.</exception>
 		public T Expect<T>() where T : Event
 		{
-			if (!Accept<T>())
+			var yamlEvent = Allow<T>();
+			if (yamlEvent == null)
 			{
 				// TODO: Throw a better exception
 				throw new YamlException(
@@ -82,8 +83,6 @@ namespace YamlDotNet.Core
 				    )
 				);
 			}
-			T yamlEvent = (T)parser.Current;
-			MoveNext();
 			return yamlEvent;
 		}
 
@@ -105,6 +104,24 @@ namespace YamlDotNet.Core
 			EnsureNotAtEndOfStream();
 
 			return parser.Current is T;
+		}
+
+		/// <summary>
+		/// Checks whether the current event is of the specified type.
+		/// If the event is of the specified type, returns it and moves to the next event.
+		/// Otherwise retruns null.
+		/// </summary>
+		/// <typeparam name="T">Type of the <see cref="Event"/>.</typeparam>
+		/// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
+		public T Allow<T>() where T : Event
+		{
+			if (!Accept<T>())
+			{
+				return null;
+			}
+			T yamlEvent = (T)parser.Current;
+			MoveNext();
+			return yamlEvent;
 		}
 
 		/// <summary>
