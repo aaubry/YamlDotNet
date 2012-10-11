@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<package> 
+  <metadata> 
+    <id>YamlDotNet.RepresentationModel</id> 
+    <version></version> 
+    <authors>Antoine Aubry</authors>
+    <description>A .NET library for YAML. yamldotnet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
+		<summary>This package contains the YAML document object model and serialization classes.</summary>
+		<language>en-US</language>
+    <licenseUrl>http://www.aaubry.net/yamldotnet/license.aspx</licenseUrl>
+    <projectUrl>http://www.aaubry.net/yamldotnet.aspx</projectUrl>
+		<iconUrl>http://www.aaubry.net/media/225/yamldotnet.png</iconUrl>
+		<tags>yaml serialization development library</tags>
+		<dependencies>
+			<dependency id="YamlDotNet.Core" version="" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.dll" target="lib" />
+		<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.pdb" target="lib" />
+	</files>
+</package>

@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>YamlDotNet.Core</RootNamespace>
+    <AssemblyName>YamlDotNet.Core</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <PublishUrl>http://localhost/YamlDotNet.Core/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\YamlDotNet.Core.XML</DocumentationFile>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Release\YamlDotNet.Core.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="CharacterAnalyzer.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Emitter.cs" />
+    <Compile Include="EmitterState.cs" />
+    <Compile Include="EventReader.cs" />
+    <Compile Include="Events\AnchorAlias.cs" />
+    <Compile Include="Events\DocumentEnd.cs" />
+    <Compile Include="Events\DocumentStart.cs" />
+    <Compile Include="Events\EventType.cs" />
+    <Compile Include="Events\IAnchorAlias.cs" />
+    <Compile Include="Events\IDocumentEnd.cs" />
+    <Compile Include="Events\IDocumentStart.cs" />
+    <Compile Include="Events\IMappingEnd.cs" />
+    <Compile Include="Events\IMappingStart.cs" />
+    <Compile Include="Events\INodeEvent.cs" />
+    <Compile Include="Events\IParsingEvent.cs" />
+    <Compile Include="Events\IScalar.cs" />
+    <Compile Include="Events\ISequenceEnd.cs" />
+    <Compile Include="Events\ISequenceStart.cs" />
+    <Compile Include="Events\IStreamEnd.cs" />
+    <Compile Include="Events\IStreamStart.cs" />
+    <Compile Include="Events\MappingStyle.cs" />
+    <Compile Include="Events\NodeEvent.cs" />
+    <Compile Include="Events\ParsingEvent.cs" />
+    <Compile Include="Events\MappingEnd.cs" />
+    <Compile Include="Events\MappingStart.cs" />
+    <Compile Include="Events\Scalar.cs" />
+    <Compile Include="Events\SequenceEnd.cs" />
+    <Compile Include="Events\SequenceStart.cs" />
+    <Compile Include="Events\SequenceStyle.cs" />
+    <Compile Include="Events\StreamEnd.cs" />
+    <Compile Include="Events\StreamStart.cs" />
+    <Compile Include="FakeList.cs" />
+    <Compile Include="ILookAheadBuffer.cs" />
+    <Compile Include="InsertionQueue.cs" />
+    <Compile Include="LookAheadBuffer.cs" />
+    <Compile Include="Mark.cs" />
+    <Compile Include="Parser.cs" />
+    <Compile Include="ParserState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scanner.cs" />
+    <Compile Include="SemanticErrorException.cs" />
+    <Compile Include="SimpleKey.cs" />
+    <Compile Include="StringLookAheadBuffer.cs" />
+    <Compile Include="SyntaxErrorException.cs" />
+    <Compile Include="TagDirectiveCollection.cs" />
+    <Compile Include="Tokens\AnchorAlias.cs" />
+    <Compile Include="Tokens\Anchor.cs" />
+    <Compile Include="Tokens\BlockEnd.cs" />
+    <Compile Include="Tokens\BlockEntry.cs" />
+    <Compile Include="Tokens\BlockMappingStart.cs" />
+    <Compile Include="Tokens\BlockSequenceStart.cs" />
+    <Compile Include="Tokens\DocumentEnd.cs" />
+    <Compile Include="Tokens\DocumentStart.cs" />
+    <Compile Include="Tokens\FlowEntry.cs" />
+    <Compile Include="Tokens\FlowMappingEnd.cs" />
+    <Compile Include="Tokens\FlowMappingStart.cs" />
+    <Compile Include="Tokens\FlowSequenceEnd.cs" />
+    <Compile Include="Tokens\FlowSequenceStart.cs" />
+    <Compile Include="Tokens\Key.cs" />
+    <Compile Include="Tokens\Scalar.cs" />
+    <Compile Include="ScalarStyle.cs" />
+    <Compile Include="Tokens\StreamEnd.cs" />
+    <Compile Include="Tokens\StreamStart.cs" />
+    <Compile Include="Tokens\Tag.cs" />
+    <Compile Include="Tokens\TagDirective.cs" />
+    <Compile Include="Tokens\Token.cs" />
+    <Compile Include="Tokens\Value.cs" />
+    <Compile Include="Tokens\VersionDirective.cs" />
+    <Compile Include="Version.cs" />
+    <Compile Include="YamlException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

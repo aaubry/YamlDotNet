@@ -1,0 +1,18 @@
+YamlDotNet - A .NET library for parsing and emitting YAML.
+
+For more information, check the YamlDotNet homepage:
+'http://yamldotnet.sourceforge.net/'.
+
+Post your questions and opinions to the YamlDotNet forum:
+'http://sourceforge.net/forum/forum.php?forum_id=850985'.
+
+Submit bug reports and feature requests to the YamlDotNet bug tracker:
+'http://sourceforge.net/tracker/?group_id=235362'.
+
+YamlDotNet is written by Antoine Aubry <aaubry@gmail.com>.  It is released
+under the MIT license.  See the file LICENSE for more details.
+
+This project contains a port of the LibYAML library by Kirill Simonov.
+The LibYAML library is released under the MIT license. See the
+file LICENSE-libyaml for more details. For more information,
+check the LibYAML homepage: 'http://pyyaml.org/wiki/LibYAML'.
