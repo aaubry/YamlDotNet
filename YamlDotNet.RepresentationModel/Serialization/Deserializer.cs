@@ -38,7 +38,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// Options that control the deserialization process.
 	/// </summary>
 	[Flags]
-	public enum SerializationOptions
+	public enum DeserializationOptions
 	{
 		/// <summary>
 		/// Serializes using the default options
@@ -85,7 +85,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="type">The static type of the object to deserialize.</param>
 		/// <param name="options">Options that control how the deserialization is to be performed.</param>
 		/// <returns>Returns the deserialized object.</returns>
-		public object Deserialize(EventReader reader, Type type, SerializationOptions options = SerializationOptions.None)
+		public object Deserialize(EventReader reader, Type type, DeserializationOptions options = DeserializationOptions.None)
 		{
 			if (reader == null)
 			{

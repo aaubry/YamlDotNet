@@ -48,7 +48,7 @@ namespace YamlDotNet.Samples
 								  "man behind the curtain."
 			};
 
-			var serializer = new YamlSerializer();
+			var serializer = new Serializer();
 			serializer.Serialize(Console.Out, receipt);
 		}
 	}
