@@ -330,6 +330,19 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
+    [Fact]
+    public void DeserializeArray() {
+      YamlSerializer<String[]> serializer = new YamlSerializer<String[]>();
+      object result = serializer.Deserialize(YamlFile("list.yaml"));
+      
+      Assert.True(result is String[]);
+      
+      String[] array = (String[])result;
+      Assert.Equal("one", array[0]);
+      Assert.Equal("two", array[1]);
+      Assert.Equal("three", array[2]);
+    }
+
 		[Fact]
 		public void Overrides()
 		{

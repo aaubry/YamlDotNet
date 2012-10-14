@@ -520,21 +520,35 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				type = typeof(ArrayList);
 			}
 
-			object result = Activator.CreateInstance(type);
+      object result;
 
 			Type iCollection = ReflectionUtility.GetImplementedGenericInterface(type, typeof(ICollection<>));
-			if (iCollection != null)
+			if (iCollection != null)    // Generic list
 			{
 				Type[] iCollectionArguments = iCollection.GetGenericArguments();
 				Debug.Assert(iCollectionArguments.Length == 1, "ICollection<> must have one generic argument.");
+        var itemType = iCollectionArguments[0];
 
-				MethodInfo addAdapter = addAdapterGeneric.MakeGenericMethod(iCollectionArguments);
-				Action<object, object> addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
-				DeserializeGenericListInternal(reader, iCollectionArguments[0], result, addAdapterDelegate, context);
+        //result = type.IsArray ? typeof(List<>).MakeGenericType(iCollectionArguments) : Activator.CreateInstance(type);
+				//MethodInfo addAdapter = addAdapterGeneric.MakeGenericMethod(iCollectionArguments);
+				//Action<object, object> addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
+        if (type.IsArray)
+        {
+          var tempListType = typeof(List<>).MakeGenericType(iCollectionArguments);
+          var tempList = Activator.CreateInstance(tempListType);
+          DeserializeGenericListInternal(reader, tempList, itemType, context);
+          result = tempListType.GetMethod("ToArray", Type.EmptyTypes).Invoke(tempList, null);
+        }
+        else
+        {
+          result = Activator.CreateInstance(type);
+          DeserializeGenericListInternal(reader, result, itemType, context);
+        }
 			}
-			else
+			else   // Non-generic list
 			{
-				IList list = result as IList;
+        result = Activator.CreateInstance(type);
+				var list = result as IList;
 				if (list != null)
 				{
 					while (!reader.Accept<SequenceEnd>())
@@ -550,8 +564,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return result;
 		}
 
-		private void DeserializeGenericListInternal(EventReader reader, Type itemType, object list, Action<object, object> addAdapterDelegate, DeserializationContext context)
+    private void DeserializeGenericListInternal(EventReader reader, object list, Type itemType, DeserializationContext context)
 		{
+      var addAdapter = addAdapterGeneric.MakeGenericMethod(new Type[] { itemType });
+      var addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
 			while (!reader.Accept<SequenceEnd>())
 			{
 				addAdapterDelegate(list, DeserializeValue(reader, itemType, context));
