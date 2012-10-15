@@ -104,6 +104,7 @@
     <Compile Include="Serialization\ObjectConverter.cs" />
     <Compile Include="Serialization\TagMappings.cs" />
     <Compile Include="Serialization\TypeAssigningEventEmitter.cs" />
+    <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />
