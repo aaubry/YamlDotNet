@@ -135,7 +135,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 					myPoint = value;
 				}
 			}
-
 		}
 
 		[Fact]
@@ -652,5 +651,26 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		//{
 		//	var serializer = new YamlSerializer(typeof(X));
 		//}
+
+		class ContainsIgnore {
+			[YamlIgnore]
+			public String IgnoreMe { get; set; }
+		}
+
+		[Fact]
+		public void SerializationRespectsYamlIgnoreAttribute()
+		{
+			var serializer = new Serializer();
+			var deserializer = new YamlSerializer<ContainsIgnore>(YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
+      
+			using (StringWriter buffer = new StringWriter())
+			{
+				var orig = new ContainsIgnore { IgnoreMe = "Some Text" };
+				serializer.Serialize(buffer, orig);
+				Console.WriteLine(buffer.ToString());
+				var copy = deserializer.Deserialize(new StringReader(buffer.ToString()));
+				Assert.Null(copy.IgnoreMe);
+			}
+		}
 	}
 }
