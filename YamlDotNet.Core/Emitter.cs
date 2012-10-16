@@ -1842,17 +1842,12 @@ namespace YamlDotNet.Core
 			isOpenEnded = false;
 
 			string chomp_hint = null;
-			if(value.Length == 0) {
+			if(value.Length == 0 || !analyzer.IsBreak(value.Length - 1)) {
 				chomp_hint = "-";
 			}
-			else {
-				if(analyzer.IsBreak(value.Length - 1)) {
-					chomp_hint = "-";
-				}
-				else if(value.Length < 2 || analyzer.IsBreak(value.Length - 2)) {
-					chomp_hint = "+";
-					isOpenEnded = true;
-				}
+			else if(value.Length >= 2 && analyzer.IsBreak(value.Length - 2)) {
+				chomp_hint = "+";
+				isOpenEnded = true;
 			}
 
 			if(chomp_hint != null){
