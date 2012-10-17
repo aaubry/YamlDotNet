@@ -202,7 +202,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		protected virtual bool IsTraversableProperty(PropertyInfo property)
 		{
-			return property.CanRead && property.GetGetMethod().GetParameters().Length == 0;
+      return
+        property.CanRead &&
+        property.GetGetMethod().GetParameters().Length == 0 &&
+        property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
 		}
 
 		private static Type GetObjectType(object value)
