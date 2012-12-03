@@ -19,8 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -62,7 +62,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			get
 			{
-				return objectsByAnchor[anchor];
+				object value;
+				if (objectsByAnchor.TryGetValue(anchor, out value))
+				{
+					return value;
+				}
+
+				throw new AnchorNotFoundException(string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
 			}
 		}
 	}

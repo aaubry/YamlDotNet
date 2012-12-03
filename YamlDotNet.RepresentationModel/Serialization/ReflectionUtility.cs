@@ -53,5 +53,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 			return method;
 		}
+
+		public static MethodInfo GetMethod<T>(Expression<Action<T>> methodAccess)
+		{
+			var method = ((MethodCallExpression)methodAccess.Body).Method;
+			if (method.IsGenericMethod)
+			{
+				method = method.GetGenericMethodDefinition();
+			}
+			return method;
+		}
 	}
 }

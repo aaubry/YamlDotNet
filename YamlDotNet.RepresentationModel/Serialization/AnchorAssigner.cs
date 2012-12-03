@@ -17,7 +17,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		bool IObjectGraphVisitor.Enter(object value, Type type)
 		{
 			// Do not assign anchors to basic types
-			if (value == null || Type.GetTypeCode(type) != TypeCode.Object)
+			if (value == null || Type.GetTypeCode(value.GetType()) != TypeCode.Object)
 			{
 				return false;
 			}
@@ -53,7 +53,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		string IAliasProvider.GetAlias(object target)
 		{
 			AnchorAssignment assignment;
-			if (assignments.TryGetValue(target, out assignment))
+			if (target != null && assignments.TryGetValue(target, out assignment))
 			{
 				return assignment.Anchor;
 			}

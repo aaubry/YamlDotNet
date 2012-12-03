@@ -672,5 +672,35 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				Assert.Null(copy.IgnoreMe);
 			}
 		}
+
+		[Fact]
+		public void SerializeArrayOfIdenticalObjects()
+		{
+			var obj1 = new Z { aaa = "abc" };
+
+			var objects = new[] { obj1, obj1, obj1 };
+
+			var result = SerializeThenDeserialize(objects);
+
+			Assert.NotNull(result);
+			Assert.Equal(3, result.Length);
+			Assert.Equal(obj1.aaa, result[0].aaa);
+			Assert.Equal(obj1.aaa, result[1].aaa);
+			Assert.Equal(obj1.aaa, result[2].aaa);
+			Assert.Same(result[0], result[1]);
+			Assert.Same(result[1], result[2]);
+		}
+
+		private T SerializeThenDeserialize<T>(T input)
+		{
+			Serializer serializer = new Serializer();
+			TextWriter writer = new StringWriter();
+			serializer.Serialize(writer, input, typeof(T));
+
+			string serialized = writer.ToString();
+			Console.WriteLine("serialized =\n-----\n{0}", serialized);
+
+			return YamlSerializer.Create(input).Deserialize(new StringReader(serialized));
+		}
 	}
 }

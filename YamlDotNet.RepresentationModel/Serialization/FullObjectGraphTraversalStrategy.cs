@@ -141,11 +141,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		}
 
 		private static readonly MethodInfo traverseGenericDictionaryHelperGeneric =
-			ReflectionUtility.GetMethod(() => TraverseGenericDictionaryHelper<int, int>(null, null, null, 0));
+			ReflectionUtility.GetMethod((FullObjectGraphTraversalStrategy s) => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0));
 
-		private static void TraverseGenericDictionaryHelper<TKey, TValue>(
-			// "this" is passed as parameter so that we can cache the generic method definition
-			FullObjectGraphTraversalStrategy self,
+		private void TraverseGenericDictionaryHelper<TKey, TValue>(
 			IDictionary<TKey, TValue> value,
 			IObjectGraphVisitor visitor, int currentDepth)
 		{
@@ -153,8 +151,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{
 				if (visitor.EnterMapping(entry.Key, typeof(TKey), entry.Value, typeof(TValue)))
 				{
-					self.Traverse(entry.Key, typeof(TKey), visitor, currentDepth);
-					self.Traverse(entry.Value, typeof(TValue), visitor, currentDepth);
+					Traverse(entry.Key, typeof(TKey), visitor, currentDepth);
+					Traverse(entry.Value, typeof(TValue), visitor, currentDepth);
 				}
 			}
 		}
@@ -202,10 +200,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		protected virtual bool IsTraversableProperty(PropertyInfo property)
 		{
-      return
-        property.CanRead &&
-        property.GetGetMethod().GetParameters().Length == 0 &&
-        property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
+			return
+				property.CanRead &&
+				property.GetGetMethod().GetParameters().Length == 0 &&
+				property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
 		}
 
 		private static Type GetObjectType(object value)
