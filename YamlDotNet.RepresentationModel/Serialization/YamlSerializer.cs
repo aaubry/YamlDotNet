@@ -177,6 +177,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			converters.Add(converter);
 		}
 
+		#region Serialization
+		[Obsolete("This method exists for source compatibility with older code. You should use the Serializer class instead.")]
+		public void Serialize(TextWriter output, object graph, SerializationOptions options = SerializationOptions.None)
+		{
+			var serializer = new YamlSerializer(serializedType, mode);
+			serializer.Serialize(output, graph, options);
+		}
+		#endregion
+
 		#region Deserialization
 		/// <summary>
 		/// Deserializes an object from the specified stream.

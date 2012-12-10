@@ -38,7 +38,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// Options that control the deserialization process.
 	/// </summary>
 	[Flags]
-	public enum DeserializationOptions
+	public enum DeserializationFlags
 	{
 		/// <summary>
 		/// Serializes using the default options
@@ -85,7 +85,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="type">The static type of the object to deserialize.</param>
 		/// <param name="options">Options that control how the deserialization is to be performed.</param>
 		/// <returns>Returns the deserialized object.</returns>
-		public object Deserialize(EventReader reader, Type type, DeserializationOptions options = DeserializationOptions.None)
+		public object Deserialize(EventReader reader, Type type, DeserializationFlags options = DeserializationFlags.None)
 		{
 			if (reader == null)
 			{
@@ -101,7 +101,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
 
-
+			object result = DeserializeValue(reader, type, null);
 
 			if (hasDocumentStart)
 			{
@@ -112,6 +112,48 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{
 				reader.Expect<StreamEnd>();
 			}
+
+			return result;
 		}
+
+		private object DeserializeValue(EventReader reader, Type expectedType, object context)
+		{
+			if (reader.Accept<AnchorAlias>())
+			{
+				throw new NotImplementedException();
+				//return context.Anchors[reader.Expect<AnchorAlias>().Value];
+			}
+
+			var nodeEvent = (NodeEvent)reader.Parser.Current;
+
+			if (IsNull(nodeEvent))
+			{
+				reader.Expect<NodeEvent>();
+				AddAnchoredObject(nodeEvent, null, context.Anchors);
+				return null;
+			}
+
+			object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
+			return ObjectConverter.Convert(result, expectedType);
+		}
+
+		//private bool IsNull(NodeEvent nodeEvent)
+		//{
+		//	if (nodeEvent.Tag == "tag:yaml.org,2002:null")
+		//	{
+		//		return true;
+		//	}
+
+		//	if (JsonCompatible)
+		//	{
+		//		var scalar = nodeEvent as Scalar;
+		//		if (scalar != null && scalar.Style == Core.ScalarStyle.Plain && scalar.Value == "null")
+		//		{
+		//			return true;
+		//		}
+		//	}
+
+		//	return false;
+		//}
 	}
 }

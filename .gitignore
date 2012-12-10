@@ -4,3 +4,7 @@ obj
 
 # mstest test results
 TestResults
+YamlDotNet.v11.suo
+Help/*
+release/*
+YamlDotNet.v11.suo
