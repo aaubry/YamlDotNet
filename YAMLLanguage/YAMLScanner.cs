@@ -233,8 +233,6 @@ namespace Company.YAMLLanguage
 			Scanner scanner = new Scanner(new StringReader(source));
 			try
 			{
-				List<Token> tokens = new
-
 				int currentOffset = 0;
 				Token previous = null;
 				while(scanner.MoveNext())
