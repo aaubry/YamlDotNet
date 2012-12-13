@@ -19,7 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-﻿using System;
+using System;
 using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System.Text.RegularExpressions;
@@ -233,8 +233,6 @@ namespace Company.YAMLLanguage
 			Scanner scanner = new Scanner(new StringReader(source));
 			try
 			{
-				List<Token> tokens = new
-
 				int currentOffset = 0;
 				Token previous = null;
 				while(scanner.MoveNext())
