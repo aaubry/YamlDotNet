@@ -179,10 +179,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		#region Serialization
 		[Obsolete("This method exists for source compatibility with older code. You should use the Serializer class instead.")]
-		public void Serialize(TextWriter output, object graph, SerializationOptions options = SerializationOptions.None)
+		public void Serialize(TextWriter output, object graph)
 		{
-			var serializer = new YamlSerializer(serializedType, mode);
-			serializer.Serialize(output, graph, options);
+			var serializer = new Serializer();
+			serializer.Serialize(output, graph, (SerializationOptions)mode);
 		}
 		#endregion
 
