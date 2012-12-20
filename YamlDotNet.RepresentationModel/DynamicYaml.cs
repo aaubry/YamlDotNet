@@ -57,15 +57,7 @@ namespace YamlDotNet.RepresentationModel
 
         internal static bool TryMapValue(object value, out object result)
         {
-            if (value is YamlScalarNode)
-            {
-                result = ((YamlScalarNode)value).Value;
-                return true;
-            }
-
-
-            if (value is YamlMappingNode ||
-                value is YamlSequenceNode)
+            if (value is YamlNode)
             {
                 result = new DynamicYaml((YamlNode)value);
                 return true;
@@ -80,11 +72,15 @@ namespace YamlDotNet.RepresentationModel
     {
         private YamlMappingNode mappingNode;
         private YamlSequenceNode sequenceNode;
+        private YamlScalarNode scalarNode;
+        private YamlNode node;
 
         public DynamicYaml(YamlNode node)
         {
-            this.mappingNode = node as YamlMappingNode;
-            this.sequenceNode = node as YamlSequenceNode;
+            this.node = node;
+            mappingNode = node as YamlMappingNode;
+            sequenceNode = node as YamlSequenceNode;
+            scalarNode = node as YamlScalarNode;
         }
 
         public DynamicYaml(TextReader reader)
@@ -106,6 +102,12 @@ namespace YamlDotNet.RepresentationModel
         {
             result = null;
             return false;
+        }
+
+        private static bool SuccessfullyGetValue(out object result, object value)
+        {
+            result = value;
+            return true;
         }
 
         private bool TryGetValueByKey(string key, out object result)
@@ -186,6 +188,82 @@ namespace YamlDotNet.RepresentationModel
             }
 
             return base.TryGetIndex(binder, indices, out result);
+        }
+
+        public override bool TryConvert(ConvertBinder binder, out object result)
+        {
+            var type = binder.ReturnType;
+            if (scalarNode == null)
+            {
+                return FailToGetValue(out result);
+            }
+            if (type == typeof(string))
+            {
+                result = scalarNode.Value;
+                return true;
+            }
+            if (type == typeof(char))
+            {
+                char charResult;
+                bool success = char.TryParse(scalarNode.Value, out charResult);
+                result = success ? (object)charResult : null;
+            }
+            if (type == typeof(int))
+            {
+                int intResult;
+                bool success = int.TryParse(scalarNode.Value, out intResult);
+                result = success ? (object)intResult : null;
+                return success;
+            }
+            if (type == typeof(long))
+            {
+                long longResult;
+                bool success = long.TryParse(scalarNode.Value, out longResult);
+                result = success ? (object)longResult : null;
+                return success;
+            }
+            if (type == typeof(float))
+            {
+                float floatResult;
+                bool success = float.TryParse(scalarNode.Value, out floatResult);
+                result = success ? (object)floatResult : null;
+                return success;
+            }
+            if (type == typeof(double))
+            {
+                double doubleResult;
+                bool success = double.TryParse(scalarNode.Value, out doubleResult);
+                result = success ? (object)doubleResult : null;
+                return success;
+            }
+            if (type == typeof(decimal))
+            {
+                decimal decimalResult;
+                bool success = decimal.TryParse(scalarNode.Value, out decimalResult);
+                result = success ? (object)decimalResult : null;
+                return success;
+            }
+            if (type.IsEnum)
+            {
+                long longResult;
+                if (long.TryParse(scalarNode.Value, out longResult))
+                {
+                    result = longResult;
+                    return true;
+                }
+
+                try
+                {
+                    result = Enum.Parse(type, scalarNode.Value);
+                    return true;
+                }
+                catch
+                {
+                    return FailToGetValue(out result);
+                }
+            }
+
+            return base.TryConvert(binder, out result);
         }
 
         public IEnumerable<YamlNode> ChildNodes

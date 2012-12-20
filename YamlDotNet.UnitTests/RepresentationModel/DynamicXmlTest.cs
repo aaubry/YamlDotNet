@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
 using Xunit;
 using YamlDotNet.RepresentationModel;
 
@@ -51,9 +52,24 @@ namespace YamlDotNet.UnitTests.RepresentationModel
         {
             dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
 
-            var firstNumber = dynamicYaml[0, 0];
-            Assert.Equal(firstNumber.ToString(), "1");
+            string firstNumberAsString = dynamicYaml[0, 0];
+            Assert.Equal(firstNumberAsString, "1");
+            int firstNumberAsInt = dynamicYaml[0, 0];
+            Assert.Equal(firstNumberAsInt, 1);
         }
+
+        [Fact]
+        public void TestEnumConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(EnumConvertYaml);
+
+            StringComparison stringComparisonMode = dynamicYaml[0].stringComparisonMode;
+            Assert.Equal(StringComparison.CurrentCultureIgnoreCase, stringComparisonMode);
+        }
+
+        private const string EnumConvertYaml = @"---
+            - stringComparisonMode: CurrentCultureIgnoreCase
+            - stringComparisonMode: Ordinal";
 
         private const string SequenceYaml = @"---
             - name: Me

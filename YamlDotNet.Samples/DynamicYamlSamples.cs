@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using YamlDotNet.RepresentationModel;
@@ -27,8 +26,20 @@ namespace YamlDotNet.Samples
         {
             dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
 
-            var firstNumber = dynamicYaml[0, 0];
+            string firstNumberAsString = dynamicYaml[0, 0];
+            int firstNumberAsInt = dynamicYaml[0, 0];
         }
+
+        public void TestEnumConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(EnumConvertYaml);
+            
+            StringComparison stringComparisonMode = dynamicYaml[0].stringComparisonMode;
+        }
+
+        private const string EnumConvertYaml = @"---
+            - stringComparisonMode: CurrentCultureIgnoreCase
+            - stringComparisonMode: Ordinal";
 
         private const string SequenceYaml = @"---
             - name: Me
