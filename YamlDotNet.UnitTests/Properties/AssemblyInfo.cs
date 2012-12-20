@@ -19,7 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-﻿using System.Reflection;
+using System.Reflection;
 
 [assembly: AssemblyTitle("YamlDotNet.UnitTests")]
 [assembly: AssemblyDescription("The unit tests for the YamlDotNet library.")]
