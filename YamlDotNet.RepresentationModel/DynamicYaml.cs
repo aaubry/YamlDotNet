@@ -81,8 +81,7 @@ namespace YamlDotNet.RepresentationModel
             typeof(long),
             typeof(float),
             typeof(double),
-            typeof(decimal),
-            typeof(Enum)
+            typeof(decimal)
         };
 
         private static readonly Type[] ConvertableCollectionTypes = new[] 
