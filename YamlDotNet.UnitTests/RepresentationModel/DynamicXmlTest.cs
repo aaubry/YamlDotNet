@@ -62,7 +62,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
         [Fact]
         public void TestEnumConvert()
         {
-            dynamic dynamicYaml = new DynamicYaml(EnumConvertYaml);
+            dynamic dynamicYaml = new DynamicYaml(EnumYaml);
 
             StringComparison stringComparisonMode = dynamicYaml[0].stringComparisonMode;
             Assert.Equal(StringComparison.CurrentCultureIgnoreCase, stringComparisonMode);
@@ -86,6 +86,19 @@ namespace YamlDotNet.UnitTests.RepresentationModel
                 int[] intArray = dynamicArray[0];
                 Assert.NotNull(intArray);
                 Assert.NotEmpty(intArray);
+            });
+        }
+
+        [Fact]
+        public void TestEnumArrayConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(EnumArrayYaml);
+
+            Assert.DoesNotThrow(() =>
+            {
+                StringComparison[] enumArray = dynamicYaml;
+                Assert.NotNull(enumArray);
+                Assert.NotEmpty(enumArray);
             });
         }
 
@@ -130,9 +143,13 @@ namespace YamlDotNet.UnitTests.RepresentationModel
             });
         }
 
-        private const string EnumConvertYaml = @"---
+        private const string EnumYaml = @"---
             - stringComparisonMode: CurrentCultureIgnoreCase
             - stringComparisonMode: Ordinal";
+
+        private const string EnumArrayYaml = @"---
+            - CurrentCultureIgnoreCase
+            - Ordinal";
 
         private const string SequenceYaml = @"---
             - name: Me

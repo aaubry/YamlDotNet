@@ -348,7 +348,10 @@ namespace YamlDotNet.RepresentationModel
 
         private bool TryConvertToType(Type type, out object result)
         {
-            if (ConvertableArrayTypes.Contains(type))
+            if (type.IsArray && 
+                (ConvertableArrayTypes.Contains(type) || 
+                 type.GetElementType().IsSubclassOf(typeof(Enum)) )
+                )
             {
                 return TryConvertToArray(type, out result);
             }
