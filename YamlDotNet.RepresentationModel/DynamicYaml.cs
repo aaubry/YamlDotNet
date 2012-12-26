@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
@@ -70,17 +71,63 @@ namespace YamlDotNet.RepresentationModel
 
     public class DynamicYaml : DynamicObject
     {
+        private static readonly Type[] ConvertableBasicTypes = new []
+        {
+            typeof(DynamicYaml),
+            typeof(object),
+            typeof(string),
+            typeof(char),
+            typeof(int),
+            typeof(long),
+            typeof(float),
+            typeof(double),
+            typeof(decimal),
+            typeof(Enum)
+        };
+
+        private static readonly Type[] ConvertableCollectionTypes = new[] 
+        {
+            typeof(IEnumerable),
+            typeof(IEnumerable<>),
+            typeof(ICollection),
+            typeof(ICollection<>),
+            typeof(IList),
+            typeof(IList<>),
+            typeof(List<>)
+        };
+
+        private static readonly Type[] ConvertableDictionaryTypes = new []
+        {
+            typeof(IDictionary),
+            typeof(IDictionary<,>),
+            typeof(Dictionary<,>)
+        };
+
+        private static readonly Type[] ConvertableGenericCollectionTypes = ConvertableCollectionTypes.
+                SelectMany(type => type.IsGenericType? ConvertableBasicTypes.
+                    Select(basicType => type.MakeGenericType(basicType)) :
+                    new[] {type}
+                ).ToArray();
+
+        private static readonly Type[] ConvertableGenericDictionaryTypes = ConvertableDictionaryTypes.
+            SelectMany(type => type.IsGenericType? ConvertableBasicTypes.
+                    SelectMany(valueType => ConvertableBasicTypes.
+                        Select(keyType => type.MakeGenericType(keyType, valueType)
+                    )) : 
+                    new[] {type}
+                ).ToArray();
+
+        private static readonly Type[] ConvertableArrayTypes = ConvertableBasicTypes.Select(
+                                        type => type.MakeArrayType()).ToArray();
+
         private YamlMappingNode mappingNode;
         private YamlSequenceNode sequenceNode;
         private YamlScalarNode scalarNode;
-        private YamlNode node;
+        private YamlNode yamlNode;
 
         public DynamicYaml(YamlNode node)
         {
-            this.node = node;
-            mappingNode = node as YamlMappingNode;
-            sequenceNode = node as YamlSequenceNode;
-            scalarNode = node as YamlScalarNode;
+            Reload(node);
         }
 
         public DynamicYaml(TextReader reader)
@@ -91,6 +138,26 @@ namespace YamlDotNet.RepresentationModel
         public DynamicYaml(string yaml)
             : this(YamlDoc.LoadFromString(yaml))
         {
+
+        }
+
+        public void Reload(YamlNode yamlNode)
+        {
+            this.yamlNode = yamlNode;
+            mappingNode = yamlNode as YamlMappingNode;
+            sequenceNode = yamlNode as YamlSequenceNode;
+            scalarNode = yamlNode as YamlScalarNode;
+            children = null;
+        }
+
+        public void Reload(TextReader reader)
+        {
+            Reload(YamlDoc.LoadFromTextReader(reader));
+        }
+
+        public void Reload(string yaml)
+        {
+            Reload(YamlDoc.LoadFromString(yaml));
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -164,6 +231,8 @@ namespace YamlDotNet.RepresentationModel
                     }
                     return true;
                 }
+
+                return FailToGetValue(out result);
             }
 
             var intKey = indices[0] as int?;
@@ -185,28 +254,33 @@ namespace YamlDotNet.RepresentationModel
 
                     return true;
                 }
+
+                return FailToGetValue(out result);
             }
 
             return base.TryGetIndex(binder, indices, out result);
         }
 
-        public override bool TryConvert(ConvertBinder binder, out object result)
+        private bool TryConvertToBasicType(Type type, out object result)
         {
-            var type = binder.ReturnType;
+            if (type == typeof(object) || type == typeof(DynamicYaml))
+            {
+                return SuccessfullyGetValue(out result, this);
+            }
             if (scalarNode == null)
             {
                 return FailToGetValue(out result);
             }
             if (type == typeof(string))
             {
-                result = scalarNode.Value;
-                return true;
+                return SuccessfullyGetValue(out result, scalarNode.Value);
             }
             if (type == typeof(char))
             {
                 char charResult;
                 bool success = char.TryParse(scalarNode.Value, out charResult);
                 result = success ? (object)charResult : null;
+                return success;
             }
             if (type == typeof(int))
             {
@@ -263,19 +337,137 @@ namespace YamlDotNet.RepresentationModel
                 }
             }
 
-            return base.TryConvert(binder, out result);
+            return FailToGetValue(out result);
         }
 
-        public IEnumerable<YamlNode> ChildNodes
+        public override bool TryConvert(ConvertBinder binder, out object result)
+        {
+            var type = binder.ReturnType;
+
+            return TryConvertToType(type, out result);
+        }
+
+        private bool TryConvertToType(Type type, out object result)
+        {
+            if (ConvertableArrayTypes.Contains(type))
+            {
+                return TryConvertToArray(type, out result);
+            }
+            if (ConvertableGenericCollectionTypes.Contains(type))
+            {
+                return TryConvertToCollection(type, out result);
+            }
+            if (ConvertableGenericDictionaryTypes.Contains(type))
+            {
+                return TryConvertToDictionary(type, out result);
+            }
+
+            return TryConvertToBasicType(type, out result);
+        }
+
+        private bool TryConvertToDictionary(Type type, out object result)
+        {
+            if (mappingNode == null)
+            {
+                return FailToGetValue(out result);
+            }
+
+            var keyType = typeof(string);
+            var valueType = typeof(object);
+            if (type.IsGenericType)
+            {
+                Type[] genericeTypeArgs = type.GetGenericArguments();
+                keyType = genericeTypeArgs[0];
+                valueType = genericeTypeArgs[1];
+            }
+
+            Type dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+            var dict = Activator.CreateInstance(dictType) as IDictionary;
+            foreach (KeyValuePair<YamlNode, YamlNode> pair in mappingNode.Children)
+            {
+                object key;
+                if (!new DynamicYaml(pair.Key).TryConvertToType(keyType, out key))
+                {
+                    return FailToGetValue(out result);
+                }
+
+                object value;
+                if (!new DynamicYaml(pair.Value).TryConvertToType(valueType, out value))
+                {
+                    return FailToGetValue(out result);
+                }
+
+                dict.Add(key, value);
+            }
+
+            return SuccessfullyGetValue(out result, dict);
+        }
+
+        private bool TryConvertToCollection(Type type, out object result)
+        {
+            var elementType = type.IsGenericType? type.GetGenericArguments().FirstOrDefault() : typeof(object);
+
+            Type listType = typeof(List<>).MakeGenericType(elementType);
+            var list = Activator.CreateInstance(listType) as IList;
+
+            foreach (DynamicYaml child in Children)
+            {
+                object result2;
+                if (!child.TryConvertToType(elementType, out result2))
+                {
+                    return FailToGetValue(out result);
+                }
+
+                list.Add(result2);
+            }
+
+            return SuccessfullyGetValue(out result, list);
+        }
+
+        private bool TryConvertToArray(Type type, out object result)
+        {
+            if (Children == null)
+            {
+                return FailToGetValue(out result);
+            }
+            var elementType = type.GetElementType();
+            Array arrayResult = Array.CreateInstance(elementType, Children.Count);
+            int index = 0;
+            foreach (var child in Children)
+            {
+                object result2;
+                if (!child.TryConvertToType(elementType, out result2))
+                {
+                    return FailToGetValue(out result);
+                }
+                arrayResult.SetValue(result2, index);
+                index++;
+            }
+
+            return SuccessfullyGetValue(out result, arrayResult);
+        }
+
+        private IList<DynamicYaml> GetChilren()
+        {
+            if (mappingNode != null)
+            {
+                return mappingNode.Children.Values.Select(node => new DynamicYaml(node)).ToList();
+            }
+
+            return sequenceNode.Select(node => new DynamicYaml(node)).ToList();
+        }
+
+        private IList<DynamicYaml> children;
+        public IList<DynamicYaml> Children
         {
             get
             {
-                if (mappingNode != null)
+                if (children == null)
                 {
-                    return mappingNode.Children.Values;
+                    children = GetChilren();
                 }
 
-                return sequenceNode;
+                return children;
             }
         }
 
@@ -283,7 +475,7 @@ namespace YamlDotNet.RepresentationModel
         {
             get
             {
-                return ChildNodes != null ? ChildNodes.Count() : 0;
+                return Children != null ? Children.Count() : 0;
             }
         }
     }

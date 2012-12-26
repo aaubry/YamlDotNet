@@ -745,7 +745,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	}
 
 	/// <summary>
-	/// Extension of the <see cref="YamlSerializer"/> type that avoida the need for casting
+	/// Extension of the <see cref="YamlSerializer"/> type that avoid the need for casting
 	/// on the user's code.
 	/// </summary>
 	/// <typeparam name="TSerialized">The type of the serialized.</typeparam>

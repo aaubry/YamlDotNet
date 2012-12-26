@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.RepresentationModel;
 
@@ -67,6 +68,68 @@ namespace YamlDotNet.UnitTests.RepresentationModel
             Assert.Equal(StringComparison.CurrentCultureIgnoreCase, stringComparisonMode);
         }
 
+        [Fact]
+        public void TestArrayConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
+            dynamic[] dynamicArray = null;
+
+            Assert.DoesNotThrow(() =>
+            {
+                dynamicArray = dynamicYaml;
+                Assert.NotNull(dynamicArray);
+                Assert.NotEmpty(dynamicArray);
+            });
+
+            Assert.DoesNotThrow(() =>
+            {
+                int[] intArray = dynamicArray[0];
+                Assert.NotNull(intArray);
+                Assert.NotEmpty(intArray);
+            });
+        }
+
+        [Fact]
+        public void TestCollectionConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
+            List<dynamic> dynamicList = null;
+            Assert.DoesNotThrow(() =>
+            {
+                dynamicList = dynamicYaml;
+                Assert.NotNull(dynamicList);
+                Assert.NotEmpty(dynamicList);
+            });
+
+            Assert.DoesNotThrow(() =>
+            {
+                List<int> intList = dynamicList[0];
+                Assert.NotNull(intList);
+                Assert.NotEmpty(intList);
+            });
+        }
+
+        [Fact]
+        public void TestDictionaryConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(MappingYaml);
+
+            Dictionary<string, dynamic> dynamicDictionary = null;
+            Assert.DoesNotThrow(() =>
+            {
+                dynamicDictionary = dynamicYaml;
+                Assert.NotNull(dynamicDictionary);
+                Assert.NotEmpty(dynamicDictionary);
+            });
+
+            Assert.DoesNotThrow(() =>
+            {
+                Dictionary<string, string> stringDictonary = dynamicDictionary["customer"];
+                Assert.NotNull(stringDictonary);
+                Assert.NotEmpty(stringDictonary);
+            });
+        }
+
         private const string EnumConvertYaml = @"---
             - stringComparisonMode: CurrentCultureIgnoreCase
             - stringComparisonMode: Ordinal";
@@ -111,6 +174,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
                 Road to the Emerald City.
                 Pay no attention to the
                 man behind the curtain.
+            
 ...";
     }
 }
