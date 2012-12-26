@@ -72,49 +72,43 @@ namespace YamlDotNet.RepresentationModel
     public class DynamicYaml : DynamicObject
     {
         private static readonly Type[] ConvertableBasicTypes = new []
-        {
-            typeof(DynamicYaml),
-            typeof(object),
-            typeof(string),
-            typeof(char),
-            typeof(int),
-            typeof(long),
-            typeof(float),
-            typeof(double),
-            typeof(decimal)
-        };
+            {
+                typeof(DynamicYaml),
+                typeof(object),
+                typeof(string),
+                typeof(char),
+                typeof(int),
+                typeof(long),
+                typeof(float),
+                typeof(double),
+                typeof(decimal)
+            };
 
-        private static readonly Type[] ConvertableCollectionTypes = new[] 
-        {
-            typeof(IEnumerable),
-            typeof(IEnumerable<>),
-            typeof(ICollection),
-            typeof(ICollection<>),
-            typeof(IList),
-            typeof(IList<>),
-            typeof(List<>)
-        };
 
-        private static readonly Type[] ConvertableDictionaryTypes = new []
-        {
-            typeof(IDictionary),
-            typeof(IDictionary<,>),
-            typeof(Dictionary<,>)
-        };
+        private static readonly Type[] ConvertableGenericCollectionTypes = new[] 
+            {
+                typeof(IEnumerable<>),
+                typeof(ICollection<>),
+                typeof(IList<>),
+                typeof(List<>)
+            };
 
-        private static readonly Type[] ConvertableGenericCollectionTypes = ConvertableCollectionTypes.
-                SelectMany(type => type.IsGenericType? ConvertableBasicTypes.
-                    Select(basicType => type.MakeGenericType(basicType)) :
-                    new[] {type}
+        private static readonly Type[] ConvertableGenericDictionaryTypes = new []
+            {
+                typeof(IDictionary<,>),
+                typeof(Dictionary<,>)
+            };
+
+        private static readonly Type[] ConvertableCollectionTypes = ConvertableGenericCollectionTypes.
+                SelectMany(type => ConvertableBasicTypes.
+                    Select(basicType => type.MakeGenericType(basicType)) 
                 ).ToArray();
 
-        private static readonly Type[] ConvertableGenericDictionaryTypes = ConvertableDictionaryTypes.
-            SelectMany(type => type.IsGenericType? ConvertableBasicTypes.
+        private static readonly Type[] ConvertableDictionaryTypes = ConvertableGenericDictionaryTypes.
+            SelectMany(type => ConvertableBasicTypes.
                     SelectMany(valueType => ConvertableBasicTypes.
                         Select(keyType => type.MakeGenericType(keyType, valueType)
-                    )) : 
-                    new[] {type}
-                ).ToArray();
+                ))).ToArray();
 
         private static readonly Type[] ConvertableArrayTypes = ConvertableBasicTypes.Select(
                                         type => type.MakeArrayType()).ToArray();
@@ -137,7 +131,6 @@ namespace YamlDotNet.RepresentationModel
         public DynamicYaml(string yaml)
             : this(YamlDoc.LoadFromString(yaml))
         {
-
         }
 
         public void Reload(YamlNode yamlNode)
@@ -346,6 +339,49 @@ namespace YamlDotNet.RepresentationModel
             return TryConvertToType(type, out result);
         }
 
+        private bool IsGenericEnumCollection(Type type)
+        {
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            Type[] genericTypeArgs = type.GetGenericArguments();
+            if(genericTypeArgs.Length != 1)
+            {
+                return false;
+            }
+
+            var elementType = genericTypeArgs.First();
+
+            return elementType.IsEnum && ConvertableGenericCollectionTypes.Any(
+                genericType => genericType.MakeGenericType(elementType) == type);
+        }
+
+        private bool IsLegalElementType(Type type)
+        {
+            return type.IsEnum || ConvertableBasicTypes.Contains(type);
+        }
+
+        private bool IsGenericEnumDictionary(Type type)
+        {
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            Type[] genericTypeArgs = type.GetGenericArguments();
+            if (genericTypeArgs.Length != 2)
+            {
+                return false;
+            }
+            Type keyType = genericTypeArgs[0], valueType = genericTypeArgs[1];
+            return (keyType.IsEnum || valueType.IsEnum) && 
+                ConvertableGenericDictionaryTypes.
+                Any(genericType => genericType.MakeGenericType(keyType, valueType) == type) &&
+                IsLegalElementType(keyType) && IsLegalElementType(valueType);
+        }
+
         private bool TryConvertToType(Type type, out object result)
         {
             if (type.IsArray && 
@@ -355,11 +391,13 @@ namespace YamlDotNet.RepresentationModel
             {
                 return TryConvertToArray(type, out result);
             }
-            if (ConvertableGenericCollectionTypes.Contains(type))
+            if (ConvertableCollectionTypes.Contains(type) ||
+                IsGenericEnumCollection(type))
             {
                 return TryConvertToCollection(type, out result);
             }
-            if (ConvertableGenericDictionaryTypes.Contains(type))
+            if (ConvertableDictionaryTypes.Contains(type) ||
+                IsGenericEnumDictionary(type))
             {
                 return TryConvertToDictionary(type, out result);
             }
@@ -374,14 +412,9 @@ namespace YamlDotNet.RepresentationModel
                 return FailToGetValue(out result);
             }
 
-            var keyType = typeof(string);
-            var valueType = typeof(object);
-            if (type.IsGenericType)
-            {
-                Type[] genericeTypeArgs = type.GetGenericArguments();
-                keyType = genericeTypeArgs[0];
-                valueType = genericeTypeArgs[1];
-            }
+            Type[] genericTypeArgs = type.GetGenericArguments();
+            Type keyType = genericTypeArgs[0],
+                 valueType = genericTypeArgs[1];
 
             Type dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
             var dict = Activator.CreateInstance(dictType) as IDictionary;
@@ -407,8 +440,7 @@ namespace YamlDotNet.RepresentationModel
 
         private bool TryConvertToCollection(Type type, out object result)
         {
-            var elementType = type.IsGenericType? type.GetGenericArguments().FirstOrDefault() : typeof(object);
-
+            var elementType = type.GetGenericArguments().First();
             Type listType = typeof(List<>).MakeGenericType(elementType);
             var list = Activator.CreateInstance(listType) as IList;
 
@@ -456,7 +488,12 @@ namespace YamlDotNet.RepresentationModel
                 return mappingNode.Children.Values.Select(node => new DynamicYaml(node)).ToList();
             }
 
-            return sequenceNode.Select(node => new DynamicYaml(node)).ToList();
+            if (sequenceNode != null)
+            {
+                return sequenceNode.Select(node => new DynamicYaml(node)).ToList();
+            }
+
+            return new List<DynamicYaml>();
         }
 
         private IList<DynamicYaml> children;
@@ -477,7 +514,7 @@ namespace YamlDotNet.RepresentationModel
         {
             get
             {
-                return Children != null ? Children.Count() : 0;
+                return Children != null ? Children.Count : 0;
             }
         }
     }

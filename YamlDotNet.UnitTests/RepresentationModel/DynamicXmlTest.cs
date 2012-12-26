@@ -92,7 +92,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
         [Fact]
         public void TestEnumArrayConvert()
         {
-            dynamic dynamicYaml = new DynamicYaml(EnumArrayYaml);
+            dynamic dynamicYaml = new DynamicYaml(EnumSequenceYaml);
 
             Assert.DoesNotThrow(() =>
             {
@@ -123,6 +123,19 @@ namespace YamlDotNet.UnitTests.RepresentationModel
         }
 
         [Fact]
+        public void TestEnumCollectionConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(EnumSequenceYaml);
+
+            Assert.DoesNotThrow(() =>
+            {
+                List<StringComparison> enumList = dynamicYaml;
+                Assert.NotNull(enumList);
+                Assert.NotEmpty(enumList);
+            });
+        }
+
+        [Fact]
         public void TestDictionaryConvert()
         {
             dynamic dynamicYaml = new DynamicYaml(MappingYaml);
@@ -143,11 +156,28 @@ namespace YamlDotNet.UnitTests.RepresentationModel
             });
         }
 
+        [Fact]
+        public void TestEnumDictonaryConvert()
+        {
+            dynamic dynamicYaml = new DynamicYaml(EnumMappingYaml);
+
+            Assert.DoesNotThrow(() =>
+            {
+                IDictionary<StringComparison, string> enumDict = dynamicYaml;
+                Assert.NotNull(enumDict);
+                Assert.NotEmpty(enumDict);
+            });
+        }
+
         private const string EnumYaml = @"---
             - stringComparisonMode: CurrentCultureIgnoreCase
             - stringComparisonMode: Ordinal";
 
-        private const string EnumArrayYaml = @"---
+        private const string EnumMappingYaml = @"---
+            CurrentCultureIgnoreCase: on
+            Ordinal: off";
+
+        private const string EnumSequenceYaml = @"---
             - CurrentCultureIgnoreCase
             - Ordinal";
 
