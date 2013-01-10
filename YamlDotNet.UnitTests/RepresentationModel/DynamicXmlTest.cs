@@ -169,6 +169,16 @@ namespace YamlDotNet.UnitTests.RepresentationModel
             });
         }
 
+        [Fact]
+        public void TestNonexistingMember()
+        {
+            dynamic dynamicYaml = new DynamicYaml(SequenceYaml);
+            string title = (string)(dynamicYaml[0].Title);
+            Assert.Null(title);
+            int? id = (int?)(dynamicYaml[0].Id);
+            Assert.Null(id);
+        }
+
         private const string EnumYaml = @"---
             - stringComparisonMode: CurrentCultureIgnoreCase
             - stringComparisonMode: Ordinal";

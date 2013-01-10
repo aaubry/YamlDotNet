@@ -154,7 +154,7 @@ namespace YamlDotNet.RepresentationModel
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            return TryGetValueByKey(binder.Name, out result);
+            return TryGetValueByKeyAndType(binder.Name, binder.ReturnType, out result);
         }
 
         private static bool FailToGetValue(out object result)
@@ -169,7 +169,9 @@ namespace YamlDotNet.RepresentationModel
             return true;
         }
 
-        private bool TryGetValueByKey(string key, out object result)
+        private bool TryGetValueByKeyAndType(string key, 
+            Type type, 
+            out object result)
         {
             if (mappingNode == null)
             {
@@ -177,11 +179,11 @@ namespace YamlDotNet.RepresentationModel
             }
             var yamlKey = new YamlScalarNode(key.Decapitalize());
             var yamlKey2 = new YamlScalarNode(key.Capitalize());
-            return TryGetValueByYamlKey(yamlKey, out result) ||
-                TryGetValueByYamlKey(yamlKey2, out result);
+            return TryGetValueByYamlKeyAndType(yamlKey, type, out result) ||
+                TryGetValueByYamlKeyAndType(yamlKey2, type, out result);
         }
 
-        private bool TryGetValueByYamlKey(YamlScalarNode yamlKey, out object result)
+        private bool TryGetValueByYamlKeyAndType(YamlScalarNode yamlKey, Type type, out object result)
         {
             if (mappingNode.Children.ContainsKey(yamlKey))
             {
@@ -192,7 +194,19 @@ namespace YamlDotNet.RepresentationModel
                 }
             }
 
-            return FailToGetValue(out result);
+            if (IsNullableType(type)) 
+            {
+                return SuccessfullyGetValue(out result, new DynamicYaml((YamlNode)null));
+            }
+            else
+            {
+                return FailToGetValue(out result);
+            }
+        }
+
+        private static bool IsNullableType(Type type)
+        {
+            return type != null && (!type.IsValueType || Nullable.GetUnderlyingType(type) != null);
         }
 
         private bool TryGetValueByIndex(int index, out object result)
@@ -215,7 +229,7 @@ namespace YamlDotNet.RepresentationModel
             var stringKey = indices[0] as string;
             if (stringKey != null)
             {
-                if (TryGetValueByKey(stringKey, out result))
+                if (TryGetValueByKeyAndType(stringKey, binder.ReturnType, out result))
                 {
                     if (indices.Length > 1)
                     {
@@ -253,7 +267,7 @@ namespace YamlDotNet.RepresentationModel
             return base.TryGetIndex(binder, indices, out result);
         }
 
-        private bool TryConvertToBasicType(Type type, out object result)
+        private bool TryConvertToBasicType(Type type, bool isNullable, out object result)
         {
             if (type == typeof(object) || type == typeof(DynamicYaml))
             {
@@ -261,6 +275,10 @@ namespace YamlDotNet.RepresentationModel
             }
             if (scalarNode == null)
             {
+                if (isNullable)
+                {
+                    return SuccessfullyGetValue(out result, null);
+                }
                 return FailToGetValue(out result);
             }
             if (type == typeof(string))
@@ -402,7 +420,12 @@ namespace YamlDotNet.RepresentationModel
                 return TryConvertToDictionary(type, out result);
             }
 
-            return TryConvertToBasicType(type, out result);
+            var underlyingType = Nullable.GetUnderlyingType(type);
+            if (underlyingType != null)
+            {
+                type = underlyingType;
+            }
+            return TryConvertToBasicType(type, IsNullableType(type), out result);
         }
 
         private bool TryConvertToDictionary(Type type, out object result)
