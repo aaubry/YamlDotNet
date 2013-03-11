@@ -544,16 +544,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					var tempList = Activator.CreateInstance(tempListType);
 					DeserializeGenericListInternal(reader, tempList, itemType, context);
 					result = tempListType.GetMethod("ToArray", Type.EmptyTypes).Invoke(tempList, null);
+                    AddAnchoredObject(sequence, result, context.Anchors);
 				}
 				else
 				{
 					result = context.Options.ObjectFactory.Create(type);
+					AddAnchoredObject(sequence, result, context.Anchors);
 					DeserializeGenericListInternal(reader, result, itemType, context);
 				}
 			}
 			else   // Non-generic list
 			{
 				result = context.Options.ObjectFactory.Create(type);
+				AddAnchoredObject(sequence, result, context.Anchors);
 				var list = result as IList;
 				if (list != null)
 				{
@@ -564,8 +567,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				}
 				reader.Expect<SequenceEnd>();
 			}
-
-			AddAnchoredObject(sequence, result, context.Anchors);
 
 			return result;
 		}
@@ -610,6 +611,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			type = GetTypeFromTag(mapping.Tag, type, context.Options.Mappings);
 			var result = context.Options.ObjectFactory.Create(type);
+			AddAnchoredObject(mapping, result, context.Anchors);
 
 			IDictionary dictionary = result as IDictionary;
 			if (dictionary != null)
@@ -674,8 +676,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				}
 			}
 			reader.Expect<MappingEnd>();
-
-			AddAnchoredObject(mapping, result, context.Anchors);
 
 			return result;
 		}
