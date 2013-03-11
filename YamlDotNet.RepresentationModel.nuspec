@@ -9,7 +9,7 @@
 		<language>en-US</language>
     <licenseUrl>http://www.aaubry.net/yamldotnet/license.aspx</licenseUrl>
     <projectUrl>http://www.aaubry.net/yamldotnet.aspx</projectUrl>
-		<iconUrl>http://www.aaubry.net/media/225/yamldotnet.png</iconUrl>
+		<iconUrl>http://www.aaubry.net/IMAGES%2f2012%2f11%2fyamldotnet.png.jpgx</iconUrl>
 		<tags>yaml serialization development library</tags>
 		<dependencies>
 			<dependency id="YamlDotNet.Core" version="" />
