@@ -34,7 +34,7 @@ using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
-	
+
 	/// <summary>
 	/// Reads and writes objects from and to YAML.
 	/// </summary>
@@ -350,7 +350,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private object DeserializeValueNotNull(EventReader reader, DeserializationContext context, INodeEvent nodeEvent, Type expectedType)
 		{
-			Type type = GetType(nodeEvent.Tag, expectedType, context.Options.Mappings);
+			Type type = GetTypeFromTag(nodeEvent.Tag, expectedType, context.Options.Mappings);
 
 			var converter = converters.FirstOrDefault(c => c.Accepts(type));
 			if (converter != null)
@@ -360,7 +360,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			if (typeof(IYamlSerializable).IsAssignableFrom(type))
 			{
-				return DeserializeYamlSerializable(reader, type);
+				return DeserializeYamlSerializable(reader, type, context);
 			}
 
 			if (reader.Accept<MappingStart>())
@@ -386,7 +386,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			Scalar scalar = reader.Expect<Scalar>();
 
 			object result;
-			type = GetType(scalar.Tag, type, context.Options.Mappings);
+			type = GetTypeFromTag(scalar.Tag, type, context.Options.Mappings);
 
 			if (type.IsEnum)
 			{
@@ -521,7 +521,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			SequenceStart sequence = reader.Expect<SequenceStart>();
 
-			type = GetType(sequence.Tag, type, context.Options.Mappings);
+			type = GetTypeFromTag(sequence.Tag, type, context.Options.Mappings);
 
 			// Choose a default list type in case there was no specific type specified.
 			if (type == typeof(object))
@@ -529,34 +529,31 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				type = typeof(ArrayList);
 			}
 
-      object result;
+			object result;
 
 			Type iCollection = ReflectionUtility.GetImplementedGenericInterface(type, typeof(ICollection<>));
 			if (iCollection != null)    // Generic list
 			{
 				Type[] iCollectionArguments = iCollection.GetGenericArguments();
 				Debug.Assert(iCollectionArguments.Length == 1, "ICollection<> must have one generic argument.");
-        var itemType = iCollectionArguments[0];
+				var itemType = iCollectionArguments[0];
 
-        //result = type.IsArray ? typeof(List<>).MakeGenericType(iCollectionArguments) : Activator.CreateInstance(type);
-				//MethodInfo addAdapter = addAdapterGeneric.MakeGenericMethod(iCollectionArguments);
-				//Action<object, object> addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
-        if (type.IsArray)
-        {
-          var tempListType = typeof(List<>).MakeGenericType(iCollectionArguments);
-          var tempList = Activator.CreateInstance(tempListType);
-          DeserializeGenericListInternal(reader, tempList, itemType, context);
-          result = tempListType.GetMethod("ToArray", Type.EmptyTypes).Invoke(tempList, null);
-        }
-        else
-        {
-          result = Activator.CreateInstance(type);
-          DeserializeGenericListInternal(reader, result, itemType, context);
-        }
+				if (type.IsArray)
+				{
+					var tempListType = typeof(List<>).MakeGenericType(iCollectionArguments);
+					var tempList = Activator.CreateInstance(tempListType);
+					DeserializeGenericListInternal(reader, tempList, itemType, context);
+					result = tempListType.GetMethod("ToArray", Type.EmptyTypes).Invoke(tempList, null);
+				}
+				else
+				{
+					result = context.Options.ObjectFactory.Create(type);
+					DeserializeGenericListInternal(reader, result, itemType, context);
+				}
 			}
 			else   // Non-generic list
 			{
-        result = Activator.CreateInstance(type);
+				result = context.Options.ObjectFactory.Create(type);
 				var list = result as IList;
 				if (list != null)
 				{
@@ -573,10 +570,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return result;
 		}
 
-    private void DeserializeGenericListInternal(EventReader reader, object list, Type itemType, DeserializationContext context)
+		private void DeserializeGenericListInternal(EventReader reader, object list, Type itemType, DeserializationContext context)
 		{
-      var addAdapter = addAdapterGeneric.MakeGenericMethod(new Type[] { itemType });
-      var addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
+			var addAdapter = addAdapterGeneric.MakeGenericMethod(new Type[] { itemType });
+			var addAdapterDelegate = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object, object>), addAdapter);
 			while (!reader.Accept<SequenceEnd>())
 			{
 				addAdapterDelegate(list, DeserializeValue(reader, itemType, context));
@@ -600,9 +597,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return converter.ReadYaml(reader.Parser, type);
 		}
 
-		private static object DeserializeYamlSerializable(EventReader reader, Type type)
+		private static object DeserializeYamlSerializable(EventReader reader, Type type, DeserializationContext context)
 		{
-			IYamlSerializable result = (IYamlSerializable)Activator.CreateInstance(type);
+			IYamlSerializable result = (IYamlSerializable)context.Options.ObjectFactory.Create(type);
 			result.ReadYaml(reader.Parser);
 			return result;
 		}
@@ -611,17 +608,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			MappingStart mapping = reader.Expect<MappingStart>();
 
-			type = GetType(mapping.Tag, type, context.Options.Mappings);
-			object result;
-			try
-			{
-				result = Activator.CreateInstance(type);
-			}
-			catch (MissingMethodException err)
-			{
-				var message = string.Format("Failed to create an instance of type '{0}'.", type);
-				throw new InvalidOperationException(message, err);
-			}
+			type = GetTypeFromTag(mapping.Tag, type, context.Options.Mappings);
+			var result = context.Options.ObjectFactory.Create(type);
 
 			IDictionary dictionary = result as IDictionary;
 			if (dictionary != null)
@@ -701,30 +689,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{ "tag:yaml.org,2002:str", typeof(string) },
 			{ "tag:yaml.org,2002:timestamp", typeof(DateTime) },
 		};
-
-		private static readonly Dictionary<Type, Type> defaultInterfaceImplementations = new Dictionary<Type, Type>
-		{
-			{ typeof(IEnumerable<>), typeof(List<>) },
-			{ typeof(ICollection<>), typeof(List<>) },
-			{ typeof(IList<>), typeof(List<>) },
-			{ typeof(IDictionary<,>), typeof(Dictionary<,>) },
-		};
-
-		private static Type GetType(string tag, Type defaultType, TagMappings mappings)
-		{
-			Type actualType = GetTypeFromTag(tag, defaultType, mappings);
-
-			if (actualType.IsInterface)
-			{
-				Type implementationType;
-				if (defaultInterfaceImplementations.TryGetValue(actualType.GetGenericTypeDefinition(), out implementationType))
-				{
-					return implementationType.MakeGenericType(actualType.GetGenericArguments());
-				}
-			}
-
-			return actualType;
-		}
 
 		private static Type GetTypeFromTag(string tag, Type defaultType, TagMappings mappings)
 		{

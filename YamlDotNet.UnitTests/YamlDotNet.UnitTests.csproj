@@ -57,6 +57,7 @@
     <Compile Include="Core\ScannerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepresentationModel\ObjectConverterTests.cs" />
+    <Compile Include="RepresentationModel\ObjectFactoryTests.cs" />
     <Compile Include="RepresentationModel\Samples.cs" />
     <Compile Include="RepresentationModel\SerializationTests.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />

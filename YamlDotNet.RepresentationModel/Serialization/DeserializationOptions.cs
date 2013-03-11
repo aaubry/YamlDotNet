@@ -59,6 +59,27 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
+		private IObjectFactory objectFactory = new DefaultObjectFactory();
+
+		/// <summary>
+		/// Gets / sets the <see cref="IObjectFactory"/> that is used to create instances of objects when deserializing.
+		/// </summary>
+		public IObjectFactory ObjectFactory
+		{
+			get
+			{
+				return objectFactory;
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("ObjectFactory");
+				}
+				objectFactory = value;
+			}
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DeserializationOptions"/> class.
 		/// </summary>
