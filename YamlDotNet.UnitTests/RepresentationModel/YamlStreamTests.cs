@@ -82,7 +82,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			SequenceEnd,
 			MappingStart,
 			MappingEnd,
-			Scalar,
+			Scalar
 		}
 
 		private class YamlNodeEvent
