@@ -135,6 +135,22 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 					myPoint = value;
 				}
 			}
+
+			private int? myNullableWithValue = 8;
+
+			public int? MyNullableWithValue
+			{
+				get { return myNullableWithValue; }
+				set { myNullableWithValue = value; }
+			}
+
+			private int? myNullableWithoutValue = null;
+
+			public int? MyNullableWithoutValue
+			{
+				get { return myNullableWithoutValue; }
+				set { myNullableWithoutValue = value; }
+			}
 		}
 
 		[Fact]
