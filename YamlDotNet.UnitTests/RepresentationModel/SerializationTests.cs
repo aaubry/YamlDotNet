@@ -122,6 +122,20 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				}
 			}
 
+			private TimeSpan myTimeSpan = TimeSpan.FromHours(1);
+
+			public TimeSpan MyTimeSpan
+			{
+				get
+				{
+					return myTimeSpan;
+				}
+				set
+				{
+					myTimeSpan = value;
+				}
+			}
+
 			private Point myPoint = new Point(100, 200);
 
 			public Point MyPoint

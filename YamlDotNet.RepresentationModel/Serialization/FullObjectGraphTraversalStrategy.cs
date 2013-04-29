@@ -71,7 +71,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
 				default:
-					if (value == null)
+					if (value == null || type == typeof(TimeSpan))
 					{
 						visitor.VisitScalar(value, type);
 						break;
