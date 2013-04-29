@@ -723,5 +723,24 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.Equal("Third", result.ThirdTest);
 			Assert.Equal("Fourth", result.AliasTest);
 		}
+
+		[Fact]
+		public void RoundtripAlias()
+		{
+			var input = new ConventionTest { AliasTest = "Fourth" };
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, input.GetType());
+			string serialized = writer.ToString();
+
+			// Ensure serialisation is correct
+			Assert.Equal("fourthTest: Fourth", serialized);
+
+			var deserializer = new YamlSerializer<ConventionTest>();
+			var output = deserializer.Deserialize(new StringReader(serialized));
+
+			// Ensure round-trip retains value
+			Assert.Equal(input.AliasTest, output.AliasTest);
+		}
 	}
 }
