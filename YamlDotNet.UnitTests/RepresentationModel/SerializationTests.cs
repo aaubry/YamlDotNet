@@ -702,5 +702,26 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			return YamlSerializer.Create(input).Deserialize(new StringReader(serialized));
 		}
+
+		private class ConventionTest
+		{
+			public string FirstTest { get; set; }
+			public string SecondTest { get; set; }
+			public string ThirdTest { get; set; }
+			[YamlAlias("fourthTest")]
+			public string AliasTest { get; set; }
+		}
+
+		[Fact]
+		public void DeserializeUsingConventions()
+		{
+			var serializer = new YamlSerializer<ConventionTest>();
+			var result = serializer.Deserialize(YamlFile("namingConvention.yaml"));
+
+			Assert.Equal("First", result.FirstTest);
+			Assert.Equal("Second", result.SecondTest);
+			Assert.Equal("Third", result.ThirdTest);
+			Assert.Equal("Fourth", result.AliasTest);
+		}
 	}
 }
