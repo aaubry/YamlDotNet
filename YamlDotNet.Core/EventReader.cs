@@ -125,6 +125,21 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
+		/// Gets the next event without consuming it.
+		/// </summary>
+		/// <typeparam name="T">Type of the <see cref="Event"/>.</typeparam>
+		/// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
+		public T Peek<T>() where T : Event
+		{
+			if (!Accept<T>())
+			{
+				return null;
+			}
+			T yamlEvent = (T)parser.Current;
+			return yamlEvent;
+		}
+
+		/// <summary>
 		/// Skips the current event and any "child" event.
 		/// </summary>
 		public void Skip()
