@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011, 2012 Antoine Aubry
-	
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-	
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-	
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,6 +33,7 @@ using YamlDotNet.Core.Events;
 using System.Globalization;
 using System.ComponentModel;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -288,11 +289,20 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 		[Fact]
-		public void ExplicitType()
+		public void DeserializeScalar()
 		{
-			YamlSerializer serializer = new YamlSerializer();
-			object result = serializer.Deserialize(YamlFile("explicitType.yaml"));
-			
+			var sut = new Deserializer();
+			object result = sut.Deserialize(YamlFile("test2.yaml"), typeof(object));
+
+			Assert.Equal("a scalar", result);
+		}
+
+		[Fact]
+		public void DeserializeExplicitType()
+		{
+			var serializer = new Deserializer();
+			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), typeof(object));
+
 			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
 			Assert.Equal("bbb", ((Z)result).aaa);
 		}
@@ -339,7 +349,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 		[Fact]
-		public void DeserializeList() {
+		public void DeserializeList()
+		{
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("list.yaml"));
 
@@ -352,7 +363,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 		[Fact]
-		public void DeserializeExplicitList() {
+		public void DeserializeExplicitList()
+		{
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
 
@@ -397,25 +409,27 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				List<int> copy = (List<int>)deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 				Assert.Equal(original.Count, copy.Count);
-				
-				for(int i = 0; i < original.Count; ++i) {
+
+				for (int i = 0; i < original.Count; ++i)
+				{
 					Assert.Equal(original[i], copy[i]);
 				}
 			}
 		}
 
-    [Fact]
-    public void DeserializeArray() {
-      YamlSerializer<String[]> serializer = new YamlSerializer<String[]>();
-      object result = serializer.Deserialize(YamlFile("list.yaml"));
-      
-      Assert.True(result is String[]);
-      
-      String[] array = (String[])result;
-      Assert.Equal("one", array[0]);
-      Assert.Equal("two", array[1]);
-      Assert.Equal("three", array[2]);
-    }
+		[Fact]
+		public void DeserializeArray()
+		{
+			YamlSerializer<String[]> serializer = new YamlSerializer<String[]>();
+			object result = serializer.Deserialize(YamlFile("list.yaml"));
+
+			Assert.True(result is String[]);
+
+			String[] array = (String[])result;
+			Assert.Equal("one", array[0]);
+			Assert.Equal("two", array[1]);
+			Assert.Equal("three", array[2]);
+		}
 
 		[Fact]
 		public void Overrides()
@@ -425,7 +439,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			YamlSerializer serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), options);
-			
+
 			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
 			Assert.Equal("BBB", ((Z)result).aaa);
 		}
@@ -489,7 +503,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				};
 			}
 		}
-		
+
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
@@ -660,7 +674,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			var deserialized = deserializer.Deserialize(new StringReader(buffer.ToString()));
 
-			foreach(var pair in deserialized)
+			foreach (var pair in deserialized)
 			{
 				Assert.Equal(entries[pair.Key], pair.Value);
 			}
@@ -774,7 +788,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		//	var serializer = new YamlSerializer(typeof(X));
 		//}
 
-		class ContainsIgnore {
+		class ContainsIgnore
+		{
 			[YamlIgnore]
 			public String IgnoreMe { get; set; }
 		}
@@ -784,7 +799,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			var serializer = new Serializer();
 			var deserializer = new YamlSerializer<ContainsIgnore>(YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
-      
+
 			using (StringWriter buffer = new StringWriter())
 			{
 				var orig = new ContainsIgnore { IgnoreMe = "Some Text" };
@@ -960,6 +975,64 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Console.WriteLine(serialized);
 
 			Assert.True(serialized.Contains("Value"));
+		}
+
+		public class Person
+		{
+			public string Name { get; set; }
+		}
+
+		[Fact]
+		public void DeserializeTwoDocuments()
+		{
+			var yaml = @"---
+Name: Andy
+---
+Name: Brad
+...";
+
+			var serializer = new YamlSerializer<Person>();
+
+			var reader = new EventReader(new Parser(new StringReader(yaml)));
+
+			reader.Expect<StreamStart>();
+
+			var andy = serializer.Deserialize(reader);
+			Assert.NotNull(andy);
+			Assert.Equal("Andy", andy.Name);
+
+			var brad = serializer.Deserialize(reader);
+			Assert.NotNull(brad);
+			Assert.Equal("Brad", brad.Name);
+		}
+
+		[Fact]
+		public void DeserializeManyDocuments()
+		{
+			var yaml = @"---
+Name: Andy
+---
+Name: Brad
+---
+Name: Charles
+...";
+
+			var serializer = new YamlSerializer<Person>();
+			var reader = new EventReader(new Parser(new StringReader(yaml)));
+
+			reader.Allow<StreamStart>();
+
+			var people = new List<Person>();
+			while (!reader.Accept<StreamEnd>())
+			{
+				var person = serializer.Deserialize(reader);
+				people.Add(person);
+			}
+
+			Assert.Equal(3, people.Count);
+			Assert.Equal("Andy", people[0].Name);
+			Assert.Equal("Brad", people[1].Name);
+			Assert.Equal("Charles", people[2].Name);
 		}
 	}
 }

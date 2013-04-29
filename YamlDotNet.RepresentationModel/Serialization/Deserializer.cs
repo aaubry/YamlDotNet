@@ -78,6 +78,22 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class Deserializer
 	{
+		private readonly ICollection<INodeDeserializer> _deserializers;
+
+		public Deserializer()
+		{
+			_deserializers = new INodeDeserializer[]
+			{
+				new NullNodeDeserializer(),
+				new ScalarNodeDeserializer(),
+			};
+		}
+
+		public object Deserialize(TextReader input, Type type)
+		{
+			return Deserialize(new EventReader(new Parser(input)), type);
+		}
+
 		/// <summary>
 		/// Deserializes an object of the specified type.
 		/// </summary>
@@ -118,23 +134,40 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private object DeserializeValue(EventReader reader, Type expectedType, object context)
 		{
-			if (reader.Accept<AnchorAlias>())
+			var nodeEvent = reader.Peek<NodeEvent>();
+
+			var nodeType = GetTypeFromTag(nodeEvent.Tag, expectedType);
+
+			foreach (var deserializer in _deserializers)
 			{
-				throw new NotImplementedException();
-				//return context.Anchors[reader.Expect<AnchorAlias>().Value];
+				object value;
+				if (deserializer.Deserialize(reader, nodeType, out value))
+				{
+					return value;
+				}
 			}
 
-			var nodeEvent = (NodeEvent)reader.Parser.Current;
+			throw new Exception("TODO");
 
-			if (IsNull(nodeEvent))
-			{
-				reader.Expect<NodeEvent>();
-				AddAnchoredObject(nodeEvent, null, context.Anchors);
-				return null;
-			}
+			//return deserializer.Deserialize(reader, expectedType);
 
-			object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
-			return ObjectConverter.Convert(result, expectedType);
+			//if (reader.Accept<AnchorAlias>())
+			//{
+			//	throw new NotImplementedException();
+			//	//return context.Anchors[reader.Expect<AnchorAlias>().Value];
+			//}
+
+			//var nodeEvent = (NodeEvent)reader.Parser.Current;
+
+			//if (IsNull(nodeEvent))
+			//{
+			//	reader.Expect<NodeEvent>();
+			//	AddAnchoredObject(nodeEvent, null, context.Anchors);
+			//	return null;
+			//}
+
+			//object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
+			//return ObjectConverter.Convert(result, expectedType);
 		}
 
 		//private bool IsNull(NodeEvent nodeEvent)
@@ -155,5 +188,190 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		//	return false;
 		//}
+
+		private static readonly Dictionary<string, Type> predefinedTypes = new Dictionary<string, Type>
+		{
+			{ "tag:yaml.org,2002:map", typeof(Dictionary<object, object>) },
+			{ "tag:yaml.org,2002:bool", typeof(bool) },
+			{ "tag:yaml.org,2002:float", typeof(double) },
+			{ "tag:yaml.org,2002:int", typeof(int) },
+			{ "tag:yaml.org,2002:str", typeof(string) },
+			{ "tag:yaml.org,2002:timestamp", typeof(DateTime) },
+		};
+
+		private static Type GetTypeFromTag(string tag, Type defaultType)//, TagMappings mappings)
+		{
+			if (tag == null)
+			{
+				return defaultType;
+			}
+
+			//Type predefinedType = mappings.GetMapping(tag);
+			//if (predefinedType != null || predefinedTypes.TryGetValue(tag, out predefinedType))
+			//{
+			//	return predefinedType;
+			//}
+
+			return Type.GetType(tag.Substring(1), true);
+		}
+	}
+
+	public interface INodeDeserializer
+	{
+		bool Deserialize(EventReader reader, Type expectedType, out object value);
+	}
+
+	public sealed class NullNodeDeserializer : INodeDeserializer
+	{
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, out object value)
+		{
+			value = null;
+			var evt = reader.Peek<NodeEvent>();
+			var isNull = evt != null
+				&& evt.Tag == "tag:yaml.org,2002:null";
+
+			if (isNull)
+			{
+				reader.Skip();
+			}
+			return isNull;
+		}
+	}
+
+	public sealed class JsonNullNodeDeserializer : INodeDeserializer
+	{
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, out object value)
+		{
+			value = null;
+			var scalar = reader.Peek<Scalar>();
+			var isNull = scalar != null
+				&& scalar.Style == Core.ScalarStyle.Plain
+				&& scalar.Value == "null";
+
+			if (isNull)
+			{
+				reader.Skip();
+			}
+			return isNull;
+		}
+	}
+
+	public sealed class ScalarNodeDeserializer : INodeDeserializer
+	{
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, out object value)
+		{
+			var scalar = reader.Allow<Scalar>();
+			if (scalar == null)
+			{
+				value = null;
+				return false;
+			}
+
+			if (expectedType.IsEnum)
+			{
+				value = Enum.Parse(expectedType, scalar.Value);
+			}
+			else
+			{
+				TypeCode typeCode = Type.GetTypeCode(expectedType);
+				switch (typeCode)
+				{
+					case TypeCode.Boolean:
+						value = bool.Parse(scalar.Value);
+						break;
+
+					case TypeCode.Byte:
+						value = Byte.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Int16:
+						value = Int16.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Int32:
+						value = Int32.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Int64:
+						value = Int64.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.SByte:
+						value = SByte.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.UInt16:
+						value = UInt16.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.UInt32:
+						value = UInt32.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.UInt64:
+						value = UInt64.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Single:
+						value = Single.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Double:
+						value = Double.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.Decimal:
+						value = Decimal.Parse(scalar.Value, numberFormat);
+						break;
+
+					case TypeCode.String:
+						value = scalar.Value;
+						break;
+
+					case TypeCode.Char:
+						value = scalar.Value[0];
+						break;
+
+					case TypeCode.DateTime:
+						// TODO: This is probably incorrect. Use the correct regular expression.
+						value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
+						break;
+
+					default:
+						if (expectedType == typeof(object))
+						{
+							// Default to string
+							value = scalar.Value;
+						}
+						else
+						{
+							TypeConverter converter = TypeDescriptor.GetConverter(expectedType);
+							if (converter != null && converter.CanConvertFrom(typeof(string)))
+							{
+								value = converter.ConvertFromInvariantString(scalar.Value);
+							}
+							else
+							{
+								value = Convert.ChangeType(scalar.Value, expectedType, CultureInfo.InvariantCulture);
+							}
+						}
+						break;
+				}
+			}
+			return true;
+		}
+
+		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
+		{
+			CurrencyDecimalSeparator = ".",
+			CurrencyGroupSeparator = "_",
+			CurrencyGroupSizes = new[] { 3 },
+			CurrencySymbol = string.Empty,
+			CurrencyDecimalDigits = 99,
+			NumberDecimalSeparator = ".",
+			NumberGroupSeparator = "_",
+			NumberGroupSizes = new[] { 3 },
+			NumberDecimalDigits = 99
+		};
 	}
 }
