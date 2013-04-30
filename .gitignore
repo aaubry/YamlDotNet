@@ -4,7 +4,7 @@ obj
 
 # mstest test results
 TestResults
-YamlDotNet.v11.suo
+*.suo
 Help/*
 release/*
-YamlDotNet.v11.suo
+/_ReSharper.*

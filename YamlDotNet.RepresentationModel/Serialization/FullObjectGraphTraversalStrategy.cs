@@ -188,10 +188,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{
 				var propertyValue = property.GetValue(value, null);
 				var propertyType = property.PropertyType;
+				var propertyName = GetPropertyName(type, property);
 
-				if(visitor.EnterMapping(property.Name, typeof(string), propertyValue, propertyType))
+				if(visitor.EnterMapping(propertyName, typeof(string), propertyValue, propertyType))
 				{
-					Traverse(property.Name, typeof(string), visitor, currentDepth);
+					Traverse(propertyName, typeof(string), visitor, currentDepth);
 					Traverse(propertyValue, propertyType, visitor, currentDepth);
 				}
 			}
@@ -212,6 +213,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				property.CanRead &&
 				property.GetGetMethod().GetParameters().Length == 0 &&
 				property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
+		}
+
+		protected string GetPropertyName(Type type, PropertyInfo property)
+		{
+			var aliasProps = property.GetCustomAttributes(typeof(YamlAliasAttribute), true);
+			return aliasProps.Length == 0 ? property.Name : ((YamlAliasAttribute)aliasProps[0]).Alias;
 		}
 
 		private static Type GetObjectType(object value)
