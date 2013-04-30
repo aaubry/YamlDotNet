@@ -748,5 +748,45 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			return YamlSerializer.Create(input).Deserialize(new StringReader(serialized));
 		}
+
+		private class ConventionTest
+		{
+			public string FirstTest { get; set; }
+			public string SecondTest { get; set; }
+			public string ThirdTest { get; set; }
+			[YamlAlias("fourthTest")]
+			public string AliasTest { get; set; }
+		}
+
+		[Fact]
+		public void DeserializeUsingConventions()
+		{
+			var serializer = new YamlSerializer<ConventionTest>();
+			var result = serializer.Deserialize(YamlFile("namingConvention.yaml"));
+
+			Assert.Equal("First", result.FirstTest);
+			Assert.Equal("Second", result.SecondTest);
+			Assert.Equal("Third", result.ThirdTest);
+			Assert.Equal("Fourth", result.AliasTest);
+		}
+
+		[Fact]
+		public void RoundtripAlias()
+		{
+			var input = new ConventionTest { AliasTest = "Fourth" };
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, input.GetType());
+			string serialized = writer.ToString();
+
+			// Ensure serialisation is correct
+			Assert.Equal("fourthTest: Fourth", serialized);
+
+			var deserializer = new YamlSerializer<ConventionTest>();
+			var output = deserializer.Deserialize(new StringReader(serialized));
+
+			// Ensure round-trip retains value
+			Assert.Equal(input.AliasTest, output.AliasTest);
+		}
 	}
 }

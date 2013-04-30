@@ -29,6 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -44,6 +45,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private readonly Type serializedType;
 
 		private readonly IList<IYamlTypeConverter> converters = new List<IYamlTypeConverter>();
+
+		private readonly IDictionary<Type, IDictionary<string, PropertyInfo>> resolvedProperties = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
+		private readonly IDictionary<Type, IDictionary<string, PropertyInfo>> propertyAliases = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
 
 		/// <summary>
 		/// Contains additional information about a deserialization.
@@ -657,20 +661,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 					if (!isOverriden)
 					{
-						PropertyInfo property = type.GetProperty(key.Value, BindingFlags.Instance | BindingFlags.Public);
-						if (property == null)
-						{
-							Console.WriteLine(key);
-
-							throw new SerializationException(
-								string.Format(
-									CultureInfo.InvariantCulture,
-									"Property '{0}' not found on type '{1}'",
-									key.Value,
-									type.FullName
-								)
-							);
-						}
+						PropertyInfo property = FindProperty(key.Value, type);
 						property.SetValue(result, DeserializeValue(reader, property.PropertyType, context), null);
 					}
 				}
@@ -704,6 +695,106 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 
 			return Type.GetType(tag.Substring(1), true);
+		}
+
+		/// <summary>
+		/// Convert a string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 
+		/// camel case (ThisIsATest).
+		/// </summary>
+		/// <param name="str">String to convert</param>
+		/// <returns>Converted string</returns>
+		private static string UnderscoresToCamelCase(string str)
+		{
+			str = Regex.Replace(str, "([_\\-])(?<char>[a-z])", match => match.Groups["char"].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
+			return char.ToUpper(str[0]) + str.Substring(1);
+		}
+
+		/// <summary>
+		/// Find the specified property on the specified type, taking aliases and property naming 
+		/// conventions into account
+		/// </summary>
+		/// <param name="name">Name of the property to find</param>
+		/// <param name="type">Type to locate the property on</param>
+		/// <returns>The property</returns>
+		/// <exception cref="SerializationException">Thrown when the specified property cannot be found</exception>
+		private PropertyInfo FindProperty(string name, Type type)
+		{
+			// Ensure a cache key is created for this type
+			if (!resolvedProperties.ContainsKey(type))
+			{
+				resolvedProperties.Add(type, new Dictionary<string, PropertyInfo>());
+			}
+
+			// Check if it's already cached
+			if (resolvedProperties[type].ContainsKey(name))
+			{
+				return resolvedProperties[type][name];
+			}
+
+			var mapping = GetPropertyAliases(type);
+
+			// All the possible property names
+			var possibleProperties = new[]
+			{
+				// As is (ie. YAML maps directly to .NET object)
+				name, 
+				// First letter uppercase (standard .NET property convention)
+				char.ToUpper(name[0]) + name.Substring(1),
+				// Underscores converted to camel case (eg. part_no -> PartNo)
+				UnderscoresToCamelCase(name),
+			}.Distinct();
+
+			var propertyName = possibleProperties.FirstOrDefault(mapping.ContainsKey);
+			if (propertyName == null)
+			{
+				throw new SerializationException(
+					string.Format(
+						CultureInfo.InvariantCulture,
+						"Property '{0}' not found on type '{1}'. Attempted properties: {2}",
+						name,
+						type.FullName,
+						string.Join(", ", possibleProperties.ToArray())
+					)
+				);
+			}
+
+			// Cache it so we don't have to do this all over again
+			resolvedProperties[type].Add(name, mapping[propertyName]);
+			return mapping[propertyName];
+		}
+
+		/// <summary>
+		/// Gets a mapping of property name to property. For any properties that have the 
+		/// <see cref="YamlAliasAttribute"/>, the aliased property name will be used instead
+		/// of the real property name.
+		/// </summary>
+		/// <param name="type">Type to retrieve aliases for</param>
+		/// <returns>Aliases for this type</returns>
+		private IDictionary<string, PropertyInfo> GetPropertyAliases(Type type)
+		{
+			// Check if it's already cached
+			if (propertyAliases.ContainsKey(type))
+			{
+				return propertyAliases[type];
+			}
+			
+			var mapping = new Dictionary<string, PropertyInfo>();
+			foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+			{
+				// Default to the property name
+				var alias = property.Name;
+
+				// Check if it has a custom aliases
+				var aliasProps = property.GetCustomAttributes(typeof(YamlAliasAttribute), true);
+				if (aliasProps.Length != 0)
+					alias = ((YamlAliasAttribute)aliasProps[0]).Alias;
+
+				mapping.Add(alias, property);
+			}
+
+			// Cache this mapping for later
+			propertyAliases.Add(type, mapping);
+			return mapping;
 		}
 		#endregion
 	}
