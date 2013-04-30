@@ -580,6 +580,22 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 		[Fact]
+		public void SerializationIncludesNullWhenAsked_BugFix()
+		{
+			var serializer = new Serializer();
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				var original = new { MyString = (string)null };
+				serializer.Serialize(buffer, original, original.GetType(), SerializationOptions.EmitDefaults);
+
+				Console.WriteLine(buffer.ToString());
+
+				Assert.True(buffer.ToString().Contains("MyString"));
+			}
+		}
+
+		[Fact]
 		public void SerializationIncludesNullWhenAsked()
 		{
 			var serializer = new Serializer();
