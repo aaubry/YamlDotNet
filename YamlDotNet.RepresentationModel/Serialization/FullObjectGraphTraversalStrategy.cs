@@ -13,15 +13,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
 	{
+		protected readonly Serializer serializer;
 		private readonly int maxRecursion;
 
-		public FullObjectGraphTraversalStrategy(int maxRecursion)
+		public FullObjectGraphTraversalStrategy(Serializer serializer, int maxRecursion)
 		{
 			if(maxRecursion <= 0)
 			{
 				throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
 			}
 
+			this.serializer = serializer;
 			this.maxRecursion = maxRecursion;
 		}
 

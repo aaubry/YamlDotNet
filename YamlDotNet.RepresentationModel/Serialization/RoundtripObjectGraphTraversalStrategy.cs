@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
@@ -22,16 +23,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		//    base.TraverseObject(value, type, visitor);
 		//}
 
-		public RoundtripObjectGraphTraversalStrategy(int maxRecursion)
-			: base(maxRecursion)
+		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, int maxRecursion)
+			: base(serializer, maxRecursion)
 		{
 		}
 
 		protected override void SerializeProperties(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
 		{
-			if (!ReflectionUtility.HasDefaultConstructor(type))
+			if (!ReflectionUtility.HasDefaultConstructor(type) && !serializer.Converters.Any(c => c.Accepts(type)))
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor.", type));
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor or a type converter.", type));
 			}
 
 			base.SerializeProperties(value, type, visitor, currentDepth);
