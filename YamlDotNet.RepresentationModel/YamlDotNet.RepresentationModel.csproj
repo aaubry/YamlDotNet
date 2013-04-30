@@ -90,6 +90,7 @@
     <Compile Include="Serialization\EmittingObjectGraphVisitor.cs" />
     <Compile Include="Serialization\IObjectFactory.cs" />
     <Compile Include="Serialization\LambdaObjectFactory.cs" />
+    <Compile Include="Serialization\SerializationPropertyNaming.cs" />
     <Compile Include="Serialization\Serializer.cs" />
     <Compile Include="Serialization\WriterEventEmitter.cs" />
     <Compile Include="Serialization\EventInfo.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Serialization\TypeAssigningEventEmitter.cs" />
     <Compile Include="Serialization\YamlAliasAttribute.cs" />
     <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />
