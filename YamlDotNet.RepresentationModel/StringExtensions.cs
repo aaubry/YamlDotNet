@@ -7,6 +7,7 @@ namespace YamlDotNet.RepresentationModel
 	/// </summary>
 	public static class StringExtensions
 	{
+
 		/// <summary>
 		/// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 
 		/// camel case (thisIsATest). Camel case is the same as Pascal case, except the first letter
@@ -41,8 +42,11 @@ namespace YamlDotNet.RepresentationModel
 		/// <returns>Converted string</returns>
 		public static string FromCamelCase(this string str, string separator)
 		{
+			// Ensure first letter is always lowercase
+			str = char.ToLower(str[0]) + str.Substring(1);
+
 			str = Regex.Replace(str.ToCamelCase(), "(?<char>[A-Z])", match => separator + match.Groups["char"].Value.ToLowerInvariant());
-			return char.ToLower(str[0]) + str.Substring(1);
+			return str;
 		}
 	}
 }
