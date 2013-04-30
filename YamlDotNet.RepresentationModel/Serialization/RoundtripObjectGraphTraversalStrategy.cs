@@ -22,8 +22,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		//    base.TraverseObject(value, type, visitor);
 		//}
 
-		public RoundtripObjectGraphTraversalStrategy(int maxRecursion)
-			: base(maxRecursion)
+		public RoundtripObjectGraphTraversalStrategy(int maxRecursion, SerializationPropertyNaming naming = SerializationPropertyNaming.Standard)
+			: base(maxRecursion, naming)
 		{
 		}
 

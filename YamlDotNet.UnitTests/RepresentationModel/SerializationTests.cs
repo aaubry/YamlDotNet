@@ -737,6 +737,47 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.Same(result[1], result[2]);
 		}
 
+		[Fact]
+		public void SerializeUsingCamelCaseNaming()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, SerializationPropertyNaming.CamelCase);
+			Assert.Contains("foo: bar", result);
+			Assert.Contains("moreFoo: More bar", result);
+			Assert.Contains("evenMoreFoo: Awesome", result);
+		}
+
+		[Fact]
+		public void SerializeUsingPascalCaseNaming()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, SerializationPropertyNaming.PascalCase);
+			Assert.Contains("Foo: bar", result);
+			Assert.Contains("MoreFoo: More bar", result);
+			Assert.Contains("EvenMoreFoo: Awesome", result);
+		}
+
+
+		[Fact]
+		public void SerializeUsingHyphenation()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, SerializationPropertyNaming.Hyphenated);
+			Assert.Contains("foo: bar", result);
+			Assert.Contains("more-foo: More bar", result);
+			Assert.Contains("even-more-foo: Awesome", result);
+		}
+
+		private string SerializeWithNaming<T>(T input, SerializationPropertyNaming naming)
+		{
+			var serializer = new Serializer();
+			using (var writer = new StringWriter())
+			{
+				serializer.Serialize(writer, input, typeof(T), SerializationOptions.None, naming);
+				return writer.ToString();
+			}
+		}
+
 		private T SerializeThenDeserialize<T>(T input)
 		{
 			Serializer serializer = new Serializer();

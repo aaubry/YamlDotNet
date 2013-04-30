@@ -14,8 +14,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
 	{
 		private readonly int maxRecursion;
+		private readonly Func<string, string> namingStrategy;
 
-		public FullObjectGraphTraversalStrategy(int maxRecursion)
+		public FullObjectGraphTraversalStrategy(int maxRecursion, SerializationPropertyNaming naming = SerializationPropertyNaming.Standard)
 		{
 			if(maxRecursion <= 0)
 			{
@@ -23,6 +24,36 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 
 			this.maxRecursion = maxRecursion;
+			this.namingStrategy = CreateNamingStrategy(naming);
+		}
+
+		/// <summary>
+		/// Factory method that creates the specified property naming strategy
+		/// </summary>
+		/// <param name="naming">Property naming strategy</param>
+		/// <returns>Function that implements the specified strategy</returns>
+		private static Func<string, string> CreateNamingStrategy(SerializationPropertyNaming naming)
+		{
+			switch (naming)
+			{
+				case SerializationPropertyNaming.Standard:
+					return name => name;
+
+				case SerializationPropertyNaming.CamelCase:
+					return StringExtensions.ToCamelCase;
+
+				case SerializationPropertyNaming.PascalCase:
+					return StringExtensions.ToPascalCase;
+
+				case SerializationPropertyNaming.Underscored:
+					return name => name.FromCamelCase("_");
+
+				case SerializationPropertyNaming.Hyphenated:
+					return name => name.FromCamelCase("-");
+
+				default:
+					throw new ArgumentException("Unrecognised property naming strategy: " + naming, "naming");
+			}
 		}
 
 		void IObjectGraphTraversalStrategy.Traverse(object graph, Type type, IObjectGraphVisitor visitor)
@@ -218,7 +249,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		protected string GetPropertyName(Type type, PropertyInfo property)
 		{
 			var aliasProps = property.GetCustomAttributes(typeof(YamlAliasAttribute), true);
-			return aliasProps.Length == 0 ? property.Name : ((YamlAliasAttribute)aliasProps[0]).Alias;
+			return aliasProps.Length == 0 
+				? namingStrategy(property.Name)
+				: ((YamlAliasAttribute)aliasProps[0]).Alias;
 		}
 
 		private static Type GetObjectType(object value)
