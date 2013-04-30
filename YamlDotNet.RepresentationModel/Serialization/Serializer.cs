@@ -71,14 +71,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public sealed class Serializer
 	{
-		private readonly IList<IYamlTypeConverter> converters = new List<IYamlTypeConverter>();
+		internal IList<IYamlTypeConverter> Converters { get; private set; }
+
+		public Serializer()
+		{
+			Converters = new List<IYamlTypeConverter>();
+		}
 
 		/// <summary>
 		/// Registers a type converter to be used to serialize and deserialize specific types.
 		/// </summary>
 		public void RegisterTypeConverter(IYamlTypeConverter converter)
 		{
-			converters.Add(converter);
+			Converters.Add(converter);
 		}
 
 		/// <summary>
@@ -155,7 +160,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
-			emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, converters);
+			emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
 
 			if ((options & SerializationOptions.DisableAliases) == 0)
 			{
@@ -191,11 +196,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			if ((options & SerializationOptions.Roundtrip) != 0)
 			{
-				return new RoundtripObjectGraphTraversalStrategy(50);
+				return new RoundtripObjectGraphTraversalStrategy(this, 50);
 			}
 			else
 			{
-				return new FullObjectGraphTraversalStrategy(50);
+				return new FullObjectGraphTraversalStrategy(this, 50);
 			}
 		}
 	}
