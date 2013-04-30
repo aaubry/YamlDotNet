@@ -21,6 +21,7 @@
 
 using System;
 using System.Drawing;
+using System.Linq;
 using Xunit;
 using System.IO;
 using YamlDotNet.RepresentationModel.Serialization;
@@ -332,7 +333,21 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.Equal(4, list[1]);
 			Assert.Equal(5, list[2]);
 		}
-		
+
+		[Fact]
+		public void DeserializeEnumerable()
+		{
+			Z[] z = new[] { new Z() { aaa = "Yo" }};
+			Serializer serializer = new Serializer();
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, z);
+
+			YamlSerializer<IEnumerable<Z>> deserializer = new YamlSerializer<IEnumerable<Z>>();
+			IEnumerable<Z> result = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			Assert.Equal(1, result.Count());
+			Assert.Equal("Yo", result.First().aaa);
+		}
+
 		[Fact]
 		public void RoundtripList()
 		{
