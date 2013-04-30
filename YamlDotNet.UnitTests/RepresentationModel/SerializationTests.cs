@@ -780,7 +780,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			string serialized = writer.ToString();
 
 			// Ensure serialisation is correct
-			Assert.Equal("fourthTest: Fourth", serialized);
+			Assert.Equal("fourthTest: Fourth", serialized.TrimEnd('\r', '\n'));
 
 			var deserializer = new YamlSerializer<ConventionTest>();
 			var output = deserializer.Deserialize(new StringReader(serialized));
