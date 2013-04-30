@@ -71,14 +71,22 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
 				default:
-					if (value == null)
+					if (value == null || type == typeof(TimeSpan))
 					{
 						visitor.VisitScalar(value, type);
+						break;
 					}
-					else
+
+					Type underlyingType = Nullable.GetUnderlyingType(type);
+					if (underlyingType == null)
 					{
 						TraverseObject(value, type, visitor, currentDepth);
+						break;
 					}
+
+					// This is a nullable type, recursively handle it with its underlying type.
+					// Not that if it contains null, the condition above already took care of it
+					Traverse(value, underlyingType, visitor, currentDepth);
 					break;
 			}
 		}
