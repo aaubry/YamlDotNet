@@ -61,6 +61,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					break;
 
 				default:
+					if (eventInfo.SourceType == typeof(TimeSpan))
+					{
+						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
+						eventInfo.Style = ScalarStyle.DoubleQuoted;
+						break;
+					}
+
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 
@@ -142,6 +149,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					break;
 
 				default:
+					if (eventInfo.SourceType == typeof(TimeSpan))
+					{
+						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
+						eventInfo.Style = ScalarStyle.DoubleQuoted;
+						break;
+					}
+
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 
@@ -178,6 +192,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public static string FormatDateTime(object dateTime)
 		{
 			return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
+		}
+
+		public static string FormatTimeSpan(object timeSpan)
+		{
+			return ((TimeSpan)timeSpan).ToString();
 		}
 	}
 }
