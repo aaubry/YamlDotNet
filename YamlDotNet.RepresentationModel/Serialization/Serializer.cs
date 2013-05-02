@@ -92,9 +92,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		public void Serialize(TextWriter writer, object graph, SerializationOptions options = SerializationOptions.None)
+		/// <param name="naming">Naming strategy to use for serialized property names</param>
+		public void Serialize(TextWriter writer, object graph, SerializationOptions options = SerializationOptions.None, SerializationPropertyNaming naming = SerializationPropertyNaming.Standard)
 		{
-			Serialize(new Emitter(writer), graph, options);
+			Serialize(new Emitter(writer), graph, options, naming);
 		}
 
 		/// <summary>
@@ -104,9 +105,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="type">The static type of the object to serialize.</param>
 		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		public void Serialize(TextWriter writer, object graph, Type type, SerializationOptions options = SerializationOptions.None)
+		/// <param name="naming">Naming strategy to use for serialized property names</param>
+		public void Serialize(TextWriter writer, object graph, Type type, SerializationOptions options = SerializationOptions.None, SerializationPropertyNaming naming = SerializationPropertyNaming.Standard)
 		{
-			Serialize(new Emitter(writer), graph, type, options);
+			Serialize(new Emitter(writer), graph, type, options, naming);
 		}
 
 		/// <summary>
@@ -115,9 +117,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="emitter">The <see cref="Emitter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		public void Serialize(Emitter emitter, object graph, SerializationOptions options = SerializationOptions.None)
+		/// <param name="naming">Naming strategy to use for serialized property names</param>
+		public void Serialize(Emitter emitter, object graph, SerializationOptions options = SerializationOptions.None, SerializationPropertyNaming naming = SerializationPropertyNaming.Standard)
 		{
-			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object), options);
+			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object), options, naming);
 		}
 
 		/// <summary>
@@ -127,7 +130,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="type">The static type of the object to serialize.</param>
 		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		public void Serialize(Emitter emitter, object graph, Type type, SerializationOptions options = SerializationOptions.None)
+		/// <param name="naming">Naming strategy to use for serialized property names</param>
+		public void Serialize(Emitter emitter, object graph, Type type, SerializationOptions options = SerializationOptions.None, SerializationPropertyNaming naming = SerializationPropertyNaming.Standard)
 		{
 			if (emitter == null)
 			{
@@ -139,7 +143,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new ArgumentNullException("type");
 			}
 
-			var traversalStrategy = CreateTraversalStrategy(options);
+			var traversalStrategy = CreateTraversalStrategy(options, naming);
 			var eventEmitter = CreateEventEmitter(emitter, options);
 			var emittingVisitor = CreateEmittingVisitor(emitter, options, traversalStrategy, eventEmitter, graph, type);
 			EmitDocument(emitter, traversalStrategy, emittingVisitor, graph, type);
@@ -192,7 +196,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
-		private IObjectGraphTraversalStrategy CreateTraversalStrategy(SerializationOptions options)
+		private IObjectGraphTraversalStrategy CreateTraversalStrategy(SerializationOptions options, SerializationPropertyNaming naming)
 		{
 			if ((options & SerializationOptions.Roundtrip) != 0)
 			{
