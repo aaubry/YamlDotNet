@@ -535,7 +535,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			object result;
 
-			Type iCollection = ReflectionUtility.GetImplementedGenericInterface(type, typeof(ICollection<>));
+			Type iCollection = ReflectionUtility.GetImplementedGenericInterface(type, typeof (ICollection<>)) ??
+			                   ReflectionUtility.GetImplementedGenericInterface(type, typeof (IEnumerable<>));
 			if (iCollection != null)    // Generic list
 			{
 				Type[] iCollectionArguments = iCollection.GetGenericArguments();
