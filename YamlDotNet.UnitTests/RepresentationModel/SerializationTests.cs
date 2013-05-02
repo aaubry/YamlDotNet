@@ -23,6 +23,7 @@ using System;
 using System.Drawing;
 using Xunit;
 using System.IO;
+using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
 using System.Collections;
@@ -554,15 +555,47 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			#endregion
 		}
 
-		//[Fact]
-		//public void DeserializeTypeConverter()
-		//{
-		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
-		//    object result = serializer.Deserialize(YamlFile("converter.yaml"));
+		class SomeCustomeType
+		{
+			// Test specifically with no parameterless, supposed to fail unless a type converter is specified
+			public SomeCustomeType(string value) { Value = value; }
+			public string Value;
+		}
 
-		//    Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-		//    Assert.Equal("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
-		//}
+		public class CustomTypeConverter : IYamlTypeConverter
+		{
+			public bool Accepts(Type type) { return type == typeof(SomeCustomeType); }
+
+			public object ReadYaml(Parser parser, Type type)
+			{
+				var value = ((Scalar)parser.Current).Value;
+				parser.MoveNext();
+				return new SomeCustomeType(value);
+			}
+
+			public void WriteYaml(Emitter emitter, object value, Type type)
+			{
+				emitter.Emit(new Scalar(((SomeCustomeType)value).Value));
+			}
+		}
+
+		[Fact]
+		public void RoundtripWithTypeConverter()
+		{
+			SomeCustomeType x = new SomeCustomeType("Yo");
+			var serializer = new Serializer();
+			serializer.RegisterTypeConverter(new CustomTypeConverter());
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, x, SerializationOptions.Roundtrip);
+
+			Console.WriteLine(buffer.ToString());
+
+			var deserializer = new YamlSerializer<SomeCustomeType>(YamlSerializerModes.Roundtrip);
+			deserializer.RegisterTypeConverter(new CustomTypeConverter());
+
+			var copy = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			Assert.Equal("Yo", copy.Value);
+		}
 
 		[Fact]
 		public void RoundtripDictionary()
