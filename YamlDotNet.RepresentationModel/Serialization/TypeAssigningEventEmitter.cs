@@ -64,7 +64,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					if (eventInfo.SourceType == typeof(TimeSpan))
 					{
 						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
-						eventInfo.Style = ScalarStyle.DoubleQuoted;
 						break;
 					}
 
@@ -152,7 +151,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					if (eventInfo.SourceType == typeof(TimeSpan))
 					{
 						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
-						eventInfo.Style = ScalarStyle.DoubleQuoted;
 						break;
 					}
 
