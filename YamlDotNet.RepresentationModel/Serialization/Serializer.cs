@@ -200,11 +200,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			if ((options & SerializationOptions.Roundtrip) != 0)
 			{
-				return new RoundtripObjectGraphTraversalStrategy(this, 50);
+				var typeDescriptor = new ReadableAndWritablePropertiesTypeDescriptor();
+				return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, 50);
 			}
 			else
 			{
-				return new FullObjectGraphTraversalStrategy(this, 50);
+				var typeDescriptor = new ReadableAndWritablePropertiesTypeDescriptor();
+				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, 50);
 			}
 		}
 	}

@@ -15,15 +15,24 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	{
 		protected readonly Serializer serializer;
 		private readonly int maxRecursion;
+		private readonly ITypeDescriptor typeDescriptor;
 
-		public FullObjectGraphTraversalStrategy(Serializer serializer, int maxRecursion)
+		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, int maxRecursion)
 		{
-			if(maxRecursion <= 0)
+			if (maxRecursion <= 0)
 			{
 				throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
 			}
 
 			this.serializer = serializer;
+
+			if (typeDescriptor == null)
+			{
+				throw new ArgumentNullException("typeDescriptor");
+			}
+
+			this.typeDescriptor = typeDescriptor;
+
 			this.maxRecursion = maxRecursion;
 		}
 
@@ -39,7 +48,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new InvalidOperationException("Too much recursion when traversing the object graph");
 			}
 
-			if(!visitor.Enter(value, type))
+			if (!visitor.Enter(value, type))
 			{
 				return;
 			}
@@ -186,15 +195,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			visitor.VisitMappingStart(value, type, typeof(string), typeof(object));
 
-			foreach (var property in GetTraversableProperties(type))
+			foreach (var propertyDescriptor in typeDescriptor.GetProperties(type))
 			{
-				var propertyValue = property.GetValue(value, null);
-				var propertyType = property.PropertyType;
-				var propertyName = GetPropertyName(type, property);
+				var propertyValue = propertyDescriptor.Property.GetValue(value, null);
+				var propertyType = propertyDescriptor.Property.PropertyType;
 
-				if(visitor.EnterMapping(propertyName, typeof(string), propertyValue, propertyType))
+				if (visitor.EnterMapping(propertyDescriptor.Name, typeof(string), propertyValue, propertyType))
 				{
-					Traverse(propertyName, typeof(string), visitor, currentDepth);
+					Traverse(propertyDescriptor.Name, typeof(string), visitor, currentDepth);
 					Traverse(propertyValue, propertyType, visitor, currentDepth);
 				}
 			}
@@ -202,30 +210,125 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			visitor.VisitMappingEnd(value, type);
 		}
 
-		private IEnumerable<PropertyInfo> GetTraversableProperties(Type type)
-		{
-			return type
-				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-				.Where(IsTraversableProperty);
-		}
-
-		protected virtual bool IsTraversableProperty(PropertyInfo property)
-		{
-			return
-				property.CanRead &&
-				property.GetGetMethod().GetParameters().Length == 0 &&
-				property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
-		}
-
-		protected string GetPropertyName(Type type, PropertyInfo property)
-		{
-			var aliasProps = property.GetCustomAttributes(typeof(YamlAliasAttribute), true);
-			return aliasProps.Length == 0 ? property.Name : ((YamlAliasAttribute)aliasProps[0]).Alias;
-		}
-
 		private static Type GetObjectType(object value)
 		{
 			return value != null ? value.GetType() : typeof(object);
+		}
+	}
+
+	public interface IPropertyDescriptor
+	{
+		string Name { get; }
+		PropertyInfo Property { get; }
+	}
+
+	public interface ITypeDescriptor
+	{
+		IEnumerable<IPropertyDescriptor> GetProperties(Type type);
+	}
+
+	public class ReadablePropertiesTypeDescriptor : ITypeDescriptor
+	{
+		private sealed class PropertyDescriptor : IPropertyDescriptor
+		{
+			public PropertyDescriptor(PropertyInfo propertyInfo)
+			{
+				if (propertyInfo == null)
+				{
+					throw new ArgumentNullException("propertyInfo");
+				}
+
+				Property = propertyInfo;
+			}
+
+			public PropertyInfo Property { get; private set; }
+
+			public string Name
+			{
+				get { return Property.Name; }
+			}
+		}
+
+		public virtual IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		{
+			return type
+				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+				.Where(p => p.CanRead && p.GetGetMethod().GetParameters().Length == 0)
+				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p));
+		}
+	}
+
+	public sealed class ReadableAndWritablePropertiesTypeDescriptor : ReadablePropertiesTypeDescriptor
+	{
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		{
+			return base.GetProperties(type)
+				.Where(p => p.Property.CanWrite);
+		}
+	}
+
+	public sealed class NamingConventionTypeDescriptor : ITypeDescriptor
+	{
+		private readonly ITypeDescriptor innerTypeDescriptor;
+		private readonly INamingConvention namingConvention;
+
+		public NamingConventionTypeDescriptor(ITypeDescriptor innerTypeDescriptor, INamingConvention namingConvention)
+		{
+			if (innerTypeDescriptor == null)
+			{
+				throw new ArgumentNullException("innerTypeDescriptor");
+			}
+
+			this.innerTypeDescriptor = innerTypeDescriptor;
+
+			if (namingConvention == null)
+			{
+				throw new ArgumentNullException("namingConvention");
+			}
+
+			this.namingConvention = namingConvention;
+		}
+
+		private sealed class PropertyDescriptor : IPropertyDescriptor
+		{
+			public PropertyDescriptor(PropertyInfo property, string name)
+			{
+				if (property == null)
+				{
+					throw new ArgumentNullException("property");
+				}
+
+				Property = property;
+
+				if (name == null)
+				{
+					throw new ArgumentNullException("name");
+				}
+
+				Name = name;
+			}
+
+			public PropertyInfo Property { get; private set; }
+			public string Name { get; private set; }
+		}
+
+		IEnumerable<IPropertyDescriptor> ITypeDescriptor.GetProperties(Type type)
+		{
+			return innerTypeDescriptor.GetProperties(type)
+				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p.Property, namingConvention.Apply(p.Name)));
+		}
+	}
+
+	public interface INamingConvention
+	{
+		string Apply(string value);
+	}
+
+	public sealed class PascalCaseNamingConvention : INamingConvention
+	{
+		public string Apply(string value)
+		{
+			return value.ToPascalCase();
 		}
 	}
 }
