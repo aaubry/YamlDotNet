@@ -197,6 +197,35 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
+		[Fact]
+		public void RoundtripWithDefaults()
+		{
+			var serializer = new Serializer();
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X();
+				serializer.Serialize(buffer, original, SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
+
+				Console.WriteLine(buffer.ToString());
+
+				var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
+				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
+
+				foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+				{
+					if (property.CanRead && property.CanWrite)
+					{
+						Assert.Equal(
+							property.GetValue(original, null),
+							property.GetValue(copy, null)
+						);
+					}
+				}
+			}
+		}
+
+
 		private class Y
 		{
 			private Y child;
