@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +16,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	{
 		protected readonly Serializer serializer;
 		private readonly int maxRecursion;
+        public bool EmitDefaults { get; set; }
 
 		public FullObjectGraphTraversalStrategy(Serializer serializer, int maxRecursion)
 		{
@@ -87,7 +89,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					}
 
 					// This is a nullable type, recursively handle it with its underlying type.
-					// Not that if it contains null, the condition above already took care of it
+					// Note that if it contains null, the condition above already took care of it
 					Traverse(value, underlyingType, visitor, currentDepth);
 					break;
 			}
@@ -186,11 +188,25 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			visitor.VisitMappingStart(value, type, typeof(string), typeof(object));
 
+			var props = TypeDescriptor.GetProperties(type);
+
 			foreach (var property in GetTraversableProperties(type))
 			{
 				var propertyValue = property.GetValue(value, null);
 				var propertyType = property.PropertyType;
 				var propertyName = GetPropertyName(type, property);
+
+				if (!EmitDefaults)
+				{
+					if ((propertyType.IsValueType && propertyValue == Activator.CreateInstance(propertyType)) || propertyValue == null)
+						continue;
+
+					var defaultAttr = (DefaultValueAttribute)props[property.Name].Attributes[typeof (DefaultValueAttribute)];
+
+					if (defaultAttr != null && propertyValue.Equals(defaultAttr.Value))
+						continue;
+				}
+
 
 				if(visitor.EnterMapping(propertyName, typeof(string), propertyValue, propertyType))
 				{

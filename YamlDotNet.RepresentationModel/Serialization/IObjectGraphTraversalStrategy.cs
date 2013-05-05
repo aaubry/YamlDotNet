@@ -14,5 +14,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="type">The static type of the graph.</param>
 		/// <param name="visitor">An <see cref="IObjectGraphVisitor"/> that is to be notified during the traversal.</param>
 		void Traverse(object graph, Type type, IObjectGraphVisitor visitor);
+
+	    /// <summary>
+	    /// Defines whether the traversal should include elements which contain the default value (e.g. null)
+	    /// </summary>
+	    bool EmitDefaults { get; set; }
 	}
 }

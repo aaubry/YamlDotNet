@@ -170,11 +170,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
 			}
 
-			if ((options & SerializationOptions.EmitDefaults) == 0)
-			{
-				emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
-			}
-
 			return emittingVisitor;
 		}
 
@@ -194,14 +189,20 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private IObjectGraphTraversalStrategy CreateTraversalStrategy(SerializationOptions options)
 		{
+		    IObjectGraphTraversalStrategy strategy;
+
 			if ((options & SerializationOptions.Roundtrip) != 0)
 			{
-				return new RoundtripObjectGraphTraversalStrategy(this, 50);
+				strategy = new RoundtripObjectGraphTraversalStrategy(this, 50);
 			}
 			else
 			{
-				return new FullObjectGraphTraversalStrategy(this, 50);
+				strategy = new FullObjectGraphTraversalStrategy(this, 50);
 			}
+
+		    strategy.EmitDefaults = (options & SerializationOptions.EmitDefaults) != 0;
+
+		    return strategy;
 		}
 	}
 }

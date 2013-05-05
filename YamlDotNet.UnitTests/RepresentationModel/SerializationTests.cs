@@ -70,6 +70,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			private int myInt = 1234;
 
+			[DefaultValue(666)]
 			public int MyInt
 			{
 				get
@@ -766,6 +767,22 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
 
 				Assert.Null(copy.MyString);
+			}
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsRespected()
+		{
+			var serializer = new Serializer();
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X { MyInt = 666 };
+				serializer.Serialize(buffer, original, typeof(X));
+
+				Console.WriteLine(buffer.ToString());
+
+				Assert.False(buffer.ToString().Contains("MyInt"));
 			}
 		}
 
