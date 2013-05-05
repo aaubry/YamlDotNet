@@ -49,9 +49,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\CommonAssemblyInfo.cs">
-      <Link>CommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="Converters\Xml\XmlConverterTests.cs" />
     <Compile Include="Core\EmitterTests.cs" />
     <Compile Include="Core\InsertionQueueTests.cs" />
@@ -63,7 +60,7 @@
     <Compile Include="RepresentationModel\ObjectFactoryTests.cs" />
     <Compile Include="RepresentationModel\Samples.cs" />
     <Compile Include="RepresentationModel\SerializationTests.cs" />
-    <Compile Include="RepresentationModel\StringExtensionTests.cs" />
+    <Compile Include="RepresentationModel\NamingConventionTests.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />
     <Compile Include="Runner.cs" />
     <Compile Include="TracingVisitor.cs" />

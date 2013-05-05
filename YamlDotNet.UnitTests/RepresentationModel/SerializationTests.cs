@@ -32,10 +32,10 @@ using System.Collections.Generic;
 using YamlDotNet.Core.Events;
 using System.Globalization;
 using System.ComponentModel;
+using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[CLSCompliant(false)]
 	public class SerializationTests : YamlTest
 	{
 		private class X
@@ -461,7 +461,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 		
-		[CLSCompliant(false)]
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
@@ -789,7 +788,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void SerializeUsingCamelCaseNaming()
 		{
 			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-			var result = SerializeWithNaming(obj, SerializationPropertyNaming.CamelCase);
+			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
 			Assert.Contains("foo: bar", result);
 			Assert.Contains("moreFoo: More bar", result);
 			Assert.Contains("evenMoreFoo: Awesome", result);
@@ -799,7 +798,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void SerializeUsingPascalCaseNaming()
 		{
 			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-			var result = SerializeWithNaming(obj, SerializationPropertyNaming.PascalCase);
+			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
 
 			Console.WriteLine(result);
 
@@ -813,13 +812,13 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void SerializeUsingHyphenation()
 		{
 			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
-			var result = SerializeWithNaming(obj, SerializationPropertyNaming.Hyphenated);
+			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
 			Assert.Contains("foo: bar", result);
 			Assert.Contains("more-foo: More bar", result);
 			Assert.Contains("even-more-foo: Awesome", result);
 		}
 
-		private string SerializeWithNaming<T>(T input, SerializationPropertyNaming naming)
+		private string SerializeWithNaming<T>(T input, INamingConvention naming)
 		{
 			var serializer = new Serializer();
 			using (var writer = new StringWriter())

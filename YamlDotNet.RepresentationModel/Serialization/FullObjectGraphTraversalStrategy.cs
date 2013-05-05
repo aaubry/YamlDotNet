@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
@@ -213,122 +212,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private static Type GetObjectType(object value)
 		{
 			return value != null ? value.GetType() : typeof(object);
-		}
-	}
-
-	public interface IPropertyDescriptor
-	{
-		string Name { get; }
-		PropertyInfo Property { get; }
-	}
-
-	public interface ITypeDescriptor
-	{
-		IEnumerable<IPropertyDescriptor> GetProperties(Type type);
-	}
-
-	public class ReadablePropertiesTypeDescriptor : ITypeDescriptor
-	{
-		private sealed class PropertyDescriptor : IPropertyDescriptor
-		{
-			public PropertyDescriptor(PropertyInfo propertyInfo)
-			{
-				if (propertyInfo == null)
-				{
-					throw new ArgumentNullException("propertyInfo");
-				}
-
-				Property = propertyInfo;
-			}
-
-			public PropertyInfo Property { get; private set; }
-
-			public string Name
-			{
-				get { return Property.Name; }
-			}
-		}
-
-		public virtual IEnumerable<IPropertyDescriptor> GetProperties(Type type)
-		{
-			return type
-				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-				.Where(p => p.CanRead && p.GetGetMethod().GetParameters().Length == 0)
-				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p));
-		}
-	}
-
-	public sealed class ReadableAndWritablePropertiesTypeDescriptor : ReadablePropertiesTypeDescriptor
-	{
-		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
-		{
-			return base.GetProperties(type)
-				.Where(p => p.Property.CanWrite);
-		}
-	}
-
-	public sealed class NamingConventionTypeDescriptor : ITypeDescriptor
-	{
-		private readonly ITypeDescriptor innerTypeDescriptor;
-		private readonly INamingConvention namingConvention;
-
-		public NamingConventionTypeDescriptor(ITypeDescriptor innerTypeDescriptor, INamingConvention namingConvention)
-		{
-			if (innerTypeDescriptor == null)
-			{
-				throw new ArgumentNullException("innerTypeDescriptor");
-			}
-
-			this.innerTypeDescriptor = innerTypeDescriptor;
-
-			if (namingConvention == null)
-			{
-				throw new ArgumentNullException("namingConvention");
-			}
-
-			this.namingConvention = namingConvention;
-		}
-
-		private sealed class PropertyDescriptor : IPropertyDescriptor
-		{
-			public PropertyDescriptor(PropertyInfo property, string name)
-			{
-				if (property == null)
-				{
-					throw new ArgumentNullException("property");
-				}
-
-				Property = property;
-
-				if (name == null)
-				{
-					throw new ArgumentNullException("name");
-				}
-
-				Name = name;
-			}
-
-			public PropertyInfo Property { get; private set; }
-			public string Name { get; private set; }
-		}
-
-		IEnumerable<IPropertyDescriptor> ITypeDescriptor.GetProperties(Type type)
-		{
-			return innerTypeDescriptor.GetProperties(type)
-				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p.Property, namingConvention.Apply(p.Name)));
-		}
-	}
-
-	public interface INamingConvention
-	{
-		string Apply(string value);
-	}
-
-	public sealed class PascalCaseNamingConvention : INamingConvention
-	{
-		public string Apply(string value)
-		{
-			return value.ToPascalCase();
 		}
 	}
 }

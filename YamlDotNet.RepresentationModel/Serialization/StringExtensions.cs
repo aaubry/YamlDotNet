@@ -1,11 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
 	/// Various string extension methods
 	/// </summary>
-	public static class StringExtensions
+	internal static class StringExtensions
 	{
 
 		/// <summary>
