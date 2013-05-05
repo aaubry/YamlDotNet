@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
@@ -15,15 +14,24 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	{
 		protected readonly Serializer serializer;
 		private readonly int maxRecursion;
+		private readonly ITypeDescriptor typeDescriptor;
 
-		public FullObjectGraphTraversalStrategy(Serializer serializer, int maxRecursion)
+		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, int maxRecursion)
 		{
-			if(maxRecursion <= 0)
+			if (maxRecursion <= 0)
 			{
 				throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
 			}
 
 			this.serializer = serializer;
+
+			if (typeDescriptor == null)
+			{
+				throw new ArgumentNullException("typeDescriptor");
+			}
+
+			this.typeDescriptor = typeDescriptor;
+
 			this.maxRecursion = maxRecursion;
 		}
 
@@ -39,7 +47,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new InvalidOperationException("Too much recursion when traversing the object graph");
 			}
 
-			if(!visitor.Enter(value, type))
+			if (!visitor.Enter(value, type))
 			{
 				return;
 			}
@@ -186,41 +194,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			visitor.VisitMappingStart(value, type, typeof(string), typeof(object));
 
-			foreach (var property in GetTraversableProperties(type))
+			foreach (var propertyDescriptor in typeDescriptor.GetProperties(type))
 			{
-				var propertyValue = property.GetValue(value, null);
-				var propertyType = property.PropertyType;
-				var propertyName = GetPropertyName(type, property);
+				var propertyValue = propertyDescriptor.Property.GetValue(value, null);
+				var propertyType = propertyDescriptor.Property.PropertyType;
 
-				if(visitor.EnterMapping(propertyName, typeof(string), propertyValue, propertyType))
+				if (visitor.EnterMapping(propertyDescriptor.Name, typeof(string), propertyValue, propertyType))
 				{
-					Traverse(propertyName, typeof(string), visitor, currentDepth);
+					Traverse(propertyDescriptor.Name, typeof(string), visitor, currentDepth);
 					Traverse(propertyValue, propertyType, visitor, currentDepth);
 				}
 			}
 
 			visitor.VisitMappingEnd(value, type);
-		}
-
-		private IEnumerable<PropertyInfo> GetTraversableProperties(Type type)
-		{
-			return type
-				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-				.Where(IsTraversableProperty);
-		}
-
-		protected virtual bool IsTraversableProperty(PropertyInfo property)
-		{
-			return
-				property.CanRead &&
-				property.GetGetMethod().GetParameters().Length == 0 &&
-				property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
-		}
-
-		protected string GetPropertyName(Type type, PropertyInfo property)
-		{
-			var aliasProps = property.GetCustomAttributes(typeof(YamlAliasAttribute), true);
-			return aliasProps.Length == 0 ? property.Name : ((YamlAliasAttribute)aliasProps[0]).Alias;
 		}
 
 		private static Type GetObjectType(object value)

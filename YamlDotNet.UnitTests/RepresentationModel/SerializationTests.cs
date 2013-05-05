@@ -32,10 +32,10 @@ using System.Collections.Generic;
 using YamlDotNet.Core.Events;
 using System.Globalization;
 using System.ComponentModel;
+using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[CLSCompliant(false)]
 	public class SerializationTests : YamlTest
 	{
 		private class X
@@ -490,7 +490,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 		
-		[CLSCompliant(false)]
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
@@ -812,6 +811,50 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.Equal(obj1.aaa, result[2].aaa);
 			Assert.Same(result[0], result[1]);
 			Assert.Same(result[1], result[2]);
+		}
+
+		[Fact]
+		public void SerializeUsingCamelCaseNaming()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
+			Assert.Contains("foo: bar", result);
+			Assert.Contains("moreFoo: More bar", result);
+			Assert.Contains("evenMoreFoo: Awesome", result);
+		}
+
+		[Fact]
+		public void SerializeUsingPascalCaseNaming()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
+
+			Console.WriteLine(result);
+
+			Assert.Contains("Foo: bar", result);
+			Assert.Contains("MoreFoo: More bar", result);
+			Assert.Contains("EvenMoreFoo: Awesome", result);
+		}
+
+
+		[Fact]
+		public void SerializeUsingHyphenation()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
+			Assert.Contains("foo: bar", result);
+			Assert.Contains("more-foo: More bar", result);
+			Assert.Contains("even-more-foo: Awesome", result);
+		}
+
+		private string SerializeWithNaming<T>(T input, INamingConvention naming)
+		{
+			var serializer = new Serializer();
+			using (var writer = new StringWriter())
+			{
+				serializer.Serialize(writer, input, typeof(T), SerializationOptions.None, naming);
+				return writer.ToString();
+			}
 		}
 
 		private T SerializeThenDeserialize<T>(T input)

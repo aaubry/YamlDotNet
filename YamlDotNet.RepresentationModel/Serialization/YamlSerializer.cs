@@ -696,18 +696,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		}
 
 		/// <summary>
-		/// Convert a string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 
-		/// camel case (ThisIsATest).
-		/// </summary>
-		/// <param name="str">String to convert</param>
-		/// <returns>Converted string</returns>
-		private static string UnderscoresToCamelCase(string str)
-		{
-			str = Regex.Replace(str, "([_\\-])(?<char>[a-z])", match => match.Groups["char"].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
-			return char.ToUpper(str[0]) + str.Substring(1);
-		}
-
-		/// <summary>
 		/// Find the specified property on the specified type, taking aliases and property naming 
 		/// conventions into account
 		/// </summary>
@@ -738,8 +726,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				name, 
 				// First letter uppercase (standard .NET property convention)
 				char.ToUpper(name[0]) + name.Substring(1),
-				// Underscores converted to camel case (eg. part_no -> PartNo)
-				UnderscoresToCamelCase(name),
+				// Underscores converted to pascal case (eg. part_no -> PartNo)
+				name.ToPascalCase(),
 			}.Distinct();
 
 			var propertyName = possibleProperties.FirstOrDefault(mapping.ContainsKey);
