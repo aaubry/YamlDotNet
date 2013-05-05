@@ -335,21 +335,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private bool IsNull(NodeEvent nodeEvent)
 		{
+			// http://yaml.org/type/null.html
+
 			if (nodeEvent.Tag == "tag:yaml.org,2002:null")
 			{
 				return true;
 			}
 
-			if (JsonCompatible)
-			{
-				var scalar = nodeEvent as Scalar;
-				if (scalar != null && scalar.Style == Core.ScalarStyle.Plain && scalar.Value == "null")
-				{
-					return true;
-				}
-			}
+			var scalar = nodeEvent as Scalar;
+			if (scalar == null)
+				return false;
 
-			return false;
+			var value = scalar.Value;
+			return value == "" || value == "~" || value == "null" || value == "Null" || value == "NULL";
 		}
 
 		private object DeserializeValueNotNull(EventReader reader, DeserializationContext context, INodeEvent nodeEvent, Type expectedType)
