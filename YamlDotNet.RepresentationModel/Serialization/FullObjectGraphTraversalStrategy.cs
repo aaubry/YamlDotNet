@@ -198,12 +198,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				if (!EmitDefaults)
 				{
-					if ((propertyType.IsValueType && propertyValue == Activator.CreateInstance(propertyType)) || propertyValue == null)
-						continue;
-
-					var defaultAttr = (DefaultValueAttribute)props[property.Name].Attributes[typeof (DefaultValueAttribute)];
-
-					if (defaultAttr != null && propertyValue.Equals(defaultAttr.Value))
+          var defaultAttr = (DefaultValueAttribute)props[property.Name].Attributes[typeof(DefaultValueAttribute)];
+          if (defaultAttr == null)
+          {
+            if ((propertyType.IsValueType && propertyValue == Activator.CreateInstance(propertyType)) || propertyValue == null)
+              continue;
+          }
+          else if (propertyValue.Equals(defaultAttr.Value))
 						continue;
 				}
 
