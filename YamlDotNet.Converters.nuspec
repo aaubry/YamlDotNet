@@ -17,7 +17,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\YamlDotNet.Converters\bin\Release\YamlDotNet.Converters.dll" target="lib" />
-		<file src="..\YamlDotNet.Converters\bin\Release\YamlDotNet.Converters.pdb" target="lib" />
+		<file src="..\YamlDotNet.Converters\bin\Release\YamlDotNet.Converters.dll" target="lib\net35" />
+		<file src="..\YamlDotNet.Converters\bin\Release\YamlDotNet.Converters.pdb" target="lib\net35" />
 	</files>
 </package>
