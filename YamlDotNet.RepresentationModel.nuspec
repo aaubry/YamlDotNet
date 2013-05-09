@@ -16,7 +16,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.dll" target="lib" />
-		<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.pdb" target="lib" />
+		<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.dll" target="lib\net35" />
+		<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.pdb" target="lib\net35" />
 	</files>
 </package>

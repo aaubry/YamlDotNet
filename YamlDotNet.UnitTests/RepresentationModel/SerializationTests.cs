@@ -21,8 +21,10 @@
 
 using System;
 using System.Drawing;
+using System.Linq;
 using Xunit;
 using System.IO;
+using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel.Serialization;
 using System.Reflection;
 using System.Collections;
@@ -31,10 +33,10 @@ using YamlDotNet.Core.Events;
 using System.Globalization;
 using System.ComponentModel;
 using YamlDotNet.Core;
+using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
-	[CLSCompliant(false)]
 	public class SerializationTests : YamlTest
 	{
 		private class X
@@ -123,6 +125,20 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				}
 			}
 
+			private TimeSpan myTimeSpan = TimeSpan.FromHours(1);
+
+			public TimeSpan MyTimeSpan
+			{
+				get
+				{
+					return myTimeSpan;
+				}
+				set
+				{
+					myTimeSpan = value;
+				}
+			}
+
 			private Point myPoint = new Point(100, 200);
 
 			public Point MyPoint
@@ -135,6 +151,22 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				{
 					myPoint = value;
 				}
+			}
+
+			private int? myNullableWithValue = 8;
+
+			public int? MyNullableWithValue
+			{
+				get { return myNullableWithValue; }
+				set { myNullableWithValue = value; }
+			}
+
+			private int? myNullableWithoutValue = null;
+
+			public int? MyNullableWithoutValue
+			{
+				get { return myNullableWithoutValue; }
+				set { myNullableWithoutValue = value; }
 			}
 		}
 
@@ -165,6 +197,35 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				}
 			}
 		}
+
+		[Fact]
+		public void RoundtripWithDefaults()
+		{
+			var serializer = new Serializer();
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				X original = new X();
+				serializer.Serialize(buffer, original, SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
+
+				Console.WriteLine(buffer.ToString());
+
+				var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
+				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
+
+				foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+				{
+					if (property.CanRead && property.CanWrite)
+					{
+						Assert.Equal(
+							property.GetValue(original, null),
+							property.GetValue(copy, null)
+						);
+					}
+				}
+			}
+		}
+
 
 		private class Y
 		{
@@ -316,6 +377,20 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 		[Fact]
+		public void DeserializeEnumerable()
+		{
+			Z[] z = new[] { new Z() { aaa = "Yo" }};
+			Serializer serializer = new Serializer();
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, z);
+
+			YamlSerializer<IEnumerable<Z>> deserializer = new YamlSerializer<IEnumerable<Z>>();
+			IEnumerable<Z> result = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			Assert.Equal(1, result.Count());
+			Assert.Equal("Yo", result.First().aaa);
+		}
+
+		[Fact]
 		public void RoundtripList()
 		{
 			var serializer = new Serializer();
@@ -429,7 +504,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			}
 		}
 
-		[CLSCompliant(false)]
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
@@ -538,15 +612,47 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			#endregion
 		}
 
-		//[Fact]
-		//public void DeserializeTypeConverter()
-		//{
-		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
-		//    object result = serializer.Deserialize(YamlFile("converter.yaml"));
+		class SomeCustomeType
+		{
+			// Test specifically with no parameterless, supposed to fail unless a type converter is specified
+			public SomeCustomeType(string value) { Value = value; }
+			public string Value;
+		}
 
-		//    Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-		//    Assert.Equal("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
-		//}
+		public class CustomTypeConverter : IYamlTypeConverter
+		{
+			public bool Accepts(Type type) { return type == typeof(SomeCustomeType); }
+
+			public object ReadYaml(Parser parser, Type type)
+			{
+				var value = ((Scalar)parser.Current).Value;
+				parser.MoveNext();
+				return new SomeCustomeType(value);
+			}
+
+			public void WriteYaml(Emitter emitter, object value, Type type)
+			{
+				emitter.Emit(new Scalar(((SomeCustomeType)value).Value));
+			}
+		}
+
+		[Fact]
+		public void RoundtripWithTypeConverter()
+		{
+			SomeCustomeType x = new SomeCustomeType("Yo");
+			var serializer = new Serializer();
+			serializer.RegisterTypeConverter(new CustomTypeConverter());
+			StringWriter buffer = new StringWriter();
+			serializer.Serialize(buffer, x, SerializationOptions.Roundtrip);
+
+			Console.WriteLine(buffer.ToString());
+
+			var deserializer = new YamlSerializer<SomeCustomeType>(YamlSerializerModes.Roundtrip);
+			deserializer.RegisterTypeConverter(new CustomTypeConverter());
+
+			var copy = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			Assert.Equal("Yo", copy.Value);
+		}
 
 		[Fact]
 		public void RoundtripDictionary()
@@ -591,6 +697,22 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			Assert.NotNull(parsed);
 			Assert.Equal(1, parsed.Count);
+		}
+
+		[Fact]
+		public void SerializationIncludesNullWhenAsked_BugFix()
+		{
+			var serializer = new Serializer();
+
+			using (StringWriter buffer = new StringWriter())
+			{
+				var original = new { MyString = (string)null };
+				serializer.Serialize(buffer, original, original.GetType(), SerializationOptions.EmitDefaults);
+
+				Console.WriteLine(buffer.ToString());
+
+				Assert.True(buffer.ToString().Contains("MyString"));
+			}
 		}
 
 		[Fact]
@@ -706,6 +828,50 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.Same(result[1], result[2]);
 		}
 
+		[Fact]
+		public void SerializeUsingCamelCaseNaming()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
+			Assert.Contains("foo: bar", result);
+			Assert.Contains("moreFoo: More bar", result);
+			Assert.Contains("evenMoreFoo: Awesome", result);
+		}
+
+		[Fact]
+		public void SerializeUsingPascalCaseNaming()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
+
+			Console.WriteLine(result);
+
+			Assert.Contains("Foo: bar", result);
+			Assert.Contains("MoreFoo: More bar", result);
+			Assert.Contains("EvenMoreFoo: Awesome", result);
+		}
+
+
+		[Fact]
+		public void SerializeUsingHyphenation()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
+			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
+			Assert.Contains("foo: bar", result);
+			Assert.Contains("more-foo: More bar", result);
+			Assert.Contains("even-more-foo: Awesome", result);
+		}
+
+		private string SerializeWithNaming<T>(T input, INamingConvention naming)
+		{
+			var serializer = new Serializer();
+			using (var writer = new StringWriter())
+			{
+				serializer.Serialize(writer, input, typeof(T), SerializationOptions.None, naming);
+				return writer.ToString();
+			}
+		}
+
 		private T SerializeThenDeserialize<T>(T input)
 		{
 			Serializer serializer = new Serializer();
@@ -718,6 +884,99 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			return YamlSerializer.Create(input).Deserialize(new StringReader(serialized));
 		}
 
+		private class ConventionTest
+		{
+			public string FirstTest { get; set; }
+			public string SecondTest { get; set; }
+			public string ThirdTest { get; set; }
+			[YamlAlias("fourthTest")]
+			public string AliasTest { get; set; }
+		}
+
+		[Fact]
+		public void DeserializeUsingConventions()
+		{
+			var serializer = new YamlSerializer<ConventionTest>();
+			var result = serializer.Deserialize(YamlFile("namingConvention.yaml"));
+
+			Assert.Equal("First", result.FirstTest);
+			Assert.Equal("Second", result.SecondTest);
+			Assert.Equal("Third", result.ThirdTest);
+			Assert.Equal("Fourth", result.AliasTest);
+		}
+
+		[Fact]
+		public void RoundtripAlias()
+		{
+			var input = new ConventionTest { AliasTest = "Fourth" };
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, input.GetType());
+			string serialized = writer.ToString();
+
+			// Ensure serialisation is correct
+			Assert.Equal("fourthTest: Fourth", serialized.TrimEnd('\r', '\n'));
+
+			var deserializer = new YamlSerializer<ConventionTest>();
+			var output = deserializer.Deserialize(new StringReader(serialized));
+
+			// Ensure round-trip retains value
+			Assert.Equal(input.AliasTest, output.AliasTest);
+		}
+
+		public class HasDefaults
+		{
+			public const string DefaultValue = "myDefault";
+
+			[DefaultValue(DefaultValue)]
+			public string Value { get; set; }
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsUsedWhenPresentWithoutEmitDefaults()
+		{
+			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+
+			Assert.False(serialized.Contains("Value"));
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsIgnoredWhenPresentWithEmitDefaults()
+		{
+			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+
+			Assert.True(serialized.Contains("Value"));
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsIgnoredWhenValueIsDifferent()
+		{
+			var input = new HasDefaults { Value = "non-default" };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+
+			Assert.True(serialized.Contains("Value"));
+		}
+		
 		public class Person
 		{
 			public string Name { get; set; }
@@ -775,5 +1034,6 @@ Name: Charles
 			Assert.Equal("Brad", people[1].Name);
 			Assert.Equal("Charles", people[2].Name);
 		}
+		
 	}
 }

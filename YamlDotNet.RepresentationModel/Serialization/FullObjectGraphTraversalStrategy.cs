@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
@@ -13,14 +12,25 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
 	{
+		protected readonly Serializer serializer;
 		private readonly int maxRecursion;
+		private readonly ITypeDescriptor typeDescriptor;
 
-		public FullObjectGraphTraversalStrategy(int maxRecursion)
+		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, int maxRecursion)
 		{
-			if(maxRecursion <= 0)
+			if (maxRecursion <= 0)
 			{
 				throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
 			}
+
+			this.serializer = serializer;
+
+			if (typeDescriptor == null)
+			{
+				throw new ArgumentNullException("typeDescriptor");
+			}
+
+			this.typeDescriptor = typeDescriptor;
 
 			this.maxRecursion = maxRecursion;
 		}
@@ -37,7 +47,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new InvalidOperationException("Too much recursion when traversing the object graph");
 			}
 
-			if(!visitor.Enter(value, type))
+			if (!visitor.Enter(value, type))
 			{
 				return;
 			}
@@ -71,14 +81,22 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
 				default:
-					if (value == null)
+					if (value == null || type == typeof(TimeSpan))
 					{
 						visitor.VisitScalar(value, type);
+						break;
 					}
-					else
+
+					Type underlyingType = Nullable.GetUnderlyingType(type);
+					if (underlyingType == null)
 					{
 						TraverseObject(value, type, visitor, currentDepth);
+						break;
 					}
+
+					// This is a nullable type, recursively handle it with its underlying type.
+					// Not that if it contains null, the condition above already took care of it
+					Traverse(value, underlyingType, visitor, currentDepth);
 					break;
 			}
 		}
@@ -176,34 +194,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			visitor.VisitMappingStart(value, type, typeof(string), typeof(object));
 
-			foreach (var property in GetTraversableProperties(type))
+			foreach (var propertyDescriptor in typeDescriptor.GetProperties(type))
 			{
-				var propertyValue = property.GetValue(value, null);
-				var propertyType = property.PropertyType;
+				var propertyValue = propertyDescriptor.Property.GetValue(value, null);
 
-				if(visitor.EnterMapping(property.Name, typeof(string), propertyValue, propertyType))
+				if (visitor.EnterMapping(propertyDescriptor, propertyValue))
 				{
-					Traverse(property.Name, typeof(string), visitor, currentDepth);
-					Traverse(propertyValue, propertyType, visitor, currentDepth);
+					Traverse(propertyDescriptor.Name, typeof(string), visitor, currentDepth);
+					Traverse(propertyValue, propertyDescriptor.Property.PropertyType, visitor, currentDepth);
 				}
 			}
 
 			visitor.VisitMappingEnd(value, type);
-		}
-
-		private IEnumerable<PropertyInfo> GetTraversableProperties(Type type)
-		{
-			return type
-				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-				.Where(IsTraversableProperty);
-		}
-
-		protected virtual bool IsTraversableProperty(PropertyInfo property)
-		{
-			return
-				property.CanRead &&
-				property.GetGetMethod().GetParameters().Length == 0 &&
-				property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0;
 		}
 
 		private static Type GetObjectType(object value)

@@ -920,7 +920,8 @@ namespace YamlDotNet.Core
 			isMappingContext = isMapping;
 			isSimpleKeyContext = isSimpleKey;
 
-			switch (GetEventType(evt))
+			var eventType = GetEventType(evt);
+			switch (eventType)
 			{
 				case EventType.YAML_ALIAS_EVENT:
 					EmitAlias();
@@ -939,7 +940,7 @@ namespace YamlDotNet.Core
 					break;
 
 				default:
-					throw new YamlException("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS.");
+					throw new YamlException(string.Format("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {0}", eventType));
 			}
 		}
 

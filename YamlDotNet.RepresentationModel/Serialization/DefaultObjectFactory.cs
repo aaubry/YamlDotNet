@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
-	/// Creates objects using <see cref="Activator.CreateInstance"/>.
+	/// Creates objects using Activator.CreateInstance.
 	/// </summary>
 	public sealed class DefaultObjectFactory : IObjectFactory
 	{

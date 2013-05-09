@@ -21,6 +21,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return true;
 		}
 
+		bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, object value)
+		{
+			return true;
+		}
+
 		void IObjectGraphVisitor.VisitScalar(object scalar, Type scalarType)
 		{
 			eventEmitter.Emit(new ScalarEventInfo(scalar, scalarType));

@@ -3,7 +3,7 @@ using System;
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
-	/// Creates objects using a <see cref="Func{Type,object}"/>.
+	/// Creates objects using a Func{Type,object}"/>.
 	/// </summary>
 	public sealed class LambdaObjectFactory : IObjectFactory
 	{

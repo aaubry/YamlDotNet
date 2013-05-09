@@ -61,6 +61,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					break;
 
 				default:
+					if (eventInfo.SourceType == typeof(TimeSpan))
+					{
+						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
+						break;
+					}
+
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 
@@ -94,14 +100,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			eventInfo.IsPlainImplicit = true;
 			eventInfo.Style = ScalarStyle.Plain;
 
-			if (eventInfo.SourceValue == null)
-			{
-				eventInfo.Tag = "tag:yaml.org,2002:null";
-				eventInfo.RenderedValue = "";
-				return;
-			}
+			var typeCode = eventInfo.SourceValue != null
+				? Type.GetTypeCode(eventInfo.SourceType)
+				: TypeCode.Empty;
 
-			var typeCode = Type.GetTypeCode(eventInfo.SourceType);
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
@@ -140,7 +142,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.SourceValue);
 					break;
 
+				case TypeCode.Empty:
+					eventInfo.Tag = "tag:yaml.org,2002:null";
+					eventInfo.RenderedValue = "";
+					break;
+
 				default:
+					if (eventInfo.SourceType == typeof(TimeSpan))
+					{
+						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
+						break;
+					}
+
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 
@@ -177,6 +190,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public static string FormatDateTime(object dateTime)
 		{
 			return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
+		}
+
+		public static string FormatTimeSpan(object timeSpan)
+		{
+			return ((TimeSpan)timeSpan).ToString();
 		}
 	}
 }

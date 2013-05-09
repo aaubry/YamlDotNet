@@ -21,6 +21,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return nextVisitor.EnterMapping(key, keyType, value, valueType);
 		}
 
+		public virtual bool EnterMapping(IPropertyDescriptor key, object value)
+		{
+			return nextVisitor.EnterMapping(key, value);
+		}
+
 		public virtual void VisitScalar(object scalar, Type scalarType)
 		{
 			nextVisitor.VisitScalar(scalar, scalarType);
