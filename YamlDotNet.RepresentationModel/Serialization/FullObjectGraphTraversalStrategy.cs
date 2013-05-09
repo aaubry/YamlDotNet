@@ -197,12 +197,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			foreach (var propertyDescriptor in typeDescriptor.GetProperties(type))
 			{
 				var propertyValue = propertyDescriptor.Property.GetValue(value, null);
-				var propertyType = propertyDescriptor.Property.PropertyType;
 
-				if (visitor.EnterMapping(propertyDescriptor.Name, typeof(string), propertyValue, propertyType))
+				if (visitor.EnterMapping(propertyDescriptor, propertyValue))
 				{
 					Traverse(propertyDescriptor.Name, typeof(string), visitor, currentDepth);
-					Traverse(propertyValue, propertyType, visitor, currentDepth);
+					Traverse(propertyValue, propertyDescriptor.Property.PropertyType, visitor, currentDepth);
 				}
 			}
 

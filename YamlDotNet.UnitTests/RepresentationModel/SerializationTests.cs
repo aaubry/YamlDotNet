@@ -908,5 +908,58 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			// Ensure round-trip retains value
 			Assert.Equal(input.AliasTest, output.AliasTest);
 		}
+
+		public class HasDefaults
+		{
+			public const string DefaultValue = "myDefault";
+
+			[DefaultValue(DefaultValue)]
+			public string Value { get; set; }
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsUsedWhenPresentWithoutEmitDefaults()
+		{
+			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+
+			Assert.False(serialized.Contains("Value"));
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsIgnoredWhenPresentWithEmitDefaults()
+		{
+			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+
+			Assert.True(serialized.Contains("Value"));
+		}
+
+		[Fact]
+		public void DefaultValueAttributeIsIgnoredWhenValueIsDifferent()
+		{
+			var input = new HasDefaults { Value = "non-default" };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+
+			Assert.True(serialized.Contains("Value"));
+		}
 	}
 }

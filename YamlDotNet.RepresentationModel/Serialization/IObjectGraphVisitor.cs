@@ -28,6 +28,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		bool EnterMapping(object key, Type keyType, object value, Type valueType);
 
 		/// <summary>
+		/// Indicates whether the specified mapping should be entered. This allows the visitor to
+		/// override the handling of a particular pair. This overload should be invoked when the
+		/// mapping is produced by an object's property.
+		/// </summary>
+		/// <param name="key">The <see cref="IPropertyDescriptor"/> that provided access to <paramref name="value"/>.</param>
+		/// <param name="value">The value of the mapping that is about to be entered.</param>
+		/// <returns>If the mapping is to be entered, returns true; otherwise returns false;</returns>
+		bool EnterMapping(IPropertyDescriptor key, object value);
+
+		/// <summary>
 		/// Notifies the visitor that a scalar value has been encountered.
 		/// </summary>
 		/// <param name="scalar">The value of the scalar.</param>

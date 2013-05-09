@@ -44,6 +44,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return true;
 		}
 
+		bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, object value)
+		{
+			return true;
+		}
+
 		void IObjectGraphVisitor.VisitScalar(object scalar, Type scalarType) { }
 		void IObjectGraphVisitor.VisitMappingStart(object mapping, Type mappingType, Type keyType, Type valueType) { }
 		void IObjectGraphVisitor.VisitMappingEnd(object mapping, Type mappingType) { }
