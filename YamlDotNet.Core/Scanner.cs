@@ -1164,11 +1164,11 @@ namespace YamlDotNet.Core
 
 			if (isAlias)
 			{
-				return new AnchorAlias(value.ToString());
+				return new AnchorAlias(value.ToString(), start, mark);
 			}
 			else
 			{
-				return new Anchor(value.ToString());
+				return new Anchor(value.ToString(), start, mark);
 			}
 		}
 
