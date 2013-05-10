@@ -78,20 +78,47 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class Deserializer
 	{
-		private readonly ICollection<INodeDeserializer> _deserializers;
+		private readonly IEnumerable<INodeDeserializer> _deserializers;
+		private readonly IEnumerable<INodeTypeResolver> _typeResolvers;
 
 		public Deserializer()
 		{
+			// TODO: Allow to override the object factory
+			var objectFactory = new DefaultObjectFactory();
+
 			_deserializers = new INodeDeserializer[]
 			{
 				new NullNodeDeserializer(),
 				new ScalarNodeDeserializer(),
+				new GenericDictionaryDeserializer(objectFactory),
+				new NonGenericDictionaryDeserializer(objectFactory),
+				new GenericCollectionDeserializer(objectFactory),
+				new NonGenericListDeserializer(objectFactory),
+				new EnumerableDeserializer(),
+				new ObjectNodeDeserializer(objectFactory),
+			};
+
+			_typeResolvers = new INodeTypeResolver[]
+			{
+				new PredefinedTagsNodeTypeResolver(),
+				new TypeNameInTagNodeTypeResolver(),
+				new DefaultContainersNodeTypeResolver(),
 			};
 		}
 
-		public object Deserialize(TextReader input, Type type)
+		public object Deserialize(TextReader input, DeserializationFlags options = DeserializationFlags.None)
 		{
-			return Deserialize(new EventReader(new Parser(input)), type);
+			return Deserialize(input, typeof(object), options);
+		}
+
+		public object Deserialize(TextReader input, Type type, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return Deserialize(new EventReader(new Parser(input)), type, options);
+		}
+
+		public object Deserialize(EventReader reader, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return Deserialize(reader, typeof(object), options);
 		}
 
 		/// <summary>
@@ -136,12 +163,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			var nodeEvent = reader.Peek<NodeEvent>();
 
-			var nodeType = GetTypeFromTag(nodeEvent.Tag, expectedType);
+			var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
 			foreach (var deserializer in _deserializers)
 			{
 				object value;
-				if (deserializer.Deserialize(reader, nodeType, out value))
+				if (deserializer.Deserialize(reader, nodeType, (r, t) => DeserializeValue(r, t, context), out value))
 				{
 					return value;
 				}
@@ -189,6 +216,36 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		//	return false;
 		//}
 
+	
+		private Type GetTypeFromEvent(NodeEvent nodeEvent, Type currentType)//, TagMappings mappings)
+		{
+			foreach (var typeResolver in _typeResolvers)
+			{
+				if (typeResolver.Resolve(nodeEvent, ref currentType))
+				{
+					break;
+				}
+			}
+			return currentType;
+		}
+	}
+
+	public interface INodeTypeResolver
+	{
+		/// <summary>
+		/// Determines the type of the specified node.
+		/// </summary>
+		/// <param name="nodeEvent">The node to be deserialized.</param>
+		/// <param name="currentType">The type that has been determined so far.</param>
+		/// <returns>
+		/// true if <paramref name="currentType"/> has been resolved completely;
+		/// false if the next type <see cref="INodeTypeResolver"/> should be invoked.
+		/// </returns>
+		bool Resolve(NodeEvent nodeEvent, ref Type currentType);
+	}
+
+	public sealed class PredefinedTagsNodeTypeResolver : INodeTypeResolver
+	{
 		private static readonly Dictionary<string, Type> predefinedTypes = new Dictionary<string, Type>
 		{
 			{ "tag:yaml.org,2002:map", typeof(Dictionary<object, object>) },
@@ -199,31 +256,61 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			{ "tag:yaml.org,2002:timestamp", typeof(DateTime) },
 		};
 
-		private static Type GetTypeFromTag(string tag, Type defaultType)//, TagMappings mappings)
+		bool INodeTypeResolver.Resolve(NodeEvent nodeEvent, ref Type currentType)
 		{
-			if (tag == null)
+			Type predefinedType;
+			if (!string.IsNullOrEmpty(nodeEvent.Tag) && predefinedTypes.TryGetValue(nodeEvent.Tag, out predefinedType))
 			{
-				return defaultType;
+				currentType = predefinedType;
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public sealed class DefaultContainersNodeTypeResolver : INodeTypeResolver
+	{
+		bool INodeTypeResolver.Resolve(NodeEvent nodeEvent, ref Type currentType)
+		{
+			if (currentType == typeof(object))
+			{
+				if (nodeEvent is SequenceStart)
+				{
+					currentType = typeof(List<object>);
+					return true;
+				}
+				if (nodeEvent is MappingStart)
+				{
+					currentType = typeof(Dictionary<object, object>);
+					return true;
+				}
 			}
 
-			//Type predefinedType = mappings.GetMapping(tag);
-			//if (predefinedType != null || predefinedTypes.TryGetValue(tag, out predefinedType))
-			//{
-			//	return predefinedType;
-			//}
+			return false;
+		}
+	}
 
-			return Type.GetType(tag.Substring(1), true);
+	public sealed class TypeNameInTagNodeTypeResolver : INodeTypeResolver
+	{
+		bool INodeTypeResolver.Resolve(NodeEvent nodeEvent, ref Type currentType)
+		{
+			if (!string.IsNullOrEmpty(nodeEvent.Tag))
+			{
+				currentType = Type.GetType(nodeEvent.Tag.Substring(1), true);
+				return true;
+			}
+			return false;
 		}
 	}
 
 	public interface INodeDeserializer
 	{
-		bool Deserialize(EventReader reader, Type expectedType, out object value);
+		bool Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value);
 	}
 
 	public sealed class NullNodeDeserializer : INodeDeserializer
 	{
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, out object value)
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
 		{
 			value = null;
 			var evt = reader.Peek<NodeEvent>();
@@ -240,7 +327,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 	public sealed class JsonNullNodeDeserializer : INodeDeserializer
 	{
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, out object value)
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
 		{
 			value = null;
 			var scalar = reader.Peek<Scalar>();
@@ -258,7 +345,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 	public sealed class ScalarNodeDeserializer : INodeDeserializer
 	{
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, out object value)
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
 		{
 			var scalar = reader.Allow<Scalar>();
 			if (scalar == null)
@@ -374,4 +461,220 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			NumberDecimalDigits = 99
 		};
 	}
+
+	public sealed class ObjectNodeDeserializer : INodeDeserializer
+	{
+		private readonly IObjectFactory _objectFactory;
+
+		public ObjectNodeDeserializer(IObjectFactory objectFactory)
+		{
+			_objectFactory = objectFactory;
+		}
+
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		{
+			var mapping = reader.Allow<MappingStart>();
+			if (mapping == null)
+			{
+				value = null;
+				return false;
+			}
+
+			value = _objectFactory.Create(expectedType);
+			while (!reader.Accept<MappingEnd>())
+			{
+				var propertyName = reader.Expect<Scalar>();
+
+				// TODO: Find property according to naming conventions
+				var property = expectedType.GetProperty(propertyName.Value, BindingFlags.Instance | BindingFlags.Public);
+				var propertyValue = nestedObjectDeserializer(reader, property.PropertyType);
+				property.SetValue(value, propertyValue, null);
+			}
+
+			reader.Expect<MappingEnd>();
+			return true;
+		}
+	}
+
+	public sealed class GenericDictionaryDeserializer : INodeDeserializer
+	{
+		private readonly IObjectFactory _objectFactory;
+
+		public GenericDictionaryDeserializer(IObjectFactory objectFactory)
+		{
+			_objectFactory = objectFactory;
+		}
+	
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		{
+			var iDictionary = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IDictionary<,>));
+			if (iDictionary == null)
+			{
+				value = false;
+				return false;
+			}
+
+			reader.Expect<MappingStart>();
+
+			value = _objectFactory.Create(expectedType);
+			_deserializeHelperMethod
+				.MakeGenericMethod(iDictionary.GetGenericArguments())
+				.Invoke(null, new object[] { reader, expectedType, nestedObjectDeserializer, value });
+
+			reader.Expect<MappingEnd>();
+
+			return true;
+		}
+
+		private static MethodInfo _deserializeHelperMethod = typeof(GenericDictionaryDeserializer)
+			.GetMethod("DeserializeHelper", BindingFlags.Static | BindingFlags.NonPublic);
+
+		private static void DeserializeHelper<TKey, TValue>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary<TKey, TValue> result)
+		{
+			while (!reader.Accept<MappingEnd>())
+			{
+				var key = (TKey)nestedObjectDeserializer(reader, typeof(TKey));
+				var value = (TValue)nestedObjectDeserializer(reader, typeof(TValue));
+				result.Add(key, value);
+			}
+		}
+	}
+
+	public sealed class NonGenericDictionaryDeserializer : INodeDeserializer
+	{
+		private readonly IObjectFactory _objectFactory;
+
+		public NonGenericDictionaryDeserializer(IObjectFactory objectFactory)
+		{
+			_objectFactory = objectFactory;
+		}
+
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		{
+			if(!typeof(IDictionary).IsAssignableFrom(expectedType))
+			{
+				value = false;
+				return false;
+			}
+
+			reader.Expect<MappingStart>();
+
+			var dictionary = (IDictionary)_objectFactory.Create(expectedType);
+			while (!reader.Accept<MappingEnd>())
+			{
+				var key = nestedObjectDeserializer(reader, typeof(object));
+				var keyValue = nestedObjectDeserializer(reader, typeof(object));
+				dictionary.Add(key, keyValue);
+			}
+			value = dictionary;
+
+			reader.Expect<MappingEnd>();
+
+			return true;
+		}
+	}
+
+	public sealed class GenericCollectionDeserializer : INodeDeserializer
+	{
+		private readonly IObjectFactory _objectFactory;
+
+		public GenericCollectionDeserializer(IObjectFactory objectFactory)
+		{
+			_objectFactory = objectFactory;
+		}
+
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		{
+			var iCollection = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
+			if (iCollection == null)
+			{
+				value = false;
+				return false;
+			}
+
+			reader.Expect<SequenceStart>();
+
+			value = _objectFactory.Create(expectedType);
+			_deserializeHelperMethod
+				.MakeGenericMethod(iCollection.GetGenericArguments())
+				.Invoke(null, new object[] { reader, expectedType, nestedObjectDeserializer, value });
+
+			reader.Expect<SequenceEnd>();
+
+			return true;
+		}
+
+		private static MethodInfo _deserializeHelperMethod = typeof(GenericCollectionDeserializer)
+			.GetMethod("DeserializeHelper", BindingFlags.Static | BindingFlags.NonPublic);
+
+		private static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
+		{
+			while (!reader.Accept<SequenceEnd>())
+			{
+				var value = (TItem)nestedObjectDeserializer(reader, typeof(TItem));
+				result.Add(value);
+			}
+		}
+	}
+
+	public sealed class NonGenericListDeserializer : INodeDeserializer
+	{
+		private readonly IObjectFactory _objectFactory;
+
+		public NonGenericListDeserializer(IObjectFactory objectFactory)
+		{
+			_objectFactory = objectFactory;
+		}
+
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		{
+			if (!typeof(IList).IsAssignableFrom(expectedType))
+			{
+				value = false;
+				return false;
+			}
+
+			reader.Expect<SequenceStart>();
+
+			var list = (IList)_objectFactory.Create(expectedType);
+			while (!reader.Accept<SequenceEnd>())
+			{
+				var item = nestedObjectDeserializer(reader, typeof(object));
+				list.Add(item);
+			}
+			value = list;
+
+			reader.Expect<SequenceEnd>();
+
+			return true;
+		}
+	}
+
+	public sealed class EnumerableDeserializer : INodeDeserializer
+	{
+		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		{
+			Type itemsType;
+			if (expectedType == typeof(IEnumerable))
+			{
+				itemsType = typeof(object);
+			}
+			else
+			{
+				var iEnumerable = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IEnumerable<>));
+				if (iEnumerable != expectedType)
+				{
+					value = null;
+					return false;
+				}
+
+				itemsType = iEnumerable.GetGenericArguments()[0];
+			}
+
+			var collectionType = typeof(List<>).MakeGenericType(itemsType);
+			value = nestedObjectDeserializer(reader, collectionType);
+			return true;
+		}
+	}
+
 }

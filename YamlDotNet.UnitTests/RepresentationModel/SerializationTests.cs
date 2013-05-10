@@ -310,7 +310,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeDictionary()
 		{
-			YamlSerializer serializer = new YamlSerializer();
+			var serializer = new Deserializer();
 			object result = serializer.Deserialize(YamlFile("dictionary.yaml"));
 
 			Assert.True(typeof(IDictionary<object, object>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
@@ -323,7 +323,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeExplicitDictionary()
 		{
-			YamlSerializer serializer = new YamlSerializer();
+			var serializer = new Deserializer();
 			object result = serializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
 
 			Assert.True(typeof(IDictionary<string, int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
@@ -336,8 +336,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeListOfDictionaries()
 		{
-			var serializer = new YamlSerializer<List<Dictionary<string, string>>>();
-			object result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"));
+			var serializer = new Deserializer();
+			object result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"), typeof(List<Dictionary<string, string>>));
 
 			Assert.IsType<List<Dictionary<string, string>>>(result);
 
@@ -351,7 +351,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeList()
 		{
-			YamlSerializer serializer = new YamlSerializer();
+			var serializer = new Deserializer();
 			object result = serializer.Deserialize(YamlFile("list.yaml"));
 
 			Assert.True(typeof(IList).IsAssignableFrom(result.GetType()));
@@ -365,7 +365,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeExplicitList()
 		{
-			YamlSerializer serializer = new YamlSerializer();
+			var serializer = new Deserializer();
 			object result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
 
 			Assert.True(typeof(IList<int>).IsAssignableFrom(result.GetType()));
@@ -384,8 +384,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, z);
 
-			YamlSerializer<IEnumerable<Z>> deserializer = new YamlSerializer<IEnumerable<Z>>();
-			IEnumerable<Z> result = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			var deserializer = new Deserializer();
+			var result = (IEnumerable<Z>)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(IEnumerable<Z>));
 			Assert.Equal(1, result.Count());
 			Assert.Equal("Yo", result.First().aaa);
 		}
@@ -437,7 +437,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			DeserializationOptions options = new DeserializationOptions();
 			options.Overrides.Add(typeof(Z), "aaa", (t, reader) => ((Z)t).aaa = reader.Expect<Scalar>().Value.ToUpperInvariant());
 
-			YamlSerializer serializer = new YamlSerializer();
+			var serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), options);
 
 			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
@@ -466,7 +466,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			DeserializationOptions options = new DeserializationOptions();
 			options.Mappings.Add("tag:yaml.org,2002:point", typeof(Point));
 
-			YamlSerializer serializer = new YamlSerializer();
+			var serializer = new YamlSerializer();
 			object result = serializer.Deserialize(YamlFile("tags.yaml"), options);
 
 			Assert.Equal(typeof(Point), result.GetType());
