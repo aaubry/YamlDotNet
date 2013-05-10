@@ -125,5 +125,19 @@ namespace YamlDotNetEditor
 			
 		}
 	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = "YamlDotNetEditor")]
+	[Name("YamlTab")]
+	[UserVisible(true)] //this should be visible to the end user
+	[Order(Before = Priority.Default)] //set the priority to be after the default classifiers
+	internal sealed class YamlTabFormat : ClassificationFormatDefinition
+	{
+		public YamlTabFormat()
+		{
+			DisplayName = "YAML Tab"; //human readable version of the name
+			BackgroundColor = Color.FromRgb(182, 0, 0);
+		}
+	}
 	#endregion //Format definition
 }

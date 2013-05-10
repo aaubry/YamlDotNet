@@ -54,5 +54,9 @@ namespace YamlDotNetEditor
 		[Export(typeof(ClassificationTypeDefinition))]
 		[Name("YamlDirective")]
 		internal static ClassificationTypeDefinition YamlDirectiveType = null;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[Name("YamlTab")]
+		internal static ClassificationTypeDefinition YamlTabType = null;
 	}
 }

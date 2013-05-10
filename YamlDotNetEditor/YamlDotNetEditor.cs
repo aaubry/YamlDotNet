@@ -72,6 +72,7 @@ namespace YamlDotNetEditor
 		private readonly IClassificationType _tag;
 		private readonly IClassificationType _symbol;
 		private readonly IClassificationType _directive;
+		private readonly IClassificationType _tab;
 
 		internal YamlDotNetEditor(IClassificationTypeRegistryService registry)
 		{
@@ -83,6 +84,7 @@ namespace YamlDotNetEditor
 			_tag = registry.GetClassificationType("YamlTag");
 			_symbol = registry.GetClassificationType("YamlSymbol");
 			_directive = registry.GetClassificationType("YamlDirective");
+			_tab = registry.GetClassificationType("YamlTab");
 		}
 
 		/// <summary>
@@ -111,6 +113,23 @@ namespace YamlDotNetEditor
 				);
 
 				text = text.Substring(0, commentIndex);
+			}
+
+			var match = Regex.Match(text, @"^( *(\t+))+");
+			if (match.Success)
+			{
+				foreach (Capture capture in match.Groups[2].Captures)
+				{
+					classifications.Add(
+						new ClassificationSpan(
+							new SnapshotSpan(
+								span.Snapshot,
+								new Span(span.Start + capture.Index, capture.Length)
+							),
+							_tab
+						)
+					);
+				}
 			}
 
 			try
