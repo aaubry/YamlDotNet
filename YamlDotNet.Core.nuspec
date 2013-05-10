@@ -13,7 +13,7 @@
 		<tags>yaml parser development library</tags>
 	</metadata>
 	<files>
-		<file src="..\YamlDotNet.Core\bin\Release\YamlDotNet.Core.dll" target="lib" />
-		<file src="..\YamlDotNet.Core\bin\Release\YamlDotNet.Core.pdb" target="lib" />
+		<file src="..\YamlDotNet.Core\bin\Release\YamlDotNet.Core.dll" target="lib\net35" />
+		<file src="..\YamlDotNet.Core\bin\Release\YamlDotNet.Core.pdb" target="lib\net35" />
 	</files>
 </package>
