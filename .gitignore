@@ -5,6 +5,7 @@ obj
 # mstest test results
 TestResults
 *.suo
+*.user
 Help/*
 release/*
 /_ReSharper.*
