@@ -394,7 +394,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void RoundtripList()
 		{
 			var serializer = new Serializer();
-			var deserializer = new YamlSerializer(typeof(List<int>), YamlSerializerModes.Roundtrip);
+			var deserializer = new Deserializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -406,7 +406,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				List<int> copy = (List<int>)deserializer.Deserialize(new StringReader(buffer.ToString()));
+				List<int> copy = (List<int>)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(List<int>));
 
 				Assert.Equal(original.Count, copy.Count);
 
