@@ -33,7 +33,6 @@ using YamlDotNet.Core.Events;
 using System.Globalization;
 using System.ComponentModel;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
-using YamlDotNet.Core;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -420,8 +419,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeArray()
 		{
-			YamlSerializer<String[]> serializer = new YamlSerializer<String[]>();
-			object result = serializer.Deserialize(YamlFile("list.yaml"));
+			var serializer = new Deserializer();
+			object result = serializer.Deserialize(YamlFile("list.yaml"), typeof(String[]));
 
 			Assert.True(result is String[]);
 
@@ -448,14 +447,14 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void Enums()
 		{
 			var serializer = new Serializer();
-			YamlSerializer<StringFormatFlags> deserializer = new YamlSerializer<StringFormatFlags>();
+			var deserializer = new Deserializer();
 
 			StringFormatFlags flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
 
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, flags);
 
-			StringFormatFlags deserialized = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			var deserialized = (StringFormatFlags)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(StringFormatFlags));
 
 			Assert.Equal(flags, deserialized);
 		}
@@ -463,11 +462,9 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void CustomTags()
 		{
-			DeserializationOptions options = new DeserializationOptions();
-			options.Mappings.Add("tag:yaml.org,2002:point", typeof(Point));
-
-			var serializer = new YamlSerializer();
-			object result = serializer.Deserialize(YamlFile("tags.yaml"), options);
+			var deserializer = new Deserializer();
+			deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
+			object result = deserializer.Deserialize(YamlFile("tags.yaml"));
 
 			Assert.Equal(typeof(Point), result.GetType());
 
@@ -647,10 +644,10 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			Console.WriteLine(buffer.ToString());
 
-			var deserializer = new YamlSerializer<SomeCustomeType>(YamlSerializerModes.Roundtrip);
+			var deserializer = new Deserializer();
 			deserializer.RegisterTypeConverter(new CustomTypeConverter());
 
-			var copy = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			var copy = (SomeCustomeType)deserializer.Deserialize(new StringReader(buffer.ToString()));
 			Assert.Equal("Yo", copy.Value);
 		}
 
