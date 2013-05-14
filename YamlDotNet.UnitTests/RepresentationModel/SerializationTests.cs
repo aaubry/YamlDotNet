@@ -876,6 +876,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			public string ThirdTest { get; set; }
 			[YamlAlias("fourthTest")]
 			public string AliasTest { get; set; }
+			[YamlIgnore]
+			public string fourthTest { get; set; }
 		}
 
 		[Fact]

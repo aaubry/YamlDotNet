@@ -767,6 +767,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			var mapping = new Dictionary<string, PropertyInfo>();
 			foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
+				if (property.GetCustomAttributes(typeof (YamlIgnoreAttribute), true).Length > 0)
+					continue;
+
 				// Default to the property name
 				var alias = property.Name;
 
