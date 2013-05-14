@@ -52,6 +52,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return;
 			}
 
+			TraverseInternal(value, type, visitor, currentDepth);
+		}
+
+		protected virtual void TraverseInternal(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
+		{
 			var typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
 			{
@@ -88,15 +93,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					}
 
 					Type underlyingType = Nullable.GetUnderlyingType(type);
-					if (underlyingType == null)
+					if (underlyingType != null)
 					{
-						TraverseObject(value, type, visitor, currentDepth);
+						// This is a nullable type, recursively handle it with its underlying type.
+						// Note that if it contains null, the condition above already took care of it
+						TraverseInternal(value, underlyingType, visitor, currentDepth);
 						break;
 					}
 
-					// This is a nullable type, recursively handle it with its underlying type.
-					// Not that if it contains null, the condition above already took care of it
-					Traverse(value, underlyingType, visitor, currentDepth);
+					TraverseObject(value, type, visitor, currentDepth);
 					break;
 			}
 		}
