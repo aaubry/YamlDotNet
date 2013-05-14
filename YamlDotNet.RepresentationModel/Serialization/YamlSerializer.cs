@@ -758,13 +758,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns>Aliases for this type</returns>
 		private IDictionary<string, PropertyInfo> GetPropertyAliases(Type type)
 		{
+			IDictionary<string, PropertyInfo> mapping;
+
 			// Check if it's already cached
-			if (propertyAliases.ContainsKey(type))
-			{
-				return propertyAliases[type];
-			}
+			if (propertyAliases.TryGetValue(type, out mapping))
+				return mapping;
 			
-			var mapping = new Dictionary<string, PropertyInfo>();
+			mapping = new Dictionary<string, PropertyInfo>();
 			foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
 				if (property.GetCustomAttributes(typeof (YamlIgnoreAttribute), true).Length > 0)
