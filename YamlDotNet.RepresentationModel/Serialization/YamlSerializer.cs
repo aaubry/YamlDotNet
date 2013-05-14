@@ -775,6 +775,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				if (aliasProps.Length != 0)
 					alias = ((YamlAliasAttribute)aliasProps[0]).Alias;
 
+				if (mapping.ContainsKey(alias))
+					throw new Exception(String.Format("A property with the name/alias {0} already exists, maybe you're misusing YamlAlias?", alias));
+
 				mapping.Add(alias, property);
 			}
 
