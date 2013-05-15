@@ -647,7 +647,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			var deserializer = new Deserializer();
 			deserializer.RegisterTypeConverter(new CustomTypeConverter());
 
-			var copy = (SomeCustomeType)deserializer.Deserialize(new StringReader(buffer.ToString()));
+			var copy = (SomeCustomeType)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(SomeCustomeType));
 			Assert.Equal("Yo", copy.Value);
 		}
 
