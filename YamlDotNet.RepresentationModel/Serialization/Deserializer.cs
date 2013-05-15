@@ -87,6 +87,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			TypeResolvers = new List<INodeTypeResolver>();
 		}
 
+		public T Deserialize<T>(TextReader input, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return (T)Deserialize(input, typeof(T), options);
+		}
+
 		public object Deserialize(TextReader input, DeserializationFlags options = DeserializationFlags.None)
 		{
 			return Deserialize(input, typeof(object), options);
@@ -95,6 +100,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public object Deserialize(TextReader input, Type type, DeserializationFlags options = DeserializationFlags.None)
 		{
 			return Deserialize(new EventReader(new Parser(input)), type, options);
+		}
+
+		public T Deserialize<T>(EventReader reader, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return (T)Deserialize(reader, typeof(T), options);
 		}
 
 		public object Deserialize(EventReader reader, DeserializationFlags options = DeserializationFlags.None)

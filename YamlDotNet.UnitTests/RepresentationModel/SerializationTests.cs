@@ -647,7 +647,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			var deserializer = new Deserializer();
 			deserializer.RegisterTypeConverter(new CustomTypeConverter());
 
-			var copy = (SomeCustomeType)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(SomeCustomeType));
+			var copy = deserializer.Deserialize<SomeCustomeType>(new StringReader(buffer.ToString()));
 			Assert.Equal("Yo", copy.Value);
 		}
 
@@ -662,14 +662,14 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			};
 
 			var serializer = new Serializer();
-			var deserializer = YamlSerializer.Create(entries, YamlSerializerModes.Roundtrip | YamlSerializerModes.DisableAliases);
 
 			StringWriter buffer = new StringWriter();
 			serializer.Serialize(buffer, entries);
 
 			Console.WriteLine(buffer.ToString());
 
-			var deserialized = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			var deserializer = new Deserializer();
+			var deserialized = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
 
 			foreach (var pair in deserialized)
 			{
@@ -689,8 +689,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 			Console.WriteLine(buffer.ToString());
 
-			var deserializer = new YamlSerializer<Dictionary<string, string>>();
-			var parsed = deserializer.Deserialize(new StringReader(buffer.ToString()));
+			var deserializer = new Deserializer();
+			var parsed = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
 
 			Assert.NotNull(parsed);
 			Assert.Equal(1, parsed.Count);
