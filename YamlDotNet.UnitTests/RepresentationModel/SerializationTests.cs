@@ -181,8 +181,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
-				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
+				var deserializer = new Deserializer();
+				X copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
 
 				foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 				{
@@ -209,8 +209,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.Roundtrip);
-				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
+				var deserializer = new Deserializer();
+				X copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
 
 				foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 				{
@@ -764,7 +764,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void DeserializationOfNullWorksInJson()
 		{
 			var serializer = new Serializer();
-			YamlSerializer deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
+			var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -878,7 +878,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			string serialized = writer.ToString();
 			Console.WriteLine("serialized =\n-----\n{0}", serialized);
 
-			return YamlSerializer.Create(input).Deserialize(new StringReader(serialized));
+			var deserializer = new Deserializer();
+			return deserializer.Deserialize<T>(new StringReader(serialized));
 		}
 
 		private class ConventionTest
@@ -893,8 +894,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializeUsingConventions()
 		{
-			var serializer = new YamlSerializer<ConventionTest>();
-			var result = serializer.Deserialize(YamlFile("namingConvention.yaml"));
+			var serializer = new Deserializer();
+			var result = serializer.Deserialize<ConventionTest>(YamlFile("namingConvention.yaml"));
 
 			Assert.Equal("First", result.FirstTest);
 			Assert.Equal("Second", result.SecondTest);
@@ -914,8 +915,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			// Ensure serialisation is correct
 			Assert.Equal("fourthTest: Fourth", serialized.TrimEnd('\r', '\n'));
 
-			var deserializer = new YamlSerializer<ConventionTest>();
-			var output = deserializer.Deserialize(new StringReader(serialized));
+			var deserializer = new Deserializer();
+			var output = deserializer.Deserialize<ConventionTest>(new StringReader(serialized));
 
 			// Ensure round-trip retains value
 			Assert.Equal(input.AliasTest, output.AliasTest);
@@ -988,17 +989,17 @@ Name: Andy
 Name: Brad
 ...";
 
-			var serializer = new YamlSerializer<Person>();
+			var serializer = new Deserializer();
 
 			var reader = new EventReader(new Parser(new StringReader(yaml)));
 
 			reader.Expect<StreamStart>();
 
-			var andy = serializer.Deserialize(reader);
+			var andy = serializer.Deserialize<Person>(reader);
 			Assert.NotNull(andy);
 			Assert.Equal("Andy", andy.Name);
 
-			var brad = serializer.Deserialize(reader);
+			var brad = serializer.Deserialize<Person>(reader);
 			Assert.NotNull(brad);
 			Assert.Equal("Brad", brad.Name);
 		}
@@ -1014,7 +1015,7 @@ Name: Brad
 Name: Charles
 ...";
 
-			var serializer = new YamlSerializer<Person>();
+			var serializer = new Deserializer();
 			var reader = new EventReader(new Parser(new StringReader(yaml)));
 
 			reader.Allow<StreamStart>();
@@ -1022,7 +1023,7 @@ Name: Charles
 			var people = new List<Person>();
 			while (!reader.Accept<StreamEnd>())
 			{
-				var person = serializer.Deserialize(reader);
+				var person = serializer.Deserialize<Person>(reader);
 				people.Add(person);
 			}
 

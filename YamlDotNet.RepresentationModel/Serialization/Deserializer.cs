@@ -514,6 +514,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 				// TODO: Find property according to naming conventions
 				var property = expectedType.GetProperty(propertyName.Value, BindingFlags.Instance | BindingFlags.Public);
+				if (property == null)
+				{
+					throw new SerializationException(
+						string.Format(
+							CultureInfo.InvariantCulture,
+							"Property '{0}' not found on type '{1}'. Attempted properties: {2}",
+							propertyName.Value,
+							expectedType.FullName,
+							""//string.Join(", ", possibleProperties.ToArray())
+						)
+					);
+				}
 				var propertyValue = nestedObjectDeserializer(reader, property.PropertyType);
 				property.SetValue(value, propertyValue, null);
 			}
