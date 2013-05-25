@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core", "YamlDotNet.Core\YamlDotNet.Core.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.RepresentationModel", "YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj", "{21CA0077-E15C-446D-9C43-F6D3F9D09687}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Converters", "YamlDotNet.Converters\YamlDotNet.Converters.csproj", "{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Configuration", "YamlDotNet.Configuration\YamlDotNet.Configuration.csproj", "{A0178805-DC16-46B6-BEDF-AA201207C17E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.UnitTests", "YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj", "{114910D8-5B05-4FDC-BDA0-0DF7A29892DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{114910D8-5B05-4FDC-BDA0-0DF7A29892DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{114910D8-5B05-4FDC-BDA0-0DF7A29892DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{114910D8-5B05-4FDC-BDA0-0DF7A29892DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{114910D8-5B05-4FDC-BDA0-0DF7A29892DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0178805-DC16-46B6-BEDF-AA201207C17E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = YamlDotNet.UnitTests\YamlDotNet.UnitTests.csproj
+	EndGlobalSection
+EndGlobal
