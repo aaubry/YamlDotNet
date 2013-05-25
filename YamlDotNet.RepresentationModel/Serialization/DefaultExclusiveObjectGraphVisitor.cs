@@ -21,8 +21,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		public override bool Enter(object value, Type type)
 		{
-			return !_objectComparer.Equals(value, GetDefault(type))
-			       && base.Enter(value, type);
+			return base.Enter(value, type);
 		}
 
 		public override bool EnterMapping(object key, Type keyType, object value, Type valueType)
