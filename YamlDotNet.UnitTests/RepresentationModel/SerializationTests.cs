@@ -891,16 +891,59 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			public string AliasTest { get; set; }
 		}
 
-		[Fact]
-		public void DeserializeUsingConventions()
+		private void DeserializeUsingNamingConvention(string yaml, INamingConvention convention)
 		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize<ConventionTest>(YamlFile("namingConvention.yaml"));
+			var serializer = new Deserializer { NamingConvention = convention };
+			var result = serializer.Deserialize<ConventionTest>(YamlText(yaml));
 
 			Assert.Equal("First", result.FirstTest);
 			Assert.Equal("Second", result.SecondTest);
 			Assert.Equal("Third", result.ThirdTest);
 			Assert.Equal("Fourth", result.AliasTest);
+		}
+
+		[Fact]
+		public void DeserializeUsingCamelCaseNamingConvention()
+		{
+			DeserializeUsingNamingConvention(@"
+				firstTest: First
+				secondTest: Second
+				thirdTest: Third
+				fourthTest: Fourth
+			", new CamelCaseNamingConvention());
+		}
+
+		[Fact]
+		public void DeserializeUsingHyphenatedNamingConvention()
+		{
+			DeserializeUsingNamingConvention(@"
+				first-test: First
+				second-test: Second
+				third-test: Third
+				fourthTest: Fourth
+			", new HyphenatedNamingConvention());
+		}
+
+		[Fact]
+		public void DeserializeUsingPascalCaseNamingConvention()
+		{
+			DeserializeUsingNamingConvention(@"
+				FirstTest: First
+				SecondTest: Second
+				ThirdTest: Third
+				fourthTest: Fourth
+			", new PascalCaseNamingConvention());
+		}
+
+		[Fact]
+		public void DeserializeUsingUnderscoredNamingConvention()
+		{
+			DeserializeUsingNamingConvention(@"
+				first_test: First
+				second_test: Second
+				third_test: Third
+				fourthTest: Fourth
+			", new UnderscoredNamingConvention());
 		}
 
 		[Fact]

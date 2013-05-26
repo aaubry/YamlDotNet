@@ -9,10 +9,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public sealed class ReadableAndWritablePropertiesTypeDescriptor : ReadablePropertiesTypeDescriptor
 	{
-		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		protected override bool IsValidProperty (System.Reflection.PropertyInfo property)
 		{
-			return base.GetProperties(type)
-				.Where(p => p.Property.CanWrite);
+			return base.IsValidProperty (property) && property.CanWrite;
 		}
 	}
 }

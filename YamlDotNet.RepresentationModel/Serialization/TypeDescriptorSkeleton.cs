@@ -1,5 +1,5 @@
 // This file is part of YamlDotNet - A .NET library for YAML.
-// Copyright (c) 2013 aaubry
+// Copyright (c) 2013 Antoine Aubry
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,47 +20,34 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Globalization;
-using System.Reflection;
 using System.Runtime.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-
-namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
+using System.Globalization;
+namespace YamlDotNet.RepresentationModel.Serialization
 {
-	public sealed class ObjectNodeDeserializer : INodeDeserializer
+	public abstract class TypeDescriptorSkeleton : ITypeDescriptor
 	{
-		private readonly IObjectFactory _objectFactory;
-		private readonly ITypeDescriptor _typeDescriptor;
+		public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type);
 
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeDescriptor typeDescriptor)
+		public IPropertyDescriptor GetProperty(Type type, string name)
 		{
-			_objectFactory = objectFactory;
-			_typeDescriptor = typeDescriptor;
-		}
-
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
-		{
-			var mapping = reader.Allow<MappingStart>();
-			if (mapping == null)
-			{
-				value = null;
-				return false;
-			}
+			var property = GetProperties(type)
+				.FirstOrDefault(p => p.Name == name);
 			
-			value = _objectFactory.Create(expectedType);
-			while (!reader.Accept<MappingEnd>())
+			if(property == null)
 			{
-				var propertyName = reader.Expect<Scalar>();
-				
-				var property = _typeDescriptor.GetProperty(expectedType, propertyName.Value).Property;
-				var propertyValue = nestedObjectDeserializer(reader, property.PropertyType);
-				property.SetValue(value, propertyValue, null);
+				throw new SerializationException(
+					string.Format(
+						CultureInfo.InvariantCulture,
+						"Property '{0}' not found on type '{1}'.",
+						name,
+						type.FullName
+					)
+				);
 			}
-
-			reader.Expect<MappingEnd>();
-			return true;
+							
+			return property;
 		}
 	}
 }

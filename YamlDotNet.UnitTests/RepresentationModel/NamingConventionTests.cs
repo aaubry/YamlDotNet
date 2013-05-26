@@ -12,6 +12,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[InlineData("test", "test")]
 		[InlineData("thisIsATest", "this-is-a-test")]
 		[InlineData("thisIsATest", "this_is_a_test")]
+		[InlineData("thisIsATest", "ThisIsATest")]
 		public void TestCamelCase(string expected, string input)
 		{
 			var sut = new CamelCaseNamingConvention();
@@ -22,6 +23,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[InlineData("Test", "test")]
 		[InlineData("ThisIsATest", "this-is-a-test")]
 		[InlineData("ThisIsATest", "this_is_a_test")]
+		[InlineData("ThisIsATest", "thisIsATest")]
 		public void TestPascalCase(string expected, string input)
 		{
 			var sut = new PascalCaseNamingConvention();

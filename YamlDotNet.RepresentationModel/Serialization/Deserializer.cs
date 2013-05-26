@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using YamlDotNet.RepresentationModel.Serialization.NodeDeserializers;
 using YamlDotNet.RepresentationModel.Serialization.NodeTypeResolvers;
+using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -43,7 +44,24 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private readonly Dictionary<string, Type> tagMappings;
 		private readonly List<IYamlTypeConverter> converters;
+		private INamingConvention namingConvention;
+		private TypeDescriptorProxy typeDescriptor = new TypeDescriptorProxy();
+		
+		private class TypeDescriptorProxy : ITypeDescriptor
+		{
+			public ITypeDescriptor TypeDescriptor;
+			
+			public IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+			{
+				return TypeDescriptor.GetProperties(type);
+			}
 
+			public IPropertyDescriptor GetProperty(Type type, string name)
+			{
+				return TypeDescriptor.GetProperty(type, name);
+			}
+		}
+		
 		public Deserializer()
 			: this(new DefaultObjectFactory())
 		{
@@ -51,6 +69,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		public Deserializer(IObjectFactory objectFactory)
 		{
+			NamingConvention = new NullNamingConvention();
+			
 			converters = new List<IYamlTypeConverter>();
 			Deserializers.Add(new TypeConverterNodeDeserializer(converters));
 			Deserializers.Add(new NullNodeDeserializer());
@@ -61,7 +81,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			Deserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
 			Deserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
 			Deserializers.Add(new EnumerableNodeDeserializer());
-			Deserializers.Add(new ObjectNodeDeserializer(objectFactory));
+			Deserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor));
 
 			tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
 			TypeResolvers.Add(new TagNodeTypeResolver(tagMappings));
@@ -77,6 +97,31 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
 		{
 			converters.Add(typeConverter);
+		}
+		
+		public INamingConvention NamingConvention
+		{
+			get
+			{
+				return namingConvention;
+			}
+			set
+			{
+				if(value == null)
+				{
+					throw new ArgumentNullException("NamingConvention");
+				}
+				
+				namingConvention = value;
+				
+				typeDescriptor.TypeDescriptor = 
+					new YamlAttributesTypeDescriptor(
+						new NamingConventionTypeDescriptor(
+							new ReadableAndWritablePropertiesTypeDescriptor(),
+							namingConvention
+						)
+					);
+			}
 		}
 	}
 }

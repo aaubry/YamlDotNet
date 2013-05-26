@@ -6,6 +6,8 @@ obj
 TestResults
 *.suo
 *.user
+*.userprefs
+*.pidb
 Help/*
 release/*
 /_ReSharper.*

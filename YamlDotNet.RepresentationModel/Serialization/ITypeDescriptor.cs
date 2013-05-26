@@ -10,6 +10,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	public interface ITypeDescriptor
 	{
 		IEnumerable<IPropertyDescriptor> GetProperties(Type type);
+		
+		IPropertyDescriptor GetProperty(Type type, string name);
 	}
 
 	public interface IPropertyDescriptor

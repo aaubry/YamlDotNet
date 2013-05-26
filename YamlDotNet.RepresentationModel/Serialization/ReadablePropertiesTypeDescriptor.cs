@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -29,13 +31,39 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				get { return Property.Name; }
 			}
 		}
+		
+		protected virtual bool IsValidProperty(PropertyInfo property)
+		{
+			return property.CanRead
+				&& property.GetGetMethod().GetParameters().Length == 0;
+		}
 
-		public virtual IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		public IEnumerable<IPropertyDescriptor> GetProperties(Type type)
 		{
 			return type
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-				.Where(p => p.CanRead && p.GetGetMethod().GetParameters().Length == 0)
+				.Where(IsValidProperty)
 				.Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p));
+		}
+		
+		public IPropertyDescriptor GetProperty(Type type, string name)
+		{
+			var property = type
+				.GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+			
+			if(property == null || IsValidProperty(property))
+			{
+				throw new SerializationException(
+					string.Format(
+						CultureInfo.InvariantCulture,
+						"Property '{0}' not found on type '{1}'.",
+						name,
+						type.FullName
+					)
+				);
+			}
+							
+			return new ReflectionPropertyDescriptor(property);
 		}
 	}
 }

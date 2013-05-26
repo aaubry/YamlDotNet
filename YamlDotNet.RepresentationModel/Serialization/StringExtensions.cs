@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -7,7 +8,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	internal static class StringExtensions
 	{
-
+		private static string ToCamelOrPascalCase(string str, Func<char, char> firstLetterTransform)
+		{
+			var text = Regex.Replace(str, "([_\\-])(?<char>[a-z])", match => match.Groups["char"].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
+			return firstLetterTransform(text[0]) + text.Substring(1);
+		}
+		
+		
 		/// <summary>
 		/// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 
 		/// camel case (thisIsATest). Camel case is the same as Pascal case, except the first letter
@@ -17,7 +24,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns>Converted string</returns>
 		public static string ToCamelCase(this string str)
 		{
-			return Regex.Replace(str, "([_\\-])(?<char>[a-z])", match => match.Groups["char"].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
+			return ToCamelOrPascalCase(str, char.ToLowerInvariant);
 		}
 
 		/// <summary>
@@ -29,8 +36,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <returns>Converted string</returns>
 		public static string ToPascalCase(this string str)
 		{
-			var camelCase = str.ToCamelCase();
-			return char.ToUpper(camelCase[0]) + camelCase.Substring(1);
+			return ToCamelOrPascalCase(str, char.ToUpperInvariant);
 		}
 
 		/// <summary>

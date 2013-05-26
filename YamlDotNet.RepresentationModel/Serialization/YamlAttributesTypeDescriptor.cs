@@ -7,7 +7,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// Applies the Yaml* attributes to another <see cref="ITypeDescriptor"/>.
 	/// </summary>
-	public sealed class YamlAttributesTypeDescriptor : ITypeDescriptor
+	public sealed class YamlAttributesTypeDescriptor : TypeDescriptorSkeleton
 	{
 		private readonly ITypeDescriptor innerTypeDescriptor;
 
@@ -16,7 +16,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.innerTypeDescriptor = innerTypeDescriptor;
 		}
 
-		public IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
 		{
 			return innerTypeDescriptor.GetProperties(type)
 				.Where(p => p.Property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0)

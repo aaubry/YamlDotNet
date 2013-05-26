@@ -9,7 +9,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// Wraps another <see cref="ITypeDescriptor"/> and applies a
 	/// naming convention to the names of the properties.
 	/// </summary>
-	public sealed class NamingConventionTypeDescriptor : ITypeDescriptor
+	public sealed class NamingConventionTypeDescriptor : TypeDescriptorSkeleton
 	{
 		private readonly ITypeDescriptor innerTypeDescriptor;
 		private readonly INamingConvention namingConvention;
@@ -31,7 +31,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.namingConvention = namingConvention;
 		}
 
-		IEnumerable<IPropertyDescriptor> ITypeDescriptor.GetProperties(Type type)
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
 		{
 			return innerTypeDescriptor.GetProperties(type)
 				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p.Property, namingConvention.Apply(p.Name)));

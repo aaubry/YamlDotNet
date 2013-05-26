@@ -151,6 +151,7 @@
     <Compile Include="Serialization\NodeTypeResolvers\TypeNameInTagNodeTypeResolver.cs" />
     <Compile Include="Serialization\DeserializationFlags.cs" />
     <Compile Include="Serialization\DeserializerSkeleton.cs" />
+    <Compile Include="Serialization\TypeDescriptorSkeleton.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
