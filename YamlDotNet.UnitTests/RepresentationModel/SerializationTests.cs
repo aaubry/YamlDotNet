@@ -893,7 +893,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 		private void DeserializeUsingNamingConvention(string yaml, INamingConvention convention)
 		{
-			var serializer = new Deserializer { NamingConvention = convention };
+			var serializer = new Deserializer(namingConvention: convention);
 			var result = serializer.Deserialize<ConventionTest>(YamlText(yaml));
 
 			Assert.Equal("First", result.FirstTest);

@@ -30,7 +30,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// A façade for the YAML library with the standard configuration.
 	/// </summary>
-	public class Deserializer : DeserializerSkeleton
+	public class Deserializer : BareDeserializer
 	{
 		private static readonly Dictionary<string, Type> predefinedTagMappings = new Dictionary<string, Type>
 		{
@@ -44,9 +44,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private readonly Dictionary<string, Type> tagMappings;
 		private readonly List<IYamlTypeConverter> converters;
-		private INamingConvention namingConvention;
 		private TypeDescriptorProxy typeDescriptor = new TypeDescriptorProxy();
-		
+
+		public IList<INodeDeserializer> Deserializers { get; private set; }
+		public IList<INodeTypeResolver> TypeResolvers { get; private set; }
+
 		private class TypeDescriptorProxy : ITypeDescriptor
 		{
 			public ITypeDescriptor TypeDescriptor;
@@ -62,16 +64,21 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 		
-		public Deserializer()
-			: this(new DefaultObjectFactory())
+		public Deserializer(IObjectFactory objectFactory = null, INamingConvention namingConvention = null)
 		{
-		}
-
-		public Deserializer(IObjectFactory objectFactory)
-		{
-			NamingConvention = new NullNamingConvention();
+			objectFactory = objectFactory ?? new DefaultObjectFactory();
+			namingConvention = namingConvention ?? new NullNamingConvention();
 			
+			typeDescriptor.TypeDescriptor = 
+				new YamlAttributesTypeDescriptor(
+					new NamingConventionTypeDescriptor(
+						new ReadableAndWritablePropertiesTypeDescriptor(),
+						namingConvention
+					)
+				);
+
 			converters = new List<IYamlTypeConverter>();
+			Deserializers = new List<INodeDeserializer>();
 			Deserializers.Add(new TypeConverterNodeDeserializer(converters));
 			Deserializers.Add(new NullNodeDeserializer());
 			Deserializers.Add(new ScalarNodeDeserializer());
@@ -84,9 +91,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			Deserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor));
 
 			tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
+			TypeResolvers = new List<INodeTypeResolver>();
 			TypeResolvers.Add(new TagNodeTypeResolver(tagMappings));
 			TypeResolvers.Add(new TypeNameInTagNodeTypeResolver());
 			TypeResolvers.Add(new DefaultContainersNodeTypeResolver());
+			
+			base.SetValueDeserializer(
+				new AliasValueDeserializer(
+					new NodeValueDeserializer(
+						Deserializers,
+						TypeResolvers
+					)
+				)
+			);
 		}
 
 		public void RegisterTagMapping(string tag, Type type)
@@ -97,31 +114,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
 		{
 			converters.Add(typeConverter);
-		}
-		
-		public INamingConvention NamingConvention
-		{
-			get
-			{
-				return namingConvention;
-			}
-			set
-			{
-				if(value == null)
-				{
-					throw new ArgumentNullException("NamingConvention");
-				}
-				
-				namingConvention = value;
-				
-				typeDescriptor.TypeDescriptor = 
-					new YamlAttributesTypeDescriptor(
-						new NamingConventionTypeDescriptor(
-							new ReadableAndWritablePropertiesTypeDescriptor(),
-							namingConvention
-						)
-					);
-			}
 		}
 	}
 }
