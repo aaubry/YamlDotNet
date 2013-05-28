@@ -32,13 +32,30 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 			value = null;
 			var evt = reader.Peek<NodeEvent>();
 			var isNull = evt != null
-				&& evt.Tag == "tag:yaml.org,2002:null";
+				&& NodeIsNull(evt);
 
 			if (isNull)
 			{
 				reader.Skip();
 			}
 			return isNull;
+		}
+
+		private bool NodeIsNull(NodeEvent nodeEvent)
+		{
+			// http://yaml.org/type/null.html
+
+			if (nodeEvent.Tag == "tag:yaml.org,2002:null")
+			{
+				return true;
+			}
+
+			var scalar = nodeEvent as Scalar;
+			if (scalar == null)
+				return false;
+
+			var value = scalar.Value;
+			return value == "" || value == "~" || value == "null" || value == "Null" || value == "NULL";
 		}
 	}
 }

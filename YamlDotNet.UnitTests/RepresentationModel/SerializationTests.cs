@@ -33,6 +33,7 @@ using YamlDotNet.Core.Events;
 using System.Globalization;
 using System.ComponentModel;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -1074,6 +1075,36 @@ Name: Charles
 			Assert.Equal("Andy", people[0].Name);
 			Assert.Equal("Brad", people[1].Name);
 			Assert.Equal("Charles", people[2].Name);
+		}
+
+		[Fact]
+		public void NullValuesInListsAreAlwaysEmittedWithoutEmitDefaults()
+		{
+			var input = new string[] { "foo", null, "bar" };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+			
+			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
+		}
+
+		[Fact]
+		public void NullValuesInListsAreAlwaysEmittedWithEmitDefaults()
+		{
+			var input = new string[] { "foo", null, "bar" };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+			
+			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
 		}
 	}
 }

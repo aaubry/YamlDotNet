@@ -11,3 +11,5 @@ TestResults
 Help/*
 release/*
 /_ReSharper.*
+*.pidb
+*.userprefs
