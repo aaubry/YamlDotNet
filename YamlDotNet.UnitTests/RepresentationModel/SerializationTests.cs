@@ -432,19 +432,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		}
 
 		[Fact]
-		public void Overrides()
-		{
-			DeserializationOptions options = new DeserializationOptions();
-			options.Overrides.Add(typeof(Z), "aaa", (t, reader) => ((Z)t).aaa = reader.Expect<Scalar>().Value.ToUpperInvariant());
-
-			var serializer = new YamlSerializer();
-			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), options);
-
-			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-			Assert.Equal("BBB", ((Z)result).aaa);
-		}
-
-		[Fact]
 		public void Enums()
 		{
 			var serializer = new Serializer();
@@ -765,7 +752,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void DeserializationOfNullWorksInJson()
 		{
 			var serializer = new Serializer();
-			var deserializer = new YamlSerializer(typeof(X), YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
+			var deserializer = new Deserializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -774,7 +761,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 				Console.WriteLine(buffer.ToString());
 
-				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()));
+				X copy = (X)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(X));
 
 				Assert.Null(copy.MyString);
 			}
@@ -796,14 +783,14 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
 			var serializer = new Serializer();
-			var deserializer = new YamlSerializer<ContainsIgnore>(YamlSerializerModes.EmitDefaults | YamlSerializerModes.JsonCompatible | YamlSerializerModes.Roundtrip);
+			var deserializer = new Deserializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				var orig = new ContainsIgnore { IgnoreMe = "Some Text" };
 				serializer.Serialize(buffer, orig);
 				Console.WriteLine(buffer.ToString());
-				var copy = deserializer.Deserialize(new StringReader(buffer.ToString()));
+				var copy = (ContainsIgnore)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ContainsIgnore));
 				Assert.Null(copy.IgnoreMe);
 			}
 		}

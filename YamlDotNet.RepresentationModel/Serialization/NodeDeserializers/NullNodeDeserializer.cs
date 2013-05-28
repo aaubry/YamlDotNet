@@ -51,7 +51,7 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 			}
 
 			var scalar = nodeEvent as Scalar;
-			if (scalar == null)
+			if (scalar == null || scalar.Style != Core.ScalarStyle.Plain)
 				return false;
 
 			var value = scalar.Value;

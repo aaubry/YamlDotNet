@@ -142,7 +142,6 @@
     <Compile Include="Serialization\NodeDeserializers\GenericDictionaryNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ObjectNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ScalarNodeDeserializer.cs" />
-    <Compile Include="Serialization\NodeDeserializers\JsonNullNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\NullNodeDeserializer.cs" />
     <Compile Include="Serialization\INodeDeserializer.cs" />
     <Compile Include="Serialization\INodeTypeResolver.cs" />
