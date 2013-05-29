@@ -74,8 +74,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	{
 		internal IList<IYamlTypeConverter> Converters { get; private set; }
 
-		public Serializer()
+		private readonly SerializationOptions options;
+		private readonly INamingConvention namingConvention;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="options">Options that control how the serialization is to be performed.</param>
+		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
+		public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
 		{
+			this.options = options;
+			this.namingConvention = namingConvention ?? new NullNamingConvention();
+
 			Converters = new List<IYamlTypeConverter>();
 		}
 
@@ -92,11 +103,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
-		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-		public void Serialize(TextWriter writer, object graph, SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+		public void Serialize(TextWriter writer, object graph)
 		{
-			Serialize(new Emitter(writer), graph, options, namingConvention);
+			Serialize(new Emitter(writer), graph);
 		}
 
 		/// <summary>
@@ -105,11 +114,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="type">The static type of the object to serialize.</param>
-		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-		public void Serialize(TextWriter writer, object graph, Type type, SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+		public void Serialize(TextWriter writer, object graph, Type type)
 		{
-			Serialize(new Emitter(writer), graph, type, options, namingConvention);
+			Serialize(new Emitter(writer), graph, type);
 		}
 
 		/// <summary>
@@ -117,11 +124,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="emitter">The <see cref="Emitter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
-		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-		public void Serialize(Emitter emitter, object graph, SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+		public void Serialize(Emitter emitter, object graph)
 		{
-			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object), options, namingConvention);
+			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object));
 		}
 
 		/// <summary>
@@ -130,9 +135,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="emitter">The <see cref="Emitter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="type">The static type of the object to serialize.</param>
-		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-		public void Serialize(Emitter emitter, object graph, Type type, SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+		public void Serialize(Emitter emitter, object graph, Type type)
 		{
 			if (emitter == null)
 			{
@@ -144,9 +147,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new ArgumentNullException("type");
 			}
 
-			var traversalStrategy = CreateTraversalStrategy(options, namingConvention ?? new NullNamingConvention());
-			var eventEmitter = CreateEventEmitter(emitter, options);
-			var emittingVisitor = CreateEmittingVisitor(emitter, options, traversalStrategy, eventEmitter, graph, type);
+			var traversalStrategy = CreateTraversalStrategy();
+			var eventEmitter = CreateEventEmitter(emitter);
+			var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph, type);
 			EmitDocument(emitter, traversalStrategy, emittingVisitor, graph, type);
 		}
 
@@ -161,7 +164,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			emitter.Emit(new StreamEnd());
 		}
 
-		private IObjectGraphVisitor CreateEmittingVisitor(Emitter emitter, SerializationOptions options, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, object graph, Type type)
+		private IObjectGraphVisitor CreateEmittingVisitor(Emitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, object graph, Type type)
 		{
 			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
@@ -183,7 +186,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return emittingVisitor;
 		}
 
-		private IEventEmitter CreateEventEmitter(Emitter emitter, SerializationOptions options)
+		private IEventEmitter CreateEventEmitter(Emitter emitter)
 		{
 			var writer = new WriterEventEmitter(emitter);
 
@@ -197,7 +200,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 		}
 
-		private IObjectGraphTraversalStrategy CreateTraversalStrategy(SerializationOptions options, INamingConvention namingConvention)
+		private IObjectGraphTraversalStrategy CreateTraversalStrategy()
 		{
 			ITypeDescriptor typeDescriptor;
 			if ((options & SerializationOptions.Roundtrip) != 0)

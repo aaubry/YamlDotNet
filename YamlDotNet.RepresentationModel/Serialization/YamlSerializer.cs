@@ -185,8 +185,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		[Obsolete("This method exists for source compatibility with older code. You should use the Serializer class instead.")]
 		public void Serialize(TextWriter output, object graph)
 		{
-			var serializer = new Serializer();
-			serializer.Serialize(output, graph, (SerializationOptions)mode);
+			var serializer = new Serializer((SerializationOptions)mode);
+			serializer.Serialize(output, graph);
 		}
 		#endregion
 

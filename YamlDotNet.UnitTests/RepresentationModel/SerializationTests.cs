@@ -173,12 +173,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void Roundtrip()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X();
-				serializer.Serialize(buffer, original, SerializationOptions.Roundtrip);
+				serializer.Serialize(buffer, original);
 
 				Console.WriteLine(buffer.ToString());
 
@@ -201,12 +201,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void RoundtripWithDefaults()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X();
-				serializer.Serialize(buffer, original, SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
+				serializer.Serialize(buffer, original);
 
 				Console.WriteLine(buffer.ToString());
 
@@ -262,7 +262,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void CircularReference()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
 
 			using (StringWriter buffer = new StringWriter())
 			{
@@ -273,7 +273,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 					Child2 = original
 				};
 
-				serializer.Serialize(buffer, original, typeof(Y), SerializationOptions.Roundtrip);
+				serializer.Serialize(buffer, original, typeof(Y));
 
 				Console.WriteLine(buffer.ToString());
 			}
@@ -393,7 +393,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void RoundtripList()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
 			var deserializer = new Deserializer();
 
 			using (StringWriter buffer = new StringWriter())
@@ -402,7 +402,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				original.Add(2);
 				original.Add(4);
 				original.Add(6);
-				serializer.Serialize(buffer, original, typeof(List<int>), SerializationOptions.Roundtrip);
+				serializer.Serialize(buffer, original, typeof(List<int>));
 
 				Console.WriteLine(buffer.ToString());
 
@@ -630,10 +630,10 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		public void RoundtripWithTypeConverter()
 		{
 			SomeCustomeType x = new SomeCustomeType("Yo");
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
 			serializer.RegisterTypeConverter(new CustomTypeConverter());
 			StringWriter buffer = new StringWriter();
-			serializer.Serialize(buffer, x, SerializationOptions.Roundtrip);
+			serializer.Serialize(buffer, x);
 
 			Console.WriteLine(buffer.ToString());
 
@@ -692,12 +692,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void SerializationIncludesNullWhenAsked_BugFix()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				var original = new { MyString = (string)null };
-				serializer.Serialize(buffer, original, original.GetType(), SerializationOptions.EmitDefaults);
+				serializer.Serialize(buffer, original, original.GetType());
 
 				Console.WriteLine(buffer.ToString());
 
@@ -708,12 +708,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void SerializationIncludesNullWhenAsked()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.EmitDefaults);
+				serializer.Serialize(buffer, original, typeof(X));
 
 				Console.WriteLine(buffer.ToString());
 
@@ -729,7 +729,7 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.None);
+				serializer.Serialize(buffer, original, typeof(X));
 
 				Console.WriteLine(buffer.ToString());
 
@@ -740,12 +740,12 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void SerializationOfNullWorksInJson()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible);
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible);
+				serializer.Serialize(buffer, original, typeof(X));
 
 				Console.WriteLine(buffer.ToString());
 
@@ -756,13 +756,13 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void DeserializationOfNullWorksInJson()
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip);
 			var deserializer = new Deserializer();
 
 			using (StringWriter buffer = new StringWriter())
 			{
 				X original = new X { MyString = null };
-				serializer.Serialize(buffer, original, typeof(X), SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip);
+				serializer.Serialize(buffer, original, typeof(X));
 
 				Console.WriteLine(buffer.ToString());
 
@@ -848,10 +848,10 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 
 		private string SerializeWithNaming<T>(T input, INamingConvention naming)
 		{
-			var serializer = new Serializer();
+			var serializer = new Serializer(namingConvention: naming);
 			using (var writer = new StringWriter())
 			{
-				serializer.Serialize(writer, input, typeof(T), SerializationOptions.None, naming);
+				serializer.Serialize(writer, input, typeof(T));
 				return writer.ToString();
 			}
 		}
@@ -980,9 +980,9 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
 
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
 			var writer = new StringWriter();
-			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			serializer.Serialize(writer, input);
 			var serialized = writer.ToString();
 
 			Console.WriteLine(serialized);
@@ -1083,9 +1083,9 @@ Name: Charles
 		{
 			var input = new string[] { "foo", null, "bar" };
 
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
 			var writer = new StringWriter();
-			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			serializer.Serialize(writer, input);
 			var serialized = writer.ToString();
 
 			Console.WriteLine(serialized);
