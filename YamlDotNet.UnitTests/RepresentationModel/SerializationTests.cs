@@ -22,6 +22,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Xunit;
 using System.IO;
 using YamlDotNet.Core;
@@ -1003,6 +1004,36 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Console.WriteLine(serialized);
 
 			Assert.True(serialized.Contains("Value"));
+		}
+
+		[Fact]
+		public void NullValuesInListsAreAlwaysEmittedWithoutEmitDefaults()
+		{
+			var input = new string[] { "foo", null, "bar" };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+			
+			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
+		}
+
+		[Fact]
+		public void NullValuesInListsAreAlwaysEmittedWithEmitDefaults()
+		{
+			var input = new string[] { "foo", null, "bar" };
+
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			var serialized = writer.ToString();
+
+			Console.WriteLine(serialized);
+			
+			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
 		}
 
 		public class Person
