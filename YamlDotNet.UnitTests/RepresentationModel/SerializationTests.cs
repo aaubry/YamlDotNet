@@ -876,6 +876,8 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			public string ThirdTest { get; set; }
 			[YamlAlias("fourthTest")]
 			public string AliasTest { get; set; }
+			[YamlIgnore]
+			public string fourthTest { get; set; }
 		}
 
 		private void DeserializeUsingNamingConvention(string yaml, INamingConvention convention)
@@ -1094,3 +1096,4 @@ Name: Charles
 		}
 	}
 }
+

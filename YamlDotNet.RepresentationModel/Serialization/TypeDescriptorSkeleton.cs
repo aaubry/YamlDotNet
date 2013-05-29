@@ -32,22 +32,40 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		public IPropertyDescriptor GetProperty(Type type, string name)
 		{
-			var property = GetProperties(type)
-				.FirstOrDefault(p => p.Name == name);
+			var candidates = GetProperties(type)
+				.Where(p => p.Name == name);
 			
-			if(property == null)
+			using(var enumerator = candidates.GetEnumerator())
 			{
-				throw new SerializationException(
-					string.Format(
-						CultureInfo.InvariantCulture,
-						"Property '{0}' not found on type '{1}'.",
-						name,
-						type.FullName
-					)
-				);
+				if(!enumerator.MoveNext())
+				{
+					throw new SerializationException(
+						string.Format(
+							CultureInfo.InvariantCulture,
+							"Property '{0}' not found on type '{1}'.",
+							name,
+							type.FullName
+						)
+					);
+				}
+				
+				var property = enumerator.Current;
+				
+				if(enumerator.MoveNext())
+				{
+					throw new SerializationException(
+						string.Format(
+							CultureInfo.InvariantCulture,
+							"Multiple properties with the name/alias '{0}' already exists on type '{1}', maybe you're misusing YamlAlias or maybe you are using the wrong naming convention? The matching properties are: {2}",
+							name,
+							type.FullName,
+							string.Join(", ", candidates.Select(p => p.Property.Name).ToArray())
+						)
+					);
+				}
+
+				return property;
 			}
-							
-			return property;
 		}
 	}
 }
