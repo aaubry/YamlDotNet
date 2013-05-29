@@ -21,16 +21,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 using YamlDotNet.RepresentationModel.Serialization.NodeDeserializers;
 using YamlDotNet.RepresentationModel.Serialization.NodeTypeResolvers;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
 	/// A façade for the YAML library with the standard configuration.
 	/// </summary>
-	public class Deserializer : BareDeserializer
+	public sealed class Deserializer
 	{
 		private static readonly Dictionary<string, Type> predefinedTagMappings = new Dictionary<string, Type>
 		{
@@ -45,6 +48,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private readonly Dictionary<string, Type> tagMappings;
 		private readonly List<IYamlTypeConverter> converters;
 		private TypeDescriptorProxy typeDescriptor = new TypeDescriptorProxy();
+		private IValueDeserializer valueDeserializer;
 
 		public IList<INodeDeserializer> NodeDeserializers { get; private set; }
 		public IList<INodeTypeResolver> TypeResolvers { get; private set; }
@@ -96,14 +100,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			TypeResolvers.Add(new TypeNameInTagNodeTypeResolver());
 			TypeResolvers.Add(new DefaultContainersNodeTypeResolver());
 			
-			base.SetValueDeserializer(
+			valueDeserializer =
 				new AliasValueDeserializer(
 					new NodeValueDeserializer(
 						NodeDeserializers,
 						TypeResolvers
 					)
-				)
-			);
+				);
 		}
 
 		public void RegisterTagMapping(string tag, Type type)
@@ -114,6 +117,69 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
 		{
 			converters.Add(typeConverter);
+		}
+
+		public T Deserialize<T>(TextReader input, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return (T)Deserialize(input, typeof(T), options);
+		}
+
+		public object Deserialize(TextReader input, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return Deserialize(input, typeof(object), options);
+		}
+
+		public object Deserialize(TextReader input, Type type, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return Deserialize(new EventReader(new Parser(input)), type, options);
+		}
+
+		public T Deserialize<T>(EventReader reader, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return (T)Deserialize(reader, typeof(T), options);
+		}
+
+		public object Deserialize(EventReader reader, DeserializationFlags options = DeserializationFlags.None)
+		{
+			return Deserialize(reader, typeof(object), options);
+		}
+
+		/// <summary>
+		/// Deserializes an object of the specified type.
+		/// </summary>
+		/// <param name="reader">The <see cref="EventReader" /> where to deserialize the object.</param>
+		/// <param name="type">The static type of the object to deserialize.</param>
+		/// <param name="options">Options that control how the deserialization is to be performed.</param>
+		/// <returns>Returns the deserialized object.</returns>
+		public object Deserialize(EventReader reader, Type type, DeserializationFlags options = DeserializationFlags.None)
+		{
+			if (reader == null)
+			{
+				throw new ArgumentNullException("reader");
+			}
+
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+
+			var hasStreamStart = reader.Allow<StreamStart>() != null;
+
+			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
+
+			var result = valueDeserializer.DeserializeValue(reader, type, new SerializerState(), valueDeserializer);
+
+			if (hasDocumentStart)
+			{
+				reader.Expect<DocumentEnd>();
+			}
+
+			if (hasStreamStart)
+			{
+				reader.Expect<StreamEnd>();
+			}
+
+			return result;
 		}
 	}
 }

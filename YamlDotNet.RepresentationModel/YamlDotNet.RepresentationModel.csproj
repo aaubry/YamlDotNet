@@ -150,7 +150,6 @@
     <Compile Include="Serialization\NodeTypeResolvers\TypeNameInTagNodeTypeResolver.cs" />
     <Compile Include="Serialization\DeserializationFlags.cs" />
     <Compile Include="Serialization\TypeDescriptorSkeleton.cs" />
-    <Compile Include="Serialization\BareDeserializer.cs" />
     <Compile Include="Serialization\NodeValueDeserializer.cs" />
     <Compile Include="Serialization\AliasValueDeserializer.cs" />
     <Compile Include="Serialization\IValueDeserializer.cs" />
