@@ -11,8 +11,8 @@ namespace YamlDotNet.Samples
 			// Setup the input
 			var input = new StringReader(_document);
 
-			var yamlSerializer = new YamlSerializer<Order>();
-			var order = yamlSerializer.Deserialize(input);
+			var deserializer = new Deserializer();
+			var order = (Order)deserializer.Deserialize(input, typeof(Order));
 
 			Console.WriteLine("Receipt: {0}", order.Receipt);
 			Console.WriteLine("Customer: {0} {1}", order.Customer.Given, order.Customer.Family);

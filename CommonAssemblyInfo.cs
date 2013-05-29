@@ -33,7 +33,7 @@ using System;
 #endif
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("YamlDotNet")]
-[assembly: AssemblyCopyright("Copyright © Antoine Aubry 2008")]
+[assembly: AssemblyCopyright("Copyright © Antoine Aubry 2008, 2009, 2010, 2011, 2012, 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -54,7 +54,7 @@ using System;
 //
 // You can specify all the values or you can default the Revision and Build Numbers
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("0.2.*")]
-//[assembly: AssemblyFileVersion("0.2.*")]
+[assembly: AssemblyVersion("2.0.*")]
+//[assembly: AssemblyFileVersion("2.0.*")]
 
 [assembly: CLSCompliant(true)]

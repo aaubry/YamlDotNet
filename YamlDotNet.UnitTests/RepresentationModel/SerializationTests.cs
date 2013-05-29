@@ -20,21 +20,20 @@
 //  SOFTWARE.
 
 using System;
-using System.Drawing;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Xunit;
-using System.IO;
-using YamlDotNet.Core;
-using YamlDotNet.RepresentationModel.Serialization;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Core.Events;
-using System.Globalization;
 using System.ComponentModel;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using Xunit;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
 namespace YamlDotNet.UnitTests.RepresentationModel
 {
@@ -1026,9 +1025,9 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			var input = new string[] { "foo", null, "bar" };
 
-			var serializer = new Serializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
 			var writer = new StringWriter();
-			serializer.Serialize(writer, input, SerializationOptions.EmitDefaults);
+			serializer.Serialize(writer, input);
 			var serialized = writer.ToString();
 
 			Console.WriteLine(serialized);
@@ -1092,36 +1091,6 @@ Name: Charles
 			Assert.Equal("Andy", people[0].Name);
 			Assert.Equal("Brad", people[1].Name);
 			Assert.Equal("Charles", people[2].Name);
-		}
-
-		[Fact]
-		public void NullValuesInListsAreAlwaysEmittedWithoutEmitDefaults()
-		{
-			var input = new string[] { "foo", null, "bar" };
-
-			var serializer = new Serializer();
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
-
-			Console.WriteLine(serialized);
-			
-			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
-		}
-
-		[Fact]
-		public void NullValuesInListsAreAlwaysEmittedWithEmitDefaults()
-		{
-			var input = new string[] { "foo", null, "bar" };
-
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
-
-			Console.WriteLine(serialized);
-			
-			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
 		}
 	}
 }
