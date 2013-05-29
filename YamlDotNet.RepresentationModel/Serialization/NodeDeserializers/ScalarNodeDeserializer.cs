@@ -116,15 +116,7 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 						}
 						else
 						{
-							TypeConverter converter = TypeDescriptor.GetConverter(expectedType);
-							if (converter != null && converter.CanConvertFrom(typeof(string)))
-							{
-								value = converter.ConvertFromInvariantString(scalar.Value);
-							}
-							else
-							{
-								value = Convert.ChangeType(scalar.Value, expectedType, CultureInfo.InvariantCulture);
-							}
+							value = TypeConverter.ChangeType(scalar.Value, expectedType);
 						}
 						break;
 				}

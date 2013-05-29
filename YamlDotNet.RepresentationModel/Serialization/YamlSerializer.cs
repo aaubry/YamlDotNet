@@ -29,7 +29,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -39,6 +38,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// Reads and writes objects from and to YAML.
 	/// </summary>
+	[Obsolete("YamlSerializer has been replaced by Deserializer. This class will be removed in the next version.")]
 	public class YamlSerializer
 	{
 		private readonly YamlSerializerModes mode;
@@ -330,7 +330,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 
 			object result = DeserializeValueNotNull(reader, context, nodeEvent, expectedType);
-			return ObjectConverter.Convert(result, expectedType);
+			return TypeConverter.ChangeType(result, expectedType);
 		}
 
 		private bool IsNull(NodeEvent nodeEvent)
@@ -468,7 +468,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 						}
 						else
 						{
-							TypeConverter converter = TypeDescriptor.GetConverter(type);
+							var converter = TypeDescriptor.GetConverter(type);
 							if (converter != null && converter.CanConvertFrom(typeof(string)))
 							{
 								result = converter.ConvertFromInvariantString(scalar.Value);
@@ -790,6 +790,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// on the user's code.
 	/// </summary>
 	/// <typeparam name="TSerialized">The type of the serialized.</typeparam>
+	[Obsolete("YamlSerializer has been replaced by Deserializer. This class will be removed in the next version.")]
 	public class YamlSerializer<TSerialized> : YamlSerializer
 	{
 		/// <summary>

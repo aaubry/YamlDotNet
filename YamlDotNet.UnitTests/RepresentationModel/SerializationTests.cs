@@ -461,21 +461,26 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 			Assert.Equal(20, value.Y);
 		}
 
-		//[Fact]
-		//public void DeserializeConvertible()
-		//{
-		//    YamlSerializer<Z> serializer = new YamlSerializer<Z>();
-		//    object result = serializer.Deserialize(YamlFile("convertible.yaml"));
+		[Fact]
+		public void DeserializeConvertible()
+		{
+			var serializer = new Deserializer();
+			object result = serializer.Deserialize(YamlFile("convertible.yaml"), typeof(Z));
 
-		//    Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-		//    Assert.Equal("[hello, world]", ((Z)result).aaa, "The property has the wrong value.");
-		//}
+			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
+			Assert.Equal("[hello, world]", ((Z)result).aaa);
+		}
 
-		public class Converter : TypeConverter
+		public class Converter : System.ComponentModel.TypeConverter
 		{
 			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 			{
 				return sourceType == typeof(string);
+			}
+
+			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+			{
+				return false;
 			}
 
 			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
@@ -766,12 +771,6 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 				Assert.Null(copy.MyString);
 			}
 		}
-
-		//[Fact]
-		//public void DeserializationIgnoresUnknownProperties()
-		//{
-		//	var serializer = new YamlSerializer(typeof(X));
-		//}
 
 		class ContainsIgnore
 		{

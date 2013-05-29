@@ -21,10 +21,9 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void NotSpecifyingObjectFactoryUsesDefault()
 		{
-			var serializer = new YamlSerializer();
-			var options = new DeserializationOptions();
-			options.Mappings.Add("!foo", typeof(FooBase));
-			var result = serializer.Deserialize(new StringReader("!foo {}"), options);
+			var deserializer = new Deserializer();
+			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			var result = deserializer.Deserialize(new StringReader("!foo {}"));
 
 			Assert.IsType<FooBase>(result);
 		}
@@ -32,13 +31,10 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		[Fact]
 		public void ObjectFactoryIsInvoked()
 		{
-			var serializer = new YamlSerializer();
-			var options = new DeserializationOptions();
-			options.Mappings.Add("!foo", typeof(FooBase));
+			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
+			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
 
-			options.ObjectFactory = new LambdaObjectFactory(t => new FooDerived());
-
-			var result = serializer.Deserialize(new StringReader("!foo {}"), options);
+			var result = deserializer.Deserialize(new StringReader("!foo {}"));
 
 			Assert.IsType<FooDerived>(result);
 		}

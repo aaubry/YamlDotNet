@@ -56,7 +56,8 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 				
 				var property = _typeDescriptor.GetProperty(expectedType, propertyName.Value).Property;
 				var propertyValue = nestedObjectDeserializer(reader, property.PropertyType);
-				property.SetValue(value, propertyValue, null);
+				var convertedValue = TypeConverter.ChangeType(propertyValue, property.PropertyType);
+				property.SetValue(value, convertedValue, null);
 			}
 
 			reader.Expect<MappingEnd>();

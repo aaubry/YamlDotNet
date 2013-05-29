@@ -3,7 +3,7 @@
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
-	/// Instructs the <see cref="YamlSerializer"/> to use a different field name for serialization.
+	/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
 	public class YamlAliasAttribute : Attribute

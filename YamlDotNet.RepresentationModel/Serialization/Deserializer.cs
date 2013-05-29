@@ -46,7 +46,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private readonly List<IYamlTypeConverter> converters;
 		private TypeDescriptorProxy typeDescriptor = new TypeDescriptorProxy();
 
-		public IList<INodeDeserializer> Deserializers { get; private set; }
+		public IList<INodeDeserializer> NodeDeserializers { get; private set; }
 		public IList<INodeTypeResolver> TypeResolvers { get; private set; }
 
 		private class TypeDescriptorProxy : ITypeDescriptor
@@ -78,17 +78,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				);
 
 			converters = new List<IYamlTypeConverter>();
-			Deserializers = new List<INodeDeserializer>();
-			Deserializers.Add(new TypeConverterNodeDeserializer(converters));
-			Deserializers.Add(new NullNodeDeserializer());
-			Deserializers.Add(new ScalarNodeDeserializer());
-			Deserializers.Add(new ArrayNodeDeserializer());
-			Deserializers.Add(new GenericDictionaryNodeDeserializer(objectFactory));
-			Deserializers.Add(new NonGenericDictionaryNodeDeserializer(objectFactory));
-			Deserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
-			Deserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
-			Deserializers.Add(new EnumerableNodeDeserializer());
-			Deserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor));
+			NodeDeserializers = new List<INodeDeserializer>();
+			NodeDeserializers.Add(new TypeConverterNodeDeserializer(converters));
+			NodeDeserializers.Add(new NullNodeDeserializer());
+			NodeDeserializers.Add(new ScalarNodeDeserializer());
+			NodeDeserializers.Add(new ArrayNodeDeserializer());
+			NodeDeserializers.Add(new GenericDictionaryNodeDeserializer(objectFactory));
+			NodeDeserializers.Add(new NonGenericDictionaryNodeDeserializer(objectFactory));
+			NodeDeserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
+			NodeDeserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
+			NodeDeserializers.Add(new EnumerableNodeDeserializer());
+			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor));
 
 			tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
 			TypeResolvers = new List<INodeTypeResolver>();
@@ -99,7 +99,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			base.SetValueDeserializer(
 				new AliasValueDeserializer(
 					new NodeValueDeserializer(
-						Deserializers,
+						NodeDeserializers,
 						TypeResolvers
 					)
 				)

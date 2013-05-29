@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -102,6 +102,7 @@
     <Compile Include="Serialization\ReadableAndWritablePropertiesTypeDescriptor.cs" />
     <Compile Include="Serialization\ReadablePropertiesTypeDescriptor.cs" />
     <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Serialization\TypeConverter.cs" />
     <Compile Include="Serialization\WriterEventEmitter.cs" />
     <Compile Include="Serialization\EventInfo.cs" />
     <Compile Include="Serialization\FullObjectGraphTraversalStrategy.cs" />
@@ -115,7 +116,6 @@
     <Compile Include="Serialization\RoundtripObjectGraphTraversalStrategy.cs" />
     <Compile Include="Serialization\StreamFragment.cs" />
     <Compile Include="Serialization\ObjectAnchorCollection.cs" />
-    <Compile Include="Serialization\ObjectConverter.cs" />
     <Compile Include="Serialization\TagMappings.cs" />
     <Compile Include="Serialization\TypeAssigningEventEmitter.cs" />
     <Compile Include="Serialization\YamlAliasAttribute.cs" />
@@ -200,9 +200,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Serialization\NodeDeserializers\" />
-    <Folder Include="Serialization\" />
-    <Folder Include="Serialization\NodeTypeResolvers\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

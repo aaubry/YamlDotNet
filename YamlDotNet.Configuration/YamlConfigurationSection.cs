@@ -115,16 +115,14 @@ namespace YamlDotNet.Configuration
 				yaml = GetYamlContent(section);
 			}
 
-			YamlSerializer serializer;
+			var sectionType = typeof(object);
 			if (section.Attributes["type"] != null)
 			{
-				serializer = new YamlSerializer(Type.GetType(section.Attributes["type"].Value, true));
+				sectionType = Type.GetType(section.Attributes["type"].Value, true);
 			}
-			else
-			{
-				serializer = new YamlSerializer();
-			}
-			return serializer.Deserialize(yaml);
+
+			var deserializer = new Deserializer();
+			return deserializer.Deserialize(yaml, sectionType);
 		}
 		#endregion
 
