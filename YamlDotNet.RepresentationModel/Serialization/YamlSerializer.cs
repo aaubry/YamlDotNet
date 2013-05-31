@@ -296,7 +296,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				reader.Expect<DocumentStart>();
 			}
 
-			object result = DeserializeValue(reader, serializedType, internalContext);
+			object result = null;
+			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
+				result = DeserializeValue(reader, serializedType, internalContext);
 
 			if (hasDocumentStart)
 			{
