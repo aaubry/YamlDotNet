@@ -167,7 +167,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
 
-			var result = valueDeserializer.DeserializeValue(reader, type, new SerializerState(), valueDeserializer);
+			object result = null;
+			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
+				result = valueDeserializer.DeserializeValue(reader, type, new SerializerState(), valueDeserializer);
 
 			if (hasDocumentStart)
 			{
