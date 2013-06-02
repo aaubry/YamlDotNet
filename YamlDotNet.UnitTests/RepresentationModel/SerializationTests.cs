@@ -1102,15 +1102,6 @@ Name: Charles
 			var arr = (int[])deserializer.Deserialize(new StringReader(""), typeof(int[]));
 			Assert.Null(arr);
 		}
-
-		[Fact]
-		[Obsolete]
-		public void DeserializeEmptyDocumentYamlDeserializer()
-		{
-			var deserializer = new YamlSerializer<int[]>();
-			var arr = deserializer.Deserialize(new StringReader(""));
-			Assert.Null(arr);
-		}
 	}
 }
 

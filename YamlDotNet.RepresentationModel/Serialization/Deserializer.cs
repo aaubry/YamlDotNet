@@ -119,29 +119,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			converters.Add(typeConverter);
 		}
 
-		public T Deserialize<T>(TextReader input, DeserializationFlags options = DeserializationFlags.None)
+		public T Deserialize<T>(TextReader input)
 		{
-			return (T)Deserialize(input, typeof(T), options);
+			return (T)Deserialize(input, typeof(T));
 		}
 
-		public object Deserialize(TextReader input, DeserializationFlags options = DeserializationFlags.None)
+		public object Deserialize(TextReader input)
 		{
-			return Deserialize(input, typeof(object), options);
+			return Deserialize(input, typeof(object));
 		}
 
-		public object Deserialize(TextReader input, Type type, DeserializationFlags options = DeserializationFlags.None)
+		public object Deserialize(TextReader input, Type type)
 		{
-			return Deserialize(new EventReader(new Parser(input)), type, options);
+			return Deserialize(new EventReader(new Parser(input)), type);
 		}
 
-		public T Deserialize<T>(EventReader reader, DeserializationFlags options = DeserializationFlags.None)
+		public T Deserialize<T>(EventReader reader)
 		{
-			return (T)Deserialize(reader, typeof(T), options);
+			return (T)Deserialize(reader, typeof(T));
 		}
 
-		public object Deserialize(EventReader reader, DeserializationFlags options = DeserializationFlags.None)
+		public object Deserialize(EventReader reader)
 		{
-			return Deserialize(reader, typeof(object), options);
+			return Deserialize(reader, typeof(object));
 		}
 
 		/// <summary>
@@ -151,7 +151,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="type">The static type of the object to deserialize.</param>
 		/// <param name="options">Options that control how the deserialization is to be performed.</param>
 		/// <returns>Returns the deserialized object.</returns>
-		public object Deserialize(EventReader reader, Type type, DeserializationFlags options = DeserializationFlags.None)
+		public object Deserialize(EventReader reader, Type type)
 		{
 			if (reader == null)
 			{

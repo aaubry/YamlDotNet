@@ -82,10 +82,6 @@
     <Compile Include="Serialization\CustomSerializationObjectGraphVisitor.cs" />
     <Compile Include="Serialization\DefaultExclusiveObjectGraphVisitor.cs" />
     <Compile Include="Serialization\DefaultObjectFactory.cs" />
-    <Compile Include="Serialization\DeserializationContext.cs" />
-    <Compile Include="Serialization\DeserializationOptions.cs" />
-    <Compile Include="Serialization\DeserializationOverride.cs" />
-    <Compile Include="Serialization\DeserializationOverrides.cs" />
     <Compile Include="Serialization\Deserializer.cs" />
     <Compile Include="Serialization\EmittingObjectGraphVisitor.cs" />
     <Compile Include="Serialization\INamingConvention.cs" />
@@ -129,8 +125,6 @@
     <Compile Include="YamlNodeIdentityEqualityComparer.cs" />
     <Compile Include="YamlScalarNode.cs" />
     <Compile Include="YamlSequenceNode.cs" />
-    <Compile Include="Serialization\YamlSerializer.cs" />
-    <Compile Include="Serialization\YamlSerializerModes.cs" />
     <Compile Include="YamlStream.cs" />
     <Compile Include="YamlVisitor.cs" />
     <Compile Include="Serialization\NodeDeserializers\TypeConverterNodeDeserializer.cs" />
@@ -148,7 +142,6 @@
     <Compile Include="Serialization\NodeTypeResolvers\TagNodeTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\DefaultContainersNodeTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\TypeNameInTagNodeTypeResolver.cs" />
-    <Compile Include="Serialization\DeserializationFlags.cs" />
     <Compile Include="Serialization\TypeDescriptorSkeleton.cs" />
     <Compile Include="Serialization\NodeValueDeserializer.cs" />
     <Compile Include="Serialization\AliasValueDeserializer.cs" />
