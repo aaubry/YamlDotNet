@@ -141,6 +141,8 @@
     <Compile Include="YamlException.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="IEmitter.cs" />
+    <Compile Include="SchemaEnforcingParser.cs" />
+    <Compile Include="ISchema.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

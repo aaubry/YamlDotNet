@@ -13,3 +13,5 @@ release/*
 /_ReSharper.*
 *.pidb
 *.userprefs
+tests
+
