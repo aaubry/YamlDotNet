@@ -88,7 +88,7 @@ namespace YamlDotNet.RepresentationModel
 		{
 			documents.Clear();
 
-			Parser parser = new Parser(input);
+			IParser parser = new Parser(input);
 
 			EventReader events = new EventReader(parser);
 			events.Expect<StreamStart>();
@@ -106,7 +106,7 @@ namespace YamlDotNet.RepresentationModel
 		/// <param name="output">The output.</param>
 		public void Save(TextWriter output)
 		{
-			Emitter emitter = new Emitter(output);
+			IEmitter emitter = new Emitter(output);
 			emitter.Emit(new StreamStart());
 
 			foreach (var document in documents)

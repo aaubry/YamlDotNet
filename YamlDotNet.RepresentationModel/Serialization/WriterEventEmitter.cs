@@ -5,9 +5,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 {
 	public sealed class WriterEventEmitter : IEventEmitter
 	{
-		private readonly Emitter emitter;
+		private readonly IEmitter emitter;
 
-		public WriterEventEmitter(Emitter emitter)
+		public WriterEventEmitter(IEmitter emitter)
 		{
 			this.emitter = emitter;
 		}

@@ -36,7 +36,7 @@ namespace YamlDotNet.Core
 	/// <summary>
 	/// Emits YAML streams.
 	/// </summary>
-	public class Emitter
+	public class Emitter : IEmitter
 	{
 		private readonly TextWriter output;
 

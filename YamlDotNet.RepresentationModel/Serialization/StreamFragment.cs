@@ -51,7 +51,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Reads this object's state from a YAML parser.
 		/// </summary>
 		/// <param name="parser"></param>
-		void IYamlSerializable.ReadYaml(Parser parser)
+		void IYamlSerializable.ReadYaml(IParser parser)
 		{
 			events.Clear();
 
@@ -74,7 +74,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Writes this object's state to a YAML emitter.
 		/// </summary>
 		/// <param name="emitter"></param>
-		void IYamlSerializable.WriteYaml(Emitter emitter)
+		void IYamlSerializable.WriteYaml(IEmitter emitter)
 		{
 			foreach (var item in events)
 			{

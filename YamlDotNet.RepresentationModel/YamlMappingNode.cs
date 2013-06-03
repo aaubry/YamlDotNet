@@ -251,7 +251,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="emitter">The emitter where the node is to be saved.</param>
 		/// <param name="state">The state.</param>
-		internal override void Emit(Emitter emitter, EmitterState state)
+		internal override void Emit(IEmitter emitter, EmitterState state)
 		{
             emitter.Emit(new MappingStart(Anchor, Tag, true, Style));
 			foreach (var entry in children)

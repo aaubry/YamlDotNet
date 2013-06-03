@@ -613,14 +613,14 @@ namespace YamlDotNet.UnitTests.RepresentationModel
 		{
 			public bool Accepts(Type type) { return type == typeof(SomeCustomeType); }
 
-			public object ReadYaml(Parser parser, Type type)
+			public object ReadYaml(IParser parser, Type type)
 			{
 				var value = ((Scalar)parser.Current).Value;
 				parser.MoveNext();
 				return new SomeCustomeType(value);
 			}
 
-			public void WriteYaml(Emitter emitter, object value, Type type)
+			public void WriteYaml(IEmitter emitter, object value, Type type)
 			{
 				emitter.Emit(new Scalar(((SomeCustomeType)value).Value));
 			}

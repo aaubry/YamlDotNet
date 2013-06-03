@@ -33,7 +33,7 @@ namespace YamlDotNet.Core
 	/// <summary>
 	/// Parses YAML streams.
 	/// </summary>
-	public class Parser
+	public class Parser : IParser
 	{
 		private readonly Stack<ParserState> states = new Stack<ParserState>();
 		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();

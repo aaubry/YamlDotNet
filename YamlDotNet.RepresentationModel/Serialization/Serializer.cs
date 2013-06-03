@@ -124,7 +124,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="emitter">The <see cref="Emitter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
-		public void Serialize(Emitter emitter, object graph)
+		public void Serialize(IEmitter emitter, object graph)
 		{
 			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object));
 		}
@@ -135,7 +135,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="emitter">The <see cref="Emitter" /> where to serialize the object.</param>
 		/// <param name="graph">The object to serialize.</param>
 		/// <param name="type">The static type of the object to serialize.</param>
-		public void Serialize(Emitter emitter, object graph, Type type)
+		public void Serialize(IEmitter emitter, object graph, Type type)
 		{
 			if (emitter == null)
 			{
@@ -153,7 +153,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			EmitDocument(emitter, traversalStrategy, emittingVisitor, graph, type);
 		}
 
-		private void EmitDocument(Emitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IObjectGraphVisitor emittingVisitor, object graph, Type type)
+		private void EmitDocument(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IObjectGraphVisitor emittingVisitor, object graph, Type type)
 		{
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart());
@@ -164,7 +164,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			emitter.Emit(new StreamEnd());
 		}
 
-		private IObjectGraphVisitor CreateEmittingVisitor(Emitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, object graph, Type type)
+		private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, object graph, Type type)
 		{
 			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
@@ -186,7 +186,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return emittingVisitor;
 		}
 
-		private IEventEmitter CreateEventEmitter(Emitter emitter)
+		private IEventEmitter CreateEventEmitter(IEmitter emitter)
 		{
 			var writer = new WriterEventEmitter(emitter);
 

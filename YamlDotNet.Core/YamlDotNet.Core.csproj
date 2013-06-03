@@ -139,6 +139,8 @@
     <Compile Include="Tokens\VersionDirective.cs" />
     <Compile Include="Version.cs" />
     <Compile Include="YamlException.cs" />
+    <Compile Include="IParser.cs" />
+    <Compile Include="IEmitter.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
