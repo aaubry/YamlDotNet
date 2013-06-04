@@ -68,7 +68,7 @@ namespace YamlDotNet.UnitTests
 			Scanner scanner = CreateScanner("test1.yaml");
 			
 			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new VersionDirective(new Core.Version(1, 1)));
+			AssertNext(scanner, new VersionDirective(new YamlDotNet.Core.Version(1, 1)));
 			AssertNext(scanner, new TagDirective("!", "!foo"));
 			AssertNext(scanner, new TagDirective("!yaml!", "tag:yaml.org,2002:"));
 			AssertNext(scanner, new DocumentStart());

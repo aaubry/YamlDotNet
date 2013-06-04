@@ -50,7 +50,29 @@ namespace YamlDotNet.Core
 		{
 			if(innerParser.MoveNext())
 			{
-				Current = schema.Apply(innerParser.Current);
+				var current = innerParser.Current;
+				
+				var nodeEvent = current as NodeEvent;
+				if(nodeEvent != null && nodeEvent.Tag == null)
+				{
+					Scalar scalar;
+					SequenceStart sequenceStart;
+					MappingStart mappingStart;
+					if((scalar = current as Scalar) != null)
+					{
+						current = schema.Apply(scalar);
+					}
+					else if((sequenceStart = current as SequenceStart) != null)
+					{
+						current = schema.Apply(sequenceStart);
+					}
+					else if((mappingStart = current as MappingStart) != null)
+					{
+						current = schema.Apply(mappingStart);
+					}
+				}
+				
+				Current = current;
 				return true;
 			}
 			return false;

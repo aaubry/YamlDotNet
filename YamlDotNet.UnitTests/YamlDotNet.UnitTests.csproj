@@ -62,6 +62,7 @@
     <Compile Include="Runner.cs" />
     <Compile Include="TracingVisitor.cs" />
     <Compile Include="YamlTest.cs" />
+    <Compile Include="Core\SchemaTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YamlDotNet.Converters\YamlDotNet.Converters.csproj">

@@ -143,6 +143,9 @@
     <Compile Include="IEmitter.cs" />
     <Compile Include="SchemaEnforcingParser.cs" />
     <Compile Include="ISchema.cs" />
+    <Compile Include="Schemas\FailsafeSchema.cs" />
+    <Compile Include="Schemas\Schema.cs" />
+    <Compile Include="Schemas\JsonSchema.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -179,4 +182,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Schemas\" />
+  </ItemGroup>
 </Project>

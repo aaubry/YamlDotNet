@@ -60,7 +60,9 @@ namespace YamlDotNet.UnitTests
 				}
 				
 				lines = lines
-					.Select(l => l.Substring(indent.Groups[1].Length))
+					.Select(l => l.Trim(' ', '\t', '\r', '\n').Length > 0
+						? l.Substring(indent.Groups[1].Length)
+						: "")
 					.ToList();
 			}
 			

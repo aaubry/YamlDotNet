@@ -22,17 +22,33 @@
 using System;
 using YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet.Core.Schemas
 {
 	/// <summary>
-	/// Represents a YAML schema.
-	/// A YAML schema is a combination of a set of tags and
-	/// a mechanism for resolving non-specific tags.
+	/// Implements the YAML failsafe schema.
+	/// <see cref="http://www.yaml.org/spec/1.2/spec.html#id2802346"/>
 	/// </summary>
-	public interface ISchema
+	/// <remarks>
+	/// The failsafe schema is guaranteed to work with any YAML document.
+	/// It is therefore the recommended schema for generic YAML tools.
+	/// A YAML processor should therefore support this schema,
+	/// at least as an option. 
+	/// </remarks>
+	public class FailsafeSchema : Schema
 	{
-		Scalar Apply(Scalar scalar);
-		SequenceStart Apply(SequenceStart sequenceStart);
-		MappingStart Apply(MappingStart mappingStart);
+		protected override string GetTag (Scalar scalar)
+		{
+			return "tag:yaml.org,2002:str";
+		}
+		
+		protected override string GetTag (SequenceStart sequenceStart)
+		{
+			return "tag:yaml.org,2002:seq";
+		}
+		
+		protected override string GetTag (MappingStart mappingStart)
+		{
+			return "tag:yaml.org,2002:map";
+		}
 	}
 }

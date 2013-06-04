@@ -112,7 +112,7 @@ namespace YamlDotNet.UnitTests
 			Parser parser = CreateParser("test1.yaml");
 			
 			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(new VersionDirective(new Core.Version(1, 1)), new TagDirectiveCollection(new TagDirective[] {
+			AssertNext(parser, new DocumentStart(new VersionDirective(new YamlDotNet.Core.Version(1, 1)), new TagDirectiveCollection(new TagDirective[] {
 				new TagDirective("!", "!foo"),
 				new TagDirective("!yaml!", "tag:yaml.org,2002:"),
 				new TagDirective("!!", "tag:yaml.org,2002:"),
@@ -406,64 +406,6 @@ namespace YamlDotNet.UnitTests
 			AssertNext(parser, new DocumentEnd(true));
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
-		}
-		
-		[Fact]
-		public void ScalarsHaveCorrectTagByDefault()
-		{
-			// http://www.yaml.org/spec/1.2/spec.html#id2805071
-			var parser = new Parser(YamlText(@"
-				- { actual: null, expected: !!null }
-				- { actual: Null, expected: !!null }
-				- { actual: NULL, expected: !!null }
-				- { actual: ~, expected: !!null }
-				- { actual: , expected: !!null }
-
-				- { actual: true, expected: !!bool true }
-				- { actual: True, expected: !!bool true }
-				- { actual: TRUE, expected: !!bool true }
-				- { actual: false, expected: !!bool false }
-				- { actual: False, expected: !!bool false }
-				- { actual: FALSE, expected: !!bool false }
-
-				- { actual: 0, expected: !!int 0 }
-				- { actual: 13, expected: !!int 13 }
-				- { actual: -6, expected: !!int -6 }
-				- { actual: 0o10, expected: !!int 8 }
-				- { actual: 0x3A, expected: !!int 58 }
-
-				- { actual: 0., expected: !!float 0 }
-				- { actual: -0.0, expected: !!float 0 }
-				- { actual: .5, expected: !!float 0.5 }
-				- { actual: +12e03, expected: !!float 12000 }
-				- { actual: -2E+05, expected: !!float -200000 }
-				- { actual: .inf, expected: !!float .inf }
-				- { actual: -.Inf, expected: !!float -.Inf }
-				- { actual: +.INF, expected: !!float +.inf }
-				- { actual: .nan, expected: !!float .nan }
-			"));
-			
-			var reader = new EventReader(parser);
-			
-			reader.Allow<StreamStart>();
-			reader.Allow<DocumentStart>();
-			reader.Allow<SequenceStart>();
-			
-			while(reader.Allow<SequenceEnd>() == null)
-			{
-				reader.Expect<MappingStart>();
-				
-				reader.Expect<Scalar>();
-				var actual = reader.Expect<Scalar>();
-				
-				reader.Expect<Scalar>();
-				var expected = reader.Expect<Scalar>();
-				
-				Console.WriteLine ("actual: {0}\nexpected: {1}\n\n", actual, expected);
-				Assert.Equal(expected.Tag, actual.Tag);
-				
-				reader.Expect<MappingEnd>();
-			}
 		}
 	}
 }
