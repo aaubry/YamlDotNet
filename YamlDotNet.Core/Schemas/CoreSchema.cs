@@ -19,48 +19,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core.Schemas
 {
 	/// <summary>
-	/// Implements the YAML JSON schema.
-	/// <see cref="http://www.yaml.org/spec/1.2/spec.html#id2803231"/>
+	/// Implements the YAML core schema.
+	/// <see cref="http://www.yaml.org/spec/1.2/spec.html#id2805071"/>
 	/// </summary>
 	/// <remarks>
-	/// The JSON schema is the lowest common denominator of most
-	/// modern computer languages, and allows parsing JSON files.
-	/// A YAML processor should therefore support this schema,
-	/// at least as an option.
-	/// It is also strongly recommended that other schemas
-	/// should be based on it. 
+	/// The Core schema is an extension of the JSON schema,
+	/// allowing for more human-readable presentation of the same types.
+	/// This is the recommended default schema that YAML processor
+	/// should use unless instructed otherwise.
+	/// It is also strongly recommended that other schemas should be based on it. 
 	/// </remarks>
-	public class JsonSchema : RegexBasedSchema
+	public class CoreSchema : RegexBasedSchema
 	{
 		private static readonly TagMapping[] tagMappings =
 			new[]
 			{
-				new TagMapping("tag:yaml.org,2002:null", @"^null$"),
-				new TagMapping("tag:yaml.org,2002:bool", @"^(true|false)$"),
-				new TagMapping("tag:yaml.org,2002:int", @"^-? ( 0 | [1-9] [0-9]* )$"),
-				new TagMapping("tag:yaml.org,2002:float", @"^-? ( 0 | [1-9] [0-9]* ) ( \. [0-9]* )? ( [eE] [-+]? [0-9]+ )?$"),
+				new TagMapping("tag:yaml.org,2002:null", @"^(null | Null | NULL | ~ | )$"),
+				new TagMapping("tag:yaml.org,2002:bool", @"^(true | True | TRUE | false | False | FALSE)$"),
+				new TagMapping("tag:yaml.org,2002:int", @"^[-+]? [0-9]+$"),
+				new TagMapping("tag:yaml.org,2002:int", @"^0o [0-7]+$"),
+				new TagMapping("tag:yaml.org,2002:int", @"^0x [0-9a-fA-F]+$"),
+				new TagMapping("tag:yaml.org,2002:float", @"^[-+]? ( \. [0-9]+ | [0-9]+ ( \. [0-9]* )? ) ( [eE] [-+]? [0-9]+ )?$"),
+				new TagMapping("tag:yaml.org,2002:float", @"^[-+]? ( \.inf | \.Inf | \.INF )$"),
+				new TagMapping("tag:yaml.org,2002:float", @"^(\.nan | \.NaN | \.NAN)$"),
 			};
 		
-		public JsonSchema()
+		public CoreSchema()
 			: base(tagMappings)
 		{
-		}
-		
-		protected override void OnUnresolvedTag(Scalar scalar)
-		{
-			throw new SyntaxErrorException(
-				scalar.Start,
-				scalar.End,
-				string.Format(
-					"Scalar '{0}' is not valid according to the JSON schema",
-					scalar.Value
-				)
-			);
 		}
 	}
 }

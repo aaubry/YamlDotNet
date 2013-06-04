@@ -19,48 +19,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Linq;
+using System.Text.RegularExpressions;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core.Schemas
 {
-	/// <summary>
-	/// Implements the YAML JSON schema.
-	/// <see cref="http://www.yaml.org/spec/1.2/spec.html#id2803231"/>
-	/// </summary>
-	/// <remarks>
-	/// The JSON schema is the lowest common denominator of most
-	/// modern computer languages, and allows parsing JSON files.
-	/// A YAML processor should therefore support this schema,
-	/// at least as an option.
-	/// It is also strongly recommended that other schemas
-	/// should be based on it. 
-	/// </remarks>
-	public class JsonSchema : RegexBasedSchema
+	public abstract class RegexBasedSchema : FailsafeSchema
 	{
-		private static readonly TagMapping[] tagMappings =
-			new[]
+		protected class TagMapping
+		{
+			public readonly string Tag;
+			public readonly Regex Pattern;
+			
+			public TagMapping (string tag, string pattern)
 			{
-				new TagMapping("tag:yaml.org,2002:null", @"^null$"),
-				new TagMapping("tag:yaml.org,2002:bool", @"^(true|false)$"),
-				new TagMapping("tag:yaml.org,2002:int", @"^-? ( 0 | [1-9] [0-9]* )$"),
-				new TagMapping("tag:yaml.org,2002:float", @"^-? ( 0 | [1-9] [0-9]* ) ( \. [0-9]* )? ( [eE] [-+]? [0-9]+ )?$"),
-			};
-		
-		public JsonSchema()
-			: base(tagMappings)
-		{
+				Tag = tag;
+				Pattern = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
+			}
 		}
 		
-		protected override void OnUnresolvedTag(Scalar scalar)
+		private readonly TagMapping[] tagMappings;
+		
+		protected RegexBasedSchema(TagMapping[] tagMappings)
 		{
-			throw new SyntaxErrorException(
-				scalar.Start,
-				scalar.End,
-				string.Format(
-					"Scalar '{0}' is not valid according to the JSON schema",
-					scalar.Value
-				)
-			);
+			this.tagMappings = tagMappings;
 		}
+		
+		protected override string GetTag (Scalar scalar)
+		{
+			if(scalar.Style == ScalarStyle.Plain)
+			{
+				var matchingMapping = tagMappings
+					.FirstOrDefault(m => m.Pattern.IsMatch(scalar.Value));
+				
+				if(matchingMapping != null)
+				{
+					return matchingMapping.Tag;
+				}
+				else
+				{
+					OnUnresolvedTag(scalar);
+				}
+			}
+			return base.GetTag(scalar);
+		}
+		
+		protected virtual void OnUnresolvedTag(Scalar scalar) {}
 	}
 }
