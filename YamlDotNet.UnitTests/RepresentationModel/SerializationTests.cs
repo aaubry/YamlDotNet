@@ -1102,6 +1102,126 @@ Name: Charles
 			var arr = (int[])deserializer.Deserialize(new StringReader(""), typeof(int[]));
 			Assert.Null(arr);
 		}
+
+		private class OnlyGenericDictionary : IDictionary<string, string>
+		{
+			private readonly Dictionary<string, string> _dictionary = new Dictionary<string, string>();
+
+			#region IDictionary<string,string> Members
+
+			public void Add(string key, string value)
+			{
+				_dictionary.Add(key, value);
+			}
+
+			public bool ContainsKey(string key)
+			{
+				throw new NotImplementedException();
+			}
+
+			public ICollection<string> Keys
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public bool Remove(string key)
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool TryGetValue(string key, out string value)
+			{
+				throw new NotImplementedException();
+			}
+
+			public ICollection<string> Values
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public string this[string key]
+			{
+				get
+				{
+					throw new NotImplementedException();
+				}
+				set
+				{
+					throw new NotImplementedException();
+				}
+			}
+
+			#endregion
+
+			#region ICollection<KeyValuePair<string,string>> Members
+
+			public void Add(KeyValuePair<string, string> item)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void Clear()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool Contains(KeyValuePair<string, string> item)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
+			{
+				throw new NotImplementedException();
+			}
+
+			public int Count
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public bool IsReadOnly
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public bool Remove(KeyValuePair<string, string> item)
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
+
+			#region IEnumerable<KeyValuePair<string,string>> Members
+
+			public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+			{
+				return _dictionary.GetEnumerator();
+			}
+
+			#endregion
+
+			#region IEnumerable Members
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return _dictionary.GetEnumerator();
+			}
+
+			#endregion
+		}
+
+		[Fact]
+		public void SerializeGenericDictionaryShouldNotThrowTargetException()
+		{
+			var serializer = new Serializer();
+
+			var buffer = new StringWriter();
+			serializer.Serialize(buffer, new OnlyGenericDictionary
+			{
+				{ "hello", "world" },
+			});
+		}
 	}
 }
 

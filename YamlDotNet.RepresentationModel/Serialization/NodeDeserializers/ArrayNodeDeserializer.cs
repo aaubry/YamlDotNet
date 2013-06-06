@@ -35,11 +35,11 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 				return false;
 			}
 
-			value = _deserializeHelper.InvokeStatic(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
+			value = _deserializeHelper.Invoke(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
 			return true;
 		}
 
-		private static readonly GenericMethod _deserializeHelper = new GenericMethod(() => DeserializeHelper<object>(null, null, null));
+		private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null));
 
 		private static TItem[] DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
 		{
