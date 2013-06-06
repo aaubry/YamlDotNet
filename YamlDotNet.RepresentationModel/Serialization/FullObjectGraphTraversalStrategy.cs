@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -112,7 +111,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			var dictionaryType = ReflectionUtility.GetImplementedGenericInterface(type, typeof(IDictionary<,>));
 			if (dictionaryType != null)
 			{
-				TraverseGenericDictionary(value, type, dictionaryType, visitor);
+				TraverseGenericDictionary(value, type, dictionaryType, visitor, currentDepth);
 				return;
 			}
 
@@ -143,7 +142,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			visitor.VisitMappingEnd(value, type);
 		}
 
-		private void TraverseGenericDictionary(object value, Type type, Type dictionaryType, IObjectGraphVisitor visitor)
+		private void TraverseGenericDictionary(object value, Type type, Type dictionaryType, IObjectGraphVisitor visitor, int currentDepth)
 		{
 			var entryTypes = dictionaryType.GetGenericArguments();
 
@@ -151,15 +150,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			visitor.VisitMappingStart(value, type, entryTypes[0], entryTypes[1]);
 
 			// Invoke TraverseGenericDictionaryHelper<,>
-			traverseGenericDictionaryHelperGeneric
-				.MakeGenericMethod(entryTypes)
-				.Invoke(null, new object[] { this, value, visitor });
+			traverseGenericDictionaryHelper.Invoke(entryTypes, this, value, visitor, currentDepth);
 
 			visitor.VisitMappingEnd(value, type);
 		}
 
-		private static readonly MethodInfo traverseGenericDictionaryHelperGeneric =
-			ReflectionUtility.GetMethod((FullObjectGraphTraversalStrategy s) => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0));
+		private static readonly GenericInstanceMethod<FullObjectGraphTraversalStrategy> traverseGenericDictionaryHelper =
+			new GenericInstanceMethod<FullObjectGraphTraversalStrategy>(s => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0));
 
 		private void TraverseGenericDictionaryHelper<TKey, TValue>(
 			IDictionary<TKey, TValue> value,

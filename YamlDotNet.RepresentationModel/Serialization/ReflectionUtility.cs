@@ -86,24 +86,35 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		}
 	}
 
-	public sealed class GenericMethod
+	public sealed class GenericStaticMethod
 	{
 		private readonly MethodInfo methodToCall;
 
-		public GenericMethod(Expression<Action> methodCall)
+		public GenericStaticMethod(Expression<Action> methodCall)
 		{
 			var callExpression = (MethodCallExpression)methodCall.Body;
 			methodToCall = callExpression.Method.GetGenericMethodDefinition();
 		}
 
-		public object InvokeStatic(Type[] genericArguments, params object[] arguments)
+		public object Invoke(Type[] genericArguments, params object[] arguments)
 		{
 			return methodToCall
 				.MakeGenericMethod(genericArguments)
 				.Invoke(null, arguments);
 		}
+	}
 
-		public object InvokeInstance(Type[] genericArguments, object instance, params  object[] arguments)
+	public sealed class GenericInstanceMethod<TInstance>
+	{
+		private readonly MethodInfo methodToCall;
+
+		public GenericInstanceMethod(Expression<Action<TInstance>> methodCall)
+		{
+			var callExpression = (MethodCallExpression)methodCall.Body;
+			methodToCall = callExpression.Method.GetGenericMethodDefinition();
+		}
+
+		public object Invoke(Type[] genericArguments, TInstance instance, params  object[] arguments)
 		{
 			return methodToCall
 				.MakeGenericMethod(genericArguments)

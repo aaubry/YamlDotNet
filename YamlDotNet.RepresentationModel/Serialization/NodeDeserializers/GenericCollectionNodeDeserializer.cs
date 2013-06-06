@@ -45,12 +45,12 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 			}
 
 			value = _objectFactory.Create(expectedType);
-			_deserializeHelper.InvokeStatic(iCollection.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
+			_deserializeHelper.Invoke(iCollection.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
 
 			return true;
 		}
 
-		private static readonly GenericMethod _deserializeHelper = new GenericMethod(() => DeserializeHelper<object>(null, null, null, null));
+		private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null, null));
 
 		internal static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
 		{
