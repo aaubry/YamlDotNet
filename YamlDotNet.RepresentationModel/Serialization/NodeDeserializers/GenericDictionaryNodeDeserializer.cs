@@ -48,17 +48,18 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 			reader.Expect<MappingStart>();
 
 			value = _objectFactory.Create(expectedType);
-			_deserializeHelperMethod
-				.MakeGenericMethod(iDictionary.GetGenericArguments())
-				.Invoke(null, new object[] { reader, expectedType, nestedObjectDeserializer, value });
+			deserializeHelperMethod.Invoke(iDictionary.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
 
 			reader.Expect<MappingEnd>();
 
 			return true;
 		}
 
-		private static MethodInfo _deserializeHelperMethod = typeof(GenericDictionaryNodeDeserializer)
-			.GetMethod("DeserializeHelper", BindingFlags.Static | BindingFlags.NonPublic);
+		private static readonly GenericStaticMethod deserializeHelperMethod =
+			new GenericStaticMethod(() => DeserializeHelper<object, object>(null, null, null, null));
+
+		//private static MethodInfo _deserializeHelperMethod = typeof(GenericDictionaryNodeDeserializer)
+		//	.GetMethod("DeserializeHelper", BindingFlags.Static | BindingFlags.NonPublic);
 
 		private static void DeserializeHelper<TKey, TValue>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary<TKey, TValue> result)
 		{

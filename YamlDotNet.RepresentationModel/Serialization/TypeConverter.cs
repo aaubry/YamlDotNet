@@ -199,7 +199,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 						if (isCompatible)
 						{
-							return method.Invoke(null, new[] { value });
+							try
+							{
+								return method.Invoke(null, new[] { value });
+							}
+							catch (TargetInvocationException ex)
+							{
+								throw ex.Unwrap();
+							}
 						}
 					}
 				}
@@ -208,18 +215,25 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			// If source type is string, try to find a Parse or TryParse method
 			if (sourceType == typeof(string))
 			{
-				// Try with - public static T Parse(string, IFormatProvider)
-				var parseMethod = destinationType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(IFormatProvider) }, null);
-				if (parseMethod != null)
+				try
 				{
-					return parseMethod.Invoke(null, new object[] { value, culture });
-				}
+					// Try with - public static T Parse(string, IFormatProvider)
+					var parseMethod = destinationType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(IFormatProvider) }, null);
+					if (parseMethod != null)
+					{
+						return parseMethod.Invoke(null, new object[] { value, culture });
+					}
 
-				// Try with - public static T Parse(string)
-				parseMethod = destinationType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
-				if (parseMethod != null)
+					// Try with - public static T Parse(string)
+					parseMethod = destinationType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
+					if (parseMethod != null)
+					{
+						return parseMethod.Invoke(null, new object[] { value });
+					}
+				}
+				catch (TargetInvocationException ex)
 				{
-					return parseMethod.Invoke(null, new object[] { value });
+					throw ex.Unwrap();
 				}
 			}
 

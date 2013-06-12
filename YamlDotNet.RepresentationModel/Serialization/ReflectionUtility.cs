@@ -67,8 +67,8 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		public static MethodInfo GetMethod(Expression<Action> methodAccess)
 		{
-			var method = ((MethodCallExpression) methodAccess.Body).Method;
-			if(method.IsGenericMethod)
+			var method = ((MethodCallExpression)methodAccess.Body).Method;
+			if (method.IsGenericMethod)
 			{
 				method = method.GetGenericMethodDefinition();
 			}
@@ -84,6 +84,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 			return method;
 		}
+
+		private static readonly FieldInfo remoteStackTraceField = typeof(Exception)
+				.GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+
+		public static Exception Unwrap(this TargetInvocationException ex)
+		{
+			var result = ex.InnerException;
+			if (remoteStackTraceField != null)
+			{
+				remoteStackTraceField.SetValue(ex.InnerException, ex.InnerException.StackTrace + "\r\n");
+			}
+			return result;
+		}
 	}
 
 	public sealed class GenericStaticMethod
@@ -98,9 +111,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		public object Invoke(Type[] genericArguments, params object[] arguments)
 		{
-			return methodToCall
-				.MakeGenericMethod(genericArguments)
-				.Invoke(null, arguments);
+			try
+			{
+				return methodToCall
+					.MakeGenericMethod(genericArguments)
+					.Invoke(null, arguments);
+			}
+			catch (TargetInvocationException ex)
+			{
+				throw ex.Unwrap();
+			}
 		}
 	}
 
@@ -116,9 +136,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		public object Invoke(Type[] genericArguments, TInstance instance, params  object[] arguments)
 		{
-			return methodToCall
-				.MakeGenericMethod(genericArguments)
-				.Invoke(instance, arguments);
+			try
+			{
+				return methodToCall
+					.MakeGenericMethod(genericArguments)
+					.Invoke(instance, arguments);
+			}
+			catch (TargetInvocationException ex)
+			{
+				throw ex.Unwrap();
+			}
 		}
 	}
 }
