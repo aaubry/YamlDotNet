@@ -54,11 +54,33 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 
 		internal static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
 		{
+			var list = result as IList<TItem>;
+
 			reader.Expect<SequenceStart>();
 			while (!reader.Accept<SequenceEnd>())
 			{
-				var value = (TItem)nestedObjectDeserializer(reader, typeof(TItem));
-				result.Add(value);
+				var current = reader.Parser.Current;
+
+				var value = nestedObjectDeserializer(reader, typeof(TItem));
+				var promise = value as IValuePromise;
+				if (promise == null)
+				{
+					result.Add((TItem)value);
+				}
+				else if(list != null)
+				{
+					var index = list.Count;
+					result.Add(default(TItem));
+					promise.ValueAvailable += v => list[index] = (TItem)v;
+				}
+				else
+				{
+					throw new ForwardAnchorNotSupportedException(
+						current.Start,
+						current.End,
+						"Forward alias references are not allowed because this type does not implement IList<>"
+					);
+				}
 			}
 			reader.Expect<SequenceEnd>();
 		}

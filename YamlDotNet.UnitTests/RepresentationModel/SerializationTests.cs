@@ -32,6 +32,7 @@ using System.Text.RegularExpressions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel;
 using YamlDotNet.RepresentationModel.Serialization;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
@@ -1221,6 +1222,105 @@ Name: Charles
 			{
 				{ "hello", "world" },
 			});
+		}
+
+		[Fact]
+		public void ForwardReferencesWorkInGenericLists()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize<string[]>(YamlText(@"
+				- *forward
+				- &forward ForwardReference
+			"));
+
+			Assert.Equal(2, result.Length);
+			Assert.Equal("ForwardReference", result[0]);
+			Assert.Equal("ForwardReference", result[1]);
+		}
+
+		[Fact]
+		public void ForwardReferencesWorkInNonGenericLists()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize<ArrayList>(YamlText(@"
+				- *forward
+				- &forward ForwardReference
+			"));
+
+			Assert.Equal(2, result.Count);
+			Assert.Equal("ForwardReference", result[0]);
+			Assert.Equal("ForwardReference", result[1]);
+		}
+
+		[Fact]
+		public void ForwardReferencesWorkInGenericDictionaries()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize<Dictionary<string, string>>(YamlText(@"
+				key1: *forward
+				*forwardKey: ForwardKeyValue
+				*forward: *forward
+				key2: &forward ForwardReference
+				key3: &forwardKey key4
+			"));
+
+			Assert.Equal(5, result.Count);
+			Assert.Equal("ForwardReference", result["ForwardReference"]);
+			Assert.Equal("ForwardReference", result["key1"]);
+			Assert.Equal("ForwardReference", result["key2"]);
+			Assert.Equal("ForwardKeyValue", result["key4"]);
+			Assert.Equal("key4", result["key3"]);
+		}
+
+		[Fact]
+		public void ForwardReferencesWorkInNonGenericDictionaries()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize<Hashtable>(YamlText(@"
+				key1: *forward
+				*forwardKey: ForwardKeyValue
+				*forward: *forward
+				key2: &forward ForwardReference
+				key3: &forwardKey key4
+			"));
+
+			Assert.Equal(5, result.Count);
+			Assert.Equal("ForwardReference", result["ForwardReference"]);
+			Assert.Equal("ForwardReference", result["key1"]);
+			Assert.Equal("ForwardReference", result["key2"]);
+			Assert.Equal("ForwardKeyValue", result["key4"]);
+			Assert.Equal("key4", result["key3"]);
+		}
+
+		[Fact]
+		public void ForwardReferencesWorkInObjects()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize<X>(YamlText(@"
+				Nothing: *forward
+				MyString: &forward ForwardReference
+			"));
+
+			Assert.Equal("ForwardReference", result.Nothing);
+			Assert.Equal("ForwardReference", result.MyString);
+		}
+
+		[Fact]
+		public void UndefinedForwardReferencesFail()
+		{
+			var deserializer = new Deserializer();
+
+			Assert.Throws<AnchorNotFoundException>(() =>
+				deserializer.Deserialize<X>(YamlText(@"
+					Nothing: *forward
+					MyString: ForwardReference
+				"))
+			);
 		}
 	}
 }

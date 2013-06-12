@@ -65,9 +65,64 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 		{
 			while (!reader.Accept<MappingEnd>())
 			{
-				var key = (TKey)nestedObjectDeserializer(reader, typeof(TKey));
-				var value = (TValue)nestedObjectDeserializer(reader, typeof(TValue));
-				result.Add(key, value);
+				var key = nestedObjectDeserializer(reader, typeof(TKey));
+				var keyPromise = key as IValuePromise;
+
+				var value = nestedObjectDeserializer(reader, typeof(TValue));
+				var valuePromise = value as IValuePromise;
+
+				if (keyPromise == null)
+				{
+					if (valuePromise == null)
+					{
+						// Happy path: both key and value are known
+						result.Add((TKey)key, (TValue)value);
+					}
+					else
+					{
+						// Key is known, value is pending
+						valuePromise.ValueAvailable += v => result.Add((TKey)key, (TValue)v);
+					}
+				}
+				else
+				{
+					if (valuePromise == null)
+					{
+						// Key is pending, value is known
+						keyPromise.ValueAvailable += v => result.Add((TKey)v, (TValue)value);
+					}
+					else
+					{
+						// Both key and value are pending. We need to wait until both of them becom available.
+						var hasFirstPart = false;
+
+						keyPromise.ValueAvailable += v =>
+						{
+							if (hasFirstPart)
+							{
+								result.Add((TKey)v, (TValue)value);
+							}
+							else
+							{
+								key = v;
+								hasFirstPart = true;
+							}
+						};
+
+						valuePromise.ValueAvailable += v =>
+						{
+							if (hasFirstPart)
+							{
+								result.Add((TKey)key, (TValue)v);
+							}
+							else
+							{
+								value = v;
+								hasFirstPart = true;
+							}
+						};
+					}
+				}
 			}
 		}
 	}

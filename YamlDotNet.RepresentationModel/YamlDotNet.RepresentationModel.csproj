@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -73,6 +73,7 @@
     <Compile Include="DocumentLoadingState.cs" />
     <Compile Include="DuplicateAnchorException.cs" />
     <Compile Include="EmitterState.cs" />
+    <Compile Include="ForwardAnchorNotSupportedException.cs" />
     <Compile Include="IYamlVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\AnchorAssigner.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Serialization\INamingConvention.cs" />
     <Compile Include="Serialization\IObjectFactory.cs" />
     <Compile Include="Serialization\ITypeDescriptor.cs" />
+    <Compile Include="Serialization\IValuePromise.cs" />
     <Compile Include="Serialization\LambdaObjectFactory.cs" />
     <Compile Include="Serialization\NamingConventions\CamelCaseNamingConvention.cs" />
     <Compile Include="Serialization\NamingConventions\HyphenatedNamingConvention.cs" />

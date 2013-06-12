@@ -21,10 +21,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
-	public sealed class SerializerState
+	/// <summary>
+	/// A generic container that is preserved during the entire deserialization process.
+	/// Any disposable object added to this collecion will be disposed when this object is disposed.
+	/// </summary>
+	public sealed class SerializerState : IDisposable
 	{
 		private readonly IDictionary<Type, object> items = new Dictionary<Type, object>();
 		
@@ -38,6 +43,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				items.Add(typeof(T), value);
 			}
 			return (T)value;
+		}
+
+		public void Dispose()
+		{
+			foreach (var disposable in items.Values.OfType<IDisposable>())
+			{
+				disposable.Dispose();
+			}
 		}
 	}
 }

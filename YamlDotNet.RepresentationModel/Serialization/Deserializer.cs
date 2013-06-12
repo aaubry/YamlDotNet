@@ -149,7 +149,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// </summary>
 		/// <param name="reader">The <see cref="EventReader" /> where to deserialize the object.</param>
 		/// <param name="type">The static type of the object to deserialize.</param>
-		/// <param name="options">Options that control how the deserialization is to be performed.</param>
 		/// <returns>Returns the deserialized object.</returns>
 		public object Deserialize(EventReader reader, Type type)
 		{
@@ -169,7 +168,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			object result = null;
 			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
-				result = valueDeserializer.DeserializeValue(reader, type, new SerializerState(), valueDeserializer);
+			{
+				using (var state = new SerializerState())
+				{
+					result = valueDeserializer.DeserializeValue(reader, type, state, valueDeserializer);
+				}
+			}
 
 			if (hasDocumentStart)
 			{

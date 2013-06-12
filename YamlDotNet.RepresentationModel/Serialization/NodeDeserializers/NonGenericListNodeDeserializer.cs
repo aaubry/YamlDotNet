@@ -48,8 +48,20 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 			var list = (IList)_objectFactory.Create(expectedType);
 			while (!reader.Accept<SequenceEnd>())
 			{
+				var current = reader.Parser.Current;
+
 				var item = nestedObjectDeserializer(reader, typeof(object));
-				list.Add(item);
+				var promise = item as IValuePromise;
+				if (promise == null)
+				{
+					list.Add(item);
+				}
+				else
+				{
+					var index = list.Count;
+					list.Add(null);
+					promise.ValueAvailable += v => list[index] = v;
+				}
 			}
 			value = list;
 
