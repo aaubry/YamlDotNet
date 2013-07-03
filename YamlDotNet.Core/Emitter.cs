@@ -1131,10 +1131,10 @@ namespace YamlDotNet.Core
 				{
 					if (!previous_break && !leadingSpaces && character == '\n')
 					{
-						do
+						while ((i + 1) < value.Length && IsBreak(value[i + 1]))
 						{
 							++i;
-						} while (i < value.Length && IsBreak(value[i]));
+						};
 
 						if (i >= value.Length || value[i] != ' ')
 						{

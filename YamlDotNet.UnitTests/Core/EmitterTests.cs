@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;
+using Xunit.Extensions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -169,6 +170,28 @@ namespace YamlDotNet.UnitTests
 		public void EmitExample14()
 		{
 			ParseAndEmit("test14.yaml");
+		}
+
+		[Theory]
+		[InlineData("LF hello\nworld")]
+		[InlineData("CRLF hello\r\nworld")]
+		public void FoldedStyleDoesNotLooseCharacters(string text)
+		{
+			var buffer = new StringWriter();
+			var emitter = new Emitter(buffer);
+			emitter.Emit(new StreamStart());
+			emitter.Emit(new DocumentStart(null, null, true));
+			emitter.Emit(new SequenceStart(null, null, false, SequenceStyle.Block));
+
+			emitter.Emit(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+
+			emitter.Emit(new SequenceEnd());
+			emitter.Emit(new DocumentEnd(true));
+			emitter.Emit(new StreamEnd());
+
+			var yaml = buffer.ToString();
+			Console.WriteLine(yaml);
+			Assert.True(yaml.Contains("world"));
 		}
 	}
 }
