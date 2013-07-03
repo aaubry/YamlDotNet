@@ -89,6 +89,7 @@
     <Compile Include="Serialization\IObjectFactory.cs" />
     <Compile Include="Serialization\ITypeDescriptor.cs" />
     <Compile Include="Serialization\IValuePromise.cs" />
+    <Compile Include="Serialization\JsonEventEmitter.cs" />
     <Compile Include="Serialization\LambdaObjectFactory.cs" />
     <Compile Include="Serialization\NamingConventions\CamelCaseNamingConvention.cs" />
     <Compile Include="Serialization\NamingConventions\HyphenatedNamingConvention.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Serialization\TypeAssigningEventEmitter.cs" />
     <Compile Include="Serialization\YamlAliasAttribute.cs" />
     <Compile Include="Serialization\YamlAttributesTypeDescriptor.cs" />
+    <Compile Include="Serialization\YamlFormatter.cs" />
     <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
     <Compile Include="Serialization\StringExtensions.cs" />
     <Compile Include="YamlAliasNode.cs" />

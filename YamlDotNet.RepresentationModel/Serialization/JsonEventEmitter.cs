@@ -1,14 +1,20 @@
 using System;
 using System.Globalization;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
-	public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
+	public sealed class JsonEventEmitter : ChainedEventEmitter
 	{
-		public TypeAssigningEventEmitter(IEventEmitter nextEmitter)
+		public JsonEventEmitter(IEventEmitter nextEmitter)
 			: base(nextEmitter)
 		{
+		}
+
+		public override void Emit(AliasEventInfo eventInfo)
+		{
+			throw new NotSupportedException("Aliases are not supported in JSON");
 		}
 
 		public override void Emit(ScalarEventInfo eventInfo)
@@ -23,7 +29,6 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
-					eventInfo.Tag = "tag:yaml.org,2002:bool";
 					eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.SourceValue);
 					break;
 
@@ -35,32 +40,24 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
 				case TypeCode.UInt64:
-					eventInfo.Tag = "tag:yaml.org,2002:int";
-					eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.SourceValue);
-					break;
-
 				case TypeCode.Single:
 				case TypeCode.Double:
 				case TypeCode.Decimal:
-					eventInfo.Tag = "tag:yaml.org,2002:float";
 					eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.SourceValue);
 					break;
 
 				case TypeCode.String:
 				case TypeCode.Char:
-					eventInfo.Tag = "tag:yaml.org,2002:str";
 					eventInfo.RenderedValue = eventInfo.SourceValue.ToString();
-					eventInfo.Style = ScalarStyle.Any;
+					eventInfo.Style = ScalarStyle.DoubleQuoted;
 					break;
 
 				case TypeCode.DateTime:
-					eventInfo.Tag = "tag:yaml.org,2002:timestamp";
 					eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.SourceValue);
 					break;
 
 				case TypeCode.Empty:
-					eventInfo.Tag = "tag:yaml.org,2002:null";
-					eventInfo.RenderedValue = "";
+					eventInfo.RenderedValue = "null";
 					break;
 
 				default:
@@ -72,6 +69,20 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
+
+			base.Emit(eventInfo);
+		}
+
+		public override void Emit(MappingStartEventInfo eventInfo)
+		{
+			eventInfo.Style = MappingStyle.Flow;
+
+			base.Emit(eventInfo);
+		}
+
+		public override void Emit(SequenceStartEventInfo eventInfo)
+		{
+			eventInfo.Style = SequenceStyle.Flow;
 
 			base.Emit(eventInfo);
 		}
