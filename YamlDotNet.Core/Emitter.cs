@@ -1114,7 +1114,6 @@ namespace YamlDotNet.Core
 		private void WriteFoldedScalar(string value)
 		{
 			bool previous_break = true;
-			bool leadingSpaces = true;
 
 			WriteIndicator(">", true, false, false);
 			WriteBlockScalarHints(value);
@@ -1129,18 +1128,18 @@ namespace YamlDotNet.Core
 
 				if (IsBreak(character))
 				{
-					if (!previous_break && !leadingSpaces && character == '\n')
+					if ((i + 1) < value.Length)
 					{
-						while ((i + 1) < value.Length && IsBreak(value[i + 1]))
+						if (character == '\r' && value[i + 1] == '\n')
 						{
 							++i;
-						};
-
-						if (i >= value.Length || value[i] != ' ')
+						}
+						else if (character == '\n' && value[i + 1] == '\r')
 						{
-							WriteBreak();
+							++i;
 						}
 					}
+
 					WriteBreak();
 					isIndentation = true;
 					previous_break = true;
@@ -1150,7 +1149,6 @@ namespace YamlDotNet.Core
 					if (previous_break)
 					{
 						WriteIndent();
-						leadingSpaces = character == ' ';
 					}
 					if (!previous_break && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
 					{
