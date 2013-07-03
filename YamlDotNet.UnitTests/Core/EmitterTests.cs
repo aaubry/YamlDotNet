@@ -200,6 +200,14 @@ namespace YamlDotNet.UnitTests
 		}
 
 		[Fact]
+		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
+		{
+			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+			Console.WriteLine(yaml);
+			Assert.True(yaml.Contains(">"));
+		}
+
+		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
 			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));

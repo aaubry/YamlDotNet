@@ -1468,14 +1468,13 @@ namespace YamlDotNet.Core
 
 			if (style == ScalarStyle.Any)
 			{
-				style = ScalarStyle.Plain;
+				style = scalarData.isMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
 			}
 
 			if (isCanonical)
 			{
 				style = ScalarStyle.DoubleQuoted;
 			}
-
 
 			if (isSimpleKeyContext && scalarData.isMultiline)
 			{
