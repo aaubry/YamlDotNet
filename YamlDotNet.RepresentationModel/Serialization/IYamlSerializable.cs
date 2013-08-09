@@ -32,11 +32,11 @@ namespace YamlDotNet.RepresentationModel
 		/// <summary>
 		/// Reads this object's state from a YAML parser.
 		/// </summary>
-		void ReadYaml(Parser parser);
+		void ReadYaml(IParser parser);
 
 		/// <summary>
 		/// Writes this object's state to a YAML emitter.
 		/// </summary>
-		void WriteYaml(Emitter emitter);
+		void WriteYaml(IEmitter emitter);
 	}
 }

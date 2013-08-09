@@ -33,7 +33,7 @@ namespace Dumper
 			using (TextReader input = File.OpenText(args[0]))
 			{
 				int indent = 0;
-				Parser parser = new Parser(input);
+				var parser = new Parser(input);
 				while(parser.MoveNext())
 				{
 					if (parser.Current is StreamEnd || parser.Current is DocumentEnd || parser.Current is SequenceEnd || parser.Current is SequenceEnd || parser.Current is MappingEnd)

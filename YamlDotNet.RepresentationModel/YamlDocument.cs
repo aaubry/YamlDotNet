@@ -168,7 +168,7 @@ namespace YamlDotNet.RepresentationModel
 			visitor.AssignAnchors(this);
 		}
 
-		internal void Save(Emitter emitter)
+		internal void Save(IEmitter emitter)
 		{
 			AssignAnchors();
 

@@ -33,19 +33,19 @@ namespace YamlDotNet.UnitTests
 {
 	public class ParserTests : YamlTest
 	{	
-		private static Parser CreateParser(string name) {
+		private static IParser CreateParser(string name) {
 			return new Parser(YamlFile(name));
 		}
 			
-		private void AssertHasNext(Parser parser) {
+		private void AssertHasNext(IParser parser) {
 			Assert.True(parser.MoveNext());
 		}
 		
-		private void AssertDoesNotHaveNext(Parser parser) {
+		private void AssertDoesNotHaveNext(IParser parser) {
 			Assert.False(parser.MoveNext());
 		}
 	
-		private void AssertCurrent(Parser parser, ParsingEvent expected) {
+		private void AssertCurrent(IParser parser, ParsingEvent expected) {
 			Console.WriteLine(expected.GetType().Name);
 			Assert.True(expected.GetType().IsAssignableFrom(parser.Current.GetType()), string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
 			
@@ -86,7 +86,7 @@ namespace YamlDotNet.UnitTests
 			}
 		}
 	
-		private void AssertNext(Parser parser, ParsingEvent expected) {
+		private void AssertNext(IParser parser, ParsingEvent expected) {
 			AssertHasNext(parser);
 			AssertCurrent(parser, expected);
 		}
@@ -94,7 +94,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void EmptyDocument()
 		{
-			Parser parser = CreateParser("empty.yaml");
+			IParser parser = CreateParser("empty.yaml");
 
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new StreamEnd());
@@ -109,7 +109,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyEventsOnExample1()
 		{
-			Parser parser = CreateParser("test1.yaml");
+			IParser parser = CreateParser("test1.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(new VersionDirective(new Core.Version(1, 1)), new TagDirectiveCollection(new TagDirective[] {
@@ -126,7 +126,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			Parser parser = CreateParser("test2.yaml");
+			IParser parser = CreateParser("test2.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -139,7 +139,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			Parser parser = CreateParser("test3.yaml");
+			IParser parser = CreateParser("test3.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -152,7 +152,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			Parser parser = CreateParser("test4.yaml");
+			IParser parser = CreateParser("test4.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -171,7 +171,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			Parser parser = CreateParser("test5.yaml");
+			IParser parser = CreateParser("test5.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -186,7 +186,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			Parser parser = CreateParser("test6.yaml");
+			IParser parser = CreateParser("test6.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -199,7 +199,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			Parser parser = CreateParser("test7.yaml");
+			IParser parser = CreateParser("test7.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -227,7 +227,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			Parser parser = CreateParser("test8.yaml");
+			IParser parser = CreateParser("test8.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -244,7 +244,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			Parser parser = CreateParser("test9.yaml");
+			IParser parser = CreateParser("test9.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -262,7 +262,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			Parser parser = CreateParser("test10.yaml");
+			IParser parser = CreateParser("test10.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -288,7 +288,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			Parser parser = CreateParser("test11.yaml");
+			IParser parser = CreateParser("test11.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -318,7 +318,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			Parser parser = CreateParser("test12.yaml");
+			IParser parser = CreateParser("test12.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -346,7 +346,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			Parser parser = CreateParser("test13.yaml");
+			IParser parser = CreateParser("test13.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -372,7 +372,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			Parser parser = CreateParser("test14.yaml");
+			IParser parser = CreateParser("test14.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -391,7 +391,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void VerifyTokenWithLocalTags()
 		{
-			Parser parser = CreateParser("local-tags.yaml");
+			IParser parser = CreateParser("local-tags.yaml");
 
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));

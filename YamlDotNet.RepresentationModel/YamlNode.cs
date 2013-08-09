@@ -113,7 +113,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="emitter">The emitter where the node is to be saved.</param>
 		/// <param name="state">The state.</param>
-		internal void Save(Emitter emitter, EmitterState state)
+		internal void Save(IEmitter emitter, EmitterState state)
 		{
 			if (!string.IsNullOrEmpty(Anchor) && !state.EmittedAnchors.Add(Anchor))
 			{
@@ -130,7 +130,7 @@ namespace YamlDotNet.RepresentationModel
 		/// </summary>
 		/// <param name="emitter">The emitter where the node is to be saved.</param>
 		/// <param name="state">The state.</param>
-		internal abstract void Emit(Emitter emitter, EmitterState state);
+		internal abstract void Emit(IEmitter emitter, EmitterState state);
 
 		/// <summary>
 		/// Accepts the specified visitor by calling the appropriate Visit method on it.

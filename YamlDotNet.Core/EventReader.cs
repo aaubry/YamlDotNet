@@ -33,14 +33,14 @@ namespace YamlDotNet.Core
 	/// </summary>
 	public class EventReader
 	{
-		private readonly Parser parser;
+		private readonly IParser parser;
 		private bool endOfStream;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="EventReader"/> class.
 		/// </summary>
 		/// <param name="parser">The parser that provides the events.</param>
-		public EventReader(Parser parser)
+		public EventReader(IParser parser)
 		{
 			this.parser = parser;
 			MoveNext();
@@ -50,7 +50,7 @@ namespace YamlDotNet.Core
 		/// Gets the underlying parser.
 		/// </summary>
 		/// <value>The parser.</value>
-		public Parser Parser
+		public IParser Parser
 		{
 			get
 			{

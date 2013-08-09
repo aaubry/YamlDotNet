@@ -36,9 +36,9 @@ namespace YamlDotNet.UnitTests
 		private void ParseAndEmit(string name) {
 			string testText = YamlFile(name).ReadToEnd();
 
-			Parser parser = new Parser(new StringReader(testText));
+			IParser parser = new Parser(new StringReader(testText));
 			using(StringWriter output = new StringWriter()) {
-				Emitter emitter = new Emitter(output, 2, int.MaxValue, false);
+				IEmitter emitter = new Emitter(output, 2, int.MaxValue, false);
 				while(parser.MoveNext()) {
 					//Console.WriteLine(parser.Current.GetType().Name);
 					Console.Error.WriteLine(parser.Current);

@@ -33,7 +33,7 @@ namespace YamlDotNet.Core
 	/// <summary>
 	/// Parses YAML streams.
 	/// </summary>
-	public class Parser
+	public class Parser : IParser
 	{
 		private readonly Stack<ParserState> states = new Stack<ParserState>();
 		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
@@ -57,7 +57,7 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Parser"/> class.
+		/// Initializes a new instance of the <see cref="IParser"/> class.
 		/// </summary>
 		/// <param name="input">The input where the YAML stream is to be read.</param>
 		public Parser(TextReader input)

@@ -7,10 +7,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 {
 	public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
 	{
-		private readonly Emitter emitter;
+		private readonly IEmitter emitter;
 		private readonly IEnumerable<IYamlTypeConverter> typeConverters;
 
-		public CustomSerializationObjectGraphVisitor(Emitter emitter, IObjectGraphVisitor nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters)
+		public CustomSerializationObjectGraphVisitor(IEmitter emitter, IObjectGraphVisitor nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters)
 			: base(nextVisitor)
 		{
 			this.emitter = emitter;

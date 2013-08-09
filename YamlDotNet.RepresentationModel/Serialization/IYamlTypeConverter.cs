@@ -37,11 +37,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <summary>
 		/// Reads an object's state from a YAML parser.
 		/// </summary>
-		object ReadYaml(Parser parser, Type type);
+		object ReadYaml(IParser parser, Type type);
 
 		/// <summary>
 		/// Writes the specified object's state to a YAML emitter.
 		/// </summary>
-		void WriteYaml(Emitter emitter, object value, Type type);
+		void WriteYaml(IEmitter emitter, object value, Type type);
 	}
 }

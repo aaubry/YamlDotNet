@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -101,8 +101,10 @@
     <Compile Include="Events\StreamEnd.cs" />
     <Compile Include="Events\StreamStart.cs" />
     <Compile Include="FakeList.cs" />
+    <Compile Include="IEmitter.cs" />
     <Compile Include="ILookAheadBuffer.cs" />
     <Compile Include="InsertionQueue.cs" />
+    <Compile Include="IParser.cs" />
     <Compile Include="LookAheadBuffer.cs" />
     <Compile Include="Mark.cs" />
     <Compile Include="Parser.cs" />
