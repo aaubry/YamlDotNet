@@ -20,12 +20,14 @@
 //  SOFTWARE.
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;
 using Xunit.Extensions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.UnitTests
 {
@@ -174,15 +176,25 @@ namespace YamlDotNet.UnitTests
 
 		private string EmitScalar(Scalar scalar)
 		{
+			return Emit(
+				new SequenceStart(null, null, false, SequenceStyle.Block),
+				scalar,
+				new SequenceEnd()
+			);
+		}
+
+		private string Emit(params ParsingEvent[] events)
+		{
 			var buffer = new StringWriter();
 			var emitter = new Emitter(buffer);
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart(null, null, true));
-			emitter.Emit(new SequenceStart(null, null, false, SequenceStyle.Block));
 
-			emitter.Emit(scalar);
+			foreach (var evt in events)
+			{
+				emitter.Emit(evt);
+			}
 
-			emitter.Emit(new SequenceEnd());
 			emitter.Emit(new DocumentEnd(true));
 			emitter.Emit(new StreamEnd());
 
@@ -194,7 +206,7 @@ namespace YamlDotNet.UnitTests
 		[InlineData("CRLF hello\r\nworld")]
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
-			var yaml = EmitScalar(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+			var yaml = Emit(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
 			Console.WriteLine(yaml);
 			Assert.True(yaml.Contains("world"));
 		}
@@ -202,7 +214,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+			var yaml = Emit(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
 			Console.WriteLine(yaml);
 			Assert.True(yaml.Contains(">"));
 		}
@@ -210,7 +222,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
+			var yaml = Emit(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
 			Console.WriteLine(yaml);
 			Assert.False(yaml.Contains("\r\n\r\n"));
 		}
@@ -218,9 +230,33 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\n\r\nworld", ScalarStyle.Folded, true, false));
+			var yaml = Emit(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
 			Console.WriteLine(yaml);
 			Assert.True(yaml.Contains("\r\n\r\n"));
+		}
+
+		[Fact]
+		public void FoldedStylePreservesNewLines()
+		{
+			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
+
+			var yaml = Emit(
+				new MappingStart(),
+				new Scalar("Payload"),
+				new Scalar(null, null, input, ScalarStyle.Folded, true, false),
+				new MappingEnd()
+			);
+			Console.WriteLine(yaml);
+
+			var stream = new YamlStream();
+			stream.Load(new StringReader(yaml));
+
+			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
+			var value = (YamlScalarNode)mapping.Children.First().Value;
+
+			Console.WriteLine(value.Value);
+
+			Assert.Equal(input, value.Value);
 		}
 	}
 }
