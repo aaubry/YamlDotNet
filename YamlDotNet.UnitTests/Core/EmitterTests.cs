@@ -173,6 +173,90 @@ namespace YamlDotNet.UnitTests
 		{
 			ParseAndEmit("test14.yaml");
 		}
+		
+		[Fact]
+		public void EmitExample1()
+		{
+			ParseAndEmit("test1.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample2()
+		{
+			ParseAndEmit("test2.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample3()
+		{
+			ParseAndEmit("test3.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample4()
+		{
+			ParseAndEmit("test4.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample5()
+		{
+			ParseAndEmit("test5.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample6()
+		{
+			ParseAndEmit("test6.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample7()
+		{
+			ParseAndEmit("test7.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample8()
+		{
+			ParseAndEmit("test8.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample9()
+		{
+			ParseAndEmit("test9.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample10()
+		{
+			ParseAndEmit("test10.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample11()
+		{
+			ParseAndEmit("test11.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample12()
+		{
+			ParseAndEmit("test12.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample13()
+		{
+			ParseAndEmit("test13.yaml");
+		}
+		
+		[Fact]
+		public void EmitExample14()
+		{
+			ParseAndEmit("test14.yaml");
+		}
 
 		private string EmitScalar(Scalar scalar)
 		{
