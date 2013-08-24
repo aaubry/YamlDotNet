@@ -206,7 +206,7 @@ namespace YamlDotNet.UnitTests
 		[InlineData("CRLF hello\r\nworld")]
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
-			var yaml = Emit(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+			var yaml = EmitScalar(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
 			Console.WriteLine(yaml);
 			Assert.True(yaml.Contains("world"));
 		}
@@ -214,7 +214,7 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
-			var yaml = Emit(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
 			Console.WriteLine(yaml);
 			Assert.True(yaml.Contains(">"));
 		}
@@ -222,17 +222,29 @@ namespace YamlDotNet.UnitTests
 		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
-			var yaml = Emit(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
+			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
 			Console.WriteLine(yaml);
-			Assert.False(yaml.Contains("\r\n\r\n"));
+
+			var stream = new YamlStream();
+			stream.Load(new StringReader(yaml));
+			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			var scalar = (YamlScalarNode)sequence.Children[0];
+
+			Assert.Equal("hello\nworld", scalar.Value);
 		}
 
 		[Fact]
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
-			var yaml = Emit(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
-			Console.WriteLine(yaml);
-			Assert.True(yaml.Contains("\r\n\r\n"));
+			var yaml = EmitScalar(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
+			Console.WriteLine("${0}$", yaml);
+
+			var stream = new YamlStream();
+			stream.Load(new StringReader(yaml));
+			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			var scalar = (YamlScalarNode)sequence.Children[0];
+
+			Assert.Equal(">+\n", scalar.Value);
 		}
 
 		[Fact]

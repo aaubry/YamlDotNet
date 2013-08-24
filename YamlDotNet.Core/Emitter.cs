@@ -1091,6 +1091,11 @@ namespace YamlDotNet.Core
 			return character == '\r' || character == '\n' || character == '\x85' || character == '\x2028' || character == '\x2029';
 		}
 
+		private static bool IsBlank(char character)
+		{
+			return character == ' ' || character == '\t';
+		}
+
 		/// <summary>
 		/// Check if the specified character is a space.
 		/// </summary>
@@ -1098,6 +1103,8 @@ namespace YamlDotNet.Core
 		{
 			return character == ' ';
 		}
+
+
 
 		private static bool IsPrintable(char character)
 		{
@@ -1114,6 +1121,7 @@ namespace YamlDotNet.Core
 		private void WriteFoldedScalar(string value)
 		{
 			bool previous_break = true;
+			bool leading_spaces = true;
 
 			WriteIndicator(">", true, false, false);
 			WriteBlockScalarHints(value);
@@ -1125,21 +1133,20 @@ namespace YamlDotNet.Core
 			for (int i = 0; i < value.Length; ++i)
 			{
 				char character = value[i];
-
 				if (IsBreak(character))
 				{
-					if ((i + 1) < value.Length)
+					if (!previous_break && !leading_spaces && character == '\n')
 					{
-						if (character == '\r' && value[i + 1] == '\n')
+						int k = 0;
+						while (i + k < value.Length && IsBreak(value[i + k]))
 						{
-							++i;
+							++k;
 						}
-						else if (character == '\n' && value[i + 1] == '\r')
+						if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k])))
 						{
-							++i;
+							WriteBreak();
 						}
 					}
-
 					WriteBreak();
 					isIndentation = true;
 					previous_break = true;
@@ -1149,6 +1156,7 @@ namespace YamlDotNet.Core
 					if (previous_break)
 					{
 						WriteIndent();
+						leading_spaces = IsBlank(character);
 					}
 					if (!previous_break && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
 					{
