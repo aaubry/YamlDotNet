@@ -6,7 +6,7 @@ using System.Text;
 using Xunit;
 using YamlDotNet.RepresentationModel.Serialization;
 
-namespace YamlDotNet.UnitTests.RepresentationModel
+namespace YamlDotNet.RepresentationModel.Test
 {
 	public class ObjectFactoryTests
 	{
