@@ -23,7 +23,7 @@ using System;
 using YamlDotNet.Core;
 using Xunit;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.Core.Test
 {
 	public class InsertionQueueTests
 	{
