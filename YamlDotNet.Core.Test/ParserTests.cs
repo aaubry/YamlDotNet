@@ -21,10 +21,7 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 using Xunit;
-using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
@@ -32,90 +29,32 @@ using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 namespace YamlDotNet.Core.Test
 {
 	public class ParserTests : YamlTest
-	{	
-		private static IParser CreateParser(string name) {
-			return new Parser(YamlFile(name));
-		}
-			
-		private void AssertHasNext(IParser parser) {
-			Assert.True(parser.MoveNext());
-		}
-		
-		private void AssertDoesNotHaveNext(IParser parser) {
-			Assert.False(parser.MoveNext());
-		}
-	
-		private void AssertCurrent(IParser parser, ParsingEvent expected) {
-			Console.WriteLine(expected.GetType().Name);
-			Assert.True(expected.GetType().IsAssignableFrom(parser.Current.GetType()), string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
-			
-			foreach (var property in expected.GetType().GetProperties()) {
-				if(property.PropertyType != typeof(Mark) && property.CanRead) {
-					object value = property.GetValue(parser.Current, null);
-					object expectedValue = property.GetValue(expected, null);
-					if(expectedValue != null && Type.GetTypeCode(expectedValue.GetType()) == TypeCode.Object && expectedValue is IEnumerable) {
-						Console.Write("\t{0} = {{", property.Name);
-						bool isFirst = true;
-						foreach(var item in (IEnumerable)value) {
-							if(isFirst) {
-								isFirst = false;
-							} else {
-								Console.Write(", ");
-							}
-							Console.Write(item);
-						}
-						Console.WriteLine("}");
-						
-						if(expectedValue is ICollection && value is ICollection) {
-							Assert.Equal(((ICollection)expectedValue).Count, ((ICollection)value).Count);
-						}
-						
-						IEnumerator values = ((IEnumerable)value).GetEnumerator();
-						IEnumerator expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
-						while(expectedValues.MoveNext()) {
-							Assert.True(values.MoveNext());
-							Assert.Equal(expectedValues.Current, values.Current);
-						}
-						
-						Assert.False(values.MoveNext());
-					} else {
-						Console.WriteLine("\t{0} = {1}", property.Name, value);
-						Assert.Equal(expectedValue, value);
-					}
-				}
-			}
-		}
-	
-		private void AssertNext(IParser parser, ParsingEvent expected) {
-			AssertHasNext(parser);
-			AssertCurrent(parser, expected);
-		}
+	{
+		private static TagDirectiveCollection defaultDirectives = new TagDirectiveCollection(new[] {
+			new TagDirective("!", "!"),
+			new TagDirective("!!", "tag:yaml.org,2002:")
+		});
 
 		[Fact]
 		public void EmptyDocument()
 		{
-			IParser parser = CreateParser("empty.yaml");
+			var parser = CreateParser("empty.yaml");
 
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
 		}
-		
-		private static TagDirectiveCollection defaultDirectives = new TagDirectiveCollection(new TagDirective[] {
-			new TagDirective("!", "!"),
-			new TagDirective("!!", "tag:yaml.org,2002:"),
-		});
-		
+
 		[Fact]
 		public void VerifyEventsOnExample1()
 		{
-			IParser parser = CreateParser("test1.yaml");
+			var parser = CreateParser("test1.yaml");
 			
 			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(new VersionDirective(new Core.Version(1, 1)), new TagDirectiveCollection(new TagDirective[] {
+			AssertNext(parser, new DocumentStart(new VersionDirective(new Version(1, 1)), new TagDirectiveCollection(new[] {
 				new TagDirective("!", "!foo"),
 				new TagDirective("!yaml!", "tag:yaml.org,2002:"),
-				new TagDirective("!!", "tag:yaml.org,2002:"),
+				new TagDirective("!!", "tag:yaml.org,2002:")
 			}), false));
 			AssertNext(parser, new Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false));
 			AssertNext(parser, new DocumentEnd(true));
@@ -126,7 +65,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			IParser parser = CreateParser("test2.yaml");
+			var parser = CreateParser("test2.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -139,7 +78,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			IParser parser = CreateParser("test3.yaml");
+			var parser = CreateParser("test3.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -152,7 +91,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			IParser parser = CreateParser("test4.yaml");
+			var parser = CreateParser("test4.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -171,7 +110,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			IParser parser = CreateParser("test5.yaml");
+			var parser = CreateParser("test5.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -186,7 +125,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			IParser parser = CreateParser("test6.yaml");
+			var parser = CreateParser("test6.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -199,7 +138,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			IParser parser = CreateParser("test7.yaml");
+			var parser = CreateParser("test7.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -227,7 +166,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			IParser parser = CreateParser("test8.yaml");
+			var parser = CreateParser("test8.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -244,7 +183,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			IParser parser = CreateParser("test9.yaml");
+			var parser = CreateParser("test9.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -262,7 +201,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			IParser parser = CreateParser("test10.yaml");
+			var parser = CreateParser("test10.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -288,7 +227,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			IParser parser = CreateParser("test11.yaml");
+			var parser = CreateParser("test11.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -318,7 +257,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			IParser parser = CreateParser("test12.yaml");
+			var parser = CreateParser("test12.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -346,7 +285,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			IParser parser = CreateParser("test13.yaml");
+			var parser = CreateParser("test13.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -372,7 +311,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			IParser parser = CreateParser("test14.yaml");
+			var parser = CreateParser("test14.yaml");
 			
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
@@ -391,7 +330,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void VerifyTokenWithLocalTags()
 		{
-			IParser parser = CreateParser("local-tags.yaml");
+			var parser = CreateParser("local-tags.yaml");
 
 			AssertNext(parser, new StreamStart());
 			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
@@ -406,6 +345,67 @@ namespace YamlDotNet.Core.Test
 			AssertNext(parser, new DocumentEnd(true));
 			AssertNext(parser, new StreamEnd());
 			AssertDoesNotHaveNext(parser);
+		}
+
+		private IParser CreateParser(string name)
+		{
+			return new Parser(YamlFile(name));
+		}
+
+		private void AssertNext(IParser parser, ParsingEvent expected) {
+			AssertHasNext(parser);
+			AssertCurrent(parser, expected);
+		}
+
+		private void AssertHasNext(IParser parser) {
+			Assert.True(parser.MoveNext());
+		}
+
+		private void AssertDoesNotHaveNext(IParser parser) {
+			Assert.False(parser.MoveNext());
+		}
+
+		private void AssertCurrent(IParser parser, ParsingEvent expected) {
+			Dump.WriteLine(expected.GetType().Name);
+			Assert.True(expected.GetType().IsAssignableFrom(parser.Current.GetType()),
+				string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
+
+			foreach (var property in expected.GetType().GetProperties()) {
+				if (property.PropertyType != typeof(Mark) && property.CanRead) {
+					var value = property.GetValue(parser.Current, null);
+					var expectedValue = property.GetValue(expected, null);
+					// Todo: what does GetTypeCode do and is it necessary?
+					if (expectedValue != null && Type.GetTypeCode(expectedValue.GetType()) == TypeCode.Object && expectedValue is IEnumerable) {
+						Dump.Write("\t{0} = {{", property.Name);
+						var isFirst = true;
+						foreach (var item in (IEnumerable)value) {
+							if (isFirst) {
+								isFirst = false;
+							} else {
+								Dump.Write(", ");
+							}
+							Dump.Write(item);
+						}
+						Dump.WriteLine("}");
+
+						if (expectedValue is ICollection && value is ICollection) {
+							Assert.Equal(((ICollection)expectedValue).Count, ((ICollection)value).Count);
+						}
+
+						var values = ((IEnumerable)value).GetEnumerator();
+						var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
+						while (expectedValues.MoveNext()) {
+							Assert.True(values.MoveNext());
+							Assert.Equal(expectedValues.Current, values.Current);
+						}
+
+						Assert.False(values.MoveNext());
+					} else {
+						Dump.WriteLine("\t{0} = {1}", property.Name, value);
+						Assert.Equal(expectedValue, value);
+					}
+				}
+			}
 		}
 	}
 }
