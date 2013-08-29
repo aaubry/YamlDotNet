@@ -87,7 +87,9 @@
     <Compile Include="Serialization\DynamicTypeResolver.cs" />
     <Compile Include="Serialization\EmittingObjectGraphVisitor.cs" />
     <Compile Include="Serialization\INamingConvention.cs" />
+    <Compile Include="Serialization\IObjectDescriptor.cs" />
     <Compile Include="Serialization\IObjectFactory.cs" />
+    <Compile Include="Serialization\IPropertyDescriptor.cs" />
     <Compile Include="Serialization\ITypeResolver.cs" />
     <Compile Include="Serialization\ITypeInspector.cs" />
     <Compile Include="Serialization\IValuePromise.cs" />

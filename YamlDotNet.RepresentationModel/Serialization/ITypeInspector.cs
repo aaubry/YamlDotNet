@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -25,62 +24,5 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="name">The name of the property.</param>
 		/// <returns></returns>
 		IPropertyDescriptor GetProperty(Type type, object container, string name);
-	}
-
-	public interface IPropertyDescriptor : IObjectDescriptor
-	{
-		string Name { get; }
-		bool CanWrite { get; }
-
-		void SetValue(object target, object value);
-
-		T GetCustomAttribute<T>() where T : Attribute;
-	}
-
-	/// <summary>
-	/// Represents an object along with its type.
-	/// </summary>
-	public interface IObjectDescriptor
-	{
-		/// <summary>
-		/// A reference to the object.
-		/// </summary>
-		object Value { get; }
-
-		/// <summary>
-		/// The type that should be used when to interpret the <see cref="Value" />.
-		/// </summary>
-		Type Type { get; }
-
-		/// <summary>
-		/// The type of <see cref="Value" /> as determined by its container (e.g. a property).
-		/// </summary>
-		Type StaticType { get; }
-	}
-
-	public sealed class ObjectDescriptor : IObjectDescriptor
-	{
-		public object Value { get; private set; }
-		public Type Type { get; private set; }
-		public Type StaticType { get; private set; }
-
-		public ObjectDescriptor(object value, Type type, Type staticType)
-		{
-			Value = value;
-
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-
-			Type = type;
-
-			if (staticType == null)
-			{
-				throw new ArgumentNullException("staticType");
-			}
-			
-			StaticType = staticType;
-		}
 	}
 }
