@@ -89,7 +89,7 @@
     <Compile Include="Serialization\INamingConvention.cs" />
     <Compile Include="Serialization\IObjectFactory.cs" />
     <Compile Include="Serialization\ITypeResolver.cs" />
-    <Compile Include="Serialization\ITypeDescriptor.cs" />
+    <Compile Include="Serialization\ITypeInspector.cs" />
     <Compile Include="Serialization\IValuePromise.cs" />
     <Compile Include="Serialization\JsonEventEmitter.cs" />
     <Compile Include="Serialization\LambdaObjectFactory.cs" />
@@ -98,10 +98,10 @@
     <Compile Include="Serialization\NamingConventions\NullNamingConvention.cs" />
     <Compile Include="Serialization\NamingConventions\PascalCaseNamingConvention.cs" />
     <Compile Include="Serialization\NamingConventions\UnderscoredNamingConvention.cs" />
-    <Compile Include="Serialization\NamingConventionTypeDescriptor.cs" />
+    <Compile Include="Serialization\NamingConventionTypeInspector.cs" />
     <Compile Include="Serialization\PropertyDescriptor.cs" />
-    <Compile Include="Serialization\ReadableAndWritablePropertiesTypeDescriptor.cs" />
-    <Compile Include="Serialization\ReadablePropertiesTypeDescriptor.cs" />
+    <Compile Include="Serialization\ReadableAndWritablePropertiesTypeInspector.cs" />
+    <Compile Include="Serialization\ReadablePropertiesTypeInspector.cs" />
     <Compile Include="Serialization\SerializationOptions.cs" />
     <Compile Include="Serialization\Serializer.cs" />
     <Compile Include="Serialization\StaticTypeResolver.cs" />
@@ -122,7 +122,7 @@
     <Compile Include="Serialization\TagMappings.cs" />
     <Compile Include="Serialization\TypeAssigningEventEmitter.cs" />
     <Compile Include="Serialization\YamlAliasAttribute.cs" />
-    <Compile Include="Serialization\YamlAttributesTypeDescriptor.cs" />
+    <Compile Include="Serialization\YamlAttributesTypeInspector.cs" />
     <Compile Include="Serialization\YamlFormatter.cs" />
     <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
     <Compile Include="Serialization\StringExtensions.cs" />
@@ -151,7 +151,7 @@
     <Compile Include="Serialization\NodeTypeResolvers\TagNodeTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\DefaultContainersNodeTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\TypeNameInTagNodeTypeResolver.cs" />
-    <Compile Include="Serialization\TypeDescriptorSkeleton.cs" />
+    <Compile Include="Serialization\TypeInspectorSkeleton.cs" />
     <Compile Include="Serialization\NodeValueDeserializer.cs" />
     <Compile Include="Serialization\AliasValueDeserializer.cs" />
     <Compile Include="Serialization\IValueDeserializer.cs" />

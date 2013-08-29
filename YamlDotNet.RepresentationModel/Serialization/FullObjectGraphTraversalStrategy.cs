@@ -13,10 +13,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	{
 		protected readonly Serializer serializer;
 		private readonly int maxRecursion;
-		private readonly ITypeDescriptor typeDescriptor;
+		private readonly ITypeInspector typeDescriptor;
 		private readonly ITypeResolver typeResolver;
 
-		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
+		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
 		{
 			if (maxRecursion <= 0)
 			{

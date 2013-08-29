@@ -53,9 +53,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public IList<INodeDeserializer> NodeDeserializers { get; private set; }
 		public IList<INodeTypeResolver> TypeResolvers { get; private set; }
 
-		private class TypeDescriptorProxy : ITypeDescriptor
+		private class TypeDescriptorProxy : ITypeInspector
 		{
-			public ITypeDescriptor TypeDescriptor;
+			public ITypeInspector TypeDescriptor;
 
 			public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 			{
@@ -74,10 +74,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			namingConvention = namingConvention ?? new NullNamingConvention();
 			
 			typeDescriptor.TypeDescriptor = 
-				new YamlAttributesTypeDescriptor(
-					new NamingConventionTypeDescriptor(
-						new ReadableAndWritablePropertiesTypeDescriptor(
-							new ReadablePropertiesTypeDescriptor(
+				new YamlAttributesTypeInspector(
+					new NamingConventionTypeInspector(
+						new ReadableAndWritablePropertiesTypeInspector(
+							new ReadablePropertiesTypeInspector(
 								new StaticTypeResolver()
 							)
 						),

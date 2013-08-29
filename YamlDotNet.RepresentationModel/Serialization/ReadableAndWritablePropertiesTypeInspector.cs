@@ -7,11 +7,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// Returns the properties of a type that are both readable and writable.
 	/// </summary>
-	public sealed class ReadableAndWritablePropertiesTypeDescriptor : TypeDescriptorSkeleton
+	public sealed class ReadableAndWritablePropertiesTypeInspector : TypeInspectorSkeleton
 	{
-		private readonly ITypeDescriptor _innerTypeDescriptor;
+		private readonly ITypeInspector _innerTypeDescriptor;
 
-		public ReadableAndWritablePropertiesTypeDescriptor(ITypeDescriptor innerTypeDescriptor)
+		public ReadableAndWritablePropertiesTypeInspector(ITypeInspector innerTypeDescriptor)
 		{
 			_innerTypeDescriptor = innerTypeDescriptor;
 		}

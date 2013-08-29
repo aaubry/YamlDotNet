@@ -7,7 +7,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// Provides access to the properties of a type.
 	/// </summary>
-	public interface ITypeDescriptor
+	public interface ITypeInspector
 	{
 		/// <summary>
 		/// Gets all properties of the specified type.

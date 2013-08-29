@@ -5,15 +5,15 @@ using System.Linq;
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
-	/// Wraps another <see cref="ITypeDescriptor"/> and applies a
+	/// Wraps another <see cref="ITypeInspector"/> and applies a
 	/// naming convention to the names of the properties.
 	/// </summary>
-	public sealed class NamingConventionTypeDescriptor : TypeDescriptorSkeleton
+	public sealed class NamingConventionTypeInspector : TypeInspectorSkeleton
 	{
-		private readonly ITypeDescriptor innerTypeDescriptor;
+		private readonly ITypeInspector innerTypeDescriptor;
 		private readonly INamingConvention namingConvention;
 
-		public NamingConventionTypeDescriptor(ITypeDescriptor innerTypeDescriptor, INamingConvention namingConvention)
+		public NamingConventionTypeInspector(ITypeInspector innerTypeDescriptor, INamingConvention namingConvention)
 		{
 			if (innerTypeDescriptor == null)
 			{

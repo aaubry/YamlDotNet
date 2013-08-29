@@ -8,11 +8,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// Returns the properties of a type that are readable.
 	/// </summary>
-	public sealed class ReadablePropertiesTypeDescriptor : TypeDescriptorSkeleton
+	public sealed class ReadablePropertiesTypeInspector : TypeInspectorSkeleton
 	{
 		private readonly ITypeResolver _reflectionPropertyDescriptorFactory;
 
-		public ReadablePropertiesTypeDescriptor(ITypeResolver reflectionPropertyDescriptorFactory)
+		public ReadablePropertiesTypeInspector(ITypeResolver reflectionPropertyDescriptorFactory)
 		{
 			if (reflectionPropertyDescriptorFactory == null)
 			{

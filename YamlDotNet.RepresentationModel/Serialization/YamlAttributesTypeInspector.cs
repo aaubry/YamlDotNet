@@ -5,13 +5,13 @@ using System.Linq;
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
-	/// Applies the Yaml* attributes to another <see cref="ITypeDescriptor"/>.
+	/// Applies the Yaml* attributes to another <see cref="ITypeInspector"/>.
 	/// </summary>
-	public sealed class YamlAttributesTypeDescriptor : TypeDescriptorSkeleton
+	public sealed class YamlAttributesTypeInspector : TypeInspectorSkeleton
 	{
-		private readonly ITypeDescriptor innerTypeDescriptor;
+		private readonly ITypeInspector innerTypeDescriptor;
 
-		public YamlAttributesTypeDescriptor(ITypeDescriptor innerTypeDescriptor)
+		public YamlAttributesTypeInspector(ITypeInspector innerTypeDescriptor)
 		{
 			this.innerTypeDescriptor = innerTypeDescriptor;
 		}

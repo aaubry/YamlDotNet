@@ -27,7 +27,7 @@ using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
-	public abstract class TypeDescriptorSkeleton : ITypeDescriptor
+	public abstract class TypeInspectorSkeleton : ITypeInspector
 	{
 		public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container);
 

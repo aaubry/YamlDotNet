@@ -11,7 +11,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
 	{
-		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
+		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
 			: base(serializer, typeDescriptor, typeResolver, maxRecursion)
 		{
 		}

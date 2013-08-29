@@ -32,9 +32,9 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 	public sealed class ObjectNodeDeserializer : INodeDeserializer
 	{
 		private readonly IObjectFactory _objectFactory;
-		private readonly ITypeDescriptor _typeDescriptor;
+		private readonly ITypeInspector _typeDescriptor;
 
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeDescriptor typeDescriptor)
+		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor)
 		{
 			_objectFactory = objectFactory;
 			_typeDescriptor = typeDescriptor;

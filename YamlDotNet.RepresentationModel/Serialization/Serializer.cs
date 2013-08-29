@@ -179,14 +179,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private IObjectGraphTraversalStrategy CreateTraversalStrategy()
 		{
-			ITypeDescriptor typeDescriptor = new ReadablePropertiesTypeDescriptor(typeResolver);
+			ITypeInspector typeDescriptor = new ReadablePropertiesTypeInspector(typeResolver);
 			if (IsOptionSet(SerializationOptions.Roundtrip))
 			{
-				typeDescriptor = new ReadableAndWritablePropertiesTypeDescriptor(typeDescriptor);
+				typeDescriptor = new ReadableAndWritablePropertiesTypeInspector(typeDescriptor);
 			}
 
-			typeDescriptor = new NamingConventionTypeDescriptor(typeDescriptor, namingConvention);
-			typeDescriptor = new YamlAttributesTypeDescriptor(typeDescriptor);
+			typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
+			typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
 
 			if (IsOptionSet(SerializationOptions.Roundtrip))
 			{
