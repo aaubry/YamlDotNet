@@ -22,14 +22,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			eventInfo.IsPlainImplicit = true;
 			eventInfo.Style = ScalarStyle.Plain;
 
-			var typeCode = eventInfo.SourceValue != null
-				? Type.GetTypeCode(eventInfo.SourceType)
+			var typeCode = eventInfo.Source.Value != null
+				? Type.GetTypeCode(eventInfo.Source.Type)
 				: TypeCode.Empty;
 
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:
-					eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.SourceValue);
+					eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
 					break;
 
 				case TypeCode.Byte:
@@ -43,17 +43,17 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				case TypeCode.Single:
 				case TypeCode.Double:
 				case TypeCode.Decimal:
-					eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.SourceValue);
+					eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
 					break;
 
 				case TypeCode.String:
 				case TypeCode.Char:
-					eventInfo.RenderedValue = eventInfo.SourceValue.ToString();
+					eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
 					eventInfo.Style = ScalarStyle.DoubleQuoted;
 					break;
 
 				case TypeCode.DateTime:
-					eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.SourceValue);
+					eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.Source.Value);
 					break;
 
 				case TypeCode.Empty:
@@ -61,9 +61,9 @@ namespace YamlDotNet.RepresentationModel.Serialization
 					break;
 
 				default:
-					if (eventInfo.SourceType == typeof(TimeSpan))
+					if (eventInfo.Source.Type == typeof(TimeSpan))
 					{
-						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
+						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.Source.Value);
 						break;
 					}
 

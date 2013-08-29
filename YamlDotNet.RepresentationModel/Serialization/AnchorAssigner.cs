@@ -14,16 +14,16 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private readonly IDictionary<object, AnchorAssignment> assignments = new Dictionary<object, AnchorAssignment>();
 		private uint nextId;
 
-		bool IObjectGraphVisitor.Enter(object value, Type type)
+		bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
 		{
 			// Do not assign anchors to basic types
-			if (value == null || Type.GetTypeCode(value.GetType()) != TypeCode.Object)
+			if (value.Value == null || Type.GetTypeCode(value.Type) != TypeCode.Object)
 			{
 				return false;
 			}
 
 			AnchorAssignment assignment;
-			if (assignments.TryGetValue(value, out assignment))
+			if (assignments.TryGetValue(value.Value, out assignment))
 			{
 				if (assignment.Anchor == null)
 				{
@@ -34,12 +34,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			}
 			else
 			{
-				assignments.Add(value, new AnchorAssignment());
+				assignments.Add(value.Value, new AnchorAssignment());
 				return true;
 			}
 		}
 
-		bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
+		bool IObjectGraphVisitor.EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
 		{
 			return true;
 		}
@@ -49,11 +49,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return true;
 		}
 
-		void IObjectGraphVisitor.VisitScalar(object scalar, Type scalarType) { }
-		void IObjectGraphVisitor.VisitMappingStart(object mapping, Type mappingType, Type keyType, Type valueType) { }
-		void IObjectGraphVisitor.VisitMappingEnd(object mapping, Type mappingType) { }
-		void IObjectGraphVisitor.VisitSequenceStart(object sequence, Type sequenceType, Type elementType) { }
-		void IObjectGraphVisitor.VisitSequenceEnd(object sequence, Type sequenceType) { }
+		void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar) { }
+		void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType) { }
+		void IObjectGraphVisitor.VisitMappingEnd(IObjectDescriptor mapping) { }
+		void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType) { }
+		void IObjectGraphVisitor.VisitSequenceEnd(IObjectDescriptor sequence) { }
 
 		string IAliasProvider.GetAlias(object target)
 		{

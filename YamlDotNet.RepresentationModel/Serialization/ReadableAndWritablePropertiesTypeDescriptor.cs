@@ -7,11 +7,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// <summary>
 	/// Returns the properties of a type that are both readable and writable.
 	/// </summary>
-	public sealed class ReadableAndWritablePropertiesTypeDescriptor : ReadablePropertiesTypeDescriptor
+	public sealed class ReadableAndWritablePropertiesTypeDescriptor : TypeDescriptorSkeleton
 	{
-		protected override bool IsValidProperty (System.Reflection.PropertyInfo property)
+		private readonly ITypeDescriptor _innerTypeDescriptor;
+
+		public ReadableAndWritablePropertiesTypeDescriptor(ITypeDescriptor innerTypeDescriptor)
 		{
-			return base.IsValidProperty (property) && property.CanWrite;
+			_innerTypeDescriptor = innerTypeDescriptor;
+		}
+	
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+		{
+			return _innerTypeDescriptor.GetProperties(type, container)
+				.Where(p => p.CanWrite);
 		}
 	}
 }

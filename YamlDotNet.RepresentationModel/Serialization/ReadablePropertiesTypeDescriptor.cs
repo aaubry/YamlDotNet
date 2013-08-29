@@ -2,68 +2,75 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Globalization;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	/// <summary>
 	/// Returns the properties of a type that are readable.
 	/// </summary>
-	public class ReadablePropertiesTypeDescriptor : ITypeDescriptor
+	public sealed class ReadablePropertiesTypeDescriptor : TypeDescriptorSkeleton
 	{
-		private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
+		private readonly ITypeResolver _reflectionPropertyDescriptorFactory;
+
+		public ReadablePropertiesTypeDescriptor(ITypeResolver reflectionPropertyDescriptorFactory)
 		{
-			public ReflectionPropertyDescriptor(PropertyInfo propertyInfo)
+			if (reflectionPropertyDescriptorFactory == null)
 			{
-				if (propertyInfo == null)
-				{
-					throw new ArgumentNullException("propertyInfo");
-				}
-
-				Property = propertyInfo;
+				throw new ArgumentNullException("reflectionPropertyDescriptorFactory");
 			}
 
-			public PropertyInfo Property { get; private set; }
-
-			public string Name
-			{
-				get { return Property.Name; }
-			}
+			_reflectionPropertyDescriptorFactory = reflectionPropertyDescriptorFactory;
 		}
-		
-		protected virtual bool IsValidProperty(PropertyInfo property)
+
+		private static bool IsValidProperty(PropertyInfo property)
 		{
 			return property.CanRead
 				&& property.GetGetMethod().GetParameters().Length == 0;
 		}
 
-		public IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 		{
 			return type
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(IsValidProperty)
-				.Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p));
+				.Select(p =>
+				{
+					var propertyValue = container != null
+						? p.GetValue(container, null)
+						: null;
+
+					return (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, _reflectionPropertyDescriptorFactory.Resolve(p.PropertyType, propertyValue), propertyValue);
+				});
 		}
-		
-		public IPropertyDescriptor GetProperty(Type type, string name)
+
+		private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
 		{
-			var property = type
-				.GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-			
-			if(property == null || IsValidProperty(property))
+			private readonly PropertyInfo _propertyInfo;
+
+			public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, Type type, object value)
 			{
-				throw new SerializationException(
-					string.Format(
-						CultureInfo.InvariantCulture,
-						"Property '{0}' not found on type '{1}'.",
-						name,
-						type.FullName
-					)
-				);
+				_propertyInfo = propertyInfo;
+				Type = type;
+				Value = value;
 			}
-							
-			return new ReflectionPropertyDescriptor(property);
+
+			public string Name { get { return _propertyInfo.Name; } }
+			public Type Type { get; private set; }
+			public Type StaticType { get { return _propertyInfo.PropertyType; } }
+			public object Value { get; private set; }
+			public bool CanWrite { get { return _propertyInfo.CanWrite; } }
+
+			public void SetValue(object target, object value)
+			{
+				_propertyInfo.SetValue(target, value, null);
+			}
+
+			public T GetCustomAttribute<T>() where T : Attribute
+			{
+				return _propertyInfo.GetCustomAttributes(typeof(T), true)
+					.Cast<T>()
+					.SingleOrDefault();
+			}
 		}
 	}
 }

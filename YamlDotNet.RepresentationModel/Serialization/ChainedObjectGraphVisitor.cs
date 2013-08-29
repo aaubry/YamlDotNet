@@ -11,14 +11,14 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.nextVisitor = nextVisitor;
 		}
 
-		public virtual bool Enter(object value, Type type)
+		public virtual bool Enter(IObjectDescriptor value)
 		{
-			return nextVisitor.Enter(value, type);
+			return nextVisitor.Enter(value);
 		}
 
-		public virtual bool EnterMapping(object key, Type keyType, object value, Type valueType)
+		public virtual bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
 		{
-			return nextVisitor.EnterMapping(key, keyType, value, valueType);
+			return nextVisitor.EnterMapping(key, value);
 		}
 
 		public virtual bool EnterMapping(IPropertyDescriptor key, object value)
@@ -26,29 +26,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return nextVisitor.EnterMapping(key, value);
 		}
 
-		public virtual void VisitScalar(object scalar, Type scalarType)
+		public virtual void VisitScalar(IObjectDescriptor scalar)
 		{
-			nextVisitor.VisitScalar(scalar, scalarType);
+			nextVisitor.VisitScalar(scalar);
 		}
 
-		public virtual void VisitMappingStart(object mapping, Type mappingType, Type keyType, Type valueType)
+		public virtual void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
 		{
-			nextVisitor.VisitMappingStart(mapping, mappingType, keyType, valueType);
+			nextVisitor.VisitMappingStart(mapping, keyType, valueType);
 		}
 
-		public virtual void VisitMappingEnd(object mapping, Type mappingType)
+		public virtual void VisitMappingEnd(IObjectDescriptor mapping)
 		{
-			nextVisitor.VisitMappingEnd(mapping, mappingType);
+			nextVisitor.VisitMappingEnd(mapping);
 		}
 
-		public virtual void VisitSequenceStart(object sequence, Type sequenceType, Type elementType)
+		public virtual void VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
 		{
-			nextVisitor.VisitSequenceStart(sequence, sequenceType, elementType);
+			nextVisitor.VisitSequenceStart(sequence, elementType);
 		}
 
-		public virtual void VisitSequenceEnd(object sequence, Type sequenceType)
+		public virtual void VisitSequenceEnd(IObjectDescriptor sequence)
 		{
-			nextVisitor.VisitSequenceEnd(sequence, sequenceType);
+			nextVisitor.VisitSequenceEnd(sequence);
 		}
 	}
 }

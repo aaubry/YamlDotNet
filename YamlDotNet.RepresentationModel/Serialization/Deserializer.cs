@@ -56,15 +56,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		private class TypeDescriptorProxy : ITypeDescriptor
 		{
 			public ITypeDescriptor TypeDescriptor;
-			
-			public IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+
+			public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 			{
-				return TypeDescriptor.GetProperties(type);
+				return TypeDescriptor.GetProperties(type, container);
 			}
 
-			public IPropertyDescriptor GetProperty(Type type, string name)
+			public IPropertyDescriptor GetProperty(Type type, object container, string name)
 			{
-				return TypeDescriptor.GetProperty(type, name);
+				return TypeDescriptor.GetProperty(type, container, name);
 			}
 		}
 		
@@ -76,7 +76,11 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			typeDescriptor.TypeDescriptor = 
 				new YamlAttributesTypeDescriptor(
 					new NamingConventionTypeDescriptor(
-						new ReadableAndWritablePropertiesTypeDescriptor(),
+						new ReadableAndWritablePropertiesTypeDescriptor(
+							new ReadablePropertiesTypeDescriptor(
+								new StaticTypeResolver()
+							)
+						),
 						namingConvention
 					)
 				);

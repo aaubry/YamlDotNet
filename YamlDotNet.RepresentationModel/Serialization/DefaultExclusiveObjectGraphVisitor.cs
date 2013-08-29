@@ -19,23 +19,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private static readonly IEqualityComparer<object> _objectComparer = EqualityComparer<object>.Default;
 
-		public override bool Enter(object value, Type type)
+		public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
 		{
-			return base.Enter(value, type);
-		}
-
-		public override bool EnterMapping(object key, Type keyType, object value, Type valueType)
-		{
-			return !_objectComparer.Equals(value, GetDefault(valueType))
-			       && base.EnterMapping(key, keyType, value, valueType);
+			return !_objectComparer.Equals(value, GetDefault(value.Type))
+			       && base.EnterMapping(key, value);
 		}
 
 		public override bool EnterMapping(IPropertyDescriptor key, object value)
 		{
-			var defaultValueAttribute = (DefaultValueAttribute)key.Property.GetCustomAttributes(typeof(DefaultValueAttribute), true).FirstOrDefault();
+			var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
 			var defaultValue = defaultValueAttribute != null
 				? defaultValueAttribute.Value
-				: GetDefault(key.Property.PropertyType);
+				: GetDefault(key.Type);
 
 			return !_objectComparer.Equals(value, defaultValue)
 				   && base.EnterMapping(key, value);

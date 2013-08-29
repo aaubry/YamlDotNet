@@ -1,28 +1,41 @@
 ﻿using System;
-using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	public sealed class PropertyDescriptor : IPropertyDescriptor
 	{
-		public PropertyDescriptor(PropertyInfo property, string name)
+		private readonly IPropertyDescriptor baseDescriptor;
+
+		public PropertyDescriptor(IPropertyDescriptor baseDescriptor)
 		{
-			if (property == null)
-			{
-				throw new ArgumentNullException("property");
-			}
-
-			Property = property;
-
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-
-			Name = name;
+			this.baseDescriptor = baseDescriptor;
+			Name = baseDescriptor.Name;
+			Type = baseDescriptor.Type;
+			StaticType = baseDescriptor.StaticType;
 		}
 
-		public PropertyInfo Property { get; private set; }
-		public string Name { get; private set; }
+		public string Name { get; set; }
+		public Type Type { get; set; }
+		public Type StaticType { get; set; }
+
+		public object Value
+		{
+			get { return baseDescriptor.Value; }
+		}
+
+		public bool CanWrite
+		{
+			get { return baseDescriptor.CanWrite; }
+		}
+
+		public void SetValue(object target, object value)
+		{
+			baseDescriptor.SetValue(target, value);
+		}
+
+		public T GetCustomAttribute<T>() where T : Attribute
+		{
+			return baseDescriptor.GetCustomAttribute<T>();
+		}
 	}
 }

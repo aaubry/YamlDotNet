@@ -24,15 +24,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Globalization;
+
 namespace YamlDotNet.RepresentationModel.Serialization
 {
 	public abstract class TypeDescriptorSkeleton : ITypeDescriptor
 	{
-		public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type);
+		public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container);
 
-		public IPropertyDescriptor GetProperty(Type type, string name)
+		public IPropertyDescriptor GetProperty(Type type, object container, string name)
 		{
-			var candidates = GetProperties(type)
+			var candidates = GetProperties(type, container)
 				.Where(p => p.Name == name);
 			
 			using(var enumerator = candidates.GetEnumerator())
@@ -59,7 +60,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 							"Multiple properties with the name/alias '{0}' already exists on type '{1}', maybe you're misusing YamlAlias or maybe you are using the wrong naming convention? The matching properties are: {2}",
 							name,
 							type.FullName,
-							string.Join(", ", candidates.Select(p => p.Property.Name).ToArray())
+							string.Join(", ", candidates.Select(p => p.Name).ToArray())
 						)
 					);
 				}

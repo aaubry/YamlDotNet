@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -31,10 +30,10 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.namingConvention = namingConvention;
 		}
 
-		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 		{
-			return innerTypeDescriptor.GetProperties(type)
-				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p.Property, namingConvention.Apply(p.Name)));
+			return innerTypeDescriptor.GetProperties(type, container)
+				.Select(p => (IPropertyDescriptor)new PropertyDescriptor(p) { Name = namingConvention.Apply(p.Name) });
 		}
 	}
 }

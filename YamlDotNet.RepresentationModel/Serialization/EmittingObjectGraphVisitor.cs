@@ -11,12 +11,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.eventEmitter = eventEmitter;
 		}
 
-		bool IObjectGraphVisitor.Enter(object value, Type type)
+		bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
 		{
 			return true;
 		}
 
-		bool IObjectGraphVisitor.EnterMapping(object key, Type keyType, object value, Type valueType)
+		bool IObjectGraphVisitor.EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
 		{
 			return true;
 		}
@@ -26,29 +26,29 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			return true;
 		}
 
-		void IObjectGraphVisitor.VisitScalar(object scalar, Type scalarType)
+		void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar)
 		{
-			eventEmitter.Emit(new ScalarEventInfo(scalar, scalarType));
+			eventEmitter.Emit(new ScalarEventInfo(scalar));
 		}
 
-		void IObjectGraphVisitor.VisitMappingStart(object mapping, Type mappingType, Type type, Type valueType)
+		void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
 		{
-			eventEmitter.Emit(new MappingStartEventInfo(mapping, mappingType));
+			eventEmitter.Emit(new MappingStartEventInfo(mapping));
 		}
 
-		void IObjectGraphVisitor.VisitMappingEnd(object mapping, Type mappingType)
+		void IObjectGraphVisitor.VisitMappingEnd(IObjectDescriptor mapping)
 		{
-			eventEmitter.Emit(new MappingEndEventInfo(mapping, mappingType));
+			eventEmitter.Emit(new MappingEndEventInfo(mapping));
 		}
 
-		void IObjectGraphVisitor.VisitSequenceStart(object sequence, Type sequenceType, Type elementType)
+		void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
 		{
-			eventEmitter.Emit(new SequenceStartEventInfo(sequence, sequenceType));
+			eventEmitter.Emit(new SequenceStartEventInfo(sequence));
 		}
 
-		void IObjectGraphVisitor.VisitSequenceEnd(object sequence, Type sequenceType)
+		void IObjectGraphVisitor.VisitSequenceEnd(IObjectDescriptor sequence)
 		{
-			eventEmitter.Emit(new SequenceEndEventInfo(sequence, sequenceType));
+			eventEmitter.Emit(new SequenceEndEventInfo(sequence));
 		}
 	}
 }

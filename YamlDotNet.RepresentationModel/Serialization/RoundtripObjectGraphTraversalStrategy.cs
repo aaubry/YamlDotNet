@@ -11,19 +11,19 @@ namespace YamlDotNet.RepresentationModel.Serialization
 	/// </summary>
 	public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
 	{
-		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, int maxRecursion)
-			: base(serializer, typeDescriptor, maxRecursion)
+		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeDescriptor typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
+			: base(serializer, typeDescriptor, typeResolver, maxRecursion)
 		{
 		}
 
-		protected override void SerializeProperties(object value, Type type, IObjectGraphVisitor visitor, int currentDepth)
+		protected override void TraverseProperties(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
 		{
-			if (!ReflectionUtility.HasDefaultConstructor(type) && !serializer.Converters.Any(c => c.Accepts(type)))
+			if (!ReflectionUtility.HasDefaultConstructor(value.Type) && !serializer.Converters.Any(c => c.Accepts(value.Type)))
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor or a type converter.", type));
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor or a type converter.", value.Type));
 			}
 
-			base.SerializeProperties(value, type, visitor, currentDepth);
+			base.TraverseProperties(value, visitor, currentDepth);
 		}
 	}
 }

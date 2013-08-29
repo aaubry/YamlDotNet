@@ -16,14 +16,30 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.innerTypeDescriptor = innerTypeDescriptor;
 		}
 
-		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 		{
-			return innerTypeDescriptor.GetProperties(type)
-				.Where(p => p.Property.GetCustomAttributes(typeof(YamlIgnoreAttribute), true).Length == 0)
+			return innerTypeDescriptor.GetProperties(type, container)
+				.Where(p => p.GetCustomAttribute<YamlIgnoreAttribute>() == null)
 				.Select(p =>
 				{
-					var alias = (YamlAliasAttribute)p.Property.GetCustomAttributes(typeof(YamlAliasAttribute), true).SingleOrDefault();
-					return alias != null ? new PropertyDescriptor(p.Property, alias.Alias) : p;
+					var descriptor = new PropertyDescriptor(p);
+
+					var alias = p.GetCustomAttribute<YamlAliasAttribute>();
+					if (alias != null)
+					{
+						descriptor.Name = alias.Alias;
+					}
+
+					var member = p.GetCustomAttribute<YamlMemberAttribute>();
+					if (member != null)
+					{
+						if (member.SerializeAs != null)
+						{
+							descriptor.Type = member.SerializeAs;
+						}
+					}
+
+					return (IPropertyDescriptor)descriptor;
 				});
 		}
 	}

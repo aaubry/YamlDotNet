@@ -16,31 +16,31 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.aliasProvider = aliasProvider;
 		}
 
-		public override bool Enter(object value, Type type)
+		public override bool Enter(IObjectDescriptor value)
 		{
-			var alias = aliasProvider.GetAlias(value);
+			var alias = aliasProvider.GetAlias(value.Value);
 			if (alias != null && !emittedAliases.Add(alias))
 			{
-				eventEmitter.Emit(new AliasEventInfo(value, type) { Alias = alias });
+				eventEmitter.Emit(new AliasEventInfo(value) { Alias = alias });
 				return false;
 			}
 
-			return base.Enter(value, type);
+			return base.Enter(value);
 		}
 
-		public override void VisitMappingStart(object mapping, Type mappingType, Type keyType, Type valueType)
+		public override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
 		{
-			eventEmitter.Emit(new MappingStartEventInfo(mapping, mappingType) { Anchor = aliasProvider.GetAlias(mapping) });
+			eventEmitter.Emit(new MappingStartEventInfo(mapping) { Anchor = aliasProvider.GetAlias(mapping.Value) });
 		}
 
-		public override void VisitSequenceStart(object sequence, Type sequenceType, Type elementType)
+		public override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
 		{
-			eventEmitter.Emit(new SequenceStartEventInfo(sequence, sequenceType) { Anchor = aliasProvider.GetAlias(sequence) });
+			eventEmitter.Emit(new SequenceStartEventInfo(sequence) { Anchor = aliasProvider.GetAlias(sequence.Value) });
 		}
 
-		public override void VisitScalar(object scalar, Type scalarType)
+		public override void VisitScalar(IObjectDescriptor scalar)
 		{
-			eventEmitter.Emit(new ScalarEventInfo(scalar, scalarType) { Anchor = aliasProvider.GetAlias(scalar) });
+			eventEmitter.Emit(new ScalarEventInfo(scalar) { Anchor = aliasProvider.GetAlias(scalar.Value) });
 		}
 	}
 }

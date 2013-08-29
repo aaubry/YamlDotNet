@@ -84,9 +84,11 @@
     <Compile Include="Serialization\DefaultExclusiveObjectGraphVisitor.cs" />
     <Compile Include="Serialization\DefaultObjectFactory.cs" />
     <Compile Include="Serialization\Deserializer.cs" />
+    <Compile Include="Serialization\DynamicTypeResolver.cs" />
     <Compile Include="Serialization\EmittingObjectGraphVisitor.cs" />
     <Compile Include="Serialization\INamingConvention.cs" />
     <Compile Include="Serialization\IObjectFactory.cs" />
+    <Compile Include="Serialization\ITypeResolver.cs" />
     <Compile Include="Serialization\ITypeDescriptor.cs" />
     <Compile Include="Serialization\IValuePromise.cs" />
     <Compile Include="Serialization\JsonEventEmitter.cs" />
@@ -100,7 +102,9 @@
     <Compile Include="Serialization\PropertyDescriptor.cs" />
     <Compile Include="Serialization\ReadableAndWritablePropertiesTypeDescriptor.cs" />
     <Compile Include="Serialization\ReadablePropertiesTypeDescriptor.cs" />
+    <Compile Include="Serialization\SerializationOptions.cs" />
     <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Serialization\StaticTypeResolver.cs" />
     <Compile Include="Serialization\TypeConverter.cs" />
     <Compile Include="Serialization\WriterEventEmitter.cs" />
     <Compile Include="Serialization\EventInfo.cs" />
@@ -122,6 +126,7 @@
     <Compile Include="Serialization\YamlFormatter.cs" />
     <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
     <Compile Include="Serialization\StringExtensions.cs" />
+    <Compile Include="Serialization\YamlMember.cs" />
     <Compile Include="YamlAliasNode.cs" />
     <Compile Include="YamlDocument.cs" />
     <Compile Include="YamlMappingNode.cs" />

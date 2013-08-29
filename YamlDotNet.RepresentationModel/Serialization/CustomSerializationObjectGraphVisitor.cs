@@ -19,12 +19,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				: Enumerable.Empty<IYamlTypeConverter>();
 		}
 
-		public override bool Enter(object value, Type type)
+		public override bool Enter(IObjectDescriptor value)
 		{
-			var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(type));
+			var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
 			if (typeConverter != null)
 			{
-				typeConverter.WriteYaml(emitter, value, type);
+				typeConverter.WriteYaml(emitter, value.Value, value.Type);
 				return false;
 			}
 
@@ -35,7 +35,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				return false;
 			}
 
-			return base.Enter(value, type);
+			return base.Enter(value);
 		}
 	}
 }

@@ -8,6 +8,7 @@ TestResults
 *.user
 *.userprefs
 *.pidb
+*.bak
 Help/*
 release/*
 /_ReSharper.*

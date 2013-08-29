@@ -108,7 +108,7 @@ namespace YamlDotNet.Core
 		private const int MaxBestIndent = 9;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="IEmitter"/> class.
+		/// Initializes a new instance of the <see cref="Emitter"/> class.
 		/// </summary>
 		/// <param name="output">The <see cref="TextWriter"/> where the emitter will write.</param>
 		public Emitter(TextWriter output)
@@ -117,7 +117,7 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="IEmitter"/> class.
+		/// Initializes a new instance of the <see cref="Emitter"/> class.
 		/// </summary>
 		/// <param name="output">The <see cref="TextWriter"/> where the emitter will write.</param>
 		/// <param name="bestIndent">The preferred indentation.</param>
@@ -127,7 +127,7 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="IEmitter"/> class.
+		/// Initializes a new instance of the <see cref="Emitter"/> class.
 		/// </summary>
 		/// <param name="output">The <see cref="TextWriter"/> where the emitter will write.</param>
 		/// <param name="bestIndent">The preferred indentation.</param>
@@ -139,7 +139,7 @@ namespace YamlDotNet.Core
 
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="IEmitter"/> class.
+		/// Initializes a new instance of the <see cref="Emitter"/> class.
 		/// </summary>
 		/// <param name="output">The <see cref="TextWriter"/> where the emitter will write.</param>
 		/// <param name="bestIndent">The preferred indentation.</param>
