@@ -20,13 +20,37 @@
 // THE SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
-using YamlDotNet.RepresentationModel.Serialization.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.RepresentationModel.Serialization.Utilities
 {
-	public interface IValueDeserializer
+	/// <summary>
+	/// A generic container that is preserved during the entire deserialization process.
+	/// Any disposable object added to this collecion will be disposed when this object is disposed.
+	/// </summary>
+	public sealed class SerializerState : IDisposable
 	{
-		object DeserializeValue(EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer);
+		private readonly IDictionary<Type, object> items = new Dictionary<Type, object>();
+		
+		public T Get<T>()
+			where T : class, new()
+		{
+			object value;
+			if(!items.TryGetValue(typeof(T), out value))
+			{
+				value = new T();
+				items.Add(typeof(T), value);
+			}
+			return (T)value;
+		}
+
+		public void Dispose()
+		{
+			foreach (var disposable in items.Values.OfType<IDisposable>())
+			{
+				disposable.Dispose();
+			}
+		}
 	}
 }

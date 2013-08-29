@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core;
+using YamlDotNet.RepresentationModel.Serialization.Utilities;
 
 namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 {

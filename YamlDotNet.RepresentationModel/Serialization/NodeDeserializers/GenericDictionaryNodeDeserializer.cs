@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization.Utilities;
 
 namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 {

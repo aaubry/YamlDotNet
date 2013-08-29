@@ -27,6 +27,11 @@ using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 using YamlDotNet.RepresentationModel.Serialization.NodeDeserializers;
 using YamlDotNet.RepresentationModel.Serialization.NodeTypeResolvers;
+using YamlDotNet.RepresentationModel.Serialization.ObjectFactories;
+using YamlDotNet.RepresentationModel.Serialization.TypeInspectors;
+using YamlDotNet.RepresentationModel.Serialization.TypeResolvers;
+using YamlDotNet.RepresentationModel.Serialization.Utilities;
+using YamlDotNet.RepresentationModel.Serialization.ValueDeserializers;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {

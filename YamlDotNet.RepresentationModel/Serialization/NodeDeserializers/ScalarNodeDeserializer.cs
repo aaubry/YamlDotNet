@@ -20,10 +20,10 @@
 // THE SOFTWARE.
 
 using System;
-using System.ComponentModel;
 using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization.Utilities;
 
 namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 {

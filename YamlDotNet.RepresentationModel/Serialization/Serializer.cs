@@ -24,7 +24,12 @@ using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization.EventEmitters;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using YamlDotNet.RepresentationModel.Serialization.ObjectGraphTraversalStrategies;
+using YamlDotNet.RepresentationModel.Serialization.ObjectGraphVisitors;
+using YamlDotNet.RepresentationModel.Serialization.TypeInspectors;
+using YamlDotNet.RepresentationModel.Serialization.TypeResolvers;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
