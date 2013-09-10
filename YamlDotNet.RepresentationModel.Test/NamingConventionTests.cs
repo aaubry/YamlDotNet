@@ -4,7 +4,7 @@ using YamlDotNet.RepresentationModel;
 using YamlDotNet.RepresentationModel.Serialization;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
-namespace YamlDotNet.UnitTests.RepresentationModel
+namespace YamlDotNet.RepresentationModel.Test
 {
 	public class NamingConventionTests
 	{

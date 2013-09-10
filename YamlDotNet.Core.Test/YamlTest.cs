@@ -20,17 +20,51 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
 using System.IO;
-using YamlDotNet.UnitTests.RepresentationModel;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.Core.Test
 {
-	public class Runner
+	public class YamlTest
 	{
-		public static void Main()
+		protected static TextReader YamlFile(string name)
 		{
-			new YamlStreamTests().RoundtripSample();
+			Stream resource =
+				Assembly.GetExecutingAssembly().GetManifestResourceStream(name) ??
+				Assembly.GetExecutingAssembly().GetManifestResourceStream("YamlDotNet.Core.Test.files." + name);
+
+			return new StreamReader(resource);
+		}
+
+		protected static TextReader YamlText(string yaml)
+		{
+			var lines = yaml
+				.Split('\n')
+				.Select(l => l.TrimEnd('\r', '\n'))
+				.SkipWhile(l => l.Trim(' ', '\t').Length == 0)
+				.ToList();
+			
+			while(lines.Count > 0 && lines[lines.Count - 1].Trim(' ', '\t').Length == 0)
+			{
+				lines.RemoveAt(lines.Count - 1);
+			}
+			
+			if(lines.Count > 0)
+			{
+				var indent = Regex.Match(lines[0], @"^(\t+)");
+				if(!indent.Success)
+				{
+					throw new ArgumentException("Invalid indentation");
+				}
+				
+				lines = lines
+					.Select(l => l.Substring(indent.Groups[1].Length))
+					.ToList();
+			}
+			
+			return new StringReader(string.Join("\n", lines.ToArray()));
 		}
 	}
 }

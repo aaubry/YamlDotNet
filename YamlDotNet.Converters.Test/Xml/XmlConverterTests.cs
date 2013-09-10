@@ -25,9 +25,10 @@ using Xunit;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Converters.Xml;
 using YamlDotNet.Converters.Xml.Extensions;
+using YamlDotNet.Core.Test;
 using System.IO;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.Converters.Test.Xml
 {
 	public class XmlConverterTests : YamlTest
 	{

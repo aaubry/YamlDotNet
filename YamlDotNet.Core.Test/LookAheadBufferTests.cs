@@ -26,7 +26,7 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.Core.Test
 {
 	public class LookAheadBufferTests
 	{

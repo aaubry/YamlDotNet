@@ -29,7 +29,7 @@ using YamlDotNet.Core.Events;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.Core.Test
 {
 	public class ParserTests : YamlTest
 	{	

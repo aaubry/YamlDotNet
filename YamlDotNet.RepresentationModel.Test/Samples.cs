@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.RepresentationModel;
 
-namespace YamlDotNet.UnitTests.RepresentationModel
+namespace YamlDotNet.RepresentationModel.Test
 {
 	public class Program
 	{

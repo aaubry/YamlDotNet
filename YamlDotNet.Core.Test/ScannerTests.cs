@@ -27,7 +27,7 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.Core.Test
 {
 	public class ScannerTests : YamlTest
 	{

@@ -25,7 +25,7 @@ using System.Linq;
 using System.Text;
 using YamlDotNet.RepresentationModel;
 
-namespace YamlDotNet.UnitTests
+namespace YamlDotNet.RepresentationModel.Test
 {
 	public class TracingVisitor : YamlVisitor
 	{

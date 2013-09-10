@@ -22,12 +22,13 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using YamlDotNet.Core.Test;
 using YamlDotNet.RepresentationModel;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace YamlDotNet.UnitTests.RepresentationModel
+namespace YamlDotNet.RepresentationModel.Test
 {
 	public class YamlStreamTests : YamlTest
 	{
