@@ -19,391 +19,358 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Collections;
 using Xunit;
 using YamlDotNet.Core.Events;
-using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
-using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 
 namespace YamlDotNet.Core.Test
 {
-	public class ParserTests : YamlTest
+	public class ParserTests : ParserTestHelper
 	{
-		private static TagDirectiveCollection defaultDirectives = new TagDirectiveCollection(new[] {
-			new TagDirective("!", "!"),
-			new TagDirective("!!", "tag:yaml.org,2002:")
-		});
-
 		[Fact]
 		public void EmptyDocument()
 		{
-			var parser = CreateParser("empty.yaml");
-
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("empty.yaml"),
+				StreamStart,
+				StreamEnd);
 		}
 
 		[Fact]
 		public void VerifyEventsOnExample1()
 		{
-			var parser = CreateParser("test1.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(new VersionDirective(new Version(1, 1)), new TagDirectiveCollection(new[] {
-				new TagDirective("!", "!foo"),
-				new TagDirective("!yaml!", "tag:yaml.org,2002:"),
-				new TagDirective("!!", "tag:yaml.org,2002:")
-			}), false));
-			AssertNext(parser, new Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test1.yaml"),
+				StreamStart,
+				DocumentStart(Explicit, Version(1, 1),
+					TagDirective("!", "!foo"),
+					TagDirective("!yaml!", TagYaml),
+					TagDirective("!!", TagYaml)),
+				PlainScalar(string.Empty),
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			var parser = CreateParser("test2.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new Scalar(null, null, "a scalar", ScalarStyle.SingleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test2.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				SingleQuotedScalar("a scalar"),
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			var parser = CreateParser("test3.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "a scalar", ScalarStyle.SingleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(false));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
-		}		
-		
+			AssertSequenceOfEventsFrom(ParserFor("test3.yaml"),
+				StreamStart,
+				DocumentStart(Explicit),
+				SingleQuotedScalar("a scalar"),
+				DocumentEnd(Explicit),
+				StreamEnd);
+		}
+
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			var parser = CreateParser("test4.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new Scalar(null, null, "a scalar", ScalarStyle.SingleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "another scalar", ScalarStyle.SingleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "yet another scalar", ScalarStyle.SingleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
-		}		
-		
+			AssertSequenceOfEventsFrom(ParserFor("test4.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				SingleQuotedScalar("a scalar"),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				SingleQuotedScalar("another scalar"),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				SingleQuotedScalar("yet another scalar"),
+				DocumentEnd(Implicit),
+				StreamEnd);
+		}
+
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			var parser = CreateParser("test5.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new SequenceStart("A", null, true, SequenceStyle.Flow));
-			AssertNext(parser, new AnchorAlias("A"));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test5.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				AnchoredFlowSequenceStart("A"),
+				AnchorAlias("A"),
+				SequenceEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			var parser = CreateParser("test6.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new Scalar(null, "tag:yaml.org,2002:float", "3.14", ScalarStyle.DoubleQuoted, false, false));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			var parser = ParserFor("test6.yaml");
+			AssertSequenceOfEventsFrom(parser,
+				StreamStart,
+				DocumentStart(Implicit),
+				ExplicitDoubleQuotedScalar(TagYaml + "float", "3.14"),
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			var parser = CreateParser("test7.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "a plain scalar", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "a single-quoted scalar", ScalarStyle.SingleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "a double-quoted scalar", ScalarStyle.DoubleQuoted, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "a literal scalar", ScalarStyle.Literal, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new Scalar(null, null, "a folded scalar", ScalarStyle.Folded, false, true));
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test7.yaml"),
+				StreamStart,
+				DocumentStart(Explicit),
+				PlainScalar(string.Empty),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				PlainScalar("a plain scalar"),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				SingleQuotedScalar("a single-quoted scalar"),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				DoubleQuotedScalar("a double-quoted scalar"),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				LiteralScalar("a literal scalar"),
+				DocumentEnd(Implicit),
+				DocumentStart(Explicit),
+				FoldedScalar("a folded scalar"),
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			var parser = CreateParser("test8.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Flow));
-			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 3", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test8.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				FlowSequenceStart,
+				PlainScalar("item 1"),
+				PlainScalar("item 2"),
+				PlainScalar("item 3"),
+				SequenceEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
 
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			var parser = CreateParser("test9.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Flow));
-			AssertNext(parser, new Scalar(null, null, "a simple key", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "a value", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "a complex key", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "another value", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test9.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				FlowMappingStart,
+				PlainScalar("a simple key"),
+				PlainScalar("a value"),
+				PlainScalar("a complex key"),
+				PlainScalar("another value"),
+				MappingEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
 
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			var parser = CreateParser("test10.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "item 3.1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 3.2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "key 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "key 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test10.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				BlockSequenceStart,
+				PlainScalar("item 1"),
+				PlainScalar("item 2"),
+				BlockSequenceStart,
+				PlainScalar("item 3.1"),
+				PlainScalar("item 3.2"),
+				SequenceEnd,
+				BlockMappingStart,
+				PlainScalar("key 1"),
+				PlainScalar("value 1"),
+				PlainScalar("key 2"),
+				PlainScalar("value 2"),
+				MappingEnd,
+				SequenceEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-	
+
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			var parser = CreateParser("test11.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "a simple key", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "a value", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "a complex key", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "another value", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "a mapping", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "key 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "key 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new Scalar(null, null, "a sequence", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test11.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				BlockMappingStart,
+				PlainScalar("a simple key"),
+				PlainScalar("a value"),
+				PlainScalar("a complex key"),
+				PlainScalar("another value"),
+				PlainScalar("a mapping"),
+				BlockMappingStart,
+				PlainScalar("key 1"),
+				PlainScalar("value 1"),
+				PlainScalar("key 2"),
+				PlainScalar("value 2"),
+				MappingEnd,
+				PlainScalar("a sequence"),
+				BlockSequenceStart,
+				PlainScalar("item 1"),
+				PlainScalar("item 2"),
+				SequenceEnd,
+				MappingEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-	
+
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			var parser = CreateParser("test12.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "key 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "key 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "complex key", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "complex value", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test12.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				BlockSequenceStart,
+				BlockSequenceStart,
+				PlainScalar("item 1"),
+				PlainScalar("item 2"),
+				SequenceEnd,
+				BlockMappingStart,
+				PlainScalar("key 1"),
+				PlainScalar("value 1"),
+				PlainScalar("key 2"),
+				PlainScalar("value 2"),
+				MappingEnd,
+				BlockMappingStart,
+				PlainScalar("complex key"),
+				PlainScalar("complex value"),
+				MappingEnd,
+				SequenceEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-			
+
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			var parser = CreateParser("test13.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "a sequence", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new Scalar(null, null, "a mapping", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "key 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "key 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "value 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test13.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				BlockMappingStart,
+				PlainScalar("a sequence"),
+				BlockSequenceStart,
+				PlainScalar("item 1"),
+				PlainScalar("item 2"),
+				SequenceEnd,
+				PlainScalar("a mapping"),
+				BlockMappingStart,
+				PlainScalar("key 1"),
+				PlainScalar("value 1"),
+				PlainScalar("key 2"),
+				PlainScalar("value 2"),
+				MappingEnd,
+				MappingEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
-			
+
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			var parser = CreateParser("test14.yaml");
-			
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, true));
-			AssertNext(parser, new MappingStart(null, null, true, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "key", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceStart(null, null, true, SequenceStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "item 1", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "item 2", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new SequenceEnd());
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("test14.yaml"),
+				StreamStart,
+				DocumentStart(Implicit),
+				BlockMappingStart,
+				PlainScalar("key"),
+				BlockSequenceStart,
+				PlainScalar("item 1"),
+				PlainScalar("item 2"),
+				SequenceEnd,
+				MappingEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
 
 		[Fact]
 		public void VerifyTokenWithLocalTags()
 		{
-			var parser = CreateParser("local-tags.yaml");
-
-			AssertNext(parser, new StreamStart());
-			AssertNext(parser, new DocumentStart(null, defaultDirectives, false));
-			AssertNext(parser, new MappingStart(null, "!MyObject", false, MappingStyle.Block));
-			AssertNext(parser, new Scalar(null, null, "a", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "1.0", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "b", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "42", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "c", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new Scalar(null, null, "-7", ScalarStyle.Plain, true, false));
-			AssertNext(parser, new MappingEnd());
-			AssertNext(parser, new DocumentEnd(true));
-			AssertNext(parser, new StreamEnd());
-			AssertDoesNotHaveNext(parser);
+			AssertSequenceOfEventsFrom(ParserFor("local-tags.yaml"),
+				StreamStart,
+				DocumentStart(Explicit),
+				TaggedBlockMappingStart("!MyObject"),
+				PlainScalar("a"),
+				PlainScalar("1.0"),
+				PlainScalar("b"),
+				PlainScalar("42"),
+				PlainScalar("c"),
+				PlainScalar("-7"),
+				MappingEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
 		}
 
-		private IParser CreateParser(string name)
+		private IParser ParserFor(string name)
 		{
 			return new Parser(YamlFile(name));
 		}
 
-		private void AssertNext(IParser parser, ParsingEvent expected) {
-			AssertHasNext(parser);
-			AssertCurrent(parser, expected);
+		private void AssertSequenceOfEventsFrom(IParser parser, params ParsingEvent[] events)
+		{
+			var eventNumber = 1;
+			foreach (var @event in events)
+			{
+				Assert.True(parser.MoveNext(), "Missing parse event number " + eventNumber);
+				AssertCurrent(parser, @event, eventNumber);
+				eventNumber++;
+			}
+			Assert.False(parser.MoveNext(), "Found extra parse events");
 		}
 
-		private void AssertHasNext(IParser parser) {
-			Assert.True(parser.MoveNext());
-		}
+		private void AssertCurrent(IParser parser, ParsingEvent expected, int eventNumber)
+		{
+			var parsingEvent = parser.Current;
+			Assert.True(expected.GetType().IsInstanceOfType(parsingEvent),
+				string.Format("Parse event {0} is not of the expected type. Exprected: {1}, Actual: {2}",
+				eventNumber, expected.GetType().Name, parsingEvent.GetType().Name));
 
-		private void AssertDoesNotHaveNext(IParser parser) {
-			Assert.False(parser.MoveNext());
-		}
+			foreach (var property in expected.GetType().GetProperties())
+			{
+				if (property.PropertyType == typeof(Mark) || !property.CanRead)
+				{
+					continue;
+				}
 
-		private void AssertCurrent(IParser parser, ParsingEvent expected) {
-			Dump.WriteLine(expected.GetType().Name);
-			Assert.True(expected.GetType().IsAssignableFrom(parser.Current.GetType()),
-				string.Format("The event is not of the expected type. Exprected: {0}, Actual: {1}", expected.GetType().Name, parser.Current.GetType().Name));
+				var value = property.GetValue(parsingEvent, null);
+				var expectedValue = property.GetValue(expected, null);
+				if (expectedValue is IEnumerable && !(expectedValue is string))
+				{
+					Dump.Write("\t{0} = {{", property.Name);
+					Dump.Write(string.Join(", ", (IEnumerable)value));
+					Dump.WriteLine("}");
 
-			foreach (var property in expected.GetType().GetProperties()) {
-				if (property.PropertyType != typeof(Mark) && property.CanRead) {
-					var value = property.GetValue(parser.Current, null);
-					var expectedValue = property.GetValue(expected, null);
-					// Todo: what does GetTypeCode do and is it necessary?
-					if (expectedValue != null && Type.GetTypeCode(expectedValue.GetType()) == TypeCode.Object && expectedValue is IEnumerable) {
-						Dump.Write("\t{0} = {{", property.Name);
-						var isFirst = true;
-						foreach (var item in (IEnumerable)value) {
-							if (isFirst) {
-								isFirst = false;
-							} else {
-								Dump.Write(", ");
-							}
-							Dump.Write(item);
-						}
-						Dump.WriteLine("}");
-
-						if (expectedValue is ICollection && value is ICollection) {
-							Assert.Equal(((ICollection)expectedValue).Count, ((ICollection)value).Count);
-						}
-
-						var values = ((IEnumerable)value).GetEnumerator();
-						var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
-						while (expectedValues.MoveNext()) {
-							Assert.True(values.MoveNext());
-							Assert.Equal(expectedValues.Current, values.Current);
-						}
-
-						Assert.False(values.MoveNext());
-					} else {
-						Dump.WriteLine("\t{0} = {1}", property.Name, value);
-						Assert.Equal(expectedValue, value);
+					if (expectedValue is ICollection && value is ICollection)
+					{
+						var expectedCount = ((ICollection)expectedValue).Count;
+						var valueCount = ((ICollection)value).Count;
+						Assert.True(expectedCount.Equals(valueCount),
+							string.Format("Expected property {0} in parse event {1} to be a collection with {2} elements but found {3} elements",
+							property.Name, eventNumber, expectedCount, valueCount));
 					}
+
+					var values = ((IEnumerable)value).GetEnumerator();
+					var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
+					while (expectedValues.MoveNext())
+					{
+						Assert.True(values.MoveNext(), string.Format("Property {0} in parse event {1} had too few elements", property.Name, eventNumber));
+						Assert.True(Equals(expectedValues.Current, values.Current),
+							string.Format("Expected element in property {0} in parse event {1} to be {2} but was {3}",
+							property.Name, eventNumber, expectedValues.Current, values.Current));
+					}
+					Assert.False(values.MoveNext(), string.Format("Property {0} in parse event {1} had too many elements", property.Name, eventNumber));
+				}
+				else
+				{
+					Dump.WriteLine("\t{0} = {1}", property.Name, value);
+					Assert.True(Equals(expectedValue, value), string.Format("Expected property {0} in parse event {1} to be {2} but was {3}",
+						property.Name, eventNumber, expectedValue, value));
 				}
 			}
 		}
