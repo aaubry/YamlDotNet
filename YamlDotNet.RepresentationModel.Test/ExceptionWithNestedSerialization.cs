@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using Xunit;
+using YamlDotNet.Core.Test;
 using YamlDotNet.RepresentationModel.Serialization;
 
 namespace YamlDotNet.RepresentationModel.Test
@@ -18,25 +15,27 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			// serialize AMessage
 			var tw = new StringWriter();
-			s.Serialize(tw, new AMessage() { Payload = new PayloadA() { X = 5, Y = 6 } });
-			Console.WriteLine(tw.ToString());
+			s.Serialize(tw, new AMessage { Payload = new PayloadA { X = 5, Y = 6 } });
+			Dump.WriteLine(tw);
 
 			// stick serialized AMessage in envelope and serialize it
-			var e = new Env() { Type = "some-type", Payload = tw.ToString() };
+			var e = new Env { Type = "some-type", Payload = tw.ToString() };
 
 			tw = new StringWriter();
 			s.Serialize(tw, e);
-			Console.WriteLine(tw.ToString());
+			Dump.WriteLine(tw);
 
-			Console.WriteLine("${0}$", e.Payload);
+			Dump.WriteLine("${0}$", e.Payload);
 
 			// deserialize envelope
 			var e2 = ds.Deserialize<Env>(new StringReader(tw.ToString()));
 
-			Console.WriteLine("${0}$", e2.Payload);
+			Dump.WriteLine("${0}$", e2.Payload);
 
 			// deserialize payload - fails if EmitDefaults is set
 			ds.Deserialize<AMessage>(new StringReader(e2.Payload));
+
+			// Todo: proper assert
 		}
 
 		public class Env

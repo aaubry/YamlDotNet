@@ -19,8 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-using System.Xml;
 using Xunit;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Converters.Xml;
@@ -32,80 +30,89 @@ namespace YamlDotNet.Converters.Test.Xml
 {
 	public class XmlConverterTests : YamlTest
 	{
-		private static YamlDocument GetDocument(string name) {
-			YamlStream stream = new YamlStream();
-			stream.Load(YamlFile(name));
-			Assert.True(stream.Documents.Count > 0);
-			return stream.Documents[0];
-		}
-		
 		[Fact]
 		public void ScalarToXml() {
-			YamlDocument yaml = GetDocument("test2.yaml");
-			
-			XmlConverter converter = new XmlConverter();
-			XmlDocument xml = converter.ToXml(yaml);
-			
-			xml.Save(Console.Out);
-		}			
-		
+			var writer = new StringWriter();
+			var yaml = GetDocument("test2.yaml");
+
+			var xml = new XmlConverter().ToXml(yaml);
+
+			xml.Save(writer);
+			Dump.Write(writer);
+		}
+
 		[Fact]
 		public void SequenceOfScalarsToXml() {
-			YamlDocument yaml = GetDocument("test8.yaml");
-			
-			XmlConverter converter = new XmlConverter();
-			XmlDocument xml = converter.ToXml(yaml);
-			
-			xml.Save(Console.Out);
-		}			
-		
+			var writer = new StringWriter();
+			var yaml = GetDocument("test8.yaml");
+
+			var xml = new XmlConverter().ToXml(yaml);
+
+			xml.Save(writer);
+			Dump.Write(writer);
+		}
+
 		[Fact]
 		public void MappingOfScalarsToXml() {
-			YamlDocument yaml = GetDocument("test9.yaml");
+			var writer = new StringWriter();
+			var yaml = GetDocument("test9.yaml");
 
-			XmlConverter converter = new XmlConverter();
-			XmlDocument xml = converter.ToXml(yaml);
-			
-			xml.Save(Console.Out);
-		}			
-		
+			var xml = new XmlConverter().ToXml(yaml);
+
+			xml.Save(writer);
+			Dump.Write(writer);
+		}
+
 		[Fact]
 		public void SequenceOfMappingAndSequencesToXml() {
-			YamlDocument yaml = GetDocument("test10.yaml");
-			
-			XmlConverter converter = new XmlConverter();
-			XmlDocument xml = converter.ToXml(yaml);
-			
-			xml.Save(Console.Out);
-		}			
-		
+			var writer = new StringWriter();
+			var yaml = GetDocument("test10.yaml");
+
+			var xml = new XmlConverter().ToXml(yaml);
+
+			xml.Save(writer);
+			Dump.Write(writer);
+		}
+
 		[Fact]
 		public void ToXmlUsingExtension() {
-			YamlDocument yaml = GetDocument("test10.yaml");
-			XmlDocument xml = yaml.ToXml();
-			xml.Save(Console.Out);
-		}			
+			var writer = new StringWriter();
+			var yaml = GetDocument("test10.yaml");
+
+			var xml = yaml.ToXml();
+
+			xml.Save(writer);
+			Dump.Write(writer);
+		}
 
 		[Fact]
 		public void Roundtrip()
 		{
-			YamlDocument yaml = GetDocument("test10.yaml");
+			var yaml = GetDocument("test10.yaml");
 
-			XmlConverter converter = new XmlConverter();
-			XmlDocument xml = converter.ToXml(yaml);
+			var converter = new XmlConverter();
+			var xml = converter.ToXml(yaml);
 
-			StringWriter firstBuffer = new StringWriter();
+			var firstBuffer = new StringWriter();
 			xml.Save(firstBuffer);
-			Console.Out.Write(firstBuffer.ToString());
+			Dump.Write(firstBuffer);
 
-			YamlDocument intermediate = converter.FromXml(xml);
-			XmlDocument final = converter.ToXml(intermediate);
+			var intermediate = converter.FromXml(xml);
+			var final = converter.ToXml(intermediate);
 
-			StringWriter secondBuffer = new StringWriter();
+			var secondBuffer = new StringWriter();
 			final.Save(secondBuffer);
-			Console.Error.Write(secondBuffer.ToString());
+			Dump.Write(secondBuffer);
 
 			Assert.Equal(firstBuffer.ToString(), secondBuffer.ToString());
+		}
+
+		private static YamlDocument GetDocument(string name)
+		{
+			var stream = new YamlStream();
+			stream.Load(YamlFile(name));
+			Assert.True(stream.Documents.Count > 0, "The file [" + name + "] did not contain any Yaml documents");
+			return stream.Documents[0];
 		}
 	}
 }
