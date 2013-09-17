@@ -19,13 +19,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.IO;
 using Xunit;
 using Xunit.Extensions;
-using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel;
 
@@ -33,145 +30,114 @@ namespace YamlDotNet.Core.Test
 {
 	public class EmitterTests : YamlTest
 	{
-		private void ParseAndEmit(string name) {
-			string testText = YamlFile(name).ReadToEnd();
-
-			IParser parser = new Parser(new StringReader(testText));
-			using(StringWriter output = new StringWriter()) {
-				IEmitter emitter = new Emitter(output, 2, int.MaxValue, false);
-				while(parser.MoveNext()) {
-					//Console.WriteLine(parser.Current.GetType().Name);
-					Console.Error.WriteLine(parser.Current);
-					emitter.Emit(parser.Current);
-				}
-				
-				string result = output.ToString();
-				
-				Console.WriteLine();
-				Console.WriteLine("------------------------------");
-				Console.WriteLine();
-				Console.WriteLine(testText);
-				Console.WriteLine();
-				Console.WriteLine("------------------------------");
-				Console.WriteLine();
-				Console.WriteLine(result);
-				Console.WriteLine();
-				Console.WriteLine("------------------------------");
-				Console.WriteLine();
-
-				/*
-				Parser resultParser = new Parser(new StringReader(result));
-				while(resultParser.MoveNext()) {
-					Console.WriteLine(resultParser.Current.GetType().Name);
-				}
-				*/
-				/*
-				
-				if(testText != result) {
-					Console.WriteLine();
-					Console.WriteLine("------------------------------");
-					Console.WriteLine();
-					Console.WriteLine("Expected:");
-					Console.WriteLine();
-					Console.WriteLine(testText);
-					Console.WriteLine();
-					Console.WriteLine("------------------------------");
-					Console.WriteLine();
-					Console.WriteLine("Result:");
-					Console.WriteLine();
-					Console.WriteLine(result);
-					Console.WriteLine();
-					Console.WriteLine("------------------------------");
-					Console.WriteLine();
-				}
-				
-				Assert.Equal(testText, result);
-				*/
-			}
-		}
-		
 		[Fact]
 		public void EmitExample1()
 		{
 			ParseAndEmit("test1.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample2()
 		{
 			ParseAndEmit("test2.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample3()
 		{
 			ParseAndEmit("test3.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample4()
 		{
 			ParseAndEmit("test4.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample5()
 		{
 			ParseAndEmit("test5.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample6()
 		{
 			ParseAndEmit("test6.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample7()
 		{
 			ParseAndEmit("test7.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample8()
 		{
 			ParseAndEmit("test8.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample9()
 		{
 			ParseAndEmit("test9.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample10()
 		{
 			ParseAndEmit("test10.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample11()
 		{
 			ParseAndEmit("test11.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample12()
 		{
 			ParseAndEmit("test12.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample13()
 		{
 			ParseAndEmit("test13.yaml");
 		}
-		
+
 		[Fact]
 		public void EmitExample14()
 		{
 			ParseAndEmit("test14.yaml");
+		}
+
+		private void ParseAndEmit(string name)
+		{
+			var testText = YamlFile(name).ReadToEnd();
+
+			var output = new StringWriter();
+			IParser parser = new Parser(new StringReader(testText));
+			IEmitter emitter = new Emitter(output, 2, int.MaxValue, false);
+			Dump.WriteLine("= Parse and emit yaml file ["+ name + "] =");
+			while (parser.MoveNext())
+			{
+				Dump.WriteLine(parser.Current);
+				emitter.Emit(parser.Current);
+			}
+			Dump.WriteLine();
+
+			Dump.WriteLine("= Original =");
+			Dump.WriteLine(testText);
+			Dump.WriteLine();
+
+			Dump.WriteLine("= Result =");
+			Dump.WriteLine(output);
+			Dump.WriteLine();
+
+			// Todo: figure out how (if?) to assert
 		}
 
 		private string EmitScalar(Scalar scalar)
@@ -207,7 +173,7 @@ namespace YamlDotNet.Core.Test
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
 			var yaml = EmitScalar(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
-			Console.WriteLine(yaml);
+			Dump.WriteLine(yaml);
 			Assert.True(yaml.Contains("world"));
 		}
 
@@ -215,7 +181,7 @@ namespace YamlDotNet.Core.Test
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
 			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
-			Console.WriteLine(yaml);
+			Dump.WriteLine(yaml);
 			Assert.True(yaml.Contains(">"));
 		}
 
@@ -223,8 +189,9 @@ namespace YamlDotNet.Core.Test
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
 			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
-			Console.WriteLine(yaml);
+			Dump.WriteLine(yaml);
 
+			// Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
 			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
@@ -237,7 +204,7 @@ namespace YamlDotNet.Core.Test
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
 			var yaml = EmitScalar(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
-			Console.WriteLine("${0}$", yaml);
+			Dump.WriteLine("${0}$", yaml);
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
@@ -258,7 +225,7 @@ namespace YamlDotNet.Core.Test
 				new Scalar(null, null, input, ScalarStyle.Folded, true, false),
 				new MappingEnd()
 			);
-			Console.WriteLine(yaml);
+			Dump.WriteLine(yaml);
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
@@ -266,9 +233,9 @@ namespace YamlDotNet.Core.Test
 			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
 			var value = (YamlScalarNode)mapping.Children.First().Value;
 
-			Console.WriteLine(value.Value);
-
-			Assert.Equal(input, value.Value);
+			var output = value.Value;
+			Dump.WriteLine(output);
+			Assert.Equal(input, output);
 		}
 	}
 }

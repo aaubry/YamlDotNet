@@ -20,55 +20,20 @@
 //  SOFTWARE.
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Text;
 using Xunit;
-using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core.Test
 {
 	public class ScannerTests : YamlTest
 	{
-		private static Scanner CreateScanner(string name) {
-			return new Scanner(YamlFile(name));
-		}
-		
-		private void AssertHasNext(Scanner scanner) {
-			Assert.True(scanner.MoveNext());
-		}
-		
-		private void AssertDoesNotHaveNext(Scanner scanner) {
-			Assert.False(scanner.MoveNext());
-		}
-
-		private void AssertCurrent(Scanner scanner, Token expected) {
-			Console.WriteLine(expected.GetType().Name);
-			Assert.NotNull(scanner.Current);
-			Assert.True(expected.GetType().IsAssignableFrom(scanner.Current.GetType()));
-			
-			foreach (var property in expected.GetType().GetProperties()) {
-				if(property.PropertyType != typeof(Mark) && property.CanRead) {
-					object value = property.GetValue(scanner.Current, null);
-					Console.WriteLine("\t{0} = {1}", property.Name, value);
-					Assert.Equal(property.GetValue(expected, null), value);
-				}
-			}
-		}
-		
-		private void AssertNext(Scanner scanner, Token expected) {
-			AssertHasNext(scanner);
-			AssertCurrent(scanner, expected);
-		}
-		
 		[Fact]
 		public void VerifyTokensOnExample1()
 		{
 			Scanner scanner = CreateScanner("test1.yaml");
 			
 			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new VersionDirective(new Core.Version(1, 1)));
+			AssertNext(scanner, new VersionDirective(new Version(1, 1)));
 			AssertNext(scanner, new TagDirective("!", "!foo"));
 			AssertNext(scanner, new TagDirective("!yaml!", "tag:yaml.org,2002:"));
 			AssertNext(scanner, new DocumentStart());
@@ -365,6 +330,37 @@ namespace YamlDotNet.Core.Test
 			AssertNext(scanner, new BlockEnd());
 			AssertNext(scanner, new StreamEnd());
 			AssertDoesNotHaveNext(scanner);
+		}
+
+		private static Scanner CreateScanner(string name) {
+			return new Scanner(YamlFile(name));
+		}
+
+		private void AssertNext(Scanner scanner, Token expected) {
+			AssertHasNext(scanner);
+			AssertCurrent(scanner, expected);
+		}
+
+		private void AssertHasNext(Scanner scanner) {
+			Assert.True(scanner.MoveNext());
+		}
+
+		private void AssertDoesNotHaveNext(Scanner scanner) {
+			Assert.False(scanner.MoveNext());
+		}
+
+		private void AssertCurrent(Scanner scanner, Token expected) {
+			Dump.WriteLine(expected.GetType().Name);
+			Assert.NotNull(scanner.Current);
+			Assert.True(expected.GetType().IsAssignableFrom(scanner.Current.GetType()));
+
+			foreach (var property in expected.GetType().GetProperties()) {
+				if (property.PropertyType != typeof(Mark) && property.CanRead) {
+					var value = property.GetValue(scanner.Current, null);
+					Dump.WriteLine("\t{0} = {1}", property.Name, value);
+					Assert.Equal(property.GetValue(expected, null), value);
+				}
+			}
 		}
 	}
 }

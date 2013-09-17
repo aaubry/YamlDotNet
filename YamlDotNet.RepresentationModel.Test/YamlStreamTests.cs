@@ -19,14 +19,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.Core.Test;
-using YamlDotNet.RepresentationModel;
 using System.Text;
 using System.IO;
-using System.Diagnostics;
 
 namespace YamlDotNet.RepresentationModel.Test
 {
@@ -35,7 +32,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 		[Fact]
 		public void LoadSimpleDocument() {
-			YamlStream stream = new YamlStream();
+			var stream = new YamlStream();
 			stream.Load(YamlFile("test2.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
@@ -45,13 +42,13 @@ namespace YamlDotNet.RepresentationModel.Test
 		
 		[Fact]
 		public void BackwardAliasReferenceWorks() {
-			YamlStream stream = new YamlStream();
+			var stream = new YamlStream();
 			stream.Load(YamlFile("backwardsAlias.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
-			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			Assert.Equal(3, sequence.Children.Count);
 
 			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[0]).Value);
@@ -62,136 +59,19 @@ namespace YamlDotNet.RepresentationModel.Test
 		
 		[Fact]
 		public void ForwardAliasReferenceWorks() {
-			YamlStream stream = new YamlStream();
+			var stream = new YamlStream();
 			stream.Load(YamlFile("forwardAlias.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
-			YamlSequenceNode sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			Assert.Equal(3, sequence.Children.Count);
 
 			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[0]).Value);
 			Assert.Equal("another scalar", ((YamlScalarNode)sequence.Children[1]).Value);
 			Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[2]).Value);
 			Assert.Same(sequence.Children[0], sequence.Children[2]);
-		}
-
-		private enum YamlNodeEventType
-		{
-			SequenceStart,
-			SequenceEnd,
-			MappingStart,
-			MappingEnd,
-			Scalar,
-		}
-
-		private class YamlNodeEvent
-		{
-			public YamlNodeEventType Type
-			{
-				get;
-				private set;
-			}
-
-			public string Anchor
-			{
-				get;
-				private set;
-			}
-
-			public string Tag
-			{
-				get;
-				private set;
-			}
-
-			public string Value
-			{
-				get;
-				private set;
-			}
-
-			public YamlNodeEvent(YamlNodeEventType type, string anchor, string tag, string value)
-			{
-				Type = type;
-				Anchor = anchor;
-				Tag = tag;
-				Value = value;
-			}
-		}
-
-		private class YamlDocumentStructureBuilder : YamlVisitor
-		{
-			private readonly List<YamlNodeEvent> events = new List<YamlNodeEvent>();
-
-			public IList<YamlNodeEvent> Events
-			{
-				get
-				{
-					return events;
-				}
-			}
-
-			protected override void Visit(YamlScalarNode scalar)
-			{
-				events.Add(new YamlNodeEvent(YamlNodeEventType.Scalar, scalar.Anchor, scalar.Tag, scalar.Value));
-			}
-
-			protected override void Visit(YamlSequenceNode sequence)
-			{
-				events.Add(new YamlNodeEvent(YamlNodeEventType.SequenceStart, sequence.Anchor, sequence.Tag, null));
-			}
-
-			protected override void Visited(YamlSequenceNode sequence)
-			{
-				events.Add(new YamlNodeEvent(YamlNodeEventType.SequenceEnd, sequence.Anchor, sequence.Tag, null));
-			}
-
-			protected override void Visit(YamlMappingNode mapping)
-			{
-				events.Add(new YamlNodeEvent(YamlNodeEventType.MappingStart, mapping.Anchor, mapping.Tag, null));
-			}
-
-			protected override void Visited(YamlMappingNode mapping)
-			{
-				events.Add(new YamlNodeEvent(YamlNodeEventType.MappingEnd, mapping.Anchor, mapping.Tag, null));
-			}
-		}
-
-		private void RoundtripTest(string yamlFileName)
-		{
-			YamlStream original = new YamlStream();
-			original.Load(YamlFile(yamlFileName));
-
-			StringBuilder buffer = new StringBuilder();
-			original.Save(new StringWriter(buffer));
-
-			Console.WriteLine(buffer.ToString());
-
-			YamlStream final = new YamlStream();
-			final.Load(new StringReader(buffer.ToString()));
-
-			YamlDocumentStructureBuilder originalBuilder = new YamlDocumentStructureBuilder();
-			original.Accept(originalBuilder);
-
-			YamlDocumentStructureBuilder finalBuilder = new YamlDocumentStructureBuilder();
-			final.Accept(finalBuilder);
-
-			Console.WriteLine("The original document produced {0} events.", originalBuilder.Events.Count);
-			Console.WriteLine("The final document produced {0} events.", finalBuilder.Events.Count);
-			Assert.Equal(originalBuilder.Events.Count, finalBuilder.Events.Count);
-
-			for (int i = 0; i < originalBuilder.Events.Count; ++i)
-			{
-				YamlNodeEvent originalEvent = originalBuilder.Events[i];
-				YamlNodeEvent finalEvent = finalBuilder.Events[i];
-
-				Assert.Equal(originalEvent.Type, finalEvent.Type);
-				//Assert.Equal(originalEvent.Tag, finalEvent.Tag);
-				//Assert.Equal(originalEvent.Anchor, finalEvent.Anchor);
-				Assert.Equal(originalEvent.Value, finalEvent.Value);
-			}
 		}
 
 		[Fact]
@@ -285,29 +165,119 @@ namespace YamlDotNet.RepresentationModel.Test
 		}
 
 		[Fact]
-		public void RoundtripSample()
-		{
-			YamlStream original = new YamlStream();
-			original.Load(YamlFile("sample.yaml"));
-
-			original.Accept(new TracingVisitor());
-			
-			//RoundtripTest("sample.yaml");
-		}
-
-		[Fact]
 		public void FailBackreference()
 		{
-			//YamlStream original = new YamlStream();
-			//original.Load(YamlFile("fail-backreference.yaml"));
 			RoundtripTest("fail-backreference.yaml");
 		}
 
 		[Fact]
 		public void AllAliasesMustBeResolved()
 		{
-			YamlStream original = new YamlStream();
+			var original = new YamlStream();
 			Assert.Throws<AnchorNotFoundException>(() => original.Load(YamlFile("invalid-reference.yaml")));
+		}
+
+		private void RoundtripTest(string yamlFileName)
+		{
+			var original = new YamlStream();
+			original.Load(YamlFile(yamlFileName));
+
+			var buffer = new StringBuilder();
+			original.Save(new StringWriter(buffer));
+
+			Dump.WriteLine(buffer);
+
+			var final = new YamlStream();
+			final.Load(new StringReader(buffer.ToString()));
+
+			var originalBuilder = new YamlDocumentStructureBuilder();
+			original.Accept(originalBuilder);
+
+			var finalBuilder = new YamlDocumentStructureBuilder();
+			final.Accept(finalBuilder);
+
+			Dump.WriteLine("The original document produced {0} events.", originalBuilder.Events.Count);
+			Dump.WriteLine("The final document produced {0} events.", finalBuilder.Events.Count);
+			Assert.Equal(originalBuilder.Events.Count, finalBuilder.Events.Count);
+
+			for (var i = 0; i < originalBuilder.Events.Count; ++i)
+			{
+				var originalEvent = originalBuilder.Events[i];
+				var finalEvent = finalBuilder.Events[i];
+
+				Assert.Equal(originalEvent.Type, finalEvent.Type);
+				Assert.Equal(originalEvent.Value, finalEvent.Value);
+			}
+		}
+
+		private class YamlDocumentStructureBuilder : YamlVisitor
+		{
+			private readonly List<YamlNodeEvent> events = new List<YamlNodeEvent>();
+
+			public IList<YamlNodeEvent> Events
+			{
+				get {
+					return events;
+				}
+			}
+
+			protected override void Visit(YamlScalarNode scalar)
+			{
+				events.Add(new YamlNodeEvent(YamlNodeEventType.Scalar, scalar.Anchor, scalar.Tag, scalar.Value));
+			}
+
+			protected override void Visit(YamlSequenceNode sequence)
+			{
+				events.Add(new YamlNodeEvent(YamlNodeEventType.SequenceStart, sequence.Anchor, sequence.Tag, null));
+			}
+
+			protected override void Visited(YamlSequenceNode sequence)
+			{
+				events.Add(new YamlNodeEvent(YamlNodeEventType.SequenceEnd, sequence.Anchor, sequence.Tag, null));
+			}
+
+			protected override void Visit(YamlMappingNode mapping)
+			{
+				events.Add(new YamlNodeEvent(YamlNodeEventType.MappingStart, mapping.Anchor, mapping.Tag, null));
+			}
+
+			protected override void Visited(YamlMappingNode mapping)
+			{
+				events.Add(new YamlNodeEvent(YamlNodeEventType.MappingEnd, mapping.Anchor, mapping.Tag, null));
+			}
+		}
+
+		private class YamlNodeEvent
+		{
+			public YamlNodeEventType Type { get; private set; }
+			public string Anchor { get; private set; }
+			public string Tag { get; private set; }
+			public string Value { get; private set; }
+
+			public YamlNodeEvent(YamlNodeEventType type, string anchor, string tag, string value) {
+				Type = type;
+				Anchor = anchor;
+				Tag = tag;
+				Value = value;
+			}
+		}
+
+		private enum YamlNodeEventType
+		{
+			SequenceStart,
+			SequenceEnd,
+			MappingStart,
+			MappingEnd,
+			Scalar,
+		}
+
+		// Todo: Sample.. belongs elsewhere?
+		[Fact]
+		public void RoundtripSample()
+		{
+			var original = new YamlStream();
+			original.Load(YamlFile("sample.yaml"));
+			original.Accept(new TracingVisitor());
 		}
 	}
 }
