@@ -21,72 +21,247 @@
 
 using System;
 using System.IO;
-using System.Reflection;
+using FakeItEasy;
+using FakeItEasy.Core;
 using Xunit;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core.Test
 {
 	public class LookAheadBufferTests
 	{
-		private static LookAheadBuffer CreateBuffer(string text, int capacity) {
-			return new LookAheadBuffer(new StringReader(text), capacity);
-		}
-		
+		private const string TestString = "abcdefghi";
+		private const int Capacity = 4;
+
 		[Fact]
-		public void ReadingWorks()
+		public void ShouldHaveReadOnceWhenPeekingAtOffsetZero()
 		{
-			LookAheadBuffer buffer = CreateBuffer("abcdefghi", 4);
-			
-			FieldInfo count = buffer.GetType().GetField("count", BindingFlags.Instance | BindingFlags.NonPublic);
-			Assert.NotNull(count);
-			
-			Assert.Equal(0, count.GetValue(buffer));
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
 			Assert.Equal('a', buffer.Peek(0));
-			Assert.Equal(1, count.GetValue(buffer));
+			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+		}
+
+		[Fact]
+		public void ShouldHaveReadTwiceWhenPeekingAtOffsetOne()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(0);
+
 			Assert.Equal('b', buffer.Peek(1));
-			Assert.Equal(2, count.GetValue(buffer));
+			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
+		}
+
+		[Fact]
+		public void ShouldHaveReadThriceWhenPeekingAtOffsetTwo()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(0);
+			buffer.Peek(1);
+
 			Assert.Equal('c', buffer.Peek(2));
-			Assert.Equal(3, count.GetValue(buffer));
+			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Times(3));
+		}
+
+		[Fact]
+		public void ShouldNotHaveReadAfterSkippingOneCharacter()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
+
+			using (OnlyTheseCalls)
+			{
+				buffer.Skip(1);
+
+				Assert.Equal('b', buffer.Peek(0));
+				Assert.Equal('c', buffer.Peek(1));
+				A.CallTo(() => reader.Read()).MustNotHaveHappened();
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadOnceAfterSkippingOneCharacter()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
+
+			using (OnlyTheseCalls)
+			{
+				buffer.Skip(1);
+
+				Assert.Equal('d', buffer.Peek(2));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadTwiceAfterSkippingOneCharacter()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
+
+			using (OnlyTheseCalls) {
+				buffer.Skip(1);
+
+				Assert.Equal('e', buffer.Peek(3));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadOnceAfterSkippingFiveCharacters()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
 			buffer.Skip(1);
-			Assert.Equal(2, count.GetValue(buffer));
-			Assert.Equal('b', buffer.Peek(0));
-			Assert.Equal(2, count.GetValue(buffer));
-			Assert.Equal('c', buffer.Peek(1));
-			Assert.Equal(2, count.GetValue(buffer));
-			Assert.Equal('d', buffer.Peek(2));
-			Assert.Equal(3, count.GetValue(buffer));
-			Assert.Equal('e', buffer.Peek(3));
-			Assert.Equal(4, count.GetValue(buffer));
+			buffer.Peek(3);
+
+			using (OnlyTheseCalls) {
+				buffer.Skip(4);
+
+				Assert.Equal('f', buffer.Peek(0));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadOnceAfterSkippingSixCharacters() {
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
 			buffer.Skip(1);
-			Assert.Equal(3, count.GetValue(buffer));			
+			buffer.Peek(3);
+			buffer.Skip(4);
+			buffer.Peek(0);
+
+			using (OnlyTheseCalls) {
+				buffer.Skip(1);
+
+				Assert.Equal('g', buffer.Peek(0));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadOnceAfterSkippingSevenCharacters() {
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
 			buffer.Skip(1);
-			Assert.Equal(2, count.GetValue(buffer));
+			buffer.Peek(3);
+			buffer.Skip(4);
+			buffer.Peek(1);
+
+			using (OnlyTheseCalls) {
+				buffer.Skip(2);
+
+				Assert.Equal('h', buffer.Peek(0));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadOnceAfterSkippingEightCharacters() {
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
 			buffer.Skip(1);
-			Assert.Equal(1, count.GetValue(buffer));
+			buffer.Peek(3);
+			buffer.Skip(4);
+			buffer.Peek(2);
+
+			using (OnlyTheseCalls) {
+				buffer.Skip(3);
+
+				Assert.Equal('i', buffer.Peek(0));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+			}
+		}
+
+		[Fact]
+		public void ShouldHaveReadOnceAfterSkippingNineCharacters() {
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
 			buffer.Skip(1);
-			Assert.Equal(0, count.GetValue(buffer));
-			Assert.Equal('f', buffer.Peek(0));
-			Assert.Equal(1, count.GetValue(buffer));
+			buffer.Peek(3);
+			buffer.Skip(4);
+			buffer.Peek(3);
+
+			using (OnlyTheseCalls) {
+				buffer.Skip(4);
+
+				Assert.Equal('\0', buffer.Peek(0));
+				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+			}
+		}
+
+		[Fact]
+		public void ShouldFindEndOfInput()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(2);
 			buffer.Skip(1);
-			Assert.Equal(0, count.GetValue(buffer));
-			Assert.Equal('g', buffer.Peek(0));
-			Assert.Equal(1, count.GetValue(buffer));
-			buffer.Skip(1);
-			Assert.Equal(0, count.GetValue(buffer));
-			Assert.Equal('h', buffer.Peek(0));
-			Assert.Equal(1, count.GetValue(buffer));
-			buffer.Skip(1);
-			Assert.Equal(0, count.GetValue(buffer));
-			Assert.Equal('i', buffer.Peek(0));
-			Assert.Equal(1, count.GetValue(buffer));
-			buffer.Skip(1);
-			Assert.Equal(0, count.GetValue(buffer));
-			Assert.False(buffer.EndOfInput);			
-			Assert.Equal('\0', buffer.Peek(0));
+			buffer.Peek(3);
+			buffer.Skip(4);
+			buffer.Peek(3);
+			buffer.Skip(4);
+			buffer.Peek(0);
+
 			Assert.True(buffer.EndOfInput);
-			Assert.Equal(0, count.GetValue(buffer));
+		}
+
+		[Fact]
+		public void ShouldThrowWhenPeekingBeyondCapacity()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Peek(4));
+		}
+
+		[Fact]
+		public void ShouldThrowWhenSkippingBeyondCurrentBuffer()
+		{
+			var reader = CreateFakeReader(TestString);
+			var buffer = CreateBuffer(reader, Capacity);
+
+			buffer.Peek(3);
+
+			Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Skip(5));
+		}
+
+		private static TextReader CreateFakeReader(string text)
+		{
+			return A.Fake<TextReader>(x => x.Wrapping(new StringReader(text)));
+		}
+
+		private static LookAheadBuffer CreateBuffer(TextReader reader, int capacity)
+		{
+			return new LookAheadBuffer(reader, capacity);
+		}
+
+		private static IFakeScope OnlyTheseCalls
+		{
+			get { return Fake.CreateScope(); }
 		}
 	}
 }
