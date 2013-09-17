@@ -31,9 +31,10 @@ namespace YamlDotNet.Core.Test
 	{
 		protected static TextReader YamlFile(string name)
 		{
-			var forType = typeof(YamlTest);
-			var assembly = Assembly.GetAssembly(forType);
-			var stream = assembly.GetManifestResourceStream(forType.Namespace + ".files." + name);
+			var fromType = typeof(YamlTest);
+			var assembly = Assembly.GetAssembly(fromType);
+			var stream = assembly.GetManifestResourceStream(name) ??
+						 assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
 			return new StreamReader(stream);
 		}
 
