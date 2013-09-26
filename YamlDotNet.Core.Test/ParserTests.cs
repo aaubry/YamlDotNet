@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System.Collections;
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core.Events;
 
@@ -315,21 +316,18 @@ namespace YamlDotNet.Core.Test
 		private void AssertSequenceOfEventsFrom(IParser parser, params ParsingEvent[] events)
 		{
 			var eventNumber = 1;
-			foreach (var @event in events)
+			foreach (var expected in events)
 			{
-				Assert.True(parser.MoveNext(), "Missing parse event number " + eventNumber);
-				AssertCurrent(parser, @event, eventNumber);
+				parser.MoveNext().Should().BeTrue("Missing parse event number {0}", eventNumber);
+				AssertEvent(expected, parser.Current, eventNumber);
 				eventNumber++;
 			}
-			Assert.False(parser.MoveNext(), "Found extra parse events");
+			parser.MoveNext().Should().BeFalse("Found extra parse events");
 		}
 
-		private void AssertCurrent(IParser parser, ParsingEvent expected, int eventNumber)
+		private void AssertEvent(ParsingEvent expected, ParsingEvent actual, int eventNumber)
 		{
-			var parsingEvent = parser.Current;
-			Assert.True(expected.GetType().IsInstanceOfType(parsingEvent),
-				string.Format("Parse event {0} is not of the expected type. Exprected: {1}, Actual: {2}",
-				eventNumber, expected.GetType().Name, parsingEvent.GetType().Name));
+			actual.GetType().Should().Be(expected.GetType(), "Parse event {0} is not of the expected type.", eventNumber);
 
 			foreach (var property in expected.GetType().GetProperties())
 			{
@@ -338,7 +336,7 @@ namespace YamlDotNet.Core.Test
 					continue;
 				}
 
-				var value = property.GetValue(parsingEvent, null);
+				var value = property.GetValue(actual, null);
 				var expectedValue = property.GetValue(expected, null);
 				if (expectedValue is IEnumerable && !(expectedValue is string))
 				{
@@ -350,27 +348,24 @@ namespace YamlDotNet.Core.Test
 					{
 						var expectedCount = ((ICollection)expectedValue).Count;
 						var valueCount = ((ICollection)value).Count;
-						Assert.True(expectedCount.Equals(valueCount),
-							string.Format("Expected property {0} in parse event {1} to be a collection with {2} elements but found {3} elements",
-							property.Name, eventNumber, expectedCount, valueCount));
+						valueCount.Should().Be(expectedCount, "Compared size of collections in property {0} in parse event {1}",
+							property.Name, eventNumber);
 					}
 
 					var values = ((IEnumerable)value).GetEnumerator();
 					var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
 					while (expectedValues.MoveNext())
 					{
-						Assert.True(values.MoveNext(), string.Format("Property {0} in parse event {1} had too few elements", property.Name, eventNumber));
-						Assert.True(Equals(expectedValues.Current, values.Current),
-							string.Format("Expected element in property {0} in parse event {1} to be {2} but was {3}",
-							property.Name, eventNumber, expectedValues.Current, values.Current));
+						values.MoveNext().Should().BeTrue("Property {0} in parse event {1} had too few elements", property.Name, eventNumber);
+						values.Current.Should().Be(expectedValues.Current,
+							"Compared element in property {0} in parse event {1}", property.Name, eventNumber);
 					}
-					Assert.False(values.MoveNext(), string.Format("Property {0} in parse event {1} had too many elements", property.Name, eventNumber));
+					values.MoveNext().Should().BeFalse("Property {0} in parse event {1} had too many elements", property.Name, eventNumber);
 				}
 				else
 				{
 					Dump.WriteLine("\t{0} = {1}", property.Name, value);
-					Assert.True(Equals(expectedValue, value), string.Format("Expected property {0} in parse event {1} to be {2} but was {3}",
-						property.Name, eventNumber, expectedValue, value));
+					value.Should().Be(expectedValue, "Compared property {0} in parse event {1}", property.Name, eventNumber);
 				}
 			}
 		}

@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core.Tokens;
 
@@ -311,33 +312,29 @@ namespace YamlDotNet.Core.Test
 		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
 		{
 			var tokenNumber = 1;
-			foreach (var token in tokens)
+			foreach (var expected in tokens)
 			{
-				Assert.True(scanner.MoveNext());
-				AssertCurrent(scanner, token, tokenNumber);
+				scanner.MoveNext().Should().BeTrue("Missing token number {0}", tokenNumber);
+				AssertToken(expected, scanner.Current, tokenNumber);
 				tokenNumber++;
 			}
-			Assert.False(scanner.MoveNext());
+			scanner.MoveNext().Should().BeFalse("Found extra tokens");
 		}
 
-		private void AssertCurrent(Scanner scanner, Token expected, int tokenNumber) {
+		private void AssertToken(Token expected, Token actual, int tokenNumber)
+		{
 			Dump.WriteLine(expected.GetType().Name);
-			var token = scanner.Current;
-			Assert.NotNull(token);
-			Assert.True(expected.GetType().IsInstanceOfType(token),
-				string.Format("Token {0} is not of the expected type. Expected: {1}, Actual: {2}",
-				tokenNumber, expected.GetType().Name, token.GetType().Name));
+			actual.Should().NotBeNull();
+			actual.GetType().Should().Be(expected.GetType(), "Token {0} is not of the expected type", tokenNumber);
 
 			foreach (var property in expected.GetType().GetProperties())
 			{
 				if (property.PropertyType != typeof(Mark) && property.CanRead)
 				{
-					var value = property.GetValue(token, null);
+					var value = property.GetValue(actual, null);
 					var expectedValue = property.GetValue(expected, null);
 					Dump.WriteLine("\t{0} = {1}", property.Name, value);
-					Assert.True(Equals(expectedValue, value),
-						string.Format("Expected property {0} in token {1} to be {2} but was {3}",
-						property.Name, tokenNumber, expectedValue, value));
+					value.Should().Be(expectedValue, "Comparing property {0} in token {1}", property.Name, tokenNumber);
 				}
 			}
 		}
