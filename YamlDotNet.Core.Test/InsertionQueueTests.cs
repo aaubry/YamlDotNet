@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using Xunit;
 
 namespace YamlDotNet.Core.Test
@@ -32,7 +33,10 @@ namespace YamlDotNet.Core.Test
 		public void ShouldThrowExceptionWhenDequeuingEmptyContainer()
 		{
 			var queue = CreateQueue();
-			Assert.Throws<InvalidOperationException>(() => queue.Dequeue());
+
+			Action action = () => queue.Dequeue();
+
+			action.ShouldThrow<InvalidOperationException>();
 		}
 
 		[Fact]
@@ -42,8 +46,9 @@ namespace YamlDotNet.Core.Test
 
 			queue.Enqueue(1);
 			queue.Dequeue();
+			Action action = () => queue.Dequeue();
 
-			Assert.Throws<InvalidOperationException>(() => queue.Dequeue());
+			action.ShouldThrow<InvalidOperationException>();
 		}
 
 		[Fact]
@@ -53,7 +58,7 @@ namespace YamlDotNet.Core.Test
 
 			WithTheRange(0, 10).Perform(queue.Enqueue);
 
-			Assert.Equal(SequenceOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), ElementsIn(queue));
+			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 		}
 
 		[Fact]
@@ -65,7 +70,7 @@ namespace YamlDotNet.Core.Test
 			PerformTimes(5, queue.Dequeue);
 			WithTheRange(10, 15).Perform(queue.Enqueue);
 
-			Assert.Equal(SequenceOf(5, 6, 7, 8, 9, 10, 11, 12, 13, 14), ElementsIn(queue));
+			OrderOfElementsIn(queue).Should().Equal(5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
 		}
 
 		[Fact]
@@ -76,8 +81,9 @@ namespace YamlDotNet.Core.Test
 			queue.Enqueue(1);
 			queue.Insert(0, 99);
 			PerformTimes(2, queue.Dequeue);
+			Action action = () => queue.Dequeue();
 
-			Assert.Throws<InvalidOperationException>(() => queue.Dequeue());
+			action.ShouldThrow<InvalidOperationException>();
 		}
 
 		[Fact]
@@ -88,7 +94,7 @@ namespace YamlDotNet.Core.Test
 			WithTheRange(0, 10).Perform(queue.Enqueue);
 			queue.Insert(5, 99);
 
-			Assert.Equal(SequenceOf(0, 1, 2, 3, 4, 99, 5, 6, 7, 8, 9), ElementsIn(queue));
+			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 99, 5, 6, 7, 8, 9);
 		}
 
 		private static InsertionQueue<int> CreateQueue()
@@ -101,12 +107,7 @@ namespace YamlDotNet.Core.Test
 			return Enumerable.Range(@from, to - @from);
 		}
 
-		private IEnumerable<T> SequenceOf<T>(params T[] items)
-		{
-			return items;
-		}
-
-		private IEnumerable<int> ElementsIn(InsertionQueue<int> queue)
+		private IEnumerable<int> OrderOfElementsIn(InsertionQueue<int> queue)
 		{
 			while (true)
 			{
