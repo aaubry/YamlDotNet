@@ -20,7 +20,9 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using System.Collections.Generic;
+using System.Linq;
+using FluentAssertions;
 using Xunit;
 
 namespace YamlDotNet.Core.Test
@@ -28,91 +30,114 @@ namespace YamlDotNet.Core.Test
 	public class InsertionQueueTests
 	{
 		[Fact]
-		public void QueueWorks() {
-			InsertionQueue<int> queue = new InsertionQueue<int>();
-			
-			for (int i = 0; i < 100; ++i) {
-				queue.Enqueue(i);
-			}
-			
-			for (int i = 0; i < 100; ++i) {
-				Assert.Equal(i, queue.Dequeue());
-			}
+		public void ShouldThrowExceptionWhenDequeuingEmptyContainer()
+		{
+			var queue = CreateQueue();
 
-			for (int i = 0; i < 50; ++i) {
-				queue.Enqueue(i);
-			}
+			Action action = () => queue.Dequeue();
 
-			for (int i = 0; i < 10; ++i) {
-				Assert.Equal(i, queue.Dequeue());
-			}		
-
-			for (int i = 50; i < 100; ++i) {
-				queue.Enqueue(i);
-			}
-
-			for (int i = 10; i < 100; ++i) {
-				Assert.Equal(i, queue.Dequeue());
-			}
+			action.ShouldThrow<InvalidOperationException>();
 		}
 
 		[Fact]
-		public void InsertWorks() {
-			InsertionQueue<int> queue = new InsertionQueue<int>();
-		
-			for(int j = 0; j < 2; ++j) {
-				for (int i = 0; i < 10; ++i) {
-					queue.Enqueue(i);
-				}
-				
-				queue.Insert(5, 99);
-				
-				for (int i = 0; i < 5; ++i) {
-					Assert.Equal(i, queue.Dequeue());
-				}
+		public void ShouldThrowExceptionWhenDequeuingContainerThatBecomesEmpty()
+		{
+			var queue = new InsertionQueue<int>();
 
-				Assert.Equal(99, queue.Dequeue());
+			queue.Enqueue(1);
+			queue.Dequeue();
+			Action action = () => queue.Dequeue();
+
+			action.ShouldThrow<InvalidOperationException>();
+		}
+
+		[Fact]
+		public void ShouldCorrectlyDequeueElementsAfterEnqueuing()
+		{
+			var queue = CreateQueue();
+
+			WithTheRange(0, 10).Perform(queue.Enqueue);
+
+			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+		}
+
+		[Fact]
+		public void ShouldCorrectlyDequeueElementsWhenIntermixingEnqueuing()
+		{
+			var queue = CreateQueue();
 			
-				for (int i = 5; i < 10; ++i) {
-					Assert.Equal(i, queue.Dequeue());
-				}
-			}
-			
-			for (int i = 0; i < 5; ++i) {
-				queue.Enqueue(i);
-				queue.Dequeue();
-			}
+			WithTheRange(0, 10).Perform(queue.Enqueue);
+			PerformTimes(5, queue.Dequeue);
+			WithTheRange(10, 15).Perform(queue.Enqueue);
 
-			for (int i = 0; i < 20; ++i) {
-				queue.Enqueue(i);
-			}
+			OrderOfElementsIn(queue).Should().Equal(5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+		}
 
+		[Fact]
+		public void ShouldThrowExceptionWhenDequeuingAfterInserting()
+		{
+			var queue = CreateQueue();
+
+			queue.Enqueue(1);
+			queue.Insert(0, 99);
+			PerformTimes(2, queue.Dequeue);
+			Action action = () => queue.Dequeue();
+
+			action.ShouldThrow<InvalidOperationException>();
+		}
+
+		[Fact]
+		public void ShouldCorrectlyDequeueElementsWhenInserting()
+		{
+			var queue = CreateQueue();
+
+			WithTheRange(0, 10).Perform(queue.Enqueue);
 			queue.Insert(5, 99);
 
-			for (int i = 0; i < 5; ++i) {
-				Assert.Equal(i, queue.Dequeue());
-			}
-			
-			Assert.Equal(99, queue.Dequeue());
-			
-			for (int i = 5; i < 20; ++i) {
-				Assert.Equal(i, queue.Dequeue());
+			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 99, 5, 6, 7, 8, 9);
+		}
+
+		private static InsertionQueue<int> CreateQueue()
+		{
+			return new InsertionQueue<int>();
+		}
+
+		private IEnumerable<int> WithTheRange(int from, int to)
+		{
+			return Enumerable.Range(@from, to - @from);
+		}
+
+		private IEnumerable<int> OrderOfElementsIn(InsertionQueue<int> queue)
+		{
+			while (true)
+			{
+				if (queue.Count == 0)
+				{
+					yield break;
+				}
+				yield return queue.Dequeue();
 			}
 		}
-			
-		[Fact]
-		public void Dequeue_ThrowsExceptionWhenEmpty() {
-			InsertionQueue<int> queue = new InsertionQueue<int>();
 
-			for (int i = 0; i < 10; ++i) {
-				queue.Enqueue(i);
+		public void PerformTimes(int times, Func<int> func)
+		{
+			WithTheRange(0, times).Perform(func);
+		}
+	}
+
+	public static class EnumerableExtensions
+	{
+		public static void Perform<T>(this IEnumerable<T> withRange, Func<int> func)
+		{
+			withRange.Perform(x => func());
+		}
+
+		public static void Perform<T>(this IEnumerable<T> withRange, Action<T> action)
+		{
+			foreach (var element in withRange)
+			{
+				action(element);
 			}
-			
-			for (int i = 0; i < 10; ++i) {
-				Assert.Equal(i, queue.Dequeue());
-			}
-			
-			Assert.Throws<InvalidOperationException>(() => queue.Dequeue());
 		}
 	}
 }
