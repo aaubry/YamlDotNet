@@ -75,5 +75,36 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 			base.Emit(eventInfo);
 		}
+
+        public override void Emit(SequenceStartEventInfo eventInfo)
+        {
+            FillTag(eventInfo);
+            base.Emit(eventInfo);
+        }
+
+
+        public override void Emit(MappingStartEventInfo eventInfo)
+        {
+            FillTag(eventInfo);
+            base.Emit(eventInfo);
+        }
+
+        private void FillTag(ObjectEventInfo eventInfo)
+        {
+            var typeCode = eventInfo.SourceValue != null
+                ? Type.GetTypeCode(eventInfo.SourceType)
+                : TypeCode.Empty;
+
+            // TODO handle sequence differently
+            // TODO handle ICollection<>
+            // TODO handle Dictionary<,>
+            // TODO Add support for Tag Mapping
+
+            if (typeCode == TypeCode.Object && string.IsNullOrEmpty(eventInfo.Tag))
+            {
+                // quick fix to output tag information
+                eventInfo.Tag = "!" + Uri.EscapeDataString(eventInfo.SourceType.FullName);
+            }
+        }
 	}
 }
