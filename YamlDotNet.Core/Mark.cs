@@ -26,7 +26,6 @@ namespace YamlDotNet.Core
 	/// <summary>
 	/// Represents a location inside a file
 	/// </summary>
-	[Serializable]
 	public struct Mark
 	{
 		private int index;
