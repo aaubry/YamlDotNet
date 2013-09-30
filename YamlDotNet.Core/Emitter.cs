@@ -93,12 +93,10 @@ namespace YamlDotNet.Core
 		{
 			get
 			{
-				return
-					output.Encoding == Encoding.UTF8 ||
-					output.Encoding == Encoding.Unicode ||
-					output.Encoding == Encoding.BigEndianUnicode ||
-					output.Encoding == Encoding.UTF7 ||
-					output.Encoding == Encoding.UTF32;
+			    return
+			        output.Encoding == Encoding.UTF8 ||
+			        output.Encoding == Encoding.Unicode ||
+			        output.Encoding == Encoding.BigEndianUnicode;
 			}
 		}
 
@@ -809,7 +807,7 @@ namespace YamlDotNet.Core
 			isIndentation = false;
 		}
 
-		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]", RegexOptions.Singleline);
 
 		private static string UrlEncode(string text)
 		{
