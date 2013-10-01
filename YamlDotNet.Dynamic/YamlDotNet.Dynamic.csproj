@@ -48,9 +48,9 @@
     <Compile Include="YamlDoc.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj">
+    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.Serialzation.csproj">
       <Project>{21CA0077-E15C-446D-9C43-F6D3F9D09687}</Project>
-      <Name>YamlDotNet.RepresentationModel</Name>
+      <Name>YamlDotNet.Serialzation</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
