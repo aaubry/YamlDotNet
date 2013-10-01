@@ -1,5 +1,5 @@
 ﻿
-namespace YamlDotNet.RepresentationModel.Serialization.NamingConventions
+namespace YamlDotNet.Serialization.NamingConventions
 {
 	/// <summary>
 	/// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to 

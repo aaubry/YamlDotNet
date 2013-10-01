@@ -22,7 +22,7 @@
 
 using System;
 
-namespace YamlDotNet.Core.Tokens
+namespace YamlDotNet.Tokens
 {
 	/// <summary>
 	/// Represents a block sequence start token.

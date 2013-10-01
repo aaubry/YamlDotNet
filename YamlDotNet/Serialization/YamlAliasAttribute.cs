@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.

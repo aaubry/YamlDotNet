@@ -23,10 +23,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet;
+using YamlDotNet.Events;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Represents an YAML document.

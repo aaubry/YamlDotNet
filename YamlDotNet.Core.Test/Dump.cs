@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class Dump
 	{

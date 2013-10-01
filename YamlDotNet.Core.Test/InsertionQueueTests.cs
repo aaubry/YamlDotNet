@@ -25,7 +25,7 @@ using System.Linq;
 using FluentAssertions;
 using Xunit;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class InsertionQueueTests
 	{

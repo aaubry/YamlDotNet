@@ -1,5 +1,5 @@
 ﻿
-namespace YamlDotNet.RepresentationModel.Serialization.NamingConventions
+namespace YamlDotNet.Serialization.NamingConventions
 {
 	/// <summary>
 	/// Convert the string from camelcase (thisIsATest) to a underscored (this_is_a_test) string

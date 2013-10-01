@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {

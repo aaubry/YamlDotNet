@@ -20,9 +20,9 @@
 // THE SOFTWARE.
 
 using System;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Events;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public interface INodeTypeResolver
 	{

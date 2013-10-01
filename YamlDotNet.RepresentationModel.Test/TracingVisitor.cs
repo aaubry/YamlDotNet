@@ -23,9 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class TracingVisitor : YamlVisitor
 	{

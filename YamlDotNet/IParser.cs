@@ -1,6 +1,6 @@
-﻿using YamlDotNet.Core.Events;
+﻿using YamlDotNet.Events;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	/// <summary>
 	/// Represents a YAML stream paser.

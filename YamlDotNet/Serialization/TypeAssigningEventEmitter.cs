@@ -1,8 +1,8 @@
 using System;
 using System.Globalization;
-using YamlDotNet.Core;
+using YamlDotNet;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
 	{

@@ -25,7 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class YamlTest
 	{
@@ -33,7 +33,7 @@ namespace YamlDotNet.Core.Test
 		{
 			Stream resource =
 				Assembly.GetExecutingAssembly().GetManifestResourceStream(name) ??
-				Assembly.GetExecutingAssembly().GetManifestResourceStream("YamlDotNet.Core.Test.files." + name);
+				Assembly.GetExecutingAssembly().GetManifestResourceStream("YamlDotNet.Test.files." + name);
 
 			return new StreamReader(resource);
 		}

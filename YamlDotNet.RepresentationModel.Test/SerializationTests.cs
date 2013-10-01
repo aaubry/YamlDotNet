@@ -30,13 +30,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Core.Test;
-using YamlDotNet.RepresentationModel.Serialization;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using YamlDotNet;
+using YamlDotNet.Events;
+using YamlDotNet.Test;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class SerializationTests : YamlTest
 	{

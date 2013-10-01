@@ -20,9 +20,9 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.Core.Tokens;
+using YamlDotNet.Tokens;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	/// <summary>
 	/// Defines constants thar relate to the YAML specification.

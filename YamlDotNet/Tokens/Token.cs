@@ -21,7 +21,7 @@
 
 using System;
 
-namespace YamlDotNet.Core.Tokens
+namespace YamlDotNet.Tokens
 {
 	/// <summary>
 	/// Base class for YAML tokens.

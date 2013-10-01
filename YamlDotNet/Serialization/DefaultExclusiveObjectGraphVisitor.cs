@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
 	{

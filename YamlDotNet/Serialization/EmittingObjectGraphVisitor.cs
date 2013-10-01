@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor
 	{

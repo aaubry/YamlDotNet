@@ -21,12 +21,12 @@
 
 using System;
 using System.IO;
-using YamlDotNet.Core;
+using YamlDotNet;
 using System.Globalization;
-using Event = YamlDotNet.Core.Events.ParsingEvent;
-using YamlDotNet.Core.Events;
+using Event = YamlDotNet.Events.ParsingEvent;
+using YamlDotNet.Events;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	/// <summary>
 	/// Reads events from a sequence of <see cref="Event" />.

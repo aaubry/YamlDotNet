@@ -21,7 +21,7 @@
 
 using System;
 
-namespace YamlDotNet.Core.Events
+namespace YamlDotNet.Events
 {
 	/// <summary>
 	/// Base class for parsing events.

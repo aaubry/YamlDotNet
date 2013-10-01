@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Core;
+using YamlDotNet;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
 	{

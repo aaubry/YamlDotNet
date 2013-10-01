@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Creates objects using a Func{Type,object}"/>.

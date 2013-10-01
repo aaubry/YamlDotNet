@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public sealed class PropertyDescriptor : IPropertyDescriptor
 	{

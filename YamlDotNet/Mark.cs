@@ -21,7 +21,7 @@
 
 using System;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	/// <summary>
 	/// Represents a location inside a file

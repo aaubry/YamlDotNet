@@ -21,11 +21,11 @@
 
 using System.Collections.Generic;
 using Xunit;
-using YamlDotNet.Core.Test;
+using YamlDotNet.Test;
 using System.Text;
 using System.IO;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class YamlStreamTests : YamlTest
 	{

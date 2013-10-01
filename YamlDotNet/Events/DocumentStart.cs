@@ -21,9 +21,9 @@
 
 using System;
 using System.Globalization;
-using YamlDotNet.Core.Tokens;
+using YamlDotNet.Tokens;
 
-namespace YamlDotNet.Core.Events
+namespace YamlDotNet.Events
 {
 	/// <summary>
 	/// Represents a document start event.

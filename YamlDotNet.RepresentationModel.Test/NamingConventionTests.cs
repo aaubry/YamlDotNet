@@ -1,10 +1,10 @@
 ﻿using Xunit;
 using Xunit.Extensions;
-using YamlDotNet.RepresentationModel;
-using YamlDotNet.RepresentationModel.Serialization;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class NamingConventionTests
 	{

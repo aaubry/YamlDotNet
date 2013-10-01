@@ -1,5 +1,5 @@
 ﻿
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Translates property names according to a specific convention.

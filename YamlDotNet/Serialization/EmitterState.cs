@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Holds state that is used when emitting a stream.

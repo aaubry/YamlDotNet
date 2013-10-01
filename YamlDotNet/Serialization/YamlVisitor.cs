@@ -21,7 +21,7 @@
 
 using System;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Abstract implementation of <see cref="IYamlVisitor"/> that knows how to walk a complete Yaml object model.

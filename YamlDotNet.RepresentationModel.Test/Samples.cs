@@ -3,9 +3,9 @@ using System.Text;
 using System.IO;
 using System.Collections.Generic;
 using Xunit;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class Program
 	{

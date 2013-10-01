@@ -21,9 +21,9 @@
 
 using System;
 using System.Runtime.Serialization;
-using YamlDotNet.Core;
+using YamlDotNet;
 
-namespace YamlDotNet.RepresentationModel
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// The exception that is thrown when an alias references an anchor

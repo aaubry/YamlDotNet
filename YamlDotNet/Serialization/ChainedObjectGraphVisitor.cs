@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public abstract class ChainedObjectGraphVisitor : IObjectGraphVisitor
 	{

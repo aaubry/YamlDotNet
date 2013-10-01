@@ -21,7 +21,7 @@
 
 using System;
 using System.Xml;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 using System.Globalization;
 using System.Diagnostics;
 

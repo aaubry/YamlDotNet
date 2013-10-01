@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class ObjectFactoryTests
 	{
