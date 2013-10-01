@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {

@@ -1,7 +1,7 @@
 
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Adds behavior to <see cref="YamlSerializer"/>.

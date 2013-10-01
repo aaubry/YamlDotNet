@@ -22,7 +22,7 @@
 using System;
 using System.Diagnostics;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	internal class CharacterAnalyzer<TBuffer> where TBuffer : ILookAheadBuffer
 	{

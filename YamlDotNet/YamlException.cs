@@ -22,7 +22,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	/// <summary>
 	/// Base exception that is thrown when the a problem occurs in the YamlDotNet library.

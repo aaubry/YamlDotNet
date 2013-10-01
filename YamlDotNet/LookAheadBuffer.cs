@@ -22,7 +22,7 @@
 using System;
 using System.IO;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet
 {
 	/// <summary>
 	/// Provides access to a stream and allows to peek at the next characters,

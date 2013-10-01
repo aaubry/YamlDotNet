@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Defined the interface of a type that can be notified during an object graph traversal.

@@ -24,10 +24,10 @@ using System.Linq;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet;
+using YamlDotNet.Events;
 
-namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization.NodeDeserializers
 {
 	public sealed class ObjectNodeDeserializer : INodeDeserializer
 	{

@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using Xunit;
-using YamlDotNet.Core.Test;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Test;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class ExceptionWithNestedSerialization
 	{

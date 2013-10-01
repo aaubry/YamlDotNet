@@ -21,7 +21,7 @@
 
 using System;
 
-namespace YamlDotNet.Core.Events
+namespace YamlDotNet.Events
 {
 	/// <summary>
 	/// Specifies the style of a mapping.

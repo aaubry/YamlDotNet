@@ -20,9 +20,9 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using YamlDotNet;
 using System.IO;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Events;
 
 namespace Dumper
 {

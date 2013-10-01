@@ -21,10 +21,10 @@
 
 using System;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet;
+using YamlDotNet.Events;
 
-namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization.NodeDeserializers
 {
 	public sealed class GenericCollectionNodeDeserializer : INodeDeserializer
 	{

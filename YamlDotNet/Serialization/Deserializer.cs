@@ -22,13 +22,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
-using YamlDotNet.RepresentationModel.Serialization.NodeDeserializers;
-using YamlDotNet.RepresentationModel.Serialization.NodeTypeResolvers;
+using YamlDotNet;
+using YamlDotNet.Events;
+using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.NodeDeserializers;
+using YamlDotNet.Serialization.NodeTypeResolvers;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// A façade for the YAML library with the standard configuration.

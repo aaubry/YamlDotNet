@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Creates objects using Activator.CreateInstance.

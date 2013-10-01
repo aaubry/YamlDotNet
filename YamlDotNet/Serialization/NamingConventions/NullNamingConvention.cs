@@ -1,5 +1,5 @@
 ﻿
-namespace YamlDotNet.RepresentationModel.Serialization.NamingConventions
+namespace YamlDotNet.Serialization.NamingConventions
 {
 	/// <summary>
 	/// Performs no naming conversion.

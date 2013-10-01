@@ -1,4 +1,4 @@
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	public interface ISerializationBehaviorFactory
 	{

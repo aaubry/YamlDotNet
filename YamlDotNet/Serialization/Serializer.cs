@@ -22,11 +22,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using YamlDotNet;
+using YamlDotNet.Events;
+using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Options that control the serialization process.

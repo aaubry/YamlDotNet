@@ -22,11 +22,11 @@
 using System;
 using System.Collections;
 using Xunit;
-using YamlDotNet.Core.Events;
-using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
-using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
+using YamlDotNet.Events;
+using VersionDirective = YamlDotNet.Tokens.VersionDirective;
+using TagDirective = YamlDotNet.Tokens.TagDirective;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class ParserTests : YamlTest
 	{

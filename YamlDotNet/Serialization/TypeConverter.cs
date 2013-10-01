@@ -29,7 +29,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Performs type conversions using every standard provided by the .NET library.

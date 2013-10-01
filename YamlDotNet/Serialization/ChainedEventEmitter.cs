@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Provided the base implementation for an IEventEmitter that is a

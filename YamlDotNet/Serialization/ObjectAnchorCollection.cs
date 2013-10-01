@@ -22,7 +22,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
 	internal sealed class ObjectAnchorCollection
 	{

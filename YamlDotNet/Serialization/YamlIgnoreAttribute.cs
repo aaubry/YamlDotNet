@@ -1,6 +1,6 @@
 using System;
 
-namespace YamlDotNet.RepresentationModel.Serialization
+namespace YamlDotNet.Serialization
 {
   /// <summary>
   /// Instructs the YamlSerializer not to serialize the public field or public read/write property value.

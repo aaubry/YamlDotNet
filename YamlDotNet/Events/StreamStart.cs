@@ -21,7 +21,7 @@
 
 using System;
 
-namespace YamlDotNet.Core.Events
+namespace YamlDotNet.Events
 {
 	/// <summary>
 	/// Represents a stream start event.
