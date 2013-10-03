@@ -19,346 +19,322 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core.Test
 {
-	public class ScannerTests : YamlTest
+	public class ScannerTests : ScannerTestHelper
 	{
 		[Fact]
 		public void VerifyTokensOnExample1()
 		{
-			Scanner scanner = CreateScanner("test1.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new VersionDirective(new Version(1, 1)));
-			AssertNext(scanner, new TagDirective("!", "!foo"));
-			AssertNext(scanner, new TagDirective("!yaml!", "tag:yaml.org,2002:"));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test1.yaml"),
+				StreamStart,
+				VersionDirective(1, 1),
+				TagDirective("!", "!foo"),
+				TagDirective("!yaml!", "tag:yaml.org,2002:"),
+				DocumentStart,
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			Scanner scanner = CreateScanner("test2.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new Scalar("a scalar", ScalarStyle.SingleQuoted));
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test2.yaml"),
+				StreamStart,
+				SingleQuotedScalar("a scalar"),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			Scanner scanner = CreateScanner("test3.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("a scalar", ScalarStyle.SingleQuoted));
-			AssertNext(scanner, new DocumentEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
-		}		
- 		
+			Scanner scanner = ScannerFor("test3.yaml");
+			AssertSequenceOfTokensFrom(scanner,
+				StreamStart,
+				DocumentStart,
+				SingleQuotedScalar("a scalar"),
+				DocumentEnd,
+				StreamEnd);
+		}
+
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			Scanner scanner = CreateScanner("test4.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new Scalar("a scalar", ScalarStyle.SingleQuoted));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("another scalar", ScalarStyle.SingleQuoted));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("yet another scalar", ScalarStyle.SingleQuoted));
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test4.yaml"),
+				StreamStart,
+				SingleQuotedScalar("a scalar"),
+				DocumentStart,
+				SingleQuotedScalar("another scalar"),
+				DocumentStart,
+				SingleQuotedScalar("yet another scalar"),
+				StreamEnd);
 		}		
  		
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			Scanner scanner = CreateScanner("test5.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new Anchor("A"));
-			AssertNext(scanner, new FlowSequenceStart());
-			AssertNext(scanner, new AnchorAlias("A"));
-			AssertNext(scanner, new FlowSequenceEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test5.yaml"),
+				StreamStart,
+				Anchor("A"),
+				FlowSequenceStart,
+				AnchorAlias("A"),
+				FlowSequenceEnd,
+				StreamEnd);
 		}
- 		
+
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			Scanner scanner = CreateScanner("test6.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new Tag("!!", "float"));
-			AssertNext(scanner, new Scalar("3.14", ScalarStyle.DoubleQuoted));
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test6.yaml"),
+				StreamStart,
+				Tag("!!", "float"),
+				DoubleQuotedScalar("3.14"),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			Scanner scanner = CreateScanner("test7.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("a plain scalar", ScalarStyle.Plain));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("a single-quoted scalar", ScalarStyle.SingleQuoted));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("a double-quoted scalar", ScalarStyle.DoubleQuoted));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("a literal scalar", ScalarStyle.Literal));
-			AssertNext(scanner, new DocumentStart());
-			AssertNext(scanner, new Scalar("a folded scalar", ScalarStyle.Folded));
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test7.yaml"),
+				StreamStart,
+				DocumentStart,
+				DocumentStart,
+				PlainScalar("a plain scalar"),
+				DocumentStart,
+				SingleQuotedScalar("a single-quoted scalar"),
+				DocumentStart,
+				DoubleQuotedScalar("a double-quoted scalar"),
+				DocumentStart,
+				LiteralScalar("a literal scalar"),
+				DocumentStart,
+				FoldedScalar("a folded scalar"),
+				StreamEnd);
 		}
-		
+
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			Scanner scanner = CreateScanner("test8.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new FlowSequenceStart());
-			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
-			AssertNext(scanner, new FlowEntry());
-			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
-			AssertNext(scanner, new FlowEntry());
-			AssertNext(scanner, new Scalar("item 3", ScalarStyle.Plain));
-			AssertNext(scanner, new FlowSequenceEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test8.yaml"),
+				StreamStart,
+				FlowSequenceStart,
+				PlainScalar("item 1"),
+				FlowEntry,
+				PlainScalar("item 2"),
+				FlowEntry,
+				PlainScalar("item 3"),
+				FlowSequenceEnd,
+				StreamEnd);
 		}
 
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			Scanner scanner = CreateScanner("test9.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new FlowMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a simple key", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("a value", ScalarStyle.Plain));
-			AssertNext(scanner, new FlowEntry());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a complex key", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("another value", ScalarStyle.Plain));
-			AssertNext(scanner, new FlowEntry());
-			AssertNext(scanner, new FlowMappingEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test9.yaml"),
+				StreamStart,
+				FlowMappingStart,
+				Key,
+				PlainScalar("a simple key"),
+				Value,
+				PlainScalar("a value"),
+				FlowEntry,
+				Key,
+				PlainScalar("a complex key"),
+				Value,
+				PlainScalar("another value"),
+				FlowEntry,
+				FlowMappingEnd,
+				StreamEnd);
 		}
 
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			Scanner scanner = CreateScanner("test10.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new BlockSequenceStart());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new BlockSequenceStart());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 3.1", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 3.2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test10.yaml"),
+				StreamStart,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("item 1"),
+				BlockEntry,
+				PlainScalar("item 2"),
+				BlockEntry,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("item 3.1"),
+				BlockEntry,
+				PlainScalar("item 3.2"),
+				BlockEnd,
+				BlockEntry,
+				BlockMappingStart,
+				Key,
+				PlainScalar("key 1"),
+				Value,
+				PlainScalar("value 1"),
+				Key,
+				PlainScalar("key 2"),
+				Value,
+				PlainScalar("value 2"),
+				BlockEnd,
+				BlockEnd,
+				StreamEnd);
 		}
-	
+
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			Scanner scanner = CreateScanner("test11.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a simple key", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("a value", ScalarStyle.Plain));
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a complex key", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("another value", ScalarStyle.Plain));
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a mapping", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a sequence", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new BlockSequenceStart());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test11.yaml"),
+				StreamStart,
+				BlockMappingStart,
+				Key,
+				PlainScalar("a simple key"),
+				Value,
+				PlainScalar("a value"),
+				Key,
+				PlainScalar("a complex key"),
+				Value,
+				PlainScalar("another value"),
+				Key,
+				PlainScalar("a mapping"),
+				Value,
+				BlockMappingStart,
+				Key,
+				PlainScalar("key 1"),
+				Value,
+				PlainScalar("value 1"),
+				Key,
+				PlainScalar("key 2"),
+				Value,
+				PlainScalar("value 2"),
+				BlockEnd,
+				Key,
+				PlainScalar("a sequence"),
+				Value,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("item 1"),
+				BlockEntry,
+				PlainScalar("item 2"),
+				BlockEnd,
+				BlockEnd,
+				StreamEnd);
 		}
 	
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			Scanner scanner = CreateScanner("test12.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new BlockSequenceStart());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new BlockSequenceStart());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("complex key", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("complex value", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test12.yaml"),
+				StreamStart,
+				BlockSequenceStart,
+				BlockEntry,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("item 1"),
+				BlockEntry,
+				PlainScalar("item 2"),
+				BlockEnd,
+				BlockEntry,
+				BlockMappingStart,
+				Key,
+				PlainScalar("key 1"),
+				Value,
+				PlainScalar("value 1"),
+				Key,
+				PlainScalar("key 2"),
+				Value,
+				PlainScalar("value 2"),
+				BlockEnd,
+				BlockEntry,
+				BlockMappingStart,
+				Key,
+				PlainScalar("complex key"),
+				Value,
+				PlainScalar("complex value"),
+				BlockEnd,
+				BlockEnd,
+				StreamEnd);
 		}
 			
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			Scanner scanner = CreateScanner("test13.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a sequence", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new BlockSequenceStart());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("a mapping", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 1", ScalarStyle.Plain));
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key 2", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new Scalar("value 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test13.yaml"),
+				StreamStart,
+				BlockMappingStart,
+				Key,
+				PlainScalar("a sequence"),
+				Value,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("item 1"),
+				BlockEntry,
+				PlainScalar("item 2"),
+				BlockEnd,
+				Key,
+				PlainScalar("a mapping"),
+				Value,
+				BlockMappingStart,
+				Key,
+				PlainScalar("key 1"),
+				Value,
+				PlainScalar("value 1"),
+				Key,
+				PlainScalar("key 2"),
+				Value,
+				PlainScalar("value 2"),
+				BlockEnd,
+				BlockEnd,
+				StreamEnd);
 		}
 			
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			Scanner scanner = CreateScanner("test14.yaml");
-			
-			AssertNext(scanner, new StreamStart());
-			AssertNext(scanner, new BlockMappingStart());
-			AssertNext(scanner, new Key());
-			AssertNext(scanner, new Scalar("key", ScalarStyle.Plain));
-			AssertNext(scanner, new Value());
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 1", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEntry());
-			AssertNext(scanner, new Scalar("item 2", ScalarStyle.Plain));
-			AssertNext(scanner, new BlockEnd());
-			AssertNext(scanner, new StreamEnd());
-			AssertDoesNotHaveNext(scanner);
+			AssertSequenceOfTokensFrom(ScannerFor("test14.yaml"),
+				StreamStart,
+				BlockMappingStart,
+				Key,
+				PlainScalar("key"),
+				Value,
+				BlockEntry,
+				PlainScalar("item 1"),
+				BlockEntry,
+				PlainScalar("item 2"),
+				BlockEnd,
+				StreamEnd);
 		}
 
-		private static Scanner CreateScanner(string name) {
+		private Scanner ScannerFor(string name) {
 			return new Scanner(YamlFile(name));
 		}
 
-		private void AssertNext(Scanner scanner, Token expected) {
-			AssertHasNext(scanner);
-			AssertCurrent(scanner, expected);
+		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
+		{
+			var tokenNumber = 1;
+			foreach (var expected in tokens)
+			{
+				scanner.MoveNext().Should().BeTrue("Missing token number {0}", tokenNumber);
+				AssertToken(expected, scanner.Current, tokenNumber);
+				tokenNumber++;
+			}
+			scanner.MoveNext().Should().BeFalse("Found extra tokens");
 		}
 
-		private void AssertHasNext(Scanner scanner) {
-			Assert.True(scanner.MoveNext());
-		}
-
-		private void AssertDoesNotHaveNext(Scanner scanner) {
-			Assert.False(scanner.MoveNext());
-		}
-
-		private void AssertCurrent(Scanner scanner, Token expected) {
+		private void AssertToken(Token expected, Token actual, int tokenNumber)
+		{
 			Dump.WriteLine(expected.GetType().Name);
-			Assert.NotNull(scanner.Current);
-			Assert.True(expected.GetType().IsAssignableFrom(scanner.Current.GetType()));
+			actual.Should().NotBeNull();
+			actual.GetType().Should().Be(expected.GetType(), "Token {0} is not of the expected type", tokenNumber);
 
-			foreach (var property in expected.GetType().GetProperties()) {
-				if (property.PropertyType != typeof(Mark) && property.CanRead) {
-					var value = property.GetValue(scanner.Current, null);
+			foreach (var property in expected.GetType().GetProperties())
+			{
+				if (property.PropertyType != typeof(Mark) && property.CanRead)
+				{
+					var value = property.GetValue(actual, null);
+					var expectedValue = property.GetValue(expected, null);
 					Dump.WriteLine("\t{0} = {1}", property.Name, value);
-					Assert.Equal(property.GetValue(expected, null), value);
+					value.Should().Be(expectedValue, "Comparing property {0} in token {1}", property.Name, tokenNumber);
 				}
 			}
 		}
