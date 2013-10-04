@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using FakeItEasy;
 using FakeItEasy.Core;
+using FluentAssertions;
 using Xunit;
 
 namespace YamlDotNet.Test
@@ -38,7 +39,7 @@ namespace YamlDotNet.Test
 			var reader = CreateFakeReader(TestString);
 			var buffer = CreateBuffer(reader, Capacity);
 
-			Assert.Equal('a', buffer.Peek(0));
+			buffer.Peek(0).Should().Be('a');
 			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 		}
 
@@ -50,7 +51,7 @@ namespace YamlDotNet.Test
 
 			buffer.Peek(0);
 
-			Assert.Equal('b', buffer.Peek(1));
+			buffer.Peek(1).Should().Be('b');
 			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
 		}
 
@@ -63,7 +64,7 @@ namespace YamlDotNet.Test
 			buffer.Peek(0);
 			buffer.Peek(1);
 
-			Assert.Equal('c', buffer.Peek(2));
+			buffer.Peek(2).Should().Be('c');
 			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Times(3));
 		}
 
@@ -79,8 +80,8 @@ namespace YamlDotNet.Test
 			{
 				buffer.Skip(1);
 
-				Assert.Equal('b', buffer.Peek(0));
-				Assert.Equal('c', buffer.Peek(1));
+				buffer.Peek(0).Should().Be('b');
+				buffer.Peek(1).Should().Be('c');
 				A.CallTo(() => reader.Read()).MustNotHaveHappened();
 			}
 		}
@@ -97,7 +98,7 @@ namespace YamlDotNet.Test
 			{
 				buffer.Skip(1);
 
-				Assert.Equal('d', buffer.Peek(2));
+				buffer.Peek(2).Should().Be('d');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 			}
 		}
@@ -113,7 +114,7 @@ namespace YamlDotNet.Test
 			using (OnlyTheseCalls) {
 				buffer.Skip(1);
 
-				Assert.Equal('e', buffer.Peek(3));
+				buffer.Peek(3).Should().Be('e');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
 			}
 		}
@@ -131,13 +132,14 @@ namespace YamlDotNet.Test
 			using (OnlyTheseCalls) {
 				buffer.Skip(4);
 
-				Assert.Equal('f', buffer.Peek(0));
+				buffer.Peek(0).Should().Be('f');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 			}
 		}
 
 		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingSixCharacters() {
+		public void ShouldHaveReadOnceAfterSkippingSixCharacters()
+		{
 			var reader = CreateFakeReader(TestString);
 			var buffer = CreateBuffer(reader, Capacity);
 
@@ -150,7 +152,7 @@ namespace YamlDotNet.Test
 			using (OnlyTheseCalls) {
 				buffer.Skip(1);
 
-				Assert.Equal('g', buffer.Peek(0));
+				buffer.Peek(0).Should().Be('g');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 			}
 		}
@@ -169,13 +171,14 @@ namespace YamlDotNet.Test
 			using (OnlyTheseCalls) {
 				buffer.Skip(2);
 
-				Assert.Equal('h', buffer.Peek(0));
+				buffer.Peek(0).Should().Be('h');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 			}
 		}
 
 		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingEightCharacters() {
+		public void ShouldHaveReadOnceAfterSkippingEightCharacters()
+		{
 			var reader = CreateFakeReader(TestString);
 			var buffer = CreateBuffer(reader, Capacity);
 
@@ -188,13 +191,14 @@ namespace YamlDotNet.Test
 			using (OnlyTheseCalls) {
 				buffer.Skip(3);
 
-				Assert.Equal('i', buffer.Peek(0));
+				buffer.Peek(0).Should().Be('i');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 			}
 		}
 
 		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingNineCharacters() {
+		public void ShouldHaveReadOnceAfterSkippingNineCharacters()
+		{
 			var reader = CreateFakeReader(TestString);
 			var buffer = CreateBuffer(reader, Capacity);
 
@@ -207,7 +211,7 @@ namespace YamlDotNet.Test
 			using (OnlyTheseCalls) {
 				buffer.Skip(4);
 
-				Assert.Equal('\0', buffer.Peek(0));
+				buffer.Peek(0).Should().Be('\0');
 				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
 			}
 		}
@@ -226,7 +230,7 @@ namespace YamlDotNet.Test
 			buffer.Skip(4);
 			buffer.Peek(0);
 
-			Assert.True(buffer.EndOfInput);
+			buffer.EndOfInput.Should().BeTrue();
 		}
 
 		[Fact]
@@ -235,7 +239,9 @@ namespace YamlDotNet.Test
 			var reader = CreateFakeReader(TestString);
 			var buffer = CreateBuffer(reader, Capacity);
 
-			Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Peek(4));
+			Action action = () => buffer.Peek(4);
+
+			action.ShouldThrow<ArgumentOutOfRangeException>();
 		}
 
 		[Fact]
@@ -245,8 +251,9 @@ namespace YamlDotNet.Test
 			var buffer = CreateBuffer(reader, Capacity);
 
 			buffer.Peek(3);
+			Action action = () => buffer.Skip(5);
 
-			Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Skip(5));
+			action.ShouldThrow<ArgumentOutOfRangeException>();
 		}
 
 		private static TextReader CreateFakeReader(string text)

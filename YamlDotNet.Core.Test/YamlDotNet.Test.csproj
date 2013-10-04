@@ -7,8 +7,8 @@
     <ProjectGuid>{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>YamlDotNet.Core.Test</RootNamespace>
-    <AssemblyName>YamlDotNet.Core.Test</AssemblyName>
+    <RootNamespace>YamlDotNet.Test</RootNamespace>
+    <AssemblyName>YamlDotNet.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-	<Reference Include="FakeItEasy">
+    <Reference Include="FakeItEasy">
       <HintPath>..\packages\FakeItEasy.1.13.1\lib\net40\FakeItEasy.dll</HintPath>
     </Reference>
     <Reference Include="FluentAssertions">
@@ -57,8 +57,10 @@
     <Compile Include="EmitterTests.cs" />
     <Compile Include="InsertionQueueTests.cs" />
     <Compile Include="LookAheadBufferTests.cs" />
+    <Compile Include="ParserTestHelper.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScannerTestHelper.cs" />
     <Compile Include="ScannerTests.cs" />
     <Compile Include="YamlTest.cs" />
   </ItemGroup>
