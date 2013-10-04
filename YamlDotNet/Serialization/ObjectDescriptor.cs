@@ -1,0 +1,183 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+
+namespace YamlDotNet.Serialization
+{
+	/// <summary>
+	/// Default implementation of a <see cref="ITypeDescriptor"/>.
+	/// </summary>
+	public class ObjectDescriptor : ITypeDescriptor
+	{
+		private readonly static object[] EmptyObjectArray = new object[0];
+		private readonly YamlSerializerSettings settings;
+		private readonly Type type;
+		private readonly IMemberDescriptor[] members;
+		private readonly Dictionary<string, IMemberDescriptor> mapMembers;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ObjectDescriptor" /> class.
+		/// </summary>
+		/// <param name="settings">The settings.</param>
+		/// <param name="type">The type.</param>
+		/// <exception cref="YamlException">Failed to get ObjectDescriptor for type [{0}]. The member [{1}] cannot be registered as a member with the same name is already registered [{2}].DoFormat(type.FullName, member, existingMember)</exception>
+		public ObjectDescriptor(YamlSerializerSettings settings, Type type)
+		{
+			if (settings == null) throw new ArgumentNullException("settings");
+			if (type == null) throw new ArgumentNullException("type");
+
+			this.settings = settings;
+			this.type = type;
+			this.members = PrepareMembers().ToArray();
+
+			// If no members found, we don't need to build a dictionary map
+			if (members.Length <= 0) return;
+
+			mapMembers = new Dictionary<string, IMemberDescriptor>(members.Length);
+			foreach (var member in Members)
+			{
+				IMemberDescriptor existingMember;
+				if (mapMembers.TryGetValue(member.Name, out existingMember))
+				{
+					throw new YamlException("Failed to get ObjectDescriptor for type [{0}]. The member [{1}] cannot be registered as a member with the same name is already registered [{2}]".DoFormat(type.FullName, member, existingMember));
+				}
+
+				mapMembers.Add(member.Name, member);
+			}
+		}
+
+		public Type Type
+		{
+			get { return type; }
+		}
+
+		public IEnumerable<IMemberDescriptor> Members
+		{
+			get { return members; }
+		}
+
+		public int Count
+		{
+			get { return members.Length; }
+		}
+
+		public bool HasMembers
+		{
+			get { return members.Length > 0; }
+		}
+
+		public IMemberDescriptor this[string name]
+		{
+			get 
+			{ 
+				if (mapMembers == null) throw new KeyNotFoundException(name);
+				return mapMembers[name];
+			}
+		}
+
+		public bool Contains(string memberName)
+		{
+			return mapMembers != null && mapMembers.ContainsKey(memberName);
+		}
+
+		protected YamlSerializerSettings Settings
+		{
+			get { return settings; }
+		}
+
+		protected virtual List<IMemberDescriptor> PrepareMembers()
+		{
+
+			// Add all public properties with a readable get method
+			var memberList = (from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+			                  where
+				                  propertyInfo.CanRead && propertyInfo.GetGetMethod(false) != null &&
+				                  propertyInfo.GetIndexParameters().Length == 0
+			                  select new PropertyDescriptor(propertyInfo)
+			                  into member
+			                  where PrepareMember(member)
+			                  select member).Cast<IMemberDescriptor>().ToList();
+
+			// Add all public fields
+			memberList.AddRange((from fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public)
+			                     where fieldInfo.IsPublic
+			                     select new FieldDescriptor(fieldInfo)
+			                     into member where PrepareMember(member) select member));
+
+			return memberList;
+		}
+
+		private bool PrepareMember(MemberDescriptorBase member)
+		{
+			// If the member has a set, this is a conventional assign method
+			if (member.HasSet)
+			{
+				member.SerializeMemberMode = SerializeMemberMode.Assign;
+			}
+			else
+			{
+				// Else we cannot only assign its content if it is a class
+				member.SerializeMemberMode = type.IsClass ? SerializeMemberMode.Content : SerializeMemberMode.Never;
+			}
+
+			var attributeRegistry = Settings.AttributeRegistry;
+
+			// Member is not displayed if there is a YamlIgnore attribute on it
+			if (attributeRegistry.GetAttribute<YamlIgnoreAttribute>(member.MemberInfo, false) != null)
+				return false; 
+
+			var memberAttribute = attributeRegistry.GetAttribute<YamlMemberAttribute>(member.MemberInfo, false);
+			if (memberAttribute != null)
+			{
+				if (!member.HasSet)
+				{
+					if (memberAttribute.SerializeMethod == SerializeMemberMode.Assign ||
+						(type.IsValueType && member.SerializeMemberMode == SerializeMemberMode.Content))
+						throw new ArgumentException("{0} {1} is not writeable by {2}.".DoFormat(type.FullName, member.Name, memberAttribute.SerializeMethod.ToString()));
+				}
+				member.SerializeMemberMode = memberAttribute.SerializeMethod;
+			}
+
+			if (member.SerializeMemberMode == SerializeMemberMode.Binary)
+			{
+				if (!type.IsArray)
+					throw new InvalidOperationException("{0} {1} of {2} is not an array. Can not be serialized as binary."
+															.DoFormat(type.FullName, member.Name, type.FullName));
+				if (!type.GetElementType().IsPureValueType())
+					throw new InvalidOperationException("{0} is not a pure ValueType. {1} {2} of {3} can not serialize as binary.".DoFormat(type.GetElementType(), type.FullName, member.Name, type.FullName));
+			}
+
+			// ShouldSerialize
+			//      YamlSerializeAttribute(Never) => false
+			//      ShouldSerializeSomeProperty => call it
+			//      DefaultValueAttribute(default) => compare to it
+			//      otherwise => true
+			var shouldSerialize = type.GetMethod("ShouldSerialize" + member.Name, BindingFlags.Instance | BindingFlags.NonPublic);
+			if (shouldSerialize != null && shouldSerialize.ReturnType == typeof(bool) && member.ShouldSerialize == null)
+				member.ShouldSerialize = obj => (bool)shouldSerialize.Invoke(obj, EmptyObjectArray);
+
+
+			var defaultValueAttribute = attributeRegistry.GetAttribute<DefaultValueAttribute>(member.MemberInfo);
+			if (defaultValueAttribute != null && member.ShouldSerialize == null)
+			{
+				object defaultValue = defaultValueAttribute.Value;
+				Type defaultType = defaultValue == null ? null : defaultValue.GetType();
+				if (defaultType.IsNumeric() && defaultType != type)
+					defaultValue = type.CastToNumericType(defaultValue);
+				member.ShouldSerialize = obj => !TypeExtensions.AreEqual(defaultValue, member.Get(obj));
+			}
+
+			if (member.ShouldSerialize == null)
+				member.ShouldSerialize = obj => true;
+
+			if (memberAttribute != null && !string.IsNullOrEmpty(memberAttribute.Name))
+			{
+				member.Name = memberAttribute.Name;
+			}
+
+			return true;
+		}
+	}
+}

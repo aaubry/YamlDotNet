@@ -61,9 +61,9 @@
       <Project>{6a8dcaf7-6c13-4ada-aed9-7aba88fe7717}</Project>
       <Name>YamlDotNet.Converters</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YamlDotNet.Core.Test\YamlDotNet.Core.Test.csproj">
+    <ProjectReference Include="..\YamlDotNet.Core.Test\YamlDotNet.Test.csproj">
       <Project>{16d8043d-c3db-4868-bff3-b2ebdf537aaa}</Project>
-      <Name>YamlDotNet.Core.Test</Name>
+      <Name>YamlDotNet.Test</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.Serialzation.csproj">
       <Project>{21ca0077-e15c-446d-9c43-f6d3f9d09687}</Project>

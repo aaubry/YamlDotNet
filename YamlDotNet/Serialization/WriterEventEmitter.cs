@@ -6,10 +6,12 @@ namespace YamlDotNet.Serialization
 	public sealed class WriterEventEmitter : IEventEmitter
 	{
 		private readonly IEmitter emitter;
+		private readonly SerializerContext context;
 
-		public WriterEventEmitter(IEmitter emitter)
+		public WriterEventEmitter(IEmitter emitter, SerializerContext context)
 		{
 			this.emitter = emitter;
+			this.context = context;
 		}
 
 		void IEventEmitter.Emit(AliasEventInfo eventInfo)
@@ -19,12 +21,12 @@ namespace YamlDotNet.Serialization
 
 		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
 		{
-			emitter.Emit(new Scalar(eventInfo.Anchor, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
+			emitter.Emit(new Scalar(eventInfo.Anchor ?? context.GetAnchor(), eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
 		}
 
 		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)
 		{
-			emitter.Emit(new MappingStart(eventInfo.Anchor, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
+			emitter.Emit(new MappingStart(eventInfo.Anchor ?? context.GetAnchor(), eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
 		}
 
 		void IEventEmitter.Emit(MappingEndEventInfo eventInfo)
@@ -34,7 +36,7 @@ namespace YamlDotNet.Serialization
 
 		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo)
 		{
-			emitter.Emit(new SequenceStart(eventInfo.Anchor, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
+			emitter.Emit(new SequenceStart(eventInfo.Anchor ?? context.GetAnchor(), eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
 		}
 
 		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo)

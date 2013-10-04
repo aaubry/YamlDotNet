@@ -84,8 +84,72 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="SemanticErrorException.cs" />
+    <Compile Include="Serialization\AnchorNotFoundException.cs" />
+    <Compile Include="Serialization\ArrayDescriptor.cs" />
+    <Compile Include="Serialization\CollectionDescriptor.cs" />
+    <Compile Include="Serialization\DefaultDescriptorFactory.cs" />
+    <Compile Include="Serialization\DictionaryDescriptor.cs" />
+    <Compile Include="Serialization\DocumentLoadingState.cs" />
+    <Compile Include="Serialization\DuplicateAnchorException.cs" />
+    <Compile Include="Serialization\EmitterState.cs" />
+    <Compile Include="Serialization\FieldDescriptor.cs" />
+    <Compile Include="Serialization\IAttributeRegistry.cs" />
+    <Compile Include="Serialization\IMemberDescriptor.cs" />
+    <Compile Include="Serialization\ITypeDescriptor.cs" />
+    <Compile Include="Serialization\ITypeDescriptorFactory.cs" />
+    <Compile Include="Serialization\IYamlVisitor.cs" />
+    <Compile Include="Serialization\MemberDescriptorBase.cs" />
+    <Compile Include="Serialization\ObjectDescriptor.cs" />
+    <Compile Include="Serialization\Processors\AnchorProcessor.cs" />
+    <Compile Include="Serialization\ChainedEventEmitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\Processors\ChainedProcessor.cs" />
+    <Compile Include="Serialization\EventInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\IdentityEqualityComparer.cs" />
+    <Compile Include="Serialization\IEventEmitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\IYamlProcessor.cs" />
+    <Compile Include="Serialization\IYamlSerializableFactory.cs" />
+    <Compile Include="Serialization\JsonEventEmitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\Processors\DictionaryProcessor.cs" />
+    <Compile Include="Serialization\Processors\ObjectProcessor.cs" />
+    <Compile Include="Serialization\PropertyDescriptor.cs" />
+    <Compile Include="Serialization\SerializerContext.cs" />
+    <Compile Include="Serialization\DefaultAttributeRegistry.cs" />
+    <Compile Include="Serialization\TagRegistry.cs" />
+    <Compile Include="Serialization\TypeAssigningEventEmitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\WriterEventEmitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\YamlAliasNode.cs" />
+    <Compile Include="Serialization\YamlDocument.cs" />
+    <Compile Include="Serialization\YamlFormatter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
+    <Compile Include="Serialization\YamlMappingNode.cs" />
+    <Compile Include="Serialization\YamlMemberAttribute.cs" />
+    <Compile Include="Serialization\YamlNode.cs" />
+    <Compile Include="Serialization\YamlNodeIdentityEqualityComparer.cs" />
+    <Compile Include="Serialization\YamlScalarNode.cs" />
+    <Compile Include="Serialization\YamlSequenceNode.cs" />
+    <Compile Include="Serialization\YamlSerializableMethod.cs" />
+    <Compile Include="Serialization\YamlSerializer.cs" />
+    <Compile Include="Serialization\YamlSerializerSettings.cs" />
+    <Compile Include="Serialization\YamlStream.cs" />
+    <Compile Include="Serialization\YamlTagAttribute.cs" />
+    <Compile Include="Serialization\YamlVisitor.cs" />
     <Compile Include="SimpleKey.cs" />
     <Compile Include="SortedDictionary.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="StringLookAheadBuffer.cs" />
     <Compile Include="SyntaxErrorException.cs" />
     <Compile Include="TagDirectiveCollection.cs" />
@@ -112,6 +176,7 @@
     <Compile Include="Tokens\Token.cs" />
     <Compile Include="Tokens\Value.cs" />
     <Compile Include="Tokens\VersionDirective.cs" />
+    <Compile Include="TypeExtensions.cs" />
     <Compile Include="Version.cs" />
     <Compile Include="YamlException.cs" />
   </ItemGroup>

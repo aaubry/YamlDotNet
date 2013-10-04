@@ -20,15 +20,12 @@
 //  SOFTWARE.
 
 using System;
-using System.Runtime.Serialization;
-using YamlDotNet;
 
 namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// The exception that is thrown when a duplicate anchor is detected.
 	/// </summary>
-	[Serializable]
 	public class DuplicateAnchorException : YamlException
 	{
 		/// <summary>

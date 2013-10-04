@@ -20,15 +20,12 @@
 //  SOFTWARE.
 
 using System;
-using System.Runtime.Serialization;
-using YamlDotNet;
 
 namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// The exception that is thrown when an alias references an anchor that does not exist.
 	/// </summary>
-	[Serializable]
 	public class AnchorNotFoundException : YamlException
 	{
 		/// <summary>
