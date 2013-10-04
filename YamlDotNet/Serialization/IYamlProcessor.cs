@@ -20,23 +20,29 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet;
 
 namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Allows an object to customize how it is serialized and deserialized.
 	/// </summary>
-	public interface IYamlSerializable
+	public interface IYamlProcessor
 	{
 		/// <summary>
 		/// Reads this object's state from a YAML parser.
 		/// </summary>
-		void ReadYaml(IParser parser);
+		/// <param name="context">The context.</param>
+		/// <param name="value"></param>
+		/// <param name="expectedType">Expected type. May be null.</param>
+		/// <returns>A instance of the object deserialized from Yaml.</returns>
+		object ReadYaml(SerializerContext context, object value, Type expectedType);
 
 		/// <summary>
 		/// Writes this object's state to a YAML emitter.
 		/// </summary>
-		void WriteYaml(IEmitter emitter);
+		/// <param name="context">The context.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="type">The type.</param>
+		void WriteYaml(SerializerContext context, object value, Type type);
 	}
 }

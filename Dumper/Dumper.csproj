@@ -66,7 +66,7 @@
   <ItemGroup>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
       <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
-      <Name>YamlDotNet.Core</Name>
+      <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
