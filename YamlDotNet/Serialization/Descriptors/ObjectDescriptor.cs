@@ -53,13 +53,22 @@ namespace YamlDotNet.Serialization.Descriptors
 
 			this.settings = settings;
 			this.type = type;
-			this.members = PrepareMembers().ToArray();
+			var memberList = PrepareMembers();
+
+			// Sort members by name
+			// This is to make sure that properties/fields for an object 
+			// are always displayed in the same order
+			memberList.Sort((left, right) => string.CompareOrdinal(left.Name, right.Name));
+
+			// Free the member list
+			this.members = memberList.ToArray();
 
 			// If no members found, we don't need to build a dictionary map
 			if (members.Length <= 0) return;
 
 			mapMembers = new Dictionary<string, IMemberDescriptor>(members.Length);
-			foreach (var member in Members)
+			
+			foreach (var member in members)
 			{
 				IMemberDescriptor existingMember;
 				if (mapMembers.TryGetValue(member.Name, out existingMember))
