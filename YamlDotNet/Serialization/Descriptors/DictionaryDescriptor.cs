@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Descriptors
 {
 	/// <summary>
 	/// Provides a descriptor for a <see cref="System.Collections.IDictionary"/>.

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization
 {

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Reflection;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Descriptors
 {
 	/// <summary>
 	/// A <see cref="IMemberDescriptor"/> for a <see cref="FieldInfo"/>

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 // The following code is a partial port of YamlSerializer
 // https://yamlserializer.codeplex.com
 // -----------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Descriptors
 {
 	/// <summary>
 	/// Default implementation of a <see cref="ITypeDescriptor"/>.

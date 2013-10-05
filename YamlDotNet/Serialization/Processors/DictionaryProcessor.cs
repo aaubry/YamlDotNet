@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using YamlDotNet.Events;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization
 {

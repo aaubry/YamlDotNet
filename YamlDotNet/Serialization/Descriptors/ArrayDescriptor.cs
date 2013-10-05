@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Descriptors
 {
 	/// <summary>
 	/// A descriptor for an array.
