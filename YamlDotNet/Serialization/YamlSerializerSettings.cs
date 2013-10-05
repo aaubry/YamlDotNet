@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization
 			schema = new CoreSchema();
 			tagTypeRegistry = new TagTypeRegistry();
 			AttributeRegistry = new AttributeRegistry();
-			TypeDescriptorFactory = new TypeDescriptorFactory(this);
+			TypeDescriptorFactory = new TypeDescriptorFactory(AttributeRegistry);
 	    }
 
 		/// <summary>

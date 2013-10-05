@@ -14,10 +14,18 @@ namespace YamlDotNet.Serialization.Descriptors
 
 			MemberInfo = memberInfo;
 			Name = MemberInfo.Name;
+			DeclaringType = memberInfo.DeclaringType;
 		}
 
 		public string Name { get; internal set; }
 		public abstract Type Type { get; }
+
+		/// <summary>
+		/// Gets the type of the declaring this member.
+		/// </summary>
+		/// <value>The type of the declaring.</value>
+		public Type DeclaringType { get; private set; }
+
 		public SerializeMemberMode SerializeMemberMode { get; internal set; }
 		public abstract object Get(object thisObject);
 		public abstract void Set(object thisObject, object value);

@@ -35,7 +35,6 @@ namespace YamlDotNet.Serialization.Descriptors
 	public class ObjectDescriptor : ITypeDescriptor
 	{
 		private readonly static object[] EmptyObjectArray = new object[0];
-		private readonly YamlSerializerSettings settings;
 		private readonly Type type;
 		private readonly IMemberDescriptor[] members;
 		private readonly Dictionary<string, IMemberDescriptor> mapMembers;
@@ -43,15 +42,16 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ObjectDescriptor" /> class.
 		/// </summary>
-		/// <param name="settings">The settings.</param>
+		/// <param name="attributeRegistry">The attribute registry.</param>
 		/// <param name="type">The type.</param>
+		/// <exception cref="System.ArgumentNullException">type</exception>
 		/// <exception cref="YamlException">Failed to get ObjectDescriptor for type [{0}]. The member [{1}] cannot be registered as a member with the same name is already registered [{2}].DoFormat(type.FullName, member, existingMember)</exception>
-		public ObjectDescriptor(YamlSerializerSettings settings, Type type)
+		public ObjectDescriptor(IAttributeRegistry attributeRegistry, Type type)
 		{
-			if (settings == null) throw new ArgumentNullException("settings");
+			if (attributeRegistry == null) throw new ArgumentNullException("attributeRegistry");
 			if (type == null) throw new ArgumentNullException("type");
 
-			this.settings = settings;
+			this.AttributeRegistry = attributeRegistry;
 			this.type = type;
 			var memberList = PrepareMembers();
 
@@ -79,6 +79,8 @@ namespace YamlDotNet.Serialization.Descriptors
 				mapMembers.Add(member.Name, member);
 			}
 		}
+
+		protected IAttributeRegistry AttributeRegistry { get; private set; }
 
 		public Type Type
 		{
@@ -112,11 +114,6 @@ namespace YamlDotNet.Serialization.Descriptors
 		public bool Contains(string memberName)
 		{
 			return mapMembers != null && mapMembers.ContainsKey(memberName);
-		}
-
-		protected YamlSerializerSettings Settings
-		{
-			get { return settings; }
 		}
 
 		protected virtual List<IMemberDescriptor> PrepareMembers()
@@ -156,13 +153,12 @@ namespace YamlDotNet.Serialization.Descriptors
 				member.SerializeMemberMode = memberType.IsClass ? SerializeMemberMode.Content : SerializeMemberMode.Never;
 			}
 
-			var attributeRegistry = Settings.AttributeRegistry;
 
 			// Member is not displayed if there is a YamlIgnore attribute on it
-			if (attributeRegistry.GetAttribute<YamlIgnoreAttribute>(member.MemberInfo, false) != null)
+			if (AttributeRegistry.GetAttribute<YamlIgnoreAttribute>(member.MemberInfo, false) != null)
 				return false; 
 
-			var memberAttribute = attributeRegistry.GetAttribute<YamlMemberAttribute>(member.MemberInfo, false);
+			var memberAttribute = AttributeRegistry.GetAttribute<YamlMemberAttribute>(member.MemberInfo, false);
 			if (memberAttribute != null)
 			{
 				if (!member.HasSet)
@@ -183,6 +179,12 @@ namespace YamlDotNet.Serialization.Descriptors
 					throw new InvalidOperationException("{0} is not a pure ValueType. {1} {2} of {3} can not serialize as binary.".DoFormat(memberType.GetElementType(), memberType.FullName, member.Name, type.FullName));
 			}
 
+			// If this member cannot be serialized, remove it from the list
+			if (member.SerializeMemberMode == SerializeMemberMode.Never)
+			{
+				return false;
+			}
+
 			// ShouldSerialize
 			//      YamlSerializeAttribute(Never) => false
 			//      ShouldSerializeSomeProperty => call it
@@ -193,7 +195,7 @@ namespace YamlDotNet.Serialization.Descriptors
 				member.ShouldSerialize = obj => (bool)shouldSerialize.Invoke(obj, EmptyObjectArray);
 
 
-			var defaultValueAttribute = attributeRegistry.GetAttribute<DefaultValueAttribute>(member.MemberInfo);
+			var defaultValueAttribute = AttributeRegistry.GetAttribute<DefaultValueAttribute>(member.MemberInfo);
 			if (defaultValueAttribute != null && member.ShouldSerialize == null)
 			{
 				object defaultValue = defaultValueAttribute.Value;
