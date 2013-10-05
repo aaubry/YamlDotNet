@@ -25,36 +25,84 @@ namespace YamlDotNet.Serialization
 			lookupAssemblies = new List<Assembly>();
 		}
 
-		public Type TypeFromTag(string tagName)
+		/// <summary>
+		/// Register an alias between a tag and a type.
+		/// </summary>
+		/// <param name="tag">The tag.</param>
+		/// <param name="type">The type.</param>
+		public void AddTagAlias(string tag, Type type)
 		{
-			if (tagName == null)
+			if (tag == null) throw new ArgumentNullException("tag");
+
+			// Prefix all tags by !
+			tag = Uri.EscapeUriString(tag);
+
+			tagToType[tag] = type;
+
+			if (type != null)
+			{
+				typeToTag[type] = tag;
+			}
+		}
+
+		public Type TypeFromTag(IYamlSchema schema, string tag)
+		{
+			if (schema == null) throw new ArgumentNullException("schema");
+
+			if (tag == null)
 			{
 				return null;
 			}
 
+			// Get the default schema type if there is any
+			var longTag = schema.ExpandTag(tag);
 			Type type;
-			if (tagToType.TryGetValue(tagName, out type))
+			if (longTag != tag)
+			{
+				type = schema.GetTypeForDefaultTag(longTag);
+				if (type != null)
+				{
+					return type;
+				}
+			}
+
+			// Unescape tag
+			longTag = Uri.UnescapeDataString(longTag);
+
+			// Else try to find a registered alias
+			if (tagToType.TryGetValue(longTag, out type))
 			{
 				return type;
 			}
 
-			type = Type.GetType(tagName);
+			// Else resolve type from assembly
+			type = Type.GetType(longTag);
 			if (type == null)
 			{
 				foreach (var assembly in lookupAssemblies)
 				{
-					type = assembly.GetType(tagName);
+					type = assembly.GetType(longTag);
 					if (type != null)
 					{
 						break;
 					}
 				}
 			}
+
+			// Register a type that was found
+			tagToType.Add(longTag, type);
+			if (type != null)
+			{
+				typeToTag.Add(type, longTag);
+			}
+
 			return type;
 		}
 
-		public string TagFromType(Type type)
+		public string TagFromType(IYamlSchema schema, Type type)
 		{
+			if (schema == null) throw new ArgumentNullException("schema");
+
 			string tagName;
 			if (!typeToTag.TryGetValue(type, out tagName))
 			{

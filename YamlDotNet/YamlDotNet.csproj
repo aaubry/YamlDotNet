@@ -88,7 +88,8 @@
     <Compile Include="Serialization\ArrayDescriptor.cs" />
     <Compile Include="Serialization\CollectionDescriptor.cs" />
     <Compile Include="Serialization\CoreSchema.cs" />
-    <Compile Include="Serialization\DescriptorFactory.cs" />
+    <Compile Include="Serialization\ExtendedSchema.cs" />
+    <Compile Include="Serialization\TypeDescriptorFactory.cs" />
     <Compile Include="Serialization\DictionaryDescriptor.cs" />
     <Compile Include="Serialization\DocumentLoadingState.cs" />
     <Compile Include="Serialization\DuplicateAnchorException.cs" />

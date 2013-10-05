@@ -92,6 +92,13 @@ namespace YamlDotNet.Events
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SequenceStart"/> class.
 		/// </summary>
+		public SequenceStart() : base(null, null)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SequenceStart"/> class.
+		/// </summary>
 		/// <param name="anchor">The anchor.</param>
 		/// <param name="tag">The tag.</param>
 		/// <param name="isImplicit">if set to <c>true</c> [is implicit].</param>

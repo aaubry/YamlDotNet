@@ -11,8 +11,45 @@ namespace YamlDotNet.Serialization
 	/// </remarks>>
 	public class JsonSchema : FailsafeSchema
 	{
-		private const string NullShortTag = "!!null";
-		private const string NullLongTag = "tag:yaml.org,2002:null";
+		/// <summary>
+		/// The null short tag: !!null
+		/// </summary>
+		public const string NullShortTag = "!!null";
+
+		/// <summary>
+		/// The null long tag: tag:yaml.org,2002:null
+		/// </summary>
+		public const string NullLongTag = "tag:yaml.org,2002:null";
+
+		/// <summary>
+		/// The bool short tag: !!bool
+		/// </summary>
+		public const string BoolShortTag = "!!bool";
+
+		/// <summary>
+		/// The bool long tag: tag:yaml.org,2002:bool
+		/// </summary>
+		public const string BoolLongTag = "tag:yaml.org,2002:bool";
+
+		/// <summary>
+		/// The int short tag: !!int
+		/// </summary>
+		public const string IntShortTag = "!!int";
+
+		/// <summary>
+		/// The int long tag: tag:yaml.org,2002:int
+		/// </summary>
+		public const string IntLongTag = "tag:yaml.org,2002:int";
+
+		/// <summary>
+		/// The float short tag: !!float
+		/// </summary>
+		public const string FloatShortTag = "!!float";
+
+		/// <summary>
+		/// The float long tag: tag:yaml.org,2002:float
+		/// </summary>
+		public const string FloatLongTag = "tag:yaml.org,2002:float";
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="JsonSchema"/> class.
@@ -20,6 +57,9 @@ namespace YamlDotNet.Serialization
 		public JsonSchema()
 		{
 			RegisterTag(NullShortTag, NullLongTag);
+			RegisterTag(BoolShortTag, BoolLongTag);
+			RegisterTag(IntShortTag, IntLongTag);
+			RegisterTag(FloatShortTag, FloatLongTag);
 		}
 
 		protected override void PrepareScalarRules()
@@ -39,8 +79,12 @@ namespace YamlDotNet.Serialization
 			AddScalarRule<double>("!!float", @"\.inf", m => double.PositiveInfinity, null);
 			AddScalarRule<double>("!!float", @"-\.inf", m => double.NegativeInfinity, null);
 			AddScalarRule<double>("!!float", @"\.nan", m => double.NaN, null);
-			
-			base.PrepareScalarRules();
+
+			// Json doesn't allow failsafe string, so we are disabling it here.
+			AllowFailsafeString = false;
+
+			// We are not calling the base as we want to completely override scalar rules
+			// and in order to have a more concise set of regex
 		}
 	}
 }

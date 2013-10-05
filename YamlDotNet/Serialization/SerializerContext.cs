@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization
 		/// <returns>Type.</returns>
 		public Type TypeFromTag(string tagName)
 		{
-			return tagTypeRegistry.TypeFromTag(tagName);
+			return tagTypeRegistry.TypeFromTag(Settings.Schema, tagName);
 		}
 		
 		/// <summary>
@@ -99,7 +99,7 @@ namespace YamlDotNet.Serialization
         /// <returns>The associated tag</returns>
 	    public string TagFromType(Type type)
         {
-	        return tagTypeRegistry.TagFromType(type);
+	        return tagTypeRegistry.TagFromType(Settings.Schema, type);
         }
 
 		internal string GetAnchor()
