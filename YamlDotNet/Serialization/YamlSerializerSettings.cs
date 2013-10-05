@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using YamlDotNet.Schemas;
 
 namespace YamlDotNet.Serialization
 {
@@ -124,7 +125,7 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
-		/// Gets or sets the schema. Default is <see cref="YamlDotNet.Serialization.CoreSchema"/>. When setting the schema in this settings, the schema is initialized by calling its <see cref="IYamlSchema.Initialize"/> method.
+		/// Gets or sets the schema. Default is <see cref="CoreSchema"/>. When setting the schema in this settings, the schema is initialized by calling its <see cref="IYamlSchema.Initialize"/> method.
 		/// </summary>
 		/// <value>The schema.</value>
 		/// <exception cref="System.ArgumentNullException">value</exception>

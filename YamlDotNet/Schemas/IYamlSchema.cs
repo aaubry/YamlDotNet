@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using YamlDotNet.Events;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Schemas
 {
 	/// <summary>
-	/// Provides schema information for tag resolution. This is used by <see cref="ITagTypeRegistry"/>
+	/// Provides schema information for tag resolution.
 	/// </summary>
 	public interface IYamlSchema
 	{

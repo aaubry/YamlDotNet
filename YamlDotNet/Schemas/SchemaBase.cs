@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using YamlDotNet.Events;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Schemas
 {
 	/// <summary>
 	/// Base implementation for a based schema.

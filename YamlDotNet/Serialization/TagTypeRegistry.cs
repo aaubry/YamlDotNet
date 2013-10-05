@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using YamlDotNet.Events;
+using YamlDotNet.Schemas;
 
 namespace YamlDotNet.Serialization
 {
