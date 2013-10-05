@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 // The following code is a partial port of YamlSerializer
 // https://yamlserializer.codeplex.com
 // -----------------------------------------------------------------------------------
@@ -23,7 +23,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Schemas
 {
 	/// <summary>
 	/// Extension to the core schema and accept different flavor of scalars

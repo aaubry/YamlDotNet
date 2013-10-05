@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 // The following code is a partial port of YamlSerializer
 // https://yamlserializer.codeplex.com
 // -----------------------------------------------------------------------------------
@@ -23,7 +23,7 @@
 
 using System;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Schemas
 {
 	/// <summary>
 	/// Implements the Core schema. <see cref="http://www.yaml.org/spec/1.2/spec.html#id2804356" />

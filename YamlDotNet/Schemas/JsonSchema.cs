@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Schemas
 {
 	/// <summary>
 	/// Implements a JSON schema. <see cref="http://www.yaml.org/spec/1.2/spec.html#id2803231" />

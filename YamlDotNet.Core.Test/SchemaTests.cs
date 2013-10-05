@@ -1,6 +1,7 @@
 ﻿using System;
 using Xunit;
 using YamlDotNet.Events;
+using YamlDotNet.Schemas;
 using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Test
