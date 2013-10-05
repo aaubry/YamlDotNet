@@ -143,6 +143,8 @@ namespace YamlDotNet.Serialization.Descriptors
 
 		private bool PrepareMember(MemberDescriptorBase member)
 		{
+			var memberType = member.Type;
+
 			// If the member has a set, this is a conventional assign method
 			if (member.HasSet)
 			{
@@ -151,7 +153,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			else
 			{
 				// Else we cannot only assign its content if it is a class
-				member.SerializeMemberMode = type.IsClass ? SerializeMemberMode.Content : SerializeMemberMode.Never;
+				member.SerializeMemberMode = memberType.IsClass ? SerializeMemberMode.Content : SerializeMemberMode.Never;
 			}
 
 			var attributeRegistry = Settings.AttributeRegistry;
@@ -166,19 +168,19 @@ namespace YamlDotNet.Serialization.Descriptors
 				if (!member.HasSet)
 				{
 					if (memberAttribute.SerializeMethod == SerializeMemberMode.Assign ||
-						(type.IsValueType && member.SerializeMemberMode == SerializeMemberMode.Content))
-						throw new ArgumentException("{0} {1} is not writeable by {2}.".DoFormat(type.FullName, member.Name, memberAttribute.SerializeMethod.ToString()));
+						(memberType.IsValueType && member.SerializeMemberMode == SerializeMemberMode.Content))
+						throw new ArgumentException("{0} {1} is not writeable by {2}.".DoFormat(memberType.FullName, member.Name, memberAttribute.SerializeMethod.ToString()));
 				}
 				member.SerializeMemberMode = memberAttribute.SerializeMethod;
 			}
 
 			if (member.SerializeMemberMode == SerializeMemberMode.Binary)
 			{
-				if (!type.IsArray)
+				if (!memberType.IsArray)
 					throw new InvalidOperationException("{0} {1} of {2} is not an array. Can not be serialized as binary."
-															.DoFormat(type.FullName, member.Name, type.FullName));
-				if (!type.GetElementType().IsPureValueType())
-					throw new InvalidOperationException("{0} is not a pure ValueType. {1} {2} of {3} can not serialize as binary.".DoFormat(type.GetElementType(), type.FullName, member.Name, type.FullName));
+															.DoFormat(memberType.FullName, member.Name, type.FullName));
+				if (!memberType.GetElementType().IsPureValueType())
+					throw new InvalidOperationException("{0} is not a pure ValueType. {1} {2} of {3} can not serialize as binary.".DoFormat(memberType.GetElementType(), memberType.FullName, member.Name, type.FullName));
 			}
 
 			// ShouldSerialize
@@ -186,7 +188,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			//      ShouldSerializeSomeProperty => call it
 			//      DefaultValueAttribute(default) => compare to it
 			//      otherwise => true
-			var shouldSerialize = type.GetMethod("ShouldSerialize" + member.Name, BindingFlags.Instance | BindingFlags.NonPublic);
+			var shouldSerialize = type.GetMethod("ShouldSerialize" + member.Name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 			if (shouldSerialize != null && shouldSerialize.ReturnType == typeof(bool) && member.ShouldSerialize == null)
 				member.ShouldSerialize = obj => (bool)shouldSerialize.Invoke(obj, EmptyObjectArray);
 
@@ -196,8 +198,8 @@ namespace YamlDotNet.Serialization.Descriptors
 			{
 				object defaultValue = defaultValueAttribute.Value;
 				Type defaultType = defaultValue == null ? null : defaultValue.GetType();
-				if (defaultType.IsNumeric() && defaultType != type)
-					defaultValue = type.CastToNumericType(defaultValue);
+				if (defaultType.IsNumeric() && defaultType != memberType)
+					defaultValue = memberType.CastToNumericType(defaultValue);
 				member.ShouldSerialize = obj => !TypeExtensions.AreEqual(defaultValue, member.Get(obj));
 			}
 
