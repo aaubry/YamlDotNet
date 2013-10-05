@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using YamlDotNet.Schemas;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization
 {
@@ -95,7 +96,7 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
-		/// Gets or sets the type descriptor factory used when trying to find a <see cref="ITypeDescriptor"/>. Default is <see cref="YamlDotNet.Serialization.TypeDescriptorFactory"/>
+		/// Gets or sets the type descriptor factory used when trying to find a <see cref="ITypeDescriptor"/>. Default is <see cref="Descriptors.TypeDescriptorFactory"/>
 		/// </summary>
 		/// <value>The type descriptor factory.</value>
 		/// <exception cref="System.ArgumentNullException">value</exception>

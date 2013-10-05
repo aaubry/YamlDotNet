@@ -90,22 +90,23 @@
     <Compile Include="Schemas\JsonSchema.cs" />
     <Compile Include="SemanticErrorException.cs" />
     <Compile Include="Serialization\AnchorNotFoundException.cs" />
-    <Compile Include="Serialization\ArrayDescriptor.cs" />
-    <Compile Include="Serialization\CollectionDescriptor.cs" />
-    <Compile Include="Serialization\TypeDescriptorFactory.cs" />
-    <Compile Include="Serialization\DictionaryDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\ArrayDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\CollectionDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\DictionaryDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\FieldDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\MemberDescriptorBase.cs" />
+    <Compile Include="Serialization\Descriptors\ObjectDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\PropertyDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\TypeDescriptorFactory.cs" />
     <Compile Include="Serialization\DocumentLoadingState.cs" />
     <Compile Include="Serialization\DuplicateAnchorException.cs" />
     <Compile Include="Serialization\EmitterState.cs" />
-    <Compile Include="Serialization\FieldDescriptor.cs" />
     <Compile Include="Serialization\IAttributeRegistry.cs" />
     <Compile Include="Serialization\IMemberDescriptor.cs" />
     <Compile Include="Serialization\ITagTypeRegistry.cs" />
     <Compile Include="Serialization\ITypeDescriptor.cs" />
     <Compile Include="Serialization\ITypeDescriptorFactory.cs" />
     <Compile Include="Serialization\IYamlVisitor.cs" />
-    <Compile Include="Serialization\MemberDescriptorBase.cs" />
-    <Compile Include="Serialization\ObjectDescriptor.cs" />
     <Compile Include="Serialization\Processors\AnchorProcessor.cs" />
     <Compile Include="Serialization\ChainedEventEmitter.cs">
       <SubType>Code</SubType>
@@ -125,7 +126,6 @@
     </Compile>
     <Compile Include="Serialization\Processors\DictionaryProcessor.cs" />
     <Compile Include="Serialization\Processors\ObjectProcessor.cs" />
-    <Compile Include="Serialization\PropertyDescriptor.cs" />
     <Compile Include="Schemas\SchemaBase.cs" />
     <Compile Include="Serialization\SerializerContext.cs" />
     <Compile Include="Serialization\AttributeRegistry.cs" />
@@ -187,6 +187,7 @@
     <Compile Include="Version.cs" />
     <Compile Include="YamlException.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
