@@ -10,7 +10,7 @@ namespace YamlDotNet.Serialization
 	/// This implementation allows to retrieve default attributes for a member or 
 	/// to attach an attribute to a specific type/member.
 	/// </summary>
-	public class DefaultAttributeRegistry : IAttributeRegistry
+	public class AttributeRegistry : IAttributeRegistry
 	{
 		private readonly Dictionary<MemberInfoKey, List<Attribute>> cachedAttributes = new Dictionary<MemberInfoKey, List<Attribute>>();
 		private readonly Dictionary<MemberInfo, List<Attribute>> registeredAttributes = new Dictionary<MemberInfo, List<Attribute>>();

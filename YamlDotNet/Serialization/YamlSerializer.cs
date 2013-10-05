@@ -5,7 +5,7 @@ namespace YamlDotNet.Serialization
     public class YamlSerializer
     {
         private readonly YamlSerializerSettings settings;
-	    internal readonly TagRegistry TagRegistry;
+	    internal readonly ITagTypeRegistry TagTypeRegistry;
 
         public YamlSerializer() : this(null)
         {
@@ -16,7 +16,7 @@ namespace YamlDotNet.Serialization
         public YamlSerializer(YamlSerializerSettings settings)
         {
             this.settings = settings ?? new YamlSerializerSettings();
-	        TagRegistry = new TagRegistry(Settings);
+	        TagTypeRegistry = settings.TagTypeRegistry;
         }
 
         public void Serialize(Stream stream, object value)

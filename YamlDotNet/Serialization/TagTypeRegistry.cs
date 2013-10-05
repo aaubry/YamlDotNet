@@ -1,20 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using YamlDotNet.Events;
 
 namespace YamlDotNet.Serialization
 {
-	internal class TagRegistry
+	/// <summary>
+	/// Default implementation of ITagTypeRegistry.
+	/// </summary>
+	public class TagTypeRegistry : ITagTypeRegistry
 	{
 		private readonly Dictionary<string, Type> tagToType;
 		private readonly Dictionary<Type, string> typeToTag;
 		private readonly List<Assembly> lookupAssemblies;
 
-		public TagRegistry(YamlSerializerSettings settings)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TagTypeRegistry"/> class.
+		/// </summary>
+		public TagTypeRegistry()
 		{
-			tagToType = new Dictionary<string, Type>(settings.TagToType);
-			typeToTag = new Dictionary<Type, string>(settings.TypeToTag);
-			lookupAssemblies = new List<Assembly>(settings.LookupAssemblies);
+			tagToType = new Dictionary<string, Type>();
+			typeToTag = new Dictionary<Type, string>();
+			lookupAssemblies = new List<Assembly>();
 		}
 
 		public Type TypeFromTag(string tagName)
@@ -53,6 +61,11 @@ namespace YamlDotNet.Serialization
 				return string.Format("!{0}", type.FullName);
 			}
 			return tagName;
+		}
+
+		public List<Assembly> LookupAssemblies
+		{
+			get { return lookupAssemblies; }
 		}
 	}
 }

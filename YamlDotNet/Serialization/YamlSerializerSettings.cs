@@ -8,9 +8,8 @@ namespace YamlDotNet.Serialization
 	/// Settings used to configure serialization.
 	/// </summary>
     public class YamlSerializerSettings
-    {
-        internal readonly Dictionary<string, Type> TagToType = new Dictionary<string, Type>();
-        internal readonly Dictionary<Type, string> TypeToTag = new Dictionary<Type, string>();
+	{
+		private ITagTypeRegistry tagTypeRegistry;
 	    private IAttributeRegistry attributeRegistry;
 	    private ITypeDescriptorFactory typeDescriptorFactory;
 		private string prefixForItems;
@@ -24,8 +23,9 @@ namespace YamlDotNet.Serialization
 		    EmitJsonComptible = false;
 		    EmitCapacityForList = false;
 			PrefixForItems = "~Items";
-			AttributeRegistry = new DefaultAttributeRegistry();
-			TypeDescriptorFactory = new DefaultDescriptorFactory(this);
+			tagTypeRegistry = new TagTypeRegistry();
+			AttributeRegistry = new AttributeRegistry();
+			TypeDescriptorFactory = new DescriptorFactory(this);
 	    }
 
 		/// <summary>
@@ -89,12 +89,19 @@ namespace YamlDotNet.Serialization
 			}
 		}
 
-	    public void RegisterTagAlias(string tagName, Type type)
-        {
-            TagToType[tagName] = type;
-            TypeToTag[type] = tagName;
-        }
-
-        public List<Assembly> LookupAssemblies { get; set; }
+		/// <summary>
+		/// Gets or sets the tag type registry.
+		/// </summary>
+		/// <value>The tag type registry.</value>
+		/// <exception cref="System.ArgumentNullException">value</exception>
+		public ITagTypeRegistry TagTypeRegistry
+		{
+			get { return tagTypeRegistry; }
+			set
+			{
+				if (value == null) throw new ArgumentNullException("value");
+				tagTypeRegistry = value;
+			}
+		}
     }
 }

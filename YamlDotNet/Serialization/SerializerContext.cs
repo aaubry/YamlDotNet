@@ -10,7 +10,7 @@ namespace YamlDotNet.Serialization
 	public class SerializerContext
 	{
         private readonly YamlSerializerSettings settings;
-	    private readonly TagRegistry tagRegistry;
+	    private readonly ITagTypeRegistry tagTypeRegistry;
 		private readonly ITypeDescriptorFactory typeDescriptorFactory;
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace YamlDotNet.Serialization
         {
             Serializer = serializer;
             settings = serializer.Settings;
-	        tagRegistry = serializer.TagRegistry;
+	        tagTypeRegistry = serializer.TagTypeRegistry;
 	        typeDescriptorFactory = settings.TypeDescriptorFactory;
         }
 
@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization
 		/// <returns>Type.</returns>
 		public Type TypeFromTag(string tagName)
 		{
-			return tagRegistry.TypeFromTag(tagName);
+			return tagTypeRegistry.TypeFromTag(tagName);
 		}
 		
 		/// <summary>
@@ -99,7 +99,7 @@ namespace YamlDotNet.Serialization
         /// <returns>The associated tag</returns>
 	    public string TagFromType(Type type)
         {
-	        return tagRegistry.TagFromType(type);
+	        return tagTypeRegistry.TagFromType(type);
         }
 
 		internal string GetAnchor()
