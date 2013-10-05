@@ -53,6 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DescriptorTests.cs" />
     <Compile Include="Dump.cs" />
     <Compile Include="EmitterTests.cs" />
     <Compile Include="InsertionQueueTests.cs" />
