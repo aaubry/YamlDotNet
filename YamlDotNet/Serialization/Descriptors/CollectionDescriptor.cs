@@ -11,29 +11,33 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CollectionDescriptor" /> class.
 		/// </summary>
-		/// <param name="settings">The settings.</param>
+		/// <param name="attributeRegistry">The attribute registry.</param>
 		/// <param name="type">The type.</param>
-		public CollectionDescriptor(YamlSerializerSettings settings, Type type) : base(settings, type)
+		public CollectionDescriptor(IAttributeRegistry attributeRegistry, Type type)
+			: base(attributeRegistry, type)
 		{
+			var member = this["Capacity"] as PropertyDescriptor;
+
+			// Gets the element type
+			var collectionType = type.GetInterface(typeof(ICollection<>));
+			ElementType = (collectionType != null) ? collectionType.GetGenericArguments()[0] : typeof(object);
+
+			// Finds if it is a pure list
+			var listType = type.GetInterface(typeof(IList<>));
+			IsPureCollection = (Count == 1 && member != null && listType != null);
 		}
 
-		protected override List<IMemberDescriptor> PrepareMembers()
-		{
-			var members = base.PrepareMembers();
+		/// <summary>
+		/// Gets or sets the type of the element.
+		/// </summary>
+		/// <value>The type of the element.</value>
+		public Type ElementType { get; set; }
 
-			// In case we are not emitting List.Capacity, we need to remove them from the member list
-			if (!Settings.EmitCapacityForList)
-			{
-				for (int i = members.Count - 1; i >= 0; i--)
-				{
-					if (members[i].Name == "Capacity" && members[i].Type == typeof (int))
-					{
-						members.RemoveAt(i);
-						break;
-					}
-				}
-			}
-			return members;
-		}
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is a pure collection (no public property/field)
+		/// </summary>
+		/// <value><c>true</c> if this instance is pure collection; otherwise, <c>false</c>.</value>
+		public bool IsPureCollection { get; private set; }
 	}
 }

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using Xunit;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Test
 {
@@ -55,13 +57,12 @@ namespace YamlDotNet.Test
 		[Fact]
 		public void TestObjectDescriptor()
 		{
-			var settings = new YamlSerializerSettings();
+			var attributeRegistry = new AttributeRegistry();
 
 			// Rename ItemRenamed2 to Item2
-			settings.AttributeRegistry.Register(typeof(TestObject).GetProperty("ItemRenamed2"), new YamlMemberAttribute("Item2"));
+			attributeRegistry.Register(typeof(TestObject).GetProperty("ItemRenamed2"), new YamlMemberAttribute("Item2"));
 
-			var descriptorFactory = settings.TypeDescriptorFactory;
-			var descriptor = descriptorFactory.Find(typeof(TestObject));
+			var descriptor = new ObjectDescriptor(attributeRegistry, typeof(TestObject));
 
 			// Verify members
 			Assert.Equal(descriptor.Count, 8);
@@ -105,6 +106,66 @@ namespace YamlDotNet.Test
 			// Check HasSet
 			Assert.True(descriptor["Collection"].HasSet);
 			Assert.False(descriptor["CollectionReadOnly"].HasSet);
+		}
+
+		/// <summary>
+		/// This is a non pure collection: It has at least one public get/set member.
+		/// </summary>
+		public class NonPureCollection : List<int>
+		{
+			public string Name { get; set; }
+		}
+
+		[Fact]
+		public void TestCollectionDescriptor()
+		{
+			var attributeRegistry = new AttributeRegistry();
+			var descriptor = new CollectionDescriptor(attributeRegistry, typeof (List<string>));
+
+			// Only Capacity as a member
+			Assert.Equal(descriptor.Count, 1);
+			Assert.True(descriptor.IsPureCollection);
+			Assert.Equal(descriptor.ElementType, typeof(string));
+
+			descriptor = new CollectionDescriptor(attributeRegistry, typeof(NonPureCollection));
+
+			// Only Capacity as a member
+			Assert.Equal(descriptor.Count, 2);
+			Assert.False(descriptor.IsPureCollection);
+			Assert.Equal(descriptor.ElementType, typeof(int));
+		}
+
+		/// <summary>
+		/// This is a non pure collection: It has at least one public get/set member.
+		/// </summary>
+		public class NonPureDictionary : Dictionary<float, object>
+		{
+			public string Name { get; set; }
+		}
+
+		[Fact]
+		public void TestDictionaryDescriptor()
+		{
+			var attributeRegistry = new AttributeRegistry();
+			var descriptor = new DictionaryDescriptor(attributeRegistry, typeof(Dictionary<int, string>));
+
+			var instance = new Dictionary<int, string>();
+
+			// Only Capacity as a member
+			Assert.Equal(descriptor.Count, 2);
+			Assert.True(descriptor.IsPureDictionary);
+			Assert.Equal(descriptor.KeyType, typeof(int));
+			Assert.Equal(descriptor.ValueType, typeof(string));
+
+			// TODO add tests for ReadOnly members
+
+			descriptor = new DictionaryDescriptor(attributeRegistry, typeof(NonPureDictionary));
+
+			// Only Capacity as a member
+			Assert.Equal(descriptor.Count, 3);
+			Assert.False(descriptor.IsPureDictionary);
+			Assert.Equal(descriptor.KeyType, typeof(float));
+			Assert.Equal(descriptor.ValueType, typeof(object));
 		}
 	}
 }

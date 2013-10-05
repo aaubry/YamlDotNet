@@ -9,25 +9,25 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class TypeDescriptorFactory : ITypeDescriptorFactory
 	{
-		private readonly YamlSerializerSettings settings;
+		private readonly IAttributeRegistry attributeRegistry;
 		protected readonly Dictionary<Type,ITypeDescriptor> RegisteredDescriptors = new Dictionary<Type, ITypeDescriptor>();
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TypeDescriptorFactory"/> class.
+		/// Initializes a new instance of the <see cref="TypeDescriptorFactory" /> class.
 		/// </summary>
-		/// <param name="settings">The settings.</param>
-		public TypeDescriptorFactory(YamlSerializerSettings settings)
+		/// <param name="attributeRegistry">The attribute registry.</param>
+		public TypeDescriptorFactory(IAttributeRegistry attributeRegistry)
 		{
-			this.settings = settings;
+			this.attributeRegistry = attributeRegistry;
 		}
 
 		/// <summary>
 		/// Gets the settings.
 		/// </summary>
 		/// <value>The settings.</value>
-		public YamlSerializerSettings Settings
+		public IAttributeRegistry AttributeRegistry
 		{
-			get { return settings; }
+			get { return attributeRegistry; }
 		}
 
 		public ITypeDescriptor Find(Type type)
@@ -61,22 +61,22 @@ namespace YamlDotNet.Serialization.Descriptors
 			if (typeof(IDictionary).IsAssignableFrom(type))
 			{
 				// IDictionary
-				descriptor = new DictionaryDescriptor(settings, type);
+				descriptor = new DictionaryDescriptor(attributeRegistry, type);
 			}
 			else if (typeof(ICollection).IsAssignableFrom(type))
 			{
 				// ICollection
-				descriptor = new CollectionDescriptor(settings, type);
+				descriptor = new CollectionDescriptor(attributeRegistry, type);
 			}
 			else if (type.IsArray)
 			{
 				// array[]
-				descriptor = new ArrayDescriptor(settings, type);
+				descriptor = new ArrayDescriptor(attributeRegistry, type);
 			}
 			else
 			{
 				// standard object (class or value type)
-				descriptor = new ObjectDescriptor(settings, type);
+				descriptor = new ObjectDescriptor(attributeRegistry, type);
 			}
 			return descriptor;
 		}

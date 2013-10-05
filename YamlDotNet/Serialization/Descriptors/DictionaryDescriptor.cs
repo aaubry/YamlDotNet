@@ -15,9 +15,10 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DictionaryDescriptor" /> class.
 		/// </summary>
-		/// <param name="settings">The serializer settings.</param>
+		/// <param name="attributeRegistry">The attribute registry.</param>
 		/// <param name="type">The type.</param>
-		public DictionaryDescriptor(YamlSerializerSettings settings, Type type) : base(settings, type)
+		public DictionaryDescriptor(IAttributeRegistry attributeRegistry, Type type)
+			: base(attributeRegistry, type)
 		{
 			// extract Key, Value types from IDictionary<??, ??>
 			var interfaceType = type.GetInterface(typeof(IDictionary<,>));
@@ -31,6 +32,9 @@ namespace YamlDotNet.Serialization.Descriptors
 				keyType = typeof(object);
 				valueType = typeof(object);
 			}
+
+			// Only Keys and Values
+			IsPureDictionary = Count == 2;
 		}
 
 		/// <summary>
@@ -50,6 +54,12 @@ namespace YamlDotNet.Serialization.Descriptors
 		{
 			get { return valueType; }
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether this instance is pure dictionary.
+		/// </summary>
+		/// <value><c>true</c> if this instance is pure dictionary; otherwise, <c>false</c>.</value>
+		public bool IsPureDictionary { get; set; }
 
 		/// <summary>
 		/// Determines whether the value passed is readonly.
