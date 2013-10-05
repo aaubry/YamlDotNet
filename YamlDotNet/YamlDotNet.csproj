@@ -87,17 +87,22 @@
     <Compile Include="Serialization\AnchorNotFoundException.cs" />
     <Compile Include="Serialization\ArrayDescriptor.cs" />
     <Compile Include="Serialization\CollectionDescriptor.cs" />
-    <Compile Include="Serialization\DefaultDescriptorFactory.cs" />
+    <Compile Include="Serialization\CoreSchema.cs" />
+    <Compile Include="Serialization\DescriptorFactory.cs" />
     <Compile Include="Serialization\DictionaryDescriptor.cs" />
     <Compile Include="Serialization\DocumentLoadingState.cs" />
     <Compile Include="Serialization\DuplicateAnchorException.cs" />
     <Compile Include="Serialization\EmitterState.cs" />
+    <Compile Include="Serialization\FailsafeSchema.cs" />
     <Compile Include="Serialization\FieldDescriptor.cs" />
     <Compile Include="Serialization\IAttributeRegistry.cs" />
     <Compile Include="Serialization\IMemberDescriptor.cs" />
+    <Compile Include="Serialization\ITagTypeRegistry.cs" />
     <Compile Include="Serialization\ITypeDescriptor.cs" />
     <Compile Include="Serialization\ITypeDescriptorFactory.cs" />
+    <Compile Include="Serialization\IYamlSchema.cs" />
     <Compile Include="Serialization\IYamlVisitor.cs" />
+    <Compile Include="Serialization\JsonSchema.cs" />
     <Compile Include="Serialization\MemberDescriptorBase.cs" />
     <Compile Include="Serialization\ObjectDescriptor.cs" />
     <Compile Include="Serialization\Processors\AnchorProcessor.cs" />
@@ -120,9 +125,10 @@
     <Compile Include="Serialization\Processors\DictionaryProcessor.cs" />
     <Compile Include="Serialization\Processors\ObjectProcessor.cs" />
     <Compile Include="Serialization\PropertyDescriptor.cs" />
+    <Compile Include="Serialization\SchemaBase.cs" />
     <Compile Include="Serialization\SerializerContext.cs" />
-    <Compile Include="Serialization\DefaultAttributeRegistry.cs" />
-    <Compile Include="Serialization\TagRegistry.cs" />
+    <Compile Include="Serialization\AttributeRegistry.cs" />
+    <Compile Include="Serialization\TagTypeRegistry.cs" />
     <Compile Include="Serialization\TypeAssigningEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>
