@@ -37,13 +37,13 @@ namespace YamlDotNet.Serialization
 		/// <param name="defaultTag">The default tag decoded from the scalar.</param>
 		/// <param name="value">The value extracted from a scalar.</param>
 		/// <returns>System.String.</returns>
-		bool DecodeScalar(Scalar scalar, bool decodeValue, out string defaultTag, out object value);
+		bool TryParse(Scalar scalar, bool decodeValue, out string defaultTag, out object value);
 
 		/// <summary>
-		/// Gets the default type for tag.
+		/// Gets the type for a default tag.
 		/// </summary>
-		/// <param name="tag">The tag.</param>
-		/// <returns>Type of the tag or null if no default tag associated</returns>
-		Type GetDefaultTypeForTag(string tag);
+		/// <param name="tag">The tag in long form.</param>
+		/// <returns>The type for a default tag or null if no default tag associated</returns>
+		Type GetTypeForDefaultTag(string tag);
 	}
 }

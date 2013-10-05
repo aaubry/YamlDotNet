@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization
 				var keyEvent = context.Reader.Peek<Scalar>();
 				if (keyEvent != null)
 				{
-					if (keyEvent.Value == Settings.PrefixForItems)
+					if (keyEvent.Value == Settings.SpecialCollectionMember)
 					{
 						pureDictionaryProcessor.ReadYaml(context, thisObject, thisObject.GetType());
 						return;
@@ -60,7 +60,7 @@ namespace YamlDotNet.Serialization
 					context.WriteYaml(memberValue, memberType);
 				}
 
-				context.Writer.Emit(new ScalarEventInfo(Settings.PrefixForItems, typeof(string)));
+				context.Writer.Emit(new ScalarEventInfo(Settings.SpecialCollectionMember, typeof(string)));
 				pureDictionaryProcessor.WriteYaml(context, thisObject, thisObject.GetType());
 			}
 		}

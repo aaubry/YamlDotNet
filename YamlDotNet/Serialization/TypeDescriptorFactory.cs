@@ -7,16 +7,16 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// A default implementation for the <see cref="ITypeDescriptorFactory"/>.
 	/// </summary>
-	public class DescriptorFactory : ITypeDescriptorFactory
+	public class TypeDescriptorFactory : ITypeDescriptorFactory
 	{
 		private readonly YamlSerializerSettings settings;
 		protected readonly Dictionary<Type,ITypeDescriptor> RegisteredDescriptors = new Dictionary<Type, ITypeDescriptor>();
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DescriptorFactory"/> class.
+		/// Initializes a new instance of the <see cref="TypeDescriptorFactory"/> class.
 		/// </summary>
 		/// <param name="settings">The settings.</param>
-		public DescriptorFactory(YamlSerializerSettings settings)
+		public TypeDescriptorFactory(YamlSerializerSettings settings)
 		{
 			this.settings = settings;
 		}
