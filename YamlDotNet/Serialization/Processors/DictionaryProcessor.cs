@@ -6,7 +6,7 @@ using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Processors
 {
-	public class DictionaryProcessor : ObjectProcessor
+	internal class DictionaryProcessor : ObjectProcessor
 	{
 		private readonly PureDictionaryProcessor pureDictionaryProcessor;
 
@@ -15,12 +15,20 @@ namespace YamlDotNet.Serialization.Processors
 			pureDictionaryProcessor = new PureDictionaryProcessor(settings);
 		}
 
+		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
+		{
+			var dictionaryDescriptor = (DictionaryDescriptor) typeDescriptor;
+
+			// If the dictionary is pure, we can directly output a sequence instead of a mapping
+			return dictionaryDescriptor.IsPureDictionary;
+		}
+
 		protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
 			var dictionary = (IDictionary) thisObject;
 			var dictionaryDescriptor = (DictionaryDescriptor) typeDescriptor;
 
-			if (!dictionaryDescriptor.HasMembers)
+			if (dictionaryDescriptor.IsPureDictionary)
 			{
 				var key = context.ReadYaml(null, dictionaryDescriptor.KeyType);
 				var value = context.ReadYaml(null, dictionaryDescriptor.ValueType);
@@ -33,6 +41,7 @@ namespace YamlDotNet.Serialization.Processors
 				{
 					if (keyEvent.Value == Settings.SpecialCollectionMember)
 					{
+						context.Reader.Accept<Scalar>();
 						pureDictionaryProcessor.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 						return;
 					}
@@ -44,7 +53,8 @@ namespace YamlDotNet.Serialization.Processors
 
 		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			if (!typeDescriptor.HasMembers)
+			var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
+			if (dictionaryDescriptor.IsPureDictionary)
 			{
 				pureDictionaryProcessor.WriteItems(context, thisObject, typeDescriptor);
 			}

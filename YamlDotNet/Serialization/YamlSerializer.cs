@@ -74,8 +74,7 @@ namespace YamlDotNet.Serialization
 				var context = new SerializerContext(this)
 					{
 						Reader = reader,
-						ObjectProcessor = new ChainedProcessor(new ObjectProcessor(Settings)),
-						PrimitiveProcessor = new PrimitiveProcessor()
+						ObjectProcessor = CreateProcessor(settings),
 					};
 				context.ReadYaml = (readValue, readType) => ReadYamlInternal(context, readValue, readType);
 				result = ReadYamlInternal(context, null, expectedType);
@@ -101,6 +100,11 @@ namespace YamlDotNet.Serialization
             context.Writer = writer;
 			throw new NotImplementedException();
         }
+
+		private IYamlProcessor CreateProcessor(YamlSerializerSettings settings)
+		{
+			return new ChainedProcessor(new RoutingProcessor(settings));
+		}
 
         private IEventEmitter CreateEmitter(Stream stream, SerializerContext context)
         {
@@ -163,18 +167,17 @@ namespace YamlDotNet.Serialization
 
 			var typeDescriptor = context.FindTypeDescriptor(type);
 
-			if (node is Scalar)
+			// When the node is not scalar, we need to instantiate the type directly
+			if (!(node is Scalar))
 			{
-				return context.PrimitiveProcessor.ReadYaml(context, value, typeDescriptor);
-			}
-			
-			// Else this is an object
-			if (value == null)
-			{
-				value = context.CreateType(type);
+				// Else this is an object
 				if (value == null)
 				{
-					throw new YamlException("Unexpected null value");
+					value = context.CreateType(type);
+					if (value == null)
+					{
+						throw new YamlException("Unexpected null value");
+					}
 				}
 			}
 

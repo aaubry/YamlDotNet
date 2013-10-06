@@ -125,10 +125,12 @@
     <Compile Include="Serialization\JsonEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Serialization\Processors\CollectionProcessor.cs" />
     <Compile Include="Serialization\Processors\DictionaryProcessor.cs" />
     <Compile Include="Serialization\Processors\ObjectProcessor.cs" />
     <Compile Include="Schemas\SchemaBase.cs" />
     <Compile Include="Serialization\Processors\PrimitiveProcessor.cs" />
+    <Compile Include="Serialization\Processors\RoutingProcessor.cs" />
     <Compile Include="Serialization\SerializerContext.cs" />
     <Compile Include="Serialization\AttributeRegistry.cs" />
     <Compile Include="Serialization\TagTypeRegistry.cs" />
