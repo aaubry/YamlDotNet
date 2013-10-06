@@ -4,9 +4,9 @@ using System.Linq;
 using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Processors
 {
-	internal class DictionaryProcessor : ObjectProcessor
+	public class DictionaryProcessor : ObjectProcessor
 	{
 		private readonly PureDictionaryProcessor pureDictionaryProcessor;
 

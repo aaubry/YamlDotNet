@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Processors
 {
-	internal class ChainedProcessor : IYamlProcessor
+	public class ChainedProcessor : IYamlProcessor
 	{
 		private readonly IYamlProcessor next;
 

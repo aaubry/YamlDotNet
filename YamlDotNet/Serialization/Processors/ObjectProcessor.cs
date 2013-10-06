@@ -1,26 +1,43 @@
 ﻿using System;
 using YamlDotNet.Events;
-using YamlDotNet.Serialization.Descriptors;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Processors
 {
+	/// <summary>
+	/// Default processor for serializing an object.
+	/// </summary>
 	public class ObjectProcessor : IYamlProcessor
 	{
 		private readonly YamlSerializerSettings settings;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ObjectProcessor"/> class.
+		/// </summary>
+		/// <param name="settings">The settings.</param>
+		/// <exception cref="System.ArgumentNullException">settings</exception>
 		public ObjectProcessor(YamlSerializerSettings settings)
 		{
 			if (settings == null) throw new ArgumentNullException("settings");
 			this.settings = settings;
 		}
 
+		/// <summary>
+		/// Gets the settings.
+		/// </summary>
+		/// <value>The settings.</value>
 		public YamlSerializerSettings Settings
 		{
 			get { return settings; }
 		}
 
-		protected virtual bool IsSequence(ITypeDescriptor typeDescriptor)
+		/// <summary>
+		/// Checks if a type is a sequence.
+		/// </summary>
+		/// <param name="typeDescriptor">The type descriptor.</param>
+		/// <returns><c>true</c> if a type is a sequence, <c>false</c> otherwise.</returns>
+		protected virtual bool CheckIsSequence(ITypeDescriptor typeDescriptor)
 		{
+			// By default return false
 			return false;
 		}
 
@@ -45,8 +62,8 @@ namespace YamlDotNet.Serialization
 			}
 
 			// Get the object accessor for the corresponding class
-			var typeDescriptor = context.TypeDescriptorFactory.Find(value.GetType());
-			var isSequence = IsSequence(typeDescriptor);
+			var typeDescriptor = context.FindTypeDescriptor(value.GetType());
+			var isSequence = CheckIsSequence(typeDescriptor);
 
 			if (isSequence)
 			{
@@ -103,9 +120,9 @@ namespace YamlDotNet.Serialization
 			var tag = typeOfValue == type ? null : context.TagFromType(typeOfValue);
 
 			// Get the object accessor for the corresponding class
-			var typeDescriptor = context.TypeDescriptorFactory.Find(typeOfValue);
+			var typeDescriptor = context.FindTypeDescriptor(typeOfValue);
 
-			var isSequence = IsSequence(typeDescriptor);
+			var isSequence = CheckIsSequence(typeDescriptor);
 
 			if (isSequence)
 			{
