@@ -22,7 +22,7 @@ namespace YamlDotNet.Test
 			TestJsonSchemaCommon(schema);
 
 			// Json should not accept plain literal
-			Assert.Equal(schema.GetDefaultTag(new Scalar(null, null, "boom", ScalarStyle.Plain, true, false)), null);
+			Assert.Equal(null, schema.GetDefaultTag(new Scalar(null, null, "boom", ScalarStyle.Plain, true, false)));
 		}
 
 		[Fact]
@@ -46,39 +46,39 @@ namespace YamlDotNet.Test
 
 		public void TestFailsafeSchemaCommon(IYamlSchema schema)
 		{
-			Assert.Equal(schema.GetDefaultTag(new Scalar("true")), SchemaBase.StrLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("custom", "boom")), SchemaBase.StrLongTag);
-			Assert.Equal(schema.GetDefaultTag(new MappingStart()), FailsafeSchema.MapLongTag);
-			Assert.Equal(schema.GetDefaultTag(new SequenceStart()), FailsafeSchema.SeqLongTag);
+			Assert.Equal(SchemaBase.StrLongTag, schema.GetDefaultTag(new Scalar("true")));
+			Assert.Equal(SchemaBase.StrLongTag, schema.GetDefaultTag(new Scalar("custom", "boom")));
+			Assert.Equal(FailsafeSchema.MapLongTag, schema.GetDefaultTag(new MappingStart()));
+			Assert.Equal(FailsafeSchema.SeqLongTag, schema.GetDefaultTag(new SequenceStart()));
 
-			Assert.Equal(schema.ExpandTag("!!map"), FailsafeSchema.MapLongTag);
-			Assert.Equal(schema.ExpandTag("!!seq"), FailsafeSchema.SeqLongTag);
-			Assert.Equal(schema.ExpandTag("!!str"), SchemaBase.StrLongTag);
+			Assert.Equal(FailsafeSchema.MapLongTag, schema.ExpandTag("!!map"));
+			Assert.Equal(FailsafeSchema.SeqLongTag, schema.ExpandTag("!!seq"));
+			Assert.Equal(SchemaBase.StrLongTag, schema.ExpandTag("!!str"));
 
-			Assert.Equal(schema.ShortenTag(FailsafeSchema.MapLongTag), "!!map");
-			Assert.Equal(schema.ShortenTag(FailsafeSchema.SeqLongTag), "!!seq");
-			Assert.Equal(schema.ShortenTag(SchemaBase.StrLongTag), "!!str");
+			Assert.Equal("!!map", schema.ShortenTag(FailsafeSchema.MapLongTag));
+			Assert.Equal("!!seq", schema.ShortenTag(FailsafeSchema.SeqLongTag));
+			Assert.Equal("!!str", schema.ShortenTag(SchemaBase.StrLongTag));
 
 			TryParse(schema, "true", SchemaBase.StrLongTag, "true");
 		}
 
 		public void TestJsonSchemaCommon(IYamlSchema schema)
 		{
-			Assert.Equal(schema.GetDefaultTag(new Scalar(null, null, "true", ScalarStyle.DoubleQuoted, false, false)), SchemaBase.StrLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("true")), JsonSchema.BoolLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("null")), JsonSchema.NullLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("5")), JsonSchema.IntLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("5.5")), JsonSchema.FloatLongTag);
+			Assert.Equal(SchemaBase.StrLongTag, schema.GetDefaultTag(new Scalar(null, null, "true", ScalarStyle.DoubleQuoted, false, false)));
+			Assert.Equal(JsonSchema.BoolLongTag, schema.GetDefaultTag(new Scalar("true")));
+			Assert.Equal(JsonSchema.NullLongTag, schema.GetDefaultTag(new Scalar("null")));
+			Assert.Equal(JsonSchema.IntLongTag, schema.GetDefaultTag(new Scalar("5")));
+			Assert.Equal(JsonSchema.FloatLongTag, schema.GetDefaultTag(new Scalar("5.5")));
 
-			Assert.Equal(schema.ExpandTag("!!null"), JsonSchema.NullLongTag);
-			Assert.Equal(schema.ExpandTag("!!bool"), JsonSchema.BoolLongTag);
-			Assert.Equal(schema.ExpandTag("!!int"), JsonSchema.IntLongTag);
-			Assert.Equal(schema.ExpandTag("!!float"), JsonSchema.FloatLongTag);
+			Assert.Equal(JsonSchema.NullLongTag, schema.ExpandTag("!!null"));
+			Assert.Equal(JsonSchema.BoolLongTag, schema.ExpandTag("!!bool"));
+			Assert.Equal(JsonSchema.IntLongTag, schema.ExpandTag("!!int"));
+			Assert.Equal(JsonSchema.FloatLongTag, schema.ExpandTag("!!float"));
 
-			Assert.Equal(schema.ShortenTag(JsonSchema.NullLongTag), "!!null");
-			Assert.Equal(schema.ShortenTag(JsonSchema.BoolLongTag), "!!bool");
-			Assert.Equal(schema.ShortenTag(JsonSchema.IntLongTag), "!!int");
-			Assert.Equal(schema.ShortenTag(JsonSchema.FloatLongTag), "!!float");
+			Assert.Equal("!!null", schema.ShortenTag(JsonSchema.NullLongTag));
+			Assert.Equal("!!bool", schema.ShortenTag(JsonSchema.BoolLongTag));
+			Assert.Equal("!!int", schema.ShortenTag(JsonSchema.IntLongTag));
+			Assert.Equal("!!float", schema.ShortenTag(JsonSchema.FloatLongTag));
 
 			TryParse(schema, "null", JsonSchema.NullLongTag, null);
 			TryParse(schema, "true", JsonSchema.BoolLongTag, true);
@@ -93,10 +93,10 @@ namespace YamlDotNet.Test
 			TestJsonSchemaCommon(schema);
 
 			// Core schema is accepting plain string
-			Assert.Equal(schema.GetDefaultTag(new Scalar("boom")), SchemaBase.StrLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("True")), JsonSchema.BoolLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("TRUE")), JsonSchema.BoolLongTag);
-			Assert.Equal(schema.GetDefaultTag(new Scalar("0x10")), JsonSchema.IntLongTag);
+			Assert.Equal(SchemaBase.StrLongTag, schema.GetDefaultTag(new Scalar("boom")));
+			Assert.Equal(JsonSchema.BoolLongTag, schema.GetDefaultTag(new Scalar("True")));
+			Assert.Equal(JsonSchema.BoolLongTag, schema.GetDefaultTag(new Scalar("TRUE")));
+			Assert.Equal(JsonSchema.IntLongTag, schema.GetDefaultTag(new Scalar("0x10")));
 
 			TryParse(schema, "TRUE", JsonSchema.BoolLongTag, true);
 			TryParse(schema, "FALSE", JsonSchema.BoolLongTag, false);
@@ -109,8 +109,8 @@ namespace YamlDotNet.Test
 			string tag;
 			object value;
 			Assert.True(schema.TryParse(new Scalar(scalar), true, out tag, out value));
-			Assert.Equal(tag, expectedLongTag);
-			Assert.Equal(value, expectedValue);
+			Assert.Equal(expectedLongTag, tag);
+			Assert.Equal(expectedValue, value);
 		}
 	}
 }
