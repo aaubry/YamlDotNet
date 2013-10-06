@@ -1,33 +1,97 @@
 ﻿using System;
 using System.IO;
 using YamlDotNet.Events;
+using YamlDotNet.Serialization.Processors;
 
 namespace YamlDotNet.Serialization
 {
     public class YamlSerializer
     {
         private readonly YamlSerializerSettings settings;
-	    internal readonly ITagTypeRegistry TagTypeRegistry;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlSerializer"/> class.
+		/// </summary>
         public YamlSerializer() : this(null)
         {
         }
 
+		/// <summary>
+		/// Gets the settings.
+		/// </summary>
+		/// <value>The settings.</value>
         public YamlSerializerSettings Settings { get { return settings; } }
 
         public YamlSerializer(YamlSerializerSettings settings)
         {
             this.settings = settings ?? new YamlSerializerSettings();
-	        TagTypeRegistry = settings.TagTypeRegistry;
         }
 
 		public object Deserialize(Stream stream)
 		{
-			var context = new SerializerContext(this);
-			context.ReadYaml = (readValue, type) => ReadYamlInternal(context, readValue, type);
-			throw new NotImplementedException();
+			return Deserialize(stream, null);
 		}
 
+		public object Deserialize(TextReader reader)
+		{
+			return Deserialize((TextReader)reader, null);
+		}
+
+		public object Deserialize(Stream stream, Type expectedType)
+		{
+			if (stream == null) throw new ArgumentNullException("stream");
+
+			return Deserialize(new StreamReader(stream), null);
+		}
+
+		public object Deserialize(string fromText)
+		{
+			return Deserialize(fromText, null);
+		}
+
+		public object Deserialize(string fromText, Type expectedType)
+		{
+			if (fromText == null) throw new ArgumentNullException("fromText");
+			return Deserialize(new StringReader(fromText), expectedType);
+		}
+
+	    public object Deserialize(TextReader reader, Type expectedType)
+	    {
+		    if (reader == null) throw new ArgumentNullException("reader");
+		    return Deserialize(new EventReader(new Parser(reader)), null);
+	    }
+
+	    public object Deserialize(EventReader reader, Type expectedType)
+		{
+			if (reader == null) throw new ArgumentNullException("reader");
+			
+			var hasStreamStart = reader.Allow<StreamStart>() != null;
+			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
+
+			object result = null;
+			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
+			{
+				var context = new SerializerContext(this)
+					{
+						Reader = reader,
+						Processor = new ChainedProcessor(new ObjectProcessor(Settings))
+					};
+				context.ReadYaml = (readValue, readType) => ReadYamlInternal(context, readValue, readType);
+				result = ReadYamlInternal(context, null, expectedType);
+			}
+
+			if (hasDocumentStart)
+			{
+				reader.Expect<DocumentEnd>();
+			}
+
+			if (hasStreamStart)
+			{
+				reader.Expect<StreamEnd>();
+			}
+
+			return result;
+		}
 
         public void Serialize(Stream stream, object value)
         {
@@ -39,7 +103,7 @@ namespace YamlDotNet.Serialization
 
         private IEventEmitter CreateEmitter(Stream stream, SerializerContext context)
         {
-            return CreateEmitter(new Emitter(new StreamWriter(stream)), context);
+            return CreateEmitter(new Emitter(new StreamWriter(stream), context.Settings.PreferredIndent), context);
         }
 
         private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)
@@ -53,7 +117,6 @@ namespace YamlDotNet.Serialization
 	        return writer;
         }
 
-
 		private object ReadYamlInternal(SerializerContext context, object value, Type expectedType)
 		{
 			var node = context.Reader.Peek<NodeEvent>();
@@ -65,7 +128,7 @@ namespace YamlDotNet.Serialization
 			// If expected type is object, set it to null, else use expected
 			var type = expectedType == typeof(object) ? null : expectedType;
 
-			// Tries to get a Type from the TagTypeRegistry
+			// Tries to get a Type from the TagTypes
 			var typeFromTag = context.TypeFromTag(node.Tag);
 
 			// Use typeFromTag when type are different
@@ -92,8 +155,23 @@ namespace YamlDotNet.Serialization
 				throw new YamlException(node.Start, node.End, "Unable to find a type for this element [{0}]".DoFormat(node));
 			}
 
-			// handle type here.
-			throw new NotImplementedException();
+			if (type == null)
+			{
+				type = value.GetType();
+			}
+			else if (value == null)
+			{
+				value = context.CreateType(type);
+				if (value == null)
+				{
+					throw new YamlException("Unexpected null value");
+				}
+			}
+
+			var typeDescriptor = context.FindTypeDescriptor(type);
+
+			// Call the top level processor
+			return context.Processor.ReadYaml(context, value, typeDescriptor);
 		}
     }
 }

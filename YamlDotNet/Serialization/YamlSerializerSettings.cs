@@ -12,24 +12,44 @@ namespace YamlDotNet.Serialization
 	/// </summary>
     public class YamlSerializerSettings
 	{
-		private ITagTypeRegistry tagTypeRegistry;
-	    private IAttributeRegistry attributeRegistry;
+		private readonly TagTypeRegistry tagTypeRegistry;
+	    private readonly AttributeRegistry attributeRegistry;
 		private IYamlSchema schema;
 		private string specialCollectionMember;
+		private int preferredIndent;
+		private Func<Type, object> typeFactory;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlSerializerSettings"/> class.
 		/// </summary>
 	    public YamlSerializerSettings()
-	    {
+		{
+			PreferredIndent = 2;
 		    SortKeyForMapping = true;
 		    EmitJsonComptible = false;
 		    EmitCapacityForList = false;
 			SpecialCollectionMember = "~Items";
 			schema = new CoreSchema();
 			tagTypeRegistry = new TagTypeRegistry();
-			AttributeRegistry = new AttributeRegistry();
-	    }
+			attributeRegistry = new AttributeRegistry();
+			TypeFactory = Activator.CreateInstance;
+		}
+
+
+		/// <summary>
+		/// Gets or sets the preferred indentation. Default is 2.
+		/// </summary>
+		/// <value>The preferred indentation.</value>
+		/// <exception cref="System.ArgumentOutOfRangeException">value;Expecting value > 0</exception>
+		public int PreferredIndent
+		{
+			get { return preferredIndent; }
+			set
+			{
+				if (value < 1) throw new ArgumentOutOfRangeException("value", "Expecting value > 0");
+				preferredIndent = value;
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to enable sorting keys for YAML mapping. Default is true. See remarks.
@@ -80,17 +100,12 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
-		/// Gets or sets the attribute registry.
+		/// Gets the attribute registry.
 		/// </summary>
 		/// <value>The attribute registry.</value>
-		public IAttributeRegistry AttributeRegistry
+		public AttributeRegistry Attributes
 		{
 			get { return attributeRegistry; }
-			set
-			{
-				if (value == null) throw new ArgumentNullException("value");
-				attributeRegistry = value;
-			}
 		}
 
 		/// <summary>
@@ -98,13 +113,23 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <value>The tag type registry.</value>
 		/// <exception cref="System.ArgumentNullException">value</exception>
-		public ITagTypeRegistry TagTypeRegistry
+		public TagTypeRegistry TagTypes
 		{
 			get { return tagTypeRegistry; }
+		}
+
+
+		/// <summary>
+		/// Gets or sets the default factory to instantiate a type. Default is <see cref="Activator.CreateInstance(System.Type)"/>.
+		/// </summary>
+		/// <value>The default factory to instantiate a type.</value>
+		public Func<Type, object> TypeFactory
+		{
+			get { return typeFactory; }
 			set
 			{
 				if (value == null) throw new ArgumentNullException("value");
-				tagTypeRegistry = value;
+				typeFactory = value;
 			}
 		}
 

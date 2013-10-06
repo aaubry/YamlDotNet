@@ -34,16 +34,19 @@ namespace YamlDotNet.Serialization
 		public void AddTagAlias(string tag, Type type)
 		{
 			if (tag == null) throw new ArgumentNullException("tag");
+			if (type == null) throw new ArgumentNullException("type");
 
 			// Prefix all tags by !
 			tag = Uri.EscapeUriString(tag);
 			tag = tag.StartsWith("!") ? tag : "!" + tag;
 
 			tagToType[tag] = type;
+			typeToTag[type] = tag;
 
-			if (type != null)
+			// Add automatically the assembly for lookup
+			if (!lookupAssemblies.Contains(type.Assembly))
 			{
-				typeToTag[type] = tag;
+				lookupAssemblies.Add(type.Assembly);
 			}
 		}
 

@@ -23,8 +23,9 @@ namespace YamlDotNet.Serialization
         {
             Serializer = serializer;
             settings = serializer.Settings;
-	        tagTypeRegistry = serializer.TagTypeRegistry;
-	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.AttributeRegistry);
+	        tagTypeRegistry = settings.TagTypes;
+	        CreateType = settings.TypeFactory;
+	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes);
         }
 
 		/// <summary>
@@ -62,6 +63,10 @@ namespace YamlDotNet.Serialization
 	    /// </summary>
 		public Func<object, Type, object> ReadYaml { get; set; }
 
+		/// <summary>
+		/// Gets or sets the type of the create.
+		/// </summary>
+		/// <value>The type of the create.</value>
 		public Func<Type, object> CreateType { get; set; }
 
 		/// <summary>
@@ -116,6 +121,8 @@ namespace YamlDotNet.Serialization
 		{
 			return Settings.Schema.TryParse(scalar, true, out defaultTag, out value);
 		}
+
+		internal IYamlProcessor Processor { get; set; }
 
 		internal string GetAnchor()
 		{

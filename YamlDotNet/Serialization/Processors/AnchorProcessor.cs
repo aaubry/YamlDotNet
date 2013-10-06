@@ -13,7 +13,7 @@ namespace YamlDotNet.Serialization.Processors
 		{
 		}
 
-		public override object ReadYaml(SerializerContext context, object value, Type expectedType)
+		public override object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 
@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.Processors
 			}
 
 			// Deserialize the current node
-			value = base.ReadYaml(context, value, expectedType);
+			value = base.ReadYaml(context, value, typeDescriptor);
 
 			// Store Anchor (&oxxx) and override any defined anchor 
 			if (anchor != null)
@@ -49,14 +49,14 @@ namespace YamlDotNet.Serialization.Processors
 			return value;
 		}
 
-		public override void WriteYaml(SerializerContext context, object value, Type type)
+		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			if (value != null && Type.GetTypeCode(value.GetType()) == TypeCode.Object)
 			{
 				string alias;
 				if (ObjectToString.TryGetValue(value, out alias))
 				{
-					context.Writer.Emit(new AliasEventInfo(value, type) {Alias = alias});
+					context.Writer.Emit(new AliasEventInfo(value, typeDescriptor.Type) {Alias = alias});
 					return;
 				}
 				else
@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization.Processors
 				}
 			}
 
-			base.WriteYaml(context, value, type);
+			base.WriteYaml(context, value, typeDescriptor);
 		}
 
 		private Dictionary<string, object> AliasToObject
