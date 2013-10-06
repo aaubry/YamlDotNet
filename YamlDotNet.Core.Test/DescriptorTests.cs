@@ -65,7 +65,7 @@ namespace YamlDotNet.Test
 			var descriptor = new ObjectDescriptor(attributeRegistry, typeof(TestObject));
 
 			// Verify members
-			Assert.Equal(descriptor.Count, 8);
+			Assert.Equal(8, descriptor.Count);
 
 			// Check names and their orders
 			Assert.Equal(descriptor.Members.Select(memberDescriptor => memberDescriptor.Name), new []
@@ -83,14 +83,14 @@ namespace YamlDotNet.Test
 			var instance = new TestObject {Name = "Yes", Property = "property"};
 
 			// Check field accessor
-			Assert.Equal(descriptor["Name"].Get(instance), "Yes");
+			Assert.Equal("Yes", descriptor["Name"].Get(instance));
 			descriptor["Name"].Set(instance, "No");
-			Assert.Equal(instance.Name, "No");
+			Assert.Equal("No", instance.Name);
 
 			// Check property accessor
-			Assert.Equal(descriptor["Property"].Get(instance), "property");
+			Assert.Equal("property", descriptor["Property"].Get(instance));
 			descriptor["Property"].Set(instance, "property1");
-			Assert.Equal(instance.Property, "property1");
+			Assert.Equal("property1", instance.Property);
 
 			// Check ShouldSerialize
 			Assert.True(descriptor["Name"].ShouldSerialize(instance));
@@ -123,16 +123,25 @@ namespace YamlDotNet.Test
 			var descriptor = new CollectionDescriptor(attributeRegistry, typeof (List<string>));
 
 			// Only Capacity as a member
-			Assert.Equal(descriptor.Count, 1);
-			Assert.True(descriptor.IsPureCollection);
-			Assert.Equal(descriptor.ElementType, typeof(string));
+			Assert.Equal(1, descriptor.Count);
+			Assert.True(descriptor.HasOnlyCapacity);
+			Assert.False(descriptor.IsPureCollection);
+			Assert.Equal(typeof(string), descriptor.ElementType);
 
 			descriptor = new CollectionDescriptor(attributeRegistry, typeof(NonPureCollection));
 
 			// Only Capacity as a member
-			Assert.Equal(descriptor.Count, 2);
+			Assert.Equal(2, descriptor.Count);
+			Assert.False(descriptor.HasOnlyCapacity);
 			Assert.False(descriptor.IsPureCollection);
-			Assert.Equal(descriptor.ElementType, typeof(int));
+			Assert.Equal(typeof(int), descriptor.ElementType);
+
+			descriptor = new CollectionDescriptor(attributeRegistry, typeof(ArrayList));
+			// Only Capacity as a member
+			Assert.Equal(1, descriptor.Count);
+			Assert.True(descriptor.HasOnlyCapacity);
+			Assert.False(descriptor.IsPureCollection);
+			Assert.Equal(typeof(object), descriptor.ElementType);		
 		}
 
 		/// <summary>
@@ -149,23 +158,44 @@ namespace YamlDotNet.Test
 			var attributeRegistry = new AttributeRegistry();
 			var descriptor = new DictionaryDescriptor(attributeRegistry, typeof(Dictionary<int, string>));
 
-			var instance = new Dictionary<int, string>();
-
-			// Only Capacity as a member
-			Assert.Equal(descriptor.Count, 2);
+			Assert.Equal(0, descriptor.Count);
 			Assert.True(descriptor.IsPureDictionary);
-			Assert.Equal(descriptor.KeyType, typeof(int));
-			Assert.Equal(descriptor.ValueType, typeof(string));
-
-			// TODO add tests for ReadOnly members
+			Assert.Equal(typeof(int), descriptor.KeyType);
+			Assert.Equal(typeof(string), descriptor.ValueType);
 
 			descriptor = new DictionaryDescriptor(attributeRegistry, typeof(NonPureDictionary));
-
-			// Only Capacity as a member
-			Assert.Equal(descriptor.Count, 3);
+			Assert.Equal(1, descriptor.Count);
 			Assert.False(descriptor.IsPureDictionary);
-			Assert.Equal(descriptor.KeyType, typeof(float));
-			Assert.Equal(descriptor.ValueType, typeof(object));
+			Assert.Equal(typeof(float), descriptor.KeyType);
+			Assert.Equal(typeof(object), descriptor.ValueType);
+		}
+
+		[Fact]
+		public void TestArrayDescriptor()
+		{
+			var attributeRegistry = new AttributeRegistry();
+			var descriptor = new ArrayDescriptor(attributeRegistry, typeof(int[]));
+
+			Assert.Equal(0, descriptor.Count);
+			Assert.Equal(typeof(int), descriptor.ElementType);
+		}
+
+		public enum MyEnum
+		{
+			A,
+			B
+		}
+
+		[Fact]
+		public void TestPrimitiveDescriptor()
+		{
+			var attributeRegistry = new AttributeRegistry();
+			var descriptor = new PrimitiveDescriptor(attributeRegistry, typeof(int));
+			Assert.Equal(0, descriptor.Count);
+
+			Assert.True(PrimitiveDescriptor.IsPrimitive(typeof(MyEnum)));
+			Assert.False(PrimitiveDescriptor.IsPrimitive(typeof (object)));
+			Assert.False(PrimitiveDescriptor.IsPrimitive(typeof (IList)));
 		}
 	}
 }

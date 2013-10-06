@@ -9,6 +9,9 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class DictionaryDescriptor : ObjectDescriptor
 	{
+		private static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
+		private static readonly List<string> ListOfMembersToRemove = new List<string> {"Comparer", "Keys", "Values"};
+
 		private readonly Type keyType;
 		private readonly Type valueType;
 
@@ -20,6 +23,9 @@ namespace YamlDotNet.Serialization.Descriptors
 		public DictionaryDescriptor(IAttributeRegistry attributeRegistry, Type type)
 			: base(attributeRegistry, type)
 		{
+			if (!IsDictionary(type))
+				throw new ArgumentException("Expecting a type inheriting from System.Collections.IDictionary", "type");
+
 			// extract Key, Value types from IDictionary<??, ??>
 			var interfaceType = type.GetInterface(typeof(IDictionary<,>));
 			if (interfaceType != null)
@@ -34,7 +40,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			}
 
 			// Only Keys and Values
-			IsPureDictionary = Count == 2;
+			IsPureDictionary = Count == 0;
 		}
 
 		/// <summary>
@@ -69,6 +75,28 @@ namespace YamlDotNet.Serialization.Descriptors
 		public bool IsReadOnly(object thisObject)
 		{
 			return ((IDictionary)thisObject).IsReadOnly;
+		}
+
+		/// <summary>
+		/// Determines whether the specified type is a .NET dictionary.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns><c>true</c> if the specified type is dictionary; otherwise, <c>false</c>.</returns>
+		public static bool IsDictionary(Type type)
+		{
+			return typeof (IDictionary).IsAssignableFrom(type);
+		}
+
+		protected override bool PrepareMember(MemberDescriptorBase member)
+		{
+			// Remove SyncRoot from members as well
+			if (member is PropertyDescriptor && (member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace)
+				&& ListOfMembersToRemove.Contains(member.Name))
+			{
+				return false;
+			}
+
+			return base.PrepareMember(member);
 		}
 	}
 }

@@ -96,6 +96,7 @@
     <Compile Include="Serialization\Descriptors\FieldDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\MemberDescriptorBase.cs" />
     <Compile Include="Serialization\Descriptors\ObjectDescriptor.cs" />
+    <Compile Include="Serialization\Descriptors\PrimitiveDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\PropertyDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\TypeDescriptorFactory.cs" />
     <Compile Include="Serialization\DocumentLoadingState.cs" />

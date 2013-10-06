@@ -138,7 +138,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			return memberList;
 		}
 
-		private bool PrepareMember(MemberDescriptorBase member)
+		protected virtual bool PrepareMember(MemberDescriptorBase member)
 		{
 			var memberType = member.Type;
 
@@ -150,7 +150,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			else
 			{
 				// Else we cannot only assign its content if it is a class
-				member.SerializeMemberMode = memberType.IsClass ? SerializeMemberMode.Content : SerializeMemberMode.Never;
+				member.SerializeMemberMode = memberType.IsClass || memberType.IsInterface ? SerializeMemberMode.Content : SerializeMemberMode.Never;
 			}
 
 
