@@ -64,6 +64,7 @@
     <Compile Include="ScannerTestHelper.cs" />
     <Compile Include="ScannerTests.cs" />
     <Compile Include="SchemaTests.cs" />
+    <Compile Include="SerializationTests.cs" />
     <Compile Include="YamlTest.cs" />
   </ItemGroup>
   <ItemGroup>
