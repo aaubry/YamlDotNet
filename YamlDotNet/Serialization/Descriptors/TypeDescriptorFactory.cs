@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace YamlDotNet.Serialization.Descriptors
@@ -10,7 +9,7 @@ namespace YamlDotNet.Serialization.Descriptors
 	public class TypeDescriptorFactory : ITypeDescriptorFactory
 	{
 		private readonly IAttributeRegistry attributeRegistry;
-		protected readonly Dictionary<Type,ITypeDescriptor> RegisteredDescriptors = new Dictionary<Type, ITypeDescriptor>();
+		private readonly Dictionary<Type,ITypeDescriptor> registeredDescriptors = new Dictionary<Type, ITypeDescriptor>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TypeDescriptorFactory" /> class.
@@ -18,16 +17,8 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <param name="attributeRegistry">The attribute registry.</param>
 		public TypeDescriptorFactory(IAttributeRegistry attributeRegistry)
 		{
+			if (attributeRegistry == null) throw new ArgumentNullException("attributeRegistry");
 			this.attributeRegistry = attributeRegistry;
-		}
-
-		/// <summary>
-		/// Gets the settings.
-		/// </summary>
-		/// <value>The settings.</value>
-		public IAttributeRegistry AttributeRegistry
-		{
-			get { return attributeRegistry; }
 		}
 
 		public ITypeDescriptor Find(Type type)
@@ -37,7 +28,7 @@ namespace YamlDotNet.Serialization.Descriptors
 
 			// Caching is integrated in this class, avoiding a ChainedTypeDescriptorFactory
 			ITypeDescriptor descriptor;
-			if (RegisteredDescriptors.TryGetValue(type, out descriptor))
+			if (registeredDescriptors.TryGetValue(type, out descriptor))
 			{
 				return descriptor;
 			}
@@ -45,9 +36,18 @@ namespace YamlDotNet.Serialization.Descriptors
 			descriptor = Create(type);
 
 			// Register this descriptor
-			RegisteredDescriptors.Add(type, descriptor);
+			registeredDescriptors.Add(type, descriptor);
 
 			return descriptor;
+		}
+
+		/// <summary>
+		/// Gets the settings.
+		/// </summary>
+		/// <value>The settings.</value>
+		protected IAttributeRegistry AttributeRegistry
+		{
+			get { return attributeRegistry; }
 		}
 
 		/// <summary>
@@ -58,12 +58,16 @@ namespace YamlDotNet.Serialization.Descriptors
 		protected virtual ITypeDescriptor Create(Type type)
 		{
 			ITypeDescriptor descriptor;
-			if (typeof(IDictionary).IsAssignableFrom(type))
+			if (PrimitiveDescriptor.IsPrimitive(type))
+			{
+				descriptor = new PrimitiveDescriptor(attributeRegistry, type);
+			}
+			else if (DictionaryDescriptor.IsDictionary(type))
 			{
 				// IDictionary
 				descriptor = new DictionaryDescriptor(attributeRegistry, type);
 			}
-			else if (typeof(ICollection).IsAssignableFrom(type))
+			else if (CollectionDescriptor.IsCollection(type))
 			{
 				// ICollection
 				descriptor = new CollectionDescriptor(attributeRegistry, type);

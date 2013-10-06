@@ -18,11 +18,15 @@ namespace YamlDotNet.Serialization.Descriptors
 		public ArrayDescriptor(IAttributeRegistry attributeRegistry, Type type)
 			: base(attributeRegistry, type)
 		{
-			if (!type.IsArray) throw new ArgumentException("Expecting arrat type", "type");
-
-			elementType = type.GetElementType();
+			if (!type.IsArray) throw new ArgumentException("Expecting array type", "type");
 
 			// TODO handle dimensions
+			if (type.GetArrayRank() != 1)
+			{
+				throw new ArgumentException("Cannot support dimension [{0}] for type [{1}]. Only supporting 1".DoFormat(type.GetArrayRank(), type.FullName));
+			}
+
+			elementType = type.GetElementType();
 		}
 
 		/// <summary>
@@ -30,5 +34,14 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// </summary>
 		/// <value>The type of the element.</value>
 		public Type ElementType { get { return elementType; } }
+
+
+		protected override bool PrepareMember(MemberDescriptorBase member)
+		{
+			if (member.Name == "SyncRoot") return false;
+
+			return base.PrepareMember(member);
+		}
+
 	}
 }
