@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using YamlDotNet.Events;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Serialization.Processors
 {
-	internal class AnchorProcessor : ChainedProcessor
+	public class AnchorProcessor : ChainedProcessor
 	{
 		private Dictionary<string, object> aliasToObject;
 		private Dictionary<object, string> objectToAlias;
