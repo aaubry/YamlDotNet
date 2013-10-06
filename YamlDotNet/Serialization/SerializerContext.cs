@@ -122,7 +122,9 @@ namespace YamlDotNet.Serialization
 			return Settings.Schema.TryParse(scalar, true, out defaultTag, out value);
 		}
 
-		internal IYamlProcessor Processor { get; set; }
+		internal IYamlProcessor ObjectProcessor { get; set; }
+
+		internal IYamlProcessor PrimitiveProcessor { get; set; }
 
 		internal string GetAnchor()
 		{

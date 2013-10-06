@@ -74,7 +74,8 @@ namespace YamlDotNet.Serialization
 				var context = new SerializerContext(this)
 					{
 						Reader = reader,
-						Processor = new ChainedProcessor(new ObjectProcessor(Settings))
+						ObjectProcessor = new ChainedProcessor(new ObjectProcessor(Settings)),
+						PrimitiveProcessor = new PrimitiveProcessor()
 					};
 				context.ReadYaml = (readValue, readType) => ReadYamlInternal(context, readValue, readType);
 				result = ReadYamlInternal(context, null, expectedType);
@@ -159,7 +160,16 @@ namespace YamlDotNet.Serialization
 			{
 				type = value.GetType();
 			}
-			else if (value == null)
+
+			var typeDescriptor = context.FindTypeDescriptor(type);
+
+			if (node is Scalar)
+			{
+				return context.PrimitiveProcessor.ReadYaml(context, value, typeDescriptor);
+			}
+			
+			// Else this is an object
+			if (value == null)
 			{
 				value = context.CreateType(type);
 				if (value == null)
@@ -168,10 +178,8 @@ namespace YamlDotNet.Serialization
 				}
 			}
 
-			var typeDescriptor = context.FindTypeDescriptor(type);
-
 			// Call the top level processor
-			return context.Processor.ReadYaml(context, value, typeDescriptor);
+			return context.ObjectProcessor.ReadYaml(context, value, typeDescriptor);
 		}
     }
 }
