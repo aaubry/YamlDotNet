@@ -37,6 +37,7 @@ namespace YamlDotNet.Serialization
 
 			// Prefix all tags by !
 			tag = Uri.EscapeUriString(tag);
+			tag = tag.StartsWith("!") ? tag : "!" + tag;
 
 			tagToType[tag] = type;
 
@@ -77,12 +78,14 @@ namespace YamlDotNet.Serialization
 			}
 
 			// Else resolve type from assembly
-			type = Type.GetType(longTag);
+			var tagAsType = longTag.StartsWith("!") ? longTag.Substring(1) : longTag;
+
+			type = Type.GetType(tagAsType);
 			if (type == null)
 			{
 				foreach (var assembly in lookupAssemblies)
 				{
-					type = assembly.GetType(longTag);
+					type = assembly.GetType(tagAsType);
 					if (type != null)
 					{
 						break;

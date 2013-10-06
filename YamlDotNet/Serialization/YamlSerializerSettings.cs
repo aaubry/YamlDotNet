@@ -14,7 +14,6 @@ namespace YamlDotNet.Serialization
 	{
 		private ITagTypeRegistry tagTypeRegistry;
 	    private IAttributeRegistry attributeRegistry;
-	    private ITypeDescriptorFactory typeDescriptorFactory;
 		private IYamlSchema schema;
 		private string specialCollectionMember;
 
@@ -30,7 +29,6 @@ namespace YamlDotNet.Serialization
 			schema = new CoreSchema();
 			tagTypeRegistry = new TagTypeRegistry();
 			AttributeRegistry = new AttributeRegistry();
-			TypeDescriptorFactory = new TypeDescriptorFactory(AttributeRegistry);
 	    }
 
 		/// <summary>
@@ -92,21 +90,6 @@ namespace YamlDotNet.Serialization
 			{
 				if (value == null) throw new ArgumentNullException("value");
 				attributeRegistry = value;
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the type descriptor factory used when trying to find a <see cref="ITypeDescriptor"/>. Default is <see cref="Descriptors.TypeDescriptorFactory"/>
-		/// </summary>
-		/// <value>The type descriptor factory.</value>
-		/// <exception cref="System.ArgumentNullException">value</exception>
-		public ITypeDescriptorFactory TypeDescriptorFactory
-		{
-			get { return typeDescriptorFactory; }
-			set
-			{
-				if (value == null) throw new ArgumentNullException("value");
-				typeDescriptorFactory = value;
 			}
 		}
 
