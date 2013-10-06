@@ -5,7 +5,7 @@ using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Processors
 {
-	public class PrimitiveProcessor : IYamlProcessor
+	internal class PrimitiveProcessor : IYamlProcessor
 	{
 		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{

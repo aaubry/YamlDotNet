@@ -124,8 +124,6 @@ namespace YamlDotNet.Serialization
 
 		internal IYamlProcessor ObjectProcessor { get; set; }
 
-		internal IYamlProcessor PrimitiveProcessor { get; set; }
-
 		internal string GetAnchor()
 		{
 			return Anchors.Count > 0 ? Anchors.Pop() : null;

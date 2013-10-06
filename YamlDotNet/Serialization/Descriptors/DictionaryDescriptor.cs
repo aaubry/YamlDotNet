@@ -65,7 +65,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// Gets or sets a value indicating whether this instance is pure dictionary.
 		/// </summary>
 		/// <value><c>true</c> if this instance is pure dictionary; otherwise, <c>false</c>.</value>
-		public bool IsPureDictionary { get; set; }
+		public bool IsPureDictionary { get; private set; }
 
 		/// <summary>
 		/// Determines whether the value passed is readonly.

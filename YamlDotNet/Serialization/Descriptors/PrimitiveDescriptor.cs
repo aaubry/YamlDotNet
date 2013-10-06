@@ -34,7 +34,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			{
 				case TypeCode.Object:
 				case TypeCode.Empty:
-					return false;
+					return type == typeof (string);
 			}
 			return true;
 		}
