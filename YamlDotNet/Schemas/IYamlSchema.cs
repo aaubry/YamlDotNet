@@ -40,6 +40,15 @@ namespace YamlDotNet.Schemas
 		bool TryParse(Scalar scalar, bool decodeValue, out string defaultTag, out object value);
 
 		/// <summary>
+		/// Gets the default tag and value for the specified <see cref="Scalar" />. The default tag can be different from a actual tag of this <see cref="NodeEvent" />.
+		/// </summary>
+		/// <param name="scalar">The scalar event.</param>
+		/// <param name="type">The type.</param>
+		/// <param name="value">The value extracted from a scalar.</param>
+		/// <returns>System.String.</returns>
+		bool TryParse(Scalar scalar, Type type, out object value);
+
+		/// <summary>
 		/// Gets the type for a default tag.
 		/// </summary>
 		/// <param name="tag">The tag in long form.</param>
