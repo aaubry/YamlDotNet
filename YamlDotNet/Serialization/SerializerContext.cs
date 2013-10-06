@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization
@@ -23,7 +24,7 @@ namespace YamlDotNet.Serialization
             Serializer = serializer;
             settings = serializer.Settings;
 	        tagTypeRegistry = serializer.TagTypeRegistry;
-	        typeDescriptorFactory = settings.TypeDescriptorFactory;
+	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.AttributeRegistry);
         }
 
 		/// <summary>
@@ -42,15 +43,6 @@ namespace YamlDotNet.Serialization
 		public YamlSerializerSettings Settings
 		{
 			get { return settings; }
-		}
-
-		/// <summary>
-		/// Gets the type descriptor factory.
-		/// </summary>
-		/// <value>The type descriptor factory.</value>
-		public ITypeDescriptorFactory TypeDescriptorFactory
-		{
-			get { return typeDescriptorFactory; }
 		}
 
 		/// <summary>
@@ -84,6 +76,16 @@ namespace YamlDotNet.Serialization
 		public Action<object, Type> WriteYaml { get; set; }
 
 		/// <summary>
+		/// Finds the type descriptor for the specified type.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns>An instance of <see cref="ITypeDescriptor"/>.</returns>
+		public ITypeDescriptor FindTypeDescriptor(Type type)
+		{
+			return typeDescriptorFactory.Find(type);
+		}
+
+		/// <summary>
 		/// Resolves a type from the specified tag.
 		/// </summary>
 		/// <param name="tagName">Name of the tag.</param>
@@ -102,6 +104,18 @@ namespace YamlDotNet.Serialization
         {
 	        return tagTypeRegistry.TagFromType(Settings.Schema, type);
         }
+
+		/// <summary>
+		/// Gets the default tag and value for the specified <see cref="Scalar" />. The default tag can be different from a actual tag of this <see cref="NodeEvent" />.
+		/// </summary>
+		/// <param name="scalar">The scalar event.</param>
+		/// <param name="defaultTag">The default tag decoded from the scalar.</param>
+		/// <param name="value">The value extracted from a scalar.</param>
+		/// <returns>System.String.</returns>
+		public bool TryParseScalar(Scalar scalar, out string defaultTag, out object value)
+		{
+			return Settings.Schema.TryParse(scalar, true, out defaultTag, out value);
+		}
 
 		internal string GetAnchor()
 		{
