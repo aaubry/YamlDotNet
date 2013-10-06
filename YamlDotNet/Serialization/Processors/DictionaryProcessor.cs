@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.Processors
 				{
 					if (keyEvent.Value == Settings.SpecialCollectionMember)
 					{
-						pureDictionaryProcessor.ReadYaml(context, thisObject, thisObject.GetType());
+						pureDictionaryProcessor.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 						return;
 					}
 				}
@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization.Processors
 				}
 
 				context.Writer.Emit(new ScalarEventInfo(Settings.SpecialCollectionMember, typeof(string)));
-				pureDictionaryProcessor.WriteYaml(context, thisObject, thisObject.GetType());
+				pureDictionaryProcessor.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 			}
 		}
 

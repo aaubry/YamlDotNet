@@ -41,28 +41,9 @@ namespace YamlDotNet.Serialization.Processors
 			return false;
 		}
 
-		public virtual object ReadYaml(SerializerContext context, object value, Type expectedType)
+		public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			var reader = context.Reader;
-			var nodeEvent = reader.Peek<NodeEvent>();
-
-			var type = context.TypeFromTag(nodeEvent.Tag) ?? (value != null ? value.GetType() : expectedType);
-			if (type == null)
-			{
-				throw new YamlException("Unable to find type for mapping [{0}]".DoFormat(nodeEvent));
-			}
-
-			if (value == null)
-			{
-				value = context.CreateType(type);
-				if (value == null)
-				{
-					throw new YamlException("Unexpected null value");
-				}
-			}
-
 			// Get the object accessor for the corresponding class
-			var typeDescriptor = context.FindTypeDescriptor(value.GetType());
 			var isSequence = CheckIsSequence(typeDescriptor);
 
 			if (isSequence)
@@ -114,16 +95,12 @@ namespace YamlDotNet.Serialization.Processors
 			}
 		}
 
-		public virtual void WriteYaml(SerializerContext context, object value, Type type)
+		public virtual void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var typeOfValue = value.GetType();
-			var tag = typeOfValue == type ? null : context.TagFromType(typeOfValue);
-
-			// Get the object accessor for the corresponding class
-			var typeDescriptor = context.FindTypeDescriptor(typeOfValue);
+			var tag = typeOfValue == typeDescriptor.Type ? null : context.TagFromType(typeOfValue);
 
 			var isSequence = CheckIsSequence(typeDescriptor);
-
 			if (isSequence)
 			{
 				context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag });
