@@ -41,8 +41,8 @@ namespace YamlDotNet.Schemas
 		private readonly Dictionary<string, List<ScalarResolutionRule>> mapTagToScalarResolutionRuleList =
 			new Dictionary<string, List<ScalarResolutionRule>>();
 
-		private readonly Dictionary<Type, ScalarResolutionRule> mapTypeToScalarResolutionRule =
-			new Dictionary<Type, ScalarResolutionRule>();
+		private readonly Dictionary<Type, List<ScalarResolutionRule>> mapTypeToScalarResolutionRuleList =
+			new Dictionary<Type, List<ScalarResolutionRule>>();
 
 		private int updateCountter;
 		private bool needFirstUpdate = true;
@@ -140,6 +140,8 @@ namespace YamlDotNet.Schemas
 
 		public virtual bool TryParse(Scalar scalar, bool parseValue, out string defaultTag, out object value)
 		{
+			if (scalar == null) throw new ArgumentNullException("scalar");
+
 			EnsureScalarRules();
 
 			defaultTag = null;
@@ -182,6 +184,45 @@ namespace YamlDotNet.Schemas
 			// Value was not successfully decoded
 			return false;
 		}
+
+		public bool TryParse(Scalar scalar, Type type, out object value)
+		{
+			if (scalar == null) throw new ArgumentNullException("scalar");
+			if (type == null) throw new ArgumentNullException("type");
+
+			EnsureScalarRules();
+
+			value = null;
+
+			// DoubleQuoted and SingleQuoted string are always decoded
+			if (type == typeof(string) && (scalar.Style == ScalarStyle.DoubleQuoted || scalar.Style == ScalarStyle.SingleQuoted))
+			{
+				value = scalar.Value;
+				return true;
+			}
+
+			// Parse only values if we have some rules
+			if (mapTypeToScalarResolutionRuleList.Count > 0)
+			{
+				List<ScalarResolutionRule> rules;
+				if (mapTypeToScalarResolutionRuleList.TryGetValue(type, out rules))
+				{
+					foreach (var rule in rules)
+					{
+						var match = rule.Pattern.Match(scalar.Value);
+						if (match.Success)
+						{
+							value = rule.Decode(match);
+							return true;
+						}
+					}
+				}
+			}
+
+			// Value was not successfully decoded
+			return false;
+		}
+
 
 		public Type GetTypeForDefaultTag(string longTag)
 		{
@@ -276,10 +317,14 @@ namespace YamlDotNet.Schemas
 				mapTagToScalarResolutionRuleList[rule.Tag].Add(rule);
 			}
 
-			mapTypeToScalarResolutionRule.Clear();
+			mapTypeToScalarResolutionRuleList.Clear();
 			foreach (var rule in scalarTagResolutionRules)
-				if (rule.HasEncoder())
-					mapTypeToScalarResolutionRule[rule.GetTypeOfValue()] = rule;
+			{
+				var type = rule.GetTypeOfValue();
+				if (!mapTypeToScalarResolutionRuleList.ContainsKey(type))
+					mapTypeToScalarResolutionRuleList[type] = new List<ScalarResolutionRule>();
+				mapTypeToScalarResolutionRuleList[type].Add(rule);
+			}
 
 			// Update the counter
 			updateCountter = scalarTagResolutionRules.Count;
