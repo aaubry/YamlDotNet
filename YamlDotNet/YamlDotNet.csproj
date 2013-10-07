@@ -145,9 +145,6 @@
     </Compile>
     <Compile Include="Serialization\YamlAliasNode.cs" />
     <Compile Include="Serialization\YamlDocument.cs" />
-    <Compile Include="Serialization\YamlFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
     <Compile Include="Serialization\YamlMappingNode.cs" />
     <Compile Include="Serialization\YamlMemberAttribute.cs" />

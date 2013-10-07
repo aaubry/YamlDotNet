@@ -28,46 +28,13 @@ namespace YamlDotNet.Serialization
 
 			switch (typeCode)
 			{
-				case TypeCode.Boolean:
-					eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.SourceValue);
-					break;
-
-				case TypeCode.Byte:
-				case TypeCode.Int16:
-				case TypeCode.Int32:
-				case TypeCode.Int64:
-				case TypeCode.SByte:
-				case TypeCode.UInt16:
-				case TypeCode.UInt32:
-				case TypeCode.UInt64:
-				case TypeCode.Single:
-				case TypeCode.Double:
-				case TypeCode.Decimal:
-					eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.SourceValue);
-					break;
-
 				case TypeCode.String:
 				case TypeCode.Char:
-					eventInfo.RenderedValue = eventInfo.SourceValue.ToString();
 					eventInfo.Style = ScalarStyle.DoubleQuoted;
 					break;
-
-				case TypeCode.DateTime:
-					eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.SourceValue);
-					break;
-
 				case TypeCode.Empty:
 					eventInfo.RenderedValue = "null";
 					break;
-
-				default:
-					if (eventInfo.SourceType == typeof(TimeSpan))
-					{
-						eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.SourceValue);
-						break;
-					}
-
-					throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 			}
 
 			base.Emit(eventInfo);
