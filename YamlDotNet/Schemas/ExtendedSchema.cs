@@ -66,6 +66,7 @@ namespace YamlDotNet.Schemas
 
 		protected override void PrepareScalarRules()
 		{
+			AddScalarRule<object>("!!null", @"null|Null|NULL|\~|", m => null, null);
 			AddScalarRule<int>("!!int", @"([-+]?(0|[1-9][0-9_]*))",
 			                   m => Convert.ToInt32(m.Value.Replace("_", "")), null);
 			AddScalarRule<int>("!!int", @"([-+]?)0b([01_]+)", m =>
@@ -95,7 +96,6 @@ namespace YamlDotNet.Schemas
 			AddScalarRule<double>("!!float", @"\.nan|\.NaN|\.NAN", m => double.NaN, null);
 			AddScalarRule<bool>("!!bool", @"y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON", m => true, null);
 			AddScalarRule<bool>("!!bool", @"n|N|no|No|NO|false|False|FALSE|off|Off|OFF", m => false, null);
-			AddScalarRule<object>("!!null", @"null|Null|NULL|\~|", m => null, null);
 			AddScalarRule<string>("!!merge", @"<<", m => "<<", null);
 			AddScalarRule<DateTime>("!!timestamp",  // Todo: spec is wrong (([ \t]*)Z|[-+][0-9][0-9]?(:[0-9][0-9])?)? should be (([ \t]*)(Z|[-+][0-9][0-9]?(:[0-9][0-9])?))? to accept "2001-12-14 21:59:43.10 -5"
 			                        @"([0-9]{4})-([0-9]{2})-([0-9]{2})" +
