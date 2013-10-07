@@ -78,6 +78,12 @@ namespace YamlDotNet.Serialization
 		public int LimitFlowSequence { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value indicating whether to emit default value. Default is false.
+		/// </summary>
+		/// <value><c>true</c> if to emit default value; otherwise, <c>false</c>.</value>
+		public bool EmitDefaultValues { get; set; }
+
+		/// <summary>
 		/// Gets or sets the prefix used to serialize items for a non pure <see cref="System.Collections.IDictionary" /> or
 		/// <see cref="System.Collections.ICollection" />
 		/// . Default to "~Items", see remarks.

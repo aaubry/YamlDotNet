@@ -21,7 +21,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <param name="type">The type.</param>
 		/// <exception cref="System.ArgumentException">Expecting arrat type;type</exception>
 		public ArrayDescriptor(IAttributeRegistry attributeRegistry, Type type)
-			: base(attributeRegistry, type)
+			: base(attributeRegistry, type, false)
 		{
 			if (!type.IsArray) throw new ArgumentException("Expecting array type", "type");
 

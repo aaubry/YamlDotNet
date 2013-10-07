@@ -174,6 +174,18 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
+		/// Deserializes an object from the specified <see cref="Stream" /> with an expected specific type.
+		/// </summary>
+		/// <typeparam name="T">The expected type</typeparam>
+		/// <param name="stream">The stream.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">stream</exception>
+		public T Deserialize<T>(Stream stream)
+		{
+			return (T) Deserialize(stream, typeof (T));
+		}
+
+		/// <summary>
 		/// Deserializes an object from the specified <see cref="TextReader" /> with an expected specific type.
 		/// </summary>
 		/// <param name="reader">The reader.</param>
@@ -185,6 +197,18 @@ namespace YamlDotNet.Serialization
 		    if (reader == null) throw new ArgumentNullException("reader");
 		    return Deserialize(new EventReader(new Parser(reader)), null);
 	    }
+
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="TextReader" /> with an expected specific type.
+		/// </summary>
+		/// <typeparam name="T">The expected type</typeparam>
+		/// <param name="reader">The reader.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">reader</exception>
+		public T Deserialize<T>(TextReader reader)
+		{
+			return (T) Deserialize(reader, typeof (T));
+		}
 
 		/// <summary>
 		/// Deserializes an object from the specified string.
@@ -207,6 +231,30 @@ namespace YamlDotNet.Serialization
 		{
 			if (fromText == null) throw new ArgumentNullException("fromText");
 			return Deserialize(new StringReader(fromText), expectedType);
+		}
+
+		/// <summary>
+		/// Deserializes an object from the specified string. with an expected specific type.
+		/// </summary>
+		/// <typeparam name="T">The expected type</typeparam>
+		/// <param name="fromText">From text.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">stream</exception>
+		public T Deserialize<T>(string fromText)
+		{
+			return (T) Deserialize(fromText, typeof (T));
+		}
+
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="EventReader" /> with an expected specific type.
+		/// </summary>
+		/// <typeparam name="T">The expected type</typeparam>
+		/// <param name="reader">The reader.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">reader</exception>
+		public T Deserialize<T>(EventReader reader)
+		{
+			return (T) Deserialize(reader, typeof (T));
 		}
 
 		/// <summary>

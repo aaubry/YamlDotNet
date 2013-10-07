@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization
 	        tagTypeRegistry = settings.TagTypes;
 	        ObjectFactory = settings.ObjectFactory;
 	        Schema = Settings.Schema;
-	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes);
+	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes, Settings.EmitDefaultValues);
         }
 
 		/// <summary>

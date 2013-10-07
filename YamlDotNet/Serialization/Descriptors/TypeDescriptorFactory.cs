@@ -6,18 +6,22 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// <summary>
 	/// A default implementation for the <see cref="ITypeDescriptorFactory"/>.
 	/// </summary>
-	public class TypeDescriptorFactory : ITypeDescriptorFactory
+	internal class TypeDescriptorFactory : ITypeDescriptorFactory
 	{
 		private readonly IAttributeRegistry attributeRegistry;
 		private readonly Dictionary<Type,ITypeDescriptor> registeredDescriptors = new Dictionary<Type, ITypeDescriptor>();
+		private readonly bool emitDefaultValues;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TypeDescriptorFactory" /> class.
 		/// </summary>
 		/// <param name="attributeRegistry">The attribute registry.</param>
-		public TypeDescriptorFactory(IAttributeRegistry attributeRegistry)
+		/// <param name="emitDefaultValues">if set to <c>true</c> [emit default values].</param>
+		/// <exception cref="System.ArgumentNullException">attributeRegistry</exception>
+		public TypeDescriptorFactory(IAttributeRegistry attributeRegistry, bool emitDefaultValues)
 		{
 			if (attributeRegistry == null) throw new ArgumentNullException("attributeRegistry");
+			this.emitDefaultValues = emitDefaultValues;
 			this.attributeRegistry = attributeRegistry;
 		}
 
@@ -65,12 +69,12 @@ namespace YamlDotNet.Serialization.Descriptors
 			else if (DictionaryDescriptor.IsDictionary(type))
 			{
 				// IDictionary
-				descriptor = new DictionaryDescriptor(attributeRegistry, type);
+				descriptor = new DictionaryDescriptor(attributeRegistry, type, emitDefaultValues);
 			}
 			else if (CollectionDescriptor.IsCollection(type))
 			{
 				// ICollection
-				descriptor = new CollectionDescriptor(attributeRegistry, type);
+				descriptor = new CollectionDescriptor(attributeRegistry, type, emitDefaultValues);
 			}
 			else if (type.IsArray)
 			{
@@ -80,7 +84,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			else
 			{
 				// standard object (class or value type)
-				descriptor = new ObjectDescriptor(attributeRegistry, type);
+				descriptor = new ObjectDescriptor(attributeRegistry, type, emitDefaultValues);
 			}
 			return descriptor;
 		}
