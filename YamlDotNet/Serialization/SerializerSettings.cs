@@ -1,28 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using YamlDotNet.Schemas;
-using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// Settings used to configure serialization.
 	/// </summary>
-    public class YamlSerializerSettings
+    public class SerializerSettings
 	{
 		private readonly TagTypeRegistry tagTypeRegistry;
 	    private readonly AttributeRegistry attributeRegistry;
 		private IYamlSchema schema;
 		private string specialCollectionMember;
 		private int preferredIndent;
-		private Func<Type, object> typeFactory;
+		private IObjectFactory objectFactory;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="YamlSerializerSettings"/> class.
+		/// Initializes a new instance of the <see cref="SerializerSettings"/> class.
 		/// </summary>
-	    public YamlSerializerSettings()
+	    public SerializerSettings()
 		{
 			PreferredIndent = 2;
 		    SortKeyForMapping = true;
@@ -32,9 +29,8 @@ namespace YamlDotNet.Serialization
 			schema = new CoreSchema();
 			tagTypeRegistry = new TagTypeRegistry();
 			attributeRegistry = new AttributeRegistry();
-			TypeFactory = Activator.CreateInstance;
+			ObjectFactory = new DefaultObjectFactory();
 		}
-
 
 		/// <summary>
 		/// Gets or sets the preferred indentation. Default is 2.
@@ -120,16 +116,16 @@ namespace YamlDotNet.Serialization
 
 
 		/// <summary>
-		/// Gets or sets the default factory to instantiate a type. Default is <see cref="Activator.CreateInstance(System.Type)"/>.
+		/// Gets or sets the default factory to instantiate a type. Default is <see cref="DefaultObjectFactory"/>.
 		/// </summary>
 		/// <value>The default factory to instantiate a type.</value>
-		public Func<Type, object> TypeFactory
+		public IObjectFactory ObjectFactory
 		{
-			get { return typeFactory; }
+			get { return objectFactory; }
 			set
 			{
 				if (value == null) throw new ArgumentNullException("value");
-				typeFactory = value;
+				objectFactory = value;
 			}
 		}
 

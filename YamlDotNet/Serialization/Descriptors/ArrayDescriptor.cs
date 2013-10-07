@@ -35,13 +35,11 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <value>The type of the element.</value>
 		public Type ElementType { get { return elementType; } }
 
-
 		protected override bool PrepareMember(MemberDescriptorBase member)
 		{
 			if (member.Name == "SyncRoot") return false;
 
 			return base.PrepareMember(member);
 		}
-
 	}
 }

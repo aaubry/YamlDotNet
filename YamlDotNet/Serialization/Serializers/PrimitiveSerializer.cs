@@ -3,9 +3,9 @@ using System.Globalization;
 using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
-namespace YamlDotNet.Serialization.Processors
+namespace YamlDotNet.Serialization.Serializers
 {
-	internal class PrimitiveProcessor : IYamlProcessor
+	internal class PrimitiveSerializer : IYamlSerializable
 	{
 		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{

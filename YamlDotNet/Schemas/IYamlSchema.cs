@@ -26,8 +26,14 @@ namespace YamlDotNet.Schemas
 		/// Gets the default tag for the specified <see cref="NodeEvent"/>. The default tag can be different from a actual tag of this <see cref="NodeEvent"/>.
 		/// </summary>
 		/// <param name="nodeEvent">The node event.</param>
-		/// <returns>System.String.</returns>
+		/// <returns>A short tag.</returns>
 		string GetDefaultTag(NodeEvent nodeEvent);
+
+        /// <summary>
+        /// Gets the default tag for the specified <see cref="Type"/>. This is only valid for scalar, return null if no default tag found.
+        /// </summary>
+        /// <returns>A short tag.</returns>
+        string GetDefaultTag(Type type);
 
 		/// <summary>
 		/// Gets the default tag and value for the specified <see cref="Scalar" />. The default tag can be different from a actual tag of this <see cref="NodeEvent" />.
@@ -51,7 +57,7 @@ namespace YamlDotNet.Schemas
 		/// <summary>
 		/// Gets the type for a default tag.
 		/// </summary>
-		/// <param name="tag">The tag in long form.</param>
+		/// <param name="tag">The tag in short form.</param>
 		/// <returns>The type for a default tag or null if no default tag associated</returns>
 		Type GetTypeForDefaultTag(string tag);
 	}

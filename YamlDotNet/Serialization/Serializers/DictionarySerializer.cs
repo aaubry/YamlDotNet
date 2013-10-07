@@ -4,15 +4,15 @@ using System.Linq;
 using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
-namespace YamlDotNet.Serialization.Processors
+namespace YamlDotNet.Serialization.Serializers
 {
-	internal class DictionaryProcessor : ObjectProcessor
+	internal class DictionarySerializer : ObjectSerializer
 	{
-		private readonly PureDictionaryProcessor pureDictionaryProcessor;
+		private readonly PureDictionarySerializer pureDictionarySerializer;
 
-		public DictionaryProcessor(YamlSerializerSettings settings) : base(settings)
+		public DictionarySerializer(SerializerSettings settings) : base(settings)
 		{
-			pureDictionaryProcessor = new PureDictionaryProcessor(settings);
+			pureDictionarySerializer = new PureDictionarySerializer(settings);
 		}
 
 		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.Processors
 					if (keyEvent.Value == Settings.SpecialCollectionMember)
 					{
 						context.Reader.Accept<Scalar>();
-						pureDictionaryProcessor.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
+						pureDictionarySerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 						return;
 					}
 				}
@@ -56,7 +56,7 @@ namespace YamlDotNet.Serialization.Processors
 			var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 			if (dictionaryDescriptor.IsPureDictionary)
 			{
-				pureDictionaryProcessor.WriteItems(context, thisObject, typeDescriptor);
+				pureDictionarySerializer.WriteItems(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -72,13 +72,13 @@ namespace YamlDotNet.Serialization.Processors
 				}
 
 				context.Writer.Emit(new ScalarEventInfo(Settings.SpecialCollectionMember, typeof(string)));
-				pureDictionaryProcessor.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
+				pureDictionarySerializer.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 			}
 		}
 
-		internal class PureDictionaryProcessor : ObjectProcessor
+		internal class PureDictionarySerializer : ObjectSerializer
 		{
-			public PureDictionaryProcessor(YamlSerializerSettings settings) : base(settings)
+			public PureDictionarySerializer(SerializerSettings settings) : base(settings)
 			{
 			}
 
