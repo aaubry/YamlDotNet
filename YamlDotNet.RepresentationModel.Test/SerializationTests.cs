@@ -51,7 +51,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
 
 			foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -76,7 +76,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
 
 			foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -116,7 +116,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeScalar()
 		{
-			var sut = new Deserializer();
+			var sut = new Serializer();
 			var result = sut.Deserialize(YamlFile("test2.yaml"), typeof(object));
 
 			Assert.Equal("a scalar", result);
@@ -125,7 +125,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeExplicitType()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), typeof(object));
 
 			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
@@ -135,7 +135,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeDictionary()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var result = serializer.Deserialize(YamlFile("dictionary.yaml"));
 
 			Assert.True(typeof(IDictionary<object, object>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
@@ -148,7 +148,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeExplicitDictionary()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			object result = serializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
 
 			Assert.True(typeof(IDictionary<string, int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
@@ -161,7 +161,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeListOfDictionaries()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"), typeof(List<Dictionary<string, string>>));
 
 			Assert.IsType<List<Dictionary<string, string>>>(result);
@@ -176,7 +176,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeList()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var result = serializer.Deserialize(YamlFile("list.yaml"));
 
 			Assert.True(typeof(IList).IsAssignableFrom(result.GetType()));
@@ -190,7 +190,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeExplicitList()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
 
 			Assert.True(typeof(IList<int>).IsAssignableFrom(result.GetType()));
@@ -209,7 +209,7 @@ namespace YamlDotNet.Serialization.Test
 			var z = new[] { new Z { aaa = "Yo" }};
 			serializer.Serialize(buffer, z);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var result = (IEnumerable<Z>)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(IEnumerable<Z>));
 			Assert.Equal(1, result.Count());
 			Assert.Equal("Yo", result.First().aaa);
@@ -219,7 +219,7 @@ namespace YamlDotNet.Serialization.Test
 		public void RoundtripList()
 		{
 			var serializer = new Serializer(SerializationOptions.Roundtrip);
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var buffer = new StringWriter();
 			var original = new List<int> { 2, 4, 6 };
@@ -240,7 +240,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeArray()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var result = serializer.Deserialize(YamlFile("list.yaml"), typeof(String[]));
 
 			Assert.True(result is String[]);
@@ -255,7 +255,7 @@ namespace YamlDotNet.Serialization.Test
 		public void Enums()
 		{
 			var serializer = new Serializer();
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
 
@@ -270,7 +270,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void CustomTags()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
 			var result = deserializer.Deserialize(YamlFile("tags.yaml"));
 
@@ -284,7 +284,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeConvertible()
 		{
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var result = serializer.Deserialize(YamlFile("convertible.yaml"), typeof(Z));
 
 			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
@@ -431,7 +431,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			deserializer.RegisterTypeConverter(new CustomTypeConverter());
 
 			var copy = deserializer.Deserialize<SomeCustomType>(new StringReader(buffer.ToString()));
@@ -476,7 +476,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var deserialized = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
 
 			foreach (var pair in deserialized)
@@ -497,7 +497,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var parsed = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
 
 			Assert.NotNull(parsed);
@@ -561,7 +561,7 @@ namespace YamlDotNet.Serialization.Test
 		{
 			var serializer = new Serializer(
 				SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip);
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var buffer = new StringWriter();
 			var original = new X { MyString = null };
@@ -578,7 +578,7 @@ namespace YamlDotNet.Serialization.Test
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
 			var serializer = new Serializer();
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var buffer = new StringWriter();
 			var orig = new ContainsIgnore { IgnoreMe = "Some Text" };
@@ -670,7 +670,7 @@ namespace YamlDotNet.Serialization.Test
 			var serialized = writer.ToString();
 			Dump.WriteLine("serialized =\n-----\n{0}", serialized);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			return deserializer.Deserialize<T>(new StringReader(serialized));
 		}
 
@@ -680,7 +680,7 @@ namespace YamlDotNet.Serialization.Test
 
 		private void DeserializeUsingNamingConvention(string yaml, INamingConvention convention)
 		{
-			var serializer = new Deserializer(namingConvention: convention);
+			var serializer = new Serializer(namingConvention: convention);
 
 			var result = serializer.Deserialize<ConventionTest>(YamlText(yaml));
 
@@ -747,7 +747,7 @@ namespace YamlDotNet.Serialization.Test
 			// Ensure serialisation is correct
 			Assert.Equal("fourthTest: Fourth", serialized.TrimEnd('\r', '\n'));
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var output = deserializer.Deserialize<ConventionTest>(new StringReader(serialized));
 
 			// Ensure round-trip retains value
@@ -850,7 +850,7 @@ Name: Andy
 ---
 Name: Brad
 ...";
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var reader = new EventReader(new Parser(new StringReader(yaml)));
 
 			reader.Expect<StreamStart>();
@@ -874,7 +874,7 @@ Name: Brad
 ---
 Name: Charles
 ...";
-			var serializer = new Deserializer();
+			var serializer = new Serializer();
 			var reader = new EventReader(new Parser(new StringReader(yaml)));
 
 			reader.Allow<StreamStart>();
@@ -899,7 +899,7 @@ Name: Charles
 		[Fact]
 		public void DeserializeEmptyDocument()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var array = (int[])deserializer.Deserialize(new StringReader(""), typeof(int[]));
 			Assert.Null(array);
 		}
@@ -1027,7 +1027,7 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInGenericLists()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var result = deserializer.Deserialize<string[]>(YamlText(@"
 				- *forward
@@ -1042,7 +1042,7 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInNonGenericLists()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var result = deserializer.Deserialize<ArrayList>(YamlText(@"
 				- *forward
@@ -1057,7 +1057,7 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInGenericDictionaries()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var result = deserializer.Deserialize<Dictionary<string, string>>(YamlText(@"
 				key1: *forward
@@ -1078,7 +1078,7 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInNonGenericDictionaries()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var result = deserializer.Deserialize<Hashtable>(YamlText(@"
 				key1: *forward
@@ -1099,7 +1099,7 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInObjects()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			var result = deserializer.Deserialize<X>(YamlText(@"
 				Nothing: *forward
@@ -1113,7 +1113,7 @@ Name: Charles
 		[Fact]
 		public void UndefinedForwardReferencesFail()
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 
 			Assert.Throws<AnchorNotFoundException>(() =>
 				deserializer.Deserialize<X>(YamlText(@"
