@@ -38,7 +38,7 @@ namespace YamlDotNet.Schemas
 		protected override void PrepareScalarRules()
 		{
 			// 10.2.1.1. Null
-			AddScalarRule<object>("!!null", @"null", m => null, null);
+			AddScalarRule<object>("!!null", @"null|Null|NULL|\~|", m => null, null);
 
 			AddScalarRule<bool>("!!bool", @"true|True|TRUE", m => true, null);
 			AddScalarRule<bool>("!!bool", @"false|False|FALSE", m => false, null);
