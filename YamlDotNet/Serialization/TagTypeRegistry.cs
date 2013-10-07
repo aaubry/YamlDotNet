@@ -27,11 +27,11 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
-		/// Register an alias between a tag and a type.
+		/// Register a mapping between a tag and a type.
 		/// </summary>
 		/// <param name="tag">The tag.</param>
 		/// <param name="type">The type.</param>
-		public void AddTagAlias(string tag, Type type)
+		public void AddTagMapping(string tag, Type type)
 		{
 			if (tag == null) throw new ArgumentNullException("tag");
 			if (type == null) throw new ArgumentNullException("type");

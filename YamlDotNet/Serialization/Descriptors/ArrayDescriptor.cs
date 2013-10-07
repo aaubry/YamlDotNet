@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace YamlDotNet.Serialization.Descriptors
 {
@@ -8,6 +11,8 @@ namespace YamlDotNet.Serialization.Descriptors
 	public class ArrayDescriptor : ObjectDescriptor
 	{
 		private readonly Type elementType;
+		private readonly Type listType;
+		private readonly MethodInfo toArrayMethod;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ObjectDescriptor" /> class.
@@ -20,13 +25,14 @@ namespace YamlDotNet.Serialization.Descriptors
 		{
 			if (!type.IsArray) throw new ArgumentException("Expecting array type", "type");
 
-			// TODO handle dimensions
 			if (type.GetArrayRank() != 1)
 			{
-				throw new ArgumentException("Cannot support dimension [{0}] for type [{1}]. Only supporting 1".DoFormat(type.GetArrayRank(), type.FullName));
+				throw new ArgumentException("Cannot support dimension [{0}] for type [{1}]. Only supporting dimension of 1".DoFormat(type.GetArrayRank(), type.FullName));
 			}
 
 			elementType = type.GetElementType();
+			listType = typeof(List<>).MakeGenericType(ElementType);
+			toArrayMethod = listType.GetMethod("ToArray");
 		}
 
 		/// <summary>
@@ -34,6 +40,21 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// </summary>
 		/// <value>The type of the element.</value>
 		public Type ElementType { get { return elementType; } }
+
+		/// <summary>
+		/// Creates the equivalent of list type for this array.
+		/// </summary>
+		/// <returns>A list type with same element type than this array.</returns>
+		public IList CreateListType()
+		{
+			return (IList)Activator.CreateInstance(listType);
+		}
+
+		public Array ToArray(IList list)
+		{
+			if (list == null) throw new ArgumentNullException("list");
+			return (Array) toArrayMethod.Invoke(list, null);
+		}
 
 		protected override bool PrepareMember(MemberDescriptorBase member)
 		{

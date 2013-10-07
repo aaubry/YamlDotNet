@@ -85,7 +85,82 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			
+			var primitiveType = (PrimitiveDescriptor)typeDescriptor;
+			var type = primitiveType.Type;
+
+			// Return null if expected type is an object and scalar is null
+			if (value == null)
+			{
+				context.Writer.Emit(new ScalarEventInfo(null, type) { RenderedValue = null});
+				return;
+			}
+
+			var valueType = value.GetType();
+			var tag = valueType != type ? context.TagFromType(valueType) : null;
+
+
+			string text = null;
+
+			// Handle string
+			text = value as string;
+			if (text == null)
+			{
+				if (valueType.IsNumeric())
+				{
+					// Parse default types 
+					switch (Type.GetTypeCode(valueType))
+					{
+						case TypeCode.Boolean:
+							text = (bool) value ? "true" : "false";
+							break;
+						case TypeCode.Byte:
+							text = ((byte) value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.SByte:
+							text = ((sbyte)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.Int16:
+							text = ((short)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.UInt16:
+							text = ((ushort)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.Int32:
+							text = ((int)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.UInt32:
+							text = ((uint)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.Int64:
+							text = ((long)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.UInt64:
+							text = ((ulong)value).ToString("G", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.Single:
+							text = ((float)value).ToString("R", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.Double:
+							text = ((double)value).ToString("R", CultureInfo.InvariantCulture);
+							break;
+						case TypeCode.Decimal:
+							text = ((decimal)value).ToString("R", CultureInfo.InvariantCulture);
+							break;
+					}
+				}
+				else if (valueType.IsEnum)
+				{
+					text = ((Enum)Enum.ToObject(valueType, value)).ToString("G");
+				}
+				// TODO handle timestamp
+			}
+
+			if (text == null)
+			{
+				throw new YamlException("Unable to serialize scalar [{0}] not supported".DoFormat(value));	
+			}
+
+			context.Writer.Emit(new ScalarEventInfo(value, type) { RenderedValue = text, Tag = tag });
 		}
 	}
 }

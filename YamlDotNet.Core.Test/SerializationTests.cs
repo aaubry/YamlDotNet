@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.Serialization;
 
@@ -15,6 +15,11 @@ namespace YamlDotNet.Test
 
 		public class MyObject
 		{
+			public MyObject()
+			{
+				ArrayContent = new int[2];
+			}
+
 			public string String { get; set; }
 
 			public sbyte SByte { get; set; }
@@ -48,6 +53,8 @@ namespace YamlDotNet.Test
             public string Alias { get; set; }
 
             public int[] Array { get; set; }
+
+			public int[] ArrayContent { get; private set; }
 		}
 
 
@@ -55,7 +62,12 @@ namespace YamlDotNet.Test
 		public void TestSimpleObjectAndPrimitive()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.AddTagAlias("MyObject", typeof(MyObject));
+
+			var name = typeof (MyObject).FullName;
+
+			//var uri = Uri.EscapeUriString("!" + name);
+
+			settings.TagTypes.AddTagMapping("MyObject", typeof(MyObject));
 
 			var serializer = new Serializer(settings);
 
@@ -65,7 +77,7 @@ Alias: *o1
 Bool: true
 BoolFalse: false
 Byte: 2
-Enum: A
+Enum: B
 Double: 6.6
 Float: 5.5
 Int16: 3
@@ -77,6 +89,7 @@ UInt16: 4
 UInt32: 6
 UInt64: 8
 Array: [1,2,3]
+ArrayContent: [1,2]
 ";
 			// not working yet, scalar read/write are not yet implemented
 			var value = serializer.Deserialize(text);
