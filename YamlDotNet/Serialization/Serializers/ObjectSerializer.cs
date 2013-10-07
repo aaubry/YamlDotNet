@@ -1,29 +1,74 @@
-﻿using YamlDotNet.Events;
+﻿using System;
+using YamlDotNet.Events;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-	/// <summary>
-	/// Default processor for serializing an object.
-	/// </summary>
-	public class ObjectSerializer : ObjectSerializerBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ObjectSerializer"/> class.
-		/// </summary>
-		/// <param name="settings">The settings.</param>
-		/// <exception cref="System.ArgumentNullException">settings</exception>
-		public ObjectSerializer(SerializerSettings settings)
-			: base(settings)
+    /// <summary>
+    /// Base class for serializing an object that can be a Yaml !!map or !!seq.
+    /// </summary>
+    public class ObjectSerializer : IYamlSerializable, IYamlSerializableFactory
+    {
+		public virtual IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
 		{
+			// always accept
+			return this;
 		}
-
-		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
+		
+		/// <summary>
+        /// Checks if a type is a sequence.
+        /// </summary>
+        /// <param name="typeDescriptor">The type descriptor.</param>
+        /// <returns><c>true</c> if a type is a sequence, <c>false</c> otherwise.</returns>
+		protected virtual bool CheckIsSequence(ITypeDescriptor typeDescriptor)
 		{
 			// By default an object serializer is a mapping
 			return false;
 		}
 
-		protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		protected virtual SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		{
+			return SequenceStyle.Block;
+		}
+
+        public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+        {
+	        var type = typeDescriptor.Type;
+
+			// When the node is not scalar, we need to instantiate the type directly
+			if (value == null && !(typeDescriptor is PrimitiveDescriptor))
+			{
+				value = context.ObjectFactory.Create(type);
+				//if (value == null)
+				//{
+				//	throw new YamlException(node.Start, node.End, "Unexpected null value");
+				//}
+			}
+
+            // Get the object accessor for the corresponding class
+            var isSequence = CheckIsSequence(typeDescriptor);
+
+			// Process members
+	        return isSequence
+		                ? ReadItems<SequenceStart, SequenceEnd>(context, value, typeDescriptor)
+		                : ReadItems<MappingStart, MappingEnd>(context, value, typeDescriptor);
+        }
+
+        protected virtual object ReadItems<TStart, TEnd>(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor) 
+            where TStart : NodeEvent
+            where TEnd : ParsingEvent
+        {
+			var reader = context.Reader;
+			reader.Expect<TStart>();
+			while (!reader.Accept<TEnd>())
+			{
+				ReadItem(context, thisObject, typeDescriptor);
+			}
+			reader.Expect<TEnd>();
+            return thisObject;
+        }
+
+		protected virtual void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 
@@ -48,7 +93,35 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 		}
 
-		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+        public virtual void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+        {
+            var typeOfValue = value.GetType();
+	        var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
+
+            var tag = typeOfValue == expectedType ? null : context.TagFromType(typeOfValue);
+
+			if (typeDescriptor == null)
+			{
+				typeDescriptor = context.FindTypeDescriptor(typeOfValue);
+			}
+
+            var isSequence = CheckIsSequence(typeDescriptor);
+            if (isSequence)
+            {
+	            var style = GetSequenceStyle(context, value, typeDescriptor);
+                context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor(), Style = style});
+                WriteItems(context, value, typeDescriptor);
+                context.Writer.Emit(new SequenceEndEventInfo(value, typeOfValue));
+            }
+            else
+            {
+				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor() });
+                WriteItems(context, value, typeDescriptor);
+                context.Writer.Emit(new MappingEndEventInfo(value, typeOfValue));
+            }
+        }
+
+		public virtual void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
 			foreach (var member in typeDescriptor.Members)
 			{
@@ -67,12 +140,12 @@ namespace YamlDotNet.Serialization.Serializers
 		protected void WriteKey(SerializerContext context, string name)
 		{
 			// Emit the key name
-			context.Writer.Emit(new ScalarEventInfo(name, typeof (string))
-				{
-					RenderedValue = name,
-					IsPlainImplicit = true,
-					Style = ScalarStyle.Plain
-				});
+			context.Writer.Emit(new ScalarEventInfo(name, typeof(string))
+			{
+				RenderedValue = name,
+				IsPlainImplicit = true,
+				Style = ScalarStyle.Plain
+			});
 		}
-	}
+    }
 }

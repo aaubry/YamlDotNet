@@ -10,9 +10,14 @@ namespace YamlDotNet.Serialization.Serializers
 	{
 		private readonly PureDictionarySerializer pureDictionarySerializer;
 
-		public DictionarySerializer(SerializerSettings settings) : base(settings)
+		public DictionarySerializer()
 		{
-			pureDictionarySerializer = new PureDictionarySerializer(settings);
+			pureDictionarySerializer = new PureDictionarySerializer();
+		}
+
+		public override IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
+		{
+			return typeDescriptor is DictionaryDescriptor ? this : null;
 		}
 
 		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
@@ -39,7 +44,7 @@ namespace YamlDotNet.Serialization.Serializers
 				var keyEvent = context.Reader.Peek<Scalar>();
 				if (keyEvent != null)
 				{
-					if (keyEvent.Value == Settings.SpecialCollectionMember)
+					if (keyEvent.Value == context.Settings.SpecialCollectionMember)
 					{
 						context.Reader.Accept<Scalar>();
 						pureDictionarySerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
@@ -71,17 +76,13 @@ namespace YamlDotNet.Serialization.Serializers
 					context.WriteYaml(memberValue, memberType);
 				}
 
-				WriteKey(context, Settings.SpecialCollectionMember);
+				WriteKey(context, context.Settings.SpecialCollectionMember);
 				pureDictionarySerializer.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 			}
 		}
 
 		internal class PureDictionarySerializer : ObjectSerializer
 		{
-			public PureDictionarySerializer(SerializerSettings settings) : base(settings)
-			{
-			}
-
 			protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
 				var dictionary = (IDictionary)thisObject;

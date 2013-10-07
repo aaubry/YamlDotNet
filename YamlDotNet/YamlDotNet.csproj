@@ -131,9 +131,8 @@
     </Compile>
     <Compile Include="Serialization\Serializers\CollectionSerializer.cs" />
     <Compile Include="Serialization\Serializers\DictionarySerializer.cs" />
-    <Compile Include="Serialization\Serializers\ObjectSerializer.cs" />
     <Compile Include="Schemas\SchemaBase.cs" />
-    <Compile Include="Serialization\Serializers\ObjectSerializerBase.cs" />
+    <Compile Include="Serialization\Serializers\ObjectSerializer.cs" />
     <Compile Include="Serialization\Serializers\TypingSerializer.cs" />
     <Compile Include="Serialization\Serializers\PrimitiveSerializer.cs" />
     <Compile Include="Serialization\Serializers\RoutingSerializer.cs" />

@@ -5,8 +5,13 @@ using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-	internal class PrimitiveSerializer : IYamlSerializable
+	internal class PrimitiveSerializer : IYamlSerializable, IYamlSerializableFactory
 	{
+		public IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
+		{
+			return typeDescriptor is PrimitiveDescriptor ? this : null;
+		}
+
 		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var primitiveType = (PrimitiveDescriptor) typeDescriptor;
@@ -41,7 +46,7 @@ namespace YamlDotNet.Serialization.Serializers
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
-					context.Settings.Schema.TryParse(scalar, type, out value);
+					context.Schema.TryParse(scalar, type, out value);
 					return value;
 				case TypeCode.DateTime:
 					return DateTime.Parse(text, CultureInfo.InvariantCulture);

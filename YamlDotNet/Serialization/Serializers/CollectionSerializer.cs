@@ -8,10 +8,14 @@ namespace YamlDotNet.Serialization.Serializers
 	{
 		private readonly PureCollectionSerializer pureCollectionSerializer;
 
-		public CollectionSerializer(SerializerSettings settings)
-			: base(settings)
+		public CollectionSerializer()
 		{
-			pureCollectionSerializer = new PureCollectionSerializer(settings);
+			pureCollectionSerializer = new PureCollectionSerializer();
+		}
+
+		public override IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
+		{
+			return typeDescriptor is CollectionDescriptor ? this : null;
 		}
 
 		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
@@ -37,7 +41,7 @@ namespace YamlDotNet.Serialization.Serializers
 				var keyEvent = context.Reader.Peek<Scalar>();
 				if (keyEvent != null)
 				{
-					if (keyEvent.Value == Settings.SpecialCollectionMember)
+					if (keyEvent.Value == context.Settings.SpecialCollectionMember)
 					{
 						context.Reader.Accept<Scalar>();
 						pureCollectionSerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
@@ -75,18 +79,13 @@ namespace YamlDotNet.Serialization.Serializers
 					context.WriteYaml(memberValue, memberType);
 				}
 
-				WriteKey(context, Settings.SpecialCollectionMember);
+				WriteKey(context, context.Settings.SpecialCollectionMember);
 				pureCollectionSerializer.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 			}
 		}
 
 		internal class PureCollectionSerializer : ObjectSerializer
 		{
-			public PureCollectionSerializer(SerializerSettings settings)
-				: base(settings)
-			{
-			}
-
 			protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
 				var list = (IList)thisObject;

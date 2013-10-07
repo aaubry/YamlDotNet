@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using YamlDotNet.Events;
+using YamlDotNet.Schemas;
 using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization
@@ -25,6 +26,7 @@ namespace YamlDotNet.Serialization
             settings = serializer.Settings;
 	        tagTypeRegistry = settings.TagTypes;
 	        ObjectFactory = settings.ObjectFactory;
+	        Schema = Settings.Schema;
 	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes);
         }
 
@@ -45,6 +47,12 @@ namespace YamlDotNet.Serialization
 		{
 			get { return settings; }
 		}
+
+		/// <summary>
+		/// Gets the schema.
+		/// </summary>
+		/// <value>The schema.</value>
+		public IYamlSchema Schema { get; private set; }
 
 		/// <summary>
 		/// Gets the serializer.
