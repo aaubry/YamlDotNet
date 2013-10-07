@@ -28,9 +28,18 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Serializes and deserializes objects into and from YAML documents.
 	/// </summary>
-    public class Serializer
+    public sealed class Serializer
     {
         private readonly SerializerSettings settings;
+
+		private static readonly IYamlSerializableFactory[] DefaultFactories = new IYamlSerializableFactory[]
+			{
+				new PrimitiveSerializer(),
+				new DictionarySerializer(),
+				new CollectionSerializer(),
+				new ArraySerializer(),
+				new ObjectSerializer(),
+			};
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Serializer"/> class.
@@ -130,41 +139,84 @@ namespace YamlDotNet.Serialization
 			context.Writer.StreamEnd();
 		}
 
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="Stream"/>.
+		/// </summary>
+		/// <param name="stream">The stream.</param>
+		/// <returns>A deserialized object.</returns>
 		public object Deserialize(Stream stream)
 		{
 			return Deserialize(stream, null);
 		}
 
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="TextReader"/>.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <returns>A deserialized object.</returns>
 		public object Deserialize(TextReader reader)
 		{
 			return Deserialize((TextReader)reader, null);
 		}
 
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="Stream" /> with an expected specific type.
+		/// </summary>
+		/// <param name="stream">The stream.</param>
+		/// <param name="expectedType">The expected type.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">stream</exception>
 		public object Deserialize(Stream stream, Type expectedType)
 		{
 			if (stream == null) throw new ArgumentNullException("stream");
 
-			return Deserialize(new StreamReader(stream), null);
+			return Deserialize(new StreamReader(stream), expectedType);
 		}
 
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="TextReader" /> with an expected specific type.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="expectedType">The expected type.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">reader</exception>
+		public object Deserialize(TextReader reader, Type expectedType)
+	    {
+		    if (reader == null) throw new ArgumentNullException("reader");
+		    return Deserialize(new EventReader(new Parser(reader)), null);
+	    }
+
+		/// <summary>
+		/// Deserializes an object from the specified string.
+		/// </summary>
+		/// <param name="fromText">The text.</param>
+		/// <returns>A deserialized object.</returns>
 		public object Deserialize(string fromText)
 		{
 			return Deserialize(fromText, null);
 		}
 
+		/// <summary>
+		/// Deserializes an object from the specified string. with an expected specific type.
+		/// </summary>
+		/// <param name="fromText">From text.</param>
+		/// <param name="expectedType">The expected type.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">stream</exception>
 		public object Deserialize(string fromText, Type expectedType)
 		{
 			if (fromText == null) throw new ArgumentNullException("fromText");
 			return Deserialize(new StringReader(fromText), expectedType);
 		}
 
-	    public object Deserialize(TextReader reader, Type expectedType)
-	    {
-		    if (reader == null) throw new ArgumentNullException("reader");
-		    return Deserialize(new EventReader(new Parser(reader)), null);
-	    }
-
-	    public object Deserialize(EventReader reader, Type expectedType)
+		/// <summary>
+		/// Deserializes an object from the specified <see cref="EventReader" /> with an expected specific type.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <param name="expectedType">The expected type.</param>
+		/// <returns>A deserialized object.</returns>
+		/// <exception cref="System.ArgumentNullException">reader</exception>
+		public object Deserialize(EventReader reader, Type expectedType)
 		{
 			if (reader == null) throw new ArgumentNullException("reader");
 			
@@ -197,7 +249,27 @@ namespace YamlDotNet.Serialization
 
 		private IYamlSerializable CreateProcessor(SerializerSettings settings)
 		{
-            return new AnchorSerializer(new TypingSerializer(new RoutingSerializer(settings)));
+			var routintSerializer = new RoutingSerializer();
+
+			// Add registered serializer
+			foreach (var typeAndSerializer in settings.serializers)
+			{
+				routintSerializer.AddSerializer(typeAndSerializer.Key, typeAndSerializer.Value);
+			}
+
+			// Add registered factories
+			foreach (var factory in settings.factories)
+			{
+				routintSerializer.AddSerializerFactory(factory);
+			}
+
+			// Add default factories
+			foreach (var defaultFactory in DefaultFactories)
+			{
+				routintSerializer.AddSerializerFactory(defaultFactory);
+			}
+
+            return new AnchorSerializer(new TypingSerializer(routintSerializer));
 		}
 
 		private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)

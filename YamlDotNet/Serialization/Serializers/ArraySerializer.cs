@@ -4,14 +4,12 @@ using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-    internal class ArraySerializer : IYamlSerializable
+    internal class ArraySerializer : IYamlSerializable, IYamlSerializableFactory
     {
-	    private SerializerSettings settings;
-
-	    public ArraySerializer(SerializerSettings settings)
-	    {
-		    this.settings = settings;
-	    }
+		public IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
+		{
+			return typeDescriptor is ArrayDescriptor ? this : null;
+		}
 
 	    public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
@@ -62,7 +60,7 @@ namespace YamlDotNet.Serialization.Serializers
 			    {
 				    Tag = tag,
 				    Anchor = context.GetAnchor(),
-				    Style = arrayList.Count < settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block
+				    Style = arrayList.Count < context.Settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block
 			    });
 
 			foreach (var element in arrayList)

@@ -40,6 +40,12 @@ namespace YamlDotNet.Serialization.Serializers
             if (type == null)
                 type = typeFromTag;
 
+			// Handle explicit null scalar
+			if (node is Scalar && context.Schema.TryParse((Scalar) node, typeof (object), out value))
+			{
+				return value;
+			}
+
             if (type == null && value == null)
             {
                 throw new YamlException(node.Start, node.End, "Unable to find a type for this element [{0}]".DoFormat(node));
