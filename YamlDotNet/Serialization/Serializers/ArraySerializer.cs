@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 			var tag = valueType != typeDescriptor.Type ? context.TagFromType(valueType) : null;
 
-			context.Writer.Emit(new SequenceStartEventInfo(value, valueType) { Tag = tag });
+			context.Writer.Emit(new SequenceStartEventInfo(value, valueType) { Tag = tag, Anchor = context.GetAnchor() });
 			foreach (var element in arrayList)
 			{
 				context.WriteYaml(element, arrayDescriptor.ElementType);

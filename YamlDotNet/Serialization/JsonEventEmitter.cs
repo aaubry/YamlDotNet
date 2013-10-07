@@ -5,7 +5,7 @@ using YamlDotNet.Events;
 
 namespace YamlDotNet.Serialization
 {
-	public sealed class JsonEventEmitter : ChainedEventEmitter
+	internal sealed class JsonEventEmitter : ChainedEventEmitter
 	{
 		public JsonEventEmitter(IEventEmitter nextEmitter)
 			: base(nextEmitter)

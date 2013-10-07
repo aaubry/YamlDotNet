@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 using YamlDotNet.Serialization;
 
@@ -48,9 +49,9 @@ namespace YamlDotNet.Test
 
 			public bool BoolFalse { get; set; }
 
-            public string Anchor { get; set; }
+            public string A0Anchor { get; set; }
 
-            public string Alias { get; set; }
+			public string A1Alias { get; set; }
 
             public int[] Array { get; set; }
 
@@ -63,17 +64,13 @@ namespace YamlDotNet.Test
 		{
 			var settings = new SerializerSettings();
 
-			var name = typeof (MyObject).FullName;
-
-			//var uri = Uri.EscapeUriString("!" + name);
-
 			settings.TagTypes.AddTagMapping("MyObject", typeof(MyObject));
 
 			var serializer = new Serializer(settings);
 
 			var text = @"!MyObject
-Anchor: &o1 Test
-Alias: *o1
+A0Anchor: &o1 Test
+A1Alias: *o1
 Bool: true
 BoolFalse: false
 Byte: 2
@@ -94,6 +91,13 @@ ArrayContent: [1,2]
 			// not working yet, scalar read/write are not yet implemented
 			var value = serializer.Deserialize(text);
 			Console.WriteLine(value);
+
+
+			var stringWriter = new StringWriter();
+			serializer.Serialize(stringWriter, value);
+			var text2 = stringWriter.ToString();
+
+			Console.WriteLine(text2);
 		}
 	}
 }
