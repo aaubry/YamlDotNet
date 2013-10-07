@@ -6,7 +6,7 @@ namespace YamlDotNet.Serialization
 	/// Provided the base implementation for an IEventEmitter that is a
 	/// decorator for another IEventEmitter.
 	/// </summary>
-	public abstract class ChainedEventEmitter : IEventEmitter
+	internal abstract class ChainedEventEmitter : IEventEmitter
 	{
 		protected readonly IEventEmitter nextEmitter;
 
@@ -18,6 +18,16 @@ namespace YamlDotNet.Serialization
 			}
 
 			this.nextEmitter = nextEmitter;
+		}
+
+		public virtual void StreamStart()
+		{
+			nextEmitter.StreamStart();
+		}
+
+		public virtual void DocumentStart()
+		{
+			nextEmitter.DocumentStart();
 		}
 
 		public virtual void Emit(AliasEventInfo eventInfo)
@@ -48,6 +58,16 @@ namespace YamlDotNet.Serialization
 		public virtual void Emit(SequenceEndEventInfo eventInfo)
 		{
 			nextEmitter.Emit(eventInfo);
+		}
+
+		public virtual void DocumentEnd()
+		{
+			nextEmitter.DocumentEnd();
+		}
+
+		public virtual void StreamEnd()
+		{
+			nextEmitter.StreamEnd();
 		}
 	}
 }

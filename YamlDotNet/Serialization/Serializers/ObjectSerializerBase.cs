@@ -91,13 +91,13 @@ namespace YamlDotNet.Serialization.Serializers
             var isSequence = CheckIsSequence(typeDescriptor);
             if (isSequence)
             {
-                context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag });
+                context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor()});
                 WriteItems(context, value, typeDescriptor);
                 context.Writer.Emit(new SequenceEndEventInfo(value, typeOfValue));
             }
             else
             {
-                context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = tag });
+				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor() });
                 WriteItems(context, value, typeDescriptor);
                 context.Writer.Emit(new MappingEndEventInfo(value, typeOfValue));
             }

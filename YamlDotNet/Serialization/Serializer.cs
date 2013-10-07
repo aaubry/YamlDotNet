@@ -119,14 +119,15 @@ namespace YamlDotNet.Serialization
 			{
 				ObjectSerializer = CreateProcessor(settings),
 			};
-			context.Writer = CreateEmitter(emitter, context);
+
+			context.Writer = CreateEmitter(emitter, context); ;
 
 			// Serialize the document
-			emitter.Emit(new StreamStart());
-			emitter.Emit(new DocumentStart());
+			context.Writer.StreamStart();
+			context.Writer.DocumentStart();
 			context.WriteYaml(graph, type);
-			emitter.Emit(new DocumentEnd(true));
-			emitter.Emit(new StreamEnd());
+			context.Writer.DocumentEnd();
+			context.Writer.StreamEnd();
 		}
 
 		public object Deserialize(Stream stream)
@@ -199,15 +200,15 @@ namespace YamlDotNet.Serialization
             return new AnchorSerializer(new TypingSerializer(new RoutingSerializer(settings)));
 		}
 
-        private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)
-        {
-            var writer = new WriterEventEmitter(emitter, context);
+		private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)
+		{
+			var writer = (IEventEmitter)new WriterEventEmitter(emitter);
 
             if (settings.EmitJsonComptible)
             {
-                return new JsonEventEmitter(writer);
+                writer = new JsonEventEmitter(writer);
             }
-	        return writer;
+	        return new AnchorEventEmitter(writer);
         }
    }
 }

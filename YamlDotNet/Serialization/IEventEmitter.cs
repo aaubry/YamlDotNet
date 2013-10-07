@@ -5,6 +5,10 @@ namespace YamlDotNet.Serialization
 	/// </summary>
 	public interface IEventEmitter
 	{
+		void StreamStart();
+
+		void DocumentStart();
+
 		void Emit(AliasEventInfo eventInfo);
 
 		void Emit(ScalarEventInfo eventInfo);
@@ -16,5 +20,9 @@ namespace YamlDotNet.Serialization
 		void Emit(SequenceStartEventInfo eventInfo);
 
 		void Emit(SequenceEndEventInfo eventInfo);
+
+		void DocumentEnd();
+
+		void StreamEnd();
 	}
 }

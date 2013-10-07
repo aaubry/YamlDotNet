@@ -24,32 +24,34 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-
-			// TODO: Handle here user defined/registered IYamlSerializable
-
-			if (typeDescriptor is PrimitiveDescriptor)
-			{
-				return primitiveSerializer.ReadYaml(context, value, typeDescriptor);
-			}
-			else if (typeDescriptor is DictionaryDescriptor)
-			{
-				return dictionarySerializer.ReadYaml(context, value, typeDescriptor);
-			}
-			else if (typeDescriptor is CollectionDescriptor)
-			{
-				return collectionSerializer.ReadYaml(context, value, typeDescriptor);
-			}
-            else if (typeDescriptor is ArrayDescriptor)
-            {
-                return arraySerializer.ReadYaml(context, value, typeDescriptor);
-            }
-
-			return defaultObjectSerializer.ReadYaml(context, value, typeDescriptor);
+			return GetSerializer(typeDescriptor).ReadYaml(context, value, typeDescriptor);
 		}
 
 		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			throw new System.NotImplementedException();
+			GetSerializer(typeDescriptor).WriteYaml(context, value, typeDescriptor);
+		}
+
+		private IYamlSerializable GetSerializer(ITypeDescriptor typeDescriptor)
+		{
+			if (typeDescriptor is PrimitiveDescriptor)
+			{
+				return primitiveSerializer;
+			}
+			else if (typeDescriptor is DictionaryDescriptor)
+			{
+				return dictionarySerializer;
+			}
+			else if (typeDescriptor is CollectionDescriptor)
+			{
+				return collectionSerializer;
+			}
+			else if (typeDescriptor is ArrayDescriptor)
+			{
+				return arraySerializer;
+			}
+
+			return defaultObjectSerializer;
 		}
 	}
 }

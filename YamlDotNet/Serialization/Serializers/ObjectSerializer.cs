@@ -2,27 +2,28 @@
 
 namespace YamlDotNet.Serialization.Serializers
 {
-    /// <summary>
+	/// <summary>
 	/// Default processor for serializing an object.
 	/// </summary>
 	public class ObjectSerializer : ObjectSerializerBase
 	{
-        /// <summary>
+		/// <summary>
 		/// Initializes a new instance of the <see cref="ObjectSerializer"/> class.
 		/// </summary>
 		/// <param name="settings">The settings.</param>
 		/// <exception cref="System.ArgumentNullException">settings</exception>
-		public ObjectSerializer(SerializerSettings settings) : base(settings)
-        {
-        }
+		public ObjectSerializer(SerializerSettings settings)
+			: base(settings)
+		{
+		}
 
-        protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
-        {
-            // By default an object serializer is a mapping
-            return false;
-        }
+		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
+		{
+			// By default an object serializer is a mapping
+			return false;
+		}
 
-        protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 
@@ -47,7 +48,7 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 		}
 
-        public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
 			foreach (var member in typeDescriptor.Members)
 			{
@@ -55,12 +56,23 @@ namespace YamlDotNet.Serialization.Serializers
 				if (!member.ShouldSerialize(thisObject)) continue;
 
 				// Emit the key name
-				context.Writer.Emit(new ScalarEventInfo(member.Name, typeof (string)));
+				WriteKey(context, member.Name);
 
 				var memberValue = member.Get(thisObject);
 				var memberType = member.Type;
 				context.WriteYaml(memberValue, memberType);
 			}
+		}
+
+		protected void WriteKey(SerializerContext context, string name)
+		{
+			// Emit the key name
+			context.Writer.Emit(new ScalarEventInfo(name, typeof (string))
+				{
+					RenderedValue = name,
+					IsPlainImplicit = true,
+					Style = ScalarStyle.Plain
+				});
 		}
 	}
 }

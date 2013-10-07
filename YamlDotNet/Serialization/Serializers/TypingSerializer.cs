@@ -1,5 +1,4 @@
 ﻿using YamlDotNet.Events;
-using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {

@@ -89,6 +89,7 @@
     <Compile Include="Schemas\IYamlSchema.cs" />
     <Compile Include="Schemas\JsonSchema.cs" />
     <Compile Include="SemanticErrorException.cs" />
+    <Compile Include="Serialization\AnchorEventEmitter.cs" />
     <Compile Include="Serialization\AnchorNotFoundException.cs" />
     <Compile Include="Serialization\DefaultObjectFactory.cs" />
     <Compile Include="Serialization\Descriptors\ArrayDescriptor.cs" />
@@ -139,9 +140,6 @@
     <Compile Include="Serialization\SerializerContext.cs" />
     <Compile Include="Serialization\AttributeRegistry.cs" />
     <Compile Include="Serialization\TagTypeRegistry.cs" />
-    <Compile Include="Serialization\TypeAssigningEventEmitter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Serialization\WriterEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>

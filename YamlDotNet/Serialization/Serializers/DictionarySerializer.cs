@@ -64,14 +64,14 @@ namespace YamlDotNet.Serialization.Serializers
 				foreach (var member in typeDescriptor.Members)
 				{
 					// Emit the key name
-					context.Writer.Emit(new ScalarEventInfo(member.Name, typeof(string)));
+					WriteKey(context, member.Name);
 
 					var memberValue = member.Get(thisObject);
 					var memberType = member.Type;
 					context.WriteYaml(memberValue, memberType);
 				}
 
-				context.Writer.Emit(new ScalarEventInfo(Settings.SpecialCollectionMember, typeof(string)));
+				WriteKey(context, Settings.SpecialCollectionMember);
 				pureDictionarySerializer.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 			}
 		}

@@ -52,7 +52,20 @@ namespace YamlDotNet.Serialization.Serializers
 		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
             // Only write anchors for object (and not value types)
-			if (value != null && Type.GetTypeCode(value.GetType()) == TypeCode.Object && !value.GetType().IsValueType)
+			bool isAnchorable = false;
+			if (value != null && !value.GetType().IsValueType)
+			{
+				var typeCode = Type.GetTypeCode(value.GetType());
+				switch (typeCode)
+				{
+					case TypeCode.Object:
+					case TypeCode.String:
+						isAnchorable = true;
+						break;
+				}
+			}
+
+			if (isAnchorable)
 			{
 				string alias;
 				if (ObjectToString.TryGetValue(value, out alias))
