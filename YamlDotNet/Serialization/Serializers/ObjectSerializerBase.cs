@@ -39,6 +39,11 @@ namespace YamlDotNet.Serialization.Serializers
         protected abstract bool CheckIsSequence(ITypeDescriptor typeDescriptor);
 
 
+		protected virtual SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		{
+			return SequenceStyle.Block;
+		}
+
         public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
         {
 	        var type = typeDescriptor.Type;
@@ -71,13 +76,13 @@ namespace YamlDotNet.Serialization.Serializers
             where TStart : NodeEvent
             where TEnd : ParsingEvent
         {
-            var reader = context.Reader;
-            reader.Expect<TStart>();
-            while (!reader.Accept<TEnd>())
-            {
-                ReadItem(context, thisObject, typeDescriptor);
-            }
-            reader.Expect<TEnd>();
+			var reader = context.Reader;
+			reader.Expect<TStart>();
+			while (!reader.Accept<TEnd>())
+			{
+				ReadItem(context, thisObject, typeDescriptor);
+			}
+			reader.Expect<TEnd>();
             return thisObject;
         }
 
@@ -86,12 +91,20 @@ namespace YamlDotNet.Serialization.Serializers
         public virtual void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
         {
             var typeOfValue = value.GetType();
-            var tag = typeOfValue == typeDescriptor.Type ? null : context.TagFromType(typeOfValue);
+	        var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
+
+            var tag = typeOfValue == expectedType ? null : context.TagFromType(typeOfValue);
+
+			if (typeDescriptor == null)
+			{
+				typeDescriptor = context.FindTypeDescriptor(typeOfValue);
+			}
 
             var isSequence = CheckIsSequence(typeDescriptor);
             if (isSequence)
             {
-                context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor()});
+	            var style = GetSequenceStyle(context, value, typeDescriptor);
+                context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor(), Style = style});
                 WriteItems(context, value, typeDescriptor);
                 context.Writer.Emit(new SequenceEndEventInfo(value, typeOfValue));
             }

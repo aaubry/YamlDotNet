@@ -58,24 +58,19 @@ namespace YamlDotNet.Test
 			public int[] ArrayContent { get; private set; }
 		}
 
-
 		[Fact]
 		public void TestSimpleObjectAndPrimitive()
 		{
-			var settings = new SerializerSettings();
-
-			settings.TagTypes.AddTagMapping("MyObject", typeof(MyObject));
-
-			var serializer = new Serializer(settings);
-
 			var text = @"!MyObject
 A0Anchor: &o1 Test
 A1Alias: *o1
+Array: [1, 2, 3]
+ArrayContent: [1, 2]
 Bool: true
 BoolFalse: false
 Byte: 2
-Enum: B
 Double: 6.6
+Enum: B
 Float: 5.5
 Int16: 3
 Int32: 5
@@ -85,19 +80,58 @@ String: This is a test
 UInt16: 4
 UInt32: 6
 UInt64: 8
-Array: [1,2,3]
-ArrayContent: [1,2]
-";
-			// not working yet, scalar read/write are not yet implemented
-			var value = serializer.Deserialize(text);
-			Console.WriteLine(value);
+".Trim();
 
+			var settings = new SerializerSettings();
+			settings.TagTypes.AddTagMapping("MyObject", typeof(MyObject));
+			SerialRoundTrip(settings, text);
+		}
+
+		public class MyObjectAndCollection
+		{
+			public MyObjectAndCollection()
+			{
+				Values = new List<string>();
+			}
+
+			public string Name { get; set; }
+
+			public List<string>  Values { get; set; }
+		}
+
+
+		[Fact]
+		public void TestObjectWithCollection()
+		{
+			var text = @"!MyObjectAndCollection
+Name: Yes
+Values: [a, b, c]
+".Trim();
+
+			var settings = new SerializerSettings();
+			settings.TagTypes.AddTagMapping("MyObjectAndCollection", typeof(MyObjectAndCollection));
+			SerialRoundTrip(settings, text);
+		}
+
+		private void SerialRoundTrip(SerializerSettings settings, string text)
+		{
+			var serializer = new Serializer(settings);
+			// not working yet, scalar read/write are not yet implemented
+			Console.WriteLine("Text to serialize:");
+			Console.WriteLine("------------------");
+			Console.WriteLine(text);
+			var value = serializer.Deserialize(text);
+
+			Console.WriteLine();
 
 			var stringWriter = new StringWriter();
 			serializer.Serialize(stringWriter, value);
-			var text2 = stringWriter.ToString();
-
+			var text2 = stringWriter.ToString().Trim();
+			Console.WriteLine("Text deserialized:");
+			Console.WriteLine("------------------");
 			Console.WriteLine(text2);
+
+			Assert.Equal(text, text2);
 		}
 	}
 }

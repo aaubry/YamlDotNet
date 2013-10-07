@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization.Serializers
 				string alias;
 				if (ObjectToString.TryGetValue(value, out alias))
 				{
-					context.Writer.Emit(new AliasEventInfo(value, typeDescriptor.Type) {Alias = alias});
+					context.Writer.Emit(new AliasEventInfo(value, value.GetType()) {Alias = alias});
 					return;
 				}
 				else

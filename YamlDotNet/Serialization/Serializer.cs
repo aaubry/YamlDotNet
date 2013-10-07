@@ -92,7 +92,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		public void Serialize(IEmitter emitter, object graph)
 		{
-			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object));
+			Serialize(emitter, graph, graph == null ? typeof(object) : null);
 		}
 
 		/// <summary>
@@ -108,7 +108,7 @@ namespace YamlDotNet.Serialization
 				throw new ArgumentNullException("emitter");
 			}
 
-			if (type == null)
+			if (graph == null && type == null)
 			{
 				throw new ArgumentNullException("type");
 			}

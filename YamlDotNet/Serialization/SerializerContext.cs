@@ -94,9 +94,9 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// The default function to write an object to Yaml
         /// </summary>
-        public void WriteYaml(object value, Type type)
+        public void WriteYaml(object value, Type expectedType)
         {
-            ObjectSerializer.WriteYaml(this, value, FindTypeDescriptor(type));
+            ObjectSerializer.WriteYaml(this, value, FindTypeDescriptor(expectedType));
         }
 
 		/// <summary>

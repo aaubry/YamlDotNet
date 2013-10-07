@@ -26,6 +26,7 @@ namespace YamlDotNet.Serialization
 		    EmitJsonComptible = false;
 		    EmitCapacityForList = false;
 			SpecialCollectionMember = "~Items";
+			LimitFlowSequence = 20;
 			schema = new CoreSchema();
 			tagTypeRegistry = new TagTypeRegistry();
 			attributeRegistry = new AttributeRegistry();
@@ -68,6 +69,13 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <value><c>true</c> if the property <see cref="List{T}.Capacity"/> should be emitted; otherwise, <c>false</c>.</value>
 		public bool EmitCapacityForList { get; set; }
+
+		/// <summary>
+		/// Gets or sets the maximum number of elements an array/list of primitive can be emitted as a 
+		/// flow sequence (instead of a block sequence by default). Default is 20.
+		/// </summary>
+		/// <value>The emit compact array limit.</value>
+		public int LimitFlowSequence { get; set; }
 
 		/// <summary>
 		/// Gets or sets the prefix used to serialize items for a non pure <see cref="System.Collections.IDictionary" /> or <see cref="System.Collections.ICollection" />. Default to "~Items", see remarks.

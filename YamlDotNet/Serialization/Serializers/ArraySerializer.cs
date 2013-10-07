@@ -6,7 +6,14 @@ namespace YamlDotNet.Serialization.Serializers
 {
     internal class ArraySerializer : IYamlSerializable
     {
-		public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+	    private SerializerSettings settings;
+
+	    public ArraySerializer(SerializerSettings settings)
+	    {
+		    this.settings = settings;
+	    }
+
+	    public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 			var arrayDescriptor = (ArrayDescriptor)typeDescriptor;
@@ -50,7 +57,14 @@ namespace YamlDotNet.Serialization.Serializers
 
 			var tag = valueType != typeDescriptor.Type ? context.TagFromType(valueType) : null;
 
-			context.Writer.Emit(new SequenceStartEventInfo(value, valueType) { Tag = tag, Anchor = context.GetAnchor() });
+			// Emit a Flow sequence or block sequence depending on settings 
+		    context.Writer.Emit(new SequenceStartEventInfo(value, valueType)
+			    {
+				    Tag = tag,
+				    Anchor = context.GetAnchor(),
+				    Style = arrayList.Count < settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block
+			    });
+
 			foreach (var element in arrayList)
 			{
 				context.WriteYaml(element, arrayDescriptor.ElementType);
