@@ -82,6 +82,8 @@ namespace YamlDotNet.Serialization
 					nextEmitter.Emit((SequenceEndEventInfo)evt);
 				}
 			}
+
+			nextEmitter.DocumentEnd();
 		}
 	}
 }

@@ -19,7 +19,7 @@ namespace YamlDotNet.Serialization.Serializers
 			dictionarySerializer = new DictionarySerializer(settings);
 			collectionSerializer = new CollectionSerializer(settings);
 			defaultObjectSerializer = new ObjectSerializer(settings);
-            arraySerializer = new ArraySerializer();
+            arraySerializer = new ArraySerializer(settings);
 		}
 
 		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
@@ -29,7 +29,15 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			GetSerializer(typeDescriptor).WriteYaml(context, value, typeDescriptor);
+			// If value is null, then just output a plain null scalar
+			if (value == null)
+			{
+				context.Writer.Emit(new ScalarEventInfo(null, typeof(object)) { RenderedValue = string.Empty, IsPlainImplicit = true, Style = ScalarStyle.Plain});
+				return;
+			}
+
+			var localTypeDescriptor = typeDescriptor ?? context.FindTypeDescriptor(value.GetType());
+			GetSerializer(localTypeDescriptor).WriteYaml(context, value, typeDescriptor);
 		}
 
 		private IYamlSerializable GetSerializer(ITypeDescriptor typeDescriptor)
