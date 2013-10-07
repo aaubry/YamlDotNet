@@ -1,228 +1,124 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
-
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of
-//  this software and associated documentation files (the "Software"), to deal in
-//  the Software without restriction, including without limitation the rights to
-//  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-//  of the Software, and to permit persons to whom the Software is furnished to do
-//  so, subject to the following conditions:
-
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
-
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using YamlDotNet;
 using YamlDotNet.Events;
-using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.Serializers;
 
 namespace YamlDotNet.Serialization
 {
-	/// <summary>
-	/// Options that control the serialization process.
-	/// </summary>
-	[Flags]
-	public enum SerializationOptions
-	{
-		/// <summary>
-		/// Serializes using the default options
-		/// </summary>
-		None = 0,
+    public class Serializer
+    {
+        private readonly SerializerSettings settings;
 
 		/// <summary>
-		/// Ensures that it will be possible to deserialize the serialized objects.
+		/// Initializes a new instance of the <see cref="Serializer"/> class.
 		/// </summary>
-		Roundtrip = 1,
+        public Serializer() : this(null)
+        {
+        }
 
 		/// <summary>
-		/// If this flag is specified, if the same object appears more than once in the
-		/// serialization graph, it will be serialized each time instead of just once.
+		/// Gets the settings.
 		/// </summary>
-		/// <remarks>
-		/// If the serialization graph contains circular references and this flag is set,
-		/// a <see cref="StackOverflowException" /> will be thrown.
-		/// If this flag is not set, there is a performance penalty because the entire
-		/// object graph must be walked twice.
-		/// </remarks>
-		DisableAliases = 2,
+		/// <value>The settings.</value>
+        public SerializerSettings Settings { get { return settings; } }
 
-		/// <summary>
-		/// Forces every value to be serialized, even if it is the default value for that type.
-		/// </summary>
-		EmitDefaults = 4,
+        public Serializer(SerializerSettings settings)
+        {
+            this.settings = settings ?? new SerializerSettings();
+        }
 
-		/// <summary>
-		/// Ensures that the result of the serialization is valid JSON.
-		/// </summary>
-		JsonCompatible = 8,
-	}
-
-	/// <summary>
-	/// Writes objects to YAML.
-	/// </summary>
-	public sealed class Serializer
-	{
-		internal IList<IYamlTypeConverter> Converters { get; private set; }
-
-		private readonly SerializationOptions options;
-		private readonly INamingConvention namingConvention;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-		public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+		public object Deserialize(Stream stream)
 		{
-			this.options = options;
-			this.namingConvention = namingConvention ?? new NullNamingConvention();
-
-			Converters = new List<IYamlTypeConverter>();
+			return Deserialize(stream, null);
 		}
 
-		/// <summary>
-		/// Registers a type converter to be used to serialize and deserialize specific types.
-		/// </summary>
-		public void RegisterTypeConverter(IYamlTypeConverter converter)
+		public object Deserialize(TextReader reader)
 		{
-			Converters.Add(converter);
+			return Deserialize((TextReader)reader, null);
 		}
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		public void Serialize(TextWriter writer, object graph)
+		public object Deserialize(Stream stream, Type expectedType)
 		{
-			Serialize(new Emitter(writer), graph);
+			if (stream == null) throw new ArgumentNullException("stream");
+
+			return Deserialize(new StreamReader(stream), null);
 		}
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		/// <param name="type">The static type of the object to serialize.</param>
-		public void Serialize(TextWriter writer, object graph, Type type)
+		public object Deserialize(string fromText)
 		{
-			Serialize(new Emitter(writer), graph, type);
+			return Deserialize(fromText, null);
 		}
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		public void Serialize(IEmitter emitter, object graph)
+		public object Deserialize(string fromText, Type expectedType)
 		{
-			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object));
+			if (fromText == null) throw new ArgumentNullException("fromText");
+			return Deserialize(new StringReader(fromText), expectedType);
 		}
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		/// <param name="type">The static type of the object to serialize.</param>
-		public void Serialize(IEmitter emitter, object graph, Type type)
+	    public object Deserialize(TextReader reader, Type expectedType)
+	    {
+		    if (reader == null) throw new ArgumentNullException("reader");
+		    return Deserialize(new EventReader(new Parser(reader)), null);
+	    }
+
+	    public object Deserialize(EventReader reader, Type expectedType)
 		{
-			if (emitter == null)
+			if (reader == null) throw new ArgumentNullException("reader");
+			
+			var hasStreamStart = reader.Allow<StreamStart>() != null;
+			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
+
+			object result = null;
+			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
 			{
-				throw new ArgumentNullException("emitter");
+				var context = new SerializerContext(this)
+					{
+						Reader = reader,
+						ObjectSerializer = CreateProcessor(settings),
+					};
+				result = context.ReadYaml(null, expectedType);
 			}
 
-			if (type == null)
+			if (hasDocumentStart)
 			{
-				throw new ArgumentNullException("type");
+				reader.Expect<DocumentEnd>();
 			}
 
-			var traversalStrategy = CreateTraversalStrategy();
-			var eventEmitter = CreateEventEmitter(emitter);
-			var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph, type);
-			EmitDocument(emitter, traversalStrategy, emittingVisitor, graph, type);
+			if (hasStreamStart)
+			{
+				reader.Expect<StreamEnd>();
+			}
+
+			return result;
 		}
 
-		private void EmitDocument(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IObjectGraphVisitor emittingVisitor, object graph, Type type)
+        public void Serialize(Stream stream, object value)
+        {
+            var context = new SerializerContext(this);
+            var writer = CreateEmitter(stream, context);
+            context.Writer = writer;
+			throw new NotImplementedException();
+        }
+
+		private IYamlSerializable CreateProcessor(SerializerSettings settings)
 		{
-			emitter.Emit(new StreamStart());
-			emitter.Emit(new DocumentStart());
-
-			traversalStrategy.Traverse(graph, type, emittingVisitor);
-
-			emitter.Emit(new DocumentEnd(true));
-			emitter.Emit(new StreamEnd());
+            return new AnchorSerializer(new TypingSerializer(new RoutingSerializer(settings)));
 		}
 
-		private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, object graph, Type type)
-		{
-			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
+        private IEventEmitter CreateEmitter(Stream stream, SerializerContext context)
+        {
+            return CreateEmitter(new Emitter(new StreamWriter(stream), context.Settings.PreferredIndent), context);
+        }
 
-			emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
+        private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)
+        {
+            var writer = new WriterEventEmitter(emitter, context);
 
-			if ((options & SerializationOptions.DisableAliases) == 0)
-			{
-				var anchorAssigner = new AnchorAssigner();
-				traversalStrategy.Traverse(graph, type, anchorAssigner);
-
-				emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
-			}
-
-			if ((options & SerializationOptions.EmitDefaults) == 0)
-			{
-				emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
-			}
-
-			return emittingVisitor;
-		}
-
-		private IEventEmitter CreateEventEmitter(IEmitter emitter)
-		{
-			var writer = new WriterEventEmitter(emitter);
-
-			if ((options & SerializationOptions.JsonCompatible) != 0)
-			{
-				return new JsonEventEmitter(writer);
-			}
-			else
-			{
-				return new TypeAssigningEventEmitter(writer);
-			}
-		}
-
-		private IObjectGraphTraversalStrategy CreateTraversalStrategy()
-		{
-			ITypeDescriptor typeDescriptor;
-			if ((options & SerializationOptions.Roundtrip) != 0)
-			{
-				typeDescriptor = new ReadableAndWritablePropertiesTypeDescriptor();
-			}
-			else
-			{
-				typeDescriptor = new ReadablePropertiesTypeDescriptor();
-			}
-
-			typeDescriptor = new NamingConventionTypeDescriptor(typeDescriptor, namingConvention);
-			typeDescriptor = new YamlAttributesTypeDescriptor(typeDescriptor);
-
-			if ((options & SerializationOptions.Roundtrip) != 0)
-			{
-				return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, 50);
-			}
-			else
-			{
-				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, 50);
-			}
-		}
-	}
+            if (settings.EmitJsonComptible)
+            {
+                return new JsonEventEmitter(writer);
+            }
+	        return writer;
+        }
+   }
 }

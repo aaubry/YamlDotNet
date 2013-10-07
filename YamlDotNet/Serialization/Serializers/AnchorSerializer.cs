@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using YamlDotNet.Events;
 
-namespace YamlDotNet.Serialization.Processors
+namespace YamlDotNet.Serialization.Serializers
 {
-	public class AnchorProcessor : ChainedProcessor
+	internal class AnchorSerializer : ChainedSerializer
 	{
 		private Dictionary<string, object> aliasToObject;
 		private Dictionary<object, string> objectToAlias;
 
-		public AnchorProcessor(IYamlProcessor next) : base(next)
+		public AnchorSerializer(IYamlSerializable next) : base(next)
 		{
 		}
 
@@ -23,13 +23,13 @@ namespace YamlDotNet.Serialization.Processors
 			{
 				if (!AliasToObject.TryGetValue(alias.Value, out value))
 				{
-					throw new YamlException("Alias [{0}] not found".DoFormat(alias.Value));
+					throw new AnchorNotFoundException(alias.Start, alias.End, "Alias [{0}] not found".DoFormat(alias.Value));
 				}
 
 				return value;
 			}
 
-			// Test if current node as an anchor
+			// Test if current node has an anchor &oxxx
 			string anchor = null;
 			var nodeEvent = reader.Peek<NodeEvent>();
 			if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
@@ -51,7 +51,8 @@ namespace YamlDotNet.Serialization.Processors
 
 		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			if (value != null && Type.GetTypeCode(value.GetType()) == TypeCode.Object)
+            // Only write anchors for object (and not value types)
+			if (value != null && Type.GetTypeCode(value.GetType()) == TypeCode.Object && !value.GetType().IsValueType)
 			{
 				string alias;
 				if (ObjectToString.TryGetValue(value, out alias))

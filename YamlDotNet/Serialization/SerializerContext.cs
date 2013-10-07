@@ -11,7 +11,7 @@ namespace YamlDotNet.Serialization
 	/// </summary>
 	public class SerializerContext
 	{
-        private readonly YamlSerializerSettings settings;
+        private readonly SerializerSettings settings;
 	    private readonly ITagTypeRegistry tagTypeRegistry;
 		private readonly ITypeDescriptorFactory typeDescriptorFactory;
 
@@ -19,12 +19,12 @@ namespace YamlDotNet.Serialization
         /// Initializes a new instance of the <see cref="SerializerContext"/> class.
         /// </summary>
         /// <param name="serializer">The serializer.</param>
-		internal SerializerContext(YamlSerializer serializer)
+		internal SerializerContext(Serializer serializer)
         {
             Serializer = serializer;
             settings = serializer.Settings;
 	        tagTypeRegistry = settings.TagTypes;
-	        CreateType = settings.TypeFactory;
+	        ObjectFactory = settings.ObjectFactory;
 	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes);
         }
 
@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization
 		/// Gets the settings.
 		/// </summary>
 		/// <value>The settings.</value>
-		public YamlSerializerSettings Settings
+		public SerializerSettings Settings
 		{
 			get { return settings; }
 		}
@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization
 		/// Gets the serializer.
 		/// </summary>
 		/// <value>The serializer.</value>
-        public YamlSerializer Serializer { get; private set; }
+        public Serializer Serializer { get; private set; }
 
         /// <summary>
         /// Gets the reader used while deserializing.
@@ -58,16 +58,22 @@ namespace YamlDotNet.Serialization
         /// <value>The reader.</value>
         public EventReader Reader { get; internal set; }
 
-	    /// <summary>
-	    /// The default function to read a Yaml.
-	    /// </summary>
-		public Func<object, Type, object> ReadYaml { get; set; }
+        /// <summary>
+        /// The default function to read an object from the current Yaml stream.
+        /// </summary>
+        /// <param name="value">The value of the receiving object, may be null.</param>
+        /// <param name="expectedType">The expected type.</param>
+        /// <returns>System.Object.</returns>
+	    public object ReadYaml(object value, Type expectedType)
+	    {
+	        return ObjectSerializer.ReadYaml(this, value, FindTypeDescriptor(expectedType));
+	    }
 
 		/// <summary>
 		/// Gets or sets the type of the create.
 		/// </summary>
 		/// <value>The type of the create.</value>
-		public Func<Type, object> CreateType { get; set; }
+		public IObjectFactory ObjectFactory { get; set; }
 
 		/// <summary>
 		/// Gets the writer used while deserializing.
@@ -78,7 +84,10 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// The default function to write an object to Yaml
         /// </summary>
-		public Action<object, Type> WriteYaml { get; set; }
+        public void WriteYaml(object value, Type type)
+        {
+            ObjectSerializer.WriteYaml(this, value, FindTypeDescriptor(type));
+        }
 
 		/// <summary>
 		/// Finds the type descriptor for the specified type.
@@ -122,7 +131,7 @@ namespace YamlDotNet.Serialization
 			return Settings.Schema.TryParse(scalar, true, out defaultTag, out value);
 		}
 
-		internal IYamlProcessor ObjectProcessor { get; set; }
+		internal IYamlSerializable ObjectSerializer { get; set; }
 
 		internal string GetAnchor()
 		{

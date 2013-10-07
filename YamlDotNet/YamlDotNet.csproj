@@ -90,6 +90,7 @@
     <Compile Include="Schemas\JsonSchema.cs" />
     <Compile Include="SemanticErrorException.cs" />
     <Compile Include="Serialization\AnchorNotFoundException.cs" />
+    <Compile Include="Serialization\DefaultObjectFactory.cs" />
     <Compile Include="Serialization\Descriptors\ArrayDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\CollectionDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\DictionaryDescriptor.cs" />
@@ -104,15 +105,17 @@
     <Compile Include="Serialization\EmitterState.cs" />
     <Compile Include="Serialization\IAttributeRegistry.cs" />
     <Compile Include="Serialization\IMemberDescriptor.cs" />
+    <Compile Include="Serialization\IObjectFactory.cs" />
     <Compile Include="Serialization\ITagTypeRegistry.cs" />
     <Compile Include="Serialization\ITypeDescriptor.cs" />
     <Compile Include="Serialization\ITypeDescriptorFactory.cs" />
     <Compile Include="Serialization\IYamlVisitor.cs" />
-    <Compile Include="Serialization\Processors\AnchorProcessor.cs" />
+    <Compile Include="Serialization\Serializers\AnchorSerializer.cs" />
     <Compile Include="Serialization\ChainedEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Serialization\Processors\ChainedProcessor.cs" />
+    <Compile Include="Serialization\Serializers\ArraySerializer.cs" />
+    <Compile Include="Serialization\Serializers\ChainedSerializer.cs" />
     <Compile Include="Serialization\EventInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -120,17 +123,19 @@
     <Compile Include="Serialization\IEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Serialization\IYamlProcessor.cs" />
+    <Compile Include="Serialization\IYamlSerializable.cs" />
     <Compile Include="Serialization\IYamlSerializableFactory.cs" />
     <Compile Include="Serialization\JsonEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Serialization\Processors\CollectionProcessor.cs" />
-    <Compile Include="Serialization\Processors\DictionaryProcessor.cs" />
-    <Compile Include="Serialization\Processors\ObjectProcessor.cs" />
+    <Compile Include="Serialization\Serializers\CollectionSerializer.cs" />
+    <Compile Include="Serialization\Serializers\DictionarySerializer.cs" />
+    <Compile Include="Serialization\Serializers\ObjectSerializer.cs" />
     <Compile Include="Schemas\SchemaBase.cs" />
-    <Compile Include="Serialization\Processors\PrimitiveProcessor.cs" />
-    <Compile Include="Serialization\Processors\RoutingProcessor.cs" />
+    <Compile Include="Serialization\Serializers\ObjectSerializerBase.cs" />
+    <Compile Include="Serialization\Serializers\TypingSerializer.cs" />
+    <Compile Include="Serialization\Serializers\PrimitiveSerializer.cs" />
+    <Compile Include="Serialization\Serializers\RoutingSerializer.cs" />
     <Compile Include="Serialization\SerializerContext.cs" />
     <Compile Include="Serialization\AttributeRegistry.cs" />
     <Compile Include="Serialization\TagTypeRegistry.cs" />
@@ -153,8 +158,8 @@
     <Compile Include="Serialization\YamlScalarNode.cs" />
     <Compile Include="Serialization\YamlSequenceNode.cs" />
     <Compile Include="Serialization\YamlSerializableMethod.cs" />
-    <Compile Include="Serialization\YamlSerializer.cs" />
-    <Compile Include="Serialization\YamlSerializerSettings.cs" />
+    <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Serialization\SerializerSettings.cs" />
     <Compile Include="Serialization\YamlStream.cs" />
     <Compile Include="Serialization\YamlTagAttribute.cs" />
     <Compile Include="Serialization\YamlVisitor.cs" />

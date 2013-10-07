@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace YamlDotNet.Serialization.Descriptors
 {
 	/// <summary>
-	/// Describes a primitive.
+    /// Describes a descriptor for a primitive (bool, char, sbyte, byte, int, uint, long, ulong, float, double, decimal, string, DateTime).
 	/// </summary>
 	public class PrimitiveDescriptor : ObjectDescriptor
 	{

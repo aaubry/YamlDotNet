@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Allows an object to customize how it is serialized and deserialized.
 	/// </summary>
-	public interface IYamlProcessor
+	public interface IYamlSerializable
 	{
 		/// <summary>
 		/// Reads this object's state from a YAML parser.

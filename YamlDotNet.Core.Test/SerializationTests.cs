@@ -42,18 +42,26 @@ namespace YamlDotNet.Test
 			public bool Bool { get; set; }
 
 			public bool BoolFalse { get; set; }
+
+            public string Anchor { get; set; }
+
+            public string Alias { get; set; }
+
+            public int[] Array { get; set; }
 		}
 
 
 		[Fact]
 		public void TestSimpleObjectAndPrimitive()
 		{
-			var settings = new YamlSerializerSettings();
+			var settings = new SerializerSettings();
 			settings.TagTypes.AddTagAlias("MyObject", typeof(MyObject));
 
-			var serializer = new YamlSerializer(settings);
+			var serializer = new Serializer(settings);
 
 			var text = @"!MyObject
+Anchor: &o1 Test
+Alias: *o1
 Bool: true
 BoolFalse: false
 Byte: 2
@@ -68,6 +76,7 @@ String: This is a test
 UInt16: 4
 UInt32: 6
 UInt64: 8
+Array: [1,2,3]
 ";
 			// not working yet, scalar read/write are not yet implemented
 			var value = serializer.Deserialize(text);

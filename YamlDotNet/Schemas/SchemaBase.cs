@@ -105,7 +105,21 @@ namespace YamlDotNet.Schemas
 			throw new NotSupportedException("NodeEvent [{0}] not supported".DoFormat(nodeEvent.GetType().FullName));
 		}
 
-		/// <summary>
+	    public string GetDefaultTag(Type type)
+	    {
+	        if (type == null) throw new ArgumentNullException("type");
+	        EnsureScalarRules();
+
+	        List<ScalarResolutionRule> rules;
+            if (mapTypeToScalarResolutionRuleList.Count > 0 && mapTypeToScalarResolutionRuleList.TryGetValue(type, out rules) && rules.Count > 0)
+            {
+                return rules[0].Tag;
+            }
+
+	        return null;
+	    }
+
+	    /// <summary>
 		/// Registers a long/short tag association.
 		/// </summary>
 		/// <param name="shortTag">The short tag.</param>
@@ -113,7 +127,7 @@ namespace YamlDotNet.Schemas
 		/// <exception cref="System.ArgumentNullException">
 		/// shortTag
 		/// or
-		/// longTag
+		/// shortTag
 		/// </exception>
 		protected void RegisterTag(string shortTag, string longTag)
 		{
@@ -224,12 +238,12 @@ namespace YamlDotNet.Schemas
 		}
 
 
-		public Type GetTypeForDefaultTag(string longTag)
+		public Type GetTypeForDefaultTag(string shortTag)
 		{
 			EnsureScalarRules();
 
 			List<ScalarResolutionRule> resolutionRules;
-			if (mapTagToScalarResolutionRuleList.TryGetValue(longTag, out resolutionRules) && resolutionRules.Count > 0)
+			if (mapTagToScalarResolutionRuleList.TryGetValue(shortTag, out resolutionRules) && resolutionRules.Count > 0)
 				return resolutionRules[0].GetTypeOfValue();
 
 			return null;
@@ -268,7 +282,7 @@ namespace YamlDotNet.Schemas
 		protected void AddScalarRule<T>(string tag, string regex, Func<Match, T> decode, Func<T, string> encode)
 		{
 			// Make sure the tag is expanded to its long form
-			var longTag = ExpandTag(tag);
+			var longTag = ShortenTag(tag);
 			scalarTagResolutionRules.Add(new ScalarResolutionRule<T>(longTag, regex, decode, encode));
 		}
 
@@ -348,9 +362,9 @@ namespace YamlDotNet.Schemas
 
 		private class ScalarResolutionRule<T> : ScalarResolutionRule
 		{
-			public ScalarResolutionRule(string longTag, string regex, Func<Match, T> decoder, Func<T, string> encoder)
+			public ScalarResolutionRule(string shortTag, string regex, Func<Match, T> decoder, Func<T, string> encoder)
 			{
-				Tag = longTag;
+				Tag = shortTag;
 				PatternSource = regex;
 				Pattern = new Regex("^(?:" + regex + ")$");
 				Decoder = decoder;

@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace YamlDotNet.Serialization.Processors
+namespace YamlDotNet.Serialization.Serializers
 {
-	internal class CollectionProcessor : ObjectProcessor
+	internal class CollectionSerializer : ObjectSerializer
 	{
-		public CollectionProcessor(YamlSerializerSettings settings) : base(settings)
+		public CollectionSerializer(SerializerSettings settings) : base(settings)
 		{
 		}
 

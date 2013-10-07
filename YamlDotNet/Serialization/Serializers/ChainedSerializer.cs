@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace YamlDotNet.Serialization.Processors
+namespace YamlDotNet.Serialization.Serializers
 {
-	public class ChainedProcessor : IYamlProcessor
+	public class ChainedSerializer : IYamlSerializable
 	{
-		private readonly IYamlProcessor next;
+		private readonly IYamlSerializable next;
 
-		public ChainedProcessor(IYamlProcessor next)
+		public ChainedSerializer(IYamlSerializable next)
 		{
 			if (next == null) throw new ArgumentNullException("next");
 			this.next = next;

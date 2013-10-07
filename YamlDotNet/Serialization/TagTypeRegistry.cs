@@ -60,28 +60,28 @@ namespace YamlDotNet.Serialization
 			}
 
 			// Get the default schema type if there is any
-			var longTag = schema.ExpandTag(tag);
+			var shortTag = schema.ShortenTag(tag);
 			Type type;
-			if (longTag != tag)
+			if (shortTag != tag)
 			{
-				type = schema.GetTypeForDefaultTag(longTag);
+				type = schema.GetTypeForDefaultTag(shortTag);
 				if (type != null)
 				{
 					return type;
 				}
 			}
 
-			// Unescape tag
-			longTag = Uri.UnescapeDataString(longTag);
+			// un-escape tag
+			shortTag = Uri.UnescapeDataString(shortTag);
 
 			// Else try to find a registered alias
-			if (tagToType.TryGetValue(longTag, out type))
+			if (tagToType.TryGetValue(shortTag, out type))
 			{
 				return type;
 			}
 
 			// Else resolve type from assembly
-			var tagAsType = longTag.StartsWith("!") ? longTag.Substring(1) : longTag;
+			var tagAsType = shortTag.StartsWith("!") ? shortTag.Substring(1) : shortTag;
 
 			type = Type.GetType(tagAsType);
 			if (type == null)
@@ -97,10 +97,10 @@ namespace YamlDotNet.Serialization
 			}
 
 			// Register a type that was found
-			tagToType.Add(longTag, type);
+			tagToType.Add(shortTag, type);
 			if (type != null)
 			{
-				typeToTag.Add(type, longTag);
+				typeToTag.Add(type, shortTag);
 			}
 
 			return type;
@@ -111,10 +111,14 @@ namespace YamlDotNet.Serialization
 			if (schema == null) throw new ArgumentNullException("schema");
 
 			string tagName;
+            // First try to resolve a tag from registered tag
 			if (!typeToTag.TryGetValue(type, out tagName))
 			{
-				return string.Format("!{0}", type.FullName);
+                // Else try to use schema tag for scalars
+                // Else use full name of the type
+                tagName = schema.GetDefaultTag(type) ?? string.Format("!{0}", type.FullName);
 			}
+
 			return tagName;
 		}
 
