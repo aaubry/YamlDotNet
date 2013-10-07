@@ -17,7 +17,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <param name="type">The type.</param>
 		/// <exception cref="System.ArgumentException">Type [{0}] is not a primitive</exception>
 		public PrimitiveDescriptor(IAttributeRegistry attributeRegistry, Type type)
-			: base(attributeRegistry, type)
+			: base(attributeRegistry, type, false)
 		{
 			if (!IsPrimitive(type))
 				throw new ArgumentException("Type [{0}] is not a primitive");

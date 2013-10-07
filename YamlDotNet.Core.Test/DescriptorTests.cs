@@ -62,7 +62,7 @@ namespace YamlDotNet.Test
 			// Rename ItemRenamed2 to Item2
 			attributeRegistry.Register(typeof(TestObject).GetProperty("ItemRenamed2"), new YamlMemberAttribute("Item2"));
 
-			var descriptor = new ObjectDescriptor(attributeRegistry, typeof(TestObject));
+			var descriptor = new ObjectDescriptor(attributeRegistry, typeof(TestObject), false);
 
 			// Verify members
 			Assert.Equal(8, descriptor.Count);
@@ -120,7 +120,7 @@ namespace YamlDotNet.Test
 		public void TestCollectionDescriptor()
 		{
 			var attributeRegistry = new AttributeRegistry();
-			var descriptor = new CollectionDescriptor(attributeRegistry, typeof (List<string>));
+			var descriptor = new CollectionDescriptor(attributeRegistry, typeof (List<string>), false);
 
 			// Only Capacity as a member
 			Assert.Equal(1, descriptor.Count);
@@ -128,7 +128,7 @@ namespace YamlDotNet.Test
 			Assert.False(descriptor.IsPureCollection);
 			Assert.Equal(typeof(string), descriptor.ElementType);
 
-			descriptor = new CollectionDescriptor(attributeRegistry, typeof(NonPureCollection));
+			descriptor = new CollectionDescriptor(attributeRegistry, typeof(NonPureCollection), false);
 
 			// Only Capacity as a member
 			Assert.Equal(2, descriptor.Count);
@@ -136,7 +136,7 @@ namespace YamlDotNet.Test
 			Assert.False(descriptor.IsPureCollection);
 			Assert.Equal(typeof(int), descriptor.ElementType);
 
-			descriptor = new CollectionDescriptor(attributeRegistry, typeof(ArrayList));
+			descriptor = new CollectionDescriptor(attributeRegistry, typeof(ArrayList), false);
 			// Only Capacity as a member
 			Assert.Equal(1, descriptor.Count);
 			Assert.True(descriptor.HasOnlyCapacity);
@@ -156,14 +156,14 @@ namespace YamlDotNet.Test
 		public void TestDictionaryDescriptor()
 		{
 			var attributeRegistry = new AttributeRegistry();
-			var descriptor = new DictionaryDescriptor(attributeRegistry, typeof(Dictionary<int, string>));
+			var descriptor = new DictionaryDescriptor(attributeRegistry, typeof(Dictionary<int, string>), false);
 
 			Assert.Equal(0, descriptor.Count);
 			Assert.True(descriptor.IsPureDictionary);
 			Assert.Equal(typeof(int), descriptor.KeyType);
 			Assert.Equal(typeof(string), descriptor.ValueType);
 
-			descriptor = new DictionaryDescriptor(attributeRegistry, typeof(NonPureDictionary));
+			descriptor = new DictionaryDescriptor(attributeRegistry, typeof(NonPureDictionary), false);
 			Assert.Equal(1, descriptor.Count);
 			Assert.False(descriptor.IsPureDictionary);
 			Assert.Equal(typeof(float), descriptor.KeyType);

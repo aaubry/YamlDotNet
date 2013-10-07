@@ -5,7 +5,7 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// A factory to create an instance of a <see cref="ITypeDescriptor"/>
 	/// </summary>
-	public interface ITypeDescriptorFactory
+	internal interface ITypeDescriptorFactory
 	{
 		/// <summary>
 		/// Tries to create an instance of a <see cref="ITypeDescriptor"/> from the type. Return null if this factory is not handling this type.

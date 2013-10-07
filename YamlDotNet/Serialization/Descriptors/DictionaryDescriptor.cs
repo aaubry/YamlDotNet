@@ -20,8 +20,10 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// </summary>
 		/// <param name="attributeRegistry">The attribute registry.</param>
 		/// <param name="type">The type.</param>
-		public DictionaryDescriptor(IAttributeRegistry attributeRegistry, Type type)
-			: base(attributeRegistry, type)
+		/// <param name="emitDefaultValues">if set to <c>true</c> [emit default values].</param>
+		/// <exception cref="System.ArgumentException">Expecting a type inheriting from System.Collections.IDictionary;type</exception>
+		public DictionaryDescriptor(IAttributeRegistry attributeRegistry, Type type, bool emitDefaultValues)
+			: base(attributeRegistry, type, emitDefaultValues)
 		{
 			if (!IsDictionary(type))
 				throw new ArgumentException("Expecting a type inheriting from System.Collections.IDictionary", "type");

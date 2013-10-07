@@ -38,19 +38,22 @@ namespace YamlDotNet.Serialization.Descriptors
 		private readonly Type type;
 		private readonly IMemberDescriptor[] members;
 		private readonly Dictionary<string, IMemberDescriptor> mapMembers;
+		private bool emitDefaultValues;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ObjectDescriptor" /> class.
 		/// </summary>
 		/// <param name="attributeRegistry">The attribute registry.</param>
 		/// <param name="type">The type.</param>
+		/// <param name="emitDefaultValues"></param>
 		/// <exception cref="System.ArgumentNullException">type</exception>
 		/// <exception cref="YamlException">Failed to get ObjectDescriptor for type [{0}]. The member [{1}] cannot be registered as a member with the same name is already registered [{2}].DoFormat(type.FullName, member, existingMember)</exception>
-		public ObjectDescriptor(IAttributeRegistry attributeRegistry, Type type)
+		public ObjectDescriptor(IAttributeRegistry attributeRegistry, Type type, bool emitDefaultValues)
 		{
 			if (attributeRegistry == null) throw new ArgumentNullException("attributeRegistry");
 			if (type == null) throw new ArgumentNullException("type");
 
+			this.emitDefaultValues = emitDefaultValues;
 			this.AttributeRegistry = attributeRegistry;
 			this.type = type;
 			var memberList = PrepareMembers();
@@ -196,7 +199,7 @@ namespace YamlDotNet.Serialization.Descriptors
 
 
 			var defaultValueAttribute = AttributeRegistry.GetAttribute<DefaultValueAttribute>(member.MemberInfo);
-			if (defaultValueAttribute != null && member.ShouldSerialize == null)
+			if (defaultValueAttribute != null && member.ShouldSerialize == null && !emitDefaultValues)
 			{
 				object defaultValue = defaultValueAttribute.Value;
 				Type defaultType = defaultValue == null ? null : defaultValue.GetType();
