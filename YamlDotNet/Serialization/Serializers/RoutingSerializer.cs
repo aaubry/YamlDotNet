@@ -19,7 +19,7 @@ namespace YamlDotNet.Serialization.Serializers
 			dictionarySerializer = new DictionarySerializer(settings);
 			collectionSerializer = new CollectionSerializer(settings);
 			defaultObjectSerializer = new ObjectSerializer(settings);
-            arraySerializer = new ArraySerializer(settings);
+            arraySerializer = new ArraySerializer();
 		}
 
 		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)

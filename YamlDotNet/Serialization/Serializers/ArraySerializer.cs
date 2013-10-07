@@ -1,42 +1,61 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
+using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-    internal class ArraySerializer : ObjectSerializerBase
+    internal class ArraySerializer : IYamlSerializable
     {
-        public ArraySerializer(SerializerSettings settings) : base(settings)
-        {
-        }
+		public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		{
+			var reader = context.Reader;
+			var arrayDescriptor = (ArrayDescriptor)typeDescriptor;
 
-        protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
-        {
-            // An array is necessary a sequence.
-            return true;
-        }
+			bool isArray = value != null && value.GetType().IsArray;
+			var arrayList = isArray ? (IList)value : arrayDescriptor.CreateListType();
 
-        protected override object ReadItems<TStart, TEnd>(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
-        {
-            var arrayDescriptor = (ArrayDescriptor) typeDescriptor;
+			reader.Expect<SequenceStart>();
+			if (isArray)
+			{
+				int index = 0;
+				while (!reader.Accept<SequenceEnd>())
+				{
+					var node = reader.Peek<ParsingEvent>();
+					if (index >= arrayList.Count)
+					{
+						throw new YamlException(node.Start, node.End, "Unable to deserialize array. Current number of elements [{0}] exceeding array size [{1}]".DoFormat(index, arrayList.Count));
+					}
 
-            var listType = typeof (List<>).MakeGenericType(arrayDescriptor.ElementType);
-            var list = Activator.CreateInstance(listType);
-            base.ReadItems<TStart, TEnd>(context, list, typeDescriptor);
+					arrayList[index++] = context.ReadYaml(null, arrayDescriptor.ElementType);
+				}
+			}
+			else
+			{
+				while (!reader.Accept<SequenceEnd>())
+				{
+					arrayList.Add(context.ReadYaml(null, arrayDescriptor.ElementType));
+				}
+			}
+			reader.Expect<SequenceEnd>();
 
-            return listType.GetMethod("ToArray").Invoke(list, null);
-        }
+			return isArray ? arrayList : arrayDescriptor.ToArray(arrayList);
+		}
 
-        protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
-        {
-            var arrayDescriptor = (ArrayDescriptor) typeDescriptor;
-            ((IList) thisObject).Add(context.ReadYaml(null, arrayDescriptor.ElementType));
-        }
+	    public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+	    {
+			var arrayDescriptor = (ArrayDescriptor)typeDescriptor;
 
-        public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
-        {
-            throw new NotImplementedException();
-        }
+		    var valueType = value.GetType();
+		    var arrayList = (IList) value;
+
+			var tag = valueType != typeDescriptor.Type ? context.TagFromType(valueType) : null;
+
+			context.Writer.Emit(new SequenceStartEventInfo(value, valueType) { Tag = tag });
+			foreach (var element in arrayList)
+			{
+				context.WriteYaml(element, arrayDescriptor.ElementType);
+			}
+			context.Writer.Emit(new SequenceEndEventInfo(value, valueType));
+	    }
     }
 }

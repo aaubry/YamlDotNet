@@ -60,7 +60,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <returns><c>true</c> if the specified type is collection; otherwise, <c>false</c>.</returns>
 		public static bool IsCollection(Type type)
 		{
-			return typeof (ICollection).IsAssignableFrom(type);
+			return !type.IsArray && typeof (ICollection).IsAssignableFrom(type);
 		}
 
 		protected override bool PrepareMember(MemberDescriptorBase member)

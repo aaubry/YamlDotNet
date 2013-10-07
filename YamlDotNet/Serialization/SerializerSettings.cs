@@ -5,7 +5,7 @@ using YamlDotNet.Schemas;
 namespace YamlDotNet.Serialization
 {
 	/// <summary>
-	/// Settings used to configure serialization.
+	/// Settings used to configure serialization and control how objects are encoded into YAML.
 	/// </summary>
     public class SerializerSettings
 	{

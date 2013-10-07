@@ -1,5 +1,6 @@
 ﻿using System;
 using YamlDotNet.Events;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
@@ -40,6 +41,18 @@ namespace YamlDotNet.Serialization.Serializers
 
         public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
         {
+	        var type = typeDescriptor.Type;
+
+			// When the node is not scalar, we need to instantiate the type directly
+			if (value == null && !(typeDescriptor is PrimitiveDescriptor))
+			{
+				value = context.ObjectFactory.Create(type);
+				//if (value == null)
+				//{
+				//	throw new YamlException(node.Start, node.End, "Unexpected null value");
+				//}
+			}
+
             // Get the object accessor for the corresponding class
             var isSequence = CheckIsSequence(typeDescriptor);
 

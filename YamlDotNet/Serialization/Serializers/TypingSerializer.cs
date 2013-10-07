@@ -53,16 +53,6 @@ namespace YamlDotNet.Serialization.Serializers
 
             typeDescriptor = context.FindTypeDescriptor(type);
 
-            // When the node is not scalar, we need to instantiate the type directly
-            if (value == null && !(typeDescriptor is PrimitiveDescriptor))
-            {
-                value = context.ObjectFactory.Create(type);
-                if (value == null)
-                {
-                    throw new YamlException(node.Start, node.End, "Unexpected null value");
-                }
-            }
-
             return base.ReadYaml(context, value, typeDescriptor);
         }
     }

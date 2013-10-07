@@ -65,8 +65,18 @@ namespace YamlDotNet.Serialization
         /// <param name="expectedType">The expected type.</param>
         /// <returns>System.Object.</returns>
 	    public object ReadYaml(object value, Type expectedType)
-	    {
-	        return ObjectSerializer.ReadYaml(this, value, FindTypeDescriptor(expectedType));
+        {
+	        var node = Reader.Parser.Current;
+	        try
+	        {
+				return ObjectSerializer.ReadYaml(this, value, FindTypeDescriptor(expectedType));
+	        }
+	        catch (Exception ex)
+	        {
+		        if (ex is YamlException)
+			        throw;
+				throw new YamlException(node.Start, node.End, "Error while deserializing node [{0}]".DoFormat(node), ex);
+	        }
 	    }
 
 		/// <summary>
