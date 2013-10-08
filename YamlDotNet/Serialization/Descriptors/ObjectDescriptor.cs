@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class ObjectDescriptor : ITypeDescriptor
 	{
-        protected static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
+		protected static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
 
 		private readonly static object[] EmptyObjectArray = new object[0];
 		private readonly Type type;
@@ -127,19 +127,19 @@ namespace YamlDotNet.Serialization.Descriptors
 
 			// Add all public properties with a readable get method
 			var memberList = (from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-			                  where
-				                  propertyInfo.CanRead && propertyInfo.GetGetMethod(false) != null &&
-				                  propertyInfo.GetIndexParameters().Length == 0
-			                  select new PropertyDescriptor(propertyInfo)
-			                  into member
-			                  where PrepareMember(member)
-			                  select member).Cast<IMemberDescriptor>().ToList();
+							  where
+								  propertyInfo.CanRead && propertyInfo.GetGetMethod(false) != null &&
+								  propertyInfo.GetIndexParameters().Length == 0
+							  select new PropertyDescriptor(propertyInfo)
+							  into member
+							  where PrepareMember(member)
+							  select member).Cast<IMemberDescriptor>().ToList();
 
 			// Add all public fields
 			memberList.AddRange((from fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public)
-			                     where fieldInfo.IsPublic
-			                     select new FieldDescriptor(fieldInfo)
-			                     into member where PrepareMember(member) select member));
+								 where fieldInfo.IsPublic
+								 select new FieldDescriptor(fieldInfo)
+								 into member where PrepareMember(member) select member));
 
 			return memberList;
 		}
@@ -148,12 +148,12 @@ namespace YamlDotNet.Serialization.Descriptors
 		{
 			var memberType = member.Type;
 
-            // Remove all SyncRoot from members
-            if (member is PropertyDescriptor && member.Name == "SyncRoot" &&
-                (member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace))
-            {
-                return false;
-            }
+			// Remove all SyncRoot from members
+			if (member is PropertyDescriptor && member.Name == "SyncRoot" &&
+				(member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace))
+			{
+				return false;
+			}
 
 			// If the member has a set, this is a conventional assign method
 			if (member.HasSet)
@@ -198,10 +198,10 @@ namespace YamlDotNet.Serialization.Descriptors
 			}
 
 			// ShouldSerialize
-			//      YamlSerializeAttribute(Never) => false
-			//      ShouldSerializeSomeProperty => call it
-			//      DefaultValueAttribute(default) => compare to it
-			//      otherwise => true
+			//	  YamlSerializeAttribute(Never) => false
+			//	  ShouldSerializeSomeProperty => call it
+			//	  DefaultValueAttribute(default) => compare to it
+			//	  otherwise => true
 			var shouldSerialize = type.GetMethod("ShouldSerialize" + member.Name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 			if (shouldSerialize != null && shouldSerialize.ReturnType == typeof(bool) && member.ShouldSerialize == null)
 				member.ShouldSerialize = obj => (bool)shouldSerialize.Invoke(obj, EmptyObjectArray);
@@ -225,7 +225,7 @@ namespace YamlDotNet.Serialization.Descriptors
 				member.Name = memberAttribute.Name;
 			}
 
-            return true;
+			return true;
 		}
 	}
 }

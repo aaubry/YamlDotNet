@@ -25,14 +25,14 @@ namespace YamlDotNet.Test.Serialization
 
 			Dump.WriteLine("${0}$", e.Payload);
 
-		    var deserializer = new Serializer(new SerializerSettings());
+			var deserializer = new Serializer(new SerializerSettings());
 			// deserialize envelope
 			var e2 = deserializer.Deserialize<Env>(new StringReader(tw.ToString()));
 
 			Dump.WriteLine("${0}$", e2.Payload);
 
 			// deserialize payload - fails if EmitDefaults is set
-            deserializer.Deserialize<AMessage>(new StringReader(e2.Payload));
+			deserializer.Deserialize<AMessage>(new StringReader(e2.Payload));
 
 			// Todo: proper assert
 		}

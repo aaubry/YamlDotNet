@@ -105,21 +105,21 @@ namespace YamlDotNet.Schemas
 			throw new NotSupportedException("NodeEvent [{0}] not supported".DoFormat(nodeEvent.GetType().FullName));
 		}
 
-	    public string GetDefaultTag(Type type)
-	    {
-	        if (type == null) throw new ArgumentNullException("type");
-	        EnsureScalarRules();
+		public string GetDefaultTag(Type type)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+			EnsureScalarRules();
 
-	        List<ScalarResolutionRule> rules;
-            if (mapTypeToScalarResolutionRuleList.Count > 0 && mapTypeToScalarResolutionRuleList.TryGetValue(type, out rules) && rules.Count > 0)
-            {
-                return rules[0].Tag;
-            }
+			List<ScalarResolutionRule> rules;
+			if (mapTypeToScalarResolutionRuleList.Count > 0 && mapTypeToScalarResolutionRuleList.TryGetValue(type, out rules) && rules.Count > 0)
+			{
+				return rules[0].Tag;
+			}
 
-	        return null;
-	    }
+			return null;
+		}
 
-	    /// <summary>
+		/// <summary>
 		/// Registers a long/short tag association.
 		/// </summary>
 		/// <param name="shortTag">The short tag.</param>
@@ -129,7 +129,7 @@ namespace YamlDotNet.Schemas
 		/// or
 		/// shortTag
 		/// </exception>
-	    public void RegisterTag(string shortTag, string longTag)
+		public void RegisterTag(string shortTag, string longTag)
 		{
 			if (shortTag == null) throw new ArgumentNullException("shortTag");
 			if (longTag == null) throw new ArgumentNullException("longTag");

@@ -62,13 +62,13 @@ namespace YamlDotNet.Serialization.Descriptors
 		protected virtual ITypeDescriptor Create(Type type)
 		{
 			ITypeDescriptor descriptor;
-            // The order of the descriptors here is important
+			// The order of the descriptors here is important
 
 			if (PrimitiveDescriptor.IsPrimitive(type))
 			{
 				descriptor = new PrimitiveDescriptor(attributeRegistry, type);
 			}
-            else if (DictionaryDescriptor.IsDictionary(type)) // resolve dictionary before collections, as they are also collections
+			else if (DictionaryDescriptor.IsDictionary(type)) // resolve dictionary before collections, as they are also collections
 			{
 				// IDictionary
 				descriptor = new DictionaryDescriptor(attributeRegistry, type, emitDefaultValues);
@@ -85,9 +85,9 @@ namespace YamlDotNet.Serialization.Descriptors
 			}
 			else if (NullableDescriptor.IsNullable(type))
 			{
-			    descriptor = new NullableDescriptor(attributeRegistry, type);
+				descriptor = new NullableDescriptor(attributeRegistry, type);
 			} 
-            else
+			else
 			{
 				// standard object (class or value type)
 				descriptor = new ObjectDescriptor(attributeRegistry, type, emitDefaultValues);

@@ -28,9 +28,9 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Serializes and deserializes objects into and from YAML documents.
 	/// </summary>
-    public sealed class Serializer
-    {
-        private readonly SerializerSettings settings;
+	public sealed class Serializer
+	{
+		private readonly SerializerSettings settings;
 
 		private static readonly IYamlSerializableFactory[] DefaultFactories = new IYamlSerializableFactory[]
 			{
@@ -38,16 +38,16 @@ namespace YamlDotNet.Serialization
 				new DictionarySerializer(),
 				new CollectionSerializer(),
 				new ArraySerializer(),
-                new NullableSerializer(), 
+				new NullableSerializer(), 
 				new ObjectSerializer(),
 			};
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Serializer"/> class.
 		/// </summary>
-        public Serializer() : this(null)
-        {
-        }
+		public Serializer() : this(null)
+		{
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Serializer"/> class.
@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization
 		/// Gets the settings.
 		/// </summary>
 		/// <value>The settings.</value>
-        public SerializerSettings Settings { get { return settings; } }
+		public SerializerSettings Settings { get { return settings; } }
 
 		/// <summary>
 		/// Serializes the specified object.
@@ -194,10 +194,10 @@ namespace YamlDotNet.Serialization
 		/// <returns>A deserialized object.</returns>
 		/// <exception cref="System.ArgumentNullException">reader</exception>
 		public object Deserialize(TextReader reader, Type expectedType)
-	    {
-		    if (reader == null) throw new ArgumentNullException("reader");
-		    return Deserialize(new EventReader(new Parser(reader)), expectedType);
-	    }
+		{
+			if (reader == null) throw new ArgumentNullException("reader");
+			return Deserialize(new EventReader(new Parser(reader)), expectedType);
+		}
 
 		/// <summary>
 		/// Deserializes an object from the specified <see cref="TextReader" /> with an expected specific type.
@@ -272,7 +272,7 @@ namespace YamlDotNet.Serialization
 			var hasStreamStart = reader.Allow<StreamStart>() != null;
 			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
 
-		    object result = null;
+			object result = null;
 			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
 			{
 				var context = new SerializerContext(this)
@@ -281,8 +281,8 @@ namespace YamlDotNet.Serialization
 						ObjectSerializer = CreateProcessor(settings),
 					};
 				var valueResult = context.ReadYaml(null, expectedType);
-                context.ResolveLateAliasBindings();
-			    result = valueResult.Value;
+				context.ResolveLateAliasBindings();
+				result = valueResult.Value;
 			}
 
 			if (hasDocumentStart)
@@ -320,18 +320,18 @@ namespace YamlDotNet.Serialization
 				routintSerializer.AddSerializerFactory(defaultFactory);
 			}
 
-            return new AnchorSerializer(new TypingSerializer(routintSerializer));
+			return new AnchorSerializer(new TypingSerializer(routintSerializer));
 		}
 
 		private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)
 		{
 			var writer = (IEventEmitter)new WriterEventEmitter(emitter);
 
-            if (settings.EmitJsonComptible)
-            {
-                writer = new JsonEventEmitter(writer);
-            }
-	        return new AnchorEventEmitter(writer);
-        }
+			if (settings.EmitJsonComptible)
+			{
+				writer = new JsonEventEmitter(writer);
+			}
+			return new AnchorEventEmitter(writer);
+		}
    }
 }

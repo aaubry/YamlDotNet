@@ -49,11 +49,11 @@ namespace YamlDotNet.Test
 
 			public bool BoolFalse { get; set; }
 
-            public string A0Anchor { get; set; }
+			public string A0Anchor { get; set; }
 
 			public string A1Alias { get; set; }
 
-            public int[] Array { get; set; }
+			public int[] Array { get; set; }
 
 			public int[] ArrayContent { get; private set; }
 		}

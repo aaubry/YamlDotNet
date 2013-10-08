@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace YamlDotNet.Serialization.Descriptors
 {
 	/// <summary>
-    /// Describes a descriptor for a primitive (bool, char, sbyte, byte, int, uint, long, ulong, float, double, decimal, string, DateTime).
+	/// Describes a descriptor for a primitive (bool, char, sbyte, byte, int, uint, long, ulong, float, double, decimal, string, DateTime).
 	/// </summary>
 	public class PrimitiveDescriptor : ObjectDescriptor
 	{
@@ -31,10 +31,10 @@ namespace YamlDotNet.Serialization.Descriptors
 		public static bool IsPrimitive(Type type)
 		{
 			switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Object:
+			{
+				case TypeCode.Object:
 				case TypeCode.Empty:
-			        return type == typeof (object) || type == typeof(TimeSpan);
+					return type == typeof (object) || type == typeof(TimeSpan);
 			}
 			return true;
 		}

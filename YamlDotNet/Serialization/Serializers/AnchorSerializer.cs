@@ -13,10 +13,10 @@ namespace YamlDotNet.Serialization.Serializers
 		{
 		}
 
-        public bool TryGetAliasValue(string alias, out object value)
-        {
-            return AliasToObject.TryGetValue(alias, out value);
-        }
+		public bool TryGetAliasValue(string alias, out object value)
+		{
+			return AliasToObject.TryGetValue(alias, out value);
+		}
 
 		public override ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
@@ -28,8 +28,8 @@ namespace YamlDotNet.Serialization.Serializers
 			{
 				if (!AliasToObject.TryGetValue(alias.Value, out value))
 				{
-                    // Late binding needs to be handled by caller
-				    return ValueResult.NewAlias(alias);
+					// Late binding needs to be handled by caller
+					return ValueResult.NewAlias(alias);
 				}
 
 				return new ValueResult(value);
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.Serializers
 			// Store Anchor (&oxxx) and override any defined anchor 
 			if (anchor != null)
 			{
-                AliasToObject[anchor] = valueResult.Value;
+				AliasToObject[anchor] = valueResult.Value;
 			}
 
 			return valueResult;
@@ -57,7 +57,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-            // Only write anchors for object (and not value types)
+			// Only write anchors for object (and not value types)
 			bool isAnchorable = false;
 			if (value != null && !value.GetType().IsValueType)
 			{
