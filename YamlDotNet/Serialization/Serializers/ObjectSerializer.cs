@@ -90,11 +90,11 @@ namespace YamlDotNet.Serialization.Serializers
 				value = memberAccessor.Get(thisObject);
 			}
 
+			var valueResult = context.ReadYaml(value, propertyType);
+
 			// Handle late binding
 			if (memberAccessor.HasSet && memberAccessor.SerializeMemberMode != SerializeMemberMode.Content)
 			{
-				var valueResult = context.ReadYaml(value, propertyType);
-
 				// If result value is a late binding, register it.
 				if (valueResult.IsAlias)
 				{
@@ -112,8 +112,19 @@ namespace YamlDotNet.Serialization.Serializers
 			var typeOfValue = value.GetType();
 			var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
 
+			// If the typeOfValue is in fact the default implementation, we don't need to serialize 
+			// the tag
+			var defaultImplementationType = DefaultObjectFactory.GetDefaultImplementation(expectedType);
+
 			// If this is an anonymous tag we will serialize only a default untyped YAML mapping
-			var tag = typeOfValue.IsAnonymous() ? null : typeOfValue == expectedType ? null : context.TagFromType(typeOfValue);
+			var tag = typeOfValue.IsAnonymous()
+				          ? null
+				          : typeOfValue == expectedType || (
+					                                           defaultImplementationType != null &&
+					                                           defaultImplementationType == typeOfValue)
+					            ? null
+					            : context.TagFromType(typeOfValue);
+
 
 			if (typeDescriptor == null)
 			{

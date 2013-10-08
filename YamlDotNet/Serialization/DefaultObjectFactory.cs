@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Serialization.Descriptors;
 
@@ -11,22 +12,50 @@ namespace YamlDotNet.Serialization
 	{
 		private static readonly Dictionary<Type, Type> DefaultInterfaceImplementations = new Dictionary<Type, Type>
 			{
+				{typeof(IList), typeof(List<object>)},
+				{typeof(IDictionary), typeof(Dictionary<object, object>)},
 				{typeof (IEnumerable<>), typeof (List<>)},
 				{typeof (ICollection<>), typeof (List<>)},
 				{typeof (IList<>), typeof (List<>)},
 				{typeof (IDictionary<,>), typeof (Dictionary<,>)},
 			};
 
-		public object Create(Type type)
+		/// <summary>
+		/// Gets the default implementation for a type.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns>The type of the implem or the same type as input if there is no default implementation</returns>
+		public static Type GetDefaultImplementation(Type type)
 		{
+			if (type == null)
+				return null;
+
+			// TODO change this code. Make it configurable?
 			if (type.IsInterface)
 			{
 				Type implementationType;
-				if (DefaultInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out implementationType))
+				if (type.IsGenericType)
 				{
-					type = implementationType.MakeGenericType(type.GetGenericArguments());
+					if (DefaultInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out implementationType))
+					{
+						type = implementationType.MakeGenericType(type.GetGenericArguments());
+					}
+				}
+				else
+				{
+					if (DefaultInterfaceImplementations.TryGetValue(type, out implementationType))
+					{
+						type = implementationType;
+					}
 				}
 			}
+			return type;
+		}
+
+		public object Create(Type type)
+		{
+			type = GetDefaultImplementation(type);
+
 			try
 			{
 				// We can't instantiate primitive or arrays

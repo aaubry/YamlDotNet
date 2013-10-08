@@ -164,7 +164,7 @@ namespace YamlDotNet.Schemas
 			// DoubleQuoted and SingleQuoted string are always decoded
 			if (scalar.Style == ScalarStyle.DoubleQuoted || scalar.Style == ScalarStyle.SingleQuoted)
 			{
-				defaultTag = StrLongTag;
+				defaultTag = StrShortTag;
 				if (parseValue)
 				{
 					value = scalar.Value;
@@ -192,7 +192,7 @@ namespace YamlDotNet.Schemas
 			else
 			{
 				// Expand the tag to a default tag.
-				defaultTag = ExpandTag(scalar.Tag);
+				defaultTag = ShortenTag(scalar.Tag);
 			}
 
 			// Value was not successfully decoded

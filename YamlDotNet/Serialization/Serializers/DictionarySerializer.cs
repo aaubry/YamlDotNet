@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.Serializers
 				{
 					if (keyEvent.Value == context.Settings.SpecialCollectionMember)
 					{
-						context.Reader.Accept<Scalar>();
+						context.Reader.Parser.MoveNext();
 						pureDictionarySerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 						return;
 					}

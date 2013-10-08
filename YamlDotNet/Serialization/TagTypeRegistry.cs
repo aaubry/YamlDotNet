@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using YamlDotNet.Schemas;
@@ -9,7 +8,7 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Default implementation of ITagTypeRegistry.
 	/// </summary>
-	public class TagTypeRegistry : ITagTypeRegistry
+	internal class TagTypeRegistry : ITagTypeRegistry
 	{
 		private readonly IYamlSchema schema;
 		private readonly Dictionary<string, Type> tagToType;
@@ -33,12 +32,23 @@ namespace YamlDotNet.Serialization
 			lookupAssemblies = new List<Assembly>();
 		}
 
+		public void RegisterAssembly(Assembly assembly)
+		{
+			if (assembly == null) throw new ArgumentNullException("assembly");
+
+			// Add automatically the assembly for lookup
+			if (!DefaultLookupAssemblies.Contains(assembly) && !lookupAssemblies.Contains(assembly))
+			{
+				lookupAssemblies.Add(assembly);
+			}
+		}
+
 		/// <summary>
 		/// Register a mapping between a tag and a type.
 		/// </summary>
 		/// <param name="tag">The tag.</param>
 		/// <param name="type">The type.</param>
-		public virtual void AddTagMapping(string tag, Type type)
+		public virtual void RegisterTagMapping(string tag, Type type)
 		{
 			if (tag == null) throw new ArgumentNullException("tag");
 			if (type == null) throw new ArgumentNullException("type");
@@ -61,11 +71,8 @@ namespace YamlDotNet.Serialization
 			tagToType[tag] = type;
 			typeToTag[type] = tag;
 
-			// Add automatically the assembly for lookup
-			if (!DefaultLookupAssemblies.Contains(type.Assembly) && !lookupAssemblies.Contains(type.Assembly))
-			{
-				lookupAssemblies.Add(type.Assembly);
-			}
+			// Make sure the assembly is registered for this type
+			RegisterAssembly(type.Assembly);
 		}
 
 		public virtual Type TypeFromTag(string tag)
@@ -99,18 +106,8 @@ namespace YamlDotNet.Serialization
 			// Else resolve type from assembly
 			var tagAsType = shortTag.StartsWith("!") ? shortTag.Substring(1) : shortTag;
 
-			type = Type.GetType(tagAsType);
-			if (type == null)
-			{
-				foreach (var assembly in lookupAssemblies)
-				{
-					type = assembly.GetType(tagAsType);
-					if (type != null)
-					{
-						break;
-					}
-				}
-			}
+			// Try to resolve the type from registered assemblies
+			type = ResolveType(tagAsType);
 
 			// Register a type that was found
 			tagToType.Add(shortTag, type);
@@ -141,9 +138,21 @@ namespace YamlDotNet.Serialization
 			return tagName;
 		}
 
-		public List<Assembly> LookupAssemblies
+		public virtual Type ResolveType(string typeName)
 		{
-			get { return lookupAssemblies; }
+			var type = Type.GetType(typeName);
+			if (type == null)
+			{
+				foreach (var assembly in lookupAssemblies)
+				{
+					type = assembly.GetType(typeName);
+					if (type != null)
+					{
+						break;
+					}
+				}
+			}
+			return type;
 		}
 	}
 }
