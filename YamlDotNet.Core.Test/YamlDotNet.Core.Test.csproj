@@ -81,7 +81,6 @@
     <EmbeddedResource Include="files\listOfDictionaries.yaml" />
     <EmbeddedResource Include="files\local-tags.yaml" />
     <EmbeddedResource Include="files\namingConvention.yaml" />
-    <EmbeddedResource Include="files\sample.yaml" />
     <EmbeddedResource Include="files\tags.yaml" />
     <EmbeddedResource Include="files\test1.yaml" />
     <EmbeddedResource Include="files\test10.yaml" />
