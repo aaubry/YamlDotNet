@@ -19,9 +19,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using YamlDotNet.Core.Tokens;
+using YamlDotNet.Test;
+using YamlDotNet.Tokens;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class ScannerTestHelper : YamlTest
 	{

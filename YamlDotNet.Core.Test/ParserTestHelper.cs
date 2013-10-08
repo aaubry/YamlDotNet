@@ -19,11 +19,12 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using YamlDotNet.Core.Events;
-using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
-using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
+using YamlDotNet.Events;
+using YamlDotNet.Test;
+using TagDirective = YamlDotNet.Tokens.TagDirective;
+using VersionDirective = YamlDotNet.Tokens.VersionDirective;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class ParserTestHelper : YamlTest
 	{

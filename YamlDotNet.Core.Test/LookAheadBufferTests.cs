@@ -26,7 +26,7 @@ using FakeItEasy.Core;
 using FluentAssertions;
 using Xunit;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class LookAheadBufferTests
 	{

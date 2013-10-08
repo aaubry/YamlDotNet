@@ -25,7 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class YamlTest
 	{

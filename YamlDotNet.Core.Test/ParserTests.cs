@@ -22,9 +22,10 @@
 using System.Collections;
 using FluentAssertions;
 using Xunit;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Test;
+using YamlDotNet.Events;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class ParserTests : ParserTestHelper
 	{

@@ -22,7 +22,7 @@
 using System;
 using System.Xml;
 using YamlDotNet.Converters.Xml;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Converters.Xml.Extensions {
 	/// <summary>

@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Text.RegularExpressions;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Configuration
 {
@@ -76,7 +76,7 @@ namespace YamlDotNet.Configuration
 
 		private void LoadSections(TextReader yaml)
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			sections = (IDictionary<string, object>)deserializer.Deserialize(yaml, typeof(Dictionary<string, object>));
 		}
 

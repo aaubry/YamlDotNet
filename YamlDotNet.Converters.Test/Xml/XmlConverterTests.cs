@@ -20,10 +20,10 @@
 //  SOFTWARE.
 
 using Xunit;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 using YamlDotNet.Converters.Xml;
 using YamlDotNet.Converters.Xml.Extensions;
-using YamlDotNet.Core.Test;
+using YamlDotNet.Test;
 using System.IO;
 
 namespace YamlDotNet.Converters.Test.Xml

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -76,13 +76,13 @@
     <Compile Include="YamlConfigurationSection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.csproj">
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
       <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
-      <Name>YamlDotNet.Core</Name>
+      <Name>YamlDotNet</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj">
+    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.Serialzation.csproj">
       <Project>{21CA0077-E15C-446D-9C43-F6D3F9D09687}</Project>
-      <Name>YamlDotNet.RepresentationModel</Name>
+      <Name>YamlDotNet.Serialzation</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

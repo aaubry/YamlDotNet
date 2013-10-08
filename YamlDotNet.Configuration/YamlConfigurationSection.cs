@@ -25,7 +25,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Configuration
 {
@@ -121,7 +121,7 @@ namespace YamlDotNet.Configuration
 				sectionType = Type.GetType(section.Attributes["type"].Value, true);
 			}
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			return deserializer.Deserialize(yaml, sectionType);
 		}
 		#endregion

@@ -51,31 +51,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExceptionWithNestedSerialization.cs" />
-    <Compile Include="NamingConventionTests.cs" />
-    <Compile Include="ObjectFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runner.cs" />
-    <Compile Include="Samples.cs" />
-    <Compile Include="SerializationTests.cs" />
-    <Compile Include="TracingVisitor.cs" />
-    <Compile Include="YamlStreamTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet.Core.Test\YamlDotNet.Core.Test.csproj">
+    <ProjectReference Include="..\YamlDotNet.Core.Test\YamlDotNet.Test.csproj">
       <Project>{16d8043d-c3db-4868-bff3-b2ebdf537aaa}</Project>
-      <Name>YamlDotNet.Core.Test</Name>
+      <Name>YamlDotNet.Test</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YamlDotNet.Core\YamlDotNet.Core.csproj">
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
       <Project>{bf32de1b-6276-4341-b212-f8862adbba7a}</Project>
-      <Name>YamlDotNet.Core</Name>
+      <Name>YamlDotNet</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj">
+    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.Serialzation.csproj">
       <Project>{21ca0077-e15c-446d-9c43-f6d3f9d09687}</Project>
-      <Name>YamlDotNet.RepresentationModel</Name>
+      <Name>YamlDotNet.Serialzation</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -8,16 +8,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		YamlDotNet.build = YamlDotNet.build
 		YamlDotNet.Converters.nuspec = YamlDotNet.Converters.nuspec
-		YamlDotNet.Core.nuspec = YamlDotNet.Core.nuspec
 		YamlDotNet.Dynamic.nuspec = YamlDotNet.Dynamic.nuspec
 		YamlDotNet.FxCop = YamlDotNet.FxCop
+		YamlDotNet.nuspec = YamlDotNet.nuspec
 		YamlDotNet.RepresentationModel.nuspec = YamlDotNet.RepresentationModel.nuspec
 		YamlDotNet.snk = YamlDotNet.snk
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core", "YamlDotNet.Core\YamlDotNet.Core.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.RepresentationModel", "YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj", "{21CA0077-E15C-446D-9C43-F6D3F9D09687}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet", "YamlDotNet\YamlDotNet.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Converters", "YamlDotNet.Converters\YamlDotNet.Converters.csproj", "{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}"
 EndProject
@@ -26,8 +24,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dumper", "Dumper\Dumper.csproj", "{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{1EC10966-19C0-4CE3-949E-D11F600B8CA3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNetEditor", "YamlDotNetEditor\YamlDotNetEditor.csproj", "{708C56D8-492C-4EED-A306-1FE75FC7D234}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8DC198EF-4A39-4072-A66A-CA0DF8396F22}"
 	ProjectSection(SolutionItems) = preProject
@@ -38,9 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8DC198
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Converters.Test", "YamlDotNet.Converters.Test\YamlDotNet.Converters.Test.csproj", "{F0EAB124-9790-41C7-AE0F-F050CA0141D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core.Test", "YamlDotNet.Core.Test\YamlDotNet.Core.Test.csproj", "{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.RepresentationModel.Test", "YamlDotNet.RepresentationModel.Test\YamlDotNet.RepresentationModel.Test.csproj", "{FF969DAA-C025-4636-89B2-46F16821FA02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Test", "YamlDotNet.Core.Test\YamlDotNet.Test.csproj", "{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Dynamic", "YamlDotNet.Dynamic\YamlDotNet.Dynamic.csproj", "{57B52D79-04A0-4091-8EE2-B419C009C2A6}"
 EndProject
@@ -66,16 +60,6 @@ Global
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release|x86.ActiveCfg = Release|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Any CPU.Build.0 = Release|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{21CA0077-E15C-446D-9C43-F6D3F9D09687}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A8DCAF7-6C13-4ADA-AED9-7ABA88FE7717}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -116,16 +100,6 @@ Global
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Release|Mixed Platforms.Build.0 = Release|x86
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Release|x86.ActiveCfg = Release|x86
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Release|x86.Build.0 = Release|x86
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|Any CPU.Build.0 = Release|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|x86.ActiveCfg = Release|Any CPU
 		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -146,16 +120,6 @@ Global
 		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|x86.ActiveCfg = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|x86.ActiveCfg = Release|Any CPU
 		{57B52D79-04A0-4091-8EE2-B419C009C2A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{57B52D79-04A0-4091-8EE2-B419C009C2A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57B52D79-04A0-4091-8EE2-B419C009C2A6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

@@ -20,10 +20,10 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
+using YamlDotNet;
 using System.IO;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.Test
 {
 	public class Runner
 	{

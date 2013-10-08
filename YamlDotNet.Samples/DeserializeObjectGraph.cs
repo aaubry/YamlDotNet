@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {
@@ -11,7 +11,7 @@ namespace YamlDotNet.Samples
 			// Setup the input
 			var input = new StringReader(_document);
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			var order = (Order)deserializer.Deserialize(input, typeof(Order));
 
 			Console.WriteLine("Receipt: {0}", order.Receipt);
@@ -42,7 +42,7 @@ namespace YamlDotNet.Samples
 			public int Quantity { get; set; }
 			
 
-			[YamlAlias("descrip")]
+			[YamlMember("descrip")]
 			public string Description { get; set; }
 		}
 

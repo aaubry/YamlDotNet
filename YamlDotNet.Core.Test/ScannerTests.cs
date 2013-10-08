@@ -21,9 +21,9 @@
 
 using FluentAssertions;
 using Xunit;
-using YamlDotNet.Core.Tokens;
+using YamlDotNet.Tokens;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
 	public class ScannerTests : ScannerTestHelper
 	{
