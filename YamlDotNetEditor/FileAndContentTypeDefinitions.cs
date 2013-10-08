@@ -26,8 +26,6 @@ namespace YamlDotNetEditor
 {
 	internal static class FileAndContentTypeDefinitions
 	{
-		public const string FileExtension = ".yaml";
-
 #pragma warning disable 0649	// Field is never assigned
 		[Export]
 		[Name("yaml")]
@@ -35,9 +33,14 @@ namespace YamlDotNetEditor
 		internal static ContentTypeDefinition hidingContentTypeDefinition;
 
 		[Export]
-		[FileExtension(FileExtension)]
+		[FileExtension(".yaml")]
 		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenFileExtensionDefinition;
+		internal static FileExtensionToContentTypeDefinition hiddenYAMLFileExtensionDefinition;
+
+		[Export]
+		[FileExtension(".yml")]
+		[ContentType("yaml")]
+		internal static FileExtensionToContentTypeDefinition hiddenYMLFileExtensionDefinition;
 #pragma warning restore 0649
 	}
 }
