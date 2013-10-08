@@ -75,12 +75,12 @@ namespace YamlDotNet.Schemas
 
 		protected override string GetDefaultTag(MappingStart nodeEvent)
 		{
-			return MapLongTag;
+			return MapShortTag;
 		}
 
 		protected override string GetDefaultTag(SequenceStart nodeEvent)
 		{
-			return SeqLongTag;
+			return SeqShortTag;
 		}
 
 		public override bool TryParse(Scalar scalar, bool parseValue, out string defaultTag, out object value)
@@ -93,7 +93,7 @@ namespace YamlDotNet.Schemas
 			if (AllowFailsafeString)
 			{
 				value = parseValue ? scalar.Value : null;
-				defaultTag = StrLongTag;
+				defaultTag = StrShortTag;
 				return true;
 			}
 

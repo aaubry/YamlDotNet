@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using YamlDotNet.Schemas;
 
 namespace YamlDotNet.Serialization
@@ -12,7 +13,7 @@ namespace YamlDotNet.Serialization
 		private readonly AttributeRegistry attributeRegistry;
 		internal readonly List<IYamlSerializableFactory> factories = new List<IYamlSerializableFactory>();
 		internal readonly Dictionary<Type, IYamlSerializable> serializers = new Dictionary<Type, IYamlSerializable>();
-		private readonly TagTypeRegistry tagTypeRegistry;
+		internal readonly ITagTypeRegistry tagTypeRegistry;
 		private readonly IYamlSchema schema;
 		private IObjectFactory objectFactory;
 		private int preferredIndent;
@@ -31,6 +32,7 @@ namespace YamlDotNet.Serialization
 		public SerializerSettings(IYamlSchema schema)
 		{
 			PreferredIndent = 2;
+			IndentLess = false;
 			SortKeyForMapping = true;
 			EmitJsonComptible = false;
 			EmitCapacityForList = false;
@@ -42,8 +44,8 @@ namespace YamlDotNet.Serialization
 			ObjectFactory = new DefaultObjectFactory();
 
 			// Register default mapping for map and seq
-			tagTypeRegistry.AddTagMapping("!!map", typeof(IDictionary<object, object>));
-			tagTypeRegistry.AddTagMapping("!!seq", typeof(IList<object>));
+			tagTypeRegistry.RegisterTagMapping("!!map", typeof(IDictionary<object, object>));
+			tagTypeRegistry.RegisterTagMapping("!!seq", typeof(IList<object>));
 		}
 
 		/// <summary>
@@ -60,6 +62,14 @@ namespace YamlDotNet.Serialization
 				preferredIndent = value;
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the identation is trying to less
+		/// indent when possible
+		/// (For example, sequence after a key are not indented). Default is false.
+		/// </summary>
+		/// <value><c>true</c> if [always indent]; otherwise, <c>false</c>.</value>
+		public bool IndentLess { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to enable sorting keys from dictionary to YAML mapping. Default is true. See remarks.
@@ -135,17 +145,6 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
-		/// Gets or sets the tag type registry. Default is <see cref="YamlDotNet.Serialization.TagTypeRegistry" />
-		/// </summary>
-		/// <value>The tag type registry.</value>
-		/// <exception cref="System.ArgumentNullException">value</exception>
-		public TagTypeRegistry TagTypes
-		{
-			get { return tagTypeRegistry; }
-		}
-
-
-		/// <summary>
 		/// Gets or sets the default factory to instantiate a type. Default is <see cref="DefaultObjectFactory" />.
 		/// </summary>
 		/// <value>The default factory to instantiate a type.</value>
@@ -172,6 +171,26 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
+		/// Register a mapping between a tag and a type.
+		/// </summary>
+		/// <param name="tagName">Name of the tag.</param>
+		/// <param name="tagType">Type of the tag.</param>
+		public void RegisterAssembly(Assembly assembly)
+		{
+			tagTypeRegistry.RegisterAssembly(assembly);
+		}
+
+		/// <summary>
+		/// Register a mapping between a tag and a type.
+		/// </summary>
+		/// <param name="tagName">Name of the tag.</param>
+		/// <param name="tagType">Type of the tag.</param>
+		public void RegisterTagMapping(string tagName, Type tagType)
+		{
+			tagTypeRegistry.RegisterTagMapping(tagName, tagType);
+		}
+
+		/// <summary>
 		/// Adds a custom serializer for the specified type.
 		/// </summary>
 		/// <param name="type">The type.</param>
@@ -181,7 +200,7 @@ namespace YamlDotNet.Serialization
 		/// or
 		/// serializer
 		/// </exception>
-		public void AddSerializer(Type type, IYamlSerializable serializer)
+		public void RegisterSerializer(Type type, IYamlSerializable serializer)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 			if (serializer == null) throw new ArgumentNullException("serializer");
@@ -193,7 +212,7 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <param name="factory">The factory.</param>
 		/// <exception cref="System.ArgumentNullException">factory</exception>
-		public void AddSerializerFactory(IYamlSerializableFactory factory)
+		public void RegisterSerializerFactory(IYamlSerializableFactory factory)
 		{
 			if (factory == null) throw new ArgumentNullException("factory");
 			factories.Add(factory);

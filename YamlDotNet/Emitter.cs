@@ -59,6 +59,7 @@ namespace YamlDotNet
 		private int column;
 		private bool isWhitespace;
 		private bool isIndentation;
+		private bool forceIndentLess;
 
 		private bool isOpenEnded;
 
@@ -135,15 +136,25 @@ namespace YamlDotNet
 		{
 		}
 
+		public Emitter(TextWriter output, int bestIndent, int bestWidth, bool isCanonical)
+			:this(output, bestIndent, bestWidth, isCanonical, false)
+		{
+		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="IEmitter"/> class.
+		/// Initializes a new instance of the <see cref="IEmitter" /> class.
 		/// </summary>
-		/// <param name="output">The <see cref="TextWriter"/> where the emitter will write.</param>
+		/// <param name="output">The <see cref="TextWriter" /> where the emitter will write.</param>
 		/// <param name="bestIndent">The preferred indentation.</param>
 		/// <param name="bestWidth">The preferred text width.</param>
 		/// <param name="isCanonical">If true, write the output in canonical form.</param>
-		public Emitter(TextWriter output, int bestIndent, int bestWidth, bool isCanonical)
+		/// <param name="forceIndentLess">if set to <c>true</c> [always indent].</param>
+		/// <exception cref="System.ArgumentOutOfRangeException">
+		/// bestIndent
+		/// or
+		/// bestWidth;The bestWidth parameter must be greater than bestIndent * 2.
+		/// </exception>
+		public Emitter(TextWriter output, int bestIndent, int bestWidth, bool isCanonical, bool forceIndentLess)
 		{
 			if (bestIndent < MinBestIndent || bestIndent > MaxBestIndent)
 			{
@@ -160,9 +171,21 @@ namespace YamlDotNet
 			this.bestWidth = bestWidth;
 
 			this.isCanonical = isCanonical;
+			this.forceIndentLess = forceIndentLess;
 
 			this.output = output;
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether [always indent].
+		/// </summary>
+		/// <value><c>true</c> if [always indent]; otherwise, <c>false</c>.</value>
+		public bool ForceIndentLess
+		{
+			get { return forceIndentLess; }
+			set { forceIndentLess = value; }
+		}
+
 
 		private void Write(char value)
 		{
@@ -1451,7 +1474,7 @@ namespace YamlDotNet
 			{
 				indent = isFlow ? bestIndent : 0;
 			}
-			else if (!isIndentless)
+			else if (!isIndentless || !forceIndentLess)
 			{
 				indent += bestIndent;
 			}

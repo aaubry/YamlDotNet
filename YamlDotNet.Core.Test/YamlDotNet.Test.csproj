@@ -65,7 +65,7 @@
     <Compile Include="ScannerTestHelper.cs" />
     <Compile Include="ScannerTests.cs" />
     <Compile Include="SchemaTests.cs" />
-    <Compile Include="SerializationTests.cs" />
+    <Compile Include="Serialization\SerializationTests2.cs" />
     <Compile Include="Serialization\ExceptionWithNestedSerialization.cs" />
     <Compile Include="Serialization\ObjectFactoryTests.cs" />
     <Compile Include="Serialization\Samples.cs" />

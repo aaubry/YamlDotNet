@@ -24,6 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -41,7 +42,7 @@ namespace YamlDotNet.Test.Serialization
 		public void Roundtrip()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+			settings.RegisterAssembly(typeof(SerializationTests).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
@@ -68,7 +69,7 @@ namespace YamlDotNet.Test.Serialization
 		public void RoundtripWithDefaults()
 		{
 			var settings = new SerializerSettings() {EmitDefaultValues = true};
-			settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+			settings.RegisterAssembly(typeof(SerializationTests).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
@@ -127,7 +128,7 @@ namespace YamlDotNet.Test.Serialization
 		public void DeserializeExplicitType()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+			settings.RegisterAssembly(typeof(SerializationTests).Assembly);
 
 			var serializer = new Serializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), typeof(object));
@@ -209,7 +210,7 @@ namespace YamlDotNet.Test.Serialization
 		public void DeserializeEnumerable()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+			settings.RegisterAssembly(typeof(SerializationTests).Assembly);
 
 			var serializer = new Serializer(settings);
 			var buffer = new StringWriter();
@@ -261,7 +262,7 @@ namespace YamlDotNet.Test.Serialization
 		public void Enums()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.LookupAssemblies.Add(typeof(StringFormatFlags).Assembly);
+			settings.RegisterAssembly(typeof(StringFormatFlags).Assembly);
 			var serializer = new Serializer(settings);
 
 			var flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
@@ -279,7 +280,7 @@ namespace YamlDotNet.Test.Serialization
 		public void CustomTags()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.AddTagMapping("tag:yaml.org,2002:point", typeof(Point));
+			settings.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
 			var serializer = new Serializer(settings);
 			var result = serializer.Deserialize(YamlFile("tags.yaml"));
 
@@ -290,18 +291,20 @@ namespace YamlDotNet.Test.Serialization
 			Assert.Equal(20, value.Y);
 		}
 
-		[Fact]
-		public void DeserializeConvertible()
-		{
-			var settings = new SerializerSettings();
-			settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+		// Convertible are not supported
+		//[Fact]
+		//public void DeserializeConvertible()
+		//{
+		//	var settings = new SerializerSettings();
+		//	settings.RegisterAssembly(typeof(SerializationTests).Assembly);
+		//	settings.RegisterSerializerFactory(new TypeConverterSerializerFactory());
 
-			var serializer = new Serializer(settings);
-			var result = serializer.Deserialize(YamlFile("convertible.yaml"), typeof(Z));
+		//	var serializer = new Serializer(settings);
+		//	var result = serializer.Deserialize(YamlFile("convertible.yaml"), typeof(Z));
 
-			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-			Assert.Equal("[hello, world]", ((Z)result).aaa);
-		}
+		//	Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
+		//	Assert.Equal("[hello, world]", ((Z)result).aaa);
+		//}
 
 		[Fact]
 		public void RoundtripWithTypeConverter()
@@ -309,7 +312,7 @@ namespace YamlDotNet.Test.Serialization
 			var buffer = new StringWriter();
 			var x = new SomeCustomType("Yo");
 			var settings = new SerializerSettings();
-			settings.AddSerializerFactory(new CustomTypeConverter());
+			settings.RegisterSerializerFactory(new CustomTypeConverter());
 			var serializer = new Serializer(settings);
 			serializer.Serialize(buffer, x);
 
@@ -393,7 +396,7 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationIncludesDefaultValueWhenAsked()
 		{
 			var settings = new SerializerSettings() {EmitDefaultValues = true};
-			settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+			settings.RegisterAssembly(typeof(X).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
@@ -409,7 +412,7 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationDoesNotIncludeDefaultValueWhenNotAsked()
 		{
 			var settings = new SerializerSettings() { EmitDefaultValues = false };
-			settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+			settings.RegisterAssembly(typeof(X).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
@@ -426,7 +429,7 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationOfNullWorksInJson()
 		{
 			var settings = new SerializerSettings() { EmitDefaultValues = true, EmitJsonComptible = true };
-			settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+			settings.RegisterAssembly(typeof(X).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
@@ -442,7 +445,7 @@ namespace YamlDotNet.Test.Serialization
 		public void DeserializationOfNullWorksInJson()
 		{
 			var settings = new SerializerSettings() { EmitDefaultValues = true, EmitJsonComptible = true };
-			settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+			settings.RegisterAssembly(typeof(X).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
@@ -461,7 +464,7 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.LookupAssemblies.Add(typeof(ContainsIgnore).Assembly);
+			settings.RegisterAssembly(typeof(ContainsIgnore).Assembly);
 			var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();

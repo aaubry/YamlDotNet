@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class ObjectDescriptor : ITypeDescriptor
 	{
-		protected static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
+		protected static readonly string SystemCollectionsNamespace = typeof(int).Namespace;
 
 		private readonly static object[] EmptyObjectArray = new object[0];
 		private readonly Type type;

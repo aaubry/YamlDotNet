@@ -123,6 +123,14 @@ namespace YamlDotNet.Serialization
 				throw new ArgumentNullException("type");
 			}
 
+			// Configure the emitter
+			// TODO the current emitter is not enough configurable to format its output
+			// This should be improved
+			var defaultEmitter = emitter as Emitter;
+			if (defaultEmitter != null)
+			{
+				defaultEmitter.ForceIndentLess = settings.IndentLess;
+			}
 
 			// Prepare the context
 			var context = new SerializerContext(this)

@@ -193,8 +193,10 @@ namespace YamlDotNet.Test
 			Assert.Equal(0, descriptor.Count);
 
 			Assert.True(PrimitiveDescriptor.IsPrimitive(typeof(MyEnum)));
-			Assert.False(PrimitiveDescriptor.IsPrimitive(typeof (object)));
-			Assert.False(PrimitiveDescriptor.IsPrimitive(typeof (IList)));
+			Assert.True(PrimitiveDescriptor.IsPrimitive(typeof (object)));
+			Assert.True(PrimitiveDescriptor.IsPrimitive(typeof(DateTime)));
+			Assert.True(PrimitiveDescriptor.IsPrimitive(typeof(TimeSpan)));
+			Assert.False(PrimitiveDescriptor.IsPrimitive(typeof(IList)));
 		}
 	}
 }

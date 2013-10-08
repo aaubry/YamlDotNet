@@ -37,7 +37,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <returns><c>true</c> if the specified type is nullable; otherwise, <c>false</c>.</returns>
 		public static bool IsNullable(Type type)
 		{
-			return Nullable.GetUnderlyingType(type) != null;
+			return type.IsNullable();
 		}
 
 		protected override System.Collections.Generic.List<IMemberDescriptor> PrepareMembers()

@@ -18,7 +18,7 @@ namespace YamlDotNet.Test.Serialization
 		public void NotSpecifyingObjectFactoryUsesDefault()
 		{
 			var settings = new SerializerSettings();
-			settings.TagTypes.AddTagMapping("!foo", typeof(FooBase));
+			settings.RegisterTagMapping("!foo", typeof(FooBase));
 			var serializer = new Serializer(settings);
 			var result = serializer.Deserialize(new StringReader("!foo {}"));
 
@@ -32,7 +32,7 @@ namespace YamlDotNet.Test.Serialization
 				{
 					ObjectFactory = new LambdaObjectFactory(t => new FooDerived(), new DefaultObjectFactory())
 				};
-			settings.TagTypes.AddTagMapping("!foo", typeof(FooBase));
+			settings.RegisterTagMapping("!foo", typeof(FooBase));
 
 			var serializer = new Serializer(settings);
 

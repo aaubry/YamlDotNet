@@ -20,10 +20,10 @@ namespace YamlDotNet.Serialization.Serializers
 
 		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
 		{
-			var dictionaryDescriptor = (CollectionDescriptor)typeDescriptor;
+			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 
 			// If the dictionary is pure, we can directly output a sequence instead of a mapping
-			return dictionaryDescriptor.IsPureCollection || dictionaryDescriptor.HasOnlyCapacity;
+			return collectionDescriptor.IsPureCollection || collectionDescriptor.HasOnlyCapacity;
 		}
 
 		public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.Serializers
 				{
 					if (keyEvent.Value == context.Settings.SpecialCollectionMember)
 					{
-						context.Reader.Accept<Scalar>();
+						context.Reader.Parser.MoveNext();
 						pureCollectionSerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
 						return;
 					}
@@ -69,6 +69,11 @@ namespace YamlDotNet.Serialization.Serializers
 				// Serialize Dictionary members
 				foreach (var member in typeDescriptor.Members)
 				{
+					if (member.Name == "Capacity" && !context.Settings.EmitCapacityForList)
+					{
+						continue;
+					}
+
 					// Emit the key name
 					WriteKey(context, member.Name);
 
@@ -84,6 +89,11 @@ namespace YamlDotNet.Serialization.Serializers
 
 		internal class PureCollectionSerializer : ObjectSerializer
 		{
+			protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
+			{
+				return true;
+			}
+
 			public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
 				var list = (IList)thisObject;

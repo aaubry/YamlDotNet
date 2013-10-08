@@ -105,7 +105,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			if (dictionary == null) throw new ArgumentNullException("dictionary");
 			if (IsGenericDictionary)
 			{
-				foreach (var item in (IEnumerable<KeyValuePair<object, object>>) getEnumeratorGeneric.Invoke(null, new object[] {dictionary}))
+				foreach (var item in (IEnumerable<KeyValuePair<object, object>>) getEnumeratorGeneric.Invoke(null, new [] {dictionary}))
 				{
 					yield return item;
 				}
@@ -117,7 +117,7 @@ namespace YamlDotNet.Serialization.Descriptors
 				{
 					if (!(keyValueObject is DictionaryEntry))
 					{
-						throw new NotSupportedException("Key value-pair [{0}] is not supported for IDictionary. Only DictionaryEntry".DoFormat(keyValueObject));
+						throw new NotSupportedException("Key value-pair type [{0}] is not supported for IDictionary. Only DictionaryEntry".DoFormat(keyValueObject));
 					}
 					var entry = (DictionaryEntry) keyValueObject;
 					yield return new KeyValuePair<object, object>(entry.Key, entry.Value);
@@ -142,6 +142,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			}
 			else
 			{
+				// Only throw an exception if the addMethod is not accessible when adding to a dictionary
 				if (addMethod == null)
 				{
 					throw new InvalidOperationException("No Add() method found on dictionary [{0}]".DoFormat(Type));

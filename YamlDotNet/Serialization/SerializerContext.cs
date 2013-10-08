@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization
 		{
 			Serializer = serializer;
 			settings = serializer.Settings;
-			tagTypeRegistry = settings.TagTypes;
+			tagTypeRegistry = settings.tagTypeRegistry;
 			ObjectFactory = settings.ObjectFactory;
 			Schema = Settings.Schema;
 			typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes, Settings.EmitDefaultValues);
@@ -70,7 +70,6 @@ namespace YamlDotNet.Serialization
 		public EventReader Reader { get; internal set; }
 
 		internal AnchorSerializer ObjectSerializer { get; set; }
-
 
 
 		/// <summary>
@@ -142,6 +141,16 @@ namespace YamlDotNet.Serialization
 		public string TagFromType(Type type)
 		{
 			return tagTypeRegistry.TagFromType(type);
+		}
+
+		/// <summary>
+		/// Resolves a type from the specified typename using registered assemblies.
+		/// </summary>
+		/// <param name="typeFullName">Full name of the type.</param>
+		/// <returns>The type of null if not found</returns>
+		public Type ResolveType(string typeFullName)
+		{
+			return tagTypeRegistry.ResolveType(typeFullName);
 		}
 
 		/// <summary>

@@ -40,6 +40,11 @@ namespace YamlDotNet
 			return null;
 		}
 
+		/// <summary>
+		/// Determines whether the specified type is an anonymous type.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns><c>true</c> if the specified type is anonymous; otherwise, <c>false</c>.</returns>
 		public static bool IsAnonymous(this Type type)
 		{
 			if (type == null)
@@ -48,6 +53,16 @@ namespace YamlDotNet
 			return type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), false).Length > 0
 				&& type.Namespace == null
 				&& type.FullName.Contains("AnonymousType");
+		}
+
+		/// <summary>
+		/// Determines whether the specified type is nullable <see cref="Nullable{T}"/>.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns><c>true</c> if the specified type is nullable; otherwise, <c>false</c>.</returns>
+		public static bool IsNullable(this Type type)
+		{
+			return Nullable.GetUnderlyingType(type) != null;			
 		}
 
 		/// <summary>

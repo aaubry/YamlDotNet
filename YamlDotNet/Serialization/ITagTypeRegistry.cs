@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace YamlDotNet.Serialization
@@ -7,7 +6,7 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Prodives tag discovery from a type and type discovery from a tag.
 	/// </summary>
-	public interface ITagTypeRegistry
+	internal interface ITagTypeRegistry
 	{
 		/// <summary>
 		/// Finds a type from a tag, null if not found.
@@ -24,16 +23,23 @@ namespace YamlDotNet.Serialization
 		string TagFromType(Type type);
 
 		/// <summary>
-		/// Gets the lookup assembly list used to look for types.
+		/// Resolves a type from the specified typeName.
 		/// </summary>
-		/// <value>The lookup assemblies.</value>
-		List<Assembly> LookupAssemblies { get; }
+		/// <param name="typeName">Name of the type.</param>
+		/// <returns>Type found for this typeName</returns>
+		Type ResolveType(string typeName);
+
+		/// <summary>
+		/// Registers an assembly when trying to resolve types.
+		/// </summary>
+		/// <param name="assembly">The assembly.</param>
+		void RegisterAssembly(Assembly assembly);
 
 		/// <summary>
 		/// Register a mapping between a tag and a type.
 		/// </summary>
 		/// <param name="tag">The tag.</param>
 		/// <param name="type">The type.</param>
-		void AddTagMapping(string tag, Type type);
+		void RegisterTagMapping(string tag, Type type);
 	}
 }
