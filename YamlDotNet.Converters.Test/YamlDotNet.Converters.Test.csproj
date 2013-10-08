@@ -65,9 +65,9 @@
       <Project>{16d8043d-c3db-4868-bff3-b2ebdf537aaa}</Project>
       <Name>YamlDotNet.Test</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.Serialzation.csproj">
-      <Project>{21ca0077-e15c-446d-9c43-f6d3f9d09687}</Project>
-      <Name>YamlDotNet.Serialzation</Name>
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
+      <Project>{bf32de1b-6276-4341-b212-f8862adbba7a}</Project>
+      <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

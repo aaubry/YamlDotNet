@@ -58,9 +58,9 @@
       <Project>{57B52D79-04A0-4091-8EE2-B419C009C2A6}</Project>
       <Name>YamlDotNet.Dynamic</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YamlDotNet.RepresentationModel\YamlDotNet.Serialzation.csproj">
-      <Project>{21CA0077-E15C-446D-9C43-F6D3F9D09687}</Project>
-      <Name>YamlDotNet.Serialzation</Name>
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
+      <Project>{bf32de1b-6276-4341-b212-f8862adbba7a}</Project>
+      <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
