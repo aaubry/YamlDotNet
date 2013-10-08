@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
-    
+	
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+	
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+	
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,43 +28,43 @@ namespace YamlDotNet.Serialization
 	/// </summary>
 	public class AnchorNotFoundException : YamlException
 	{
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnchorNotFoundException" /> class.
-        /// </summary>
-        /// <param name="anchorAlias">The anchor alias.</param>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnchorNotFoundException" /> class.
+		/// </summary>
+		/// <param name="anchorAlias">The anchor alias.</param>
 		public AnchorNotFoundException(string anchorAlias)
 		{
-		    Alias = anchorAlias;
+			Alias = anchorAlias;
 		}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnchorNotFoundException" /> class.
-        /// </summary>
-        /// <param name="anchorAlias">The anchor alias.</param>
-        /// <param name="message">The message.</param>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnchorNotFoundException" /> class.
+		/// </summary>
+		/// <param name="anchorAlias">The anchor alias.</param>
+		/// <param name="message">The message.</param>
 		public AnchorNotFoundException(string anchorAlias, string message)
 			: base(message)
 		{
-		    Alias = anchorAlias;
+			Alias = anchorAlias;
 		}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnchorNotFoundException" /> class.
-        /// </summary>
-        /// <param name="anchorAlias">The anchor alias.</param>
-        /// <param name="start">The start.</param>
-        /// <param name="end">The end.</param>
-        /// <param name="message">The message.</param>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnchorNotFoundException" /> class.
+		/// </summary>
+		/// <param name="anchorAlias">The anchor alias.</param>
+		/// <param name="start">The start.</param>
+		/// <param name="end">The end.</param>
+		/// <param name="message">The message.</param>
 		public AnchorNotFoundException(string anchorAlias, Mark start, Mark end, string message)
 			: base(start, end, message)
 		{
-		    Alias = anchorAlias;
+			Alias = anchorAlias;
 		}
 
-        /// <summary>
-        /// Gets or sets the anchor alias.
-        /// </summary>
-        /// <value>The anchor alias.</value>
-        public string Alias { get; private set; }
+		/// <summary>
+		/// Gets or sets the anchor alias.
+		/// </summary>
+		/// <value>The anchor alias.</value>
+		public string Alias { get; private set; }
 	}
 }

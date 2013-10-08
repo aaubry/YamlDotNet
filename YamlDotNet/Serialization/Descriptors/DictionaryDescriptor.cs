@@ -16,8 +16,8 @@ namespace YamlDotNet.Serialization.Descriptors
 
 		private readonly Type keyType;
 		private readonly Type valueType;
-	    private MethodInfo getEnumeratorGeneric;
-	    private MethodInfo addMethod;
+		private MethodInfo getEnumeratorGeneric;
+		private MethodInfo addMethod;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DictionaryDescriptor" /> class.
@@ -38,26 +38,26 @@ namespace YamlDotNet.Serialization.Descriptors
 			{
 				keyType = interfaceType.GetGenericArguments()[0];
 				valueType = interfaceType.GetGenericArguments()[1];
-			    IsGenericDictionary = true;
-			    getEnumeratorGeneric = typeof (DictionaryDescriptor).GetMethod("GetGenericEnumerable").MakeGenericMethod(keyType, valueType);
+				IsGenericDictionary = true;
+				getEnumeratorGeneric = typeof (DictionaryDescriptor).GetMethod("GetGenericEnumerable").MakeGenericMethod(keyType, valueType);
 			}
 			else
 			{
 				keyType = typeof(object);
 				valueType = typeof(object);
-            }
+			}
 
-            addMethod = type.GetMethod("Add", new[] { keyType, valueType });
+			addMethod = type.GetMethod("Add", new[] { keyType, valueType });
 
 			// Only Keys and Values
 			IsPureDictionary = Count == 0;
 		}
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is generic dictionary.
-        /// </summary>
-        /// <value><c>true</c> if this instance is generic dictionary; otherwise, <c>false</c>.</value>
-        public bool IsGenericDictionary { get; private set; }
+		/// <summary>
+		/// Gets a value indicating whether this instance is generic dictionary.
+		/// </summary>
+		/// <value><c>true</c> if this instance is generic dictionary; otherwise, <c>false</c>.</value>
+		public bool IsGenericDictionary { get; private set; }
 
 		/// <summary>
 		/// Gets the type of the key.
@@ -93,62 +93,62 @@ namespace YamlDotNet.Serialization.Descriptors
 			return ((IDictionary)thisObject).IsReadOnly;
 		}
 
-        /// <summary>
-        /// Gets a generic enumerator for a dictionary.
-        /// </summary>
-        /// <param name="dictionary">The dictionary.</param>
-        /// <returns>A generic enumerator.</returns>
-        /// <exception cref="System.ArgumentNullException">dictionary</exception>
-        /// <exception cref="System.NotSupportedException">Key value-pair [{0}] is not supported for IDictionary. Only DictionaryEntry.DoFormat(keyValueObject)</exception>
-	    public IEnumerable<KeyValuePair<object, object>> GetEnumerator(object dictionary)
-	    {
-	        if (dictionary == null) throw new ArgumentNullException("dictionary");
-	        if (IsGenericDictionary)
-	        {
-	            foreach (var item in (IEnumerable<KeyValuePair<object, object>>) getEnumeratorGeneric.Invoke(null, new object[] {dictionary}))
-	            {
-	                yield return item;
-	            }
-	        }
-	        else
-	        {
-                var simpleDictionary = (IDictionary)dictionary;
-                foreach (var keyValueObject in simpleDictionary)
-                {
-                    if (!(keyValueObject is DictionaryEntry))
-                    {
-                        throw new NotSupportedException("Key value-pair [{0}] is not supported for IDictionary. Only DictionaryEntry".DoFormat(keyValueObject));
-                    }
-                    var entry = (DictionaryEntry) keyValueObject;
-                    yield return new KeyValuePair<object, object>(entry.Key, entry.Value);
-                }
-	        }
-	    }
+		/// <summary>
+		/// Gets a generic enumerator for a dictionary.
+		/// </summary>
+		/// <param name="dictionary">The dictionary.</param>
+		/// <returns>A generic enumerator.</returns>
+		/// <exception cref="System.ArgumentNullException">dictionary</exception>
+		/// <exception cref="System.NotSupportedException">Key value-pair [{0}] is not supported for IDictionary. Only DictionaryEntry.DoFormat(keyValueObject)</exception>
+		public IEnumerable<KeyValuePair<object, object>> GetEnumerator(object dictionary)
+		{
+			if (dictionary == null) throw new ArgumentNullException("dictionary");
+			if (IsGenericDictionary)
+			{
+				foreach (var item in (IEnumerable<KeyValuePair<object, object>>) getEnumeratorGeneric.Invoke(null, new object[] {dictionary}))
+				{
+					yield return item;
+				}
+			}
+			else
+			{
+				var simpleDictionary = (IDictionary)dictionary;
+				foreach (var keyValueObject in simpleDictionary)
+				{
+					if (!(keyValueObject is DictionaryEntry))
+					{
+						throw new NotSupportedException("Key value-pair [{0}] is not supported for IDictionary. Only DictionaryEntry".DoFormat(keyValueObject));
+					}
+					var entry = (DictionaryEntry) keyValueObject;
+					yield return new KeyValuePair<object, object>(entry.Key, entry.Value);
+				}
+			}
+		}
 
-	    /// <summary>
-        /// Adds a a key-value to a dictionary.
-        /// </summary>
-        /// <param name="dictionary">The dictionary.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        /// <exception cref="System.InvalidOperationException">No Add() method found on dictionary [{0}].DoFormat(Type)</exception>
-        public void AddToDictionary(object dictionary, object key, object value)
-        {
-	        if (dictionary == null) throw new ArgumentNullException("dictionary");
-	        var simpleDictionary = dictionary as IDictionary;
-            if (simpleDictionary != null)
-            {
-                simpleDictionary.Add(key, value);
-            }
-            else
-            {
-                if (addMethod == null)
-                {
-                    throw new InvalidOperationException("No Add() method found on dictionary [{0}]".DoFormat(Type));
-                }
-                addMethod.Invoke(dictionary, new object[] {key, value});
-            }
-        }
+		/// <summary>
+		/// Adds a a key-value to a dictionary.
+		/// </summary>
+		/// <param name="dictionary">The dictionary.</param>
+		/// <param name="key">The key.</param>
+		/// <param name="value">The value.</param>
+		/// <exception cref="System.InvalidOperationException">No Add() method found on dictionary [{0}].DoFormat(Type)</exception>
+		public void AddToDictionary(object dictionary, object key, object value)
+		{
+			if (dictionary == null) throw new ArgumentNullException("dictionary");
+			var simpleDictionary = dictionary as IDictionary;
+			if (simpleDictionary != null)
+			{
+				simpleDictionary.Add(key, value);
+			}
+			else
+			{
+				if (addMethod == null)
+				{
+					throw new InvalidOperationException("No Add() method found on dictionary [{0}]".DoFormat(Type));
+				}
+				addMethod.Invoke(dictionary, new object[] {key, value});
+			}
+		}
 
 		/// <summary>
 		/// Determines whether the specified type is a .NET dictionary.
@@ -157,19 +157,19 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <returns><c>true</c> if the specified type is dictionary; otherwise, <c>false</c>.</returns>
 		public static bool IsDictionary(Type type)
 		{
-		    return typeof (IDictionary).IsAssignableFrom(type) || type.HasInterface(typeof(IDictionary<,>));
+			return typeof (IDictionary).IsAssignableFrom(type) || type.HasInterface(typeof(IDictionary<,>));
 		}
 
-        public static IEnumerable<KeyValuePair<object, object>> GetGenericEnumerable<TKey, TValue>(IDictionary<TKey, TValue> dictionary)
-        {
-            return dictionary.Select(keyValue => new KeyValuePair<object, object>(keyValue.Key, keyValue.Value));
-        }
+		public static IEnumerable<KeyValuePair<object, object>> GetGenericEnumerable<TKey, TValue>(IDictionary<TKey, TValue> dictionary)
+		{
+			return dictionary.Select(keyValue => new KeyValuePair<object, object>(keyValue.Key, keyValue.Value));
+		}
 
-	    protected override bool PrepareMember(MemberDescriptorBase member)
+		protected override bool PrepareMember(MemberDescriptorBase member)
 		{
 			// Filter members
-            if (member is PropertyDescriptor && ListOfMembersToRemove.Contains(member.Name))
-            //if (member is PropertyDescriptor && (member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace) && ListOfMembersToRemove.Contains(member.Name))
+			if (member is PropertyDescriptor && ListOfMembersToRemove.Contains(member.Name))
+			//if (member is PropertyDescriptor && (member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace) && ListOfMembersToRemove.Contains(member.Name))
 			{
 				return false;
 			}

@@ -5,14 +5,14 @@ using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-    internal class PrimitiveSerializer : ScalarSerializerBase, IYamlSerializableFactory
+	internal class PrimitiveSerializer : ScalarSerializerBase, IYamlSerializableFactory
 	{
 		public IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
 		{
 			return typeDescriptor is PrimitiveDescriptor ? this : null;
 		}
 
-        public override object ConvertFrom(SerializerContext context, object value, Scalar scalar, ITypeDescriptor typeDescriptor)
+		public override object ConvertFrom(SerializerContext context, object value, Scalar scalar, ITypeDescriptor typeDescriptor)
 		{
 			var primitiveType = (PrimitiveDescriptor) typeDescriptor;
 			var type = primitiveType.Type;
@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 			if (type == typeof (TimeSpan))
 			{
-				return TimeSpan.Parse(text, CultureInfo.InvariantCulture);        
+				return TimeSpan.Parse(text, CultureInfo.InvariantCulture);		
 			}
 
 			// Remove _ character from numeric values
@@ -87,17 +87,17 @@ namespace YamlDotNet.Serialization.Serializers
 					return decimal.Parse(text, CultureInfo.InvariantCulture);
 			}
 
-            // If we are expecting a type object, return directly the string
-            if (type == typeof (object))
-            {
-                return text;
-            }
+			// If we are expecting a type object, return directly the string
+			if (type == typeof (object))
+			{
+				return text;
+			}
 
 			throw new YamlException(scalar.Start, scalar.End, "Unable to decode scalar [{0}] not supported by current schema".DoFormat(scalar));
 		}
 
-        public override void ConvertTo(SerializerContext context, object value, ScalarEventInfo scalar, ITypeDescriptor typeDescriptor)
-        {
+		public override void ConvertTo(SerializerContext context, object value, ScalarEventInfo scalar, ITypeDescriptor typeDescriptor)
+		{
 			var primitiveType = (PrimitiveDescriptor)typeDescriptor;
 			var type = primitiveType.Type;
 

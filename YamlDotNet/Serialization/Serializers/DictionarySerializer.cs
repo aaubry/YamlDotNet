@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 			if (dictionaryDescriptor.IsPureDictionary)
 			{
-			    pureDictionarySerializer.ReadItem(context, thisObject, typeDescriptor);
+				pureDictionarySerializer.ReadItem(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -76,43 +76,43 @@ namespace YamlDotNet.Serialization.Serializers
 			{
 				var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 
-                var keyResult = context.ReadYaml(null, dictionaryDescriptor.KeyType);
-                var valueResult = context.ReadYaml(null, dictionaryDescriptor.ValueType);
+				var keyResult = context.ReadYaml(null, dictionaryDescriptor.KeyType);
+				var valueResult = context.ReadYaml(null, dictionaryDescriptor.ValueType);
 
-                // Handle aliasing
-                if (keyResult.IsAlias || valueResult.IsAlias)
-                {
-                    if (keyResult.IsAlias)
-                    {
-                        if (valueResult.IsAlias)
-                        {
-                            context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, context.GetAliasValue(valueResult.Alias)));
-                        }
-                        else
-                        {
-                            context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, valueResult.Value));
-                        }
-                    }
-                    else
-                    {
-                        context.AddAliasBinding(valueResult.Alias, deferredAlias => dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, deferredAlias));
-                    }
-                }
-                else
-                {
-                    dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, valueResult.Value);
-                }
+				// Handle aliasing
+				if (keyResult.IsAlias || valueResult.IsAlias)
+				{
+					if (keyResult.IsAlias)
+					{
+						if (valueResult.IsAlias)
+						{
+							context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, context.GetAliasValue(valueResult.Alias)));
+						}
+						else
+						{
+							context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, valueResult.Value));
+						}
+					}
+					else
+					{
+						context.AddAliasBinding(valueResult.Alias, deferredAlias => dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, deferredAlias));
+					}
+				}
+				else
+				{
+					dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, valueResult.Value);
+				}
 			}
 
 			public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
 				var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 
-			    var keyValues = dictionaryDescriptor.GetEnumerator(thisObject).ToList();
+				var keyValues = dictionaryDescriptor.GetEnumerator(thisObject).ToList();
 
 				if (context.Settings.SortKeyForMapping)
 				{
-                    keyValues.Sort((left, right) =>
+					keyValues.Sort((left, right) =>
 						{
 							if (left.Key is IComparable && right.Key is IComparable)
 							{
@@ -126,7 +126,7 @@ namespace YamlDotNet.Serialization.Serializers
 				var valueType = dictionaryDescriptor.ValueType;
 				foreach (var keyValue in keyValues)
 				{
-                    context.WriteYaml(keyValue.Key, keyType);
+					context.WriteYaml(keyValue.Key, keyType);
 					context.WriteYaml(keyValue.Value, valueType);
 				}
 			}

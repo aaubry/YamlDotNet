@@ -13,19 +13,19 @@ namespace YamlDotNet.Serialization
 		internal readonly List<IYamlSerializableFactory> factories = new List<IYamlSerializableFactory>();
 		internal readonly Dictionary<Type, IYamlSerializable> serializers = new Dictionary<Type, IYamlSerializable>();
 		private readonly TagTypeRegistry tagTypeRegistry;
-	    private readonly IYamlSchema schema;
-        private IObjectFactory objectFactory;
+		private readonly IYamlSchema schema;
+		private IObjectFactory objectFactory;
 		private int preferredIndent;
-        private string specialCollectionMember;
+		private string specialCollectionMember;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SerializerSettings"/> class.
-        /// </summary>
-	    public SerializerSettings() : this(null)
-	    {
-	    }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SerializerSettings"/> class.
+		/// </summary>
+		public SerializerSettings() : this(null)
+		{
+		}
 
-	    /// <summary>
+		/// <summary>
 		/// Initializes a new instance of the <see cref="SerializerSettings" /> class.
 		/// </summary>
 		public SerializerSettings(IYamlSchema schema)
@@ -41,9 +41,9 @@ namespace YamlDotNet.Serialization
 			attributeRegistry = new AttributeRegistry();
 			ObjectFactory = new DefaultObjectFactory();
 
-            // Register default mapping for map and seq
-            tagTypeRegistry.AddTagMapping("!!map", typeof(IDictionary<object, object>));
-            tagTypeRegistry.AddTagMapping("!!seq", typeof(IList<object>));
+			// Register default mapping for map and seq
+			tagTypeRegistry.AddTagMapping("!!map", typeof(IDictionary<object, object>));
+			tagTypeRegistry.AddTagMapping("!!seq", typeof(IList<object>));
 		}
 
 		/// <summary>
@@ -160,18 +160,18 @@ namespace YamlDotNet.Serialization
 			}
 		}
 
-	    /// <summary>
-	    /// Gets or sets the schema. Default is <see cref="CoreSchema" />.
-	    /// method.
-	    /// </summary>
-	    /// <value>The schema.</value>
-	    /// <exception cref="System.ArgumentNullException">value</exception>
-	    public IYamlSchema Schema
-	    {
-	        get { return schema; }
-	    }
+		/// <summary>
+		/// Gets or sets the schema. Default is <see cref="CoreSchema" />.
+		/// method.
+		/// </summary>
+		/// <value>The schema.</value>
+		/// <exception cref="System.ArgumentNullException">value</exception>
+		public IYamlSchema Schema
+		{
+			get { return schema; }
+		}
 
-	    /// <summary>
+		/// <summary>
 		/// Adds a custom serializer for the specified type.
 		/// </summary>
 		/// <param name="type">The type.</param>

@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-    /// <summary>
-    /// This serializer is responsible to route to a specific serializer.
-    /// </summary>
+	/// <summary>
+	/// This serializer is responsible to route to a specific serializer.
+	/// </summary>
 	internal class RoutingSerializer : IYamlSerializable
 	{
 		private readonly Dictionary<Type, IYamlSerializable> serializers = new Dictionary<Type, IYamlSerializable>();
 		private readonly List<IYamlSerializableFactory> factories = new List<IYamlSerializableFactory>();
 
-        public RoutingSerializer()
+		public RoutingSerializer()
 		{
 		}
 
@@ -27,8 +27,8 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-            var serializer = GetSerializer(context, typeDescriptor);
-            return serializer.ReadYaml(context, value, typeDescriptor);
+			var serializer = GetSerializer(context, typeDescriptor);
+			return serializer.ReadYaml(context, value, typeDescriptor);
 		}
 
 		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
@@ -41,8 +41,8 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 
 			var localTypeDescriptor = typeDescriptor ?? context.FindTypeDescriptor(value.GetType());
-            var serializer = GetSerializer(context, localTypeDescriptor);
-            serializer.WriteYaml(context, value, typeDescriptor);
+			var serializer = GetSerializer(context, localTypeDescriptor);
+			serializer.WriteYaml(context, value, typeDescriptor);
 		}
 
 		private IYamlSerializable GetSerializer(SerializerContext context, ITypeDescriptor typeDescriptor)

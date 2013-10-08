@@ -28,14 +28,14 @@ namespace YamlDotNet.Serialization.Descriptors
 			ElementType = (collectionType != null) ? collectionType.GetGenericArguments()[0] : typeof(object);
 
 			// Finds if it is a pure list
-		    if (Contains("Capacity"))
-		    {
-		        var capacityMember = this["Capacity"] as PropertyDescriptor;
-		        HasOnlyCapacity = Count == 1 && capacityMember != null &&
-		                          (capacityMember.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace);
-		    }
+			if (Contains("Capacity"))
+			{
+				var capacityMember = this["Capacity"] as PropertyDescriptor;
+				HasOnlyCapacity = Count == 1 && capacityMember != null &&
+								  (capacityMember.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace);
+			}
 
-		    IsPureCollection = Count == 0;
+			IsPureCollection = Count == 0;
 		}
 
 		/// <summary>

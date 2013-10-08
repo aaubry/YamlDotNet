@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 			if (CheckIsSequence(collectionDescriptor))
 			{
-			    pureCollectionSerializer.ReadItem(context, thisObject, typeDescriptor);
+				pureCollectionSerializer.ReadItem(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -91,15 +91,15 @@ namespace YamlDotNet.Serialization.Serializers
 
 				var valueResult = context.ReadYaml(null, collectionDescriptor.ElementType);
 
-                // Handle aliasing
-                if (valueResult.IsAlias)
-                {
-                    context.AddAliasBinding(valueResult.Alias, deferredValue => list.Add(deferredValue));
-                }
-                else
-                {
-                    list.Add(valueResult.Value);
-                }
+				// Handle aliasing
+				if (valueResult.IsAlias)
+				{
+					context.AddAliasBinding(valueResult.Alias, deferredValue => list.Add(deferredValue));
+				}
+				else
+				{
+					list.Add(valueResult.Value);
+				}
 			}
 
 			protected override SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)

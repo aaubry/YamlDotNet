@@ -68,7 +68,7 @@ namespace YamlDotNet.Schemas
 		{
 			AddScalarRule<object>("!!null", @"null|Null|NULL|\~|", m => null, null);
 			AddScalarRule<int>("!!int", @"([-+]?(0|[1-9][0-9_]*))",
-			                   m => Convert.ToInt32(m.Value.Replace("_", "")), null);
+							   m => Convert.ToInt32(m.Value.Replace("_", "")), null);
 			AddScalarRule<int>("!!int", @"([-+]?)0b([01_]+)", m =>
 				{
 					var v = Convert.ToInt32(m.Groups[2].Value.Replace("_", ""), 2);
@@ -86,11 +86,11 @@ namespace YamlDotNet.Schemas
 				}, null);
 			// Todo: http://yaml.org/type/float.html is wrong  => [0-9.] should be [0-9_]
 			AddScalarRule<double>("!!float", @"[-+]?(0|[1-9][0-9_]*)\.[0-9_]*([eE][-+]?[0-9]+)?",
-			                      m => Convert.ToDouble(m.Value.Replace("_", "")), null);
+								  m => Convert.ToDouble(m.Value.Replace("_", "")), null);
 			AddScalarRule<double>("!!float", @"[-+]?\._*[0-9][0-9_]*([eE][-+]?[0-9]+)?",
-			                      m => Convert.ToDouble(m.Value.Replace("_", "")), null);
+								  m => Convert.ToDouble(m.Value.Replace("_", "")), null);
 			AddScalarRule<double>("!!float", @"[-+]?(0|[1-9][0-9_]*)([eE][-+]?[0-9]+)",
-			                      m => Convert.ToDouble(m.Value.Replace("_", "")), null);
+								  m => Convert.ToDouble(m.Value.Replace("_", "")), null);
 			AddScalarRule<double>("!!float", @"\+?(\.inf|\.Inf|\.INF)", m => double.PositiveInfinity, null);
 			AddScalarRule<double>("!!float", @"-(\.inf|\.Inf|\.INF)", m => double.NegativeInfinity, null);
 			AddScalarRule<double>("!!float", @"\.nan|\.NaN|\.NAN", m => double.NaN, null);
@@ -98,37 +98,37 @@ namespace YamlDotNet.Schemas
 			AddScalarRule<bool>("!!bool", @"n|N|no|No|NO|false|False|FALSE|off|Off|OFF", m => false, null);
 			AddScalarRule<string>("!!merge", @"<<", m => "<<", null);
 			AddScalarRule<DateTime>("!!timestamp",  // Todo: spec is wrong (([ \t]*)Z|[-+][0-9][0-9]?(:[0-9][0-9])?)? should be (([ \t]*)(Z|[-+][0-9][0-9]?(:[0-9][0-9])?))? to accept "2001-12-14 21:59:43.10 -5"
-			                        @"([0-9]{4})-([0-9]{2})-([0-9]{2})" +
-			                        @"(" +
-			                        @"([Tt]|[\t ]+)" +
-			                        @"([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})(\.([0-9]*))?" +
-			                        @"(" +
-			                        @"([ \t]*)" +
-			                        @"(Z|([-+])([0-9]{1,2})(:([0-9][0-9]))?)" +
-			                        @")?" +
-			                        @")?",
-			                        match => DateTime.Parse(match.Value),
-			                        datetime =>
-				                        {
-					                        var z = datetime.ToString("%K");
-					                        if (z != "Z" && z != "")
-						                        z = " " + z;
-					                        if (datetime.Millisecond == 0)
-					                        {
-						                        if (datetime.Hour == 0 && datetime.Minute == 0 && datetime.Second == 0)
-						                        {
-							                        return datetime.ToString("yyyy-MM-dd" + z);
-						                        }
-						                        else
-						                        {
-							                        return datetime.ToString("yyyy-MM-dd HH:mm:ss" + z);
-						                        }
-					                        }
-					                        else
-					                        {
-						                        return datetime.ToString("yyyy-MM-dd HH:mm:ss.fff" + z);
-					                        }
-				                        });
+									@"([0-9]{4})-([0-9]{2})-([0-9]{2})" +
+									@"(" +
+									@"([Tt]|[\t ]+)" +
+									@"([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})(\.([0-9]*))?" +
+									@"(" +
+									@"([ \t]*)" +
+									@"(Z|([-+])([0-9]{1,2})(:([0-9][0-9]))?)" +
+									@")?" +
+									@")?",
+									match => DateTime.Parse(match.Value),
+									datetime =>
+										{
+											var z = datetime.ToString("%K");
+											if (z != "Z" && z != "")
+												z = " " + z;
+											if (datetime.Millisecond == 0)
+											{
+												if (datetime.Hour == 0 && datetime.Minute == 0 && datetime.Second == 0)
+												{
+													return datetime.ToString("yyyy-MM-dd" + z);
+												}
+												else
+												{
+													return datetime.ToString("yyyy-MM-dd HH:mm:ss" + z);
+												}
+											}
+											else
+											{
+												return datetime.ToString("yyyy-MM-dd HH:mm:ss.fff" + z);
+											}
+										});
 
 			AllowFailsafeString = true;
 

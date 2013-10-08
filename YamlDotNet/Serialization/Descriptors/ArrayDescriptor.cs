@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <returns>A list type with same element type than this array.</returns>
 		public Array CreateArray(int dimension)
 		{
-		    return Array.CreateInstance(ElementType, dimension);
+			return Array.CreateInstance(ElementType, dimension);
 		}
 	}
 }

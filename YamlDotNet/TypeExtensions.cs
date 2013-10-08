@@ -7,48 +7,48 @@ namespace YamlDotNet
 	internal static class TypeExtensions
 	{
 
-	    public static bool HasInterface(this Type type, Type lookInterfaceType)
-	    {
-	        return type.GetInterface(lookInterfaceType) != null;
-	    }
+		public static bool HasInterface(this Type type, Type lookInterfaceType)
+		{
+			return type.GetInterface(lookInterfaceType) != null;
+		}
 
-	    public static Type GetInterface(this Type type, Type lookInterfaceType)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (lookInterfaceType == null)
-                throw new ArgumentNullException("lookInterfaceType");
+		public static Type GetInterface(this Type type, Type lookInterfaceType)
+		{
+			if (type == null)
+				throw new ArgumentNullException("type");
+			if (lookInterfaceType == null)
+				throw new ArgumentNullException("lookInterfaceType");
 
-            if (lookInterfaceType.IsGenericTypeDefinition)
-            {
-                if (lookInterfaceType.IsInterface)
-                    foreach (var interfaceType in type.GetInterfaces())
-                        if (interfaceType.IsGenericType
-                            && interfaceType.GetGenericTypeDefinition() == lookInterfaceType)
-                            return interfaceType;
+			if (lookInterfaceType.IsGenericTypeDefinition)
+			{
+				if (lookInterfaceType.IsInterface)
+					foreach (var interfaceType in type.GetInterfaces())
+						if (interfaceType.IsGenericType
+							&& interfaceType.GetGenericTypeDefinition() == lookInterfaceType)
+							return interfaceType;
 
-                for (Type t = type; t != null; t = t.BaseType)
-                    if (t.IsGenericType && t.GetGenericTypeDefinition() == lookInterfaceType)
-                        return t;
-            }
-            else
-            {
-                if (lookInterfaceType.IsAssignableFrom(type))
-                    return lookInterfaceType;
-            }
+				for (Type t = type; t != null; t = t.BaseType)
+					if (t.IsGenericType && t.GetGenericTypeDefinition() == lookInterfaceType)
+						return t;
+			}
+			else
+			{
+				if (lookInterfaceType.IsAssignableFrom(type))
+					return lookInterfaceType;
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        public static bool IsAnonymous(this Type type)
-        {
-            if (type == null)
-                return false;
+		public static bool IsAnonymous(this Type type)
+		{
+			if (type == null)
+				return false;
 
-            return type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), false).Length > 0
-                && type.Namespace == null
-                && type.FullName.Contains("AnonymousType");
-        }
+			return type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), false).Length > 0
+				&& type.Namespace == null
+				&& type.FullName.Contains("AnonymousType");
+		}
 
 		/// <summary>
 		/// Check if the type is a ValueType and does not contain any non ValueType members.
