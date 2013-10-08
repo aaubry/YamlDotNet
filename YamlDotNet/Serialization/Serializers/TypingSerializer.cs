@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization.Serializers
 				throw new YamlException(parsingEvent.Start, parsingEvent.End, "Unexpected parsing event found [{0}]. Expecting Scalar, Mapping or Sequence".DoFormat(parsingEvent));
 			}
 
-			var type = typeDescriptor != null ? typeDescriptor.Type : null; ;
+			var type = typeDescriptor != null ? typeDescriptor.Type : null;
 
 			// Tries to get a Type from the TagTypes
 			Type typeFromTag = null;

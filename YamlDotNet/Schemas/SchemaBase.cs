@@ -186,7 +186,6 @@ namespace YamlDotNet.Schemas
 						value = rule.Decode(match);
 					}
 					return true;
-					break;
 				}
 			}
 			else
@@ -277,8 +276,6 @@ namespace YamlDotNet.Schemas
 		/// Add( ... );
 		/// EndUpdate();   // automaticall invoke internal calculation method
 		///   </code></example>
-		/// <remarks>Surround sequential calls of this function by <see cref="BeginScalarRuleUpdate" /> / <see cref="EndScalarRuleUpdate" />
-		/// pair to avoid invoking slow internal calculation method many times.</remarks>
 		protected void AddScalarRule<T>(string tag, string regex, Func<Match, T> decode, Func<T, string> encode)
 		{
 			// Make sure the tag is expanded to its long form
@@ -371,8 +368,8 @@ namespace YamlDotNet.Schemas
 				Encoder = encoder;
 			}
 
-			private Func<Match, T> Decoder;
-			private Func<T, string> Encoder;
+			private readonly Func<Match, T> Decoder;
+			private readonly Func<T, string> Encoder;
 
 			public override object Decode(Match m)
 			{

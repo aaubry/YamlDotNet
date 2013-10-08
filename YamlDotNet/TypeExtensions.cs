@@ -102,7 +102,7 @@ namespace YamlDotNet
 		/// <summary>
 		/// Return if an object is a numeric value.
 		/// </summary>
-		/// <param name="obj">Any object to be tested.</param>
+		/// <param name="type">The type.</param>
 		/// <returns>True if object is a numeric value.</returns>
 		public static bool IsNumeric(this Type type)
 		{
