@@ -91,12 +91,14 @@
     <Compile Include="SemanticErrorException.cs" />
     <Compile Include="Serialization\AnchorEventEmitter.cs" />
     <Compile Include="Serialization\AnchorNotFoundException.cs" />
+    <Compile Include="Serialization\ChainedObjectFactory.cs" />
     <Compile Include="Serialization\DefaultObjectFactory.cs" />
     <Compile Include="Serialization\Descriptors\ArrayDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\CollectionDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\DictionaryDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\FieldDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\MemberDescriptorBase.cs" />
+    <Compile Include="Serialization\Descriptors\NullableDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\ObjectDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\PrimitiveDescriptor.cs" />
     <Compile Include="Serialization\Descriptors\PropertyDescriptor.cs" />
@@ -111,6 +113,7 @@
     <Compile Include="Serialization\ITypeDescriptor.cs" />
     <Compile Include="Serialization\ITypeDescriptorFactory.cs" />
     <Compile Include="Serialization\IYamlVisitor.cs" />
+    <Compile Include="Serialization\LambdaObjectFactory.cs" />
     <Compile Include="Serialization\Serializers\AnchorSerializer.cs" />
     <Compile Include="Serialization\ChainedEventEmitter.cs">
       <SubType>Code</SubType>
@@ -132,7 +135,9 @@
     <Compile Include="Serialization\Serializers\CollectionSerializer.cs" />
     <Compile Include="Serialization\Serializers\DictionarySerializer.cs" />
     <Compile Include="Schemas\SchemaBase.cs" />
+    <Compile Include="Serialization\Serializers\NullableSerializer.cs" />
     <Compile Include="Serialization\Serializers\ObjectSerializer.cs" />
+    <Compile Include="Serialization\Serializers\ScalarSerializerBase.cs" />
     <Compile Include="Serialization\Serializers\TypingSerializer.cs" />
     <Compile Include="Serialization\Serializers\PrimitiveSerializer.cs" />
     <Compile Include="Serialization\Serializers\RoutingSerializer.cs" />

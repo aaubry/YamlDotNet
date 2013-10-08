@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
@@ -9,7 +10,11 @@ namespace YamlDotNet.Serialization.Serializers
     /// </summary>
     public class ObjectSerializer : IYamlSerializable, IYamlSerializableFactory
     {
-		public virtual IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
+        public ObjectSerializer()
+        {
+        }
+
+        public virtual IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
 		{
 			// always accept
 			return this;
@@ -31,7 +36,7 @@ namespace YamlDotNet.Serialization.Serializers
 			return SequenceStyle.Block;
 		}
 
-        public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+        public virtual ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
         {
 	        var type = typeDescriptor.Type;
 
@@ -49,9 +54,9 @@ namespace YamlDotNet.Serialization.Serializers
             var isSequence = CheckIsSequence(typeDescriptor);
 
 			// Process members
-	        return isSequence
+	        return new ValueResult(isSequence
 		                ? ReadItems<SequenceStart, SequenceEnd>(context, value, typeDescriptor)
-		                : ReadItems<MappingStart, MappingEnd>(context, value, typeDescriptor);
+		                : ReadItems<MappingStart, MappingEnd>(context, value, typeDescriptor));
         }
 
         protected virtual object ReadItems<TStart, TEnd>(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor) 
@@ -68,7 +73,7 @@ namespace YamlDotNet.Serialization.Serializers
             return thisObject;
         }
 
-		protected virtual void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		public virtual void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 
@@ -85,20 +90,30 @@ namespace YamlDotNet.Serialization.Serializers
 				value = memberAccessor.Get(thisObject);
 			}
 
-			var propertyValue = context.ReadYaml(value, propertyType);
+            // Handle late binding
+		    if (memberAccessor.HasSet && memberAccessor.SerializeMemberMode != SerializeMemberMode.Content)
+		    {
+                var valueResult = context.ReadYaml(value, propertyType);
 
-			if (memberAccessor.HasSet && memberAccessor.SerializeMemberMode != SerializeMemberMode.Content)
-			{
-				memberAccessor.Set(thisObject, propertyValue);
-			}
+                // If result value is a late binding, register it.
+                if (valueResult.IsAlias)
+                {
+                    context.AddAliasBinding(valueResult.Alias, lateValue => memberAccessor.Set(thisObject, lateValue));
+                }
+                else
+                {
+                    memberAccessor.Set(thisObject, valueResult.Value);
+                }
+		    }
 		}
 
         public virtual void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
         {
             var typeOfValue = value.GetType();
-	        var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
+            var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
 
-            var tag = typeOfValue == expectedType ? null : context.TagFromType(typeOfValue);
+            // If this is an anonymous tag we will serialize only a default untyped YAML mapping
+            var tag = typeOfValue.IsAnonymous() ? null : typeOfValue == expectedType ? null : context.TagFromType(typeOfValue);
 
 			if (typeDescriptor == null)
 			{

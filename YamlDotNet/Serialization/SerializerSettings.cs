@@ -13,15 +13,22 @@ namespace YamlDotNet.Serialization
 		internal readonly List<IYamlSerializableFactory> factories = new List<IYamlSerializableFactory>();
 		internal readonly Dictionary<Type, IYamlSerializable> serializers = new Dictionary<Type, IYamlSerializable>();
 		private readonly TagTypeRegistry tagTypeRegistry;
-		private IObjectFactory objectFactory;
+	    private readonly IYamlSchema schema;
+        private IObjectFactory objectFactory;
 		private int preferredIndent;
-		private IYamlSchema schema;
-		private string specialCollectionMember;
+        private string specialCollectionMember;
 
-		/// <summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SerializerSettings"/> class.
+        /// </summary>
+	    public SerializerSettings() : this(null)
+	    {
+	    }
+
+	    /// <summary>
 		/// Initializes a new instance of the <see cref="SerializerSettings" /> class.
 		/// </summary>
-		public SerializerSettings()
+		public SerializerSettings(IYamlSchema schema)
 		{
 			PreferredIndent = 2;
 			SortKeyForMapping = true;
@@ -29,10 +36,14 @@ namespace YamlDotNet.Serialization
 			EmitCapacityForList = false;
 			SpecialCollectionMember = "~Items";
 			LimitFlowSequence = 20;
-			schema = new CoreSchema();
-			tagTypeRegistry = new TagTypeRegistry();
+			this.schema = schema ?? new CoreSchema();
+			tagTypeRegistry = new TagTypeRegistry(Schema);
 			attributeRegistry = new AttributeRegistry();
 			ObjectFactory = new DefaultObjectFactory();
+
+            // Register default mapping for map and seq
+            tagTypeRegistry.AddTagMapping("!!map", typeof(IDictionary<object, object>));
+            tagTypeRegistry.AddTagMapping("!!seq", typeof(IList<object>));
 		}
 
 		/// <summary>
@@ -59,9 +70,9 @@ namespace YamlDotNet.Serialization
 		public bool SortKeyForMapping { get; set; }
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to emit json comptible YAML.
+		/// Gets or sets a value indicating whether to emit JSON compatible YAML.
 		/// </summary>
-		/// <value><c>true</c> if to emit json comptible YAML; otherwise, <c>false</c>.</value>
+		/// <value><c>true</c> if to emit JSON compatible YAML; otherwise, <c>false</c>.</value>
 		public bool EmitJsonComptible { get; set; }
 
 		/// <summary>
@@ -149,24 +160,18 @@ namespace YamlDotNet.Serialization
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the schema. Default is <see cref="CoreSchema" />. When setting the schema in this settings, the schema is initialized by calling its
-		/// <see cref="IYamlSchema.Initialize" />
-		/// method.
-		/// </summary>
-		/// <value>The schema.</value>
-		/// <exception cref="System.ArgumentNullException">value</exception>
-		public IYamlSchema Schema
-		{
-			get { return schema; }
-			set
-			{
-				if (value == null) throw new ArgumentNullException("value");
-				schema = value;
-			}
-		}
+	    /// <summary>
+	    /// Gets or sets the schema. Default is <see cref="CoreSchema" />.
+	    /// method.
+	    /// </summary>
+	    /// <value>The schema.</value>
+	    /// <exception cref="System.ArgumentNullException">value</exception>
+	    public IYamlSchema Schema
+	    {
+	        get { return schema; }
+	    }
 
-		/// <summary>
+	    /// <summary>
 		/// Adds a custom serializer for the specified type.
 		/// </summary>
 		/// <param name="type">The type.</param>

@@ -31,10 +31,10 @@ namespace YamlDotNet.Serialization.Descriptors
 		public static bool IsPrimitive(Type type)
 		{
 			switch (Type.GetTypeCode(type))
-			{
-				case TypeCode.Object:
+            {
+                case TypeCode.Object:
 				case TypeCode.Empty:
-					return false;
+			        return type == typeof (object) || type == typeof(TimeSpan);
 			}
 			return true;
 		}

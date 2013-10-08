@@ -129,7 +129,7 @@ namespace YamlDotNet.Schemas
 		/// or
 		/// shortTag
 		/// </exception>
-		protected void RegisterTag(string shortTag, string longTag)
+	    public void RegisterTag(string shortTag, string longTag)
 		{
 			if (shortTag == null) throw new ArgumentNullException("shortTag");
 			if (longTag == null) throw new ArgumentNullException("longTag");

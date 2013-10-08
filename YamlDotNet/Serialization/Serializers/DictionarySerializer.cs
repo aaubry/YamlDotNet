@@ -20,24 +20,13 @@ namespace YamlDotNet.Serialization.Serializers
 			return typeDescriptor is DictionaryDescriptor ? this : null;
 		}
 
-		protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
+		public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			var dictionaryDescriptor = (DictionaryDescriptor) typeDescriptor;
-
-			// If the dictionary is pure, we can directly output a sequence instead of a mapping
-			return dictionaryDescriptor.IsPureDictionary;
-		}
-
-		protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
-		{
-			var dictionary = (IDictionary) thisObject;
 			var dictionaryDescriptor = (DictionaryDescriptor) typeDescriptor;
 
 			if (dictionaryDescriptor.IsPureDictionary)
 			{
-				var key = context.ReadYaml(null, dictionaryDescriptor.KeyType);
-				var value = context.ReadYaml(null, dictionaryDescriptor.ValueType);
-				dictionary.Add(key, value);
+			    pureDictionarySerializer.ReadItem(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -83,42 +72,62 @@ namespace YamlDotNet.Serialization.Serializers
 
 		internal class PureDictionarySerializer : ObjectSerializer
 		{
-			protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+			public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
-				var dictionary = (IDictionary)thisObject;
 				var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 
-				var key = context.ReadYaml(null, dictionaryDescriptor.KeyType);
-				var value = context.ReadYaml(null, dictionaryDescriptor.ValueType);
-				dictionary.Add(key, value);
+                var keyResult = context.ReadYaml(null, dictionaryDescriptor.KeyType);
+                var valueResult = context.ReadYaml(null, dictionaryDescriptor.ValueType);
+
+                // Handle aliasing
+                if (keyResult.IsAlias || valueResult.IsAlias)
+                {
+                    if (keyResult.IsAlias)
+                    {
+                        if (valueResult.IsAlias)
+                        {
+                            context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, context.GetAliasValue(valueResult.Alias)));
+                        }
+                        else
+                        {
+                            context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, valueResult.Value));
+                        }
+                    }
+                    else
+                    {
+                        context.AddAliasBinding(valueResult.Alias, deferredAlias => dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, deferredAlias));
+                    }
+                }
+                else
+                {
+                    dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, valueResult.Value);
+                }
 			}
 
 			public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
-				var dictionary = (IDictionary) thisObject;
 				var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 
-				var keys = dictionary.Keys;
+			    var keyValues = dictionaryDescriptor.GetEnumerator(thisObject).ToList();
+
 				if (context.Settings.SortKeyForMapping)
 				{
-					var sortedKeys = keys.Cast<object>().ToList();
-					sortedKeys.Sort((left, right) =>
+                    keyValues.Sort((left, right) =>
 						{
-							if (left is IComparable && right is IComparable)
+							if (left.Key is IComparable && right.Key is IComparable)
 							{
-								return ((IComparable) left).CompareTo(right);
+								return ((IComparable) left.Key).CompareTo(right.Key);
 							}
 							return 0;
 						});
-					keys = sortedKeys;
 				}
 
 				var keyType = dictionaryDescriptor.KeyType;
 				var valueType = dictionaryDescriptor.ValueType;
-				foreach (var key in keys)
+				foreach (var keyValue in keyValues)
 				{
-					context.WriteYaml(key, keyType);
-					context.WriteYaml(dictionary[key], valueType);
+                    context.WriteYaml(keyValue.Key, keyType);
+					context.WriteYaml(keyValue.Value, valueType);
 				}
 			}
 		}

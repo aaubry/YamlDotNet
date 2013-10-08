@@ -26,15 +26,13 @@ namespace YamlDotNet.Serialization.Serializers
 			return dictionaryDescriptor.IsPureCollection || dictionaryDescriptor.HasOnlyCapacity;
 		}
 
-		protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			var collection = (IList)thisObject;
 			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 
 			if (CheckIsSequence(collectionDescriptor))
 			{
-				var value = context.ReadYaml(null, collectionDescriptor.ElementType);
-				collection.Add(value);
+			    pureCollectionSerializer.ReadItem(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -86,13 +84,22 @@ namespace YamlDotNet.Serialization.Serializers
 
 		internal class PureCollectionSerializer : ObjectSerializer
 		{
-			protected override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+			public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
 				var list = (IList)thisObject;
 				var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 
-				var value = context.ReadYaml(null, collectionDescriptor.ElementType);
-				list.Add(value);
+				var valueResult = context.ReadYaml(null, collectionDescriptor.ElementType);
+
+                // Handle aliasing
+                if (valueResult.IsAlias)
+                {
+                    context.AddAliasBinding(valueResult.Alias, deferredValue => list.Add(deferredValue));
+                }
+                else
+                {
+                    list.Add(valueResult.Value);
+                }
 			}
 
 			protected override SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)

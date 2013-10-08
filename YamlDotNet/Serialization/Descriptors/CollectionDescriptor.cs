@@ -10,8 +10,6 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class CollectionDescriptor : ObjectDescriptor
 	{
-		private static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CollectionDescriptor" /> class.
 		/// </summary>
@@ -26,15 +24,18 @@ namespace YamlDotNet.Serialization.Descriptors
 				throw new ArgumentException("Expecting a type inheriting from System.Collections.ICollection", "type");
 
 			// Gets the element type
-			var collectionType = type.GetInterface(typeof(ICollection<>));
+			var collectionType = type.GetInterface(typeof(IEnumerable<>));
 			ElementType = (collectionType != null) ? collectionType.GetGenericArguments()[0] : typeof(object);
 
 			// Finds if it is a pure list
-			var capacityMember = this["Capacity"] as PropertyDescriptor;
-			HasOnlyCapacity = Count == 1 && capacityMember != null &&
-			              (capacityMember.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace);
+		    if (Contains("Capacity"))
+		    {
+		        var capacityMember = this["Capacity"] as PropertyDescriptor;
+		        HasOnlyCapacity = Count == 1 && capacityMember != null &&
+		                          (capacityMember.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace);
+		    }
 
-			IsPureCollection = Count == 0;
+		    IsPureCollection = Count == 0;
 		}
 
 		/// <summary>
@@ -62,18 +63,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// <returns><c>true</c> if the specified type is collection; otherwise, <c>false</c>.</returns>
 		public static bool IsCollection(Type type)
 		{
-			return !type.IsArray && typeof (ICollection).IsAssignableFrom(type);
-		}
-
-		protected override bool PrepareMember(MemberDescriptorBase member)
-		{
-			// Remove SyncRoot from members as well
-			if (member is PropertyDescriptor && member.Name == "SyncRoot" &&
-				(member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace))
-			{
-				return false;
-			}
-			return base.PrepareMember(member);
+			return !type.IsArray && (typeof (ICollection).IsAssignableFrom(type) || type.HasInterface(typeof(ICollection<>)) || typeof(IEnumerable).IsAssignableFrom(type));
 		}
 	}
 }

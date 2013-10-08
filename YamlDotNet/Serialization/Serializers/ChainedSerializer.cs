@@ -12,7 +12,7 @@ namespace YamlDotNet.Serialization.Serializers
 			this.next = next;
 		}
 
-		public virtual object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public virtual ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			return next.ReadYaml(context, value, typeDescriptor);
 		}

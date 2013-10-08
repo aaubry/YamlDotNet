@@ -45,22 +45,9 @@ namespace YamlDotNet.Serialization.Descriptors
 		/// Creates the equivalent of list type for this array.
 		/// </summary>
 		/// <returns>A list type with same element type than this array.</returns>
-		public IList CreateListType()
+		public Array CreateArray(int dimension)
 		{
-			return (IList)Activator.CreateInstance(listType);
-		}
-
-		public Array ToArray(IList list)
-		{
-			if (list == null) throw new ArgumentNullException("list");
-			return (Array) toArrayMethod.Invoke(list, null);
-		}
-
-		protected override bool PrepareMember(MemberDescriptorBase member)
-		{
-			if (member.Name == "SyncRoot") return false;
-
-			return base.PrepareMember(member);
+		    return Array.CreateInstance(ElementType, dimension);
 		}
 	}
 }
