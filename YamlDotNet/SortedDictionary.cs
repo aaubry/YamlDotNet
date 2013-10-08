@@ -12,7 +12,7 @@ namespace YamlDotNet
 
 		private ValueCollection values;
 
-		private TreeSet<KeyValuePair<TKey, TValue>> _set;
+		private readonly TreeSet<KeyValuePair<TKey, TValue>> _set;
 
 		public SortedDictionary()
 			: this((IComparer<TKey>) null)
@@ -390,7 +390,7 @@ namespace YamlDotNet
 		public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
 		{
 			private TreeSet<KeyValuePair<TKey, TValue>>.Enumerator treeEnum;
-			private int getEnumeratorRetType; // What should Enumerator.Current return?
+			private readonly int getEnumeratorRetType; // What should Enumerator.Current return?
 
 			internal const int KeyValuePair = 1;
 			internal const int DictEntry = 2;
@@ -495,7 +495,7 @@ namespace YamlDotNet
 
 		public sealed class KeyCollection : ICollection<TKey>, ICollection
 		{
-			private SortedDictionary<TKey, TValue> dictionary;
+			private readonly SortedDictionary<TKey, TValue> dictionary;
 
 			public KeyCollection(SortedDictionary<TKey, TValue> dictionary)
 			{
@@ -628,7 +628,6 @@ namespace YamlDotNet
 			bool ICollection<TKey>.Remove(TKey item)
 			{
 				throw new NotSupportedException();
-				return false;
 			}
 
 			bool ICollection.IsSynchronized
@@ -688,7 +687,7 @@ namespace YamlDotNet
 
 		public sealed class ValueCollection : ICollection<TValue>, ICollection
 		{
-			private SortedDictionary<TKey, TValue> dictionary;
+			private readonly SortedDictionary<TKey, TValue> dictionary;
 
 			public ValueCollection(SortedDictionary<TKey, TValue> dictionary)
 			{
@@ -821,7 +820,6 @@ namespace YamlDotNet
 			bool ICollection<TValue>.Remove(TValue item)
 			{
 				throw new NotSupportedException();
-				return false;
 			}
 
 			bool ICollection.IsSynchronized
@@ -931,7 +929,7 @@ namespace YamlDotNet
 	internal class TreeSet<T> : ICollection<T>, ICollection
 	{
 		private Node root;
-		private IComparer<T> comparer;
+		private readonly IComparer<T> comparer;
 		private int count;
 		private int version;
 		private Object _syncRoot;
@@ -943,14 +941,7 @@ namespace YamlDotNet
 
 		public TreeSet(IComparer<T> comparer)
 		{
-			if (comparer == null)
-			{
-				this.comparer = Comparer<T>.Default;
-			}
-			else
-			{
-				this.comparer = comparer;
-			}
+			this.comparer = comparer ?? Comparer<T>.Default;
 		}
 
 		public int Count
@@ -1637,9 +1628,9 @@ namespace YamlDotNet
 
 		public struct Enumerator : IEnumerator<T>, IEnumerator
 		{
-			private TreeSet<T> tree;
-			private int version;
-			private Stack<TreeSet<T>.Node> stack;
+			private readonly TreeSet<T> tree;
+			private readonly int version;
+			private readonly Stack<TreeSet<T>.Node> stack;
 			private TreeSet<T>.Node current;
 			private static TreeSet<T>.Node dummyNode = new TreeSet<T>.Node(default(T));
 

@@ -11,13 +11,12 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class DictionaryDescriptor : ObjectDescriptor
 	{
-		private static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
 		private static readonly List<string> ListOfMembersToRemove = new List<string> {"Comparer", "Keys", "Values"};
 
 		private readonly Type keyType;
 		private readonly Type valueType;
-		private MethodInfo getEnumeratorGeneric;
-		private MethodInfo addMethod;
+		private readonly MethodInfo getEnumeratorGeneric;
+		private readonly MethodInfo addMethod;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DictionaryDescriptor" /> class.

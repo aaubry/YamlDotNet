@@ -173,8 +173,7 @@ namespace YamlDotNet.Serialization
 		/// <summary>
 		/// Register a mapping between a tag and a type.
 		/// </summary>
-		/// <param name="tagName">Name of the tag.</param>
-		/// <param name="tagType">Type of the tag.</param>
+		/// <param name="assembly">The assembly.</param>
 		public void RegisterAssembly(Assembly assembly)
 		{
 			tagTypeRegistry.RegisterAssembly(assembly);

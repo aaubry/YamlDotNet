@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		private readonly Type type;
 		private readonly IMemberDescriptor[] members;
 		private readonly Dictionary<string, IMemberDescriptor> mapMembers;
-		private bool emitDefaultValues;
+		private readonly bool emitDefaultValues;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ObjectDescriptor" /> class.

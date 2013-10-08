@@ -30,7 +30,6 @@ namespace YamlDotNet.Serialization.Serializers
 					default:
 						// TODO check this
 						throw new YamlException(scalar.Start, scalar.End, "Unexpected null scalar value");
-						break;
 				}
 			}
 

@@ -138,7 +138,7 @@ namespace YamlDotNet.Serialization
 				ObjectSerializer = CreateProcessor(settings),
 			};
 
-			context.Writer = CreateEmitter(emitter, context); ;
+			context.Writer = CreateEmitter(emitter, context);
 
 			// Serialize the document
 			context.Writer.StreamStart();
