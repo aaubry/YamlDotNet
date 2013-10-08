@@ -13,7 +13,12 @@ namespace YamlDotNet.Serialization.Serializers
 		{
 		}
 
-		public override object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+        public bool TryGetAliasValue(string alias, out object value)
+        {
+            return AliasToObject.TryGetValue(alias, out value);
+        }
+
+		public override ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 
@@ -23,10 +28,11 @@ namespace YamlDotNet.Serialization.Serializers
 			{
 				if (!AliasToObject.TryGetValue(alias.Value, out value))
 				{
-					throw new AnchorNotFoundException(alias.Start, alias.End, "Alias [{0}] not found".DoFormat(alias.Value));
+                    // Late binding needs to be handled by caller
+				    return ValueResult.NewAlias(alias);
 				}
 
-				return value;
+				return new ValueResult(value);
 			}
 
 			// Test if current node has an anchor &oxxx
@@ -38,15 +44,15 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 
 			// Deserialize the current node
-			value = base.ReadYaml(context, value, typeDescriptor);
+			var valueResult = base.ReadYaml(context, value, typeDescriptor);
 
 			// Store Anchor (&oxxx) and override any defined anchor 
 			if (anchor != null)
 			{
-				AliasToObject[anchor] = value;
+                AliasToObject[anchor] = valueResult.Value;
 			}
 
-			return value;
+			return valueResult;
 		}
 
 		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)

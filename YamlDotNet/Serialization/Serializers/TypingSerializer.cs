@@ -1,4 +1,6 @@
-﻿using YamlDotNet.Events;
+﻿using System;
+using System.Collections.Generic;
+using YamlDotNet.Events;
 
 namespace YamlDotNet.Serialization.Serializers
 {
@@ -8,7 +10,7 @@ namespace YamlDotNet.Serialization.Serializers
         {
         }
 
-        public override object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+        public override ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
         {
             var parsingEvent = context.Reader.Peek<ParsingEvent>();
             // Can this happen here?
@@ -24,13 +26,18 @@ namespace YamlDotNet.Serialization.Serializers
                 throw new YamlException(parsingEvent.Start, parsingEvent.End, "Unexpected parsing event found [{0}]. Expecting Scalar, Mapping or Sequence".DoFormat(parsingEvent));
             }
 
-            var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
-
-            // If expected type is object, set it to null, else use expected
-            var type = expectedType == typeof(object) ? null : expectedType;
+            var type = typeDescriptor != null ? typeDescriptor.Type : null; ;
 
             // Tries to get a Type from the TagTypes
-            var typeFromTag = context.TypeFromTag(node.Tag);
+            Type typeFromTag = null;
+            if (!string.IsNullOrEmpty(node.Tag))
+            {
+                typeFromTag = context.TypeFromTag(node.Tag);
+                if (typeFromTag == null)
+                {
+                    throw new YamlException(parsingEvent.Start, parsingEvent.End, "Unable to resolve tag [{0}] to type from tag resolution or registered assemblies".DoFormat(node.Tag));
+                }
+            }
 
             // Use typeFromTag when type are different
             if (typeFromTag != null && type != typeFromTag && typeFromTag.IsClass && typeFromTag != typeof(string))
@@ -43,8 +50,25 @@ namespace YamlDotNet.Serialization.Serializers
 			// Handle explicit null scalar
 			if (node is Scalar && context.Schema.TryParse((Scalar) node, typeof (object), out value))
 			{
-				return value;
+                // The value was pick up, go to next
+			    context.Reader.Parser.MoveNext();
+				return new ValueResult(value);
 			}
+
+            // If type and value are nulls
+            if (type == null && value == null)
+            {
+                // If the node is a sequence start, fallback to a IList<object>
+                if (node is SequenceStart)
+                {
+                    type = typeof (IList<object>);
+                }
+                else if (node is MappingStart)
+                {
+                    // If the node is a mapping start, fallback to a IDictionary<object, object>
+                    type = typeof(IDictionary<object, object>);
+                }
+            }
 
             if (type == null && value == null)
             {

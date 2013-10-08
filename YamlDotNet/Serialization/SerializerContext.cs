@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using YamlDotNet.Events;
 using YamlDotNet.Schemas;
 using YamlDotNet.Serialization.Descriptors;
+using YamlDotNet.Serialization.Serializers;
 
 namespace YamlDotNet.Serialization
 {
@@ -15,6 +16,7 @@ namespace YamlDotNet.Serialization
         private readonly SerializerSettings settings;
 	    private readonly ITagTypeRegistry tagTypeRegistry;
 		private readonly ITypeDescriptorFactory typeDescriptorFactory;
+        private readonly List<AnchorLateBinding> anchorLateBindings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializerContext"/> class.
@@ -28,6 +30,7 @@ namespace YamlDotNet.Serialization
 	        ObjectFactory = settings.ObjectFactory;
 	        Schema = Settings.Schema;
 	        typeDescriptorFactory = new TypeDescriptorFactory(Settings.Attributes, Settings.EmitDefaultValues);
+            anchorLateBindings = new List<AnchorLateBinding>();
         }
 
 		/// <summary>
@@ -66,13 +69,17 @@ namespace YamlDotNet.Serialization
         /// <value>The reader.</value>
         public EventReader Reader { get; internal set; }
 
+        internal AnchorSerializer ObjectSerializer { get; set; }
+
+
+
         /// <summary>
         /// The default function to read an object from the current Yaml stream.
         /// </summary>
         /// <param name="value">The value of the receiving object, may be null.</param>
         /// <param name="expectedType">The expected type.</param>
         /// <returns>System.Object.</returns>
-	    public object ReadYaml(object value, Type expectedType)
+	    public ValueResult ReadYaml(object value, Type expectedType)
         {
 	        var node = Reader.Parser.Current;
 	        try
@@ -124,7 +131,7 @@ namespace YamlDotNet.Serialization
 		/// <returns>Type.</returns>
 		public Type TypeFromTag(string tagName)
 		{
-			return tagTypeRegistry.TypeFromTag(Settings.Schema, tagName);
+			return tagTypeRegistry.TypeFromTag(tagName);
 		}
 		
 		/// <summary>
@@ -134,7 +141,7 @@ namespace YamlDotNet.Serialization
         /// <returns>The associated tag</returns>
 	    public string TagFromType(Type type)
         {
-	        return tagTypeRegistry.TagFromType(Settings.Schema, type);
+	        return tagTypeRegistry.TagFromType(type);
         }
 
 		/// <summary>
@@ -149,9 +156,54 @@ namespace YamlDotNet.Serialization
 			return Settings.Schema.TryParse(scalar, true, out defaultTag, out value);
 		}
 
-		internal IYamlSerializable ObjectSerializer { get; set; }
 
-		internal string GetAnchor()
+        private struct AnchorLateBinding
+        {
+            public AnchorLateBinding(AnchorAlias anchorAlias, Action<object> setter)
+            {
+                AnchorAlias = anchorAlias;
+                Setter = setter;
+            }
+
+            public readonly AnchorAlias AnchorAlias;
+
+            public readonly Action<object> Setter;
+        }
+
+        /// <summary>
+        /// Gets the alias value.
+        /// </summary>
+        /// <param name="alias">The alias.</param>
+        /// <returns>System.Object.</returns>
+        /// <exception cref="System.ArgumentNullException">alias</exception>
+        /// <exception cref="AnchorNotFoundException">Alias [{0}] not found.DoFormat(alias.Value)</exception>
+        public object GetAliasValue(AnchorAlias alias)
+        {
+            if (alias == null) throw new ArgumentNullException("alias");
+
+            object value;
+            if (!ObjectSerializer.TryGetAliasValue(alias.Value, out value))
+            {
+                throw new AnchorNotFoundException(alias.Value, alias.Start, alias.End, "Alias [{0}] not found".DoFormat(alias.Value));                
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Adds the late binding.
+        /// </summary>
+        /// <param name="alias">The alias.</param>
+        /// <param name="setter">The setter.</param>
+        /// <exception cref="System.ArgumentException">No alias found in the ValueResult;valueResult</exception>
+        public void AddAliasBinding(AnchorAlias alias, Action<object> setter)
+        {
+            if (alias == null) throw new ArgumentNullException("alias");
+            if (setter == null) throw new ArgumentNullException("setter");
+
+            anchorLateBindings.Add(new AnchorLateBinding(alias, setter));
+        }
+
+	    internal string GetAnchor()
 		{
 			return Anchors.Count > 0 ? Anchors.Pop() : null;
 		}
@@ -159,5 +211,15 @@ namespace YamlDotNet.Serialization
 		internal Stack<string> Anchors = new Stack<string>();
 
 		internal int AnchorCount;
+
+        internal void ResolveLateAliasBindings()
+        {
+            foreach (var lateBinding in anchorLateBindings)
+            {
+                var alias = lateBinding.AnchorAlias;
+                var value = GetAliasValue(alias);
+                lateBinding.Setter(value);
+            }
+        }
 	}
 }

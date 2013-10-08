@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using YamlDotNet.Events;
 using YamlDotNet.Schemas;
 
 namespace YamlDotNet.Serialization
@@ -12,15 +11,23 @@ namespace YamlDotNet.Serialization
 	/// </summary>
 	public class TagTypeRegistry : ITagTypeRegistry
 	{
+	    private readonly IYamlSchema schema;
 		private readonly Dictionary<string, Type> tagToType;
 		private readonly Dictionary<Type, string> typeToTag;
 		private readonly List<Assembly> lookupAssemblies;
 
+	    private static readonly List<Assembly> DefaultLookupAssemblies = new List<Assembly>()
+	        {
+	            typeof (int).Assembly,
+	        };
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TagTypeRegistry"/> class.
 		/// </summary>
-		public TagTypeRegistry()
+		public TagTypeRegistry(IYamlSchema schema)
 		{
+		    if (schema == null) throw new ArgumentNullException("schema");
+		    this.schema = schema;
 			tagToType = new Dictionary<string, Type>();
 			typeToTag = new Dictionary<Type, string>();
 			lookupAssemblies = new List<Assembly>();
@@ -31,29 +38,38 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <param name="tag">The tag.</param>
 		/// <param name="type">The type.</param>
-		public void AddTagMapping(string tag, Type type)
+		public virtual void AddTagMapping(string tag, Type type)
 		{
 			if (tag == null) throw new ArgumentNullException("tag");
 			if (type == null) throw new ArgumentNullException("type");
 
 			// Prefix all tags by !
 			tag = Uri.EscapeUriString(tag);
+            if (tag.StartsWith("tag:"))
+            {
+                // shorten tag
+                // TODO this is not really failsafe
+                var shortTag = "!!" + tag.Substring(tag.LastIndexOf(':') + 1);
+
+                // Auto register tag to schema
+                schema.RegisterTag(shortTag, tag);
+                tag = shortTag;
+            }
+
 			tag = tag.StartsWith("!") ? tag : "!" + tag;
 
 			tagToType[tag] = type;
 			typeToTag[type] = tag;
 
 			// Add automatically the assembly for lookup
-			if (!lookupAssemblies.Contains(type.Assembly))
+            if (!DefaultLookupAssemblies.Contains(type.Assembly) && !lookupAssemblies.Contains(type.Assembly))
 			{
 				lookupAssemblies.Add(type.Assembly);
 			}
 		}
 
-		public Type TypeFromTag(IYamlSchema schema, string tag)
+		public virtual Type TypeFromTag(string tag)
 		{
-			if (schema == null) throw new ArgumentNullException("schema");
-
 			if (tag == null)
 			{
 				return null;
@@ -106,9 +122,12 @@ namespace YamlDotNet.Serialization
 			return type;
 		}
 
-		public string TagFromType(IYamlSchema schema, Type type)
+		public virtual string TagFromType(Type type)
 		{
-			if (schema == null) throw new ArgumentNullException("schema");
+            if (type == null)
+            {
+                return "!!null";
+            }
 
 			string tagName;
             // First try to resolve a tag from registered tag

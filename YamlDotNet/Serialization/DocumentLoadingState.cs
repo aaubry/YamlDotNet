@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization
 			}
 			else if (throwException)
 			{
-				throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
+				throw new AnchorNotFoundException(anchor, start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
 			}
 			else
 			{

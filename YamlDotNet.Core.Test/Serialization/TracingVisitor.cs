@@ -20,12 +20,9 @@
 //  SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Serialization.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class TracingVisitor : YamlVisitor
 	{

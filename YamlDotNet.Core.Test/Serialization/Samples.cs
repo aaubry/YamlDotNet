@@ -1,11 +1,9 @@
 using System;
-using System.Text;
 using System.IO;
-using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Serialization.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class Program
 	{

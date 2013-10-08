@@ -60,5 +60,17 @@ namespace YamlDotNet.Schemas
 		/// <param name="tag">The tag in short form.</param>
 		/// <returns>The type for a default tag or null if no default tag associated</returns>
 		Type GetTypeForDefaultTag(string tag);
+
+	    /// <summary>
+	    /// Registers a long/short tag association.
+	    /// </summary>
+	    /// <param name="shortTag">The short tag.</param>
+	    /// <param name="longTag">The long tag.</param>
+	    /// <exception cref="System.ArgumentNullException">
+	    /// shortTag
+	    /// or
+	    /// shortTag
+	    /// </exception>
+	    void RegisterTag(string shortTag, string longTag);
 	}
 }

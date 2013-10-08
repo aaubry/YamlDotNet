@@ -1,39 +1,38 @@
 ﻿using System.IO;
 using Xunit;
-using YamlDotNet.Test;
 using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Serialization.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class ExceptionWithNestedSerialization
 	{
 		[Fact]
 		public void NestedDocumentShouldDeserializeProperly()
 		{
-			var s = new Serializer(SerializationOptions.EmitDefaults);
-			var ds = new Deserializer();
+			var serializer = new Serializer(new SerializerSettings() { EmitDefaultValues =  true});
 
 			// serialize AMessage
 			var tw = new StringWriter();
-			s.Serialize(tw, new AMessage { Payload = new PayloadA { X = 5, Y = 6 } });
+			serializer.Serialize(tw, new AMessage { Payload = new PayloadA { X = 5, Y = 6 } });
 			Dump.WriteLine(tw);
 
 			// stick serialized AMessage in envelope and serialize it
 			var e = new Env { Type = "some-type", Payload = tw.ToString() };
 
 			tw = new StringWriter();
-			s.Serialize(tw, e);
+			serializer.Serialize(tw, e);
 			Dump.WriteLine(tw);
 
 			Dump.WriteLine("${0}$", e.Payload);
 
+		    var deserializer = new Serializer(new SerializerSettings());
 			// deserialize envelope
-			var e2 = ds.Deserialize<Env>(new StringReader(tw.ToString()));
+			var e2 = deserializer.Deserialize<Env>(new StringReader(tw.ToString()));
 
 			Dump.WriteLine("${0}$", e2.Payload);
 
 			// deserialize payload - fails if EmitDefaults is set
-			ds.Deserialize<AMessage>(new StringReader(e2.Payload));
+            deserializer.Deserialize<AMessage>(new StringReader(e2.Payload));
 
 			// Todo: proper assert
 		}

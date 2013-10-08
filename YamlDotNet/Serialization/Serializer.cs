@@ -38,6 +38,7 @@ namespace YamlDotNet.Serialization
 				new DictionarySerializer(),
 				new CollectionSerializer(),
 				new ArraySerializer(),
+                new NullableSerializer(), 
 				new ObjectSerializer(),
 			};
 
@@ -195,7 +196,7 @@ namespace YamlDotNet.Serialization
 		public object Deserialize(TextReader reader, Type expectedType)
 	    {
 		    if (reader == null) throw new ArgumentNullException("reader");
-		    return Deserialize(new EventReader(new Parser(reader)), null);
+		    return Deserialize(new EventReader(new Parser(reader)), expectedType);
 	    }
 
 		/// <summary>
@@ -271,7 +272,7 @@ namespace YamlDotNet.Serialization
 			var hasStreamStart = reader.Allow<StreamStart>() != null;
 			var hasDocumentStart = reader.Allow<DocumentStart>() != null;
 
-			object result = null;
+		    object result = null;
 			if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
 			{
 				var context = new SerializerContext(this)
@@ -279,7 +280,9 @@ namespace YamlDotNet.Serialization
 						Reader = reader,
 						ObjectSerializer = CreateProcessor(settings),
 					};
-				result = context.ReadYaml(null, expectedType);
+				var valueResult = context.ReadYaml(null, expectedType);
+                context.ResolveLateAliasBindings();
+			    result = valueResult.Value;
 			}
 
 			if (hasDocumentStart)
@@ -295,7 +298,7 @@ namespace YamlDotNet.Serialization
 			return result;
 		}
 
-		private IYamlSerializable CreateProcessor(SerializerSettings settings)
+		private AnchorSerializer CreateProcessor(SerializerSettings settings)
 		{
 			var routintSerializer = new RoutingSerializer();
 

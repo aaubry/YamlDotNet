@@ -5,19 +5,17 @@ using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
-	internal class PrimitiveSerializer : IYamlSerializable, IYamlSerializableFactory
+    internal class PrimitiveSerializer : ScalarSerializerBase, IYamlSerializableFactory
 	{
 		public IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
 		{
 			return typeDescriptor is PrimitiveDescriptor ? this : null;
 		}
 
-		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+        public override object ConvertFrom(SerializerContext context, object value, Scalar scalar, ITypeDescriptor typeDescriptor)
 		{
 			var primitiveType = (PrimitiveDescriptor) typeDescriptor;
 			var type = primitiveType.Type;
-
-			var scalar = context.Reader.Expect<Scalar>();
 			var text = scalar.Value;
 
 			// Return null if expected type is an object and scalar is null
@@ -89,20 +87,19 @@ namespace YamlDotNet.Serialization.Serializers
 					return decimal.Parse(text, CultureInfo.InvariantCulture);
 			}
 
+            // If we are expecting a type object, return directly the string
+            if (type == typeof (object))
+            {
+                return text;
+            }
+
 			throw new YamlException(scalar.Start, scalar.End, "Unable to decode scalar [{0}] not supported by current schema".DoFormat(scalar));
 		}
 
-		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
-		{
+        public override void ConvertTo(SerializerContext context, object value, ScalarEventInfo scalar, ITypeDescriptor typeDescriptor)
+        {
 			var primitiveType = (PrimitiveDescriptor)typeDescriptor;
 			var type = primitiveType.Type;
-
-			var scalar = new ScalarEventInfo(value, type)
-				{
-					IsPlainImplicit = true, 
-					Style = ScalarStyle.Plain,
-					Anchor = context.GetAnchor()
-				};
 
 			// Return null if expected type is an object and scalar is null
 			if (value == null)
@@ -188,8 +185,6 @@ namespace YamlDotNet.Serialization.Serializers
 
 				scalar.RenderedValue = text;
 			}
-
-			context.Writer.Emit(scalar);
 		}
 	}
 }

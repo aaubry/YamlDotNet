@@ -22,6 +22,7 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -34,6 +35,8 @@ namespace YamlDotNet.Serialization.Descriptors
 	/// </summary>
 	public class ObjectDescriptor : ITypeDescriptor
 	{
+        protected static readonly string SystemCollectionsNamespace = typeof(IList).Namespace;
+
 		private readonly static object[] EmptyObjectArray = new object[0];
 		private readonly Type type;
 		private readonly IMemberDescriptor[] members;
@@ -145,6 +148,13 @@ namespace YamlDotNet.Serialization.Descriptors
 		{
 			var memberType = member.Type;
 
+            // Remove all SyncRoot from members
+            if (member is PropertyDescriptor && member.Name == "SyncRoot" &&
+                (member.DeclaringType.Namespace ?? string.Empty).StartsWith(SystemCollectionsNamespace))
+            {
+                return false;
+            }
+
 			// If the member has a set, this is a conventional assign method
 			if (member.HasSet)
 			{
@@ -153,9 +163,8 @@ namespace YamlDotNet.Serialization.Descriptors
 			else
 			{
 				// Else we cannot only assign its content if it is a class
-				member.SerializeMemberMode = memberType.IsClass || memberType.IsInterface ? SerializeMemberMode.Content : SerializeMemberMode.Never;
+				member.SerializeMemberMode = memberType.IsClass || memberType.IsInterface || type.IsAnonymous() ? SerializeMemberMode.Content : SerializeMemberMode.Never;
 			}
-
 
 			// Member is not displayed if there is a YamlIgnore attribute on it
 			if (AttributeRegistry.GetAttribute<YamlIgnoreAttribute>(member.MemberInfo, false) != null)
@@ -216,7 +225,7 @@ namespace YamlDotNet.Serialization.Descriptors
 				member.Name = memberAttribute.Name;
 			}
 
-			return true;
+            return true;
 		}
 	}
 }

@@ -24,35 +24,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
-using YamlDotNet;
 using YamlDotNet.Events;
-using YamlDotNet.Test;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.Serializers;
 
-namespace YamlDotNet.Serialization.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class SerializationTests : YamlTest
 	{
 		[Fact]
 		public void Roundtrip()
 		{
-			var buffer = new StringWriter();
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
+		    var settings = new SerializerSettings();
+            settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+			var serializer = new Serializer(settings);
 
-			var original = new X();
+            var buffer = new StringWriter();
+            var original = new X();
 			serializer.Serialize(buffer, original);
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Serializer();
-			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
+		    var bufferText = buffer.ToString();
+			var copy = serializer.Deserialize<X>(bufferText);
 
 			foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 			{
@@ -68,16 +67,18 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void RoundtripWithDefaults()
 		{
-			var buffer = new StringWriter();
-			var serializer = new Serializer(SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
+		    var settings = new SerializerSettings() {EmitDefaultValues = true};
+            settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+            var serializer = new Serializer(settings);
 
-			var original = new X();
+            var buffer = new StringWriter();
+            var original = new X();
 			serializer.Serialize(buffer, original);
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Serializer();
-			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
+            var bufferText = buffer.ToString();
+            var copy = serializer.Deserialize<X>(bufferText);
 
 			foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
 			{
@@ -93,7 +94,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void CircularReference()
 		{
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
+			var serializer = new Serializer();
 
 			var buffer = new StringWriter();
 			var original = new Y();
@@ -125,6 +126,9 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeExplicitType()
 		{
+		    var settings = new SerializerSettings();
+            settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+
 			var serializer = new Serializer();
 			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), typeof(object));
 
@@ -204,13 +208,16 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeEnumerable()
 		{
-			var serializer = new Serializer();
+		    var settings = new SerializerSettings();
+            settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+
+			var serializer = new Serializer(settings);
 			var buffer = new StringWriter();
 			var z = new[] { new Z { aaa = "Yo" }};
 			serializer.Serialize(buffer, z);
 
-			var deserializer = new Serializer();
-			var result = (IEnumerable<Z>)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(IEnumerable<Z>));
+		    var bufferAsText = buffer.ToString();
+			var result = (IEnumerable<Z>)serializer.Deserialize(bufferAsText, typeof(IEnumerable<Z>));
 			Assert.Equal(1, result.Count());
 			Assert.Equal("Yo", result.First().aaa);
 		}
@@ -218,8 +225,7 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void RoundtripList()
 		{
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
 			var buffer = new StringWriter();
 			var original = new List<int> { 2, 4, 6 };
@@ -227,7 +233,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var copy = (List<int>) deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(List<int>));
+			var copy = (List<int>) serializer.Deserialize(new StringReader(buffer.ToString()), typeof(List<int>));
 
 			Assert.Equal(original.Count, copy.Count);
 
@@ -254,15 +260,17 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void Enums()
 		{
-			var serializer = new Serializer();
-			var deserializer = new Serializer();
+		    var settings = new SerializerSettings();
+            settings.TagTypes.LookupAssemblies.Add(typeof(StringFormatFlags).Assembly);
+			var serializer = new Serializer(settings);
 
 			var flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
 
 			var buffer = new StringWriter();
 			serializer.Serialize(buffer, flags);
 
-			var deserialized = (StringFormatFlags)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(StringFormatFlags));
+		    var bufferAsText = buffer.ToString();
+			var deserialized = (StringFormatFlags)serializer.Deserialize(bufferAsText, typeof(StringFormatFlags));
 
 			Assert.Equal(flags, deserialized);
 		}
@@ -270,9 +278,10 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void CustomTags()
 		{
-			var deserializer = new Serializer();
-			deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
-			var result = deserializer.Deserialize(YamlFile("tags.yaml"));
+		    var settings = new SerializerSettings();
+            settings.TagTypes.AddTagMapping("tag:yaml.org,2002:point", typeof(Point));
+            var serializer = new Serializer(settings);
+			var result = serializer.Deserialize(YamlFile("tags.yaml"));
 
 			Assert.Equal(typeof(Point), result.GetType());
 
@@ -284,140 +293,14 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void DeserializeConvertible()
 		{
-			var serializer = new Serializer();
+		    var settings = new SerializerSettings();
+            settings.TagTypes.LookupAssemblies.Add(typeof(SerializationTests).Assembly);
+
+			var serializer = new Serializer(settings);
 			var result = serializer.Deserialize(YamlFile("convertible.yaml"), typeof(Z));
 
 			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
 			Assert.Equal("[hello, world]", ((Z)result).aaa);
-		}
-
-		// Todo: these two classes aren't used in any tests
-		public class Converter : System.ComponentModel.TypeConverter
-		{
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-			{
-				return sourceType == typeof(string);
-			}
-
-			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-			{
-				return false;
-			}
-
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-			{
-				var parts = ((string)value).Split(' ');
-				return new Convertible
-				{
-					Left = parts[0],
-					Right = parts[1]
-				};
-			}
-		}
-
-		[TypeConverter(typeof(Converter))]
-		public class Convertible : IConvertible
-		{
-			public string Left
-			{
-				get;
-				set;
-			}
-
-			public string Right
-			{
-				get;
-				set;
-			}
-
-			public string ToString(IFormatProvider provider) {
-				Assert.Equal(CultureInfo.InvariantCulture, provider);
-				return string.Format(provider, "[{0}, {1}]", Left, Right);
-			}
-
-			public object ToType(Type conversionType, IFormatProvider provider) {
-				Assert.Equal(typeof(string), conversionType);
-				return ToString(provider);
-			}
-
-			#region not implemented IConvertible Members
-
-			public TypeCode GetTypeCode()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool ToBoolean(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public byte ToByte(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public char ToChar(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public DateTime ToDateTime(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public decimal ToDecimal(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public double ToDouble(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public short ToInt16(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public int ToInt32(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public long ToInt64(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public sbyte ToSByte(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public float ToSingle(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public ushort ToUInt16(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public uint ToUInt32(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			public ulong ToUInt64(IFormatProvider provider)
-			{
-				throw new NotImplementedException();
-			}
-
-			#endregion
 		}
 
 		[Fact]
@@ -425,16 +308,15 @@ namespace YamlDotNet.Serialization.Test
 		{
 			var buffer = new StringWriter();
 			var x = new SomeCustomType("Yo");
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
-			serializer.RegisterTypeConverter(new CustomTypeConverter());
+		    var settings = new SerializerSettings();
+            settings.AddSerializerFactory(new CustomTypeConverter());
+            var serializer = new Serializer(settings);
 			serializer.Serialize(buffer, x);
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Serializer();
-			deserializer.RegisterTypeConverter(new CustomTypeConverter());
-
-			var copy = deserializer.Deserialize<SomeCustomType>(new StringReader(buffer.ToString()));
+		    var bufferText = buffer.ToString();
+			var copy = serializer.Deserialize<SomeCustomType>(bufferText);
 			Assert.Equal("Yo", copy.Value);
 		}
 
@@ -444,20 +326,22 @@ namespace YamlDotNet.Serialization.Test
 			public string Value;
 		}
 
-		public class CustomTypeConverter : IYamlTypeConverter {
-			public bool Accepts(Type type) {
-				return type == typeof(SomeCustomType);
-			}
+		public class CustomTypeConverter : ScalarSerializerBase, IYamlSerializableFactory {
+            public IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
+            {
+                return typeDescriptor.Type == typeof (SomeCustomType) ? this : null;
+            }
 
-			public object ReadYaml(IParser parser, Type type) {
-				var value = ((Scalar)parser.Current).Value;
-				parser.MoveNext();
-				return new SomeCustomType(value);
-			}
+		    public override object ConvertFrom(SerializerContext context, object value, Scalar fromScalar, ITypeDescriptor typeDescriptor)
+		    {
+		        return new SomeCustomType(fromScalar.Value);
+		    }
 
-			public void WriteYaml(IEmitter emitter, object value, Type type) {
-				emitter.Emit(new Scalar(((SomeCustomType)value).Value));
-			}
+		    public override void ConvertTo(SerializerContext context, object value, ScalarEventInfo toScalar, ITypeDescriptor typeDescriptor)
+		    {
+		        toScalar.RenderedValue = ((SomeCustomType) value).Value;
+		    }
+
 		}
 
 		[Fact]
@@ -476,8 +360,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Serializer();
-			var deserialized = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
+			var deserialized = serializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
 
 			foreach (var pair in deserialized)
 			{
@@ -497,71 +380,70 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var deserializer = new Serializer();
-			var parsed = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
+		    var bufferText = buffer.ToString();
+			var parsed = serializer.Deserialize<Dictionary<string, string>>(bufferText);
 
 			Assert.NotNull(parsed);
 			Assert.Equal(1, parsed.Count);
-		}
+		    Assert.True(parsed.ContainsKey("Key"));
+            Assert.Equal(parsed["Key"], "3");
+        }
 
 		[Fact]
-		public void SerializationIncludesNullWhenAsked_BugFix()
+		public void SerializationIncludesDefaultValueWhenAsked()
 		{
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
-			
-			var buffer = new StringWriter();
-			var original = new { MyString = (string) null };
-			serializer.Serialize(buffer, original, original.GetType());
-
-			Dump.WriteLine(buffer);
-			Assert.True(buffer.ToString().Contains("MyString"));
-		}
-
-		[Fact]
-		public void SerializationIncludesNullWhenAsked()
-		{
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
+		    var settings = new SerializerSettings() {EmitDefaultValues = true};
+            settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+            var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
-			var original = new X { MyString = null };
+		    var original = new X();
 			serializer.Serialize(buffer, original, typeof(X));
 
 			Dump.WriteLine(buffer);
-			Assert.True(buffer.ToString().Contains("MyString"));
+		    var bufferText = buffer.ToString();
+			Assert.True(bufferText.Contains("MyString"));
 		}
 
 		[Fact]
-		public void SerializationDoesNotIncludeNullWhenNotAsked()
+		public void SerializationDoesNotIncludeDefaultValueWhenNotAsked()
 		{
-			var buffer = new StringWriter();
-			var original = new X { MyString = null };
-			var serializer = new Serializer();
+            var settings = new SerializerSettings() { EmitDefaultValues = false };
+            settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+            var serializer = new Serializer(settings);
+
+            var buffer = new StringWriter();
+            var original = new X();
 
 			serializer.Serialize(buffer, original, typeof(X));
 
 			Dump.WriteLine(buffer);
-			Assert.False(buffer.ToString().Contains("MyString"));
+            var bufferText = buffer.ToString();
+            Assert.False(bufferText.Contains("MyString"));
 		}
 
 		[Fact]
 		public void SerializationOfNullWorksInJson()
 		{
-			var serializer = new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible);
+            var settings = new SerializerSettings() { EmitDefaultValues = true, EmitJsonComptible = true };
+            settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+            var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
 			var original = new X { MyString = null };
 			serializer.Serialize(buffer, original, typeof(X));
 
 			Dump.WriteLine(buffer);
-			Assert.True(buffer.ToString().Contains("MyString"));
+            var bufferText = buffer.ToString();
+            Assert.True(bufferText.Contains("MyString"));
 		}
 
 		[Fact]
 		public void DeserializationOfNullWorksInJson()
 		{
-			var serializer = new Serializer(
-				SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip);
-			var deserializer = new Serializer();
+            var settings = new SerializerSettings() { EmitDefaultValues = true, EmitJsonComptible = true };
+            settings.TagTypes.LookupAssemblies.Add(typeof(X).Assembly);
+            var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
 			var original = new X { MyString = null };
@@ -569,7 +451,8 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 
-			var copy = (X) deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(X));
+		    var bufferText = buffer.ToString();
+			var copy = (X) serializer.Deserialize(bufferText, typeof(X));
 
 			Assert.Null(copy.MyString);
 		}
@@ -577,8 +460,9 @@ namespace YamlDotNet.Serialization.Test
 		[Fact]
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
-			var serializer = new Serializer();
-			var deserializer = new Serializer();
+		    var settings = new SerializerSettings();
+            settings.TagTypes.LookupAssemblies.Add(typeof(ContainsIgnore).Assembly);
+            var serializer = new Serializer(settings);
 
 			var buffer = new StringWriter();
 			var orig = new ContainsIgnore { IgnoreMe = "Some Text" };
@@ -586,7 +470,7 @@ namespace YamlDotNet.Serialization.Test
 
 			Dump.WriteLine(buffer);
 			
-			var copy = (ContainsIgnore) deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ContainsIgnore));
+			var copy = (ContainsIgnore) serializer.Deserialize(new StringReader(buffer.ToString()), typeof(ContainsIgnore));
 			
 			Assert.Null(copy.IgnoreMe);
 		}
@@ -615,52 +499,6 @@ namespace YamlDotNet.Serialization.Test
 			Assert.Same(result[1], result[2]);
 		}
 
-		[Fact]
-		public void SerializeUsingCamelCaseNaming()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
-
-			Assert.Contains("foo: bar", result);
-			Assert.Contains("moreFoo: More bar", result);
-			Assert.Contains("evenMoreFoo: Awesome", result);
-		}
-
-		[Fact]
-		public void SerializeUsingPascalCaseNaming()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
-
-			Dump.WriteLine(result);
-			Assert.Contains("Foo: bar", result);
-			Assert.Contains("MoreFoo: More bar", result);
-			Assert.Contains("EvenMoreFoo: Awesome", result);
-		}
-
-
-		[Fact]
-		public void SerializeUsingHyphenation()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
-
-			Assert.Contains("foo: bar", result);
-			Assert.Contains("more-foo: More bar", result);
-			Assert.Contains("even-more-foo: Awesome", result);
-		}
-
-		private string SerializeWithNaming<T>(T input, INamingConvention naming)
-		{
-			var serializer = new Serializer(namingConvention: naming);
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input, typeof(T));
-			return writer.ToString();
-		}
-
 		private T SerializeThenDeserialize<T>(T input)
 		{
 			var serializer = new Serializer();
@@ -670,69 +508,11 @@ namespace YamlDotNet.Serialization.Test
 			var serialized = writer.ToString();
 			Dump.WriteLine("serialized =\n-----\n{0}", serialized);
 
-			var deserializer = new Serializer();
-			return deserializer.Deserialize<T>(new StringReader(serialized));
+			return serializer.Deserialize<T>(new StringReader(serialized));
 		}
 
 		public class Z {
 			public string aaa { get; set; }
-		}
-
-		private void DeserializeUsingNamingConvention(string yaml, INamingConvention convention)
-		{
-			var serializer = new Serializer(namingConvention: convention);
-
-			var result = serializer.Deserialize<ConventionTest>(YamlText(yaml));
-
-			Assert.Equal("First", result.FirstTest);
-			Assert.Equal("Second", result.SecondTest);
-			Assert.Equal("Third", result.ThirdTest);
-			Assert.Equal("Fourth", result.AliasTest);
-		}
-
-		// Todo: are these needed? Naming convention classes are tested elsewhere
-		[Fact]
-		public void DeserializeUsingCamelCaseNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				firstTest: First
-				secondTest: Second
-				thirdTest: Third
-				fourthTest: Fourth
-			", new CamelCaseNamingConvention());
-		}
-
-		[Fact]
-		public void DeserializeUsingHyphenatedNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				first-test: First
-				second-test: Second
-				third-test: Third
-				fourthTest: Fourth
-			", new HyphenatedNamingConvention());
-		}
-
-		[Fact]
-		public void DeserializeUsingPascalCaseNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				FirstTest: First
-				SecondTest: Second
-				ThirdTest: Third
-				fourthTest: Fourth
-			", new PascalCaseNamingConvention());
-		}
-
-		[Fact]
-		public void DeserializeUsingUnderscoredNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				first_test: First
-				second_test: Second
-				third_test: Third
-				fourthTest: Fourth
-			", new UnderscoredNamingConvention());
 		}
 
 		[Fact]
@@ -745,20 +525,22 @@ namespace YamlDotNet.Serialization.Test
 			var serialized = writer.ToString();
 
 			// Ensure serialisation is correct
-			Assert.Equal("fourthTest: Fourth", serialized.TrimEnd('\r', '\n'));
+			Assert.True(serialized.Contains("fourthTest: Fourth"));
 
-			var deserializer = new Serializer();
-			var output = deserializer.Deserialize<ConventionTest>(new StringReader(serialized));
+			var output = serializer.Deserialize<ConventionTest>(serialized);
 
 			// Ensure round-trip retains value
 			Assert.Equal(input.AliasTest, output.AliasTest);
 		}
 
 		private class ConventionTest {
+            [DefaultValue(null)]
 			public string FirstTest { get; set; }
-			public string SecondTest { get; set; }
-			public string ThirdTest { get; set; }
-			[YamlAlias("fourthTest")]
+            [DefaultValue(null)]
+            public string SecondTest { get; set; }
+            [DefaultValue(null)]
+            public string ThirdTest { get; set; }
+			[YamlMember("fourthTest")]
 			public string AliasTest { get; set; }
 			[YamlIgnore]
 			public string fourthTest { get; set; }
@@ -782,7 +564,7 @@ namespace YamlDotNet.Serialization.Test
 		public void DefaultValueAttributeIsIgnoredWhenPresentWithEmitDefaults()
 		{
 			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
+			var serializer = new Serializer(new SerializerSettings() { EmitDefaultValues = true});
 			var writer = new StringWriter();
 
 			serializer.Serialize(writer, input);
@@ -818,8 +600,8 @@ namespace YamlDotNet.Serialization.Test
 		public void NullValuesInListsAreAlwaysEmittedWithoutEmitDefaults()
 		{
 			var input = new[] { "foo", null, "bar" };
-			var serializer = new Serializer();
-			var writer = new StringWriter();
+            var serializer = new Serializer(new SerializerSettings() { LimitFlowSequence = 0 });
+            var writer = new StringWriter();
 
 			serializer.Serialize(writer, input);
 			var serialized = writer.ToString();
@@ -832,7 +614,7 @@ namespace YamlDotNet.Serialization.Test
 		public void NullValuesInListsAreAlwaysEmittedWithEmitDefaults()
 		{
 			var input = new[] { "foo", null, "bar" };
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
+			var serializer = new Serializer(new SerializerSettings() { EmitDefaultValues = true, LimitFlowSequence = 0});
 			var writer = new StringWriter();
 
 			serializer.Serialize(writer, input);
@@ -899,8 +681,8 @@ Name: Charles
 		[Fact]
 		public void DeserializeEmptyDocument()
 		{
-			var deserializer = new Serializer();
-			var array = (int[])deserializer.Deserialize(new StringReader(""), typeof(int[]));
+			var serializer = new Serializer();
+			var array = (int[])serializer.Deserialize(new StringReader(""), typeof(int[]));
 			Assert.Null(array);
 		}
 
@@ -1027,9 +809,9 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInGenericLists()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
-			var result = deserializer.Deserialize<string[]>(YamlText(@"
+			var result = serializer.Deserialize<string[]>(YamlText(@"
 				- *forward
 				- &forward ForwardReference
 			"));
@@ -1042,9 +824,9 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInNonGenericLists()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
-			var result = deserializer.Deserialize<ArrayList>(YamlText(@"
+			var result = serializer.Deserialize<ArrayList>(YamlText(@"
 				- *forward
 				- &forward ForwardReference
 			"));
@@ -1057,9 +839,9 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInGenericDictionaries()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
-			var result = deserializer.Deserialize<Dictionary<string, string>>(YamlText(@"
+			var result = serializer.Deserialize<Dictionary<string, string>>(YamlText(@"
 				key1: *forward
 				*forwardKey: ForwardKeyValue
 				*forward: *forward
@@ -1078,9 +860,9 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInNonGenericDictionaries()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
-			var result = deserializer.Deserialize<Hashtable>(YamlText(@"
+			var result = serializer.Deserialize<Hashtable>(YamlText(@"
 				key1: *forward
 				*forwardKey: ForwardKeyValue
 				*forward: *forward
@@ -1099,9 +881,9 @@ Name: Charles
 		[Fact]
 		public void ForwardReferencesWorkInObjects()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
-			var result = deserializer.Deserialize<X>(YamlText(@"
+			var result = serializer.Deserialize<X>(YamlText(@"
 				Nothing: *forward
 				MyString: &forward ForwardReference
 			"));
@@ -1113,10 +895,10 @@ Name: Charles
 		[Fact]
 		public void UndefinedForwardReferencesFail()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
 			Assert.Throws<AnchorNotFoundException>(() =>
-				deserializer.Deserialize<X>(YamlText(@"
+				serializer.Deserialize<X>(YamlText(@"
 					Nothing: *forward
 					MyString: ForwardReference
 				"))
@@ -1125,15 +907,29 @@ Name: Charles
 
 		private class X
 		{
+            [DefaultValue(false)]
 			public bool MyFlag { get; set; }
-			public string Nothing { get; set; }
-			public int MyInt { get; set; }
+
+            [DefaultValue(null)]
+            public string Nothing { get; set; }
+
+            [DefaultValue(1234)]
+            public int MyInt { get; set; }
+
+            [DefaultValue(6789.1011)]
 			public double MyDouble { get; set; }
+
+            [DefaultValue("Hello world")]
 			public string MyString { get; set; }
+
 			public DateTime MyDate { get; set; }
 			public TimeSpan MyTimeSpan { get; set; }
 			public Point MyPoint { get; set; }
+
+            [DefaultValue(8)]
 			public int? MyNullableWithValue { get; set; }
+
+            [DefaultValue(null)]
 			public int? MyNullableWithoutValue { get; set; }
 
 			public X()

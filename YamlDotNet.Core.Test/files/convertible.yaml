@@ -1,4 +1,4 @@
 aaa:
-  !<!YamlDotNet.RepresentationModel.Test.SerializationTests%2BConvertible%2C%20YamlDotNet.RepresentationModel.Test>
+  !<!YamlDotNet.Test.Serialization.SerializationTests%2BConvertible%2C%YamlDotNet.Test>
   Left: hello
   Right: world

@@ -25,9 +25,10 @@ namespace YamlDotNet.Serialization.Serializers
 			factories.Add(factory);
 		}
 
-		public object ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			return GetSerializer(context, typeDescriptor).ReadYaml(context, value, typeDescriptor);
+            var serializer = GetSerializer(context, typeDescriptor);
+            return serializer.ReadYaml(context, value, typeDescriptor);
 		}
 
 		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
@@ -40,7 +41,8 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 
 			var localTypeDescriptor = typeDescriptor ?? context.FindTypeDescriptor(value.GetType());
-			GetSerializer(context, localTypeDescriptor).WriteYaml(context, value, typeDescriptor);
+            var serializer = GetSerializer(context, localTypeDescriptor);
+            serializer.WriteYaml(context, value, typeDescriptor);
 		}
 
 		private IYamlSerializable GetSerializer(SerializerContext context, ITypeDescriptor typeDescriptor)

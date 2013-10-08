@@ -1,35 +1,53 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace YamlDotNet
 {
 	internal static class TypeExtensions
 	{
-        public static Type GetInterface(this Type type, Type lookInterfaceType)
+
+	    public static bool HasInterface(this Type type, Type lookInterfaceType)
+	    {
+	        return type.GetInterface(lookInterfaceType) != null;
+	    }
+
+	    public static Type GetInterface(this Type type, Type lookInterfaceType)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (lookInterfaceType == null)
+                throw new ArgumentNullException("lookInterfaceType");
+
             if (lookInterfaceType.IsGenericTypeDefinition)
             {
-                foreach (var interfaceType in type.GetInterfaces())
-                {
-                    if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == lookInterfaceType)
-                    {
-                        return interfaceType;
-                    }
-                }
+                if (lookInterfaceType.IsInterface)
+                    foreach (var interfaceType in type.GetInterfaces())
+                        if (interfaceType.IsGenericType
+                            && interfaceType.GetGenericTypeDefinition() == lookInterfaceType)
+                            return interfaceType;
+
+                for (Type t = type; t != null; t = t.BaseType)
+                    if (t.IsGenericType && t.GetGenericTypeDefinition() == lookInterfaceType)
+                        return t;
             }
             else
             {
-                foreach (var interfaceType in type.GetInterfaces())
-                {
-                    if (interfaceType == lookInterfaceType)
-                    {
-                        return interfaceType;
-                    }
-                }
-                
+                if (lookInterfaceType.IsAssignableFrom(type))
+                    return lookInterfaceType;
             }
 
             return null;
+        }
+
+        public static bool IsAnonymous(this Type type)
+        {
+            if (type == null)
+                return false;
+
+            return type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), false).Length > 0
+                && type.Namespace == null
+                && type.FullName.Contains("AnonymousType");
         }
 
 		/// <summary>

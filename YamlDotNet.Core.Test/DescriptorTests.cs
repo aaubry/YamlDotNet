@@ -16,7 +16,6 @@ namespace YamlDotNet.Test
 		public class TestObject
 		{
 			// unused, not public
-			private string name;
 			internal string InternalName { get; set; }
 
 			public TestObject()
