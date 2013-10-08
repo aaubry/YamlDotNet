@@ -19,9 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-using YamlDotNet.Events;
-
 namespace YamlDotNet.Serialization
 {
 	/// <summary>
@@ -45,62 +42,5 @@ namespace YamlDotNet.Serialization
 		/// <param name="value">The value.</param>
 		/// <param name="typeDescriptor"></param>
 		void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor);
-	}
-
-
-	/// <summary>
-	/// A deserialized value.
-	/// </summary>
-	public struct ValueResult
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ValueResult"/> struct.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		public ValueResult(object value) : this()
-		{
-			Value = value;
-			IsAlias = false;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ValueResult"/> struct.
-		/// </summary>
-		/// <param name="isAlias">if set to <c>true</c> [is alias].</param>
-		/// <param name="value">The value.</param>
-		private ValueResult(bool isAlias, AnchorAlias value)
-		{
-			IsAlias = isAlias;
-			Value = value;
-		}
-
-		/// <summary>
-		/// News the alias.
-		/// </summary>
-		/// <param name="alias">The alias.</param>
-		/// <returns>ValueResult.</returns>
-		public static ValueResult NewAlias(AnchorAlias alias)
-		{
-			return new ValueResult(true, alias);
-		}
-
-		/// <summary>
-		/// The returned value or null if no value.
-		/// </summary>
-		public readonly object Value;
-
-		/// <summary>
-		/// True if this value result is an alias.
-		/// </summary>
-		public readonly bool IsAlias;
-
-		/// <summary>
-		/// Gets the alias, only valid if <see cref="IsAlias"/> is true, null otherwise.
-		/// </summary>
-		/// <value>The alias.</value>
-		public AnchorAlias Alias
-		{
-			get { return IsAlias ? (AnchorAlias)Value : null; }
-		}
 	}
 }

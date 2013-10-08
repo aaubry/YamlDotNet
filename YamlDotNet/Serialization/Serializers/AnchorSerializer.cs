@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.Serializers
 				if (!AliasToObject.TryGetValue(alias.Value, out value))
 				{
 					// Late binding needs to be handled by caller
-					return ValueResult.NewAlias(alias);
+					return new ValueResult(alias);
 				}
 
 				return new ValueResult(value);
