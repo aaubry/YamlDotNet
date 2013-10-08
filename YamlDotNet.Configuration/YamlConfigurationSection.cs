@@ -121,7 +121,7 @@ namespace YamlDotNet.Configuration
 				sectionType = Type.GetType(section.Attributes["type"].Value, true);
 			}
 
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			return deserializer.Deserialize(yaml, sectionType);
 		}
 		#endregion

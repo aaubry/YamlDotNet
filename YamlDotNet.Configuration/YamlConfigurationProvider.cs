@@ -76,7 +76,7 @@ namespace YamlDotNet.Configuration
 
 		private void LoadSections(TextReader yaml)
 		{
-			var deserializer = new Deserializer();
+			var deserializer = new Serializer();
 			sections = (IDictionary<string, object>)deserializer.Deserialize(yaml, typeof(Dictionary<string, object>));
 		}
 
