@@ -14,13 +14,22 @@ namespace YamlDotNet.Serialization
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlMemberAttribute"/> class.
 		/// </summary>
+		/// <param name="order">The order.</param>
+		public YamlMemberAttribute(int order)
+		{
+			Order = order;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlMemberAttribute"/> class.
+		/// </summary>
 		/// <param name="name">The name.</param>
 		public YamlMemberAttribute(string name)
 		{
 			this.name = name;
 			serializeMethod = SerializeMemberMode.Assign;
+			Order = -1;
 		}
-
 
 		/// <summary>
 		/// Specify the way to store a property or field of some class or structure.
@@ -31,6 +40,7 @@ namespace YamlDotNet.Serialization
 		{
 			this.name = name;
 			this.serializeMethod = serializeMethod;
+			Order = -1;
 		}
 
 		/// <summary>
@@ -40,6 +50,7 @@ namespace YamlDotNet.Serialization
 		public YamlMemberAttribute(SerializeMemberMode serializeMethod)
 		{
 			this.serializeMethod = serializeMethod;
+			Order = -1;
 		}
 
 		/// <summary>
@@ -59,5 +70,12 @@ namespace YamlDotNet.Serialization
 		{
 			get { return serializeMethod; }
 		}
+
+
+		/// <summary>
+		/// Gets or sets the order. Default is -1 (default to alphabetical)
+		/// </summary>
+		/// <value>The order.</value>
+		public int Order { get; set; }
 	}
 }

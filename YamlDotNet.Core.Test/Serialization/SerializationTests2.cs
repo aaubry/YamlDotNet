@@ -84,7 +84,7 @@ UInt64: 8
 ".Trim();
 
 			var settings = new SerializerSettings();
-			settings.RegisterTagMapping("MyObject", typeof(MyObject));
+			settings.RegisterTagMapping("MyObject", typeof (MyObject));
 			SerialRoundTrip(settings, text);
 		}
 
@@ -97,7 +97,7 @@ UInt64: 8
 
 			public string Name { get; set; }
 
-			public List<string>  Values { get; set; }
+			public List<string> Values { get; set; }
 		}
 
 
@@ -113,7 +113,7 @@ Values: [a, b, c]
 ".Trim();
 
 			var settings = new SerializerSettings();
-			settings.RegisterTagMapping("MyObjectAndCollection", typeof(MyObjectAndCollection));
+			settings.RegisterTagMapping("MyObjectAndCollection", typeof (MyObjectAndCollection));
 			SerialRoundTrip(settings, text);
 		}
 
@@ -144,7 +144,7 @@ Value: 1
 ".Trim();
 
 			var settings = new SerializerSettings() {LimitFlowSequence = 0};
-			settings.RegisterTagMapping("MyCustomCollectionWithProperties", typeof(MyCustomCollectionWithProperties));
+			settings.RegisterTagMapping("MyCustomCollectionWithProperties", typeof (MyCustomCollectionWithProperties));
 			SerialRoundTrip(settings, text);
 		}
 
@@ -176,8 +176,8 @@ Value: 1
   c: true
 ".Trim();
 
-			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
-			settings.RegisterTagMapping("MyCustomDictionaryWithProperties", typeof(MyCustomDictionaryWithProperties));
+			var settings = new SerializerSettings() {LimitFlowSequence = 0};
+			settings.RegisterTagMapping("MyCustomDictionaryWithProperties", typeof (MyCustomDictionaryWithProperties));
 			SerialRoundTrip(settings, text);
 		}
 
@@ -277,9 +277,67 @@ StringMapbyContent:
 Value: 0
 ".Trim();
 
-			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
-			settings.RegisterTagMapping("MyCustomClassWithSpecialMembers", typeof(MyCustomClassWithSpecialMembers));
+			var settings = new SerializerSettings() {LimitFlowSequence = 0};
+			settings.RegisterTagMapping("MyCustomClassWithSpecialMembers", typeof (MyCustomClassWithSpecialMembers));
 			SerialRoundTrip(settings, text);
+		}
+
+
+		/// <summary>
+		/// Tests the serialization of ordered members.
+		/// </summary>
+		public class ClassMemberOrder
+		{
+			public ClassMemberOrder()
+			{
+				First = 1;
+				Second = 2;
+				BeforeName = 3;
+				Name = 4;
+				NameAfter = 5;
+			}
+
+			/// <summary>
+			/// Sets an explicit order
+			/// </summary>
+			[YamlMember(1)]
+			public int Second { get; set; }
+
+			/// <summary>
+			/// Sets an explicit order
+			/// </summary>
+			[YamlMember(0)]
+			public int First { get; set; }
+
+			/// <summary>
+			/// This property will be sorted after 
+			/// the explicit order by alphabetical order
+			/// </summary>
+			/// <value>The name after.</value>
+			public int NameAfter { get; set; }
+
+			/// <summary>
+			/// This property will be sorted after 
+			/// the explicit order by alphabetical order
+			/// </summary>
+			public int Name { get; set; }
+
+			/// <summary>
+			/// Sets an explicit order
+			/// </summary>
+			[YamlMember(2)]
+			public int BeforeName { get; set; }
+		}
+
+		/// <summary>
+		/// Tests the serialization of ordered members in the class <see cref="ClassMemberOrder"/>.
+		/// </summary>
+		[Fact]
+		public void TestClassMemberOrder()
+		{
+			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			settings.RegisterTagMapping("ClassMemberOrder", typeof(ClassMemberOrder));
+			SerialRoundTrip(settings, new ClassMemberOrder());
 		}
 
 		private void SerialRoundTrip(SerializerSettings settings, string text)
@@ -302,6 +360,24 @@ Value: 0
 
 			Assert.Equal(text, text2);
 		}
-	
+
+		private void SerialRoundTrip(SerializerSettings settings, object value)
+		{
+			var serializer = new Serializer(settings);
+
+			var text = serializer.Serialize(value);
+			Console.WriteLine("Text serialize:");
+			Console.WriteLine("------------------");
+			Console.WriteLine(text);
+
+			// not working yet, scalar read/write are not yet implemented
+			Console.WriteLine("Text to deserialize/serialize:");
+			Console.WriteLine("------------------");
+			var text2 = serializer.Serialize(serializer.Deserialize(text));
+			Console.WriteLine(text2);
+
+			Assert.Equal(text, text2);
+		}
+
 	}
 }

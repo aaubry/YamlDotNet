@@ -64,7 +64,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			// Sort members by name
 			// This is to make sure that properties/fields for an object 
 			// are always displayed in the same order
-			memberList.Sort((left, right) => string.CompareOrdinal(left.Name, right.Name));
+			memberList.Sort(SortMembers);
 
 			// Free the member list
 			this.members = memberList.ToArray();
@@ -84,6 +84,20 @@ namespace YamlDotNet.Serialization.Descriptors
 
 				mapMembers.Add(member.Name, member);
 			}
+		}
+
+		private int SortMembers(IMemberDescriptor left, IMemberDescriptor right)
+		{
+			// If order is defined, first order by order
+			if (left.Order >= 0 || right.Order >= 0)
+			{
+				var leftOrder = left.Order < 0 ? int.MaxValue : left.Order;
+				var rightOrder = right.Order < 0 ? int.MaxValue : right.Order;
+				return leftOrder.CompareTo(rightOrder);
+			}
+			
+			// else order by name
+			return string.CompareOrdinal(left.Name, right.Name);
 		}
 
 		protected IAttributeRegistry AttributeRegistry { get; private set; }
@@ -179,7 +193,12 @@ namespace YamlDotNet.Serialization.Descriptors
 						(memberType.IsValueType && member.SerializeMemberMode == SerializeMemberMode.Content))
 						throw new ArgumentException("{0} {1} is not writeable by {2}.".DoFormat(memberType.FullName, member.Name, memberAttribute.SerializeMethod.ToString()));
 				}
-				member.SerializeMemberMode = memberAttribute.SerializeMethod;
+
+				if (memberAttribute.SerializeMethod != SerializeMemberMode.Default)
+				{
+					member.SerializeMemberMode = memberAttribute.SerializeMethod;
+				}
+				member.Order = memberAttribute.Order;
 			}
 
 			if (member.SerializeMemberMode == SerializeMemberMode.Binary)
@@ -227,5 +246,6 @@ namespace YamlDotNet.Serialization.Descriptors
 
 			return true;
 		}
+
 	}
 }

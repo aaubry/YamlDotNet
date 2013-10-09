@@ -15,10 +15,12 @@ namespace YamlDotNet.Serialization.Descriptors
 			MemberInfo = memberInfo;
 			Name = MemberInfo.Name;
 			DeclaringType = memberInfo.DeclaringType;
+			Order = -1;
 		}
 
 		public string Name { get; internal set; }
 		public abstract Type Type { get; }
+		public int Order { get; internal set; }
 
 		/// <summary>
 		/// Gets the type of the declaring this member.

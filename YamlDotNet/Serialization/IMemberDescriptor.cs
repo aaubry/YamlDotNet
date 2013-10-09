@@ -20,6 +20,14 @@ namespace YamlDotNet.Serialization
 		Type Type { get; }
 
 		/// <summary>
+		/// Gets the order of this member. 
+		/// Default is -1, meaning that it is using the alphabetical order 
+		/// based on the name of this property.
+		/// </summary>
+		/// <value>The order.</value>
+		int Order { get; }
+
+		/// <summary>
 		/// Gets the mode of serialization for this member.
 		/// </summary>
 		/// <value>The mode.</value>

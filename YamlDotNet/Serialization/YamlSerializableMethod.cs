@@ -7,9 +7,9 @@
 	public enum SerializeMemberMode
 	{
 		/// <summary>
-		/// The property / field will not be stored.
+		/// Use the default mode depending on the type of the field/property.
 		/// </summary>
-		Never,
+		Default,
 
 		/// <summary>
 		/// When restored, new object is created by using the parameters in
@@ -31,6 +31,12 @@
 		///  some value type. The content of the array is stored in a binary
 		///  format encoded in base64 style.
 		/// </summary>
-		Binary
+		Binary,
+
+		/// <summary>
+		/// The property / field will not be stored.
+		/// </summary>
+		Never,
+
 	}
 }
