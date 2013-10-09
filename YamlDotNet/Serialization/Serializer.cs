@@ -95,7 +95,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		public void Serialize(TextWriter writer, object graph)
 		{
-			Serialize(new Emitter(writer), graph);
+			Serialize(new Emitter(writer, Settings.PreferredIndent), graph);
 		}
 
 		/// <summary>
@@ -106,7 +106,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="type">The static type of the object to serialize.</param>
 		public void Serialize(TextWriter writer, object graph, Type type)
 		{
-			Serialize(new Emitter(writer), graph, type);
+			Serialize(new Emitter(writer, Settings.PreferredIndent), graph, type);
 		}
 
 		/// <summary>
