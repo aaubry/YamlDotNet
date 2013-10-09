@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
@@ -112,14 +113,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 				if (context.Settings.SortKeyForMapping)
 				{
-					keyValues.Sort((left, right) =>
-						{
-							if (left.Key is IComparable && right.Key is IComparable)
-							{
-								return ((IComparable) left.Key).CompareTo(right.Key);
-							}
-							return 0;
-						});
+					keyValues.Sort(SortDictionaryByKeys);
 				}
 
 				var keyType = dictionaryDescriptor.KeyType;
@@ -129,6 +123,20 @@ namespace YamlDotNet.Serialization.Serializers
 					context.WriteYaml(keyValue.Key, keyType);
 					context.WriteYaml(keyValue.Value, valueType);
 				}
+			}
+
+			private static int SortDictionaryByKeys(KeyValuePair<object, object> left, KeyValuePair<object, object> right)
+			{
+				if (left.Key is string && right.Key is string)
+				{
+					return string.CompareOrdinal((string) left.Key, (string) right.Key);
+				}
+
+				if (left.Key is IComparable && right.Key is IComparable)
+				{
+					return ((IComparable) left.Key).CompareTo(right.Key);
+				}
+				return 0;
 			}
 		}
 	}
