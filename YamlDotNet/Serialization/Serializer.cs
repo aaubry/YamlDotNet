@@ -65,6 +65,31 @@ namespace YamlDotNet.Serialization
 		public SerializerSettings Settings { get { return settings; } }
 
 		/// <summary>
+		/// Serializes the specified object to a string.
+		/// </summary>
+		/// <param name="graph">The graph.</param>
+		/// <returns>A YAML string of the object.</returns>
+		public string Serialize(object graph)
+		{
+			var stringWriter = new StringWriter();
+			Serialize(stringWriter, graph);
+			return stringWriter.ToString();
+		}
+
+		/// <summary>
+		/// Serializes the specified object to a string.
+		/// </summary>
+		/// <param name="graph">The graph.</param>
+		/// <param name="expectedType">The expected type.</param>
+		/// <returns>A YAML string of the object.</returns>
+		public string Serialize(object graph, Type expectedType)
+		{
+			var stringWriter = new StringWriter();
+			Serialize(stringWriter, graph, expectedType);
+			return stringWriter.ToString();
+		}
+
+		/// <summary>
 		/// Serializes the specified object.
 		/// </summary>
 		/// <param name="stream">The stream.</param>
