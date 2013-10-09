@@ -187,6 +187,7 @@ Value: 1
 			{
 				StringListByContent = new List<string>();
 				StringMapbyContent = new Dictionary<string, object>();
+				ListByContent = new List<string>();
 			}
 
 			public string Name { get; set; }
@@ -230,6 +231,14 @@ Value: 1
 			/// </summary>
 			/// <value>The content of the string mapby.</value>
 			public Dictionary<string, object> StringMapbyContent { get; private set; }
+
+			/// <summary>
+			/// For this property, the deserializer is using the actual
+			/// value of the list stored in this instance instead of 
+			/// creating a new List&lt;T&gtl instance.
+			/// </summary>
+			/// <value>The content of the list by.</value>
+			public IList ListByContent { get; private set; }
 		}
 
 		/// <summary>
@@ -249,6 +258,9 @@ BasicList:
 BasicMap:
   a: 1
   b: 2
+ListByContent:
+  - a
+  - b
 Name: Yes
 StringList:
   - 1

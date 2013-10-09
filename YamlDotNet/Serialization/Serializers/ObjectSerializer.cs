@@ -159,6 +159,18 @@ namespace YamlDotNet.Serialization.Serializers
 
 				var memberValue = member.Get(thisObject);
 				var memberType = member.Type;
+
+				// In case of serializing a property/field which is not writeable
+				// we need to change the expected type to the actual type of the 
+				// content value
+				if (member.SerializeMemberMode == SerializeMemberMode.Content)
+				{
+					if (memberValue != null)
+					{
+						memberType = memberValue.GetType();
+					}
+				}
+
 				context.WriteYaml(memberValue, memberType);
 			}
 		}
