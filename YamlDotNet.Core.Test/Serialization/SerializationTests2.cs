@@ -437,8 +437,29 @@ Value: 0
 			string Name { get; set; }
 		}
 
-		public class MemberInterface : IMemberInterface
+		public class MemberInterface : IMemberInterface 
 		{
+			protected bool Equals(MemberInterface other)
+			{
+				return string.Equals(Name, other.Name) && string.Equals(Value, other.Value);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != this.GetType()) return false;
+				return Equals((MemberInterface) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				unchecked
+				{
+					return ((Name != null ? Name.GetHashCode() : 0)*397) ^ (Value != null ? Value.GetHashCode() : 0);
+				}
+			}
+
 			public MemberInterface()
 			{
 				Name = "name1";
@@ -450,32 +471,92 @@ Value: 0
 			public string Value { get; set; }
 		}
 
-		public class ClassMemberWithInterface
+		public class MemberObject : MemberInterface 
 		{
-			public ClassMemberWithInterface()
+			public MemberObject()
 			{
-				Member = new MemberInterface();
+				Object = "object1";
 			}
 
-			public IMemberInterface Member { get; set; }
+			public string Object { get; set; }
+
+			protected bool Equals(MemberObject other)
+			{
+				return base.Equals(other) && string.Equals(Object, other.Object);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != this.GetType()) return false;
+				return Equals((MemberObject) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				unchecked
+				{
+					return (base.GetHashCode()*397) ^ (Object != null ? Object.GetHashCode() : 0);
+				}
+			}
+		}
+
+		public class ClassMemberWithInheritance
+		{
+			public ClassMemberWithInheritance()
+			{
+				ThroughObject = new MemberObject() {Object = "throughObject"};
+				ThroughInterface = new MemberInterface();
+				ThroughBase = new MemberObject() {Object = "throughBase"};
+				Direct = new MemberObject() {Object = "direct"};
+			}
+
+			public object ThroughObject { get; set; }
+
+			public IMemberInterface ThroughInterface { get; set; }
+
+			public MemberInterface ThroughBase { get; set; }
+
+			public MemberObject Direct { get; set; }
+
+			protected bool Equals(ClassMemberWithInheritance other)
+			{
+				return Equals(ThroughObject, other.ThroughObject) && Equals(ThroughInterface, other.ThroughInterface) && Equals(ThroughBase, other.ThroughBase) && Equals(Direct, other.Direct);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != this.GetType()) return false;
+				return Equals((ClassMemberWithInheritance) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				unchecked
+				{
+					int hashCode = (ThroughObject != null ? ThroughObject.GetHashCode() : 0);
+					hashCode = (hashCode*397) ^ (ThroughInterface != null ? ThroughInterface.GetHashCode() : 0);
+					hashCode = (hashCode*397) ^ (ThroughBase != null ? ThroughBase.GetHashCode() : 0);
+					hashCode = (hashCode*397) ^ (Direct != null ? Direct.GetHashCode() : 0);
+					return hashCode;
+				}
+			}
 		}
 
 		[Fact]
-		public void TestMemberWithInterface()
+		public void TestClassMemberWithInheritance()
 		{
 			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
-			settings.RegisterTagMapping("ClassMemberWithInterface", typeof(ClassMemberWithInterface));
+			settings.RegisterTagMapping("ClassMemberWithInheritance", typeof(ClassMemberWithInheritance));
 			settings.RegisterTagMapping("MemberInterface", typeof(MemberInterface));
-			var original = new ClassMemberWithInterface();
+			settings.RegisterTagMapping("MemberObject", typeof(MemberObject));
+			var original = new ClassMemberWithInheritance();
 			var obj = SerialRoundTrip(settings, original);
-			Assert.True(obj is ClassMemberWithInterface);
-
-			var classMemberWithRef = (ClassMemberWithInterface)obj;
-			Assert.NotNull(classMemberWithRef.Member);
-			Assert.True(classMemberWithRef.Member is MemberInterface);
-			var memberRef = (MemberInterface)classMemberWithRef.Member;
-			Assert.Equal(original.Member.Name, memberRef.Name);
-			Assert.Equal(((MemberInterface)original.Member).Value, memberRef.Value);
+			Assert.True(obj is ClassMemberWithInheritance);
+			Assert.Equal(original, obj);
 		}
 		
 		private void SerialRoundTrip(SerializerSettings settings, string text, Type serializedType = null)

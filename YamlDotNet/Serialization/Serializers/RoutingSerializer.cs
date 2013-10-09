@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
 {
@@ -27,7 +28,9 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			var serializer = GetSerializer(context, typeDescriptor);
+			// If value is not null, use its TypeDescriptor otherwise use expected type descriptor
+			var typeDescriptorOfValue = value != null ? context.FindTypeDescriptor(value.GetType()) : typeDescriptor;
+			var serializer = GetSerializer(context, typeDescriptorOfValue);
 			return serializer.ReadYaml(context, value, typeDescriptor);
 		}
 
@@ -40,12 +43,13 @@ namespace YamlDotNet.Serialization.Serializers
 				return;
 			}
 
-			// If TypeDescriptor is null, typeof(object) or an interface, use the serializer of the actual value
-			var localTypeDescriptor = typeDescriptor == null || typeDescriptor.Type == typeof (object) || typeDescriptor.Type.IsInterface
-				                          ? context.FindTypeDescriptor(value.GetType())
-				                          : typeDescriptor;
+			// Always use the TypeDescriptor of the value when serializing, unless it is a nullable descriptor
+			var typeDescriptorOfValue =  context.FindTypeDescriptor(value.GetType());
+			var typeDescriptorToUseForSerializing = typeDescriptor is NullableDescriptor
+												  ? typeDescriptor
+												  : typeDescriptorOfValue;
 
-			var serializer = GetSerializer(context, localTypeDescriptor);
+			var serializer = GetSerializer(context, typeDescriptorToUseForSerializing);
 			serializer.WriteYaml(context, value, typeDescriptor);
 		}
 
