@@ -26,13 +26,8 @@ namespace YamlDotNet.Serialization.Serializers
 			var alias = reader.Allow<AnchorAlias>();
 			if (alias != null)
 			{
-				if (!AliasToObject.TryGetValue(alias.Value, out value))
-				{
-					// Late binding needs to be handled by caller
-					return new ValueResult(alias);
-				}
-
-				return new ValueResult(value);
+				// Return an alias or directly the value
+				return !AliasToObject.TryGetValue(alias.Value, out value) ? new ValueResult(alias) : new ValueResult(value);
 			}
 
 			// Test if current node has an anchor &oxxx
@@ -57,13 +52,6 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			// Don't emit any aliasing if settings are disabling them
-			if (!context.Settings.EmitAlias)
-			{
-				base.WriteYaml(context, value, typeDescriptor);
-				return;
-			}
-
 			// Only write anchors for object (and not value types)
 			bool isAnchorable = false;
 			if (value != null && !value.GetType().IsValueType)

@@ -69,7 +69,7 @@ namespace YamlDotNet.Serialization
 		/// <value>The reader.</value>
 		public EventReader Reader { get; internal set; }
 
-		internal AnchorSerializer ObjectSerializer { get; set; }
+		internal IYamlSerializable ObjectSerializer { get; set; }
 
 
 		/// <summary>
@@ -190,8 +190,11 @@ namespace YamlDotNet.Serialization
 		{
 			if (alias == null) throw new ArgumentNullException("alias");
 
+			// Verify that we have the anchorserializer
+			var anchorSerializer = CheckAnchorSerializer();
+
 			object value;
-			if (!ObjectSerializer.TryGetAliasValue(alias.Value, out value))
+			if (!anchorSerializer.TryGetAliasValue(alias.Value, out value))
 			{
 				throw new AnchorNotFoundException(alias.Value, alias.Start, alias.End, "Alias [{0}] not found".DoFormat(alias.Value));				
 			}
@@ -208,6 +211,8 @@ namespace YamlDotNet.Serialization
 		{
 			if (alias == null) throw new ArgumentNullException("alias");
 			if (setter == null) throw new ArgumentNullException("setter");
+
+			CheckAnchorSerializer();
 
 			anchorLateBindings.Add(new AnchorLateBinding(alias, setter));
 		}
@@ -229,6 +234,18 @@ namespace YamlDotNet.Serialization
 				var value = GetAliasValue(alias);
 				lateBinding.Setter(value);
 			}
+		}
+
+		private AnchorSerializer CheckAnchorSerializer()
+		{
+			// Verify that we have the anchorserializer
+			var anchorSerializer = ObjectSerializer as AnchorSerializer;
+			if (anchorSerializer == null)
+			{
+				throw new InvalidOperationException("Alias was desactivated by the settings. This method cannot be used");
+			}
+
+			return anchorSerializer;
 		}
 	}
 }

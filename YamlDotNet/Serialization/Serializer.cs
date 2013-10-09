@@ -174,10 +174,10 @@ namespace YamlDotNet.Serialization
 			// Prepare the context
 			var context = new SerializerContext(this)
 			{
-				ObjectSerializer = CreateProcessor(settings),
+				ObjectSerializer = CreateProcessor(),
 			};
 
-			context.Writer = CreateEmitter(emitter, context);
+			context.Writer = CreateEmitter(emitter);
 
 			// Serialize the document
 			context.Writer.StreamStart();
@@ -325,7 +325,7 @@ namespace YamlDotNet.Serialization
 				var context = new SerializerContext(this)
 					{
 						Reader = reader,
-						ObjectSerializer = CreateProcessor(settings),
+						ObjectSerializer = CreateProcessor(),
 					};
 				var valueResult = context.ReadYaml(null, expectedType);
 				context.ResolveLateAliasBindings();
@@ -345,7 +345,7 @@ namespace YamlDotNet.Serialization
 			return result;
 		}
 
-		private AnchorSerializer CreateProcessor(SerializerSettings settings)
+		private IYamlSerializable CreateProcessor()
 		{
 			var routintSerializer = new RoutingSerializer();
 
@@ -367,10 +367,11 @@ namespace YamlDotNet.Serialization
 				routintSerializer.AddSerializerFactory(defaultFactory);
 			}
 
-			return new AnchorSerializer(new TypingSerializer(routintSerializer));
+			var typingSerializer = new TypingSerializer(routintSerializer);
+			return settings.EmitAlias ? (IYamlSerializable)new AnchorSerializer(typingSerializer) : typingSerializer;
 		}
 
-		private IEventEmitter CreateEmitter(IEmitter emitter, SerializerContext context)
+		private IEventEmitter CreateEmitter(IEmitter emitter)
 		{
 			var writer = (IEventEmitter)new WriterEventEmitter(emitter);
 
@@ -378,7 +379,7 @@ namespace YamlDotNet.Serialization
 			{
 				writer = new JsonEventEmitter(writer);
 			}
-			return new AnchorEventEmitter(writer);
+			return settings.EmitAlias ? new AnchorEventEmitter(writer) : writer;
 		}
    }
 }
