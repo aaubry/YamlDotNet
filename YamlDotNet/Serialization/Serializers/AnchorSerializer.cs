@@ -57,6 +57,13 @@ namespace YamlDotNet.Serialization.Serializers
 
 		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
+			// Don't emit any aliasing if settings are disabling them
+			if (!context.Settings.EmitAlias)
+			{
+				base.WriteYaml(context, value, typeDescriptor);
+				return;
+			}
+
 			// Only write anchors for object (and not value types)
 			bool isAnchorable = false;
 			if (value != null && !value.GetType().IsValueType)

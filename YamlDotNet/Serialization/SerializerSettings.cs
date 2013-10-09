@@ -33,6 +33,7 @@ namespace YamlDotNet.Serialization
 		{
 			PreferredIndent = 2;
 			IndentLess = false;
+			EmitAlias = true;
 			SortKeyForMapping = true;
 			EmitJsonComptible = false;
 			EmitCapacityForList = false;
@@ -62,6 +63,12 @@ namespace YamlDotNet.Serialization
 				preferredIndent = value;
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether to emit anchor alias. Default is true.
+		/// </summary>
+		/// <value><c>true</c> to emit anchor alias; otherwise, <c>false</c>.</value>
+		public bool EmitAlias { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the identation is trying to less
