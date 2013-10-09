@@ -125,11 +125,8 @@ namespace YamlDotNet.Serialization.Serializers
 					            ? null
 					            : context.TagFromType(typeOfValue);
 
-
-			if (typeDescriptor == null)
-			{
-				typeDescriptor = context.FindTypeDescriptor(typeOfValue);
-			}
+			// Use the actual type of the value when serializing
+			typeDescriptor = context.FindTypeDescriptor(typeOfValue);
 
 			var isSequence = CheckIsSequence(typeDescriptor);
 			if (isSequence)
