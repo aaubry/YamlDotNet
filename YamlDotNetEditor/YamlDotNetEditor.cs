@@ -22,15 +22,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using YamlDotNet.Core;
 using System.IO;
-using YamlDotNet.Core.Tokens;
 using Microsoft.VisualStudio.Language.StandardClassification;
 using System.Text.RegularExpressions;
+using YamlDotNet;
+using YamlDotNet.Tokens;
 
 namespace YamlDotNetEditor
 {
