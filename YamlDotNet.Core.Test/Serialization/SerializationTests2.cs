@@ -349,6 +349,28 @@ Value: 0
 			}
 		}
 
+		[Fact]
+		public void TestIEnumerable()
+		{
+			var serializer = new Serializer();
+			var text = serializer.Serialize(new ClassWithMemberIEnumerable(), typeof (ClassWithMemberIEnumerable));
+			Assert.Throws<YamlException>(() => serializer.Deserialize(text, typeof(ClassWithMemberIEnumerable)));
+			var value = serializer.Deserialize(text);
+
+			Assert.True(value is IDictionary<object, object>);
+			var dictionary = (IDictionary<object, object>) value;
+			Assert.True(dictionary.ContainsKey("Keys"));
+			Assert.True( dictionary["Keys"] is IList<object>);
+			var list = (IList<object>) dictionary["Keys"];
+			Assert.Equal(list.OfType<int>(), new ClassWithMemberIEnumerable().Keys);
+
+			// Test simple IEnumerable
+			var iterator = Enumerable.Range(0, 10);
+			var values = serializer.Deserialize(serializer.Serialize(iterator, iterator.GetType()));
+			Assert.True(value is IEnumerable);
+			Assert.Equal(((IEnumerable<object>)values).OfType<int>(), iterator);
+		}
+
 		public class ClassWithObjectAndScalar
 		{
 			public ClassWithObjectAndScalar()
@@ -377,28 +399,86 @@ Value: 0
 		}
 
 		[Fact]
-		public void TestIEnumerable()
+		public void TestImplicitDictionaryAndList()
 		{
-			var serializer = new Serializer();
-			var text = serializer.Serialize(new ClassWithMemberIEnumerable(), typeof (ClassWithMemberIEnumerable));
-			Assert.Throws<YamlException>(() => serializer.Deserialize(text, typeof(ClassWithMemberIEnumerable)));
-			var value = serializer.Deserialize(text);
+			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
 
-			Assert.True(value is IDictionary<object, object>);
-			var dictionary = (IDictionary<object, object>) value;
-			Assert.True(dictionary.ContainsKey("Keys"));
-			Assert.True( dictionary["Keys"] is IList<object>);
-			var list = (IList<object>) dictionary["Keys"];
-			Assert.Equal(list.OfType<int>(), new ClassWithMemberIEnumerable().Keys);
+			var text = @"BasicList:
+  - 1
+  - 2
+BasicMap:
+  a: 1
+  b: 2
+ListByContent:
+  - a
+  - b
+Name: Yes
+StringList:
+  - 1
+  - 2
+StringListByContent:
+  - 3
+  - 4
+StringMap:
+  c: yes
+  d: 3
+StringMapbyContent:
+  e: 4
+  f: no
+Value: 0
+".Trim();
 
-			// Test simple IEnumerable
-			var iterator = Enumerable.Range(0, 10);
-			var values = serializer.Deserialize(serializer.Serialize(iterator, iterator.GetType()));
-			Assert.True(value is IEnumerable);
-			Assert.Equal(((IEnumerable<object>)values).OfType<int>(), iterator);
+			SerialRoundTrip(settings, text, typeof(Dictionary<object, object>));
 		}
 
-		private void SerialRoundTrip(SerializerSettings settings, string text)
+
+		public interface IMemberInterface
+		{
+			string Name { get; set; }
+		}
+
+		public class MemberInterface : IMemberInterface
+		{
+			public MemberInterface()
+			{
+				Name = "name1";
+				Value = "value1";
+			}
+
+			public string Name { get; set; }
+
+			public string Value { get; set; }
+		}
+
+		public class ClassMemberWithInterface
+		{
+			public ClassMemberWithInterface()
+			{
+				Member = new MemberInterface();
+			}
+
+			public IMemberInterface Member { get; set; }
+		}
+
+		[Fact]
+		public void TestMemberWithInterface()
+		{
+			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			settings.RegisterTagMapping("ClassMemberWithInterface", typeof(ClassMemberWithInterface));
+			settings.RegisterTagMapping("MemberInterface", typeof(MemberInterface));
+			var original = new ClassMemberWithInterface();
+			var obj = SerialRoundTrip(settings, original);
+			Assert.True(obj is ClassMemberWithInterface);
+
+			var classMemberWithRef = (ClassMemberWithInterface)obj;
+			Assert.NotNull(classMemberWithRef.Member);
+			Assert.True(classMemberWithRef.Member is MemberInterface);
+			var memberRef = (MemberInterface)classMemberWithRef.Member;
+			Assert.Equal(original.Member.Name, memberRef.Name);
+			Assert.Equal(((MemberInterface)original.Member).Value, memberRef.Value);
+		}
+		
+		private void SerialRoundTrip(SerializerSettings settings, string text, Type serializedType = null)
 		{
 			var serializer = new Serializer(settings);
 			// not working yet, scalar read/write are not yet implemented
@@ -409,9 +489,7 @@ Value: 0
 
 			Console.WriteLine();
 
-			var stringWriter = new StringWriter();
-			serializer.Serialize(stringWriter, value);
-			var text2 = stringWriter.ToString().Trim();
+			var text2 = serializer.Serialize(value, serializedType).Trim();
 			Console.WriteLine("Text deserialized:");
 			Console.WriteLine("------------------");
 			Console.WriteLine(text2);
@@ -419,7 +497,7 @@ Value: 0
 			Assert.Equal(text, text2);
 		}
 
-		private void SerialRoundTrip(SerializerSettings settings, object value, Type expectedType = null)
+		private object SerialRoundTrip(SerializerSettings settings, object value, Type expectedType = null)
 		{
 			var serializer = new Serializer(settings);
 
@@ -431,10 +509,13 @@ Value: 0
 			// not working yet, scalar read/write are not yet implemented
 			Console.WriteLine("Text to deserialize/serialize:");
 			Console.WriteLine("------------------");
-			var text2 = serializer.Serialize(serializer.Deserialize(text));
+			var valueDeserialized = serializer.Deserialize(text);
+			var text2 = serializer.Serialize(valueDeserialized);
 			Console.WriteLine(text2);
 
 			Assert.Equal(text, text2);
+
+			return valueDeserialized;
 		}
 
 	}

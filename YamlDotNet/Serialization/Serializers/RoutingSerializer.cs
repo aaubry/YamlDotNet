@@ -40,7 +40,11 @@ namespace YamlDotNet.Serialization.Serializers
 				return;
 			}
 
-			var localTypeDescriptor = typeDescriptor ?? context.FindTypeDescriptor(value.GetType());
+			// If TypeDescriptor is null, typeof(object) or an interface, use the serializer of the actual value
+			var localTypeDescriptor = typeDescriptor == null || typeDescriptor.Type == typeof (object) || typeDescriptor.Type.IsInterface
+				                          ? context.FindTypeDescriptor(value.GetType())
+				                          : typeDescriptor;
+
 			var serializer = GetSerializer(context, localTypeDescriptor);
 			serializer.WriteYaml(context, value, typeDescriptor);
 		}

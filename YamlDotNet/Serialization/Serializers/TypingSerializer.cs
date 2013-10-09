@@ -89,5 +89,24 @@ namespace YamlDotNet.Serialization.Serializers
 
 			return base.ReadYaml(context, value, typeDescriptor);
 		}
+
+		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		{
+			var type = typeDescriptor != null ? typeDescriptor.Type : null;
+
+			// Allow to serialize back to plain YAML !!map and !!seq if the expected type is an object
+			// and the value is of the type Dictionary<object, object> or List<object>
+			if (value != null && type == typeof(object))
+			{
+				var valueType = value.GetType();
+				if (valueType == typeof (Dictionary<object, object>) || valueType == typeof(List<object>))
+				{
+					typeDescriptor = context.FindTypeDescriptor(valueType);
+				}
+			}
+			
+			base.WriteYaml(context, value, typeDescriptor);
+		}
+
 	}
 }

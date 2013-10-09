@@ -96,12 +96,22 @@ namespace YamlDotNet.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		public void Serialize(Stream stream, object graph)
 		{
+			Serialize(stream, graph, null);
+		}
+
+		/// <summary>
+		/// Serializes the specified object.
+		/// </summary>
+		/// <param name="stream">The stream.</param>
+		/// <param name="graph">The object to serialize.</param>
+		public void Serialize(Stream stream, object graph, Type expectedType)
+		{
 			var writer = new StreamWriter(stream);
 			try
 			{
-				Serialize(writer, graph);
+				Serialize(writer, graph, expectedType);
 			}
-			finally 
+			finally
 			{
 				try
 				{
