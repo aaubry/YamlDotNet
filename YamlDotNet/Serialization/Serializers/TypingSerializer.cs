@@ -55,8 +55,13 @@ namespace YamlDotNet.Serialization.Serializers
 				return new ValueResult(value);
 			}
 
-			// If type and value are nulls
-			if (type == null && value == null)
+			// If type is null or equal to typeof(object) and value is null
+			// and we have a node starting with a Sequence or Mapping
+			// Set the type to accept IList<object> for sequences
+			// or IDictionary<object, object> for mappings
+			// This allow to load any YAML documents into dictionary/list
+			// automatically
+			if ((type == null || type == typeof(object)) && value == null)
 			{
 				// If the node is a sequence start, fallback to a IList<object>
 				if (node is SequenceStart)
