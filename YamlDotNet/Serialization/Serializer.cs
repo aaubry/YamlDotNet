@@ -71,7 +71,21 @@ namespace YamlDotNet.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		public void Serialize(Stream stream, object graph)
 		{
-			Serialize(new StreamWriter(stream), graph);
+			var writer = new StreamWriter(stream);
+			try
+			{
+				Serialize(writer, graph);
+			}
+			finally 
+			{
+				try
+				{
+					writer.Flush();
+				}
+				catch (Exception)
+				{
+				}
+			}
 		}
 
 		/// <summary>
