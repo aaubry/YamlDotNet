@@ -85,6 +85,34 @@ namespace YamlDotNetEditor
 
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = "YamlDotNetEditor")]
+	[Name("YamlNumber")]
+	[UserVisible(true)] //this should be visible to the end user
+	[Order(Before = Priority.Default)] //set the priority to be after the default classifiers
+	internal sealed class YamlNumberFormat : ClassificationFormatDefinition
+	{
+		public YamlNumberFormat()
+		{
+			DisplayName = "YAML Number"; //human readable version of the name
+			ForegroundColor = Color.FromRgb(181, 206, 168);
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = "YamlDotNetEditor")]
+	[Name("YamlString")]
+	[UserVisible(true)] //this should be visible to the end user
+	[Order(Before = Priority.Default)] //set the priority to be after the default classifiers
+	internal sealed class YamlStringFormat : ClassificationFormatDefinition
+	{
+		public YamlStringFormat()
+		{
+			DisplayName = "YAML String"; //human readable version of the name
+			ForegroundColor = Color.FromRgb(214, 157, 133);
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = "YamlDotNetEditor")]
 	[Name("YamlTag")]
 	[UserVisible(true)] //this should be visible to the end user
 	[Order(Before = Priority.Default)] //set the priority to be after the default classifiers

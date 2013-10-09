@@ -44,6 +44,14 @@ namespace YamlDotNetEditor
 		internal static ClassificationTypeDefinition YamlValueType = null;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[Name("YamlNumber")]
+		internal static ClassificationTypeDefinition YamlNumberType = null;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[Name("YamlString")]
+		internal static ClassificationTypeDefinition YamlStringType = null;
+		
+		[Export(typeof(ClassificationTypeDefinition))]
 		[Name("YamlTag")]
 		internal static ClassificationTypeDefinition YamlTagType = null;
 

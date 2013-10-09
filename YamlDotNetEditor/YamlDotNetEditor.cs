@@ -29,6 +29,7 @@ using System.IO;
 using Microsoft.VisualStudio.Language.StandardClassification;
 using System.Text.RegularExpressions;
 using YamlDotNet;
+using YamlDotNet.Schemas;
 using YamlDotNet.Tokens;
 
 namespace YamlDotNetEditor
@@ -63,11 +64,14 @@ namespace YamlDotNetEditor
 	/// </summary>
 	class YamlDotNetEditor : IClassifier
 	{
+		private readonly CoreSchema schema;
 		private readonly IClassificationType _comment;
 		private readonly IClassificationType _anchor;
 		private readonly IClassificationType _alias;
 		private readonly IClassificationType _key;
 		private readonly IClassificationType _value;
+		private readonly IClassificationType _number;
+		private readonly IClassificationType _string;
 		private readonly IClassificationType _tag;
 		private readonly IClassificationType _symbol;
 		private readonly IClassificationType _directive;
@@ -75,11 +79,14 @@ namespace YamlDotNetEditor
 
 		internal YamlDotNetEditor(IClassificationTypeRegistryService registry)
 		{
+			schema = new CoreSchema();
 			_comment = registry.GetClassificationType(PredefinedClassificationTypeNames.Comment);
 			_anchor = registry.GetClassificationType("YamlAnchor");
 			_alias = registry.GetClassificationType("YamlAlias");
 			_key = registry.GetClassificationType("YamlKey");
 			_value = registry.GetClassificationType("YamlValue");
+			_number = registry.GetClassificationType("YamlNumber");
+			_string = registry.GetClassificationType("YamlString");
 			_tag = registry.GetClassificationType("YamlTag");
 			_symbol = registry.GetClassificationType("YamlSymbol");
 			_directive = registry.GetClassificationType("YamlDirective");
@@ -153,7 +160,31 @@ namespace YamlDotNetEditor
 					}
 					else if (currentTokenType == typeof(Scalar))
 					{
-						classificationType = previousTokenType == typeof(Key) ? _key : _value;
+						if (previousTokenType == typeof (Key))
+						{
+							classificationType = _key;
+						}
+						else
+						{
+							// Decode the scalar
+							var scalarToken = (Scalar) scanner.Current;
+							var scalar = new YamlDotNet.Events.Scalar(scalarToken.Value);
+							switch (schema.GetDefaultTag(scalar))
+							{
+								case JsonSchema.BoolShortTag:
+								case JsonSchema.FloatShortTag:
+								case JsonSchema.IntShortTag:
+									classificationType = _number;
+									break;
+								case SchemaBase.StrShortTag:
+									classificationType = scalarToken.Style == ScalarStyle.DoubleQuoted || scalarToken.Style == ScalarStyle.SingleQuoted ? _string : _value;
+									break;
+								default:
+									classificationType = _value;
+									break;
+							}
+						}
+						
 					}
 					else if (currentTokenType == typeof(Tag))
 					{
