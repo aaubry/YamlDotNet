@@ -10,10 +10,10 @@ namespace YamlDotNet.Serialization
 	/// </summary>
 	public sealed class SerializerSettings
 	{
-		private readonly AttributeRegistry attributeRegistry;
 		internal readonly List<IYamlSerializableFactory> factories = new List<IYamlSerializableFactory>();
 		internal readonly Dictionary<Type, IYamlSerializable> serializers = new Dictionary<Type, IYamlSerializable>();
 		internal readonly ITagTypeRegistry tagTypeRegistry;
+		private IAttributeRegistry attributeRegistry;
 		private readonly IYamlSchema schema;
 		private IObjectFactory objectFactory;
 		private int preferredIndent;
@@ -146,9 +146,14 @@ namespace YamlDotNet.Serialization
 		/// Gets the attribute registry.
 		/// </summary>
 		/// <value>The attribute registry.</value>
-		public AttributeRegistry Attributes
+		public IAttributeRegistry Attributes
 		{
 			get { return attributeRegistry; }
+			set
+			{
+				if (value == null) throw new ArgumentNullException("value");
+				attributeRegistry = value;
+			}
 		}
 
 		/// <summary>
