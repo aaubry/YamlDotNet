@@ -349,6 +349,33 @@ Value: 0
 			}
 		}
 
+		public class ClassWithObjectAndScalar
+		{
+			public ClassWithObjectAndScalar()
+			{
+				Value1 = 1;
+				Value2 = 2.0f;
+				Value3 = "3";
+				Value4 = (byte)4;
+			}
+
+			public object Value1;
+
+			public object Value2;
+
+			public object Value3;
+
+			public object Value4;
+		}
+
+		[Fact]
+		public void TestClassWithObjectAndScalar()
+		{
+			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			settings.RegisterTagMapping("ClassWithObjectAndScalar", typeof(ClassWithObjectAndScalar));
+			SerialRoundTrip(settings, new ClassWithObjectAndScalar());
+		}
+
 		[Fact]
 		public void TestIEnumerable()
 		{
