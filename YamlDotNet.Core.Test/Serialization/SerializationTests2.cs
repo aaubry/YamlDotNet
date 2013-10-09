@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 using YamlDotNet.Serialization;
 
@@ -340,6 +341,36 @@ Value: 0
 			SerialRoundTrip(settings, new ClassMemberOrder());
 		}
 
+		public class ClassWithMemberIEnumerable
+		{
+			public IEnumerable<int> Keys
+			{
+				get { return Enumerable.Range(0, 10); }
+			}
+		}
+
+		[Fact]
+		public void TestIEnumerable()
+		{
+			var serializer = new Serializer();
+			var text = serializer.Serialize(new ClassWithMemberIEnumerable(), typeof (ClassWithMemberIEnumerable));
+			Assert.Throws<YamlException>(() => serializer.Deserialize(text, typeof(ClassWithMemberIEnumerable)));
+			var value = serializer.Deserialize(text);
+
+			Assert.True(value is IDictionary<object, object>);
+			var dictionary = (IDictionary<object, object>) value;
+			Assert.True(dictionary.ContainsKey("Keys"));
+			Assert.True( dictionary["Keys"] is IList<object>);
+			var list = (IList<object>) dictionary["Keys"];
+			Assert.Equal(list.OfType<int>(), new ClassWithMemberIEnumerable().Keys);
+
+			// Test simple IEnumerable
+			var iterator = Enumerable.Range(0, 10);
+			var values = serializer.Deserialize(serializer.Serialize(iterator, iterator.GetType()));
+			Assert.True(value is IEnumerable);
+			Assert.Equal(((IEnumerable<object>)values).OfType<int>(), iterator);
+		}
+
 		private void SerialRoundTrip(SerializerSettings settings, string text)
 		{
 			var serializer = new Serializer(settings);
@@ -361,11 +392,11 @@ Value: 0
 			Assert.Equal(text, text2);
 		}
 
-		private void SerialRoundTrip(SerializerSettings settings, object value)
+		private void SerialRoundTrip(SerializerSettings settings, object value, Type expectedType = null)
 		{
 			var serializer = new Serializer(settings);
 
-			var text = serializer.Serialize(value);
+			var text = serializer.Serialize(value, expectedType);
 			Console.WriteLine("Text serialize:");
 			Console.WriteLine("------------------");
 			Console.WriteLine(text);

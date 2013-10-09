@@ -40,6 +40,12 @@ namespace YamlDotNet.Serialization
 		IMemberDescriptor this[string name] { get; }
 
 		/// <summary>
+		/// Gets a value indicating whether this instance is a compiler generated type.
+		/// </summary>
+		/// <value><c>true</c> if this instance is a compiler generated type; otherwise, <c>false</c>.</value>
+		bool IsCompilerGenerated { get; }
+
+		/// <summary>
 		/// Determines whether this instance contains a member with the specified member name.
 		/// </summary>
 		/// <param name="memberName">Name of the member.</param>

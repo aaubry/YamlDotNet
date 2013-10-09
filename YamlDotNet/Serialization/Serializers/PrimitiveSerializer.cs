@@ -89,6 +89,14 @@ namespace YamlDotNet.Serialization.Serializers
 			// If we are expecting a type object, return directly the string
 			if (type == typeof (object))
 			{
+				// Try to parse the scalar directly
+				string defaultTag;
+				object scalarValue;
+				if (context.Schema.TryParse(scalar, true, out defaultTag, out scalarValue))
+				{
+					return scalarValue;
+				}
+				
 				return text;
 			}
 

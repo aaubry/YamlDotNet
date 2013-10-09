@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace YamlDotNet.Serialization.Descriptors
 {
@@ -59,6 +60,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			this.emitDefaultValues = emitDefaultValues;
 			this.AttributeRegistry = attributeRegistry;
 			this.type = type;
+			this.IsCompilerGenerated = type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), true).Length > 0;
 			var memberList = PrepareMembers();
 
 			// Sort members by name
@@ -131,6 +133,8 @@ namespace YamlDotNet.Serialization.Descriptors
 			}
 		}
 
+		public bool IsCompilerGenerated { get; private set; }
+
 		public bool Contains(string memberName)
 		{
 			return mapMembers != null && mapMembers.ContainsKey(memberName);
@@ -138,7 +142,6 @@ namespace YamlDotNet.Serialization.Descriptors
 
 		protected virtual List<IMemberDescriptor> PrepareMembers()
 		{
-
 			// Add all public properties with a readable get method
 			var memberList = (from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 							  where

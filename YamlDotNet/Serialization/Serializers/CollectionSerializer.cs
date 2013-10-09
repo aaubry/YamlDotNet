@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
@@ -53,8 +54,8 @@ namespace YamlDotNet.Serialization.Serializers
 
 		protected override SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			var collection = (ICollection) thisObject;
-			return collection.Count < context.Settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block;
+			var collection = thisObject as ICollection;
+			return collection == null || collection.Count >= context.Settings.LimitFlowSequence ? SequenceStyle.Block : SequenceStyle.Flow;
 		}
 
 		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
@@ -96,7 +97,12 @@ namespace YamlDotNet.Serialization.Serializers
 
 			public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
-				var list = (IList)thisObject;
+				var list = thisObject as IList;
+				if (list == null)
+				{
+					throw new InvalidOperationException("Cannot deserialize list to type [{0}]".DoFormat(typeDescriptor.Type));
+				}
+
 				var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 
 				var valueResult = context.ReadYaml(null, collectionDescriptor.ElementType);
@@ -114,13 +120,13 @@ namespace YamlDotNet.Serialization.Serializers
 
 			protected override SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
-				var collection = (ICollection)thisObject;
-				return collection.Count < context.Settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block;
+				var collection = thisObject as ICollection;
+				return collection == null || collection.Count >= context.Settings.LimitFlowSequence ? SequenceStyle.Block : SequenceStyle.Flow;
 			}
 
 			public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 			{
-				var collection = (ICollection)thisObject;
+				var collection = (IEnumerable)thisObject;
 				var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 
 				foreach (var item in collection)

@@ -65,5 +65,11 @@ namespace YamlDotNet.Serialization.Descriptors
 		{
 			return !type.IsArray && (typeof (ICollection).IsAssignableFrom(type) || type.HasInterface(typeof(ICollection<>)) || typeof(IEnumerable).IsAssignableFrom(type));
 		}
+
+		protected override bool PrepareMember(MemberDescriptorBase member)
+		{
+			// Exclude members for compiler generated collections
+			return !IsCompilerGenerated && base.PrepareMember(member);
+		}
 	}
 }
