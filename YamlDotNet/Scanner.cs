@@ -38,6 +38,14 @@ namespace YamlDotNet
 		private readonly Stack<int> indents = new Stack<int>();
 		private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
 		private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
+
+		// Used by ScanFlowScalar, this will reduce memory usage by /2
+		private readonly StringBuilder scanScalarValue = new StringBuilder();
+		private readonly StringBuilder scanScalarWhitespaces = new StringBuilder();
+		private readonly StringBuilder scanScalarLeadingBreak = new StringBuilder();
+		private readonly StringBuilder scanScalarTrailingBreaks = new StringBuilder();
+
+
 		private bool streamStartProduced;
 		private bool streamEndProduced;
 		private int indent = -1;
@@ -1566,7 +1574,6 @@ namespace YamlDotNet
 		/// <summary>
 		/// Scan a quoted scalar.
 		/// </summary>
-
 		private Token ScanFlowScalar(bool isSingleQuoted)
 		{
 			// Eat the left quote.
@@ -1576,11 +1583,10 @@ namespace YamlDotNet
 			Skip();
 
 			// Consume the content of the quoted scalar.
-
-			StringBuilder value = new StringBuilder();
-			StringBuilder whitespaces = new StringBuilder();
-			StringBuilder leadingBreak = new StringBuilder();
-			StringBuilder trailingBreaks = new StringBuilder();
+			scanScalarValue.Clear();
+			scanScalarWhitespaces.Clear();
+			scanScalarLeadingBreak.Clear();
+			scanScalarTrailingBreaks.Clear();
 			for (; ;)
 			{
 				// Check that there are no document indicators at the beginning of the line.
@@ -1607,7 +1613,7 @@ namespace YamlDotNet
 
 					if (isSingleQuoted && analyzer.Check('\'', 0) && analyzer.Check('\'', 1))
 					{
-						value.Append('\'');
+						scanScalarValue.Append('\'');
 						Skip();
 						Skip();
 					}
@@ -1656,7 +1662,7 @@ namespace YamlDotNet
 								char unescapedCharacter;
 								if (simpleEscapeCodes.TryGetValue(escapeCharacter, out unescapedCharacter))
 								{
-									value.Append(unescapedCharacter);
+									scanScalarValue.Append(unescapedCharacter);
 								}
 								else
 								{
@@ -1692,7 +1698,7 @@ namespace YamlDotNet
 								throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, find invalid Unicode character escape code.");
 							}
 
-							value.Append((char)character);
+							scanScalarValue.Append((char)character);
 
 							// Advance the pointer.
 
@@ -1706,7 +1712,7 @@ namespace YamlDotNet
 					{
 						// It is a non-escaped non-blank character.
 
-						value.Append(ReadCurrentCharacter());
+						scanScalarValue.Append(ReadCurrentCharacter());
 					}
 				}
 
@@ -1725,7 +1731,7 @@ namespace YamlDotNet
 
 						if (!hasLeadingBlanks)
 						{
-							whitespaces.Append(ReadCurrentCharacter());
+							scanScalarWhitespaces.Append(ReadCurrentCharacter());
 						}
 						else
 						{
@@ -1738,13 +1744,13 @@ namespace YamlDotNet
 
 						if (!hasLeadingBlanks)
 						{
-							whitespaces.Length = 0;
-							leadingBreak.Append(ReadLine());
+							scanScalarWhitespaces.Length = 0;
+							scanScalarLeadingBreak.Append(ReadLine());
 							hasLeadingBlanks = true;
 						}
 						else
 						{
-							trailingBreaks.Append(ReadLine());
+							scanScalarTrailingBreaks.Append(ReadLine());
 						}
 					}
 				}
@@ -1755,29 +1761,29 @@ namespace YamlDotNet
 				{
 					// Do we need to fold line breaks?
 
-					if (StartsWith(leadingBreak, '\n'))
+					if (StartsWith(scanScalarLeadingBreak, '\n'))
 					{
-						if (trailingBreaks.Length == 0)
+						if (scanScalarTrailingBreaks.Length == 0)
 						{
-							value.Append(' ');
+							scanScalarValue.Append(' ');
 						}
 						else
 						{
-							value.Append(trailingBreaks.ToString());
+							scanScalarValue.Append(scanScalarTrailingBreaks.ToString());
 						}
 					}
 					else
 					{
-						value.Append(leadingBreak.ToString());
-						value.Append(trailingBreaks.ToString());
+						scanScalarValue.Append(scanScalarLeadingBreak.ToString());
+						scanScalarValue.Append(scanScalarTrailingBreaks.ToString());
 					}
-					leadingBreak.Length = 0;
-					trailingBreaks.Length = 0;
+					scanScalarLeadingBreak.Length = 0;
+					scanScalarTrailingBreaks.Length = 0;
 				}
 				else
 				{
-					value.Append(whitespaces.ToString());
-					whitespaces.Length = 0;
+					scanScalarValue.Append(scanScalarWhitespaces.ToString());
+					scanScalarWhitespaces.Length = 0;
 				}
 			}
 
@@ -1785,7 +1791,7 @@ namespace YamlDotNet
 
 			Skip();
 
-			return new Scalar(value.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted);
+			return new Scalar(scanScalarValue.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted);
 		}
 
 		/// <summary>
