@@ -1579,6 +1579,7 @@ namespace YamlDotNet
 			// Eat the left quote.
 
 			Mark start = mark;
+		    Mark end = mark;
 
 			Skip();
 
@@ -1788,10 +1789,10 @@ namespace YamlDotNet
 			}
 
 			// Eat the right quote.
-
 			Skip();
 
-			return new Scalar(scanScalarValue.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted);
+			end = mark;
+			return new Scalar(scanScalarValue.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted, start, end);
 		}
 
 		/// <summary>
