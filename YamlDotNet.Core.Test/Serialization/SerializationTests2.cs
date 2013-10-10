@@ -565,6 +565,24 @@ Value: 0
 			var settings = new SerializerSettings() { EmitShortTypeName = true };
 			SerialRoundTrip(settings, new ClassWithObjectAndScalar());
 		}
+
+		public class ClassWithChars
+		{
+			public char Start;
+
+			public char End;
+		}
+
+		[Fact]
+		public void TestClassWithChars()
+		{
+			var settings = new SerializerSettings() { EmitShortTypeName = true };
+			SerialRoundTrip(settings, new ClassWithChars()
+			{
+				Start = ' ',
+				End = '\x7f'
+			});
+		}
 		
 		private void SerialRoundTrip(SerializerSettings settings, string text, Type serializedType = null)
 		{

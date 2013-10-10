@@ -62,6 +62,13 @@ namespace YamlDotNet.Serialization.Serializers
 			// Parse default types 
 			switch (Type.GetTypeCode(type))
 			{
+				case TypeCode.Char:
+					if (text.Length != 1)
+					{
+						throw new YamlException(scalar.Start, scalar.End, "Unable to decode char from [{0}]. Expecting a string of length == 1".DoFormat(text));
+					}
+					return text.ToCharArray()[0];
+					break;
 				case TypeCode.Byte:
 					return byte.Parse(text, CultureInfo.InvariantCulture);
 				case TypeCode.SByte:
