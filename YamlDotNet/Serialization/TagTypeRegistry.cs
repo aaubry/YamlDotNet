@@ -32,6 +32,12 @@ namespace YamlDotNet.Serialization
 			lookupAssemblies = new List<Assembly>();
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether [use short type name].
+		/// </summary>
+		/// <value><c>true</c> if [use short type name]; otherwise, <c>false</c>.</value>
+		public bool UseShortTypeName { get; set; }
+
 		public void RegisterAssembly(Assembly assembly)
 		{
 			if (assembly == null) throw new ArgumentNullException("assembly");
@@ -111,7 +117,7 @@ namespace YamlDotNet.Serialization
 
 			// Register a type that was found
 			tagToType.Add(shortTag, type);
-			if (type != null)
+			if (type != null && !typeToTag.ContainsKey(type))
 			{
 				typeToTag.Add(type, shortTag);
 			}
@@ -132,7 +138,9 @@ namespace YamlDotNet.Serialization
 			{
 				// Else try to use schema tag for scalars
 				// Else use full name of the type
-				tagName = schema.GetDefaultTag(type) ?? string.Format("!{0}", type.FullName);
+				var typeName = UseShortTypeName ? type.GetShortAssemblyQualifiedName() : type.AssemblyQualifiedName;
+				tagName = schema.GetDefaultTag(type) ?? Uri.EscapeUriString(string.Format("!{0}", typeName));
+				typeToTag.Add(type, tagName);
 			}
 
 			return tagName;

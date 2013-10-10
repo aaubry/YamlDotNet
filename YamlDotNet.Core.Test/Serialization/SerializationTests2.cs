@@ -558,6 +558,13 @@ Value: 0
 			Assert.True(obj is ClassMemberWithInheritance);
 			Assert.Equal(original, obj);
 		}
+
+		[Fact]
+		public void TestEmitShortTypeName()
+		{
+			var settings = new SerializerSettings() { EmitShortTypeName = true };
+			SerialRoundTrip(settings, new ClassWithObjectAndScalar());
+		}
 		
 		private void SerialRoundTrip(SerializerSettings settings, string text, Type serializedType = null)
 		{

@@ -41,6 +41,32 @@ namespace YamlDotNet
 		}
 
 		/// <summary>
+		/// Gets the assembly qualified name of the type, but without the assembly version or public token.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns>The assembly qualified name of the type, but without the assembly version or public token.</returns>
+		/// <exception cref="System.InvalidOperationException">Unable to get an assembly qualified name for type [{0}].DoFormat(type)</exception>
+		public static string GetShortAssemblyQualifiedName(this Type type)
+		{
+			var typeName = type.AssemblyQualifiedName;
+			if (typeName == null)
+			{
+				throw new InvalidOperationException("Unable to get an assembly qualified name for type [{0}]".DoFormat(type));
+			}
+
+			var indexAfterType = typeName.IndexOf(',');
+			if (indexAfterType >= 0)
+			{
+				var indexAfterAssembly = typeName.IndexOf(',', indexAfterType + 1);
+				if (indexAfterAssembly >= 0)
+				{
+					typeName = typeName.Substring(0, indexAfterAssembly).Replace(" ", string.Empty);
+				}
+			}
+			return typeName;
+		}
+
+		/// <summary>
 		/// Determines whether the specified type is an anonymous type.
 		/// </summary>
 		/// <param name="type">The type.</param>

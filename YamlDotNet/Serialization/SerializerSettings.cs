@@ -12,7 +12,7 @@ namespace YamlDotNet.Serialization
 	{
 		internal readonly List<IYamlSerializableFactory> factories = new List<IYamlSerializableFactory>();
 		internal readonly Dictionary<Type, IYamlSerializable> serializers = new Dictionary<Type, IYamlSerializable>();
-		internal readonly ITagTypeRegistry tagTypeRegistry;
+		internal readonly TagTypeRegistry tagTypeRegistry;
 		private IAttributeRegistry attributeRegistry;
 		private readonly IYamlSchema schema;
 		private IObjectFactory objectFactory;
@@ -110,6 +110,16 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <value><c>true</c> if to emit default value; otherwise, <c>false</c>.</value>
 		public bool EmitDefaultValues { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether to emit short type name (type, assembly name) or full <see cref="Type.AssemblyQualifiedName"/>. Default is false.
+		/// </summary>
+		/// <value><c>true</c> to emit short type name; otherwise, <c>false</c>.</value>
+		public bool EmitShortTypeName
+		{
+			get { return tagTypeRegistry.UseShortTypeName; }
+			set { tagTypeRegistry.UseShortTypeName = value; }
+		}
 
 		/// <summary>
 		/// Gets or sets the prefix used to serialize items for a non pure <see cref="System.Collections.IDictionary" /> or
