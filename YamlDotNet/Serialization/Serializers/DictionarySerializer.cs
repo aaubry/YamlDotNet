@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Events;
@@ -9,11 +8,8 @@ namespace YamlDotNet.Serialization.Serializers
 {
 	internal class DictionarySerializer : ObjectSerializer
 	{
-		private readonly PureDictionarySerializer pureDictionarySerializer;
-
 		public DictionarySerializer()
 		{
-			pureDictionarySerializer = new PureDictionarySerializer();
 		}
 
 		public override IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
@@ -27,7 +23,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 			if (dictionaryDescriptor.IsPureDictionary)
 			{
-				pureDictionarySerializer.ReadItem(context, thisObject, typeDescriptor);
+				ReadPureDictionaryItems(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -36,8 +32,12 @@ namespace YamlDotNet.Serialization.Serializers
 				{
 					if (keyEvent.Value == context.Settings.SpecialCollectionMember)
 					{
-						context.Reader.Parser.MoveNext();
-						pureDictionarySerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
+						var reader = context.Reader;
+						reader.Parser.MoveNext();
+
+						reader.Expect<MappingStart>();
+						ReadPureDictionaryItems(context, thisObject, typeDescriptor);
+						reader.Expect<MappingEnd>();
 						return;
 					}
 				}
@@ -51,7 +51,7 @@ namespace YamlDotNet.Serialization.Serializers
 			var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 			if (dictionaryDescriptor.IsPureDictionary)
 			{
-				pureDictionarySerializer.WriteItems(context, thisObject, typeDescriptor);
+				WritePureDictionaryItems(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -67,16 +67,20 @@ namespace YamlDotNet.Serialization.Serializers
 				}
 
 				WriteKey(context, context.Settings.SpecialCollectionMember);
-				pureDictionarySerializer.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
+
+				context.Writer.Emit(new MappingStartEventInfo(thisObject, thisObject.GetType()));
+				WritePureDictionaryItems(context, thisObject, typeDescriptor);
+				context.Writer.Emit(new MappingEndEventInfo(thisObject, thisObject.GetType()));
 			}
 		}
 
-		internal class PureDictionarySerializer : ObjectSerializer
+		private void ReadPureDictionaryItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
-			{
-				var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
+			var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 
+			var reader = context.Reader;
+			while (!reader.Accept<MappingEnd>())
+			{
 				var keyResult = context.ReadYaml(null, dictionaryDescriptor.KeyType);
 				var valueResult = context.ReadYaml(null, dictionaryDescriptor.ValueType);
 
@@ -87,16 +91,23 @@ namespace YamlDotNet.Serialization.Serializers
 					{
 						if (valueResult.IsAlias)
 						{
-							context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, context.GetAliasValue(valueResult.Alias)));
+							context.AddAliasBinding(keyResult.Alias,
+							                        deferredKey =>
+							                        dictionaryDescriptor.AddToDictionary(thisObject, deferredKey,
+							                                                             context.GetAliasValue(valueResult.Alias)));
 						}
 						else
 						{
-							context.AddAliasBinding(keyResult.Alias, deferredKey => dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, valueResult.Value));
+							context.AddAliasBinding(keyResult.Alias,
+							                        deferredKey =>
+							                        dictionaryDescriptor.AddToDictionary(thisObject, deferredKey, valueResult.Value));
 						}
 					}
 					else
 					{
-						context.AddAliasBinding(valueResult.Alias, deferredAlias => dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, deferredAlias));
+						context.AddAliasBinding(valueResult.Alias,
+						                        deferredAlias =>
+						                        dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, deferredAlias));
 					}
 				}
 				else
@@ -104,40 +115,40 @@ namespace YamlDotNet.Serialization.Serializers
 					dictionaryDescriptor.AddToDictionary(thisObject, keyResult.Value, valueResult.Value);
 				}
 			}
+		}
 
-			public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		private void WritePureDictionaryItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		{
+			var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
+
+			var keyValues = dictionaryDescriptor.GetEnumerator(thisObject).ToList();
+
+			if (context.Settings.SortKeyForMapping)
 			{
-				var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
-
-				var keyValues = dictionaryDescriptor.GetEnumerator(thisObject).ToList();
-
-				if (context.Settings.SortKeyForMapping)
-				{
-					keyValues.Sort(SortDictionaryByKeys);
-				}
-
-				var keyType = dictionaryDescriptor.KeyType;
-				var valueType = dictionaryDescriptor.ValueType;
-				foreach (var keyValue in keyValues)
-				{
-					context.WriteYaml(keyValue.Key, keyType);
-					context.WriteYaml(keyValue.Value, valueType);
-				}
+				keyValues.Sort(SortDictionaryByKeys);
 			}
 
-			private static int SortDictionaryByKeys(KeyValuePair<object, object> left, KeyValuePair<object, object> right)
+			var keyType = dictionaryDescriptor.KeyType;
+			var valueType = dictionaryDescriptor.ValueType;
+			foreach (var keyValue in keyValues)
 			{
-				if (left.Key is string && right.Key is string)
-				{
-					return string.CompareOrdinal((string) left.Key, (string) right.Key);
-				}
-
-				if (left.Key is IComparable && right.Key is IComparable)
-				{
-					return ((IComparable) left.Key).CompareTo(right.Key);
-				}
-				return 0;
+				context.WriteYaml(keyValue.Key, keyType);
+				context.WriteYaml(keyValue.Value, valueType);
 			}
+		}
+
+		private static int SortDictionaryByKeys(KeyValuePair<object, object> left, KeyValuePair<object, object> right)
+		{
+			if (left.Key is string && right.Key is string)
+			{
+				return string.CompareOrdinal((string)left.Key, (string)right.Key);
+			}
+
+			if (left.Key is IComparable && right.Key is IComparable)
+			{
+				return ((IComparable)left.Key).CompareTo(right.Key);
+			}
+			return 0;
 		}
 	}
 }

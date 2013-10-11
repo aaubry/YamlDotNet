@@ -110,95 +110,85 @@ namespace YamlDotNet.Serialization.Serializers
 			throw new YamlException(scalar.Start, scalar.End, "Unable to decode scalar [{0}] not supported by current schema".DoFormat(scalar));
 		}
 
-		public override void ConvertTo(SerializerContext context, object value, ScalarEventInfo scalar, ITypeDescriptor typeDescriptor)
+		public override string ConvertTo(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
-			var primitiveType = (PrimitiveDescriptor)typeDescriptor;
-			var type = primitiveType.Type;
-
+			var text = string.Empty;
 			// Return null if expected type is an object and scalar is null
 			if (value == null)
 			{
-				scalar.RenderedValue = string.Empty;
+				return text;
+			}
+
+			var valueType = value.GetType();
+
+			// Handle string
+			if (valueType.IsEnum)
+			{
+				text = ((Enum) Enum.ToObject(valueType, value)).ToString("G");
 			}
 			else
 			{
-				var valueType = value.GetType();
-				scalar.Tag = valueType != type ? context.TagFromType(valueType) : null;
-
-				string text = null;
-
-				// Handle string
-				if (valueType.IsEnum)
+				// Parse default types 
+				switch (Type.GetTypeCode(valueType))
 				{
-					text = ((Enum) Enum.ToObject(valueType, value)).ToString("G");
-				}
-				else
-				{
-					// Parse default types 
-					switch (Type.GetTypeCode(valueType))
-					{
-						case TypeCode.String:
-						case TypeCode.Char:
-							scalar.Style = ScalarStyle.Any;
+					case TypeCode.String:
+					case TypeCode.Char:
+						text = value.ToString();
+						break;
+					case TypeCode.Boolean:
+						text = (bool) value ? "true" : "false";
+						break;
+					case TypeCode.Byte:
+						text = ((byte) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.SByte:
+						text = ((sbyte) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.Int16:
+						text = ((short) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.UInt16:
+						text = ((ushort) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.Int32:
+						text = ((int) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.UInt32:
+						text = ((uint) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.Int64:
+						text = ((long) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.UInt64:
+						text = ((ulong) value).ToString("G", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.Single:
+						text = ((float) value).ToString("R", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.Double:
+						text = ((double) value).ToString("R", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.Decimal:
+						text = ((decimal) value).ToString("R", CultureInfo.InvariantCulture);
+						break;
+					case TypeCode.DateTime:
+						text = ((DateTime) value).ToString("o", CultureInfo.InvariantCulture);
+						break;
+					default:
+						if (valueType == typeof (TimeSpan))
+						{
 							text = value.ToString();
-							break;
-						case TypeCode.Boolean:
-							text = (bool) value ? "true" : "false";
-							break;
-						case TypeCode.Byte:
-							text = ((byte) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.SByte:
-							text = ((sbyte) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.Int16:
-							text = ((short) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.UInt16:
-							text = ((ushort) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.Int32:
-							text = ((int) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.UInt32:
-							text = ((uint) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.Int64:
-							text = ((long) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.UInt64:
-							text = ((ulong) value).ToString("G", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.Single:
-							text = ((float) value).ToString("R", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.Double:
-							text = ((double) value).ToString("R", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.Decimal:
-							text = ((decimal) value).ToString("R", CultureInfo.InvariantCulture);
-							break;
-						case TypeCode.DateTime:
-							text = ((DateTime) value).ToString("o", CultureInfo.InvariantCulture);
-							break;
-						default:
-							if (valueType == typeof(TimeSpan))
-							{
-								text = value.ToString();
-							}
-							break;
-					}
+						}
+						break;
 				}
-
-				// TODO handle timestamp
-
-				if (text == null)
-				{
-					throw new YamlException("Unable to serialize scalar [{0}] not supported".DoFormat(value));
-				}
-
-				scalar.RenderedValue = text;
 			}
+
+			if (text == null)
+			{
+				throw new YamlException("Unable to serialize scalar [{0}] not supported".DoFormat(value));
+			}
+
+			return text;
 		}
 	}
 }

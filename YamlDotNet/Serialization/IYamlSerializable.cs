@@ -30,10 +30,10 @@ namespace YamlDotNet.Serialization
 		/// Reads this object's state from a YAML parser.
 		/// </summary>
 		/// <param name="context">The context.</param>
-		/// <param name="value"></param>
-		/// <param name="typeDescriptor"></param>
+		/// <param name="value">The value.</param>
+		/// <param name="typeDescriptor">The type descriptor.</param>
 		/// <returns>A instance of the object deserialized from Yaml.</returns>
-		ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor);
+		ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor);
 
 		/// <summary>
 		/// Writes this object's state to a YAML emitter.
@@ -41,6 +41,6 @@ namespace YamlDotNet.Serialization
 		/// <param name="context">The context.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="typeDescriptor"></param>
-		void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor);
+		void WriteYaml(SerializerContext context, ValueInput input, ITypeDescriptor typeDescriptor);
 	}
 }

@@ -135,5 +135,11 @@ namespace YamlDotNet.Schemas
 			// We are not calling the base as we want to completely override scalar rules
 			// and in order to have a more concise set of regex
 		}
+
+		protected override void RegisterDefaultTagMappings()
+		{
+			base.RegisterDefaultTagMappings();
+			RegisterDefaultTagMapping<DateTime>(TimestampShortTag, true);
+		}
 	}
 }

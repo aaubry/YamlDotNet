@@ -38,7 +38,6 @@ namespace YamlDotNet.Serialization
 				new DictionarySerializer(),
 				new CollectionSerializer(),
 				new ArraySerializer(),
-				new NullableSerializer(), 
 				new ObjectSerializer(),
 			};
 
@@ -377,7 +376,7 @@ namespace YamlDotNet.Serialization
 				routintSerializer.AddSerializerFactory(defaultFactory);
 			}
 
-			var typingSerializer = new TypingSerializer(routintSerializer);
+			var typingSerializer = new TagTypeSerializer(routintSerializer);
 			return settings.EmitAlias ? (IYamlSerializable)new AnchorSerializer(typingSerializer) : typingSerializer;
 		}
 

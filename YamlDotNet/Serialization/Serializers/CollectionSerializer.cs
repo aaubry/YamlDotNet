@@ -7,11 +7,8 @@ namespace YamlDotNet.Serialization.Serializers
 {
 	internal class CollectionSerializer : ObjectSerializer
 	{
-		private readonly PureCollectionSerializer pureCollectionSerializer;
-
 		public CollectionSerializer()
 		{
-			pureCollectionSerializer = new PureCollectionSerializer();
 		}
 
 		public override IYamlSerializable TryCreate(SerializerContext context, ITypeDescriptor typeDescriptor)
@@ -33,7 +30,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 			if (CheckIsSequence(collectionDescriptor))
 			{
-				pureCollectionSerializer.ReadItem(context, thisObject, typeDescriptor);
+				ReadPureCollectionItems(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -42,8 +39,13 @@ namespace YamlDotNet.Serialization.Serializers
 				{
 					if (keyEvent.Value == context.Settings.SpecialCollectionMember)
 					{
-						context.Reader.Parser.MoveNext();
-						pureCollectionSerializer.ReadYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
+						var reader = context.Reader;
+						reader.Parser.MoveNext();
+
+						// Read inner sequence
+						reader.Expect<SequenceStart>();
+						ReadPureCollectionItems(context, thisObject, typeDescriptor);
+						reader.Expect<SequenceEnd>();
 						return;
 					}
 				}
@@ -63,7 +65,7 @@ namespace YamlDotNet.Serialization.Serializers
 			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 			if (CheckIsSequence(collectionDescriptor))
 			{
-				pureCollectionSerializer.WriteItems(context, thisObject, typeDescriptor);
+				WritePureCollectionItems(context, thisObject, typeDescriptor);
 			}
 			else
 			{
@@ -84,29 +86,28 @@ namespace YamlDotNet.Serialization.Serializers
 				}
 
 				WriteKey(context, context.Settings.SpecialCollectionMember);
-				pureCollectionSerializer.WriteYaml(context, thisObject, context.FindTypeDescriptor(thisObject.GetType()));
+
+				context.Writer.Emit(new SequenceStartEventInfo(thisObject, thisObject.GetType()));
+				WritePureCollectionItems(context, thisObject, typeDescriptor);
+				context.Writer.Emit(new SequenceEndEventInfo(thisObject, thisObject.GetType()));
 			}
 		}
 
-		internal class PureCollectionSerializer : ObjectSerializer
+		private void ReadPureCollectionItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			protected override bool CheckIsSequence(ITypeDescriptor typeDescriptor)
+			var list = thisObject as IList;
+			if (list == null)
 			{
-				return true;
+				throw new InvalidOperationException("Cannot deserialize list to type [{0}]".DoFormat(typeDescriptor.Type));
 			}
 
-			public override void ReadItem(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
+			var reader = context.Reader;
+
+			while (!reader.Accept<SequenceEnd>())
 			{
-				var list = thisObject as IList;
-				if (list == null)
-				{
-					throw new InvalidOperationException("Cannot deserialize list to type [{0}]".DoFormat(typeDescriptor.Type));
-				}
-
-				var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
-
 				var valueResult = context.ReadYaml(null, collectionDescriptor.ElementType);
-
+	
 				// Handle aliasing
 				if (valueResult.IsAlias)
 				{
@@ -117,22 +118,16 @@ namespace YamlDotNet.Serialization.Serializers
 					list.Add(valueResult.Value);
 				}
 			}
+		}
 
-			protected override SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		private void WritePureCollectionItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		{
+			var collection = (IEnumerable)thisObject;
+			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
+
+			foreach (var item in collection)
 			{
-				var collection = thisObject as ICollection;
-				return collection == null || collection.Count >= context.Settings.LimitFlowSequence ? SequenceStyle.Block : SequenceStyle.Flow;
-			}
-
-			public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
-			{
-				var collection = (IEnumerable)thisObject;
-				var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
-
-				foreach (var item in collection)
-				{
-					context.WriteYaml(item, collectionDescriptor.ElementType);
-				}
+				context.WriteYaml(item, collectionDescriptor.ElementType);
 			}
 		}
 	}

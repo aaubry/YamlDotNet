@@ -340,11 +340,10 @@ namespace YamlDotNet.Test.Serialization
 				return new SomeCustomType(fromScalar.Value);
 			}
 
-			public override void ConvertTo(SerializerContext context, object value, ScalarEventInfo toScalar, ITypeDescriptor typeDescriptor)
+			public override string ConvertTo(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 			{
-				toScalar.RenderedValue = ((SomeCustomType) value).Value;
+				return ((SomeCustomType) value).Value;
 			}
-
 		}
 
 		[Fact]

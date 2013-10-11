@@ -1,39 +1,49 @@
-﻿using YamlDotNet.Events;
+﻿using System;
+using YamlDotNet.Events;
 
 namespace YamlDotNet.Serialization.Serializers
 {
 	public abstract class ScalarSerializerBase : IYamlSerializable
 	{
-		public ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var scalar = context.Reader.Expect<Scalar>();
-			return new ValueResult(ConvertFrom(context, value, scalar, typeDescriptor));
+			return new ValueOutput(ConvertFrom(context, value, scalar, typeDescriptor));
 		}
 
 		public abstract object ConvertFrom(SerializerContext context, object value, Scalar fromScalar, ITypeDescriptor typeDescriptor);
 
-		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public void WriteYaml(SerializerContext context, ValueInput input, ITypeDescriptor typeDescriptor)
 		{
-			var valueType = value != null ? value.GetType() : typeDescriptor != null ? typeDescriptor.Type : null;
+			var value = input.Value;
+			var typeOfValue = value.GetType();
 
-			var scalar = new ScalarEventInfo(value, valueType)
+			var isSchemaImplicitTag = context.Schema.IsTagImplicit(input.Tag);
+			var scalar = new ScalarEventInfo(value, typeOfValue)
 				{
-					IsPlainImplicit = true,
+					IsPlainImplicit = isSchemaImplicitTag,
 					Style = ScalarStyle.Plain,
-					Anchor = context.GetAnchor()
+					Anchor = context.GetAnchor(),
+					Tag = input.Tag,
 				};
 
-			if (typeDescriptor == null)
+
+			// Parse default types 
+			switch (Type.GetTypeCode(typeOfValue))
 			{
-				typeDescriptor = context.FindTypeDescriptor(valueType);
+				case TypeCode.Object:
+				case TypeCode.String:
+				case TypeCode.Char:
+					scalar.Style = ScalarStyle.Any;
+					break;
 			}
 
-			ConvertTo(context, value, scalar, typeDescriptor);
+			scalar.RenderedValue =  ConvertTo(context, value, typeDescriptor);
 
 			// Emit the scalar
 			context.Writer.Emit(scalar);
 		}
 
-		public abstract void ConvertTo(SerializerContext context, object value, ScalarEventInfo toScalar, ITypeDescriptor typeDescriptor);
+		public abstract string ConvertTo(SerializerContext context, object value, ITypeDescriptor typeDescriptor);
 	}
 }

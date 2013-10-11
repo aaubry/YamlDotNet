@@ -18,7 +18,7 @@ namespace YamlDotNet.Serialization.Serializers
 			return AliasToObject.TryGetValue(alias, out value);
 		}
 
-		public override ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public override ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 
@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.Serializers
 			if (alias != null)
 			{
 				// Return an alias or directly the value
-				return !AliasToObject.TryGetValue(alias.Value, out value) ? new ValueResult(alias) : new ValueResult(value);
+				return !AliasToObject.TryGetValue(alias.Value, out value) ? new ValueOutput(alias) : new ValueOutput(value);
 			}
 
 			// Test if current node has an anchor &oxxx
@@ -50,8 +50,10 @@ namespace YamlDotNet.Serialization.Serializers
 			return valueResult;
 		}
 
-		public override void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public override void WriteYaml(SerializerContext context, ValueInput input, ITypeDescriptor typeDescriptor)
 		{
+			var value = input.Value;
+
 			// Only write anchors for object (and not value types)
 			bool isAnchorable = false;
 			if (value != null && !value.GetType().IsValueType)
@@ -85,7 +87,7 @@ namespace YamlDotNet.Serialization.Serializers
 				}
 			}
 
-			base.WriteYaml(context, value, typeDescriptor);
+			base.WriteYaml(context, input, typeDescriptor);
 		}
 
 		private Dictionary<string, object> AliasToObject

@@ -36,6 +36,13 @@ namespace YamlDotNet.Schemas
 		string GetDefaultTag(Type type);
 
 		/// <summary>
+		/// Determines whether the short tag implicit (e.g. !!int).
+		/// </summary>
+		/// <param name="tag">The tag.</param>
+		/// <returns><c>true</c> if [is tag implicit] [the specified tag]; otherwise, <c>false</c>.</returns>
+		bool IsTagImplicit(string tag);
+
+		/// <summary>
 		/// Gets the default tag and value for the specified <see cref="Scalar" />. The default tag can be different from a actual tag of this <see cref="NodeEvent" />.
 		/// </summary>
 		/// <param name="scalar">The scalar event.</param>

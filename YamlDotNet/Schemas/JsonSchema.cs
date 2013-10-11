@@ -86,5 +86,31 @@ namespace YamlDotNet.Schemas
 			// We are not calling the base as we want to completely override scalar rules
 			// and in order to have a more concise set of regex
 		}
+
+		protected override void RegisterDefaultTagMappings()
+		{
+			base.RegisterDefaultTagMappings();
+
+			// All bool type
+			RegisterDefaultTagMapping<bool>(BoolShortTag, true);
+
+			// All int types
+			RegisterDefaultTagMapping<sbyte>(IntShortTag);
+			RegisterDefaultTagMapping<byte>(IntShortTag);
+			RegisterDefaultTagMapping<short>(IntShortTag);
+			RegisterDefaultTagMapping<ushort>(IntShortTag);
+			RegisterDefaultTagMapping<int>(IntShortTag, true);
+			RegisterDefaultTagMapping<uint>(IntShortTag);
+			RegisterDefaultTagMapping<long>(IntShortTag);
+			RegisterDefaultTagMapping<ulong>(IntShortTag);
+
+			// All double/float types
+			RegisterDefaultTagMapping<float>(FloatShortTag, true);
+			RegisterDefaultTagMapping<double>(FloatShortTag);
+
+			// All string types
+			RegisterDefaultTagMapping<char>(StrShortTag);
+			RegisterDefaultTagMapping<string>(StrShortTag, true);
+		}
 	}
 }

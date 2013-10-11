@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.Serializers
 			return SequenceStyle.Block;
 		}
 
-		public virtual ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public virtual ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var type = typeDescriptor.Type;
 
@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.Serializers
 			var isSequence = CheckIsSequence(typeDescriptor);
 
 			// Process members
-			return new ValueResult(isSequence
+			return new ValueOutput(isSequence
 						? ReadItems<SequenceStart, SequenceEnd>(context, value, typeDescriptor)
 						: ReadItems<MappingStart, MappingEnd>(context, value, typeDescriptor));
 		}
@@ -107,38 +107,22 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 		}
 
-		public virtual void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public virtual void WriteYaml(SerializerContext context, ValueInput input, ITypeDescriptor typeDescriptor)
 		{
+			var value = input.Value;
 			var typeOfValue = value.GetType();
-			var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
-
-			// If the typeOfValue is in fact the default implementation, we don't need to serialize 
-			// the tag
-			var defaultImplementationType = DefaultObjectFactory.GetDefaultImplementation(expectedType);
-
-			// If this is an anonymous tag we will serialize only a default untyped YAML mapping
-			var tag = typeOfValue.IsAnonymous()
-				          ? null
-				          : typeOfValue == expectedType || (
-					                                           defaultImplementationType != null &&
-					                                           defaultImplementationType == typeOfValue)
-					            ? null
-					            : context.TagFromType(typeOfValue);
-
-			// Use the actual type of the value when serializing
-			typeDescriptor = context.FindTypeDescriptor(typeOfValue);
 
 			var isSequence = CheckIsSequence(typeDescriptor);
 			if (isSequence)
 			{
 				var style = GetSequenceStyle(context, value, typeDescriptor);
-				context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor(), Style = style});
+				context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor(), Style = style});
 				WriteItems(context, value, typeDescriptor);
 				context.Writer.Emit(new SequenceEndEventInfo(value, typeOfValue));
 			}
 			else
 			{
-				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = tag, Anchor = context.GetAnchor() });
+				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor() });
 				WriteItems(context, value, typeDescriptor);
 				context.Writer.Emit(new MappingEndEventInfo(value, typeOfValue));
 			}

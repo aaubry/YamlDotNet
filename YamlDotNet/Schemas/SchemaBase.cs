@@ -44,8 +44,16 @@ namespace YamlDotNet.Schemas
 		private readonly Dictionary<Type, List<ScalarResolutionRule>> mapTypeToScalarResolutionRuleList =
 			new Dictionary<Type, List<ScalarResolutionRule>>();
 
+		private readonly Dictionary<Type, string> mapTypeToShortTag = new Dictionary<Type, string>();
+		private readonly Dictionary<string, Type> mapShortTagToType = new Dictionary<string, Type>();
+
 		private int updateCountter;
 		private bool needFirstUpdate = true;
+
+		protected SchemaBase()
+		{
+			RegisterDefaultTagMappings();
+		}
 
 		/// <summary>
 		/// The string short tag: !!str
@@ -110,13 +118,18 @@ namespace YamlDotNet.Schemas
 			if (type == null) throw new ArgumentNullException("type");
 			EnsureScalarRules();
 
-			List<ScalarResolutionRule> rules;
-			if (mapTypeToScalarResolutionRuleList.Count > 0 && mapTypeToScalarResolutionRuleList.TryGetValue(type, out rules) && rules.Count > 0)
-			{
-				return rules[0].Tag;
-			}
+			string defaultTag;
+			mapTypeToShortTag.TryGetValue(type, out defaultTag);
+			return defaultTag;
+		}
 
-			return null;
+		public bool IsTagImplicit(string tag)
+		{
+			if (tag == null)
+			{
+				return true;
+			}
+			return shortTagToLongTag.ContainsKey(tag);
 		}
 
 		/// <summary>
@@ -236,16 +249,16 @@ namespace YamlDotNet.Schemas
 			return false;
 		}
 
-
 		public Type GetTypeForDefaultTag(string shortTag)
 		{
-			EnsureScalarRules();
+			if (shortTag == null)
+			{
+				return null;
+			}
 
-			List<ScalarResolutionRule> resolutionRules;
-			if (mapTagToScalarResolutionRuleList.TryGetValue(shortTag, out resolutionRules) && resolutionRules.Count > 0)
-				return resolutionRules[0].GetTypeOfValue();
-
-			return null;
+			Type type;
+			mapShortTagToType.TryGetValue(shortTag, out type);
+			return type;
 		}
 
 		/// <summary>
@@ -281,6 +294,33 @@ namespace YamlDotNet.Schemas
 			// Make sure the tag is expanded to its long form
 			var longTag = ShortenTag(tag);
 			scalarTagResolutionRules.Add(new ScalarResolutionRule<T>(longTag, regex, decode, encode));
+		}
+
+		protected void RegisterDefaultTagMapping<T>(string tag, bool isDefault = false)
+		{
+			if (tag == null) throw new ArgumentNullException("tag");
+			RegisterDefaultTagMapping(tag, typeof(T), isDefault);
+		}
+
+		protected void RegisterDefaultTagMapping(string tag, Type type, bool isDefault)
+		{
+			if (tag == null) throw new ArgumentNullException("tag");
+			if (type == null) throw new ArgumentNullException("type");
+
+			if (!mapTypeToShortTag.ContainsKey(type))
+				mapTypeToShortTag.Add(type, tag);
+
+			if (isDefault)
+			{
+				mapShortTagToType[tag] = type;
+			}
+		}
+
+		/// <summary>
+		/// Allows to register tag mapping for all primitive types (e.g. int -> !!int)
+		/// </summary>
+		protected virtual void RegisterDefaultTagMappings()
+		{
 		}
 
 		private void EnsureScalarRules()

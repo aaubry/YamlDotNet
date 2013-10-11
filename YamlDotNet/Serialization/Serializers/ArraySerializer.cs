@@ -12,7 +12,7 @@ namespace YamlDotNet.Serialization.Serializers
 			return typeDescriptor is ArrayDescriptor ? this : null;
 		}
 
-		public virtual ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public virtual ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			var reader = context.Reader;
 			var arrayDescriptor = (ArrayDescriptor)typeDescriptor;
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 			else
 			{
-				var results = new List<ValueResult>();
+				var results = new List<ValueOutput>();
 				while (!reader.Accept<SequenceEnd>())
 				{
 					results.Add(context.ReadYaml(null, arrayDescriptor.ElementType));
@@ -73,30 +73,21 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 			reader.Expect<SequenceEnd>();
 
-			return new ValueResult(arrayList);
+			return new ValueOutput(arrayList);
 		}
 
-		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public void WriteYaml(SerializerContext context, ValueInput input, ITypeDescriptor typeDescriptor)
 		{
-			var typeOfValue = value.GetType();
-			var expectedType = typeDescriptor != null ? typeDescriptor.Type : null;
-
-			if (typeDescriptor == null)
-			{
-				typeDescriptor = context.FindTypeDescriptor(typeOfValue);
-			}
-
+			var value = input.Value;
 			var arrayDescriptor = (ArrayDescriptor)typeDescriptor;
 
 			var valueType = value.GetType();
 			var arrayList = (IList) value;
 
-			var tag = typeOfValue == expectedType ? null : context.TagFromType(typeOfValue);
-
 			// Emit a Flow sequence or block sequence depending on settings 
 			context.Writer.Emit(new SequenceStartEventInfo(value, valueType)
 				{
-					Tag = tag,
+					Tag = input.Tag,
 					Anchor = context.GetAnchor(),
 					Style = arrayList.Count < context.Settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block
 				});

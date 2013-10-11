@@ -78,7 +78,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="value">The value of the receiving object, may be null.</param>
 		/// <param name="expectedType">The expected type.</param>
 		/// <returns>System.Object.</returns>
-		public ValueResult ReadYaml(object value, Type expectedType)
+		public ValueOutput ReadYaml(object value, Type expectedType)
 		{
 			var node = Reader.Parser.Current;
 			try
@@ -110,7 +110,7 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		public void WriteYaml(object value, Type expectedType)
 		{
-			ObjectSerializer.WriteYaml(this, value, FindTypeDescriptor(expectedType));
+			ObjectSerializer.WriteYaml(this, new ValueInput(value), FindTypeDescriptor(expectedType));
 		}
 
 		/// <summary>
@@ -206,7 +206,7 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <param name="alias">The alias.</param>
 		/// <param name="setter">The setter.</param>
-		/// <exception cref="System.ArgumentException">No alias found in the ValueResult;valueResult</exception>
+		/// <exception cref="System.ArgumentException">No alias found in the ValueOutput;valueResult</exception>
 		public void AddAliasBinding(AnchorAlias alias, Action<object> setter)
 		{
 			if (alias == null) throw new ArgumentNullException("alias");

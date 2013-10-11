@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization.Serializers
 			factories.Add(factory);
 		}
 
-		public ValueResult ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
 		{
 			// If value is not null, use its TypeDescriptor otherwise use expected type descriptor
 			var typeDescriptorOfValue = value != null ? context.FindTypeDescriptor(value.GetType()) : typeDescriptor;
@@ -34,23 +34,10 @@ namespace YamlDotNet.Serialization.Serializers
 			return serializer.ReadYaml(context, value, typeDescriptor);
 		}
 
-		public void WriteYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		public void WriteYaml(SerializerContext context, ValueInput input, ITypeDescriptor typeDescriptor)
 		{
-			// If value is null, then just output a plain null scalar
-			if (value == null)
-			{
-				context.Writer.Emit(new ScalarEventInfo(null, typeof(object)) { RenderedValue = "null", IsPlainImplicit = true, Style = ScalarStyle.Plain});
-				return;
-			}
-
-			// Always use the TypeDescriptor of the value when serializing, unless it is a nullable descriptor
-			var typeDescriptorOfValue =  context.FindTypeDescriptor(value.GetType());
-			var typeDescriptorToUseForSerializing = typeDescriptor is NullableDescriptor
-												  ? typeDescriptor
-												  : typeDescriptorOfValue;
-
-			var serializer = GetSerializer(context, typeDescriptorToUseForSerializing);
-			serializer.WriteYaml(context, value, typeDescriptor);
+			var serializer = GetSerializer(context, typeDescriptor);
+			serializer.WriteYaml(context, input, typeDescriptor);
 		}
 
 		private IYamlSerializable GetSerializer(SerializerContext context, ITypeDescriptor typeDescriptor)

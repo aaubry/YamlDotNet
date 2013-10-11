@@ -135,16 +135,16 @@
     <Compile Include="Serialization\Serializers\CollectionSerializer.cs" />
     <Compile Include="Serialization\Serializers\DictionarySerializer.cs" />
     <Compile Include="Schemas\SchemaBase.cs" />
-    <Compile Include="Serialization\Serializers\NullableSerializer.cs" />
     <Compile Include="Serialization\Serializers\ObjectSerializer.cs" />
     <Compile Include="Serialization\Serializers\ScalarSerializerBase.cs" />
-    <Compile Include="Serialization\Serializers\TypingSerializer.cs" />
+    <Compile Include="Serialization\Serializers\TagTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\PrimitiveSerializer.cs" />
     <Compile Include="Serialization\Serializers\RoutingSerializer.cs" />
     <Compile Include="Serialization\SerializerContext.cs" />
     <Compile Include="Serialization\AttributeRegistry.cs" />
     <Compile Include="Serialization\TagTypeRegistry.cs" />
-    <Compile Include="Serialization\ValueResult.cs" />
+    <Compile Include="Serialization\ValueInput.cs" />
+    <Compile Include="Serialization\ValueOutput.cs" />
     <Compile Include="Serialization\WriterEventEmitter.cs">
       <SubType>Code</SubType>
     </Compile>
