@@ -13,23 +13,20 @@ namespace YamlDotNet.Serialization
 	public struct ValueResult
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ValueResult"/> struct.
+		/// Initializes a new instance of the <see cref="ValueResult"/> struct that contains a value.
 		/// </summary>
 		/// <param name="value">The value.</param>
 		public ValueResult(object value) : this()
 		{
 			Value = value;
-			IsAlias = false;
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ValueResult"/> struct.
+		/// Initializes a new instance of the <see cref="ValueResult" /> struct that contains an <see cref="AnchorAlias"/>.
 		/// </summary>
-		/// <param name="isAlias">if set to <c>true</c> [is alias].</param>
 		/// <param name="value">The value.</param>
 		public ValueResult(AnchorAlias value)
 		{
-			IsAlias = true;
 			Value = value;
 		}
 
@@ -41,7 +38,10 @@ namespace YamlDotNet.Serialization
 		/// <summary>
 		/// True if this value result is an alias.
 		/// </summary>
-		public readonly bool IsAlias;
+		public bool IsAlias
+		{
+			get { return Value is AnchorAlias; }
+		}
 
 		/// <summary>
 		/// Gets the alias, only valid if <see cref="IsAlias"/> is true, null otherwise.
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization
 		/// <value>The alias.</value>
 		public AnchorAlias Alias
 		{
-			get { return IsAlias ? (AnchorAlias)Value : null; }
+			get { return Value as AnchorAlias; }
 		}
 	}
 }
