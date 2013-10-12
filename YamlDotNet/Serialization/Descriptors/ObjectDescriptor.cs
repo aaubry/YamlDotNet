@@ -180,7 +180,7 @@ namespace YamlDotNet.Serialization.Descriptors
 			else
 			{
 				// Else we cannot only assign its content if it is a class
-				member.SerializeMemberMode = memberType.IsClass || memberType.IsInterface || type.IsAnonymous() ? SerializeMemberMode.Content : SerializeMemberMode.Never;
+				member.SerializeMemberMode = (memberType != typeof(string) && memberType.IsClass) || memberType.IsInterface || type.IsAnonymous() ? SerializeMemberMode.Content : SerializeMemberMode.Never;
 			}
 
 			// Member is not displayed if there is a YamlIgnore attribute on it
