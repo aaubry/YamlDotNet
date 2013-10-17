@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.20827.3
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69EE9636-55BA-49C2-827E-D5684221C345}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		add-license.sh = add-license.sh
 		CommonAssemblyInfo.cs = CommonAssemblyInfo.cs
 		LICENSE = LICENSE
+		license.cs = license.cs
 		YamlDotNet.build = YamlDotNet.build
 		YamlDotNet.Converters.nuspec = YamlDotNet.Converters.nuspec
 		YamlDotNet.Core.nuspec = YamlDotNet.Core.nuspec
