@@ -11,8 +11,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// Traverses the specified object graph.
 		/// </summary>
 		/// <param name="graph">The graph.</param>
-		/// <param name="type">The static type of the graph.</param>
 		/// <param name="visitor">An <see cref="IObjectGraphVisitor"/> that is to be notified during the traversal.</param>
-		void Traverse(object graph, Type type, IObjectGraphVisitor visitor);
+		void Traverse(IObjectDescriptor graph, IObjectGraphVisitor visitor);
 	}
 }

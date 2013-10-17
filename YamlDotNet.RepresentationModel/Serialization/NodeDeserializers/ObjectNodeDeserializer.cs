@@ -26,15 +26,16 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization.Utilities;
 
 namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 {
 	public sealed class ObjectNodeDeserializer : INodeDeserializer
 	{
 		private readonly IObjectFactory _objectFactory;
-		private readonly ITypeDescriptor _typeDescriptor;
+		private readonly ITypeInspector _typeDescriptor;
 
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeDescriptor typeDescriptor)
+		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor)
 		{
 			_objectFactory = objectFactory;
 			_typeDescriptor = typeDescriptor;
@@ -54,21 +55,21 @@ namespace YamlDotNet.RepresentationModel.Serialization.NodeDeserializers
 			{
 				var propertyName = reader.Expect<Scalar>();
 				
-				var property = _typeDescriptor.GetProperty(expectedType, propertyName.Value).Property;
-				var propertyValue = nestedObjectDeserializer(reader, property.PropertyType);
+				var property = _typeDescriptor.GetProperty(expectedType, null, propertyName.Value);
+				var propertyValue = nestedObjectDeserializer(reader, property.Type);
 				var propertyValuePromise = propertyValue as IValuePromise;
 				if (propertyValuePromise == null)
 				{
-					var convertedValue = TypeConverter.ChangeType(propertyValue, property.PropertyType);
-					property.SetValue(value, convertedValue, null);
+					var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
+					property.SetValue(value, convertedValue);
 				}
 				else
 				{
 					var valueRef = value;
 					propertyValuePromise.ValueAvailable += v =>
 					{
-						var convertedValue = TypeConverter.ChangeType(v, property.PropertyType);
-						property.SetValue(valueRef, convertedValue, null);
+						var convertedValue = TypeConverter.ChangeType(v, property.Type);
+						property.SetValue(valueRef, convertedValue);
 					};
 				}
 			}

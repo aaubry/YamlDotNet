@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using Xunit;
 using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.RepresentationModel.Serialization.ObjectFactories;
 
 namespace YamlDotNet.RepresentationModel.Test
 {

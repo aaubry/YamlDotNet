@@ -27,6 +27,11 @@ using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 using YamlDotNet.RepresentationModel.Serialization.NodeDeserializers;
 using YamlDotNet.RepresentationModel.Serialization.NodeTypeResolvers;
+using YamlDotNet.RepresentationModel.Serialization.ObjectFactories;
+using YamlDotNet.RepresentationModel.Serialization.TypeInspectors;
+using YamlDotNet.RepresentationModel.Serialization.TypeResolvers;
+using YamlDotNet.RepresentationModel.Serialization.Utilities;
+using YamlDotNet.RepresentationModel.Serialization.ValueDeserializers;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
@@ -53,18 +58,18 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		public IList<INodeDeserializer> NodeDeserializers { get; private set; }
 		public IList<INodeTypeResolver> TypeResolvers { get; private set; }
 
-		private class TypeDescriptorProxy : ITypeDescriptor
+		private class TypeDescriptorProxy : ITypeInspector
 		{
-			public ITypeDescriptor TypeDescriptor;
-			
-			public IEnumerable<IPropertyDescriptor> GetProperties(Type type)
+			public ITypeInspector TypeDescriptor;
+
+			public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 			{
-				return TypeDescriptor.GetProperties(type);
+				return TypeDescriptor.GetProperties(type, container);
 			}
 
-			public IPropertyDescriptor GetProperty(Type type, string name)
+			public IPropertyDescriptor GetProperty(Type type, object container, string name)
 			{
-				return TypeDescriptor.GetProperty(type, name);
+				return TypeDescriptor.GetProperty(type, container, name);
 			}
 		}
 		
@@ -74,9 +79,13 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			namingConvention = namingConvention ?? new NullNamingConvention();
 			
 			typeDescriptor.TypeDescriptor = 
-				new YamlAttributesTypeDescriptor(
-					new NamingConventionTypeDescriptor(
-						new ReadableAndWritablePropertiesTypeDescriptor(),
+				new YamlAttributesTypeInspector(
+					new NamingConventionTypeInspector(
+						new ReadableAndWritablePropertiesTypeInspector(
+							new ReadablePropertiesTypeInspector(
+								new StaticTypeResolver()
+							)
+						),
 						namingConvention
 					)
 				);

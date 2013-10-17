@@ -40,6 +40,14 @@ namespace YamlDotNet.RepresentationModel.Test
 {
 	public class SerializationTests : YamlTest
 	{
+
+			private int? myNullableWithDefaultValue = 0;
+
+			public int? MyNullableWithDefaultValue
+			{
+				get { return myNullableWithDefaultValue; }
+				set { myNullableWithDefaultValue = value; }
+			}
 		[Fact]
 		public void Roundtrip()
 		{
@@ -597,6 +605,60 @@ namespace YamlDotNet.RepresentationModel.Test
 			public String IgnoreMe { get; set; }
 		}
 
+		class Parent
+		{
+			public string ParentProp { get; set; }
+		}
+
+		class Child : Parent
+		{
+			public string ChildProp { get; set; }
+		}
+
+		class ParentChildContainer
+		{
+			public object SomeScalar { get; set; }
+			public Parent RegularParent { get; set; }
+			[YamlMember(serializeAs: typeof(Parent))]
+			public Parent ParentWithSerializeAs { get; set; }
+		}
+
+		[Fact]
+		public void RoundtripWithPolymorphism()
+		{
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
+			var deserializer = new Deserializer();
+
+			var buffer = new StringWriter();
+			serializer.Serialize(buffer, new ParentChildContainer {
+				SomeScalar = "Hello",
+				RegularParent = new Child { ParentProp = "foo", ChildProp = "bar" },
+			});
+			Console.WriteLine(buffer.ToString());
+			var copy = (ParentChildContainer)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ParentChildContainer));
+			Assert.Equal("Hello", copy.SomeScalar);
+			Assert.IsType(typeof(Child), copy.RegularParent);
+			Assert.Equal("bar", ((Child)copy.RegularParent).ChildProp);
+		}
+
+		[Fact]
+		public void RoundtripWithSerializeAs()
+		{
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
+			var deserializer = new Deserializer();
+
+			var buffer = new StringWriter();
+			serializer.Serialize(buffer, new ParentChildContainer
+			{
+				SomeScalar = "Hello",
+				ParentWithSerializeAs = new Child { ParentProp = "foo", ChildProp = "bar" },
+			});
+			Console.WriteLine(buffer.ToString());
+			var copy = (ParentChildContainer)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ParentChildContainer));
+			Assert.IsType(typeof(Parent), copy.ParentWithSerializeAs);
+			Assert.Equal("foo", copy.ParentWithSerializeAs.ParentProp);
+		}
+
 		[Fact]
 		public void SerializeArrayOfIdenticalObjects()
 		{
@@ -613,6 +675,22 @@ namespace YamlDotNet.RepresentationModel.Test
 			Assert.Equal(obj1.aaa, result[2].aaa);
 			Assert.Same(result[0], result[1]);
 			Assert.Same(result[1], result[2]);
+		}
+
+		[Fact]
+		public void BoxedArray()
+		{
+			var serializer = new Serializer();
+			var buffer = new StringWriter();
+			serializer.Serialize(buffer, new object[] {1, 2, "3"});
+
+			Console.WriteLine(buffer.ToString());
+
+			var deserializer = new Deserializer();
+			var copy = (int[])deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(int[]));
+			Assert.Equal(1, copy[0]);
+			Assert.Equal(2, copy[1]);
+			Assert.Equal(3, copy[2]);
 		}
 
 		[Fact]

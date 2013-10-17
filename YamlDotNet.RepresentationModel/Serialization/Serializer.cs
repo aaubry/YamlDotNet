@@ -24,49 +24,15 @@ using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel.Serialization.EventEmitters;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using YamlDotNet.RepresentationModel.Serialization.ObjectGraphTraversalStrategies;
+using YamlDotNet.RepresentationModel.Serialization.ObjectGraphVisitors;
+using YamlDotNet.RepresentationModel.Serialization.TypeInspectors;
+using YamlDotNet.RepresentationModel.Serialization.TypeResolvers;
 
 namespace YamlDotNet.RepresentationModel.Serialization
 {
-	/// <summary>
-	/// Options that control the serialization process.
-	/// </summary>
-	[Flags]
-	public enum SerializationOptions
-	{
-		/// <summary>
-		/// Serializes using the default options
-		/// </summary>
-		None = 0,
-
-		/// <summary>
-		/// Ensures that it will be possible to deserialize the serialized objects.
-		/// </summary>
-		Roundtrip = 1,
-
-		/// <summary>
-		/// If this flag is specified, if the same object appears more than once in the
-		/// serialization graph, it will be serialized each time instead of just once.
-		/// </summary>
-		/// <remarks>
-		/// If the serialization graph contains circular references and this flag is set,
-		/// a <see cref="StackOverflowException" /> will be thrown.
-		/// If this flag is not set, there is a performance penalty because the entire
-		/// object graph must be walked twice.
-		/// </remarks>
-		DisableAliases = 2,
-
-		/// <summary>
-		/// Forces every value to be serialized, even if it is the default value for that type.
-		/// </summary>
-		EmitDefaults = 4,
-
-		/// <summary>
-		/// Ensures that the result of the serialization is valid JSON.
-		/// </summary>
-		JsonCompatible = 8,
-	}
-
 	/// <summary>
 	/// Writes objects to YAML.
 	/// </summary>
@@ -76,6 +42,7 @@ namespace YamlDotNet.RepresentationModel.Serialization
 
 		private readonly SerializationOptions options;
 		private readonly INamingConvention namingConvention;
+		private readonly ITypeResolver typeResolver;
 
 		/// <summary>
 		/// 
@@ -88,6 +55,15 @@ namespace YamlDotNet.RepresentationModel.Serialization
 			this.namingConvention = namingConvention ?? new NullNamingConvention();
 
 			Converters = new List<IYamlTypeConverter>();
+
+			typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
+				? (ITypeResolver)new StaticTypeResolver()
+				: (ITypeResolver)new DynamicTypeResolver();
+		}
+
+		private bool IsOptionSet(SerializationOptions option)
+		{
+			return (options & option) != 0;
 		}
 
 		/// <summary>
@@ -126,7 +102,12 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		/// <param name="graph">The object to serialize.</param>
 		public void Serialize(IEmitter emitter, object graph)
 		{
-			Serialize(emitter, graph, graph != null ? graph.GetType() : typeof(object));
+			if (emitter == null)
+			{
+				throw new ArgumentNullException("emitter");
+			}
+
+			EmitDocument(emitter, new ObjectDescriptor(graph, graph != null ? graph.GetType() : typeof(object), typeof(object)));
 		}
 
 		/// <summary>
@@ -147,38 +128,39 @@ namespace YamlDotNet.RepresentationModel.Serialization
 				throw new ArgumentNullException("type");
 			}
 
-			var traversalStrategy = CreateTraversalStrategy();
-			var eventEmitter = CreateEventEmitter(emitter);
-			var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph, type);
-			EmitDocument(emitter, traversalStrategy, emittingVisitor, graph, type);
+			EmitDocument(emitter, new ObjectDescriptor(graph, type, type));
 		}
 
-		private void EmitDocument(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IObjectGraphVisitor emittingVisitor, object graph, Type type)
+		private void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
 		{
+			var traversalStrategy = CreateTraversalStrategy();
+			var eventEmitter = CreateEventEmitter(emitter);
+			var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph);
+
 			emitter.Emit(new StreamStart());
 			emitter.Emit(new DocumentStart());
 
-			traversalStrategy.Traverse(graph, type, emittingVisitor);
+			traversalStrategy.Traverse(graph, emittingVisitor);
 
 			emitter.Emit(new DocumentEnd(true));
 			emitter.Emit(new StreamEnd());
 		}
 
-		private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, object graph, Type type)
+		private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
 		{
 			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
 			emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
 
-			if ((options & SerializationOptions.DisableAliases) == 0)
+			if (!IsOptionSet(SerializationOptions.DisableAliases))
 			{
 				var anchorAssigner = new AnchorAssigner();
-				traversalStrategy.Traverse(graph, type, anchorAssigner);
+				traversalStrategy.Traverse(graph, anchorAssigner);
 
 				emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
 			}
 
-			if ((options & SerializationOptions.EmitDefaults) == 0)
+			if (!IsOptionSet(SerializationOptions.EmitDefaults))
 			{
 				emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
 			}
@@ -190,38 +172,34 @@ namespace YamlDotNet.RepresentationModel.Serialization
 		{
 			var writer = new WriterEventEmitter(emitter);
 
-			if ((options & SerializationOptions.JsonCompatible) != 0)
+			if (IsOptionSet(SerializationOptions.JsonCompatible))
 			{
 				return new JsonEventEmitter(writer);
 			}
 			else
 			{
-				return new TypeAssigningEventEmitter(writer);
+				return new TypeAssigningEventEmitter(writer, IsOptionSet(SerializationOptions.Roundtrip));
 			}
 		}
 
 		private IObjectGraphTraversalStrategy CreateTraversalStrategy()
 		{
-			ITypeDescriptor typeDescriptor;
-			if ((options & SerializationOptions.Roundtrip) != 0)
+			ITypeInspector typeDescriptor = new ReadablePropertiesTypeInspector(typeResolver);
+			if (IsOptionSet(SerializationOptions.Roundtrip))
 			{
-				typeDescriptor = new ReadableAndWritablePropertiesTypeDescriptor();
+				typeDescriptor = new ReadableAndWritablePropertiesTypeInspector(typeDescriptor);
+			}
+
+			typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
+			typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
+
+			if (IsOptionSet(SerializationOptions.Roundtrip))
+			{
+				return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50);
 			}
 			else
 			{
-				typeDescriptor = new ReadablePropertiesTypeDescriptor();
-			}
-
-			typeDescriptor = new NamingConventionTypeDescriptor(typeDescriptor, namingConvention);
-			typeDescriptor = new YamlAttributesTypeDescriptor(typeDescriptor);
-
-			if ((options & SerializationOptions.Roundtrip) != 0)
-			{
-				return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, 50);
-			}
-			else
-			{
-				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, 50);
+				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50);
 			}
 		}
 	}

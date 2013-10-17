@@ -1,4 +1,5 @@
-﻿
+﻿using YamlDotNet.RepresentationModel.Serialization.Utilities;
+
 namespace YamlDotNet.RepresentationModel.Serialization.NamingConventions
 {
 	/// <summary>
