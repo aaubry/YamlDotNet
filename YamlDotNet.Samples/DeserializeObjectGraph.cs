@@ -25,6 +25,7 @@ using YamlDotNet.RepresentationModel.Serialization;
 
 namespace YamlDotNet.Samples
 {
+	[Sample]
 	public class DeserializeObjectGraph
 	{
 		public void Run(string[] args)

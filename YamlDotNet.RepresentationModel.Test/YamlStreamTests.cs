@@ -270,14 +270,5 @@ namespace YamlDotNet.RepresentationModel.Test
 			MappingEnd,
 			Scalar,
 		}
-
-		// Todo: Sample.. belongs elsewhere?
-		[Fact]
-		public void RoundtripSample()
-		{
-			var original = new YamlStream();
-			original.Load(YamlFile("sample.yaml"));
-			original.Accept(new TracingVisitor());
-		}
 	}
 }
