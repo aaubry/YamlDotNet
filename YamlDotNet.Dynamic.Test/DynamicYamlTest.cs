@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace YamlDotNet.Dynamic.UnitTests
+namespace YamlDotNet.Dynamic.Test
 {
     public class DynamicYamlTest
     {
