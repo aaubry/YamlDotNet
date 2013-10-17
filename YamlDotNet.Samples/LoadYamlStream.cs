@@ -27,6 +27,7 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Samples
 {
+	[Sample]
 	class LoadYamlStream
 	{
 		public void Run(string[] args)
