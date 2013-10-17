@@ -4,17 +4,14 @@
 	<!-- This build file requires .NET 4.0 and nant 0.91 alpha 2 or higher -->
 	<property name="nant.settings.currentframework" value="net-4.0"/>
 
-	<property name="version" value="2.2.0" />
+	<property name="version" value="2.3.0-rc" />
 
 	<fileset id="binaries">
-		<include name="YamlDotNet.Core/bin/Release/YamlDotNet.Core.dll" />
-		<include name="YamlDotNet.Core/bin/Release/YamlDotNet.Core.pdb" />
+		<include name="YamlDotNet/bin/Release/YamlDotNet.dll" />
+		<include name="YamlDotNet/bin/Release/YamlDotNet.pdb" />
 
-		<include name="YamlDotNet.RepresentationModel/bin/Release/YamlDotNet.RepresentationModel.dll" />
-		<include name="YamlDotNet.RepresentationModel/bin/Release/YamlDotNet.RepresentationModel.pdb" />
-
-		<include name="YamlDotNet.Converters/bin/Release/YamlDotNet.Converters.dll" />
-		<include name="YamlDotNet.Converters/bin/Release/YamlDotNet.Converters.pdb" />
+		<include name="YamlDotNet.Dynamic/bin/Release/YamlDotNet.Dynamic.dll" />
+		<include name="YamlDotNet.Dynamic/bin/Release/YamlDotNet.Dynamic.pdb" />
 	</fileset>
 
 	<loadtasks assembly="support/nantcontrib/NAnt.Contrib.Tasks.dll" />
@@ -27,7 +24,11 @@
 	
 	<target name="build">
 		
-		<msbuild project="YamlDotNet.sln" target="Rebuild">
+		<msbuild project="YamlDotNet.sln" target="YamlDotNet:Rebuild">
+			<property name="Configuration" value="Release" />
+		</msbuild>
+
+		<msbuild project="YamlDotNet.sln" target="YamlDotNet_Dynamic:Rebuild">
 			<property name="Configuration" value="Release" />
 		</msbuild>
 

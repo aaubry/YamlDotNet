@@ -11,15 +11,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		license.cs = license.cs
 		YamlDotNet.build = YamlDotNet.build
-		YamlDotNet.Converters.nuspec = YamlDotNet.Converters.nuspec
-		YamlDotNet.Core.nuspec = YamlDotNet.Core.nuspec
 		YamlDotNet.Dynamic.nuspec = YamlDotNet.Dynamic.nuspec
 		YamlDotNet.FxCop = YamlDotNet.FxCop
-		YamlDotNet.RepresentationModel.nuspec = YamlDotNet.RepresentationModel.nuspec
+		YamlDotNet.nuspec = YamlDotNet.nuspec
+		YamlDotNet.shfbproj = YamlDotNet.shfbproj
 		YamlDotNet.snk = YamlDotNet.snk
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dumper", "Dumper\Dumper.csproj", "{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{1EC10966-19C0-4CE3-949E-D11F600B8CA3}"
 EndProject
@@ -30,11 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8DC198
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Converters.Test", "YamlDotNet.Converters.Test\YamlDotNet.Converters.Test.csproj", "{F0EAB124-9790-41C7-AE0F-F050CA0141D3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{BF32DE1B-6276-4341-B212-F8862ADBBA7A} = {BF32DE1B-6276-4341-B212-F8862ADBBA7A}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core.Test", "YamlDotNet.Core.Test\YamlDotNet.Core.Test.csproj", "{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}"
@@ -60,16 +52,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{BB38DE1D-A8E2-4035-AC3A-C6B5AF6B6252}.Release|x86.ActiveCfg = Release|Any CPU
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -90,16 +72,6 @@ Global
 		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{708C56D8-492C-4EED-A306-1FE75FC7D234}.Release|x86.ActiveCfg = Release|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{F0EAB124-9790-41C7-AE0F-F050CA0141D3}.Release|x86.ActiveCfg = Release|Any CPU
 		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

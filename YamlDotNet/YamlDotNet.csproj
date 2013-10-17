@@ -70,14 +70,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Configuration\ConfigurationLoader.cs" />
-    <Compile Include="Configuration\DotNetConfigurationProvider.cs" />
-    <Compile Include="Configuration\IConfigurationProvider.cs" />
-    <Compile Include="Configuration\YamlConfigurationProvider.cs" />
-    <Compile Include="Configuration\YamlConfigurationSection.cs" />
-    <Compile Include="Converters\Xml\Extensions\XmlConverterExtensions.cs" />
-    <Compile Include="Converters\Xml\XmlConverter.cs" />
-    <Compile Include="Converters\Xml\XmlConverterOptions.cs" />
     <Compile Include="Core\CharacterAnalyzer.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="Core\Emitter.cs" />

@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-	<id>YamlDotNet.RepresentationModel</id>
+	<id>YamlDotNet</id>
 	<version></version>
 	<authors>Antoine Aubry</authors>
 	<description>A .NET library for YAML. yamldotnet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
-	<summary>This package contains the YAML document object model and serialization classes.</summary>
+	<summary>This package contains the YAML parser and serializer.</summary>
 	<language>en-US</language>
 	<licenseUrl>http://www.aaubry.net/yamldotnet/license.aspx</licenseUrl>
 	<projectUrl>http://www.aaubry.net/yamldotnet.aspx</projectUrl>
 	<iconUrl>http://www.aaubry.net/IMAGES%2f2012%2f11%2fyamldotnet.png.jpgx</iconUrl>
-	<tags>yaml serialization development library</tags>
-	<dependencies>
-	  <dependency id="YamlDotNet.Core" version="" />
-	</dependencies>
+	<tags>yaml parser development library serialization</tags>
   </metadata>
   <files>
-	<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.dll" target="lib\net35" />
-	<file src="..\YamlDotNet.RepresentationModel\bin\Release\YamlDotNet.RepresentationModel.pdb" target="lib\net35" />
+	<file src="..\YamlDotNet\bin\Release\YamlDotNet.dll" target="lib\net35" />
+	<file src="..\YamlDotNet\bin\Release\YamlDotNet.pdb" target="lib\net35" />
   </files>
 </package>

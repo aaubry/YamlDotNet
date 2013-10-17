@@ -42,9 +42,8 @@
     <NamingMethod>MemberName</NamingMethod>
     <HelpFileVersion>0.1.0.0</HelpFileVersion>
     <DocumentationSources>
-      <DocumentationSource sourceFile="YamlDotNet.Converters\YamlDotNet.Converters.csproj" />
-<DocumentationSource sourceFile="YamlDotNet.Core\YamlDotNet.Core.csproj" />
-<DocumentationSource sourceFile="YamlDotNet.RepresentationModel\YamlDotNet.RepresentationModel.csproj" /></DocumentationSources>
+      <DocumentationSource sourceFile="YamlDotNet\YamlDotNet.csproj" />
+<DocumentationSource sourceFile="YamlDotNet.Dynamic\YamlDotNet.Dynamic.csproj" />
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in
        order for Visual Studio to perform the build.  The others are optional
