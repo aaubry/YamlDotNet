@@ -6,7 +6,6 @@ namespace YamlDotNet
 {
 	internal static class TypeExtensions
 	{
-
 		public static bool HasInterface(this Type type, Type lookInterfaceType)
 		{
 			return type.GetInterface(lookInterfaceType) != null;

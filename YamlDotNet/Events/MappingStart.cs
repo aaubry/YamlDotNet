@@ -75,12 +75,12 @@ namespace YamlDotNet.Events
 			}
 		}
 
-		private readonly MappingStyle style;
+		private readonly YamlStyle style;
 
 		/// <summary>
 		/// Gets the style of the mapping.
 		/// </summary>
-		public MappingStyle Style
+		public YamlStyle Style
 		{
 			get
 			{
@@ -97,7 +97,7 @@ namespace YamlDotNet.Events
 		/// <param name="style">The style of the mapping.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		public MappingStart(string anchor, string tag, bool isImplicit, MappingStyle style, Mark start, Mark end)
+		public MappingStart(string anchor, string tag, bool isImplicit, YamlStyle style, Mark start, Mark end)
 			: base(anchor, tag, start, end)
 		{
 			this.isImplicit = isImplicit;
@@ -111,7 +111,7 @@ namespace YamlDotNet.Events
 		/// <param name="tag">The tag.</param>
 		/// <param name="isImplicit">Indicates whether the event is implicit.</param>
 		/// <param name="style">The style of the mapping.</param>
-		public MappingStart(string anchor, string tag, bool isImplicit, MappingStyle style)
+		public MappingStart(string anchor, string tag, bool isImplicit, YamlStyle style)
 			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
 		{
 		}
@@ -120,7 +120,7 @@ namespace YamlDotNet.Events
 		/// Initializes a new instance of the <see cref="MappingStart"/> class.
 		/// </summary>
 		public MappingStart()
-			: this(null, null, true, MappingStyle.Any, Mark.Empty, Mark.Empty)
+			: this(null, null, true, YamlStyle.Any, Mark.Empty, Mark.Empty)
 		{
 		}
 

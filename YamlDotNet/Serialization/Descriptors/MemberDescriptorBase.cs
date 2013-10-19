@@ -32,6 +32,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		public abstract object Get(object thisObject);
 		public abstract void Set(object thisObject, object value);
 		public abstract bool HasSet { get; }
+		public YamlStyle Style { get; internal set; }
 		public Func<object, bool> ShouldSerialize { get; internal set; }
 
 		/// <summary>

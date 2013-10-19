@@ -143,7 +143,7 @@ namespace YamlDotNet.Test
 		private string EmitScalar(Scalar scalar)
 		{
 			return Emit(
-				new SequenceStart(null, null, false, SequenceStyle.Block),
+				new SequenceStart(null, null, false, YamlStyle.Block),
 				scalar,
 				new SequenceEnd()
 			);

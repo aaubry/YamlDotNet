@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization.Serializers
 				{
 					Tag = input.Tag,
 					Anchor = context.GetAnchor(),
-					Style = arrayList.Count < context.Settings.LimitFlowSequence ? SequenceStyle.Flow : SequenceStyle.Block
+					Style = arrayList.Count < context.Settings.LimitPrimitiveFlowSequence ? YamlStyle.Flow : YamlStyle.Block
 				});
 
 			foreach (var element in arrayList)

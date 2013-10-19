@@ -84,7 +84,7 @@ UInt32: 6
 UInt64: 8
 ".Trim();
 
-			var settings = new SerializerSettings();
+			var settings = new SerializerSettings() {LimitPrimitiveFlowSequence = 20};
 			settings.RegisterTagMapping("MyObject", typeof (MyObject));
 			SerialRoundTrip(settings, text);
 		}
@@ -113,7 +113,7 @@ Name: Yes
 Values: [a, b, c]
 ".Trim();
 
-			var settings = new SerializerSettings();
+			var settings = new SerializerSettings() {LimitPrimitiveFlowSequence = 20};
 			settings.RegisterTagMapping("MyObjectAndCollection", typeof (MyObjectAndCollection));
 			SerialRoundTrip(settings, text);
 		}
@@ -144,7 +144,7 @@ Value: 1
   - c
 ".Trim();
 
-			var settings = new SerializerSettings() {LimitFlowSequence = 0};
+			var settings = new SerializerSettings() {LimitPrimitiveFlowSequence = 0};
 			settings.RegisterTagMapping("MyCustomCollectionWithProperties", typeof (MyCustomCollectionWithProperties));
 			SerialRoundTrip(settings, text);
 		}
@@ -177,7 +177,7 @@ Value: 1
   c: true
 ".Trim();
 
-			var settings = new SerializerSettings() {LimitFlowSequence = 0};
+			var settings = new SerializerSettings() {LimitPrimitiveFlowSequence = 0};
 			settings.RegisterTagMapping("MyCustomDictionaryWithProperties", typeof (MyCustomDictionaryWithProperties));
 			SerialRoundTrip(settings, text);
 		}
@@ -278,7 +278,7 @@ StringMapbyContent:
 Value: 0
 ".Trim();
 
-			var settings = new SerializerSettings() {LimitFlowSequence = 0};
+			var settings = new SerializerSettings() {LimitPrimitiveFlowSequence = 0};
 			settings.RegisterTagMapping("MyCustomClassWithSpecialMembers", typeof (MyCustomClassWithSpecialMembers));
 			SerialRoundTrip(settings, text);
 		}
@@ -336,7 +336,7 @@ Value: 0
 		[Fact]
 		public void TestClassMemberOrder()
 		{
-			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			var settings = new SerializerSettings() { LimitPrimitiveFlowSequence = 0 };
 			settings.RegisterTagMapping("ClassMemberOrder", typeof(ClassMemberOrder));
 			SerialRoundTrip(settings, new ClassMemberOrder());
 		}
@@ -393,7 +393,7 @@ Value: 0
 		[Fact]
 		public void TestClassWithObjectAndScalar()
 		{
-			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			var settings = new SerializerSettings() { LimitPrimitiveFlowSequence = 0 };
 			settings.RegisterTagMapping("ClassWithObjectAndScalar", typeof(ClassWithObjectAndScalar));
 			SerialRoundTrip(settings, new ClassWithObjectAndScalar());
 		}
@@ -401,7 +401,7 @@ Value: 0
 		[Fact]
 		public void TestImplicitDictionaryAndList()
 		{
-			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			var settings = new SerializerSettings() { LimitPrimitiveFlowSequence = 0 };
 
 			var text = @"BasicList:
   - 1
@@ -549,7 +549,7 @@ Value: 0
 		[Fact]
 		public void TestClassMemberWithInheritance()
 		{
-			var settings = new SerializerSettings() { LimitFlowSequence = 0 };
+			var settings = new SerializerSettings() { LimitPrimitiveFlowSequence = 0 };
 			settings.RegisterTagMapping("ClassMemberWithInheritance", typeof(ClassMemberWithInheritance));
 			settings.RegisterTagMapping("MemberInterface", typeof(MemberInterface));
 			settings.RegisterTagMapping("MemberObject", typeof(MemberObject));
@@ -582,6 +582,103 @@ Value: 0
 				Start = ' ',
 				End = '\x7f'
 			});
+		}
+
+
+		[YamlStyle(YamlStyle.Flow)]
+		public class ClassWithStyle
+		{
+			public string Name { get; set; }
+
+			public object Value { get; set; }
+		}
+
+		public class ClassNoStyle
+		{
+			public ClassNoStyle()
+			{
+				A_ListWithCustomStyle = new List<string>();
+				D_ListHandleByDynamicStyleFormat = new List<object>();
+				E_ListDefaultPrimitiveLimit = new List<int>();
+				E_ListDefaultPrimitiveLimitExceed = new List<int>();
+				F_ListClassWithStyleDefaultFormat = new List<ClassWithStyle>();
+			}
+
+			[YamlStyle(YamlStyle.Flow)]
+			public List<string> A_ListWithCustomStyle { get; set; }
+
+			public ClassWithStyle B_ClassWithStyle { get; set; }
+
+			[YamlStyle(YamlStyle.Block)]
+			public ClassWithStyle C_ClassWithStyleOverridenByLocalYamlStyle { get; set; }
+
+			public List<object> D_ListHandleByDynamicStyleFormat { get; set; }
+
+			public List<int> E_ListDefaultPrimitiveLimit { get; set; }
+
+			public List<int> E_ListDefaultPrimitiveLimitExceed { get; set; }
+
+			public List<ClassWithStyle> F_ListClassWithStyleDefaultFormat { get; set; }
+		}
+
+		private class FormatListObject : IDynamicStyleFormat
+		{
+			public YamlStyle GetStyle(SerializerContext context, object value, ITypeDescriptor descriptor)
+			{
+				return value is List<object> ? YamlStyle.Flow : YamlStyle.Any;
+			}
+		}
+
+		/// <summary>
+		/// Tests formatting styles.
+		/// </summary>
+		[Fact]
+		public void TestStyles()
+		{
+			var settings = new SerializerSettings() {LimitPrimitiveFlowSequence = 4};
+			settings.RegisterTagMapping("ClassNoStyle", typeof(ClassNoStyle));
+			settings.RegisterTagMapping("ClassWithStyle", typeof(ClassWithStyle));
+			settings.DynamicStyleFormat = new FormatListObject();
+
+			var classNoStyle = new ClassNoStyle();
+			classNoStyle.A_ListWithCustomStyle.Add("a");
+			classNoStyle.A_ListWithCustomStyle.Add("b");
+			classNoStyle.A_ListWithCustomStyle.Add("c");
+			classNoStyle.B_ClassWithStyle = new ClassWithStyle() {Name = "name1", Value = 1};
+			classNoStyle.C_ClassWithStyleOverridenByLocalYamlStyle = new ClassWithStyle() {Name = "name2", Value = 2};
+			classNoStyle.D_ListHandleByDynamicStyleFormat.Add(1);
+			classNoStyle.D_ListHandleByDynamicStyleFormat.Add(2);
+			classNoStyle.D_ListHandleByDynamicStyleFormat.Add(3);
+			classNoStyle.E_ListDefaultPrimitiveLimit.Add(1);
+			classNoStyle.E_ListDefaultPrimitiveLimit.Add(2);
+			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(1);
+			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(2);
+			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(3);
+			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(4);
+			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(5);
+			classNoStyle.F_ListClassWithStyleDefaultFormat.Add(new ClassWithStyle() {Name = "name3", Value = 3});
+
+			var serializer = new Serializer(settings);
+			var text = serializer.Serialize(classNoStyle).Trim();
+
+			var textReference = @"!ClassNoStyle
+A_ListWithCustomStyle: [a, b, c]
+B_ClassWithStyle: {Name: name1, Value: 1}
+C_ClassWithStyleOverridenByLocalYamlStyle:
+  Name: name2
+  Value: 2
+D_ListHandleByDynamicStyleFormat: [1, 2, 3]
+E_ListDefaultPrimitiveLimit: [1, 2]
+E_ListDefaultPrimitiveLimitExceed:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+F_ListClassWithStyleDefaultFormat:
+  - {Name: name3, Value: 3}";
+
+			Assert.Equal(textReference, text);
 		}
 		
 		private void SerialRoundTrip(SerializerSettings settings, string text, Type serializedType = null)

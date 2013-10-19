@@ -602,7 +602,7 @@ namespace YamlDotNet.Test.Serialization
 		public void NullValuesInListsAreAlwaysEmittedWithoutEmitDefaults()
 		{
 			var input = new[] { "foo", null, "bar" };
-			var serializer = new Serializer(new SerializerSettings() { LimitFlowSequence = 0 });
+			var serializer = new Serializer(new SerializerSettings() { LimitPrimitiveFlowSequence = 0 });
 			var writer = new StringWriter();
 
 			serializer.Serialize(writer, input);
@@ -616,7 +616,7 @@ namespace YamlDotNet.Test.Serialization
 		public void NullValuesInListsAreAlwaysEmittedWithEmitDefaults()
 		{
 			var input = new[] { "foo", null, "bar" };
-			var serializer = new Serializer(new SerializerSettings() { EmitDefaultValues = true, LimitFlowSequence = 0});
+			var serializer = new Serializer(new SerializerSettings() { EmitDefaultValues = true, LimitPrimitiveFlowSequence = 0});
 			var writer = new StringWriter();
 
 			serializer.Serialize(writer, input);

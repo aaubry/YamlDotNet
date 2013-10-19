@@ -23,10 +23,16 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
+using YamlDotNet.Events;
 using YamlDotNet.Tokens;
+using AnchorAlias = YamlDotNet.Tokens.AnchorAlias;
+using DocumentEnd = YamlDotNet.Tokens.DocumentEnd;
+using DocumentStart = YamlDotNet.Tokens.DocumentStart;
 using Event = YamlDotNet.Events.ParsingEvent;
-using SequenceStyle = YamlDotNet.Events.SequenceStyle;
-using MappingStyle = YamlDotNet.Events.MappingStyle;
+using YamlStyle = YamlDotNet.YamlStyle;
+using Scalar = YamlDotNet.Tokens.Scalar;
+using StreamEnd = YamlDotNet.Tokens.StreamEnd;
+using StreamStart = YamlDotNet.Tokens.StreamStart;
 
 namespace YamlDotNet
 {
@@ -467,7 +473,7 @@ namespace YamlDotNet
 				           anchorName,
 				           tagName,
 				           isImplicit,
-				           SequenceStyle.Block,
+				           YamlStyle.Block,
 				           start,
 				           GetCurrentToken().End
 				       );
@@ -499,14 +505,14 @@ namespace YamlDotNet
 				if (flowSequenceStart != null)
 				{
 					state = ParserState.YAML_PARSE_FLOW_SEQUENCE_FIRST_ENTRY_STATE;
-					return new Events.SequenceStart(anchorName, tagName, isImplicit, SequenceStyle.Flow, start, flowSequenceStart.End);
+					return new Events.SequenceStart(anchorName, tagName, isImplicit, YamlStyle.Flow, start, flowSequenceStart.End);
 				}
 
 				FlowMappingStart flowMappingStart = GetCurrentToken() as FlowMappingStart;
 				if (flowMappingStart != null)
 				{
 					state = ParserState.YAML_PARSE_FLOW_MAPPING_FIRST_KEY_STATE;
-					return new Events.MappingStart(anchorName, tagName, isImplicit, MappingStyle.Flow, start, flowMappingStart.End);
+					return new Events.MappingStart(anchorName, tagName, isImplicit, YamlStyle.Flow, start, flowMappingStart.End);
 				}
 
 				if (isBlock)
@@ -515,14 +521,14 @@ namespace YamlDotNet
 					if (blockSequenceStart != null)
 					{
 						state = ParserState.YAML_PARSE_BLOCK_SEQUENCE_FIRST_ENTRY_STATE;
-						return new Events.SequenceStart(anchorName, tagName, isImplicit, SequenceStyle.Block, start, blockSequenceStart.End);
+						return new Events.SequenceStart(anchorName, tagName, isImplicit, YamlStyle.Block, start, blockSequenceStart.End);
 					}
 
 					BlockMappingStart blockMappingStart = GetCurrentToken() as BlockMappingStart;
 					if (blockMappingStart != null)
 					{
 						state = ParserState.YAML_PARSE_BLOCK_MAPPING_FIRST_KEY_STATE;
-						return new Events.MappingStart(anchorName, tagName, isImplicit, MappingStyle.Block, start, GetCurrentToken().End);
+						return new Events.MappingStart(anchorName, tagName, isImplicit, YamlStyle.Block, start, GetCurrentToken().End);
 					}
 				}
 
@@ -767,7 +773,7 @@ namespace YamlDotNet
 				if (GetCurrentToken() is Key)
 				{
 					state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_MAPPING_KEY_STATE;
-					evt = new Events.MappingStart(null, null, true, MappingStyle.Flow);
+					evt = new Events.MappingStart(null, null, true, YamlStyle.Flow);
 					Skip();
 					return evt;
 				}

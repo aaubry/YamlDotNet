@@ -54,6 +54,12 @@ namespace YamlDotNet.Serialization
 		bool HasSet { get; }
 
 		/// <summary>
+		/// Gets the default style attached to this member.
+		/// </summary>
+		/// <value>The style.</value>
+		YamlStyle Style { get; }
+
+		/// <summary>
 		/// Gets a value indicating whether this member should be serialized.
 		/// </summary>
 		/// <value><c>true</c> if [should serialize]; otherwise, <c>false</c>.</value>

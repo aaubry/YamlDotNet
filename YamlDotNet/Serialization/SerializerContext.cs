@@ -17,6 +17,9 @@ namespace YamlDotNet.Serialization
 		private readonly ITagTypeRegistry tagTypeRegistry;
 		private readonly ITypeDescriptorFactory typeDescriptorFactory;
 		private readonly List<AnchorLateBinding> anchorLateBindings;
+		internal readonly Stack<string> Anchors = new Stack<string>();
+		internal readonly Stack<YamlStyle> styles = new Stack<YamlStyle>(); 
+		internal int AnchorCount;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SerializerContext"/> class.
@@ -217,14 +220,28 @@ namespace YamlDotNet.Serialization
 			anchorLateBindings.Add(new AnchorLateBinding(alias, setter));
 		}
 
+		/// <summary>
+		/// Pushes a style for the next element to be emitted.
+		/// </summary>
+		/// <param name="style">The style.</param>
+		internal void PushStyle(YamlStyle style)
+		{
+			styles.Push(style);
+		}
+
+		/// <summary>
+		/// Pops the current style.
+		/// </summary>
+		/// <returns>The current style.</returns>
+		internal YamlStyle PopStyle()
+		{
+			return styles.Count > 0 ? styles.Pop() : YamlStyle.Any;
+		}
+
 		internal string GetAnchor()
 		{
 			return Anchors.Count > 0 ? Anchors.Pop() : null;
 		}
-
-		internal Stack<string> Anchors = new Stack<string>();
-
-		internal int AnchorCount;
 
 		internal void ResolveLateAliasBindings()
 		{

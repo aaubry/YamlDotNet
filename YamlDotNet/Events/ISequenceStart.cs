@@ -32,7 +32,7 @@ namespace YamlDotNet.Events
 		/// Gets the style.
 		/// </summary>
 		/// <value>The style.</value>
-		SequenceStyle Style
+		YamlStyle Style
 		{
 			get;
 		}

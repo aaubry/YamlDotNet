@@ -21,12 +21,12 @@
 
 using System;
 
-namespace YamlDotNet.Events
+namespace YamlDotNet
 {
 	/// <summary>
-	/// Specifies the style of a mapping.
+	/// Specifies the style of a sequence or mapping.
 	/// </summary>
-	public enum MappingStyle
+	public enum YamlStyle
 	{
 		/// <summary>
 		/// Let the emitter choose the style.
@@ -34,12 +34,12 @@ namespace YamlDotNet.Events
 		Any,
 
 		/// <summary>
-		/// The block mapping style.
+		/// The block style.
 		/// </summary>
 		Block,
 
 		/// <summary>
-		/// The flow mapping style.
+		/// The flow style.
 		/// </summary>
 		Flow
 	}

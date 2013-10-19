@@ -61,7 +61,6 @@
     <Compile Include="Events\ISequenceStart.cs" />
     <Compile Include="Events\IStreamEnd.cs" />
     <Compile Include="Events\IStreamStart.cs" />
-    <Compile Include="Events\MappingStyle.cs" />
     <Compile Include="Events\NodeEvent.cs" />
     <Compile Include="Events\ParsingEvent.cs" />
     <Compile Include="Events\MappingEnd.cs" />
@@ -69,7 +68,8 @@
     <Compile Include="Events\Scalar.cs" />
     <Compile Include="Events\SequenceEnd.cs" />
     <Compile Include="Events\SequenceStart.cs" />
-    <Compile Include="Events\SequenceStyle.cs" />
+    <Compile Include="Serialization\IDynamicStyleFormat.cs" />
+    <Compile Include="YamlStyle.cs" />
     <Compile Include="Events\StreamEnd.cs" />
     <Compile Include="Events\StreamStart.cs" />
     <Compile Include="FakeList.cs" />
@@ -195,6 +195,7 @@
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="Version.cs" />
     <Compile Include="YamlException.cs" />
+    <Compile Include="YamlStyleAttribute.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

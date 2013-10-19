@@ -75,13 +75,13 @@ namespace YamlDotNet.Events
 			}
 		}
 
-		private readonly SequenceStyle style;
+		private readonly YamlStyle style;
 
 		/// <summary>
 		/// Gets the style.
 		/// </summary>
 		/// <value>The style.</value>
-		public SequenceStyle Style
+		public YamlStyle Style
 		{
 			get
 			{
@@ -105,7 +105,7 @@ namespace YamlDotNet.Events
 		/// <param name="style">The style.</param>
 		/// <param name="start">The start position of the event.</param>
 		/// <param name="end">The end position of the event.</param>
-		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
+		public SequenceStart(string anchor, string tag, bool isImplicit, YamlStyle style, Mark start, Mark end)
 			: base(anchor, tag, start, end)
 		{
 			this.isImplicit = isImplicit;
@@ -115,7 +115,7 @@ namespace YamlDotNet.Events
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SequenceStart"/> class.
 		/// </summary>
-		public SequenceStart(string anchor, string tag, bool isImplicit, SequenceStyle style)
+		public SequenceStart(string anchor, string tag, bool isImplicit, YamlStyle style)
 			: this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
 		{
 		}

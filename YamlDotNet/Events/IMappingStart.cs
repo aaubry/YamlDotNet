@@ -40,7 +40,7 @@ namespace YamlDotNet.Events
 		/// <summary>
 		/// Gets the style of the mapping.
 		/// </summary>
-		MappingStyle Style
+		YamlStyle Style
 		{
 			get;
 		}

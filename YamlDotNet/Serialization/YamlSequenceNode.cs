@@ -53,7 +53,7 @@ namespace YamlDotNet.Serialization
 		/// Gets or sets the style of the node.
 		/// </summary>
 		/// <value>The style.</value>
-		public SequenceStyle Style { get; set; }
+		public YamlStyle Style { get; set; }
 
 
 		/// <summary>

@@ -63,6 +63,8 @@ namespace YamlDotNet.Serialization.Serializers
 
 					var memberValue = member.Get(thisObject);
 					var memberType = member.Type;
+
+					context.PushStyle(member.Style);
 					context.WriteYaml(memberValue, memberType);
 				}
 

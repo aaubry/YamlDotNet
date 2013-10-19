@@ -975,7 +975,7 @@ namespace YamlDotNet
 
 			SequenceStart sequenceStart = (SequenceStart)evt;
 
-			if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || CheckEmptySequence())
+			if (flowLevel != 0 || isCanonical || sequenceStart.Style == YamlStyle.Flow || CheckEmptySequence())
 			{
 				state = EmitterState.YAML_EMIT_FLOW_SEQUENCE_FIRST_ITEM_STATE;
 			}
@@ -1049,7 +1049,7 @@ namespace YamlDotNet
 
 			MappingStart mappingStart = (MappingStart)evt;
 
-			if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || CheckEmptyMapping())
+			if (flowLevel != 0 || isCanonical || mappingStart.Style == YamlStyle.Flow || CheckEmptyMapping())
 			{
 				state = EmitterState.YAML_EMIT_FLOW_MAPPING_FIRST_KEY_STATE;
 			}

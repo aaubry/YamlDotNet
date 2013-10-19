@@ -43,6 +43,7 @@ namespace YamlDotNet.Serialization.Descriptors
 		private readonly IMemberDescriptor[] members;
 		private readonly Dictionary<string, IMemberDescriptor> mapMembers;
 		private readonly bool emitDefaultValues;
+		private YamlStyle style;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ObjectDescriptor" /> class.
@@ -60,7 +61,9 @@ namespace YamlDotNet.Serialization.Descriptors
 			this.emitDefaultValues = emitDefaultValues;
 			this.AttributeRegistry = attributeRegistry;
 			this.type = type;
-			this.IsCompilerGenerated = type.GetCustomAttributes(typeof (CompilerGeneratedAttribute), true).Length > 0;
+			var styleAttribute = AttributeRegistry.GetAttribute<YamlStyleAttribute>(type);
+			this.style = styleAttribute != null ? styleAttribute.Style : YamlStyle.Any;
+			this.IsCompilerGenerated = AttributeRegistry.GetAttribute<CompilerGeneratedAttribute>(type) != null;
 			var memberList = PrepareMembers();
 
 			// Sort members by name
@@ -124,6 +127,11 @@ namespace YamlDotNet.Serialization.Descriptors
 			get { return members.Length > 0; }
 		}
 
+		public YamlStyle Style
+		{
+			get { return style; }
+		}
+
 		public IMemberDescriptor this[string name]
 		{
 			get 
@@ -185,8 +193,13 @@ namespace YamlDotNet.Serialization.Descriptors
 
 			// Member is not displayed if there is a YamlIgnore attribute on it
 			if (AttributeRegistry.GetAttribute<YamlIgnoreAttribute>(member.MemberInfo, false) != null)
-				return false; 
+				return false;
 
+			// Gets the style
+			var styleAttribute = AttributeRegistry.GetAttribute<YamlStyleAttribute>(member.MemberInfo);
+			member.Style = styleAttribute != null ? styleAttribute.Style : YamlStyle.Any;
+
+			// Handle member attribute
 			var memberAttribute = AttributeRegistry.GetAttribute<YamlMemberAttribute>(member.MemberInfo, false);
 			if (memberAttribute != null)
 			{

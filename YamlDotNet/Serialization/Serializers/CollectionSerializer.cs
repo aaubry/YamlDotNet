@@ -54,10 +54,38 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 		}
 
-		protected override SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		protected override YamlStyle GetStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			var collection = thisObject as ICollection;
-			return collection == null || collection.Count >= context.Settings.LimitFlowSequence ? SequenceStyle.Block : SequenceStyle.Flow;
+			var style = base.GetStyle(context, thisObject, typeDescriptor);
+
+			// In case of any style, allow to emit a flow sequence depending on Settings LimitPrimitiveFlowSequence.
+			// Apply this only for primitives
+			if (style == YamlStyle.Any)
+			{
+				bool isPrimitiveElementType = false;
+				var collectionDescriptor = typeDescriptor as CollectionDescriptor;
+				int count = 0;
+				if (collectionDescriptor != null)
+				{
+					isPrimitiveElementType = PrimitiveDescriptor.IsPrimitive(collectionDescriptor.ElementType);
+					count = collectionDescriptor.GetCollectionCount(thisObject);
+				}
+				else
+				{
+					var arrayDescriptor = typeDescriptor as ArrayDescriptor;
+					if (arrayDescriptor != null)
+					{
+						isPrimitiveElementType = PrimitiveDescriptor.IsPrimitive(arrayDescriptor.ElementType);
+						count = thisObject != null ? ((Array) thisObject).Length : -1;
+					}
+				}
+
+				style = thisObject == null || count >= context.Settings.LimitPrimitiveFlowSequence || !isPrimitiveElementType
+					       ? YamlStyle.Block
+					       : YamlStyle.Flow;
+			}
+
+			return style;
 		}
 
 		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
@@ -82,6 +110,8 @@ namespace YamlDotNet.Serialization.Serializers
 
 					var memberValue = member.Get(thisObject);
 					var memberType = member.Type;
+
+					context.PushStyle(member.Style);
 					context.WriteYaml(memberValue, memberType);
 				}
 
@@ -95,27 +125,30 @@ namespace YamlDotNet.Serialization.Serializers
 
 		private void ReadPureCollectionItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			var list = thisObject as IList;
-			if (list == null)
+			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
+			if (!collectionDescriptor.HasAdd)
 			{
-				throw new InvalidOperationException("Cannot deserialize list to type [{0}]".DoFormat(typeDescriptor.Type));
+				throw new InvalidOperationException("Cannot deserialize list to type [{0}]. No Add method found".DoFormat(thisObject.GetType()));
+			}
+			if (collectionDescriptor.IsReadOnly(thisObject))
+			{
+				throw new InvalidOperationException("Cannot deserialize list to readonly collection type [{0}].".DoFormat(thisObject.GetType()));
 			}
 
-			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 			var reader = context.Reader;
 
 			while (!reader.Accept<SequenceEnd>())
 			{
 				var valueResult = context.ReadYaml(null, collectionDescriptor.ElementType);
 	
-				// Handle aliasing
+				// Handle aliasing. TODO: Aliasing doesn't preserve order here. This is not an expected behavior
 				if (valueResult.IsAlias)
 				{
-					context.AddAliasBinding(valueResult.Alias, deferredValue => list.Add(deferredValue));
+					context.AddAliasBinding(valueResult.Alias, deferredValue => collectionDescriptor.CollectionAdd(thisObject, deferredValue));
 				}
 				else
 				{
-					list.Add(valueResult.Value);
+					collectionDescriptor.CollectionAdd(thisObject, valueResult.Value);
 				}
 			}
 		}

@@ -57,7 +57,7 @@ namespace YamlDotNet.Serialization
 		}
 
 		public bool IsImplicit { get; set; }
-		public MappingStyle Style { get; set; }
+		public YamlStyle Style { get; set; }
 	}
 
 	public sealed class MappingEndEventInfo : EventInfo
@@ -76,7 +76,7 @@ namespace YamlDotNet.Serialization
 		}
 
 		public bool IsImplicit { get; set; }
-		public SequenceStyle Style { get; set; }
+		public YamlStyle Style { get; set; }
 	}
 
 	public sealed class SequenceEndEventInfo : EventInfo

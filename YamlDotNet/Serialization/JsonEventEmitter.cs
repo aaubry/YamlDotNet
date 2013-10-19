@@ -42,14 +42,14 @@ namespace YamlDotNet.Serialization
 
 		public override void Emit(MappingStartEventInfo eventInfo)
 		{
-			eventInfo.Style = MappingStyle.Flow;
+			eventInfo.Style = YamlStyle.Flow;
 
 			base.Emit(eventInfo);
 		}
 
 		public override void Emit(SequenceStartEventInfo eventInfo)
 		{
-			eventInfo.Style = SequenceStyle.Flow;
+			eventInfo.Style = YamlStyle.Flow;
 
 			base.Emit(eventInfo);
 		}

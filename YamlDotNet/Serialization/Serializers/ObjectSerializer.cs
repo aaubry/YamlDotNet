@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using YamlDotNet.Events;
+﻿using YamlDotNet.Events;
 using YamlDotNet.Serialization.Descriptors;
 
 namespace YamlDotNet.Serialization.Serializers
@@ -10,6 +8,9 @@ namespace YamlDotNet.Serialization.Serializers
 	/// </summary>
 	public class ObjectSerializer : IYamlSerializable, IYamlSerializableFactory
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ObjectSerializer"/> class.
+		/// </summary>
 		public ObjectSerializer()
 		{
 		}
@@ -31,9 +32,9 @@ namespace YamlDotNet.Serialization.Serializers
 			return false;
 		}
 
-		protected virtual SequenceStyle GetSequenceStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		protected virtual YamlStyle GetStyle(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
 		{
-			return SequenceStyle.Block;
+			return typeDescriptor.Style;
 		}
 
 		public virtual ValueOutput ReadYaml(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
@@ -113,16 +114,19 @@ namespace YamlDotNet.Serialization.Serializers
 			var typeOfValue = value.GetType();
 
 			var isSequence = CheckIsSequence(typeDescriptor);
+
+			// Resolve the style, use default style if not defined.
+			var style = ResolveStyle(context, value, typeDescriptor);
+
 			if (isSequence)
 			{
-				var style = GetSequenceStyle(context, value, typeDescriptor);
 				context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor(), Style = style});
 				WriteItems(context, value, typeDescriptor);
 				context.Writer.Emit(new SequenceEndEventInfo(value, typeOfValue));
 			}
 			else
 			{
-				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor() });
+				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor(), Style = style });
 				WriteItems(context, value, typeDescriptor);
 				context.Writer.Emit(new MappingEndEventInfo(value, typeOfValue));
 			}
@@ -152,6 +156,8 @@ namespace YamlDotNet.Serialization.Serializers
 					}
 				}
 
+				// Push the style of the current member
+				context.PushStyle(member.Style);
 				context.WriteYaml(memberValue, memberType);
 			}
 		}
@@ -165,6 +171,44 @@ namespace YamlDotNet.Serialization.Serializers
 				IsPlainImplicit = true,
 				Style = ScalarStyle.Plain
 			});
+		}
+
+		private YamlStyle ResolveStyle(SerializerContext context, object value, ITypeDescriptor typeDescriptor)
+		{
+			// Resolve the style, use default style if not defined.
+			// First pop style of current member being serialized.
+			var style = context.PopStyle();
+
+			// If a dynamic style format is found, try to resolve through it
+			if (context.Settings.DynamicStyleFormat != null)
+			{
+				var dynamicStyle = context.Settings.DynamicStyleFormat.GetStyle(context, value, typeDescriptor);
+				if (dynamicStyle != YamlStyle.Any)
+				{
+					style = dynamicStyle;
+				}
+			}
+
+			// If no style yet defined
+			if (style == YamlStyle.Any)
+			{
+				// Try to get the style from this serializer
+				style = GetStyle(context, value, typeDescriptor);
+
+				// If not defined, get the default style
+				if (style == YamlStyle.Any)
+				{
+					style = context.Settings.DefaultStyle;
+
+					// If default style is set to Any, set it to Block by default.
+					if (style == YamlStyle.Any)
+					{
+						style = YamlStyle.Block;
+					}
+				}
+			}
+
+			return style;
 		}
 	}
 }

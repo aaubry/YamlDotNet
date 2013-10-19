@@ -109,17 +109,17 @@ namespace YamlDotNet.Test
 
 		protected SequenceStart BlockSequenceStart
 		{
-			get { return new SequenceStart(null, null, true, SequenceStyle.Block); }
+			get { return new SequenceStart(null, null, true, YamlStyle.Block); }
 		}
 
 		protected SequenceStart FlowSequenceStart
 		{
-			get { return new SequenceStart(null, null, true, SequenceStyle.Flow); }
+			get { return new SequenceStart(null, null, true, YamlStyle.Flow); }
 		}
 
 		protected SequenceStart AnchoredFlowSequenceStart(string anchor)
 		{
-			return new SequenceStart(anchor, null, true, SequenceStyle.Flow);
+			return new SequenceStart(anchor, null, true, YamlStyle.Flow);
 		}
 
 		protected SequenceEnd SequenceEnd
@@ -129,17 +129,17 @@ namespace YamlDotNet.Test
 
 		protected MappingStart BlockMappingStart
 		{
-			get { return new MappingStart(null, null, true, MappingStyle.Block); }
+			get { return new MappingStart(null, null, true, YamlStyle.Block); }
 		}
 
 		protected MappingStart TaggedBlockMappingStart(string tag)
 		{
-			return new MappingStart(null, tag, false, MappingStyle.Block);
+			return new MappingStart(null, tag, false, YamlStyle.Block);
 		}
 
 		protected MappingStart FlowMappingStart
 		{
-			get { return new MappingStart(null, null, true, MappingStyle.Flow); }
+			get { return new MappingStart(null, null, true, YamlStyle.Flow); }
 		}
 
 		protected MappingEnd MappingEnd

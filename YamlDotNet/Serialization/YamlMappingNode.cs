@@ -51,7 +51,7 @@ namespace YamlDotNet.Serialization
 		/// Gets or sets the style of the node.
 		/// </summary>
 		/// <value>The style.</value>
-		public MappingStyle Style { get; set; }
+		public YamlStyle Style { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlMappingNode"/> class.

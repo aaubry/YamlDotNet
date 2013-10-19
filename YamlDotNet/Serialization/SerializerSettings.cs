@@ -38,7 +38,8 @@ namespace YamlDotNet.Serialization
 			EmitJsonComptible = false;
 			EmitCapacityForList = false;
 			SpecialCollectionMember = "~Items";
-			LimitFlowSequence = 20;
+			LimitPrimitiveFlowSequence = 0;
+			DefaultStyle = YamlStyle.Block;
 			this.schema = schema ?? new CoreSchema();
 			tagTypeRegistry = new TagTypeRegistry(Schema);
 			attributeRegistry = new AttributeRegistry();
@@ -100,10 +101,11 @@ namespace YamlDotNet.Serialization
 
 		/// <summary>
 		/// Gets or sets the maximum number of elements an array/list of primitive can be emitted as a
-		/// flow sequence (instead of a block sequence by default). Default is 20.
+		/// flow sequence (instead of a block sequence by default). Default is 0, meaning block style
+		/// for all sequuences.
 		/// </summary>
 		/// <value>The emit compact array limit.</value>
-		public int LimitFlowSequence { get; set; }
+		public int LimitPrimitiveFlowSequence { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to emit default value. Default is false.
@@ -120,6 +122,29 @@ namespace YamlDotNet.Serialization
 			get { return tagTypeRegistry.UseShortTypeName; }
 			set { tagTypeRegistry.UseShortTypeName = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets the default <see cref="YamlStyle"/>. Default is <see cref="YamlStyle.Block"/>. See <see cref="DynamicStyleFormat"/> to understand the resolution of styles.
+		/// </summary>
+		/// <value>The default style.</value>
+		public YamlStyle DefaultStyle { get; set; }
+
+		/// <summary>
+		/// Gets or sets a <see cref="IDynamicStyleFormat"/> to allow switching <see cref="YamlStyle"/> dynamically based
+		/// on the element being serialized. See remarks.
+		/// </summary>
+		/// <value>The dynamic style format.</value>
+		/// <remarks>
+		/// The order to resolve a style is:
+		/// <ul>
+		/// <li>First try to get a style from <see cref="DynamicStyleFormat"/>, if null or returns <see cref="YamlStyle.Any"/></li>
+		/// <li>Second try to resolve the style from the property/field being serialized with the attribute <see cref="YamlStyleAttribute"/>, if it is different from <see cref="YamlStyle.Any"/> </li>
+		/// <li>Third  try to resolve the style from the type being serialized with the attribute <see cref="YamlStyleAttribute"/>, if it is different from <see cref="YamlStyle.Any"/> </li>
+		/// <li>If <see cref="LimitPrimitiveFlowSequence"/> is &gt; 0, use flow sequence for list/array of primitives less that the value defined in <see cref="LimitPrimitiveFlowSequence"/> </li>
+		/// <li>Else use the default style <see cref="DefaultStyle"/></li>
+		/// </ul>
+		/// </remarks>
+		public IDynamicStyleFormat DynamicStyleFormat { get; set; }
 
 		/// <summary>
 		/// Gets or sets the prefix used to serialize items for a non pure <see cref="System.Collections.IDictionary" /> or
