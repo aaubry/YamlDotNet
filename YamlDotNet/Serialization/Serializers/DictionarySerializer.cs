@@ -46,7 +46,7 @@ namespace YamlDotNet.Serialization.Serializers
 			}
 		}
 
-		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor, YamlStyle style)
 		{
 			var dictionaryDescriptor = (DictionaryDescriptor)typeDescriptor;
 			if (dictionaryDescriptor.IsPureDictionary)
@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 				WriteKey(context, context.Settings.SpecialCollectionMember);
 
-				context.Writer.Emit(new MappingStartEventInfo(thisObject, thisObject.GetType()));
+				context.Writer.Emit(new MappingStartEventInfo(thisObject, thisObject.GetType()) { Style = style });
 				WritePureDictionaryItems(context, thisObject, typeDescriptor);
 				context.Writer.Emit(new MappingEndEventInfo(thisObject, thisObject.GetType()));
 			}

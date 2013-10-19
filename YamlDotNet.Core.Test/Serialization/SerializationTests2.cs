@@ -602,6 +602,7 @@ Value: 0
 				E_ListDefaultPrimitiveLimit = new List<int>();
 				E_ListDefaultPrimitiveLimitExceed = new List<int>();
 				F_ListClassWithStyleDefaultFormat = new List<ClassWithStyle>();
+				G_ListCustom = new CustomList();
 			}
 
 			[YamlStyle(YamlStyle.Flow)]
@@ -619,7 +620,16 @@ Value: 0
 			public List<int> E_ListDefaultPrimitiveLimitExceed { get; set; }
 
 			public List<ClassWithStyle> F_ListClassWithStyleDefaultFormat { get; set; }
+
+			public CustomList G_ListCustom { get; set; }
 		}
+
+		[YamlStyle(YamlStyle.Flow)]
+		public class CustomList : List<object>
+		{
+			public string Name { get; set; }
+		}
+
 
 		private class FormatListObject : IDynamicStyleFormat
 		{
@@ -657,6 +667,14 @@ Value: 0
 			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(4);
 			classNoStyle.E_ListDefaultPrimitiveLimitExceed.Add(5);
 			classNoStyle.F_ListClassWithStyleDefaultFormat.Add(new ClassWithStyle() {Name = "name3", Value = 3});
+			classNoStyle.G_ListCustom.Name = "name4";
+			classNoStyle.G_ListCustom.Add(1);
+			classNoStyle.G_ListCustom.Add(2);
+			classNoStyle.G_ListCustom.Add(3);
+			classNoStyle.G_ListCustom.Add(4);
+			classNoStyle.G_ListCustom.Add(5);
+			classNoStyle.G_ListCustom.Add(6);
+			classNoStyle.G_ListCustom.Add(7);
 
 			var serializer = new Serializer(settings);
 			var text = serializer.Serialize(classNoStyle).Trim();
@@ -676,7 +694,8 @@ E_ListDefaultPrimitiveLimitExceed:
   - 4
   - 5
 F_ListClassWithStyleDefaultFormat:
-  - {Name: name3, Value: 3}";
+  - {Name: name3, Value: 3}
+G_ListCustom: {Name: name4, ~Items: [1, 2, 3, 4, 5, 6, 7]}";
 
 			Assert.Equal(textReference, text);
 		}

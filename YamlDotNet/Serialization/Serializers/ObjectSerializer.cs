@@ -121,18 +121,18 @@ namespace YamlDotNet.Serialization.Serializers
 			if (isSequence)
 			{
 				context.Writer.Emit(new SequenceStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor(), Style = style});
-				WriteItems(context, value, typeDescriptor);
+				WriteItems(context, value, typeDescriptor, style);
 				context.Writer.Emit(new SequenceEndEventInfo(value, typeOfValue));
 			}
 			else
 			{
 				context.Writer.Emit(new MappingStartEventInfo(value, typeOfValue) { Tag = input.Tag, Anchor = context.GetAnchor(), Style = style });
-				WriteItems(context, value, typeDescriptor);
+				WriteItems(context, value, typeDescriptor, style);
 				context.Writer.Emit(new MappingEndEventInfo(value, typeOfValue));
 			}
 		}
 
-		public virtual void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		public virtual void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor, YamlStyle style)
 		{
 			foreach (var member in typeDescriptor.Members)
 			{

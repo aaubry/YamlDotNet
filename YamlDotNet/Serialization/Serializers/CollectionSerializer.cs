@@ -88,7 +88,7 @@ namespace YamlDotNet.Serialization.Serializers
 			return style;
 		}
 
-		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor)
+		public override void WriteItems(SerializerContext context, object thisObject, ITypeDescriptor typeDescriptor, YamlStyle style)
 		{
 			var collectionDescriptor = (CollectionDescriptor)typeDescriptor;
 			if (CheckIsSequence(collectionDescriptor))
@@ -117,7 +117,7 @@ namespace YamlDotNet.Serialization.Serializers
 
 				WriteKey(context, context.Settings.SpecialCollectionMember);
 
-				context.Writer.Emit(new SequenceStartEventInfo(thisObject, thisObject.GetType()));
+				context.Writer.Emit(new SequenceStartEventInfo(thisObject, thisObject.GetType()) { Style = style });
 				WritePureCollectionItems(context, thisObject, typeDescriptor);
 				context.Writer.Emit(new SequenceEndEventInfo(thisObject, thisObject.GetType()));
 			}
