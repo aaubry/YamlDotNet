@@ -30,10 +30,13 @@ namespace YamlDotNet.Serialization
 		Type ResolveType(string typeName);
 
 		/// <summary>
-		/// Registers an assembly when trying to resolve types.
+		/// Registers an assembly when trying to resolve types. All types
+		/// having <see cref="YamlTagAttribute" /> will be registered
+		/// automatically.
 		/// </summary>
 		/// <param name="assembly">The assembly.</param>
-		void RegisterAssembly(Assembly assembly);
+		/// <param name="attributeRegistry">The attribute registry to use when quering for <see cref="YamlTagAttribute"/>.</param>
+		void RegisterAssembly(Assembly assembly, IAttributeRegistry attributeRegistry);
 
 		/// <summary>
 		/// Register a mapping between a tag and a type.

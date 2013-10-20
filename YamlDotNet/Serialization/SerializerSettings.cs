@@ -223,7 +223,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="assembly">The assembly.</param>
 		public void RegisterAssembly(Assembly assembly)
 		{
-			tagTypeRegistry.RegisterAssembly(assembly);
+			tagTypeRegistry.RegisterAssembly(assembly, attributeRegistry);
 		}
 
 		/// <summary>

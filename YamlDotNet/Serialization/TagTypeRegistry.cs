@@ -38,14 +38,25 @@ namespace YamlDotNet.Serialization
 		/// <value><c>true</c> if [use short type name]; otherwise, <c>false</c>.</value>
 		public bool UseShortTypeName { get; set; }
 
-		public void RegisterAssembly(Assembly assembly)
+		public void RegisterAssembly(Assembly assembly, IAttributeRegistry attributeRegistry)
 		{
 			if (assembly == null) throw new ArgumentNullException("assembly");
+			if (attributeRegistry == null) throw new ArgumentNullException("attributeRegistry");
 
 			// Add automatically the assembly for lookup
 			if (!DefaultLookupAssemblies.Contains(assembly) && !lookupAssemblies.Contains(assembly))
 			{
 				lookupAssemblies.Add(assembly);
+
+				// Register all tags automatically.
+				foreach (var type in assembly.GetTypes())
+				{
+					var tagAttribute = attributeRegistry.GetAttribute<YamlTagAttribute>(type);
+					if (tagAttribute != null && !string.IsNullOrEmpty(tagAttribute.Tag))
+					{
+						RegisterTagMapping(tagAttribute.Tag, type);
+					}
+				}
 			}
 		}
 
@@ -76,9 +87,6 @@ namespace YamlDotNet.Serialization
 
 			tagToType[tag] = type;
 			typeToTag[type] = tag;
-
-			// Make sure the assembly is registered for this type
-			RegisterAssembly(type.Assembly);
 		}
 
 		public virtual Type TypeFromTag(string tag)
