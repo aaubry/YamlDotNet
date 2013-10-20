@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YamlDotNet
+namespace YamlDotNet.Serialization
 {
 	/// <summary>
 	/// An attribute to modify the output style of a sequence or mapping. 

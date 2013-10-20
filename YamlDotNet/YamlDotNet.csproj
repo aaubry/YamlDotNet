@@ -195,7 +195,7 @@
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="Version.cs" />
     <Compile Include="YamlException.cs" />
-    <Compile Include="YamlStyleAttribute.cs" />
+    <Compile Include="Serialization\YamlStyleAttribute.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
