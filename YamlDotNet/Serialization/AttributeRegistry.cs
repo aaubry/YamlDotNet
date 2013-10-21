@@ -21,7 +21,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="memberInfo">The reflection member.</param>
 		/// <param name="inherit">if set to <c>true</c> includes inherited attributes.</param>
 		/// <returns>An enumeration of <see cref="Attribute"/>.</returns>
-		public List<Attribute> GetAttributes(MemberInfo memberInfo, bool inherit = true)
+		public virtual List<Attribute> GetAttributes(MemberInfo memberInfo, bool inherit = true)
 		{
 			var key = new MemberInfoKey(memberInfo, inherit);
 
