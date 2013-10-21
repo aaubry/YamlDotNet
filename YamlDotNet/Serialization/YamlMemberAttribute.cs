@@ -27,7 +27,6 @@ namespace YamlDotNet.Serialization
 		public YamlMemberAttribute(string name)
 		{
 			this.name = name;
-			serializeMethod = SerializeMemberMode.Assign;
 			Order = -1;
 		}
 
