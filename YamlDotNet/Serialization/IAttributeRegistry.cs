@@ -44,7 +44,7 @@ namespace YamlDotNet.Serialization
 		}
 
 		/// <summary>
-		/// Gets an attribute associated with the specified member.
+		/// Gets the first attribute of type T associated with the specified member.
 		/// </summary>
 		/// <typeparam name="T">Type of the attribute</typeparam>
 		/// <param name="memberInfo">The member information.</param>
@@ -52,12 +52,7 @@ namespace YamlDotNet.Serialization
 		/// <returns>An attribute of type {T} if it was found; otherwise <c>null</c> </returns>
 		public static T GetAttribute<T>(this IAttributeRegistry attributeRegistry, MemberInfo memberInfo, bool inherit = true) where T : Attribute
 		{
-			var list = attributeRegistry.GetAttributes(memberInfo, inherit);
-			if (list.Count > 0)
-			{
-				return list[list.Count - 1] as T;
-			}
-			return null;
+			return attributeRegistry.GetAttributes(memberInfo, inherit).OfType<T>().FirstOrDefault();
 		}
 	}
 }
