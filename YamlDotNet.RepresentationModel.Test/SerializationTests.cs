@@ -64,7 +64,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			Dump.WriteLine(buffer);
 
 			var deserializer = new Deserializer();
-			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
+			var copy = deserializer.Deserialize<X>(UsingReaderFor(buffer));
 
 			copy.ShouldHave().AllProperties().EqualTo(original);
 		}
@@ -188,7 +188,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			var z = new[] { new Z { aaa = "Yo" }};
 
 			serializer.Serialize(buffer, z);
-			var result = deserializer.Deserialize<IEnumerable<Z>>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<IEnumerable<Z>>(UsingReaderFor(buffer));
 
 			result.Should().ContainSingle(item => "Yo".Equals(item.aaa));
 		}
@@ -203,7 +203,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			serializer.Serialize(buffer, original, typeof(List<int>));
 			Dump.WriteLine(buffer);
-			var copy = deserializer.Deserialize<List<int>>(new StringReader(buffer.ToString()));
+			var copy = deserializer.Deserialize<List<int>>(UsingReaderFor(buffer));
 
 			copy.Should().Equal(original);
 		}
@@ -227,7 +227,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			var flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
 
 			serializer.Serialize(buffer, flags);
-			var result = deserializer.Deserialize<StringFormatFlags>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<StringFormatFlags>(UsingReaderFor(buffer));
 
 			result.Should().Be(flags);
 		}
@@ -391,7 +391,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			Dump.WriteLine(buffer);
 
 			deserializer.RegisterTypeConverter(new ParameterizedCtorConverter());
-			var copy = deserializer.Deserialize<ParameterizedCtor>(new StringReader(buffer.ToString()));
+			var copy = deserializer.Deserialize<ParameterizedCtor>(UsingReaderFor(buffer));
 
 			copy.Value.Should().Be("Yo");
 		}
@@ -437,7 +437,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			serializer.Serialize(buffer, entries);
 			Dump.WriteLine(buffer);
-			var result = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(buffer));
 
 			result.Should().Equal(entries);
 		}
@@ -452,7 +452,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			serializer.Serialize(buffer, data);
 			Dump.WriteLine(buffer);
-			var result = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(buffer));
 
 			result.Should().Equal(new Dictionary<string, string> {
 				{ "Key", "3" }
@@ -523,7 +523,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			serializer.Serialize(buffer, original, typeof(X));
 			Dump.WriteLine(buffer);
-			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
+			var copy = deserializer.Deserialize<X>(UsingReaderFor(buffer));
 
 			copy.MyString.Should().BeNull();
 		}
@@ -538,7 +538,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			serializer.Serialize(buffer, original);
 			Dump.WriteLine(buffer);
-			var copy = deserializer.Deserialize<ContainsIgnore>(new StringReader(buffer.ToString()));
+			var copy = deserializer.Deserialize<ContainsIgnore>(UsingReaderFor(buffer));
 
 			copy.IgnoreMe.Should().BeNull();
 		}
@@ -562,7 +562,7 @@ namespace YamlDotNet.RepresentationModel.Test
 				RegularParent = new Child { ParentProp = "foo", ChildProp = "bar" },
 			});
 			Dump.WriteLine(buffer);
-			var result = deserializer.Deserialize<ParentChildContainer>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<ParentChildContainer>(UsingReaderFor(buffer));
 
 			result.SomeScalar.Should().Be("Hello");
 			result.RegularParent.Should().BeOfType<Child>().And
@@ -582,7 +582,7 @@ namespace YamlDotNet.RepresentationModel.Test
 				ParentWithSerializeAs = new Child { ParentProp = "foo", ChildProp = "bar" },
 			});
 			Dump.WriteLine(buffer);
-			var result = deserializer.Deserialize<ParentChildContainer>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<ParentChildContainer>(UsingReaderFor(buffer));
 
 			result.ParentWithSerializeAs.Should().BeOfType<Parent>().And
 				.Subject.As<Parent>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
@@ -624,11 +624,10 @@ namespace YamlDotNet.RepresentationModel.Test
 			var writer = new StringWriter();
 			serializer.Serialize(writer, input, typeof(T));
 
-			var serialized = writer.ToString();
-			Dump.WriteLine("serialized =\n-----\n{0}", serialized);
+			Dump.WriteLine("serialized =\n-----\n{0}", writer);
 
 			var deserializer = new Deserializer();
-			return deserializer.Deserialize<T>(new StringReader(serialized));
+			return deserializer.Deserialize<T>(UsingReaderFor(writer));
 		}
 
 		[Fact]
@@ -640,7 +639,7 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			serializer.Serialize(buffer, new object[] {1, 2, "3"});
 			Dump.WriteLine(buffer);
-			var result = deserializer.Deserialize<int[]>(new StringReader(buffer.ToString()));
+			var result = deserializer.Deserialize<int[]>(UsingReaderFor(buffer));
 
 			result.Should().Equal(1, 2, 3);
 		}
@@ -752,8 +751,7 @@ namespace YamlDotNet.RepresentationModel.Test
 		{
 			var deserializer = new Deserializer(namingConvention: convention);
 
-			var reader = new StringReader(Lines(yaml));
-			var result = deserializer.Deserialize<ConventionTest>(reader);
+			var result = deserializer.Deserialize<ConventionTest>(UsingReaderFor(Lines(yaml)));
 
 			result.ShouldHave().SharedProperties().EqualTo(new {
 				FirstTest = "First",
@@ -772,12 +770,12 @@ namespace YamlDotNet.RepresentationModel.Test
 			var input = new ConventionTest { AliasTest = "Fourth" };
 
 			serializer.Serialize(writer, input, input.GetType());
-			var serialized = writer.ToString();
+			var text = writer.ToString();
 
 			// Todo: use RegEx once FluentAssertions 2.2 is released
-			serialized.TrimEnd('\r', '\n').Should().Be("fourthTest: Fourth");
+			text.TrimEnd('\r', '\n').Should().Be("fourthTest: Fourth");
 
-			var output = deserializer.Deserialize<ConventionTest>(new StringReader(serialized));
+			var output = deserializer.Deserialize<ConventionTest>(UsingReaderFor(text));
 
 			output.AliasTest.Should().Be(input.AliasTest);
 		}
@@ -938,7 +936,7 @@ namespace YamlDotNet.RepresentationModel.Test
 		{
 			var deserializer = new Deserializer();
 
-			var array = deserializer.Deserialize<int[]>(new StringReader(""));
+			var array = deserializer.Deserialize<int[]>(UsingReaderFor(""));
 
 			array.Should().BeNull();
 		}
@@ -1050,11 +1048,11 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void ForwardReferencesWorkInGenericLists()
 		{
 			var deserializer = new Deserializer();
-			var reader = new StringReader(Lines(
+			var text = Lines(
 				"- *forward",
-				"- &forward ForwardReference"));
+				"- &forward ForwardReference");
 
-			var result = deserializer.Deserialize<string[]>(reader);
+			var result = deserializer.Deserialize<string[]>(UsingReaderFor(text));
 
 			result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
 		}
@@ -1063,12 +1061,11 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void ForwardReferencesWorkInNonGenericLists()
 		{
 			var deserializer = new Deserializer();
-
-			var reader = new StringReader(Lines(
+			var text = Lines(
 				"- *forward",
-				"- &forward ForwardReference"));
+				"- &forward ForwardReference");
 
-			var result = deserializer.Deserialize<ArrayList>(reader);
+			var result = deserializer.Deserialize<ArrayList>(UsingReaderFor(text));
 
 			result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
 		}
@@ -1077,14 +1074,14 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void ForwardReferencesWorkInGenericDictionaries()
 		{
 			var deserializer = new Deserializer();
-			var reader = new StringReader(Lines(
+			var text = Lines(
 				"key1: *forward",
 				"*forwardKey: ForwardKeyValue",
 				"*forward: *forward",
 				"key2: &forward ForwardReference",
-				"key3: &forwardKey key4"));
+				"key3: &forwardKey key4");
 
-			var result = deserializer.Deserialize<Dictionary<string, string>>(reader);
+			var result = deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(text));
 
 			result.Should().Equal(new Dictionary<string, string> {
 				{ "ForwardReference", "ForwardReference" },
@@ -1099,14 +1096,14 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void ForwardReferencesWorkInNonGenericDictionaries()
 		{
 			var deserializer = new Deserializer();
-			var reader = new StringReader(Lines(
+			var text = Lines(
 				"key1: *forward",
 				"*forwardKey: ForwardKeyValue",
 				"*forward: *forward",
 				"key2: &forward ForwardReference",
-				"key3: &forwardKey key4"));
+				"key3: &forwardKey key4");
 
-			var result = deserializer.Deserialize<Hashtable>(reader);
+			var result = deserializer.Deserialize<Hashtable>(UsingReaderFor(text));
 
 			result.Should().BeEquivalentTo(
 				Entry("ForwardReference", "ForwardReference"),
@@ -1125,11 +1122,11 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void ForwardReferencesWorkInObjects()
 		{
 			var deserializer = new Deserializer();
-			var reader = new StringReader(Lines(
+			var text = Lines(
 				"Nothing: *forward",
-				"MyString: &forward ForwardReference"));
+				"MyString: &forward ForwardReference");
 
-			var result = deserializer.Deserialize<X>(reader);
+			var result = deserializer.Deserialize<X>(UsingReaderFor(text));
 
 			result.ShouldHave().SharedProperties().EqualTo(
 				new { Nothing = "ForwardReference", MyString = "ForwardReference" });
@@ -1139,11 +1136,11 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void UndefinedForwardReferencesFail()
 		{
 			var deserializer = new Deserializer();
-			var reader = new StringReader(Lines(
-					"Nothing: *forward",
-					"MyString: ForwardReference"));
+			var text = Lines(
+				"Nothing: *forward",
+				"MyString: ForwardReference");
 
-			Action action = () => deserializer.Deserialize<X>(reader);
+			Action action = () => deserializer.Deserialize<X>(UsingReaderFor(text));
 
 			action.ShouldThrow<AnchorNotFoundException>();
 		}
@@ -1171,6 +1168,16 @@ namespace YamlDotNet.RepresentationModel.Test
 				MyPoint = new Point(100, 200);
 				MyNullableWithValue = 8;
 			}
+		}
+
+		private StringReader UsingReaderFor(StringWriter buffer)
+		{
+			return UsingReaderFor(buffer.ToString());
+		}
+
+		private StringReader UsingReaderFor(string text)
+		{
+			return new StringReader(text);
 		}
 	}
 }
