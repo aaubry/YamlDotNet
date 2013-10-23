@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using Xunit;
+using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Core.Test;
@@ -139,29 +139,22 @@ namespace YamlDotNet.RepresentationModel.Test
 			}
 		}
 
-		public class ParameterizedCtor
-		{
-			public string Value;
-			// Fails in serialization unless a type converter is specified
-			public ParameterizedCtor(string value) { Value = value; }
-		}
-
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
 			public string Left { get; set; }
 			public string Right { get; set; }
 
-			public string ToString(IFormatProvider provider)
-			{
-				Assert.Equal(CultureInfo.InvariantCulture, provider);
-				return string.Format(provider, "[{0}, {1}]", Left, Right);
-			}
-
 			public object ToType(Type conversionType, IFormatProvider provider)
 			{
-				Assert.Equal(typeof(string), conversionType);
+				conversionType.Should().Be<string>();
 				return ToString(provider);
+			}
+
+			public string ToString(IFormatProvider provider)
+			{
+				provider.Should().Be(CultureInfo.InvariantCulture);
+				return string.Format(provider, "[{0}, {1}]", Left, Right);
 			}
 
 			#region Unused IConvertible Members
@@ -242,6 +235,13 @@ namespace YamlDotNet.RepresentationModel.Test
 			}
 
 			#endregion
+		}
+
+		public class ParameterizedCtor
+		{
+			public string Value;
+			// Fails in serialization unless a type converter is specified
+			public ParameterizedCtor(string value) { Value = value; }
 		}
 
 		public class ParameterizedCtorConverter : IYamlTypeConverter

@@ -97,9 +97,9 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void DeserializeExplicitType()
 		{
-			var stream = Yaml.StreamFrom("explicitType.yaml");
+			var text = Yaml.StreamFrom("explicitType.template").TemplatedOn<Z>();
 
-			var result = Deserializer.Deserialize<Z>(stream);
+			var result = Deserializer.Deserialize<Z>(UsingReaderFor(text));
 
 			result.aaa.Should().Be("bbb");
 		}
@@ -107,9 +107,10 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void DeserializeConvertible()
 		{
-			var stream = Yaml.StreamFrom("convertible.yaml");
+			var text = Yaml.StreamFrom("convertible.template").TemplatedOn<Convertible>();
+			Console.WriteLine(text);
 
-			var result = Deserializer.Deserialize<Z>(stream);
+			var result = Deserializer.Deserialize<Z>(UsingReaderFor(text));
 
 			result.aaa.Should().Be("[hello, world]");
 		}

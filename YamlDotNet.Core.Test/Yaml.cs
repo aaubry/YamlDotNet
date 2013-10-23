@@ -19,12 +19,14 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core.Test
 {
-	public class Yaml
+	public static class Yaml
 	{
 		public static TextReader StreamFrom(string name)
 		{
@@ -33,6 +35,13 @@ namespace YamlDotNet.Core.Test
 			var stream = assembly.GetManifestResourceStream(name) ??
 						 assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
 			return new StreamReader(stream);
+		}
+
+		public static string TemplatedOn<T>(this TextReader reader)
+		{
+			var text = reader.ReadToEnd();
+			return Regex.Replace(text, @"{type}", match => 
+				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Namespace)));
 		}
 	}
 }
