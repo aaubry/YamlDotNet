@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System.Collections;
+using System.IO;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core.Events;
@@ -31,7 +32,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void EmptyDocument()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("empty.yaml"),
+			AssertSequenceOfEventsFrom(ParserForEmptyContent(),
 				StreamStart,
 				StreamEnd);
 		}
@@ -306,6 +307,11 @@ namespace YamlDotNet.Core.Test
 				MappingEnd,
 				DocumentEnd(Implicit),
 				StreamEnd);
+		}
+
+		private IParser ParserForEmptyContent()
+		{
+			return new Parser(new StringReader(string.Empty));
 		}
 
 		private IParser ParserFor(string name)

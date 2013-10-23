@@ -70,7 +70,6 @@
     <EmbeddedResource Include="files\convertible.template" />
     <EmbeddedResource Include="files\dictionary.yaml" />
     <EmbeddedResource Include="files\dictionaryExplicit.yaml" />
-    <EmbeddedResource Include="files\empty.yaml" />
     <EmbeddedResource Include="files\explicitType.template" />
     <EmbeddedResource Include="files\fail-backreference.yaml" />
     <EmbeddedResource Include="files\forwardAlias.yaml" />
