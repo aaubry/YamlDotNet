@@ -215,6 +215,7 @@ namespace YamlDotNet.Core.Test
 		}
 
 		[Fact]
+		[Trait("motive", "issue #39")]
 		public void FoldedStylePreservesNewLines()
 		{
 			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
