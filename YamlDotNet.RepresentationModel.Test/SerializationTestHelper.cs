@@ -102,44 +102,20 @@ namespace YamlDotNet.RepresentationModel.Test
 		}
 
 		[Flags]
-		public enum EnumFlags
+		public enum EnumExample
 		{
 			None,
 			One,
 			Two
 		}
 
-		public class Y
+		public class CircularReference
 		{
-			public Y Child1 { get; set; }
-			public Y Child2 { get; set; }
+			public CircularReference Child1 { get; set; }
+			public CircularReference Child2 { get; set; }
 		}
 
-		public class Converter : TypeConverter
-		{
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-			{
-				return sourceType == typeof(string);
-			}
-
-			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-			{
-				return false;
-			}
-
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-			{
-				if (!(value is string))
-					throw new InvalidOperationException();
-				var parts = (value as string).Split(' ');
-				return new Convertible {
-					Left = parts[0],
-					Right = parts[1]
-				};
-			}
-		}
-
-		[TypeConverter(typeof(Converter))]
+		[TypeConverter(typeof(ConvertibleConverter))]
 		public class Convertible : IConvertible
 		{
 			public string Left { get; set; }
@@ -157,7 +133,7 @@ namespace YamlDotNet.RepresentationModel.Test
 				return string.Format(provider, "[{0}, {1}]", Left, Right);
 			}
 
-			#region Unused IConvertible Members
+			#region Unsupported Members
 
 			public TypeCode GetTypeCode()
 			{
@@ -237,62 +213,80 @@ namespace YamlDotNet.RepresentationModel.Test
 			#endregion
 		}
 
-		public class ParameterizedCtor
+		public class ConvertibleConverter : TypeConverter
 		{
-			public string Value;
-			// Fails in serialization unless a type converter is specified
-			public ParameterizedCtor(string value) { Value = value; }
+			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+			{
+				return sourceType == typeof(string);
+			}
+
+			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+			{
+				return false;
+			}
+
+			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			{
+				if (!(value is string))
+					throw new InvalidOperationException();
+				var parts = (value as string).Split(' ');
+				return new Convertible {
+					Left = parts[0],
+					Right = parts[1]
+				};
+			}
 		}
 
-		public class ParameterizedCtorConverter : IYamlTypeConverter
+		public class MissingDefaultCtor
+		{
+			public string Value;
+			public MissingDefaultCtor(string value) { Value = value; }
+		}
+
+		public class MissingDefaultCtorConverter : IYamlTypeConverter
 		{
 			public bool Accepts(Type type)
 			{
-				return type == typeof(ParameterizedCtor);
+				return type == typeof(MissingDefaultCtor);
 			}
 
 			public object ReadYaml(IParser parser, Type type)
 			{
 				var value = ((Scalar)parser.Current).Value;
 				parser.MoveNext();
-				return new ParameterizedCtor(value);
+				return new MissingDefaultCtor(value);
 			}
 
 			public void WriteYaml(IEmitter emitter, object value, Type type)
 			{
-				emitter.Emit(new Scalar(((ParameterizedCtor)value).Value));
+				emitter.Emit(new Scalar(((MissingDefaultCtor)value).Value));
 			}
 		}
 
-		public class ParentChildContainer
+		public class InheritanceExample
 		{
 			public object SomeScalar { get; set; }
-			public Parent RegularParent { get; set; }
-			[YamlMember(serializeAs: typeof(Parent))]
-			public Parent ParentWithSerializeAs { get; set; }
+			public Base RegularBase { get; set; }
+			[YamlMember(serializeAs: typeof(Base))]
+			public Base BaseWithSerializeAs { get; set; }
 		}
 
-		public class Parent
+		public class Base
 		{
-			public string ParentProp { get; set; }
+			public string BaseProperty { get; set; }
 		}
 
-		public class Child : Parent
+		public class Derived : Base
 		{
-			public string ChildProp { get; set; }
+			public string DerivedProperty { get; set; }
 		}
 
-		public class Z
+		public class Simple
 		{
 			public string aaa { get; set; }
 		}
 
-		public class Person
-		{
-			public string Name { get; set; }
-		}
-
-		public class X
+		public class Example
 		{
 			public bool MyFlag { get; set; }
 			public string Nothing { get; set; }
@@ -305,7 +299,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			public int? MyNullableWithValue { get; set; }
 			public int? MyNullableWithoutValue { get; set; }
 
-			public X()
+			public Example()
 			{
 				MyInt = 1234;
 				MyDouble = 6789.1011;
@@ -317,13 +311,13 @@ namespace YamlDotNet.RepresentationModel.Test
 			}
 		}
 
-		public class ContainsIgnore
+		public class IgnoreExample
 		{
 			[YamlIgnore]
 			public String IgnoreMe { get; set; }
 		}
 
-		public class HasDefaults
+		public class DefaultsExample
 		{
 			public const string DefaultValue = "myDefault";
 
@@ -331,7 +325,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			public string Value { get; set; }
 		}
 
-		public class OnlyGenericDictionary : IDictionary<string, string>
+		public class CustomGenericDictionary : IDictionary<string, string>
 		{
 			private readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
 
@@ -350,7 +344,7 @@ namespace YamlDotNet.RepresentationModel.Test
 				return GetEnumerator();
 			}
 
-			#region Unused Members
+			#region Unsupported Members
 
 			public bool ContainsKey(string key)
 			{
@@ -421,7 +415,7 @@ namespace YamlDotNet.RepresentationModel.Test
 			#endregion
 		}
 
-		public class ConventionTest
+		public class NameConvention
 		{
 			public string FirstTest { get; set; }
 			public string SecondTest { get; set; }
