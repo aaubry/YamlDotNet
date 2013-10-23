@@ -25,7 +25,7 @@ using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
 
 namespace YamlDotNet.Core.Test
 {
-	public class ParserTestHelper : YamlTest
+	public class ParserTestHelper
 	{
 		protected const bool Explicit = false;
 		protected const bool Implicit = true;

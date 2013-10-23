@@ -310,7 +310,7 @@ namespace YamlDotNet.Core.Test
 
 		private IParser ParserFor(string name)
 		{
-			return new Parser(YamlFile(name));
+			return new Parser(Yaml.StreamFrom(name));
 		}
 
 		private void AssertSequenceOfEventsFrom(IParser parser, params ParsingEvent[] events)

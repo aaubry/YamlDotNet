@@ -55,6 +55,7 @@
     <Compile Include="NamingConventionTests.cs" />
     <Compile Include="ObjectFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializationTestHelper.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="YamlStreamTests.cs" />
   </ItemGroup>

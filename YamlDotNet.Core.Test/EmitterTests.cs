@@ -28,7 +28,7 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Core.Test
 {
-	public class EmitterTests : YamlTest
+	public class EmitterTests
 	{
 		[Fact]
 		public void EmitExample1()
@@ -114,14 +114,14 @@ namespace YamlDotNet.Core.Test
 			ParseAndEmit("test14.yaml");
 		}
 
-		private void ParseAndEmit(string name)
+		private void ParseAndEmit(string filename)
 		{
-			var testText = YamlFile(name).ReadToEnd();
+			var testText = Yaml.StreamFrom(filename).ReadToEnd();
 
 			var output = new StringWriter();
 			IParser parser = new Parser(new StringReader(testText));
 			IEmitter emitter = new Emitter(output, 2, int.MaxValue, false);
-			Dump.WriteLine("= Parse and emit yaml file ["+ name + "] =");
+			Dump.WriteLine("= Parse and emit yaml file ["+ filename + "] =");
 			while (parser.MoveNext())
 			{
 				Dump.WriteLine(parser.Current);

@@ -27,13 +27,12 @@ using System.IO;
 
 namespace YamlDotNet.RepresentationModel.Test
 {
-	public class YamlStreamTests : YamlTest
+	public class YamlStreamTests
 	{
-
 		[Fact]
 		public void LoadSimpleDocument() {
 			var stream = new YamlStream();
-			stream.Load(YamlFile("test2.yaml"));
+			stream.Load(Yaml.StreamFrom("test2.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
@@ -43,7 +42,7 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void BackwardAliasReferenceWorks() {
 			var stream = new YamlStream();
-			stream.Load(YamlFile("backwardsAlias.yaml"));
+			stream.Load(Yaml.StreamFrom("backwardsAlias.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
@@ -60,7 +59,7 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void ForwardAliasReferenceWorks() {
 			var stream = new YamlStream();
-			stream.Load(YamlFile("forwardAlias.yaml"));
+			stream.Load(Yaml.StreamFrom("forwardAlias.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
@@ -174,13 +173,13 @@ namespace YamlDotNet.RepresentationModel.Test
 		public void AllAliasesMustBeResolved()
 		{
 			var original = new YamlStream();
-			Assert.Throws<AnchorNotFoundException>(() => original.Load(YamlFile("invalid-reference.yaml")));
+			Assert.Throws<AnchorNotFoundException>(() => original.Load(Yaml.StreamFrom("invalid-reference.yaml")));
 		}
 
 		private void RoundtripTest(string yamlFileName)
 		{
 			var original = new YamlStream();
-			original.Load(YamlFile(yamlFileName));
+			original.Load(Yaml.StreamFrom(yamlFileName));
 
 			var buffer = new StringBuilder();
 			original.Save(new StringWriter(buffer));
