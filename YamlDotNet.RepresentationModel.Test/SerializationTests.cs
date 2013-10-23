@@ -84,11 +84,10 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void DeserializeCustomTags()
 		{
-			var deserializer = Deserializer;
 			var stream = Yaml.StreamFrom("tags.yaml");
 
-			deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
-			var result = deserializer.Deserialize(stream);
+			Deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
+			var result = Deserializer.Deserialize(stream);
 
 			result.Should().BeOfType<Point>().And
 				.Subject.As<Point>().ShouldHave()
@@ -175,13 +174,11 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void RoundtripWithYamlTypeConverter()
 		{
-			var serializer = RoundtripSerializer;
-			var deserializer = Deserializer;
 			var obj = new MissingDefaultCtor("Yo");
 
-			serializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
-			deserializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
-			var result = DoRoundtripFromObjectTo<MissingDefaultCtor>(obj, serializer, deserializer);
+			RoundtripSerializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
+			Deserializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
+			var result = DoRoundtripFromObjectTo<MissingDefaultCtor>(obj, RoundtripSerializer, Deserializer);
 
 			result.Value.Should().Be("Yo");
 		}
@@ -435,7 +432,6 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void DeserializeTwoDocuments()
 		{
-			var deserializer = Deserializer;
 			var reader = EventReaderFor(Lines(
 				"---",
 				"aaa: 111",
@@ -444,8 +440,8 @@ namespace YamlDotNet.RepresentationModel.Test
 				"..."));
 
 			reader.Expect<StreamStart>();
-			var one = deserializer.Deserialize<Simple>(reader);
-			var two = deserializer.Deserialize<Simple>(reader);
+			var one = Deserializer.Deserialize<Simple>(reader);
+			var two = Deserializer.Deserialize<Simple>(reader);
 
 			one.ShouldHave().AllProperties().EqualTo(new { aaa = "111" });
 			two.ShouldHave().AllProperties().EqualTo(new { aaa = "222" });
@@ -454,7 +450,6 @@ namespace YamlDotNet.RepresentationModel.Test
 		[Fact]
 		public void DeserializeThreeDocuments()
 		{
-			var deserializer = Deserializer;
 			var reader = EventReaderFor(Lines(
 				"---",
 				"aaa: 111",
@@ -465,9 +460,9 @@ namespace YamlDotNet.RepresentationModel.Test
 				"..."));
 
 			reader.Expect<StreamStart>();
-			var one = deserializer.Deserialize<Simple>(reader);
-			var two = deserializer.Deserialize<Simple>(reader);
-			var three = deserializer.Deserialize<Simple>(reader);
+			var one = Deserializer.Deserialize<Simple>(reader);
+			var two = Deserializer.Deserialize<Simple>(reader);
+			var three = Deserializer.Deserialize<Simple>(reader);
 
 			reader.Accept<StreamEnd>().Should().BeTrue("reader should have reached StreamEnd");
 			one.ShouldHave().AllProperties().EqualTo(new { aaa = "111" });
@@ -548,11 +543,6 @@ namespace YamlDotNet.RepresentationModel.Test
 			Dump.WriteLine(writer);
 
 			writer.ToString().Should().Contain("MyString");
-		}
-
-		private static Serializer EmitDefaultsJsonCompatibleSerializer
-		{
-			get { return new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible); }
 		}
 
 		[Fact]
