@@ -20,9 +20,7 @@
 //  SOFTWARE.
 
 using System;
-using System.Text;
 using System.IO;
-using System.Collections.Generic;
 using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Samples
