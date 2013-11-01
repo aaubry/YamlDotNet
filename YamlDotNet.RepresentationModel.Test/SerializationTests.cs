@@ -26,9 +26,9 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -36,271 +36,126 @@ using YamlDotNet.Core.Test;
 using YamlDotNet.RepresentationModel.Serialization;
 using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
 
+// ReSharper disable InconsistentNaming
 namespace YamlDotNet.RepresentationModel.Test
 {
 	public class SerializationTests : YamlTest
 	{
-
-			private int? myNullableWithDefaultValue = 0;
-
-			public int? MyNullableWithDefaultValue
-			{
-				get { return myNullableWithDefaultValue; }
-				set { myNullableWithDefaultValue = value; }
-			}
 		[Fact]
-		public void Roundtrip()
+		public void DeserializeEmptyDocument()
 		{
-			var buffer = new StringWriter();
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
-
-			var original = new X();
-			serializer.Serialize(buffer, original);
-
-			Dump.WriteLine(buffer);
-
 			var deserializer = new Deserializer();
-			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
 
-			foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-			{
-				if (property.CanRead && property.CanWrite)
-				{
-					Assert.Equal(
-						property.GetValue(original, null),
-						property.GetValue(copy, null));
-				}
-			}
-		}
+			var array = deserializer.Deserialize<int[]>(UsingReaderFor(""));
 
-		[Fact]
-		public void RoundtripWithDefaults()
-		{
-			var buffer = new StringWriter();
-			var serializer = new Serializer(SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
-
-			var original = new X();
-			serializer.Serialize(buffer, original);
-
-			Dump.WriteLine(buffer);
-
-			var deserializer = new Deserializer();
-			var copy = deserializer.Deserialize<X>(new StringReader(buffer.ToString()));
-
-			foreach (var property in typeof(X).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-			{
-				if (property.CanRead && property.CanWrite)
-				{
-					Assert.Equal(
-						property.GetValue(original, null),
-						property.GetValue(copy, null));
-				}
-			}
-		}
-
-		[Fact]
-		public void CircularReference()
-		{
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
-
-			var buffer = new StringWriter();
-			var original = new Y();
-			original.Child = new Y {
-				Child = original,
-				Child2 = original
-			};
-
-			serializer.Serialize(buffer, original, typeof(Y));
-
-			Dump.WriteLine(buffer);
-		}
-
-		private class Y
-		{
-			public Y Child { get; set; }
-			public Y Child2 { get; set; }
+			array.Should().BeNull();
 		}
 
 		[Fact]
 		public void DeserializeScalar()
 		{
-			var sut = new Deserializer();
-			var result = sut.Deserialize(YamlFile("test2.yaml"), typeof(object));
+			var deserializer = new Deserializer();
 
-			Assert.Equal("a scalar", result);
+			var result = deserializer.Deserialize(YamlFile("test2.yaml"));
+
+			result.Should().Be("a scalar");
+		}
+
+		[Fact]
+		public void RoundtripEnums()
+		{
+			var serializer = new Serializer();
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var flags = EnumFlags.One | EnumFlags.Two;
+
+			serializer.Serialize(buffer, flags);
+			var result = deserializer.Deserialize<EnumFlags>(UsingReaderFor(buffer));
+
+			result.Should().Be(flags);
+		}
+
+		[Flags]
+		public enum EnumFlags
+		{
+			None,
+			One,
+			Two
+		}
+
+		[Fact]
+		public void SerializeAnonymousType()
+		{
+			var serializer = new Serializer();
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var data = new { Key = 3 };
+
+			serializer.Serialize(buffer, data);
+			Dump.WriteLine(buffer);
+			var result = deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(buffer));
+
+			result.Should().Equal(new Dictionary<string, string> {
+				{ "Key", "3" }
+			});
+		}
+
+		[Fact]
+		public void SerializeCircularReference()
+		{
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
+			var buffer = new StringWriter();
+			var original = new Y();
+			original.Child1 = new Y {
+				Child1 = original,
+				Child2 = original
+			};
+
+			Action action = () => serializer.Serialize(buffer, original, typeof(Y));
+
+			action.ShouldNotThrow();
+		}
+
+		public class Y
+		{
+			public Y Child1 { get; set; }
+			public Y Child2 { get; set; }
+		}
+
+		[Fact]
+		public void DeserializeCustomTags()
+		{
+			var deserializer = new Deserializer();
+
+			deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
+			var result = deserializer.Deserialize(YamlFile("tags.yaml"));
+
+			result.Should().BeOfType<Point>().And
+				.Subject.As<Point>().ShouldHave()
+				.SharedProperties().EqualTo(new { X = 10, Y = 20 });
 		}
 
 		[Fact]
 		public void DeserializeExplicitType()
 		{
-			var serializer = new Deserializer();
-			object result = serializer.Deserialize(YamlFile("explicitType.yaml"), typeof(object));
-
-			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-			Assert.Equal("bbb", ((Z)result).aaa);
-		}
-
-		[Fact]
-		public void DeserializeDictionary()
-		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize(YamlFile("dictionary.yaml"));
-
-			Assert.True(typeof(IDictionary<object, object>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
-
-			var dictionary = (IDictionary<object, object>)result;
-			Assert.Equal("value1", dictionary["key1"]);
-			Assert.Equal("value2", dictionary["key2"]);
-		}
-
-		[Fact]
-		public void DeserializeExplicitDictionary()
-		{
-			var serializer = new Deserializer();
-			object result = serializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
-
-			Assert.True(typeof(IDictionary<string, int>).IsAssignableFrom(result.GetType()), "The deserialized object has the wrong type.");
-
-			var dictionary = (IDictionary<string, int>)result;
-			Assert.Equal(1, dictionary["key1"]);
-			Assert.Equal(2, dictionary["key2"]);
-		}
-
-		[Fact]
-		public void DeserializeListOfDictionaries()
-		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize(YamlFile("listOfDictionaries.yaml"), typeof(List<Dictionary<string, string>>));
-
-			Assert.IsType<List<Dictionary<string, string>>>(result);
-
-			var list = (List<Dictionary<string, string>>)result;
-			Assert.Equal("conn1", list[0]["connection"]);
-			Assert.Equal("path1", list[0]["path"]);
-			Assert.Equal("conn2", list[1]["connection"]);
-			Assert.Equal("path2", list[1]["path"]);
-		}
-
-		[Fact]
-		public void DeserializeList()
-		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize(YamlFile("list.yaml"));
-
-			Assert.True(typeof(IList).IsAssignableFrom(result.GetType()));
-
-			var list = (IList)result;
-			Assert.Equal("one", list[0]);
-			Assert.Equal("two", list[1]);
-			Assert.Equal("three", list[2]);
-		}
-
-		[Fact]
-		public void DeserializeExplicitList()
-		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize(YamlFile("listExplicit.yaml"));
-
-			Assert.True(typeof(IList<int>).IsAssignableFrom(result.GetType()));
-
-			var list = (IList<int>)result;
-			Assert.Equal(3, list[0]);
-			Assert.Equal(4, list[1]);
-			Assert.Equal(5, list[2]);
-		}
-
-		[Fact]
-		public void DeserializeEnumerable()
-		{
-			var serializer = new Serializer();
-			var buffer = new StringWriter();
-			var z = new[] { new Z { aaa = "Yo" }};
-			serializer.Serialize(buffer, z);
-
-			var deserializer = new Deserializer();
-			var result = (IEnumerable<Z>)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(IEnumerable<Z>));
-			Assert.Equal(1, result.Count());
-			Assert.Equal("Yo", result.First().aaa);
-		}
-
-		[Fact]
-		public void RoundtripList()
-		{
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
 			var deserializer = new Deserializer();
 
-			var buffer = new StringWriter();
-			var original = new List<int> { 2, 4, 6 };
-			serializer.Serialize(buffer, original, typeof(List<int>));
+			var result = deserializer.Deserialize<Z>(YamlFile("explicitType.yaml"));
 
-			Dump.WriteLine(buffer);
-
-			var copy = (List<int>) deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(List<int>));
-
-			Assert.Equal(original.Count, copy.Count);
-
-			for (int i = 0; i < original.Count; ++i)
-			{
-				Assert.Equal(original[i], copy[i]);
-			}
-		}
-
-		[Fact]
-		public void DeserializeArray()
-		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize(YamlFile("list.yaml"), typeof(String[]));
-
-			Assert.True(result is String[]);
-
-			var array = (String[])result;
-			Assert.Equal("one", array[0]);
-			Assert.Equal("two", array[1]);
-			Assert.Equal("three", array[2]);
-		}
-
-		[Fact]
-		public void Enums()
-		{
-			var serializer = new Serializer();
-			var deserializer = new Deserializer();
-
-			var flags = StringFormatFlags.NoClip | StringFormatFlags.NoFontFallback;
-
-			var buffer = new StringWriter();
-			serializer.Serialize(buffer, flags);
-
-			var deserialized = (StringFormatFlags)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(StringFormatFlags));
-
-			Assert.Equal(flags, deserialized);
-		}
-
-		[Fact]
-		public void CustomTags()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
-			var result = deserializer.Deserialize(YamlFile("tags.yaml"));
-
-			Assert.Equal(typeof(Point), result.GetType());
-
-			var value = (Point)result;
-			Assert.Equal(10, value.X);
-			Assert.Equal(20, value.Y);
+			result.aaa.Should().Be("bbb");
 		}
 
 		[Fact]
 		public void DeserializeConvertible()
 		{
-			var serializer = new Deserializer();
-			var result = serializer.Deserialize(YamlFile("convertible.yaml"), typeof(Z));
+			var deserializer = new Deserializer();
 
-			Assert.True(typeof(Z).IsAssignableFrom(result.GetType()));
-			Assert.Equal("[hello, world]", ((Z)result).aaa);
+			var result = deserializer.Deserialize<Z>(YamlFile("convertible.yaml"));
+
+			result.aaa.Should().Be("[hello, world]");
 		}
 
-		// Todo: these two classes aren't used in any tests
-		public class Converter : System.ComponentModel.TypeConverter
+		public class Converter : TypeConverter
 		{
 			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 			{
@@ -314,9 +169,10 @@ namespace YamlDotNet.RepresentationModel.Test
 
 			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 			{
-				var parts = ((string)value).Split(' ');
-				return new Convertible
-				{
+				if (!(value is string))
+					throw new InvalidOperationException();
+				var parts = (value as string).Split(' ');
+				return new Convertible {
 					Left = parts[0],
 					Right = parts[1]
 				};
@@ -326,305 +182,242 @@ namespace YamlDotNet.RepresentationModel.Test
 		[TypeConverter(typeof(Converter))]
 		public class Convertible : IConvertible
 		{
-			public string Left
-			{
-				get;
-				set;
-			}
+			public string Left { get; set; }
+			public string Right { get; set; }
 
-			public string Right
+			public string ToString(IFormatProvider provider)
 			{
-				get;
-				set;
-			}
-
-			public string ToString(IFormatProvider provider) {
 				Assert.Equal(CultureInfo.InvariantCulture, provider);
 				return string.Format(provider, "[{0}, {1}]", Left, Right);
 			}
 
-			public object ToType(Type conversionType, IFormatProvider provider) {
+			public object ToType(Type conversionType, IFormatProvider provider)
+			{
 				Assert.Equal(typeof(string), conversionType);
 				return ToString(provider);
 			}
 
-			#region not implemented IConvertible Members
+			#region Unused IConvertible Members
 
 			public TypeCode GetTypeCode()
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public bool ToBoolean(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public byte ToByte(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public char ToChar(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public DateTime ToDateTime(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public decimal ToDecimal(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public double ToDouble(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public short ToInt16(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public int ToInt32(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public long ToInt64(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public sbyte ToSByte(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public float ToSingle(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public ushort ToUInt16(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public uint ToUInt32(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			public ulong ToUInt64(IFormatProvider provider)
 			{
-				throw new NotImplementedException();
+				throw new NotSupportedException();
 			}
 
 			#endregion
 		}
 
 		[Fact]
-		public void RoundtripWithTypeConverter()
+		public void DeserializationOfObjectsHandlesForwardReferences()
+		{
+			var deserializer = new Deserializer();
+			var text = Lines(
+				"Nothing: *forward",
+				"MyString: &forward ForwardReference");
+
+			var result = deserializer.Deserialize<X>(UsingReaderFor(text));
+
+			result.ShouldHave().SharedProperties().EqualTo(
+				new { Nothing = "ForwardReference", MyString = "ForwardReference" });
+		}
+
+		[Fact]
+		public void DeserializationFailsForUndefinedForwardReferences()
+		{
+			var deserializer = new Deserializer();
+			var text = Lines(
+				"Nothing: *forward",
+				"MyString: ForwardReference");
+
+			Action action = () => deserializer.Deserialize<X>(UsingReaderFor(text));
+
+			action.ShouldThrow<AnchorNotFoundException>();
+		}
+
+		[Fact]
+		public void RoundtripObject()
+		{
+			ShouldRountripWithOptions(SerializationOptions.Roundtrip);
+		}
+
+		[Fact]
+		public void RoundtripObjectWithDefaults()
+		{
+			ShouldRountripWithOptions(SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults);
+		}
+
+		private void ShouldRountripWithOptions(SerializationOptions options)
 		{
 			var buffer = new StringWriter();
-			var x = new SomeCustomType("Yo");
-			var serializer = new Serializer(SerializationOptions.Roundtrip);
-			serializer.RegisterTypeConverter(new CustomTypeConverter());
-			serializer.Serialize(buffer, x);
+			var serializer = new Serializer(options);
+
+			var original = new X();
+			serializer.Serialize(buffer, original);
 
 			Dump.WriteLine(buffer);
 
 			var deserializer = new Deserializer();
-			deserializer.RegisterTypeConverter(new CustomTypeConverter());
+			var copy = deserializer.Deserialize<X>(UsingReaderFor(buffer));
 
-			var copy = deserializer.Deserialize<SomeCustomType>(new StringReader(buffer.ToString()));
-			Assert.Equal("Yo", copy.Value);
+			copy.ShouldHave().AllProperties().EqualTo(original);
 		}
 
-		class SomeCustomType {
-			// Test specifically with no parameterless, supposed to fail unless a type converter is specified
-			public SomeCustomType(string value) { Value = value; }
+		[Fact]
+		public void RoundtripWithYamlTypeConverter()
+		{
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var x = new ParameterizedCtor("Yo");
+
+			serializer.RegisterTypeConverter(new ParameterizedCtorConverter());
+			serializer.Serialize(buffer, x);
+			Dump.WriteLine(buffer);
+
+			deserializer.RegisterTypeConverter(new ParameterizedCtorConverter());
+			var copy = deserializer.Deserialize<ParameterizedCtor>(UsingReaderFor(buffer));
+
+			copy.Value.Should().Be("Yo");
+		}
+
+		public class ParameterizedCtor
+		{
 			public string Value;
+			// Fails in serialization unless a type converter is specified
+			public ParameterizedCtor(string value) { Value = value; }
 		}
 
-		public class CustomTypeConverter : IYamlTypeConverter {
-			public bool Accepts(Type type) {
-				return type == typeof(SomeCustomType);
+		public class ParameterizedCtorConverter : IYamlTypeConverter
+		{
+			public bool Accepts(Type type)
+			{
+				return type == typeof(ParameterizedCtor);
 			}
 
-			public object ReadYaml(IParser parser, Type type) {
+			public object ReadYaml(IParser parser, Type type)
+			{
 				var value = ((Scalar)parser.Current).Value;
 				parser.MoveNext();
-				return new SomeCustomType(value);
+				return new ParameterizedCtor(value);
 			}
 
-			public void WriteYaml(IEmitter emitter, object value, Type type) {
-				emitter.Emit(new Scalar(((SomeCustomType)value).Value));
-			}
-		}
-
-		[Fact]
-		public void RoundtripDictionary()
-		{
-			var entries = new Dictionary<string, string>
+			public void WriteYaml(IEmitter emitter, object value, Type type)
 			{
-				{ "key1", "value1" },
-				{ "key2", "value2" },
-				{ "key3", "value3" },
-			};
-
-			var buffer = new StringWriter();
-			var serializer = new Serializer();
-			serializer.Serialize(buffer, entries);
-
-			Dump.WriteLine(buffer);
-
-			var deserializer = new Deserializer();
-			var deserialized = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
-
-			foreach (var pair in deserialized)
-			{
-				Assert.Equal(entries[pair.Key], pair.Value);
+				emitter.Emit(new Scalar(((ParameterizedCtor)value).Value));
 			}
 		}
 
 		[Fact]
-		public void SerializeAnonymousType()
-		{
-			var data = new { Key = 3 };
-
-			var serializer = new Serializer();
-
-			var buffer = new StringWriter();
-			serializer.Serialize(buffer, data);
-
-			Dump.WriteLine(buffer);
-
-			var deserializer = new Deserializer();
-			var parsed = deserializer.Deserialize<Dictionary<string, string>>(new StringReader(buffer.ToString()));
-
-			Assert.NotNull(parsed);
-			Assert.Equal(1, parsed.Count);
-		}
-
-		[Fact]
-		public void SerializationIncludesNullWhenAsked_BugFix()
-		{
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
-			
-			var buffer = new StringWriter();
-			var original = new { MyString = (string) null };
-			serializer.Serialize(buffer, original, original.GetType());
-
-			Dump.WriteLine(buffer);
-			Assert.True(buffer.ToString().Contains("MyString"));
-		}
-
-		[Fact]
-		public void SerializationIncludesNullWhenAsked()
-		{
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
-
-			var buffer = new StringWriter();
-			var original = new X { MyString = null };
-			serializer.Serialize(buffer, original, typeof(X));
-
-			Dump.WriteLine(buffer);
-			Assert.True(buffer.ToString().Contains("MyString"));
-		}
-
-		[Fact]
-		public void SerializationDoesNotIncludeNullWhenNotAsked()
-		{
-			var buffer = new StringWriter();
-			var original = new X { MyString = null };
-			var serializer = new Serializer();
-
-			serializer.Serialize(buffer, original, typeof(X));
-
-			Dump.WriteLine(buffer);
-			Assert.False(buffer.ToString().Contains("MyString"));
-		}
-
-		[Fact]
-		public void SerializationOfNullWorksInJson()
-		{
-			var serializer = new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible);
-
-			var buffer = new StringWriter();
-			var original = new X { MyString = null };
-			serializer.Serialize(buffer, original, typeof(X));
-
-			Dump.WriteLine(buffer);
-			Assert.True(buffer.ToString().Contains("MyString"));
-		}
-
-		[Fact]
-		public void DeserializationOfNullWorksInJson()
-		{
-			var serializer = new Serializer(
-				SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip);
-			var deserializer = new Deserializer();
-
-			var buffer = new StringWriter();
-			var original = new X { MyString = null };
-			serializer.Serialize(buffer, original, typeof(X));
-
-			Dump.WriteLine(buffer);
-
-			var copy = (X) deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(X));
-
-			Assert.Null(copy.MyString);
-		}
-
-		[Fact]
-		public void SerializationRespectsYamlIgnoreAttribute()
+		public void RoundtripAlias()
 		{
 			var serializer = new Serializer();
 			var deserializer = new Deserializer();
+			var writer = new StringWriter();
+			var input = new ConventionTest { AliasTest = "Fourth" };
 
-			var buffer = new StringWriter();
-			var orig = new ContainsIgnore { IgnoreMe = "Some Text" };
-			serializer.Serialize(buffer, orig);
+			serializer.Serialize(writer, input, input.GetType());
+			var text = writer.ToString();
 
-			Dump.WriteLine(buffer);
-			
-			var copy = (ContainsIgnore) deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ContainsIgnore));
-			
-			Assert.Null(copy.IgnoreMe);
-		}
+			// Todo: use RegEx once FluentAssertions 2.2 is released
+			text.TrimEnd('\r', '\n').Should().Be("fourthTest: Fourth");
 
-		class ContainsIgnore
-		{
-			[YamlIgnore]
-			public String IgnoreMe { get; set; }
-		}
+			var output = deserializer.Deserialize<ConventionTest>(UsingReaderFor(text));
 
-		class Parent
-		{
-			public string ParentProp { get; set; }
-		}
-
-		class Child : Parent
-		{
-			public string ChildProp { get; set; }
-		}
-
-		class ParentChildContainer
-		{
-			public object SomeScalar { get; set; }
-			public Parent RegularParent { get; set; }
-			[YamlMember(serializeAs: typeof(Parent))]
-			public Parent ParentWithSerializeAs { get; set; }
+			output.AliasTest.Should().Be(input.AliasTest);
 		}
 
 		[Fact]
-		public void RoundtripWithPolymorphism()
+		// Todo: is the assert on the string necessary?
+		public void RoundtripDerivedClass()
+		{
+			var serializer = new Serializer(SerializationOptions.Roundtrip);
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+
+			serializer.Serialize(buffer, new ParentChildContainer {
+				SomeScalar = "Hello",
+				RegularParent = new Child { ParentProp = "foo", ChildProp = "bar" },
+			});
+			Dump.WriteLine(buffer);
+			var result = deserializer.Deserialize<ParentChildContainer>(UsingReaderFor(buffer));
+
+			result.SomeScalar.Should().Be("Hello");
+			result.RegularParent.Should().BeOfType<Child>().And
+				.Subject.As<Child>().ShouldHave().SharedProperties().EqualTo(new { ChildProp = "bar" });
+		}
+
+		[Fact]
+		public void RoundtripDerivedClassWithSerializeAs()
 		{
 			var serializer = new Serializer(SerializationOptions.Roundtrip);
 			var deserializer = new Deserializer();
@@ -632,576 +425,420 @@ namespace YamlDotNet.RepresentationModel.Test
 			var buffer = new StringWriter();
 			serializer.Serialize(buffer, new ParentChildContainer {
 				SomeScalar = "Hello",
-				RegularParent = new Child { ParentProp = "foo", ChildProp = "bar" },
+				ParentWithSerializeAs = new Child { ParentProp = "foo", ChildProp = "bar" },
 			});
-			Console.WriteLine(buffer.ToString());
-			var copy = (ParentChildContainer)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ParentChildContainer));
-			Assert.Equal("Hello", copy.SomeScalar);
-			Assert.IsType(typeof(Child), copy.RegularParent);
-			Assert.Equal("bar", ((Child)copy.RegularParent).ChildProp);
+			Dump.WriteLine(buffer);
+			var result = deserializer.Deserialize<ParentChildContainer>(UsingReaderFor(buffer));
+
+			result.ParentWithSerializeAs.Should().BeOfType<Parent>().And
+				.Subject.As<Parent>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
+		}
+
+		public class ParentChildContainer
+		{
+			public object SomeScalar { get; set; }
+			public Parent RegularParent { get; set; }
+			[YamlMember(serializeAs: typeof(Parent))]
+			public Parent ParentWithSerializeAs { get; set; }
+		}
+
+		public class Parent
+		{
+			public string ParentProp { get; set; }
+		}
+
+		public class Child : Parent
+		{
+			public string ChildProp { get; set; }
 		}
 
 		[Fact]
-		public void RoundtripWithSerializeAs()
+		public void DeserializeEnumerable()
+		{
+			var serializer = new Serializer();
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var z = new[] { new Z { aaa = "bbb" }};
+
+			serializer.Serialize(buffer, z);
+			var result = deserializer.Deserialize<IEnumerable<Z>>(UsingReaderFor(buffer));
+
+			result.Should().ContainSingle(item => "bbb".Equals(item.aaa));
+		}
+
+		[Fact]
+		public void DeserializeArray()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize<String[]>(YamlFile("list.yaml"));
+
+			result.Should().Equal(new[] { "one", "two", "three" });
+		}
+
+		[Fact]
+		public void DeserializeList()
+		{
+			var deserializer = new Deserializer();
+			
+			var result = deserializer.Deserialize(YamlFile("list.yaml"));
+
+			result.Should().BeAssignableTo<IList>().And
+				.Subject.As<IList>().Should().Equal(new[] { "one", "two", "three" });
+		}
+
+		[Fact]
+		public void DeserializeExplicitList()
+		{
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize(YamlFile("listExplicit.yaml"));
+
+			result.Should().BeAssignableTo<IList<int>>().And
+				.Subject.As<IList<int>>().Should().Equal(3, 4, 5);
+		}
+
+		[Fact]
+		public void DeserializationOfGenericListsHandlesForwardReferences()
+		{
+			var deserializer = new Deserializer();
+			var text = Lines(
+				"- *forward",
+				"- &forward ForwardReference");
+
+			var result = deserializer.Deserialize<string[]>(UsingReaderFor(text));
+
+			result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
+		}
+
+		[Fact]
+		public void DeserializationOfNonGenericListsHandlesForwardReferences()
+		{
+			var deserializer = new Deserializer();
+			var text = Lines(
+				"- *forward",
+				"- &forward ForwardReference");
+
+			var result = deserializer.Deserialize<ArrayList>(UsingReaderFor(text));
+
+			result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
+		}
+
+		[Fact]
+		public void RoundtripList()
 		{
 			var serializer = new Serializer(SerializationOptions.Roundtrip);
 			var deserializer = new Deserializer();
-
 			var buffer = new StringWriter();
-			serializer.Serialize(buffer, new ParentChildContainer
-			{
-				SomeScalar = "Hello",
-				ParentWithSerializeAs = new Child { ParentProp = "foo", ChildProp = "bar" },
-			});
-			Console.WriteLine(buffer.ToString());
-			var copy = (ParentChildContainer)deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(ParentChildContainer));
-			Assert.IsType(typeof(Parent), copy.ParentWithSerializeAs);
-			Assert.Equal("foo", copy.ParentWithSerializeAs.ParentProp);
+			var original = new List<int> { 2, 4, 6 };
+
+			serializer.Serialize(buffer, original, typeof(List<int>));
+			Dump.WriteLine(buffer);
+			var copy = deserializer.Deserialize<List<int>>(UsingReaderFor(buffer));
+
+			copy.Should().Equal(original);
 		}
 
 		[Fact]
-		public void SerializeArrayOfIdenticalObjects()
-		{
-			var obj1 = new Z { aaa = "abc" };
-
-			var objects = new[] { obj1, obj1, obj1 };
-
-			var result = SerializeThenDeserialize(objects);
-
-			Assert.NotNull(result);
-			Assert.Equal(3, result.Length);
-			Assert.Equal(obj1.aaa, result[0].aaa);
-			Assert.Equal(obj1.aaa, result[1].aaa);
-			Assert.Equal(obj1.aaa, result[2].aaa);
-			Assert.Same(result[0], result[1]);
-			Assert.Same(result[1], result[2]);
-		}
-
-		[Fact]
-		public void BoxedArray()
+		public void RoundtripArrayWithTypeConversion()
 		{
 			var serializer = new Serializer();
-			var buffer = new StringWriter();
-			serializer.Serialize(buffer, new object[] {1, 2, "3"});
-
-			Console.WriteLine(buffer.ToString());
-
 			var deserializer = new Deserializer();
-			var copy = (int[])deserializer.Deserialize(new StringReader(buffer.ToString()), typeof(int[]));
-			Assert.Equal(1, copy[0]);
-			Assert.Equal(2, copy[1]);
-			Assert.Equal(3, copy[2]);
+			var buffer = new StringWriter();
+
+			serializer.Serialize(buffer, new object[] { 1, 2, "3" });
+			Dump.WriteLine(buffer);
+			var result = deserializer.Deserialize<int[]>(UsingReaderFor(buffer));
+
+			result.Should().Equal(1, 2, 3);
 		}
 
 		[Fact]
-		public void SerializeUsingCamelCaseNaming()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
-
-			Assert.Contains("foo: bar", result);
-			Assert.Contains("moreFoo: More bar", result);
-			Assert.Contains("evenMoreFoo: Awesome", result);
-		}
-
-		[Fact]
-		public void SerializeUsingPascalCaseNaming()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
-
-			Dump.WriteLine(result);
-			Assert.Contains("Foo: bar", result);
-			Assert.Contains("MoreFoo: More bar", result);
-			Assert.Contains("EvenMoreFoo: Awesome", result);
-		}
-
-
-		[Fact]
-		public void SerializeUsingHyphenation()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
-
-			Assert.Contains("foo: bar", result);
-			Assert.Contains("more-foo: More bar", result);
-			Assert.Contains("even-more-foo: Awesome", result);
-		}
-
-		private string SerializeWithNaming<T>(T input, INamingConvention naming)
-		{
-			var serializer = new Serializer(namingConvention: naming);
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input, typeof(T));
-			return writer.ToString();
-		}
-
-		private T SerializeThenDeserialize<T>(T input)
+		public void RoundtripArrayOfIdenticalObjects()
 		{
 			var serializer = new Serializer();
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input, typeof(T));
-
-			var serialized = writer.ToString();
-			Dump.WriteLine("serialized =\n-----\n{0}", serialized);
-
 			var deserializer = new Deserializer();
-			return deserializer.Deserialize<T>(new StringReader(serialized));
+			var buffer = new StringWriter();
+			var z = new Z { aaa = "abc" };
+			var objects = new[] { z, z, z };
+
+			serializer.Serialize(buffer, objects, typeof(Z[]));
+			Dump.WriteLine(buffer);
+			var result = deserializer.Deserialize<Z[]>(UsingReaderFor(buffer));
+
+			result.Should().HaveCount(3).And.OnlyContain(x => z.aaa.Equals(x.aaa));
+			result[0].Should().BeSameAs(result[1]).And.BeSameAs(result[2]);
 		}
 
-		public class Z {
+		public class Z
+		{
 			public string aaa { get; set; }
 		}
 
-		private void DeserializeUsingNamingConvention(string yaml, INamingConvention convention)
-		{
-			var serializer = new Deserializer(namingConvention: convention);
-
-			var result = serializer.Deserialize<ConventionTest>(YamlText(yaml));
-
-			Assert.Equal("First", result.FirstTest);
-			Assert.Equal("Second", result.SecondTest);
-			Assert.Equal("Third", result.ThirdTest);
-			Assert.Equal("Fourth", result.AliasTest);
-		}
-
-		// Todo: are these needed? Naming convention classes are tested elsewhere
 		[Fact]
-		public void DeserializeUsingCamelCaseNamingConvention()
+		public void DeserializeDictionary()
 		{
-			DeserializeUsingNamingConvention(@"
-				firstTest: First
-				secondTest: Second
-				thirdTest: Third
-				fourthTest: Fourth
-			", new CamelCaseNamingConvention());
-		}
-
-		[Fact]
-		public void DeserializeUsingHyphenatedNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				first-test: First
-				second-test: Second
-				third-test: Third
-				fourthTest: Fourth
-			", new HyphenatedNamingConvention());
-		}
-
-		[Fact]
-		public void DeserializeUsingPascalCaseNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				FirstTest: First
-				SecondTest: Second
-				ThirdTest: Third
-				fourthTest: Fourth
-			", new PascalCaseNamingConvention());
-		}
-
-		[Fact]
-		public void DeserializeUsingUnderscoredNamingConvention()
-		{
-			DeserializeUsingNamingConvention(@"
-				first_test: First
-				second_test: Second
-				third_test: Third
-				fourthTest: Fourth
-			", new UnderscoredNamingConvention());
-		}
-
-		[Fact]
-		public void RoundtripAlias()
-		{
-			var input = new ConventionTest { AliasTest = "Fourth" };
-			var serializer = new Serializer();
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input, input.GetType());
-			var serialized = writer.ToString();
-
-			// Ensure serialisation is correct
-			Assert.Equal("fourthTest: Fourth", serialized.TrimEnd('\r', '\n'));
-
 			var deserializer = new Deserializer();
-			var output = deserializer.Deserialize<ConventionTest>(new StringReader(serialized));
 
-			// Ensure round-trip retains value
-			Assert.Equal(input.AliasTest, output.AliasTest);
-		}
+			var result = deserializer.Deserialize(YamlFile("dictionary.yaml"));
 
-		private class ConventionTest {
-			public string FirstTest { get; set; }
-			public string SecondTest { get; set; }
-			public string ThirdTest { get; set; }
-			[YamlAlias("fourthTest")]
-			public string AliasTest { get; set; }
-			[YamlIgnore]
-			public string fourthTest { get; set; }
+			result.Should().BeAssignableTo<IDictionary<object, object>>().And.Subject
+				.As<IDictionary<object, object>>().Should().Equal(new Dictionary<object, object> {
+					{ "key1", "value1" },
+					{ "key2", "value2" }
+				});
 		}
 
 		[Fact]
-		public void DefaultValueAttributeIsUsedWhenPresentWithoutEmitDefaults()
+		public void DeserializeExplicitDictionary()
 		{
-			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+			var deserializer = new Deserializer();
+
+			var result = deserializer.Deserialize(YamlFile("dictionaryExplicit.yaml"));
+
+			result.Should().BeAssignableTo<IDictionary<string, int>>().And.Subject
+				.As<IDictionary<string, int>>().Should().Equal(new Dictionary<string, int> {
+					{ "key1", 1 },
+					{ "key2", 2 }
+				});
+		}
+
+		[Fact]
+		public void RoundtripDictionary()
+		{
 			var serializer = new Serializer();
-			var writer = new StringWriter();
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var entries = new Dictionary<string, string> {
+				{ "key1", "value1" },
+				{ "key2", "value2" },
+				{ "key3", "value3" },
+			};
 
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
+			serializer.Serialize(buffer, entries);
+			Dump.WriteLine(buffer);
+			var result = deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(buffer));
 
-			Dump.WriteLine(serialized);
-			Assert.False(serialized.Contains("Value"));
+			result.Should().Equal(entries);
 		}
 
 		[Fact]
-		public void DefaultValueAttributeIsIgnoredWhenPresentWithEmitDefaults()
+		public void DeserializationOfGenericDictionariesHandlesForwardReferences()
 		{
-			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
-			var writer = new StringWriter();
+			var deserializer = new Deserializer();
+			var text = Lines(
+				"key1: *forward",
+				"*forwardKey: ForwardKeyValue",
+				"*forward: *forward",
+				"key2: &forward ForwardReference",
+				"key3: &forwardKey key4");
 
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
+			var result = deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(text));
 
-			Dump.WriteLine(serialized);
-			Assert.True(serialized.Contains("Value"));
+			result.Should().Equal(new Dictionary<string, string> {
+				{ "ForwardReference", "ForwardReference" },
+				{ "key1", "ForwardReference" },
+				{ "key2", "ForwardReference" },
+				{ "key4", "ForwardKeyValue" },
+				{ "key3", "key4" }
+			});
 		}
 
 		[Fact]
-		public void DefaultValueAttributeIsIgnoredWhenValueIsDifferent()
+		public void DeserializationOfNonGenericDictionariesHandlesForwardReferences()
 		{
-			var input = new HasDefaults { Value = "non-default" };
-			var serializer = new Serializer();
-			var writer = new StringWriter();
+			var deserializer = new Deserializer();
+			var text = Lines(
+				"key1: *forward",
+				"*forwardKey: ForwardKeyValue",
+				"*forward: *forward",
+				"key2: &forward ForwardReference",
+				"key3: &forwardKey key4");
 
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
+			var result = deserializer.Deserialize<Hashtable>(UsingReaderFor(text));
 
-			Dump.WriteLine(serialized);
-
-			Assert.True(serialized.Contains("Value"));
+			result.Should().BeEquivalentTo(
+				Entry("ForwardReference", "ForwardReference"),
+				Entry("key1", "ForwardReference"),
+				Entry("key2", "ForwardReference"),
+				Entry("key4", "ForwardKeyValue"),
+				Entry("key3", "key4"));
 		}
 
-		public class HasDefaults {
-			public const string DefaultValue = "myDefault";
-
-			[DefaultValue(DefaultValue)]
-			public string Value { get; set; }
-		}
-
-		[Fact]
-		public void NullValuesInListsAreAlwaysEmittedWithoutEmitDefaults()
+		private object Entry(string key, string value)
 		{
-			var input = new[] { "foo", null, "bar" };
-			var serializer = new Serializer();
-			var writer = new StringWriter();
-
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
-
-			Dump.WriteLine(serialized);
-			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
+			return new DictionaryEntry(key, value);
 		}
 
 		[Fact]
-		public void NullValuesInListsAreAlwaysEmittedWithEmitDefaults()
+		public void DeserializeListOfDictionaries()
 		{
-			var input = new[] { "foo", null, "bar" };
-			var serializer = new Serializer(SerializationOptions.EmitDefaults);
-			var writer = new StringWriter();
+			var deserializer = new Deserializer();
 
-			serializer.Serialize(writer, input);
-			var serialized = writer.ToString();
+			var result = deserializer.Deserialize<List<Dictionary<string, string>>>(YamlFile("listOfDictionaries.yaml"));
 
-			Dump.WriteLine(serialized);
-			Assert.Equal(3, Regex.Matches(serialized, "-").Count);
+			result.ShouldBeEquivalentTo(new[] {
+				new Dictionary<string, string> {
+					{ "connection", "conn1" },
+					{ "path", "path1" }
+				},
+				new Dictionary<string, string> {
+					{ "connection", "conn2" },
+					{ "path", "path2" }
+				}}, opt => opt.WithStrictOrderingFor(root => root));
 		}
 
 		[Fact]
 		public void DeserializeTwoDocuments()
 		{
-			var yaml = @"---
-Name: Andy
----
-Name: Brad
-...";
-			var serializer = new Deserializer();
-			var reader = new EventReader(new Parser(new StringReader(yaml)));
+			var deserializer = new Deserializer();
+			var reader = EventReaderFor(Lines(
+				"---",
+				"Name: Andy",
+				"---",
+				"Name: Brad",
+				"..."));
 
 			reader.Expect<StreamStart>();
+			var andy = deserializer.Deserialize<Person>(reader);
+			var brad = deserializer.Deserialize<Person>(reader);
 
-			var andy = serializer.Deserialize<Person>(reader);
-			Assert.NotNull(andy);
-			Assert.Equal("Andy", andy.Name);
-
-			var brad = serializer.Deserialize<Person>(reader);
-			Assert.NotNull(brad);
-			Assert.Equal("Brad", brad.Name);
+			andy.ShouldHave().AllProperties().EqualTo(new { Name = "Andy" });
+			brad.ShouldHave().AllProperties().EqualTo(new { Name = "Brad" });
 		}
 
 		[Fact]
-		public void DeserializeManyDocuments()
+		public void DeserializeThreeDocuments()
 		{
-			var yaml = @"---
-Name: Andy
----
-Name: Brad
----
-Name: Charles
-...";
-			var serializer = new Deserializer();
-			var reader = new EventReader(new Parser(new StringReader(yaml)));
+			var deserializer = new Deserializer();
+			var reader = EventReaderFor(Lines(
+				"---",
+				"Name: Andy",
+				"---",
+				"Name: Brad",
+				"---",
+				"Name: Charles",
+				"..."));
 
-			reader.Allow<StreamStart>();
+			reader.Expect<StreamStart>();
+			var andy = deserializer.Deserialize<Person>(reader);
+			var brad = deserializer.Deserialize<Person>(reader);
+			var charles = deserializer.Deserialize<Person>(reader);
 
-			var people = new List<Person>();
-			while (!reader.Accept<StreamEnd>())
-			{
-				var person = serializer.Deserialize<Person>(reader);
-				people.Add(person);
-			}
-
-			Assert.Equal(3, people.Count);
-			Assert.Equal("Andy", people[0].Name);
-			Assert.Equal("Brad", people[1].Name);
-			Assert.Equal("Charles", people[2].Name);
+			reader.Accept<StreamEnd>().Should().BeTrue("reader should have reach the end of stream");
+			andy.ShouldHave().AllProperties().EqualTo(new { Name = "Andy" });
+			brad.ShouldHave().AllProperties().EqualTo(new { Name = "Brad" });
+			charles.ShouldHave().AllProperties().EqualTo(new { Name = "Charles" });
 		}
 
-		public class Person {
+		private static EventReader EventReaderFor(string yaml)
+		{
+			return new EventReader(new Parser(new StringReader(yaml)));
+		}
+
+		public class Person
+		{
 			public string Name { get; set; }
 		}
 
 		[Fact]
-		public void DeserializeEmptyDocument()
-		{
-			var deserializer = new Deserializer();
-			var array = (int[])deserializer.Deserialize(new StringReader(""), typeof(int[]));
-			Assert.Null(array);
-		}
-
-		[Fact]
-		public void SerializeGenericDictionaryShouldNotThrowTargetException()
+		public void SerializationOfNullInListsAreAlwaysEmittedWithoutUsingEmitDefaults()
 		{
 			var serializer = new Serializer();
+			var writer = new StringWriter();
+			var input = new[] { "foo", null, "bar" };
 
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			Regex.Matches(serialized, "-").Count.Should().Be(3, "there should have been 3 elements");
+		}
+
+		[Fact]
+		public void SerializationOfNullInListsAreAlwaysEmittedWhenUsingEmitDefaults()
+		{
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
+			var writer = new StringWriter();
+			var input = new[] { "foo", null, "bar" };
+
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			Regex.Matches(serialized, "-").Count.Should().Be(3, "there should have been 3 elements");
+		}
+
+		[Fact]
+		public void SerializationIncludesKeyWhenEmittingDefaults()
+		{
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
 			var buffer = new StringWriter();
-			serializer.Serialize(buffer, new OnlyGenericDictionary
-			{
-				{ "hello", "world" },
-			});
-		}
+			var original = new X { MyString = null };
 
-		private class OnlyGenericDictionary : IDictionary<string, string>
-		{
-			private readonly Dictionary<string, string> _dictionary = new Dictionary<string, string>();
+			serializer.Serialize(buffer, original, typeof(X));
+			Dump.WriteLine(buffer);
 
-			#region IDictionary<string,string> Members
-
-			public void Add(string key, string value)
-			{
-				_dictionary.Add(key, value);
-			}
-
-			public bool ContainsKey(string key)
-			{
-				throw new NotImplementedException();
-			}
-
-			public ICollection<string> Keys
-			{
-				get { throw new NotImplementedException(); }
-			}
-
-			public bool Remove(string key)
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool TryGetValue(string key, out string value)
-			{
-				throw new NotImplementedException();
-			}
-
-			public ICollection<string> Values
-			{
-				get { throw new NotImplementedException(); }
-			}
-
-			public string this[string key]
-			{
-				get
-				{
-					throw new NotImplementedException();
-				}
-				set
-				{
-					throw new NotImplementedException();
-				}
-			}
-
-			#endregion
-
-			#region ICollection<KeyValuePair<string,string>> Members
-
-			public void Add(KeyValuePair<string, string> item)
-			{
-				throw new NotImplementedException();
-			}
-
-			public void Clear()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Contains(KeyValuePair<string, string> item)
-			{
-				throw new NotImplementedException();
-			}
-
-			public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
-			{
-				throw new NotImplementedException();
-			}
-
-			public int Count
-			{
-				get { throw new NotImplementedException(); }
-			}
-
-			public bool IsReadOnly
-			{
-				get { throw new NotImplementedException(); }
-			}
-
-			public bool Remove(KeyValuePair<string, string> item)
-			{
-				throw new NotImplementedException();
-			}
-
-			#endregion
-
-			#region IEnumerable<KeyValuePair<string,string>> Members
-
-			public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-			{
-				return _dictionary.GetEnumerator();
-			}
-
-			#endregion
-
-			#region IEnumerable Members
-
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return _dictionary.GetEnumerator();
-			}
-
-			#endregion
+			buffer.ToString().Should().Contain("MyString");
 		}
 
 		[Fact]
-		public void ForwardReferencesWorkInGenericLists()
+		[Trait("Motive", "Bug fix")]
+		public void SerializationIncludesKeyFromAnonymousTypeWhenEmittingDefaults()
 		{
-			var deserializer = new Deserializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
+			var buffer = new StringWriter();
+			var original = new { MyString = (string) null };
+			
+			serializer.Serialize(buffer, original, original.GetType());
+			Dump.WriteLine(buffer);
 
-			var result = deserializer.Deserialize<string[]>(YamlText(@"
-				- *forward
-				- &forward ForwardReference
-			"));
-
-			Assert.Equal(2, result.Length);
-			Assert.Equal("ForwardReference", result[0]);
-			Assert.Equal("ForwardReference", result[1]);
+			buffer.ToString().Should().Contain("MyString");
 		}
 
 		[Fact]
-		public void ForwardReferencesWorkInNonGenericLists()
+		public void SerializationDoesNotIncludeKeyWhenDisregardingDefaults()
 		{
-			var deserializer = new Deserializer();
+			var serializer = new Serializer();
+			var buffer = new StringWriter();
+			var original = new X { MyString = null };
 
-			var result = deserializer.Deserialize<ArrayList>(YamlText(@"
-				- *forward
-				- &forward ForwardReference
-			"));
+			serializer.Serialize(buffer, original, typeof(X));
+			Dump.WriteLine(buffer);
 
-			Assert.Equal(2, result.Count);
-			Assert.Equal("ForwardReference", result[0]);
-			Assert.Equal("ForwardReference", result[1]);
+			buffer.ToString().Should().NotContain("MyString");
 		}
 
 		[Fact]
-		public void ForwardReferencesWorkInGenericDictionaries()
+		public void SerializationOfDefaultsWorkInJson()
 		{
-			var deserializer = new Deserializer();
+			var serializer = new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible);
+			var buffer = new StringWriter();
+			var original = new X { MyString = null };
 
-			var result = deserializer.Deserialize<Dictionary<string, string>>(YamlText(@"
-				key1: *forward
-				*forwardKey: ForwardKeyValue
-				*forward: *forward
-				key2: &forward ForwardReference
-				key3: &forwardKey key4
-			"));
+			serializer.Serialize(buffer, original, typeof(X));
+			Dump.WriteLine(buffer);
 
-			Assert.Equal(5, result.Count);
-			Assert.Equal("ForwardReference", result["ForwardReference"]);
-			Assert.Equal("ForwardReference", result["key1"]);
-			Assert.Equal("ForwardReference", result["key2"]);
-			Assert.Equal("ForwardKeyValue", result["key4"]);
-			Assert.Equal("key4", result["key3"]);
+			buffer.ToString().Should().Contain("MyString");
 		}
 
 		[Fact]
-		public void ForwardReferencesWorkInNonGenericDictionaries()
+		public void DeserializationOfDefaultsWorkInJson()
 		{
+			var options = SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip;
+			var serializer = new Serializer(options);
 			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var original = new X { MyString = null };
 
-			var result = deserializer.Deserialize<Hashtable>(YamlText(@"
-				key1: *forward
-				*forwardKey: ForwardKeyValue
-				*forward: *forward
-				key2: &forward ForwardReference
-				key3: &forwardKey key4
-			"));
+			serializer.Serialize(buffer, original, typeof(X));
+			Dump.WriteLine(buffer);
+			var copy = deserializer.Deserialize<X>(UsingReaderFor(buffer));
 
-			Assert.Equal(5, result.Count);
-			Assert.Equal("ForwardReference", result["ForwardReference"]);
-			Assert.Equal("ForwardReference", result["key1"]);
-			Assert.Equal("ForwardReference", result["key2"]);
-			Assert.Equal("ForwardKeyValue", result["key4"]);
-			Assert.Equal("key4", result["key3"]);
+			copy.MyString.Should().BeNull();
 		}
 
-		[Fact]
-		public void ForwardReferencesWorkInObjects()
-		{
-			var deserializer = new Deserializer();
-
-			var result = deserializer.Deserialize<X>(YamlText(@"
-				Nothing: *forward
-				MyString: &forward ForwardReference
-			"));
-
-			Assert.Equal("ForwardReference", result.Nothing);
-			Assert.Equal("ForwardReference", result.MyString);
-		}
-
-		[Fact]
-		public void UndefinedForwardReferencesFail()
-		{
-			var deserializer = new Deserializer();
-
-			Assert.Throws<AnchorNotFoundException>(() =>
-				deserializer.Deserialize<X>(YamlText(@"
-					Nothing: *forward
-					MyString: ForwardReference
-				"))
-			);
-		}
-
-		private class X
+		public class X
 		{
 			public bool MyFlag { get; set; }
 			public string Nothing { get; set; }
@@ -1224,6 +861,318 @@ Name: Charles
 				MyPoint = new Point(100, 200);
 				MyNullableWithValue = 8;
 			}
+		}
+
+		[Fact]
+		public void SerializationRespectsYamlIgnoreAttribute()
+		{
+			var serializer = new Serializer();
+			var deserializer = new Deserializer();
+			var buffer = new StringWriter();
+			var original = new ContainsIgnore { IgnoreMe = "Some Text" };
+
+			serializer.Serialize(buffer, original);
+			Dump.WriteLine(buffer);
+			var copy = deserializer.Deserialize<ContainsIgnore>(UsingReaderFor(buffer));
+
+			copy.IgnoreMe.Should().BeNull();
+		}
+
+		public class ContainsIgnore
+		{
+			[YamlIgnore]
+			public String IgnoreMe { get; set; }
+		}
+
+		[Fact]
+		public void SerializationSkipsPropertyWhenUsingDefaultValueAttribute()
+		{
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should().NotContain("Value");
+		}
+
+		[Fact]
+		public void SerializationEmitsPropertyWhenUsingEmitDefaultsAndDefaultValueAttribute()
+		{
+			var serializer = new Serializer(SerializationOptions.EmitDefaults);
+			var writer = new StringWriter();
+			var input = new HasDefaults { Value = HasDefaults.DefaultValue };
+
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should().Contain("Value");
+		}
+
+		[Fact]
+		public void SerializationEmitsPropertyWhenValueDifferFromDefaultValueAttribute()
+		{
+			var serializer = new Serializer();
+			var writer = new StringWriter();
+			var input = new HasDefaults { Value = "non-default" };
+
+			serializer.Serialize(writer, input);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should().Contain("Value");
+		}
+
+		public class HasDefaults
+		{
+			public const string DefaultValue = "myDefault";
+
+			[DefaultValue(DefaultValue)]
+			public string Value { get; set; }
+		}
+
+		[Fact]
+		public void SerializingAGenericDictionaryShouldNotThrowTargetException()
+		{
+			var serializer = new Serializer();
+			var buffer = new StringWriter();
+
+			Action action = () => serializer.Serialize(buffer, new OnlyGenericDictionary {
+				{ "hello", "world" },
+			});
+
+			action.ShouldNotThrow<TargetException>();
+		}
+
+		public class OnlyGenericDictionary : IDictionary<string, string>
+		{
+			private readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
+
+			public void Add(string key, string value)
+			{
+				dictionary.Add(key, value);
+			}
+
+			public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+			{
+				return dictionary.GetEnumerator();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+
+			#region Unused Members
+
+			public bool ContainsKey(string key)
+			{
+				throw new NotSupportedException();
+			}
+
+			public ICollection<string> Keys
+			{
+				get { throw new NotSupportedException(); }
+			}
+
+			public bool Remove(string key)
+			{
+				throw new NotSupportedException();
+			}
+
+			public bool TryGetValue(string key, out string value)
+			{
+				throw new NotSupportedException();
+			}
+
+			public ICollection<string> Values
+			{
+				get { throw new NotSupportedException(); }
+			}
+
+			public string this[string key]
+			{
+				get { throw new NotSupportedException(); }
+				set { throw new NotSupportedException(); }
+			}
+
+			public void Add(KeyValuePair<string, string> item)
+			{
+				throw new NotSupportedException();
+			}
+
+			public void Clear()
+			{
+				throw new NotSupportedException();
+			}
+
+			public bool Contains(KeyValuePair<string, string> item)
+			{
+				throw new NotSupportedException();
+			}
+
+			public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
+			{
+				throw new NotSupportedException();
+			}
+
+			public int Count
+			{
+				get { throw new NotSupportedException(); }
+			}
+
+			public bool IsReadOnly
+			{
+				get { throw new NotSupportedException(); }
+			}
+
+			public bool Remove(KeyValuePair<string, string> item)
+			{
+				throw new NotSupportedException();
+			}
+
+			#endregion
+		}
+
+		[Fact]
+		// Todo: are these needed? Naming convention classes are tested elsewhere
+		public void SerializeUsingCamelCaseNamingConvention()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+
+			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
+
+			result.Should().Contain("foo: bar").And
+				.Contain("moreFoo: More bar").And
+				.Contain("evenMoreFoo: Awesome");
+		}
+
+		[Fact]
+		public void DeserializeUsingCamelCaseNamingConvention()
+		{
+			DeserializeUsing(new CamelCaseNamingConvention(),
+				"firstTest: First",
+				"secondTest: Second",
+				"thirdTest: Third",
+				"fourthTest: Fourth");
+		}
+
+		[Fact]
+		public void SerializeUsingPascalCaseNamingConvention()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+
+			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
+			Dump.WriteLine(result);
+
+			result.Should().Contain("Foo: bar").And
+				.Contain("MoreFoo: More bar").And
+				.Contain("EvenMoreFoo: Awesome");
+		}
+
+		[Fact]
+		public void DeserializeUsingPascalCaseNamingConvention()
+		{
+			DeserializeUsing(new PascalCaseNamingConvention(),
+				"FirstTest: First",
+				"SecondTest: Second",
+				"ThirdTest: Third",
+				"fourthTest: Fourth");
+		}
+
+		[Fact]
+		public void SerializeUsingHyphenationNamingConvention()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
+
+			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
+
+			result.Should().Contain("foo: bar").And
+				.Contain("more-foo: More bar").And
+				.Contain("even-more-foo: Awesome");
+		}
+
+		[Fact]
+		public void DeserializeUsingHyphenatedNamingConvention()
+		{
+			DeserializeUsing(new HyphenatedNamingConvention(),
+				"first-test: First",
+				"second-test: Second",
+				"third-test: Third",
+				"fourthTest: Fourth");
+		}
+
+		[Fact]
+		public void SerializeUsingUnderscoredNamingConvention()
+		{
+			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awsome" };
+
+			var result = SerializeWithNaming(obj, new UnderscoredNamingConvention());
+
+			result.Should().Contain("foo: bar").And
+				.Contain("more_foo: More bar").And
+				.Contain("even_more_foo: Awsome");
+		}
+
+		[Fact]
+		public void DeserializeUsingUnderscoredNamingConvention()
+		{
+			DeserializeUsing(new UnderscoredNamingConvention(),
+				"first_test: First",
+				"second_test: Second",
+				"third_test: Third",
+				"fourthTest: Fourth");
+		}
+
+		private string SerializeWithNaming<T>(T input, INamingConvention naming)
+		{
+			var serializer = new Serializer(namingConvention: naming);
+			var writer = new StringWriter();
+			serializer.Serialize(writer, input, typeof(T));
+			return writer.ToString();
+		}
+
+		private void DeserializeUsing(INamingConvention convention, params string[] yaml)
+		{
+			var deserializer = new Deserializer(namingConvention: convention);
+
+			var result = deserializer.Deserialize<ConventionTest>(UsingReaderFor(Lines(yaml)));
+
+			result.ShouldHave().SharedProperties().EqualTo(new {
+				FirstTest = "First",
+				SecondTest = "Second",
+				ThirdTest = "Third",
+				AliasTest = "Fourth"
+			});
+		}
+
+		public class ConventionTest
+		{
+			public string FirstTest { get; set; }
+			public string SecondTest { get; set; }
+			public string ThirdTest { get; set; }
+			[YamlAlias("fourthTest")]
+			public string AliasTest { get; set; }
+			[YamlIgnore]
+			public string fourthTest { get; set; }
+		}
+
+		private StringReader UsingReaderFor(StringWriter buffer)
+		{
+			return UsingReaderFor(buffer.ToString());
+		}
+
+		private StringReader UsingReaderFor(string text)
+		{
+			return new StringReader(text);
+		}
+
+		private string Lines(params string[] lines)
+		{
+			return string.Join(Environment.NewLine, lines);
 		}
 	}
 }
