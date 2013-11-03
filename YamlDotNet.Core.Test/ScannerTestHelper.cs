@@ -23,7 +23,7 @@ using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core.Test
 {
-	public class ScannerTestHelper : YamlTest
+	public class ScannerTestHelper
 	{
 		protected static StreamStart StreamStart
 		{

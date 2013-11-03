@@ -306,7 +306,7 @@ namespace YamlDotNet.Core.Test
 		}
 
 		private Scanner ScannerFor(string name) {
-			return new Scanner(YamlFile(name));
+			return new Scanner(Yaml.StreamFrom(name));
 		}
 
 		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
