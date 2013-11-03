@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,7 +23,7 @@ using Xunit;
 using Xunit.Extensions;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class NamingConventionTests
 	{

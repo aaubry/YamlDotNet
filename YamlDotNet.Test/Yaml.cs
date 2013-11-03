@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2013 Antoine Aubry
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,46 +19,29 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.Diagnostics;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test
 {
-	public class Dump
+	public static class Yaml
 	{
-		[Conditional("TEST_DUMP")]
-		public static void Write(object value)
+		public static TextReader StreamFrom(string name)
 		{
-			Debug.Write(value);
+			var fromType = typeof(Yaml);
+			var assembly = Assembly.GetAssembly(fromType);
+			var stream = assembly.GetManifestResourceStream(name) ??
+						 assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
+			return new StreamReader(stream);
 		}
 
-		[Conditional("TEST_DUMP")]
-		public static void Write(string format, params object[] args)
+		public static string TemplatedOn<T>(this TextReader reader)
 		{
-			Debug.Write(string.Format(format, args));
-		}
-
-		[Conditional("TEST_DUMP")]
-		public static void WriteLine()
-		{
-			Debug.WriteLine(string.Empty);
-		}
-
-		[Conditional("TEST_DUMP")]
-		public static void WriteLine(string value)
-		{
-			WriteLine((object)value);
-		}
-
-		[Conditional("TEST_DUMP")]
-		public static void WriteLine(object value)
-		{
-			WriteLine("{0}", value);
-		}
-
-		[Conditional("TEST_DUMP")]
-		public static void WriteLine(string format, params object[] args)
-		{
-			Debug.WriteLine(format, args);
+			var text = reader.ReadToEnd();
+			return Regex.Replace(text, @"{type}", match => 
+				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Namespace)));
 		}
 	}
 }

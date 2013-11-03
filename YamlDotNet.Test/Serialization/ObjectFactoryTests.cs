@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
+//  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,29 +19,42 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.IO;
-using System.Reflection;
-using System.Text.RegularExpressions;
+using Xunit;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.ObjectFactories;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test.Serialization
 {
-	public static class Yaml
+	public class ObjectFactoryTests
 	{
-		public static TextReader StreamFrom(string name)
+		public class FooBase
 		{
-			var fromType = typeof(Yaml);
-			var assembly = Assembly.GetAssembly(fromType);
-			var stream = assembly.GetManifestResourceStream(name) ??
-						 assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
-			return new StreamReader(stream);
 		}
 
-		public static string TemplatedOn<T>(this TextReader reader)
+		public class FooDerived : FooBase
 		{
-			var text = reader.ReadToEnd();
-			return Regex.Replace(text, @"{type}", match => 
-				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Namespace)));
+		}
+
+		[Fact]
+		public void NotSpecifyingObjectFactoryUsesDefault()
+		{
+			var deserializer = new Deserializer();
+			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+
+			Assert.IsType<FooBase>(result);
+		}
+
+		[Fact]
+		public void ObjectFactoryIsInvoked()
+		{
+			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
+			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+
+			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+
+			Assert.IsType<FooDerived>(result);
 		}
 	}
 }

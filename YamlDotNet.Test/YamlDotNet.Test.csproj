@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}</ProjectGuid>
+    <ProjectGuid>{A9F67018-0240-4D16-A4EA-BCB780D0AF05}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>YamlDotNet.Core.Test</RootNamespace>
-    <AssemblyName>YamlDotNet.Core.Test</AssemblyName>
+    <RootNamespace>YamlDotNet.Test</RootNamespace>
+    <AssemblyName>YamlDotNet.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;TEST_DUMP</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;TEST_DUMP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -40,6 +40,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,24 +54,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\EmitterTests.cs" />
+    <Compile Include="Core\InsertionQueueTests.cs" />
+    <Compile Include="Core\LookAheadBufferTests.cs" />
+    <Compile Include="Core\ParserTestHelper.cs" />
+    <Compile Include="Core\ParserTests.cs" />
+    <Compile Include="Core\ScannerTestHelper.cs" />
+    <Compile Include="Core\ScannerTests.cs" />
     <Compile Include="Dump.cs" />
-    <Compile Include="EmitterTests.cs" />
-    <Compile Include="InsertionQueueTests.cs" />
-    <Compile Include="LookAheadBufferTests.cs" />
-    <Compile Include="ParserTestHelper.cs" />
-    <Compile Include="ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScannerTestHelper.cs" />
-    <Compile Include="ScannerTests.cs" />
+    <Compile Include="RepresentationModel\YamlStreamTests.cs" />
+    <Compile Include="Serialization\NamingConventionTests.cs" />
+    <Compile Include="Serialization\ObjectFactoryTests.cs" />
+    <Compile Include="Serialization\SerializationTestHelper.cs" />
+    <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Yaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="files\backreference.yaml" />
     <EmbeddedResource Include="files\backwardsAlias.yaml" />
-    <EmbeddedResource Include="files\convertible.template" />
     <EmbeddedResource Include="files\dictionary.yaml" />
     <EmbeddedResource Include="files\dictionaryExplicit.yaml" />
-    <EmbeddedResource Include="files\explicitType.template" />
     <EmbeddedResource Include="files\fail-backreference.yaml" />
     <EmbeddedResource Include="files\forwardAlias.yaml" />
     <EmbeddedResource Include="files\invalid-reference.yaml" />
@@ -94,6 +98,8 @@
     <EmbeddedResource Include="files\test7.yaml" />
     <EmbeddedResource Include="files\test8.yaml" />
     <EmbeddedResource Include="files\test9.yaml" />
+    <EmbeddedResource Include="files\convertible.template" />
+    <EmbeddedResource Include="files\explicitType.template" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -101,9 +107,6 @@
       <Project>{bf32de1b-6276-4341-b212-f8862adbba7a}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

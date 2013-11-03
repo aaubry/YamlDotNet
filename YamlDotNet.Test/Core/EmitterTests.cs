@@ -23,10 +23,11 @@ using System.Linq;
 using System.IO;
 using Xunit;
 using Xunit.Extensions;
+using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test.Core
 {
 	public class EmitterTests
 	{

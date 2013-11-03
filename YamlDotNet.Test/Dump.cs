@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,46 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System.Diagnostics;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Test
 {
-	public class ObjectFactoryTests
+	public class Dump
 	{
-		public class FooBase
+		[Conditional("TEST_DUMP")]
+		public static void Write(object value)
 		{
+			Debug.Write(value);
 		}
 
-		public class FooDerived : FooBase
+		[Conditional("TEST_DUMP")]
+		public static void Write(string format, params object[] args)
 		{
+			Debug.Write(string.Format(format, args));
 		}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
+		[Conditional("TEST_DUMP")]
+		public static void WriteLine()
 		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
+			Debug.WriteLine(string.Empty);
 		}
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
+		[Conditional("TEST_DUMP")]
+		public static void WriteLine(string value)
 		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			WriteLine((object)value);
+		}
 
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+		[Conditional("TEST_DUMP")]
+		public static void WriteLine(object value)
+		{
+			WriteLine("{0}", value);
+		}
 
-			Assert.IsType<FooDerived>(result);
+		[Conditional("TEST_DUMP")]
+		public static void WriteLine(string format, params object[] args)
+		{
+			Debug.WriteLine(format, args);
 		}
 	}
 }

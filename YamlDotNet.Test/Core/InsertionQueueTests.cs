@@ -24,8 +24,9 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
+using YamlDotNet.Core;
 
-namespace YamlDotNet.Core.Test
+namespace YamlDotNet.Test.Core
 {
 	public class InsertionQueueTests
 	{
@@ -42,7 +43,7 @@ namespace YamlDotNet.Core.Test
 		[Fact]
 		public void ShouldThrowExceptionWhenDequeuingContainerThatBecomesEmpty()
 		{
-			var queue = new InsertionQueue<int>();
+			var queue = CreateQueue();
 
 			queue.Enqueue(1);
 			queue.Dequeue();

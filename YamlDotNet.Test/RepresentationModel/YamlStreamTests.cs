@@ -20,13 +20,13 @@
 //  SOFTWARE.
 
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Text;
 using Xunit;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Test;
+using YamlDotNet.RepresentationModel;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Test.RepresentationModel
 {
 	public class YamlStreamTests
 	{

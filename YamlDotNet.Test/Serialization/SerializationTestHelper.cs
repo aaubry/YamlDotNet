@@ -8,11 +8,10 @@ using System.IO;
 using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Core.Test;
 using YamlDotNet.Serialization;
 
 // ReSharper disable InconsistentNaming
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class SerializationTestHelper
 	{

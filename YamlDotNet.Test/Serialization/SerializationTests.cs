@@ -29,12 +29,11 @@ using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Test;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Test.Serialization
 {
 	public class SerializationTests : SerializationTestHelper
 	{
