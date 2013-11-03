@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,44 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
+using System.Globalization;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization
 {
-	public class ObjectFactoryTests
+	internal static class YamlFormatter
 	{
-		public class FooBase
+		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
 		{
+			CurrencyDecimalSeparator = ".",
+			CurrencyGroupSeparator = "_",
+			CurrencyGroupSizes = new[] { 3 },
+			CurrencySymbol = string.Empty,
+			CurrencyDecimalDigits = 99,
+			NumberDecimalSeparator = ".",
+			NumberGroupSeparator = "_",
+			NumberGroupSizes = new[] { 3 },
+			NumberDecimalDigits = 99
+		};
+
+		public static string FormatNumber(object number)
+		{
+			return Convert.ToString(number, numberFormat);
 		}
 
-		public class FooDerived : FooBase
+		public static string FormatBoolean(object boolean)
 		{
+			return boolean.Equals(true) ? "true" : "false";
 		}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
+		public static string FormatDateTime(object dateTime)
 		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
+			return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
 		}
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
+		public static string FormatTimeSpan(object timeSpan)
 		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+			return ((TimeSpan)timeSpan).ToString();
 		}
 	}
 }

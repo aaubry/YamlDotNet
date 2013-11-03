@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,28 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.TypeInspectors
 {
-	public class ObjectFactoryTests
+	/// <summary>
+	/// Returns the properties of a type that are both readable and writable.
+	/// </summary>
+	public sealed class ReadableAndWritablePropertiesTypeInspector : TypeInspectorSkeleton
 	{
-		public class FooBase
+		private readonly ITypeInspector _innerTypeDescriptor;
+
+		public ReadableAndWritablePropertiesTypeInspector(ITypeInspector innerTypeDescriptor)
 		{
+			_innerTypeDescriptor = innerTypeDescriptor;
 		}
-
-		public class FooDerived : FooBase
+	
+		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 		{
-		}
-
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
-		}
-
-		[Fact]
-		public void ObjectFactoryIsInvoked()
-		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+			return _innerTypeDescriptor.GetProperties(type, container)
+				.Where(p => p.CanWrite);
 		}
 	}
 }

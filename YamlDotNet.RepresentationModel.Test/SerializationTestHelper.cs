@@ -9,7 +9,7 @@ using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Core.Test;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
 // ReSharper disable InconsistentNaming
 namespace YamlDotNet.RepresentationModel.Test

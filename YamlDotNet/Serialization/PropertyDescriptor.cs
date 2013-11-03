@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,44 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization
 {
-	public class ObjectFactoryTests
+	public sealed class PropertyDescriptor : IPropertyDescriptor
 	{
-		public class FooBase
+		private readonly IPropertyDescriptor baseDescriptor;
+
+		public PropertyDescriptor(IPropertyDescriptor baseDescriptor)
 		{
+			this.baseDescriptor = baseDescriptor;
+			Name = baseDescriptor.Name;
+			Type = baseDescriptor.Type;
+			StaticType = baseDescriptor.StaticType;
 		}
 
-		public class FooDerived : FooBase
+		public string Name { get; set; }
+		public Type Type { get; set; }
+		public Type StaticType { get; set; }
+
+		public object Value
 		{
+			get { return baseDescriptor.Value; }
 		}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
+		public bool CanWrite
 		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
+			get { return baseDescriptor.CanWrite; }
 		}
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
+		public void SetValue(object target, object value)
 		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			baseDescriptor.SetValue(target, value);
+		}
 
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+		public T GetCustomAttribute<T>() where T : Attribute
+		{
+			return baseDescriptor.GetCustomAttribute<T>();
 		}
 	}
 }

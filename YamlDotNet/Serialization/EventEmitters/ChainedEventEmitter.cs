@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,56 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.EventEmitters
 {
-	public class ObjectFactoryTests
+	/// <summary>
+	/// Provided the base implementation for an IEventEmitter that is a
+	/// decorator for another IEventEmitter.
+	/// </summary>
+	public abstract class ChainedEventEmitter : IEventEmitter
 	{
-		public class FooBase
+		protected readonly IEventEmitter nextEmitter;
+
+		protected ChainedEventEmitter(IEventEmitter nextEmitter)
 		{
+			if (nextEmitter == null)
+			{
+				throw new ArgumentNullException("nextEmitter");
+			}
+
+			this.nextEmitter = nextEmitter;
 		}
 
-		public class FooDerived : FooBase
+		public virtual void Emit(AliasEventInfo eventInfo)
 		{
+			nextEmitter.Emit(eventInfo);
 		}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
+		public virtual void Emit(ScalarEventInfo eventInfo)
 		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
+			nextEmitter.Emit(eventInfo);
 		}
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
+		public virtual void Emit(MappingStartEventInfo eventInfo)
 		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			nextEmitter.Emit(eventInfo);
+		}
 
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+		public virtual void Emit(MappingEndEventInfo eventInfo)
+		{
+			nextEmitter.Emit(eventInfo);
+		}
 
-			Assert.IsType<FooDerived>(result);
+		public virtual void Emit(SequenceStartEventInfo eventInfo)
+		{
+			nextEmitter.Emit(eventInfo);
+		}
+
+		public virtual void Emit(SequenceEndEventInfo eventInfo)
+		{
+			nextEmitter.Emit(eventInfo);
 		}
 	}
 }

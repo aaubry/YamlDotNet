@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,43 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System.Collections.Generic;
+using System.Linq;
+using YamlDotNet.Core;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-	public class ObjectFactoryTests
+	public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
 	{
-		public class FooBase
+		private readonly IEmitter emitter;
+		private readonly IEnumerable<IYamlTypeConverter> typeConverters;
+
+		public CustomSerializationObjectGraphVisitor(IEmitter emitter, IObjectGraphVisitor nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters)
+			: base(nextVisitor)
 		{
+			this.emitter = emitter;
+			this.typeConverters = typeConverters != null
+				? typeConverters.ToList()
+				: Enumerable.Empty<IYamlTypeConverter>();
 		}
 
-		public class FooDerived : FooBase
+		public override bool Enter(IObjectDescriptor value)
 		{
-		}
+			var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
+			if (typeConverter != null)
+			{
+				typeConverter.WriteYaml(emitter, value.Value, value.Type);
+				return false;
+			}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+			var serializable = value as IYamlSerializable;
+			if (serializable != null)
+			{
+				serializable.WriteYaml(emitter);
+				return false;
+			}
 
-			Assert.IsType<FooBase>(result);
-		}
-
-		[Fact]
-		public void ObjectFactoryIsInvoked()
-		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+			return base.Enter(value);
 		}
 	}
 }

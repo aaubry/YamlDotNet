@@ -20,10 +20,11 @@
 //  SOFTWARE.
 
 using System.Collections.Generic;
-using Xunit;
-using YamlDotNet.Core.Test;
 using System.Text;
 using System.IO;
+using Xunit;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Test;
 
 namespace YamlDotNet.RepresentationModel.Test
 {

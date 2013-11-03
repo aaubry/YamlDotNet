@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,31 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
+using System.Collections.Generic;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization
 {
-	public class ObjectFactoryTests
+	/// <summary>
+	/// Provides access to the properties of a type.
+	/// </summary>
+	public interface ITypeInspector
 	{
-		public class FooBase
-		{
-		}
+		/// <summary>
+		/// Gets all properties of the specified type.
+		/// </summary>
+		/// <param name="type">The type whose properties are to be enumerated.</param>
+		/// <param name="container">The actual object of type <paramref name="type"/> whose properties are to be enumerated. Can be null.</param>
+		/// <returns></returns>
+		IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container);
 
-		public class FooDerived : FooBase
-		{
-		}
-
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
-		}
-
-		[Fact]
-		public void ObjectFactoryIsInvoked()
-		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
-		}
+		/// <summary>
+		/// Gets the property of the type with the specified name.
+		/// </summary>
+		/// <param name="type">The type whose properties are to be searched.</param>
+		/// <param name="container">The actual object of type <paramref name="type"/> whose properties are to be searched. Can be null.</param>
+		/// <param name="name">The name of the property.</param>
+		/// <returns></returns>
+		IPropertyDescriptor GetProperty(Type type, object container, string name);
 	}
 }

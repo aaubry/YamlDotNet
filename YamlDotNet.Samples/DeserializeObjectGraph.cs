@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,9 +19,9 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-﻿using System;
+ using System;
 using System.IO;
-using YamlDotNet.RepresentationModel.Serialization;
+ using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {

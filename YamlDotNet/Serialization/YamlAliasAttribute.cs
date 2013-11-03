@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,28 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization
 {
-	public class ObjectFactoryTests
+	/// <summary>
+	/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+	public class YamlAliasAttribute : Attribute
 	{
-		public class FooBase
+		/// <summary>
+		/// Gets or sets the alias name.
+		/// </summary>
+		public string Alias { get; set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="YamlAliasAttribute" /> class.
+		/// </summary>
+		/// <param name="alias">The alias to use for this field.</param>
+		public YamlAliasAttribute(string alias)
 		{
-		}
-
-		public class FooDerived : FooBase
-		{
-		}
-
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooBase>(result);
-		}
-
-		[Fact]
-		public void ObjectFactoryIsInvoked()
-		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+			Alias = alias;
 		}
 	}
 }

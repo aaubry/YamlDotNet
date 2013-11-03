@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,41 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-	public class ObjectFactoryTests
+	public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
 	{
-		public class FooBase
+		public DefaultExclusiveObjectGraphVisitor(IObjectGraphVisitor nextVisitor)
+			: base(nextVisitor)
 		{
 		}
 
-		public class FooDerived : FooBase
+		private static object GetDefault(Type type)
 		{
+			return type.IsValueType ? Activator.CreateInstance(type) : null;
 		}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+		private static readonly IEqualityComparer<object> _objectComparer = EqualityComparer<object>.Default;
 
-			Assert.IsType<FooBase>(result);
+		public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
+		{
+			return !_objectComparer.Equals(value, GetDefault(value.Type))
+			       && base.EnterMapping(key, value);
 		}
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
+		public override bool EnterMapping(IPropertyDescriptor key, object value)
 		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
+			var defaultValue = defaultValueAttribute != null
+				? defaultValueAttribute.Value
+				: GetDefault(key.Type);
 
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+			return !_objectComparer.Equals(value, defaultValue)
+				   && base.EnterMapping(key, value);
 		}
 	}
 }

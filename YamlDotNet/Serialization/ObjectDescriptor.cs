@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2013 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,42 +19,33 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
-using Xunit;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
+using System;
 
-namespace YamlDotNet.RepresentationModel.Test
+namespace YamlDotNet.Serialization
 {
-	public class ObjectFactoryTests
+	public sealed class ObjectDescriptor : IObjectDescriptor
 	{
-		public class FooBase
+		public object Value { get; private set; }
+		public Type Type { get; private set; }
+		public Type StaticType { get; private set; }
+
+		public ObjectDescriptor(object value, Type type, Type staticType)
 		{
-		}
+			Value = value;
 
-		public class FooDerived : FooBase
-		{
-		}
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
 
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+			Type = type;
 
-			Assert.IsType<FooBase>(result);
-		}
+			if (staticType == null)
+			{
+				throw new ArgumentNullException("staticType");
+			}
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
-		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
-
-			Assert.IsType<FooDerived>(result);
+			StaticType = staticType;
 		}
 	}
 }
