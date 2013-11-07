@@ -41,7 +41,7 @@ namespace YamlDotNet.Test
 		{
 			var text = reader.ReadToEnd();
 			return Regex.Replace(text, @"{type}", match => 
-				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Namespace)));
+				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Assembly.FullName)));
 		}
 	}
 }
