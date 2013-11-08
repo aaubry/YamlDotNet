@@ -19,42 +19,35 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
+using FluentAssertions;
 using Xunit;
-using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 
 namespace YamlDotNet.Test.Serialization
 {
-	public class ObjectFactoryTests
+	public class ObjectFactoryTests : SerializationTestHelper
 	{
-		public class FooBase
-		{
-		}
-
-		public class FooDerived : FooBase
-		{
-		}
-
 		[Fact]
 		public void NotSpecifyingObjectFactoryUsesDefault()
 		{
-			var deserializer = new Deserializer();
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+			var text = "!empty {}";
+			
+			Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
+			var result = Deserializer.Deserialize(UsingReaderFor(text));
 
-			Assert.IsType<FooBase>(result);
+			result.Should().BeOfType<EmptyBase>();
 		}
 
 		[Fact]
 		public void ObjectFactoryIsInvoked()
 		{
-			var deserializer = new Deserializer(new LambdaObjectFactory(t => new FooDerived()));
-			deserializer.RegisterTagMapping("!foo", typeof(FooBase));
+			AssumingDeserializerWith(new LambdaObjectFactory(t => new EmptyDerived()));
+			var text = "!empty {}";
 
-			var result = deserializer.Deserialize(new StringReader("!foo {}"));
+			Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
+			var result = Deserializer.Deserialize(UsingReaderFor(text));
 
-			Assert.IsType<FooDerived>(result);
+			result.Should().BeOfType<EmptyDerived>();
 		}
 	}
 }

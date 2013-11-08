@@ -10,7 +10,6 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-// ReSharper disable InconsistentNaming
 namespace YamlDotNet.Test.Serialization
 {
 	public class SerializationTestHelper
@@ -76,7 +75,10 @@ namespace YamlDotNet.Test.Serialization
 
 		protected Serializer RoundtripEmitDefaultsJsonCompatibleSerializer
 		{
-			get { return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible | SerializationOptions.Roundtrip)); }
+			get { return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults |
+				                                           SerializationOptions.JsonCompatible |
+				                                           SerializationOptions.Roundtrip));
+			}
 		}
 
 		private Serializer CurrentOrNew(Func<Serializer> serializerFactory)
@@ -87,6 +89,11 @@ namespace YamlDotNet.Test.Serialization
 		protected Deserializer Deserializer
 		{
 			get { return deserializer = deserializer ?? new Deserializer(); }
+		}
+
+		protected void AssumingDeserializerWith(IObjectFactory factory)
+		{
+			deserializer = new Deserializer(factory);
 		}
 
 		protected TextReader UsingReaderFor(TextWriter buffer)
@@ -113,330 +120,347 @@ namespace YamlDotNet.Test.Serialization
 		{
 			return new DictionaryEntry(key, value);
 		}
+	}
 
-		[Flags]
-		public enum EnumExample
+	// ReSharper disable InconsistentNaming
+
+	[Flags]
+	public enum EnumExample
+	{
+		None,
+		One,
+		Two
+	}
+
+	public class CircularReference
+	{
+		public CircularReference Child1 { get; set; }
+		public CircularReference Child2 { get; set; }
+	}
+
+	[TypeConverter(typeof(ConvertibleConverter))]
+	public class Convertible : IConvertible
+	{
+		public string Left { get; set; }
+		public string Right { get; set; }
+
+		public object ToType(Type conversionType, IFormatProvider provider)
 		{
-			None,
-			One,
-			Two
+			conversionType.Should().Be<string>();
+			return ToString(provider);
 		}
 
-		public class CircularReference
+		public string ToString(IFormatProvider provider)
 		{
-			public CircularReference Child1 { get; set; }
-			public CircularReference Child2 { get; set; }
+			provider.Should().Be(CultureInfo.InvariantCulture);
+			return string.Format(provider, "[{0}, {1}]", Left, Right);
 		}
 
-		[TypeConverter(typeof(ConvertibleConverter))]
-		public class Convertible : IConvertible
+		#region Unsupported Members
+
+		public TypeCode GetTypeCode()
 		{
-			public string Left { get; set; }
-			public string Right { get; set; }
-
-			public object ToType(Type conversionType, IFormatProvider provider)
-			{
-				conversionType.Should().Be<string>();
-				return ToString(provider);
-			}
-
-			public string ToString(IFormatProvider provider)
-			{
-				provider.Should().Be(CultureInfo.InvariantCulture);
-				return string.Format(provider, "[{0}, {1}]", Left, Right);
-			}
-
-			#region Unsupported Members
-
-			public TypeCode GetTypeCode()
-			{
-				throw new NotSupportedException();
-			}
-
-			public bool ToBoolean(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public byte ToByte(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public char ToChar(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public DateTime ToDateTime(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public decimal ToDecimal(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public double ToDouble(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public short ToInt16(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public int ToInt32(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public long ToInt64(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public sbyte ToSByte(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public float ToSingle(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public ushort ToUInt16(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public uint ToUInt32(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			public ulong ToUInt64(IFormatProvider provider)
-			{
-				throw new NotSupportedException();
-			}
-
-			#endregion
+			throw new NotSupportedException();
 		}
 
-		public class ConvertibleConverter : TypeConverter
+		public bool ToBoolean(IFormatProvider provider)
 		{
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-			{
-				return sourceType == typeof(string);
-			}
-
-			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-			{
-				return false;
-			}
-
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-			{
-				if (!(value is string))
-					throw new InvalidOperationException();
-				var parts = (value as string).Split(' ');
-				return new Convertible {
-					Left = parts[0],
-					Right = parts[1]
-				};
-			}
+			throw new NotSupportedException();
 		}
 
-		public class MissingDefaultCtor
+		public byte ToByte(IFormatProvider provider)
 		{
-			public string Value;
-			public MissingDefaultCtor(string value) { Value = value; }
+			throw new NotSupportedException();
 		}
 
-		public class MissingDefaultCtorConverter : IYamlTypeConverter
+		public char ToChar(IFormatProvider provider)
 		{
-			public bool Accepts(Type type)
-			{
-				return type == typeof(MissingDefaultCtor);
-			}
-
-			public object ReadYaml(IParser parser, Type type)
-			{
-				var value = ((Scalar)parser.Current).Value;
-				parser.MoveNext();
-				return new MissingDefaultCtor(value);
-			}
-
-			public void WriteYaml(IEmitter emitter, object value, Type type)
-			{
-				emitter.Emit(new Scalar(((MissingDefaultCtor)value).Value));
-			}
+			throw new NotSupportedException();
 		}
 
-		public class InheritanceExample
+		public DateTime ToDateTime(IFormatProvider provider)
 		{
-			public object SomeScalar { get; set; }
-			public Base RegularBase { get; set; }
-			[YamlMember(serializeAs: typeof(Base))]
-			public Base BaseWithSerializeAs { get; set; }
+			throw new NotSupportedException();
 		}
 
-		public class Base
+		public decimal ToDecimal(IFormatProvider provider)
 		{
-			public string BaseProperty { get; set; }
+			throw new NotSupportedException();
 		}
 
-		public class Derived : Base
+		public double ToDouble(IFormatProvider provider)
 		{
-			public string DerivedProperty { get; set; }
+			throw new NotSupportedException();
 		}
 
-		public class Simple
+		public short ToInt16(IFormatProvider provider)
 		{
-			public string aaa { get; set; }
+			throw new NotSupportedException();
 		}
 
-		public class Example
+		public int ToInt32(IFormatProvider provider)
 		{
-			public bool MyFlag { get; set; }
-			public string Nothing { get; set; }
-			public int MyInt { get; set; }
-			public double MyDouble { get; set; }
-			public string MyString { get; set; }
-			public DateTime MyDate { get; set; }
-			public TimeSpan MyTimeSpan { get; set; }
-			public Point MyPoint { get; set; }
-			public int? MyNullableWithValue { get; set; }
-			public int? MyNullableWithoutValue { get; set; }
-
-			public Example()
-			{
-				MyInt = 1234;
-				MyDouble = 6789.1011;
-				MyString = "Hello world";
-				MyDate = DateTime.Now;
-				MyTimeSpan = TimeSpan.FromHours(1);
-				MyPoint = new Point(100, 200);
-				MyNullableWithValue = 8;
-			}
+			throw new NotSupportedException();
 		}
 
-		public class IgnoreExample
+		public long ToInt64(IFormatProvider provider)
 		{
-			[YamlIgnore]
-			public String IgnoreMe { get; set; }
+			throw new NotSupportedException();
 		}
 
-		public class DefaultsExample
+		public sbyte ToSByte(IFormatProvider provider)
 		{
-			public const string DefaultValue = "myDefault";
-
-			[DefaultValue(DefaultValue)]
-			public string Value { get; set; }
+			throw new NotSupportedException();
 		}
 
-		public class CustomGenericDictionary : IDictionary<string, string>
+		public float ToSingle(IFormatProvider provider)
 		{
-			private readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
-
-			public void Add(string key, string value)
-			{
-				dictionary.Add(key, value);
-			}
-
-			public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-			{
-				return dictionary.GetEnumerator();
-			}
-
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return GetEnumerator();
-			}
-
-			#region Unsupported Members
-
-			public bool ContainsKey(string key)
-			{
-				throw new NotSupportedException();
-			}
-
-			public ICollection<string> Keys
-			{
-				get { throw new NotSupportedException(); }
-			}
-
-			public bool Remove(string key)
-			{
-				throw new NotSupportedException();
-			}
-
-			public bool TryGetValue(string key, out string value)
-			{
-				throw new NotSupportedException();
-			}
-
-			public ICollection<string> Values
-			{
-				get { throw new NotSupportedException(); }
-			}
-
-			public string this[string key]
-			{
-				get { throw new NotSupportedException(); }
-				set { throw new NotSupportedException(); }
-			}
-
-			public void Add(KeyValuePair<string, string> item)
-			{
-				throw new NotSupportedException();
-			}
-
-			public void Clear()
-			{
-				throw new NotSupportedException();
-			}
-
-			public bool Contains(KeyValuePair<string, string> item)
-			{
-				throw new NotSupportedException();
-			}
-
-			public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
-			{
-				throw new NotSupportedException();
-			}
-
-			public int Count
-			{
-				get { throw new NotSupportedException(); }
-			}
-
-			public bool IsReadOnly
-			{
-				get { throw new NotSupportedException(); }
-			}
-
-			public bool Remove(KeyValuePair<string, string> item)
-			{
-				throw new NotSupportedException();
-			}
-
-			#endregion
+			throw new NotSupportedException();
 		}
 
-		public class NameConvention
+		public ushort ToUInt16(IFormatProvider provider)
 		{
-			public string FirstTest { get; set; }
-			public string SecondTest { get; set; }
-			public string ThirdTest { get; set; }
-			[YamlAlias("fourthTest")]
-			public string AliasTest { get; set; }
-			[YamlIgnore]
-			public string fourthTest { get; set; }
+			throw new NotSupportedException();
 		}
+
+		public uint ToUInt32(IFormatProvider provider)
+		{
+			throw new NotSupportedException();
+		}
+
+		public ulong ToUInt64(IFormatProvider provider)
+		{
+			throw new NotSupportedException();
+		}
+
+		#endregion
+	}
+
+	public class ConvertibleConverter : TypeConverter
+	{
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		{
+			return sourceType == typeof(string);
+		}
+
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		{
+			return false;
+		}
+
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			if (!(value is string))
+				throw new InvalidOperationException();
+			var parts = (value as string).Split(' ');
+			return new Convertible {
+				Left = parts[0],
+				Right = parts[1]
+			};
+		}
+	}
+
+	public class MissingDefaultCtor
+	{
+		public string Value;
+
+		public MissingDefaultCtor(string value)
+		{
+			Value = value;
+		}
+	}
+
+	public class MissingDefaultCtorConverter : IYamlTypeConverter
+	{
+		public bool Accepts(Type type)
+		{
+			return type == typeof(MissingDefaultCtor);
+		}
+
+		public object ReadYaml(IParser parser, Type type)
+		{
+			var value = ((Scalar) parser.Current).Value;
+			parser.MoveNext();
+			return new MissingDefaultCtor(value);
+		}
+
+		public void WriteYaml(IEmitter emitter, object value, Type type)
+		{
+			emitter.Emit(new Scalar(((MissingDefaultCtor) value).Value));
+		}
+	}
+
+	public class InheritanceExample
+	{
+		public object SomeScalar { get; set; }
+		public Base RegularBase { get; set; }
+
+		[YamlMember(serializeAs: typeof(Base))]
+		public Base BaseWithSerializeAs { get; set; }
+	}
+
+	public class Base
+	{
+		public string BaseProperty { get; set; }
+	}
+
+	public class Derived : Base
+	{
+		public string DerivedProperty { get; set; }
+	}
+
+	public class EmptyBase
+	{
+	}
+
+	public class EmptyDerived : EmptyBase
+	{
+	}
+
+	public class Simple
+	{
+		public string aaa { get; set; }
+	}
+
+	public class Example
+	{
+		public bool MyFlag { get; set; }
+		public string Nothing { get; set; }
+		public int MyInt { get; set; }
+		public double MyDouble { get; set; }
+		public string MyString { get; set; }
+		public DateTime MyDate { get; set; }
+		public TimeSpan MyTimeSpan { get; set; }
+		public Point MyPoint { get; set; }
+		public int? MyNullableWithValue { get; set; }
+		public int? MyNullableWithoutValue { get; set; }
+
+		public Example()
+		{
+			MyInt = 1234;
+			MyDouble = 6789.1011;
+			MyString = "Hello world";
+			MyDate = DateTime.Now;
+			MyTimeSpan = TimeSpan.FromHours(1);
+			MyPoint = new Point(100, 200);
+			MyNullableWithValue = 8;
+		}
+	}
+
+	public class IgnoreExample
+	{
+		[YamlIgnore]
+		public String IgnoreMe { get; set; }
+	}
+
+	public class DefaultsExample
+	{
+		public const string DefaultValue = "myDefault";
+
+		[DefaultValue(DefaultValue)]
+		public string Value { get; set; }
+	}
+
+	public class CustomGenericDictionary : IDictionary<string, string>
+	{
+		private readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
+
+		public void Add(string key, string value)
+		{
+			dictionary.Add(key, value);
+		}
+
+		public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+		{
+			return dictionary.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		#region Unsupported Members
+
+		public bool ContainsKey(string key)
+		{
+			throw new NotSupportedException();
+		}
+
+		public ICollection<string> Keys
+		{
+			get { throw new NotSupportedException(); }
+		}
+
+		public bool Remove(string key)
+		{
+			throw new NotSupportedException();
+		}
+
+		public bool TryGetValue(string key, out string value)
+		{
+			throw new NotSupportedException();
+		}
+
+		public ICollection<string> Values
+		{
+			get { throw new NotSupportedException(); }
+		}
+
+		public string this[string key]
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
+
+		public void Add(KeyValuePair<string, string> item)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void Clear()
+		{
+			throw new NotSupportedException();
+		}
+
+		public bool Contains(KeyValuePair<string, string> item)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
+		{
+			throw new NotSupportedException();
+		}
+
+		public int Count
+		{
+			get { throw new NotSupportedException(); }
+		}
+
+		public bool IsReadOnly
+		{
+			get { throw new NotSupportedException(); }
+		}
+
+		public bool Remove(KeyValuePair<string, string> item)
+		{
+			throw new NotSupportedException();
+		}
+
+		#endregion
+	}
+
+	public class NameConvention
+	{
+		public string FirstTest { get; set; }
+		public string SecondTest { get; set; }
+		public string ThirdTest { get; set; }
+
+		[YamlAlias("fourthTest")]
+		public string AliasTest { get; set; }
+
+		[YamlIgnore]
+		public string fourthTest { get; set; }
 	}
 }
