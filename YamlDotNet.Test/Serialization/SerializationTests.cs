@@ -26,6 +26,7 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
@@ -624,114 +625,33 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
-		// Todo: are these needed? Naming convention classes are tested elsewhere
-		public void SerializeUsingCamelCaseNamingConvention()
+		public void SerializaionUtilizeNamingConventions()
 		{
-			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
+			var convention = A.Fake<INamingConvention>();
+			A.CallTo(() => convention.Apply(A<string>._)).ReturnsLazily((string x) => x);
+			var obj = new NameConvention { FirstTest = "1", SecondTest = "2" };
 
-			var result = SerializeWithNaming(obj, new CamelCaseNamingConvention());
+			var serializer = new Serializer(namingConvention: convention);
+			serializer.Serialize(new StringWriter(), obj);
 
-			result.Should().Contain("foo: bar").And
-				.Contain("moreFoo: More bar").And
-				.Contain("evenMoreFoo: Awesome");
+			A.CallTo(() => convention.Apply("FirstTest")).MustHaveHappened();
+			A.CallTo(() => convention.Apply("SecondTest")).MustHaveHappened();
 		}
 
 		[Fact]
-		public void DeserializeUsingCamelCaseNamingConvention()
+		public void DeserializationUtilizeNamingConventions()
 		{
-			DeserializeUsing(new CamelCaseNamingConvention(),
-				"firstTest: First",
-				"secondTest: Second",
-				"thirdTest: Third",
-				"fourthTest: Fourth");
-		}
+			var convention = A.Fake<INamingConvention>();
+			A.CallTo(() => convention.Apply(A<string>._)).ReturnsLazily((string x) => x);
+			var text = Lines(
+				"FirstTest: 1",
+				"SecondTest: 2");
 
-		[Fact]
-		public void SerializeUsingPascalCaseNamingConvention()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", evenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new PascalCaseNamingConvention());
-
-			result.Should().Contain("Foo: bar").And
-				.Contain("MoreFoo: More bar").And
-				.Contain("EvenMoreFoo: Awesome");
-		}
-
-		[Fact]
-		public void DeserializeUsingPascalCaseNamingConvention()
-		{
-			DeserializeUsing(new PascalCaseNamingConvention(),
-				"FirstTest: First",
-				"SecondTest: Second",
-				"ThirdTest: Third",
-				"fourthTest: Fourth");
-		}
-
-		[Fact]
-		public void SerializeUsingHyphenationNamingConvention()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awesome" };
-
-			var result = SerializeWithNaming(obj, new HyphenatedNamingConvention());
-
-			result.Should().Contain("foo: bar").And
-				.Contain("more-foo: More bar").And
-				.Contain("even-more-foo: Awesome");
-		}
-
-		[Fact]
-		public void DeserializeUsingHyphenatedNamingConvention()
-		{
-			DeserializeUsing(new HyphenatedNamingConvention(),
-				"first-test: First",
-				"second-test: Second",
-				"third-test: Third",
-				"fourthTest: Fourth");
-		}
-
-		[Fact]
-		public void SerializeUsingUnderscoredNamingConvention()
-		{
-			var obj = new { foo = "bar", moreFoo = "More bar", EvenMoreFoo = "Awsome" };
-
-			var result = SerializeWithNaming(obj, new UnderscoredNamingConvention());
-
-			result.Should().Contain("foo: bar").And
-				.Contain("more_foo: More bar").And
-				.Contain("even_more_foo: Awsome");
-		}
-
-		[Fact]
-		public void DeserializeUsingUnderscoredNamingConvention()
-		{
-			DeserializeUsing(new UnderscoredNamingConvention(),
-				"first_test: First",
-				"second_test: Second",
-				"third_test: Third",
-				"fourthTest: Fourth");
-		}
-
-		private string SerializeWithNaming<T>(T input, INamingConvention naming)
-		{
-			var serializer = new Serializer(namingConvention: naming);
-			var writer = new StringWriter();
-			serializer.Serialize(writer, input, typeof(T));
-			return writer.ToString();
-		}
-
-		private void DeserializeUsing(INamingConvention convention, params string[] yaml)
-		{
 			var deserializer = new Deserializer(namingConvention: convention);
+			deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
 
-			var result = deserializer.Deserialize<NameConvention>(UsingReaderFor(Lines(yaml)));
-
-			result.ShouldHave().SharedProperties().EqualTo(new {
-				FirstTest = "First",
-				SecondTest = "Second",
-				ThirdTest = "Third",
-				AliasTest = "Fourth"
-			});
+			A.CallTo(() => convention.Apply("FirstTest")).MustHaveHappened();
+			A.CallTo(() => convention.Apply("SecondTest")).MustHaveHappened();
 		}
 	}
 }
