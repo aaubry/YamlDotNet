@@ -32,7 +32,6 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -51,7 +50,7 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void DeserializeScalar()
 		{
-			var stream = Yaml.StreamFrom("test2.yaml");
+			var stream = Yaml.StreamFrom("02-scalar-in-imp-doc.yaml");
 
 			var result = Deserializer.Deserialize(stream);
 
@@ -98,7 +97,7 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void DeserializeExplicitType()
 		{
-			var text = Yaml.StreamFrom("explicitType.template").TemplatedOn<Simple>();
+			var text = Yaml.StreamFrom("explicit-type.template").TemplatedOn<Simple>();
 
 			var result = Deserializer.Deserialize<Simple>(UsingReaderFor(text));
 
@@ -265,7 +264,7 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void DeserializeExplicitList()
 		{
-			var stream = Yaml.StreamFrom("listExplicit.yaml");
+			var stream = Yaml.StreamFrom("list-explicit.yaml");
 
 			var result = Deserializer.Deserialize(stream);
 
@@ -346,7 +345,7 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void DeserializeExplicitDictionary()
 		{
-			var stream = Yaml.StreamFrom("dictionaryExplicit.yaml");
+			var stream = Yaml.StreamFrom("dictionary-explicit.yaml");
 
 			var result = Deserializer.Deserialize(stream);
 
@@ -415,7 +414,7 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void DeserializeListOfDictionaries()
 		{
-			var stream = Yaml.StreamFrom("listOfDictionaries.yaml");
+			var stream = Yaml.StreamFrom("list-of-dictionaries.yaml");
 
 			var result = Deserializer.Deserialize<List<Dictionary<string, string>>>(stream);
 

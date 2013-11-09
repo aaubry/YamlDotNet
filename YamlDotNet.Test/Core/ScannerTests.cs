@@ -31,7 +31,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample1()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test1.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("01-directives.yaml"),
 				StreamStart,
 				VersionDirective(1, 1),
 				TagDirective("!", "!foo"),
@@ -43,7 +43,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test2.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("02-scalar-in-imp-doc.yaml"),
 				StreamStart,
 				SingleQuotedScalar("a scalar"),
 				StreamEnd);
@@ -52,7 +52,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			Scanner scanner = ScannerFor("test3.yaml");
+			Scanner scanner = ScannerFor("03-scalar-in-exp-doc.yaml");
 			AssertSequenceOfTokensFrom(scanner,
 				StreamStart,
 				DocumentStart,
@@ -64,7 +64,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test4.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("04-scalars-in-multi-docs.yaml"),
 				StreamStart,
 				SingleQuotedScalar("a scalar"),
 				DocumentStart,
@@ -77,7 +77,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test5.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("05-circular-sequence.yaml"),
 				StreamStart,
 				Anchor("A"),
 				FlowSequenceStart,
@@ -89,7 +89,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test6.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("06-float-tag.yaml"),
 				StreamStart,
 				Tag("!!", "float"),
 				DoubleQuotedScalar("3.14"),
@@ -99,7 +99,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test7.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("07-scalar-styles.yaml"),
 				StreamStart,
 				DocumentStart,
 				DocumentStart,
@@ -118,7 +118,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test8.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("08-flow-sequence.yaml"),
 				StreamStart,
 				FlowSequenceStart,
 				PlainScalar("item 1"),
@@ -133,7 +133,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test9.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("09-flow-mapping.yaml"),
 				StreamStart,
 				FlowMappingStart,
 				Key,
@@ -153,7 +153,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test10.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("10-mixed-nodes-in-sequence.yaml"),
 				StreamStart,
 				BlockSequenceStart,
 				BlockEntry,
@@ -185,7 +185,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test11.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("11-mixed-nodes-in-mapping.yaml"),
 				StreamStart,
 				BlockMappingStart,
 				Key,
@@ -225,7 +225,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test12.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("12-compact-sequence.yaml"),
 				StreamStart,
 				BlockSequenceStart,
 				BlockEntry,
@@ -260,7 +260,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test13.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("13-compact-mapping.yaml"),
 				StreamStart,
 				BlockMappingStart,
 				Key,
@@ -292,7 +292,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			AssertSequenceOfTokensFrom(ScannerFor("test14.yaml"),
+			AssertSequenceOfTokensFrom(ScannerFor("14-mapping-wo-indent.yaml"),
 				StreamStart,
 				BlockMappingStart,
 				Key,

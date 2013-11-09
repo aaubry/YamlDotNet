@@ -33,7 +33,7 @@ namespace YamlDotNet.Test.RepresentationModel
 		[Fact]
 		public void LoadSimpleDocument() {
 			var stream = new YamlStream();
-			stream.Load(Yaml.StreamFrom("test2.yaml"));
+			stream.Load(Yaml.StreamFrom("02-scalar-in-imp-doc.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
@@ -43,7 +43,7 @@ namespace YamlDotNet.Test.RepresentationModel
 		[Fact]
 		public void BackwardAliasReferenceWorks() {
 			var stream = new YamlStream();
-			stream.Load(Yaml.StreamFrom("backwardsAlias.yaml"));
+			stream.Load(Yaml.StreamFrom("backwards-alias.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
@@ -60,7 +60,7 @@ namespace YamlDotNet.Test.RepresentationModel
 		[Fact]
 		public void ForwardAliasReferenceWorks() {
 			var stream = new YamlStream();
-			stream.Load(Yaml.StreamFrom("forwardAlias.yaml"));
+			stream.Load(Yaml.StreamFrom("forward-alias.yaml"));
 			
 			Assert.Equal(1, stream.Documents.Count);
 			Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
@@ -77,85 +77,85 @@ namespace YamlDotNet.Test.RepresentationModel
 		[Fact]
 		public void RoundtripExample1()
 		{
-			RoundtripTest("test1.yaml");
+			RoundtripTest("01-directives.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample2()
 		{
-			RoundtripTest("test2.yaml");
+			RoundtripTest("02-scalar-in-imp-doc.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample3()
 		{
-			RoundtripTest("test3.yaml");
+			RoundtripTest("03-scalar-in-exp-doc.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample4()
 		{
-			RoundtripTest("test4.yaml");
+			RoundtripTest("04-scalars-in-multi-docs.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample5()
 		{
-			RoundtripTest("test6.yaml");
+			RoundtripTest("06-float-tag.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample6()
 		{
-			RoundtripTest("test6.yaml");
+			RoundtripTest("06-float-tag.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample7()
 		{
-			RoundtripTest("test7.yaml");
+			RoundtripTest("07-scalar-styles.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample8()
 		{
-			RoundtripTest("test8.yaml");
+			RoundtripTest("08-flow-sequence.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample9()
 		{
-			RoundtripTest("test9.yaml");
+			RoundtripTest("09-flow-mapping.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample10()
 		{
-			RoundtripTest("test10.yaml");
+			RoundtripTest("10-mixed-nodes-in-sequence.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample11()
 		{
-			RoundtripTest("test11.yaml");
+			RoundtripTest("11-mixed-nodes-in-mapping.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample12()
 		{
-			RoundtripTest("test12.yaml");
+			RoundtripTest("12-compact-sequence.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample13()
 		{
-			RoundtripTest("test13.yaml");
+			RoundtripTest("13-compact-mapping.yaml");
 		}
 
 		[Fact]
 		public void RoundtripExample14()
 		{
-			RoundtripTest("test14.yaml");
+			RoundtripTest("14-mapping-wo-indent.yaml");
 		}
 
 		[Fact]
