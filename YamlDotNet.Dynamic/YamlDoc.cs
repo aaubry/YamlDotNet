@@ -27,37 +27,37 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Dynamic
 {
-    public static class YamlDoc
-    {
-        public static YamlNode LoadFromFile(string fileName)
-        {
-            return LoadFromTextReader(File.OpenText(fileName));
-        }
+	public static class YamlDoc
+	{
+		public static YamlNode LoadFromFile(string fileName)
+		{
+			return LoadFromTextReader(File.OpenText(fileName));
+		}
 
-        public static YamlNode LoadFromString(string yamlText)
-        {
-            return LoadFromTextReader(new StringReader(yamlText));
-        }
+		public static YamlNode LoadFromString(string yamlText)
+		{
+			return LoadFromTextReader(new StringReader(yamlText));
+		}
 
-        public static YamlNode LoadFromTextReader(TextReader reader)
-        {
-            var yaml = new YamlStream();
-            yaml.Load(reader);
+		public static YamlNode LoadFromTextReader(TextReader reader)
+		{
+			var yaml = new YamlStream();
+			yaml.Load(reader);
 
-            return yaml.Documents.First().RootNode;
-        }
+			return yaml.Documents.First().RootNode;
+		}
 
-        internal static bool TryMapValue(object value, out object result)
-        {
-            var node = value as YamlNode;
-            if (node != null)
-            {
-                result = new DynamicYaml(node);
-                return true;
-            }
+		internal static bool TryMapValue(object value, out object result)
+		{
+			var node = value as YamlNode;
+			if (node != null)
+			{
+				result = new DynamicYaml(node);
+				return true;
+			}
 
-            result = null;
-            return false;
-        }
-    }
+			result = null;
+			return false;
+		}
+	}
 }
