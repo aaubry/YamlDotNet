@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using FluentAssertions;
 using Xunit;
 
 namespace YamlDotNet.Dynamic.Test
@@ -45,7 +46,8 @@ namespace YamlDotNet.Dynamic.Test
 			dynamic dynamicYaml = new DynamicYaml(SequenceYaml);
 
 			string firstName = dynamicYaml[0].name;
-			Assert.Equal(firstName, "Me");
+
+			firstName.Should().Be("Me");
 		}
 
 		[Fact]
@@ -54,9 +56,10 @@ namespace YamlDotNet.Dynamic.Test
 			dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
 
 			string firstNumberAsString = dynamicYaml[0, 0];
-			Assert.Equal(firstNumberAsString, "1");
 			int firstNumberAsInt = dynamicYaml[0, 0];
-			Assert.Equal(firstNumberAsInt, 1);
+
+			firstNumberAsString.Should().Be("1");
+			firstNumberAsInt.Should().Be(1);
 		}
 
 		[Fact]
@@ -65,118 +68,129 @@ namespace YamlDotNet.Dynamic.Test
 			dynamic dynamicYaml = new DynamicYaml(EnumYaml);
 
 			StringComparison stringComparisonMode = dynamicYaml[0].stringComparisonMode;
-			Assert.Equal(StringComparison.CurrentCultureIgnoreCase, stringComparisonMode);
+
+			stringComparisonMode.Should().Be(StringComparison.CurrentCultureIgnoreCase);
 		}
 
 		[Fact]
-		public void TestArrayConvert()
+		public void TestArrayAccess()
 		{
 			dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
 			dynamic[] dynamicArray = null;
 
-			Assert.DoesNotThrow(() =>
-			{
-				dynamicArray = dynamicYaml;
-				Assert.NotNull(dynamicArray);
-				Assert.NotEmpty(dynamicArray);
-			});
+			Action action = () => { dynamicArray = dynamicYaml; };
 
-			Assert.DoesNotThrow(() =>
-			{
-				int[] intArray = dynamicArray[0];
-				Assert.NotNull(intArray);
-				Assert.NotEmpty(intArray);
-			});
+			action.ShouldNotThrow();
+			dynamicArray.Should().NotBeNull().And.NotBeEmpty();
+		}
+
+		[Fact]
+		public void TestArrayConvert() {
+			dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
+			dynamic[] dynamicArray = dynamicYaml;
+			int[] intArray = null;
+
+			Action action = () => { intArray = dynamicArray[0]; };
+
+			action.ShouldNotThrow();
+			intArray.Should().NotBeNull().And.NotBeEmpty();
 		}
 
 		[Fact]
 		public void TestEnumArrayConvert()
 		{
 			dynamic dynamicYaml = new DynamicYaml(EnumSequenceYaml);
+			StringComparison[] enumArray = null;
 
-			Assert.DoesNotThrow(() =>
-			{
-				StringComparison[] enumArray = dynamicYaml;
-				Assert.NotNull(enumArray);
-				Assert.NotEmpty(enumArray);
-			});
+			Action action = () => { enumArray = dynamicYaml; };
+
+			action.ShouldNotThrow();
+			enumArray.Should().NotBeNull().And.NotBeEmpty();
+		}
+
+		[Fact]
+		public void TestCollectionAccess() {
+			dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
+			List<dynamic> dynamicList = null;
+
+			Action action = () => { dynamicList = dynamicYaml; };
+
+			action.ShouldNotThrow();
+			dynamicList.Should().NotBeNull().And.NotBeEmpty();
 		}
 
 		[Fact]
 		public void TestCollectionConvert()
 		{
 			dynamic dynamicYaml = new DynamicYaml(NestedSequenceYaml);
-			List<dynamic> dynamicList = null;
-			Assert.DoesNotThrow(() =>
-			{
-				dynamicList = dynamicYaml;
-				Assert.NotNull(dynamicList);
-				Assert.NotEmpty(dynamicList);
-			});
+			List<dynamic> dynamicList = dynamicYaml;
+			List<int> intList = null;
 
-			Assert.DoesNotThrow(() =>
-			{
-				List<int> intList = dynamicList[0];
-				Assert.NotNull(intList);
-				Assert.NotEmpty(intList);
-			});
+			Action action = () => { intList = dynamicList[0]; };
+
+			action.ShouldNotThrow();
+			intList.Should().NotBeNull().And.NotBeEmpty();
 		}
 
 		[Fact]
 		public void TestEnumCollectionConvert()
 		{
 			dynamic dynamicYaml = new DynamicYaml(EnumSequenceYaml);
+			List<StringComparison> enumList = null;
 
-			Assert.DoesNotThrow(() =>
-			{
-				List<StringComparison> enumList = dynamicYaml;
-				Assert.NotNull(enumList);
-				Assert.NotEmpty(enumList);
-			});
+			Action action = () => { enumList = dynamicYaml; };
+
+			action.ShouldNotThrow();
+			enumList.Should().NotBeNull().And.NotBeEmpty();
+		}
+
+		[Fact]
+		public void TestDictionaryAccess()
+		{
+			dynamic dynamicYaml = new DynamicYaml(MappingYaml);
+			Dictionary<string, dynamic> dynamicDictionary = null;
+
+			Action action = () => { dynamicDictionary = dynamicYaml; };
+
+			action.ShouldNotThrow();
+			dynamicDictionary.Should().NotBeNull().And.NotBeEmpty();
 		}
 
 		[Fact]
 		public void TestDictionaryConvert()
 		{
 			dynamic dynamicYaml = new DynamicYaml(MappingYaml);
+			Dictionary<string, dynamic> dynamicDictionary = dynamicYaml;
+			Dictionary<string, string> stringDictonary = null;
 
-			Dictionary<string, dynamic> dynamicDictionary = null;
-			Assert.DoesNotThrow(() =>
-			{
-				dynamicDictionary = dynamicYaml;
-				Assert.NotNull(dynamicDictionary);
-				Assert.NotEmpty(dynamicDictionary);
-			});
+			Action action = () => { stringDictonary = dynamicDictionary["customer"]; };
 
-			Assert.DoesNotThrow(() =>
-			{
-				Dictionary<string, string> stringDictonary = dynamicDictionary["customer"];
-				Assert.NotNull(stringDictonary);
-				Assert.NotEmpty(stringDictonary);
-			});
+			action.ShouldNotThrow();
+			stringDictonary.Should().NotBeNull().And.NotBeEmpty();
 		}
 
 		[Fact]
 		public void TestEnumDictonaryConvert()
 		{
 			dynamic dynamicYaml = new DynamicYaml(EnumMappingYaml);
+			IDictionary<StringComparison, string> enumDict = null;
 
-			Assert.DoesNotThrow(() =>
-			{
-				IDictionary<StringComparison, string> enumDict = dynamicYaml;
-				Assert.NotNull(enumDict);
-				Assert.NotEmpty(enumDict);
-			});
+			Action action = () => { enumDict = dynamicYaml; };
+
+			action.ShouldNotThrow();
+			enumDict.Should().NotBeNull().And.NotBeEmpty();
 		}
 
 		[Fact]
 		public void TestNonexistingMember()
 		{
 			dynamic dynamicYaml = new DynamicYaml(SequenceYaml);
-			var title = (string)(dynamicYaml[0].Title);
-			Assert.Null(title);
-			var id = (int?)(dynamicYaml[0].Id);
-			Assert.Null(id);
+
+			string title = dynamicYaml[0].Title;
+			int? id = dynamicYaml[0].Id;
+
+			title.Should().BeNull();
+			id.Should().NotHaveValue();
 		}
 
 		private const string EnumYaml = @"---

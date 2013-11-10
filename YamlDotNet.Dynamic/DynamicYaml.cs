@@ -61,19 +61,19 @@ namespace YamlDotNet.Dynamic
 			typeof(Dictionary<,>)
 		};
 
-		private static readonly Type[] ConvertableCollectionTypes = ConvertableGenericCollectionTypes.
-				SelectMany(type => ConvertableBasicTypes.
-					Select(basicType => type.MakeGenericType(basicType))
-				).ToArray();
+		private static readonly Type[] ConvertableCollectionTypes =
+			ConvertableGenericCollectionTypes.SelectMany(
+				type => ConvertableBasicTypes.Select(
+					basicType => type.MakeGenericType(basicType))).ToArray();
 
-		private static readonly Type[] ConvertableDictionaryTypes = ConvertableGenericDictionaryTypes.
-			SelectMany(type => ConvertableBasicTypes.
-					SelectMany(valueType => ConvertableBasicTypes.
-						Select(keyType => type.MakeGenericType(keyType, valueType)
-				))).ToArray();
+		private static readonly Type[] ConvertableDictionaryTypes =
+			ConvertableGenericDictionaryTypes.SelectMany(
+				type => ConvertableBasicTypes.SelectMany(
+					valueType => ConvertableBasicTypes.Select(
+						keyType => type.MakeGenericType(keyType, valueType)))).ToArray();
 
-		private static readonly Type[] ConvertableArrayTypes = ConvertableBasicTypes.Select(
-										type => type.MakeArrayType()).ToArray();
+		private static readonly Type[] ConvertableArrayTypes =
+			ConvertableBasicTypes.Select(type => type.MakeArrayType()).ToArray();
 
 		private YamlMappingNode mappingNode;
 		private YamlSequenceNode sequenceNode;
@@ -125,15 +125,13 @@ namespace YamlDotNet.Dynamic
 			return false;
 		}
 
-		private static bool SuccessfullyGetValue(out object result, object value)
+		private static bool SuccessfullyGetValue(object value, out object result)
 		{
 			result = value;
 			return true;
 		}
 
-		private bool TryGetValueByKeyAndType(string key,
-			Type type,
-			out object result)
+		private bool TryGetValueByKeyAndType(string key, Type type, out object result)
 		{
 			if (mappingNode == null)
 			{
@@ -156,7 +154,7 @@ namespace YamlDotNet.Dynamic
 				}
 			}
 
-			return IsNullableType(type) ? SuccessfullyGetValue(out result, new DynamicYaml((YamlNode)null)) : FailToGetValue(out result);
+			return IsNullableType(type) ? SuccessfullyGetValue(new DynamicYaml((YamlNode)null), out result) : FailToGetValue(out result);
 		}
 
 		private static bool IsNullableType(Type type)
@@ -219,59 +217,55 @@ namespace YamlDotNet.Dynamic
 		{
 			if (type == typeof(object) || type == typeof(DynamicYaml))
 			{
-				return SuccessfullyGetValue(out result, this);
+				return SuccessfullyGetValue(this, out result);
 			}
 			if (scalarNode == null)
 			{
-				if (isNullable)
-				{
-					return SuccessfullyGetValue(out result, null);
-				}
-				return FailToGetValue(out result);
+				return isNullable? SuccessfullyGetValue(null, out result): FailToGetValue(out result);
 			}
 			if (type == typeof(string))
 			{
-				return SuccessfullyGetValue(out result, scalarNode.Value);
+				return SuccessfullyGetValue(scalarNode.Value, out result);
 			}
 			if (type == typeof(char))
 			{
 				char charResult;
-				bool success = char.TryParse(scalarNode.Value, out charResult);
+				var success = char.TryParse(scalarNode.Value, out charResult);
 				result = success ? (object)charResult : null;
 				return success;
 			}
 			if (type == typeof(int))
 			{
 				int intResult;
-				bool success = int.TryParse(scalarNode.Value, out intResult);
+				var success = int.TryParse(scalarNode.Value, out intResult);
 				result = success ? (object)intResult : null;
 				return success;
 			}
 			if (type == typeof(long))
 			{
 				long longResult;
-				bool success = long.TryParse(scalarNode.Value, out longResult);
+				var success = long.TryParse(scalarNode.Value, out longResult);
 				result = success ? (object)longResult : null;
 				return success;
 			}
 			if (type == typeof(float))
 			{
 				float floatResult;
-				bool success = float.TryParse(scalarNode.Value, out floatResult);
+				var success = float.TryParse(scalarNode.Value, out floatResult);
 				result = success ? (object)floatResult : null;
 				return success;
 			}
 			if (type == typeof(double))
 			{
 				double doubleResult;
-				bool success = double.TryParse(scalarNode.Value, out doubleResult);
+				var success = double.TryParse(scalarNode.Value, out doubleResult);
 				result = success ? (object)doubleResult : null;
 				return success;
 			}
 			if (type == typeof(decimal))
 			{
 				decimal decimalResult;
-				bool success = decimal.TryParse(scalarNode.Value, out decimalResult);
+				var success = decimal.TryParse(scalarNode.Value, out decimalResult);
 				result = success ? (object)decimalResult : null;
 				return success;
 			}
@@ -312,7 +306,7 @@ namespace YamlDotNet.Dynamic
 				return false;
 			}
 
-			Type[] genericTypeArgs = type.GetGenericArguments();
+			var genericTypeArgs = type.GetGenericArguments();
 			if (genericTypeArgs.Length != 1)
 			{
 				return false;
@@ -336,7 +330,7 @@ namespace YamlDotNet.Dynamic
 				return false;
 			}
 
-			Type[] genericTypeArgs = type.GetGenericArguments();
+			var genericTypeArgs = type.GetGenericArguments();
 			if (genericTypeArgs.Length != 2)
 			{
 				return false;
@@ -352,8 +346,7 @@ namespace YamlDotNet.Dynamic
 		{
 			if (type.IsArray &&
 				(ConvertableArrayTypes.Contains(type) ||
-				 type.GetElementType().IsSubclassOf(typeof(Enum)))
-				)
+				type.GetElementType().IsSubclassOf(typeof(Enum))))
 			{
 				return TryConvertToArray(type, out result);
 			}
@@ -383,16 +376,16 @@ namespace YamlDotNet.Dynamic
 				return FailToGetValue(out result);
 			}
 
-			Type[] genericTypeArgs = type.GetGenericArguments();
+			var genericTypeArgs = type.GetGenericArguments();
 			Type keyType = genericTypeArgs[0],
 				 valueType = genericTypeArgs[1];
 
-			Type dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+			var dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
 			var dict = Activator.CreateInstance(dictType) as IDictionary;
 
 			if (dict != null)
 			{
-				foreach (KeyValuePair<YamlNode, YamlNode> pair in mappingNode.Children)
+				foreach (var pair in mappingNode.Children)
 				{
 					object key;
 					if (!new DynamicYaml(pair.Key).TryConvertToType(keyType, out key))
@@ -410,18 +403,18 @@ namespace YamlDotNet.Dynamic
 				}
 			}
 
-			return SuccessfullyGetValue(out result, dict);
+			return SuccessfullyGetValue(dict, out result);
 		}
 
 		private bool TryConvertToCollection(Type type, out object result)
 		{
 			var elementType = type.GetGenericArguments().First();
-			Type listType = typeof(List<>).MakeGenericType(elementType);
+			var listType = typeof(List<>).MakeGenericType(elementType);
 			var list = Activator.CreateInstance(listType) as IList;
 
 			if (list != null)
 			{
-				foreach (DynamicYaml child in Children)
+				foreach (var child in Children)
 				{
 					object result2;
 					if (!child.TryConvertToType(elementType, out result2))
@@ -433,7 +426,7 @@ namespace YamlDotNet.Dynamic
 				}
 			}
 
-			return SuccessfullyGetValue(out result, list);
+			return SuccessfullyGetValue(list, out result);
 		}
 
 		private bool TryConvertToArray(Type type, out object result)
@@ -443,8 +436,8 @@ namespace YamlDotNet.Dynamic
 				return FailToGetValue(out result);
 			}
 			var elementType = type.GetElementType();
-			Array arrayResult = Array.CreateInstance(elementType, Children.Count);
-			int index = 0;
+			var arrayResult = Array.CreateInstance(elementType, Children.Count);
+			var index = 0;
 			foreach (var child in Children)
 			{
 				object result2;
@@ -456,10 +449,10 @@ namespace YamlDotNet.Dynamic
 				index++;
 			}
 
-			return SuccessfullyGetValue(out result, arrayResult);
+			return SuccessfullyGetValue(arrayResult, out result);
 		}
 
-		private IList<DynamicYaml> GetChilren()
+		private IList<DynamicYaml> GetChildren()
 		{
 			if (mappingNode != null)
 			{
@@ -477,15 +470,7 @@ namespace YamlDotNet.Dynamic
 		private IList<DynamicYaml> children;
 		public IList<DynamicYaml> Children
 		{
-			get
-			{
-				if (children == null)
-				{
-					children = GetChilren();
-				}
-
-				return children;
-			}
+			get { return children ?? (children = GetChildren()); }
 		}
 
 		public int Count
