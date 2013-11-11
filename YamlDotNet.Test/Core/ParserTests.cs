@@ -41,7 +41,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyEventsOnExample1()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test1.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("01-directives.yaml"),
 				StreamStart,
 				DocumentStart(Explicit, Version(1, 1),
 					TagDirective("!", "!foo"),
@@ -55,7 +55,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test2.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("02-scalar-in-imp-doc.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				SingleQuotedScalar("a scalar"),
@@ -66,7 +66,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test3.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("03-scalar-in-exp-doc.yaml"),
 				StreamStart,
 				DocumentStart(Explicit),
 				SingleQuotedScalar("a scalar"),
@@ -77,7 +77,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test4.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("04-scalars-in-multi-docs.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				SingleQuotedScalar("a scalar"),
@@ -94,7 +94,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test5.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("05-circular-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				AnchoredFlowSequenceStart("A"),
@@ -107,7 +107,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			var parser = ParserFor("test6.yaml");
+			var parser = ParserFor("06-float-tag.yaml");
 			AssertSequenceOfEventsFrom(parser,
 				StreamStart,
 				DocumentStart(Implicit),
@@ -119,7 +119,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test7.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("07-scalar-styles.yaml"),
 				StreamStart,
 				DocumentStart(Explicit),
 				PlainScalar(string.Empty),
@@ -145,7 +145,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test8.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("08-flow-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				FlowSequenceStart,
@@ -160,7 +160,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test9.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("09-flow-mapping.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				FlowMappingStart,
@@ -176,7 +176,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test10.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("10-mixed-nodes-in-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockSequenceStart,
@@ -200,7 +200,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test11.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("11-mixed-nodes-in-mapping.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockMappingStart,
@@ -228,7 +228,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test12.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("12-compact-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockSequenceStart,
@@ -254,7 +254,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test13.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("13-compact-mapping.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockMappingStart,
@@ -278,7 +278,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("test14.yaml"),
+			AssertSequenceOfEventsFrom(ParserFor("14-mapping-wo-indent.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockMappingStart,

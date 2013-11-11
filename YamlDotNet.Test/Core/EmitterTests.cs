@@ -34,85 +34,85 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void EmitExample1()
 		{
-			ParseAndEmit("test1.yaml");
+			ParseAndEmit("01-directives.yaml");
 		}
 
 		[Fact]
 		public void EmitExample2()
 		{
-			ParseAndEmit("test2.yaml");
+			ParseAndEmit("02-scalar-in-imp-doc.yaml");
 		}
 
 		[Fact]
 		public void EmitExample3()
 		{
-			ParseAndEmit("test3.yaml");
+			ParseAndEmit("03-scalar-in-exp-doc.yaml");
 		}
 
 		[Fact]
 		public void EmitExample4()
 		{
-			ParseAndEmit("test4.yaml");
+			ParseAndEmit("04-scalars-in-multi-docs.yaml");
 		}
 
 		[Fact]
 		public void EmitExample5()
 		{
-			ParseAndEmit("test5.yaml");
+			ParseAndEmit("05-circular-sequence.yaml");
 		}
 
 		[Fact]
 		public void EmitExample6()
 		{
-			ParseAndEmit("test6.yaml");
+			ParseAndEmit("06-float-tag.yaml");
 		}
 
 		[Fact]
 		public void EmitExample7()
 		{
-			ParseAndEmit("test7.yaml");
+			ParseAndEmit("07-scalar-styles.yaml");
 		}
 
 		[Fact]
 		public void EmitExample8()
 		{
-			ParseAndEmit("test8.yaml");
+			ParseAndEmit("08-flow-sequence.yaml");
 		}
 
 		[Fact]
 		public void EmitExample9()
 		{
-			ParseAndEmit("test9.yaml");
+			ParseAndEmit("09-flow-mapping.yaml");
 		}
 
 		[Fact]
 		public void EmitExample10()
 		{
-			ParseAndEmit("test10.yaml");
+			ParseAndEmit("10-mixed-nodes-in-sequence.yaml");
 		}
 
 		[Fact]
 		public void EmitExample11()
 		{
-			ParseAndEmit("test11.yaml");
+			ParseAndEmit("11-mixed-nodes-in-mapping.yaml");
 		}
 
 		[Fact]
 		public void EmitExample12()
 		{
-			ParseAndEmit("test12.yaml");
+			ParseAndEmit("12-compact-sequence.yaml");
 		}
 
 		[Fact]
 		public void EmitExample13()
 		{
-			ParseAndEmit("test13.yaml");
+			ParseAndEmit("13-compact-mapping.yaml");
 		}
 
 		[Fact]
 		public void EmitExample14()
 		{
-			ParseAndEmit("test14.yaml");
+			ParseAndEmit("14-mapping-wo-indent.yaml");
 		}
 
 		private void ParseAndEmit(string filename)

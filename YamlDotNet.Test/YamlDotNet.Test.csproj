@@ -72,34 +72,33 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="files\backreference.yaml" />
-    <EmbeddedResource Include="files\backwardsAlias.yaml" />
+    <EmbeddedResource Include="files\backwards-alias.yaml" />
     <EmbeddedResource Include="files\dictionary.yaml" />
-    <EmbeddedResource Include="files\dictionaryExplicit.yaml" />
+    <EmbeddedResource Include="files\dictionary-explicit.yaml" />
     <EmbeddedResource Include="files\fail-backreference.yaml" />
-    <EmbeddedResource Include="files\forwardAlias.yaml" />
+    <EmbeddedResource Include="files\forward-alias.yaml" />
     <EmbeddedResource Include="files\invalid-reference.yaml" />
     <EmbeddedResource Include="files\list.yaml" />
-    <EmbeddedResource Include="files\listExplicit.yaml" />
-    <EmbeddedResource Include="files\listOfDictionaries.yaml" />
+    <EmbeddedResource Include="files\list-explicit.yaml" />
+    <EmbeddedResource Include="files\list-of-dictionaries.yaml" />
     <EmbeddedResource Include="files\local-tags.yaml" />
-    <EmbeddedResource Include="files\namingConvention.yaml" />
     <EmbeddedResource Include="files\tags.yaml" />
-    <EmbeddedResource Include="files\test1.yaml" />
-    <EmbeddedResource Include="files\test10.yaml" />
-    <EmbeddedResource Include="files\test11.yaml" />
-    <EmbeddedResource Include="files\test12.yaml" />
-    <EmbeddedResource Include="files\test13.yaml" />
-    <EmbeddedResource Include="files\test14.yaml" />
-    <EmbeddedResource Include="files\test2.yaml" />
-    <EmbeddedResource Include="files\test3.yaml" />
-    <EmbeddedResource Include="files\test4.yaml" />
-    <EmbeddedResource Include="files\test5.yaml" />
-    <EmbeddedResource Include="files\test6.yaml" />
-    <EmbeddedResource Include="files\test7.yaml" />
-    <EmbeddedResource Include="files\test8.yaml" />
-    <EmbeddedResource Include="files\test9.yaml" />
+    <EmbeddedResource Include="files\01-directives.yaml" />
+    <EmbeddedResource Include="files\10-mixed-nodes-in-sequence.yaml" />
+    <EmbeddedResource Include="files\11-mixed-nodes-in-mapping.yaml" />
+    <EmbeddedResource Include="files\12-compact-sequence.yaml" />
+    <EmbeddedResource Include="files\13-compact-mapping.yaml" />
+    <EmbeddedResource Include="files\14-mapping-wo-indent.yaml" />
+    <EmbeddedResource Include="files\02-scalar-in-imp-doc.yaml" />
+    <EmbeddedResource Include="files\03-scalar-in-exp-doc.yaml" />
+    <EmbeddedResource Include="files\04-scalars-in-multi-docs.yaml" />
+    <EmbeddedResource Include="files\05-circular-sequence.yaml" />
+    <EmbeddedResource Include="files\06-float-tag.yaml" />
+    <EmbeddedResource Include="files\07-scalar-styles.yaml" />
+    <EmbeddedResource Include="files\08-flow-sequence.yaml" />
+    <EmbeddedResource Include="files\09-flow-mapping.yaml" />
     <EmbeddedResource Include="files\convertible.template" />
-    <EmbeddedResource Include="files\explicitType.template" />
+    <EmbeddedResource Include="files\explicit-type.template" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
