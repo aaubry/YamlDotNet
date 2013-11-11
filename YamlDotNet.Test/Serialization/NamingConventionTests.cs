@@ -19,8 +19,9 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using Xunit;
+using FluentAssertions;
 using Xunit.Extensions;
+using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization
@@ -32,10 +33,9 @@ namespace YamlDotNet.Test.Serialization
 		[InlineData("thisIsATest", "this-is-a-test")]
 		[InlineData("thisIsATest", "this_is_a_test")]
 		[InlineData("thisIsATest", "ThisIsATest")]
-		public void TestCamelCase(string expected, string input)
+		public void AppliesCamelCaseConvention(string expectedName, string input)
 		{
-			var sut = new CamelCaseNamingConvention();
-			Assert.Equal(expected, sut.Apply(input));
+			ShouldApplyConventionGiven(input, expectedName, new CamelCaseNamingConvention());
 		}
 
 		[Theory]
@@ -43,30 +43,32 @@ namespace YamlDotNet.Test.Serialization
 		[InlineData("ThisIsATest", "this-is-a-test")]
 		[InlineData("ThisIsATest", "this_is_a_test")]
 		[InlineData("ThisIsATest", "thisIsATest")]
-		public void TestPascalCase(string expected, string input)
+		public void AppliesPascalCaseConvention(string expectedName, string input)
 		{
-			var sut = new PascalCaseNamingConvention();
-			Assert.Equal(expected, sut.Apply(input));
+			ShouldApplyConventionGiven(input, expectedName, new PascalCaseNamingConvention());
 		}
 
 		[Theory]
 		[InlineData("test", "test")]
 		[InlineData("this-is-a-test", "thisIsATest")]
 		[InlineData("this-is-a-test", "this-is-a-test")]
-		public void TestHyphenated(string expected, string input)
+		public void AppliesHyphenatedConvention(string expectedName, string input)
 		{
-			var sut = new HyphenatedNamingConvention();
-			Assert.Equal(expected, sut.Apply(input));
+			ShouldApplyConventionGiven(input, expectedName, new HyphenatedNamingConvention());
 		}
 
 		[Theory]
 		[InlineData("test", "test")]
 		[InlineData("this_is_a_test", "thisIsATest")]
 		[InlineData("this_is_a_test", "this-is-a-test")]
-		public void TestUnderscored(string expected, string input)
+		public void AppliesUnderscoredConvention(string expectedName, string input)
 		{
-			var sut = new UnderscoredNamingConvention();
-			Assert.Equal(expected, sut.Apply(input));
+			ShouldApplyConventionGiven(input, expectedName, new UnderscoredNamingConvention());
+		}
+
+		private void ShouldApplyConventionGiven(string input, string expectedName, INamingConvention convention)
+		{
+			convention.Apply(input).Should().Be(expectedName);
 		}
 	}
 }
