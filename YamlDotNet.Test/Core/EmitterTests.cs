@@ -19,8 +19,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using FluentAssertions;
 using Xunit;
 using Xunit.Extensions;
 using YamlDotNet.Core;
@@ -31,141 +33,57 @@ namespace YamlDotNet.Test.Core
 {
 	public class EmitterTests
 	{
-		[Fact]
-		public void EmitExample1()
+		[Theory]
+		[InlineData("01-directives.yaml")]
+		[InlineData("02-scalar-in-imp-doc.yaml")]
+		[InlineData("03-scalar-in-exp-doc.yaml")]
+		[InlineData("04-scalars-in-multi-docs.yaml")]
+		[InlineData("05-circular-sequence.yaml")]
+		[InlineData("06-float-tag.yaml")]
+		[InlineData("07-scalar-styles.yaml")]
+		[InlineData("08-flow-sequence.yaml")]
+		[InlineData("09-flow-mapping.yaml")]
+		[InlineData("10-mixed-nodes-in-sequence.yaml")]
+		[InlineData("11-mixed-nodes-in-mapping.yaml")]
+		[InlineData("12-compact-sequence.yaml")]
+		[InlineData("13-compact-mapping.yaml")]
+		[InlineData("14-mapping-wo-indent.yaml")]
+		public void CompareOriginalAndEmittedText(string filename)
 		{
-			ParseAndEmit("01-directives.yaml");
+			var stream = Yaml.StreamFrom(filename);
+
+			var originalEvents = ParsingEventsOf(stream.ReadToEnd());
+			var emittedText = EmittedTextFrom(originalEvents);
+			var emittedEvents = ParsingEventsOf(emittedText);
+
+			Dump.WriteLine(emittedText);
+			emittedEvents.Should().Equal(originalEvents);
 		}
 
-		[Fact]
-		public void EmitExample2()
+		private IList<IParsingEvent> ParsingEventsOf(string text)
 		{
-			ParseAndEmit("02-scalar-in-imp-doc.yaml");
+			IParser parser = new Parser(new StringReader(text));
+			return EnumerationOf(parser).ToList();
 		}
 
-		[Fact]
-		public void EmitExample3()
+		private IEnumerable<IParsingEvent> EnumerationOf(IParser parser)
 		{
-			ParseAndEmit("03-scalar-in-exp-doc.yaml");
-		}
-
-		[Fact]
-		public void EmitExample4()
-		{
-			ParseAndEmit("04-scalars-in-multi-docs.yaml");
-		}
-
-		[Fact]
-		public void EmitExample5()
-		{
-			ParseAndEmit("05-circular-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample6()
-		{
-			ParseAndEmit("06-float-tag.yaml");
-		}
-
-		[Fact]
-		public void EmitExample7()
-		{
-			ParseAndEmit("07-scalar-styles.yaml");
-		}
-
-		[Fact]
-		public void EmitExample8()
-		{
-			ParseAndEmit("08-flow-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample9()
-		{
-			ParseAndEmit("09-flow-mapping.yaml");
-		}
-
-		[Fact]
-		public void EmitExample10()
-		{
-			ParseAndEmit("10-mixed-nodes-in-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample11()
-		{
-			ParseAndEmit("11-mixed-nodes-in-mapping.yaml");
-		}
-
-		[Fact]
-		public void EmitExample12()
-		{
-			ParseAndEmit("12-compact-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample13()
-		{
-			ParseAndEmit("13-compact-mapping.yaml");
-		}
-
-		[Fact]
-		public void EmitExample14()
-		{
-			ParseAndEmit("14-mapping-wo-indent.yaml");
-		}
-
-		private void ParseAndEmit(string filename)
-		{
-			var testText = Yaml.StreamFrom(filename).ReadToEnd();
-
-			var output = new StringWriter();
-			IParser parser = new Parser(new StringReader(testText));
-			IEmitter emitter = new Emitter(output, 2, int.MaxValue, false);
-			Dump.WriteLine("= Parse and emit yaml file ["+ filename + "] =");
 			while (parser.MoveNext())
 			{
-				Dump.WriteLine(parser.Current);
-				emitter.Emit(parser.Current);
+				yield return parser.Current;
 			}
-			Dump.WriteLine();
-
-			Dump.WriteLine("= Original =");
-			Dump.WriteLine(testText);
-			Dump.WriteLine();
-
-			Dump.WriteLine("= Result =");
-			Dump.WriteLine(output);
-			Dump.WriteLine();
-
-			// Todo: figure out how (if?) to assert
 		}
 
-		private string EmitScalar(Scalar scalar)
+		private static string EmittedTextFrom(IEnumerable<IParsingEvent> events)
 		{
-			return Emit(
-				new SequenceStart(null, null, false, SequenceStyle.Block),
-				scalar,
-				new SequenceEnd()
-			);
-		}
+			var output = new StringWriter();
+			var emitter = new Emitter(output, 2, int.MaxValue, false);
 
-		private string Emit(params ParsingEvent[] events)
-		{
-			var buffer = new StringWriter();
-			var emitter = new Emitter(buffer);
-			emitter.Emit(new StreamStart());
-			emitter.Emit(new DocumentStart(null, null, true));
+			events
+				.Do(evt => Dump.WriteLine(evt))
+				.Run(emitter.Emit);
 
-			foreach (var evt in events)
-			{
-				emitter.Emit(evt);
-			}
-
-			emitter.Emit(new DocumentEnd(true));
-			emitter.Emit(new StreamEnd());
-
-			return buffer.ToString();
+			return output.ToString();
 		}
 
 		[Theory]
@@ -238,6 +156,32 @@ namespace YamlDotNet.Test.Core
 			var output = value.Value;
 			Dump.WriteLine(output);
 			Assert.Equal(input, output);
+		}
+
+		private string EmitScalar(Scalar scalar)
+		{
+			return Emit(
+				new SequenceStart(null, null, false, SequenceStyle.Block),
+				scalar,
+				new SequenceEnd()
+			);
+		}
+
+		private string Emit(params ParsingEvent[] events)
+		{
+			var buffer = new StringWriter();
+			var emitter = new Emitter(buffer);
+			emitter.Emit(new StreamStart());
+			emitter.Emit(new DocumentStart(null, null, true));
+
+			foreach (var evt in events) {
+				emitter.Emit(evt);
+			}
+
+			emitter.Emit(new DocumentEnd(true));
+			emitter.Emit(new StreamEnd());
+
+			return buffer.ToString();
 		}
 	}
 }

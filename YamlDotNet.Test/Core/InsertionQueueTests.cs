@@ -57,7 +57,7 @@ namespace YamlDotNet.Test.Core
 		{
 			var queue = CreateQueue();
 
-			WithTheRange(0, 10).Perform(queue.Enqueue);
+			WithTheRange(0, 10).Run(queue.Enqueue);
 
 			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 		}
@@ -67,9 +67,9 @@ namespace YamlDotNet.Test.Core
 		{
 			var queue = CreateQueue();
 			
-			WithTheRange(0, 10).Perform(queue.Enqueue);
+			WithTheRange(0, 10).Run(queue.Enqueue);
 			PerformTimes(5, queue.Dequeue);
-			WithTheRange(10, 15).Perform(queue.Enqueue);
+			WithTheRange(10, 15).Run(queue.Enqueue);
 
 			OrderOfElementsIn(queue).Should().Equal(5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
 		}
@@ -92,7 +92,7 @@ namespace YamlDotNet.Test.Core
 		{
 			var queue = CreateQueue();
 
-			WithTheRange(0, 10).Perform(queue.Enqueue);
+			WithTheRange(0, 10).Run(queue.Enqueue);
 			queue.Insert(5, 99);
 
 			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 99, 5, 6, 7, 8, 9);
@@ -122,23 +122,7 @@ namespace YamlDotNet.Test.Core
 
 		public void PerformTimes(int times, Func<int> func)
 		{
-			WithTheRange(0, times).Perform(func);
-		}
-	}
-
-	public static class EnumerableExtensions
-	{
-		public static void Perform<T>(this IEnumerable<T> withRange, Func<int> func)
-		{
-			withRange.Perform(x => func());
-		}
-
-		public static void Perform<T>(this IEnumerable<T> withRange, Action<T> action)
-		{
-			foreach (var element in withRange)
-			{
-				action(element);
-			}
+			WithTheRange(0, times).Run(x => func());
 		}
 	}
 }
