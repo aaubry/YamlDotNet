@@ -57,9 +57,9 @@
     <Compile Include="Core\EmitterTests.cs" />
     <Compile Include="Core\InsertionQueueTests.cs" />
     <Compile Include="Core\LookAheadBufferTests.cs" />
-    <Compile Include="Core\ParserTestHelper.cs" />
+    <Compile Include="Core\EventsHelper.cs" />
     <Compile Include="Core\ParserTests.cs" />
-    <Compile Include="Core\ScannerTestHelper.cs" />
+    <Compile Include="Core\TokenHelper.cs" />
     <Compile Include="Core\ScannerTests.cs" />
     <Compile Include="Dump.cs" />
     <Compile Include="EnumerableExtensions.cs" />
