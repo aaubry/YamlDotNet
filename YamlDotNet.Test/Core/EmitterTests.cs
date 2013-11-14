@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -53,10 +54,11 @@ namespace YamlDotNet.Test.Core
 			var stream = Yaml.StreamFrom(filename);
 
 			var originalEvents = ParsingEventsOf(stream.ReadToEnd());
+			originalEvents.Run(x => Dump.WriteLine(x));
 			var emittedText = EmittedTextFrom(originalEvents);
+			Dump.WriteLine(emittedText);
 			var emittedEvents = ParsingEventsOf(emittedText);
 
-			Dump.WriteLine(emittedText);
 			emittedEvents.Should().Equal(originalEvents);
 		}
 
@@ -74,16 +76,14 @@ namespace YamlDotNet.Test.Core
 			}
 		}
 
-		private static string EmittedTextFrom(IEnumerable<IParsingEvent> events)
+		private string EmittedTextFrom(IEnumerable<IParsingEvent> events)
 		{
-			var output = new StringWriter();
-			var emitter = new Emitter(output, 2, int.MaxValue, false);
+			return Emit(events, EmitterWithIndentCreator);
+		}
 
-			events
-				.Do(evt => Dump.WriteLine(evt))
-				.Run(emitter.Emit);
-
-			return output.ToString();
+		private Func<TextWriter, Emitter> EmitterWithIndentCreator
+		{
+			get { return writer => new Emitter(writer, 2, int.MaxValue, false); }
 		}
 
 		[Theory]
@@ -91,24 +91,31 @@ namespace YamlDotNet.Test.Core
 		[InlineData("CRLF hello\r\nworld")]
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
-			var yaml = EmitScalar(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+			var events = SequenceWith(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+
+			var yaml = Emit(StreamedDocumentWith(events));
+
 			Dump.WriteLine(yaml);
-			Assert.True(yaml.Contains("world"));
+			yaml.Should().Contain("world");
 		}
 
 		[Fact]
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+			var events = SequenceWith(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+
+			var yaml = Emit(StreamedDocumentWith(events));
+
 			Dump.WriteLine(yaml);
-			Assert.True(yaml.Contains(">"));
+			yaml.Should().Contain(">");
 		}
 
 		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
-			Dump.WriteLine(yaml);
+			var events = SequenceWith(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
+
+			var yaml = Emit(StreamedDocumentWith(events));
 
 			// Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
 			var stream = new YamlStream();
@@ -116,21 +123,24 @@ namespace YamlDotNet.Test.Core
 			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			var scalar = (YamlScalarNode)sequence.Children[0];
 
-			Assert.Equal("hello\nworld", scalar.Value);
+			Dump.WriteLine(yaml);
+			scalar.Value.Should().Be("hello\nworld");
 		}
 
 		[Fact]
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
-			Dump.WriteLine("${0}$", yaml);
+			var events = SequenceWith(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
+
+			var yaml = Emit(StreamedDocumentWith(events));
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
 			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			var scalar = (YamlScalarNode)sequence.Children[0];
 
-			Assert.Equal(">+\n", scalar.Value);
+			Dump.WriteLine("${0}$", yaml);
+			scalar.Value.Should().Be(">+\n");
 		}
 
 		[Fact]
@@ -138,13 +148,11 @@ namespace YamlDotNet.Test.Core
 		public void FoldedStylePreservesNewLines()
 		{
 			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
-
-			var yaml = Emit(
-				new MappingStart(),
+			var events = MappingWith(
 				new Scalar("Payload"),
-				new Scalar(null, null, input, ScalarStyle.Folded, true, false),
-				new MappingEnd()
-			);
+				new Scalar(null, null, input, ScalarStyle.Folded, true, false));
+
+			var yaml = Emit(StreamedDocumentWith(events));
 			Dump.WriteLine(yaml);
 
 			var stream = new YamlStream();
@@ -153,35 +161,48 @@ namespace YamlDotNet.Test.Core
 			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
 			var value = (YamlScalarNode)mapping.Children.First().Value;
 
-			var output = value.Value;
-			Dump.WriteLine(output);
-			Assert.Equal(input, output);
+			Dump.WriteLine(value.Value);
+			value.Value.Should().Be(input);
 		}
 
-		private string EmitScalar(Scalar scalar)
+		private string Emit(IEnumerable<IParsingEvent> events)
 		{
-			return Emit(
-				new SequenceStart(null, null, false, SequenceStyle.Block),
-				scalar,
-				new SequenceEnd()
-			);
+			return Emit(events, x => new Emitter(x));
 		}
 
-		private string Emit(params ParsingEvent[] events)
+		private string Emit(IEnumerable<IParsingEvent> events, Func<TextWriter, Emitter> createEmitter)
 		{
-			var buffer = new StringWriter();
-			var emitter = new Emitter(buffer);
-			emitter.Emit(new StreamStart());
-			emitter.Emit(new DocumentStart(null, null, true));
+			var writer = new StringWriter();
+			var emitter = createEmitter(writer);
+			events.Run(emitter.Emit);
+			return writer.ToString();
+		}
 
-			foreach (var evt in events) {
-				emitter.Emit(evt);
+		private IEnumerable<IParsingEvent> StreamedDocumentWith(IEnumerable<IParsingEvent> events)
+		{
+			return Wrap(
+				Wrap(events, new DocumentStart(null, null, true), new DocumentEnd(true)),
+				new StreamStart(), new StreamEnd());
+		}
+
+		private IEnumerable<IParsingEvent> SequenceWith(params IParsingEvent[] events)
+		{
+			return Wrap(events, new SequenceStart(null, null, false, SequenceStyle.Block), new SequenceEnd());
+		}
+
+		private IEnumerable<IParsingEvent> MappingWith(params IParsingEvent[] events)
+		{
+			return Wrap(events, new MappingStart(), new MappingEnd());
+		}
+
+		private IEnumerable<IParsingEvent> Wrap(IEnumerable<IParsingEvent> events, IParsingEvent start, IParsingEvent end)
+		{
+			yield return start;
+			foreach (var @event in events)
+			{
+				yield return @event;
 			}
-
-			emitter.Emit(new DocumentEnd(true));
-			emitter.Emit(new StreamEnd());
-
-			return buffer.ToString();
+			yield return end;
 		}
 	}
 }
