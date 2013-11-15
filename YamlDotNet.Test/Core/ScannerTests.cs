@@ -26,7 +26,7 @@ using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Test.Core
 {
-	public class ScannerTests : ScannerTestHelper
+	public class ScannerTests : TokenHelper
 	{
 		[Fact]
 		public void VerifyTokensOnExample1()

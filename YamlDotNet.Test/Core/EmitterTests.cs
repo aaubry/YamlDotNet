@@ -19,8 +19,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using FluentAssertions;
 using Xunit;
 using Xunit.Extensions;
 using YamlDotNet.Core;
@@ -29,143 +32,58 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Test.Core
 {
-	public class EmitterTests
+	public class EmitterTests : EventsHelper
 	{
-		[Fact]
-		public void EmitExample1()
+		[Theory]
+		[InlineData("01-directives.yaml")]
+		[InlineData("02-scalar-in-imp-doc.yaml")]
+		[InlineData("03-scalar-in-exp-doc.yaml")]
+		[InlineData("04-scalars-in-multi-docs.yaml")]
+		[InlineData("05-circular-sequence.yaml")]
+		[InlineData("06-float-tag.yaml")]
+		[InlineData("07-scalar-styles.yaml")]
+		[InlineData("08-flow-sequence.yaml")]
+		[InlineData("09-flow-mapping.yaml")]
+		[InlineData("10-mixed-nodes-in-sequence.yaml")]
+		[InlineData("11-mixed-nodes-in-mapping.yaml")]
+		[InlineData("12-compact-sequence.yaml")]
+		[InlineData("13-compact-mapping.yaml")]
+		[InlineData("14-mapping-wo-indent.yaml")]
+		public void CompareOriginalAndEmittedText(string filename)
 		{
-			ParseAndEmit("01-directives.yaml");
+			var stream = Yaml.StreamFrom(filename);
+
+			var originalEvents = ParsingEventsOf(stream.ReadToEnd());
+			originalEvents.Run(x => Dump.WriteLine(x));
+			var emittedText = EmittedTextFrom(originalEvents);
+			Dump.WriteLine(emittedText);
+			var emittedEvents = ParsingEventsOf(emittedText);
+
+			emittedEvents.Should().Equal(originalEvents);
 		}
 
-		[Fact]
-		public void EmitExample2()
+		private IList<IParsingEvent> ParsingEventsOf(string text)
 		{
-			ParseAndEmit("02-scalar-in-imp-doc.yaml");
+			IParser parser = new Parser(new StringReader(text));
+			return EnumerationOf(parser).ToList();
 		}
 
-		[Fact]
-		public void EmitExample3()
+		private IEnumerable<IParsingEvent> EnumerationOf(IParser parser)
 		{
-			ParseAndEmit("03-scalar-in-exp-doc.yaml");
-		}
-
-		[Fact]
-		public void EmitExample4()
-		{
-			ParseAndEmit("04-scalars-in-multi-docs.yaml");
-		}
-
-		[Fact]
-		public void EmitExample5()
-		{
-			ParseAndEmit("05-circular-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample6()
-		{
-			ParseAndEmit("06-float-tag.yaml");
-		}
-
-		[Fact]
-		public void EmitExample7()
-		{
-			ParseAndEmit("07-scalar-styles.yaml");
-		}
-
-		[Fact]
-		public void EmitExample8()
-		{
-			ParseAndEmit("08-flow-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample9()
-		{
-			ParseAndEmit("09-flow-mapping.yaml");
-		}
-
-		[Fact]
-		public void EmitExample10()
-		{
-			ParseAndEmit("10-mixed-nodes-in-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample11()
-		{
-			ParseAndEmit("11-mixed-nodes-in-mapping.yaml");
-		}
-
-		[Fact]
-		public void EmitExample12()
-		{
-			ParseAndEmit("12-compact-sequence.yaml");
-		}
-
-		[Fact]
-		public void EmitExample13()
-		{
-			ParseAndEmit("13-compact-mapping.yaml");
-		}
-
-		[Fact]
-		public void EmitExample14()
-		{
-			ParseAndEmit("14-mapping-wo-indent.yaml");
-		}
-
-		private void ParseAndEmit(string filename)
-		{
-			var testText = Yaml.StreamFrom(filename).ReadToEnd();
-
-			var output = new StringWriter();
-			IParser parser = new Parser(new StringReader(testText));
-			IEmitter emitter = new Emitter(output, 2, int.MaxValue, false);
-			Dump.WriteLine("= Parse and emit yaml file ["+ filename + "] =");
 			while (parser.MoveNext())
 			{
-				Dump.WriteLine(parser.Current);
-				emitter.Emit(parser.Current);
+				yield return parser.Current;
 			}
-			Dump.WriteLine();
-
-			Dump.WriteLine("= Original =");
-			Dump.WriteLine(testText);
-			Dump.WriteLine();
-
-			Dump.WriteLine("= Result =");
-			Dump.WriteLine(output);
-			Dump.WriteLine();
-
-			// Todo: figure out how (if?) to assert
 		}
 
-		private string EmitScalar(Scalar scalar)
+		private string EmittedTextFrom(IEnumerable<IParsingEvent> events)
 		{
-			return Emit(
-				new SequenceStart(null, null, false, SequenceStyle.Block),
-				scalar,
-				new SequenceEnd()
-			);
+			return Emit(events, EmitterWithIndentCreator);
 		}
 
-		private string Emit(params ParsingEvent[] events)
+		private Func<TextWriter, Emitter> EmitterWithIndentCreator
 		{
-			var buffer = new StringWriter();
-			var emitter = new Emitter(buffer);
-			emitter.Emit(new StreamStart());
-			emitter.Emit(new DocumentStart(null, null, true));
-
-			foreach (var evt in events)
-			{
-				emitter.Emit(evt);
-			}
-
-			emitter.Emit(new DocumentEnd(true));
-			emitter.Emit(new StreamEnd());
-
-			return buffer.ToString();
+			get { return writer => new Emitter(writer, 2, int.MaxValue, false); }
 		}
 
 		[Theory]
@@ -173,24 +91,31 @@ namespace YamlDotNet.Test.Core
 		[InlineData("CRLF hello\r\nworld")]
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
-			var yaml = EmitScalar(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+			var events = SequenceWith(FoldedScalar(text).ExplicitQuoted);
+
+			var yaml = Emit(StreamedDocumentWith(events));
+
 			Dump.WriteLine(yaml);
-			Assert.True(yaml.Contains("world"));
+			yaml.Should().Contain("world");
 		}
 
 		[Fact]
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+			var events = SequenceWith(Scalar("hello\nworld").ExplicitQuoted);
+
+			var yaml = Emit(StreamedDocumentWith(events));
+
 			Dump.WriteLine(yaml);
-			Assert.True(yaml.Contains(">"));
+			yaml.Should().Contain(">");
 		}
 
 		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
-			Dump.WriteLine(yaml);
+			var events = SequenceWith(FoldedScalar("hello\nworld").ExplicitQuoted);
+
+			var yaml = Emit(StreamedDocumentWith(events));
 
 			// Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
 			var stream = new YamlStream();
@@ -198,21 +123,24 @@ namespace YamlDotNet.Test.Core
 			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			var scalar = (YamlScalarNode)sequence.Children[0];
 
-			Assert.Equal("hello\nworld", scalar.Value);
+			Dump.WriteLine(yaml);
+			scalar.Value.Should().Be("hello\nworld");
 		}
 
 		[Fact]
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
-			var yaml = EmitScalar(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
-			Dump.WriteLine("${0}$", yaml);
+			var events = SequenceWith(FoldedScalar(">+\n").ExplicitQuoted);
+
+			var yaml = Emit(StreamedDocumentWith(events));
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
 			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
 			var scalar = (YamlScalarNode)sequence.Children[0];
 
-			Assert.Equal(">+\n", scalar.Value);
+			Dump.WriteLine("${0}$", yaml);
+			scalar.Value.Should().Be(">+\n");
 		}
 
 		[Fact]
@@ -220,13 +148,11 @@ namespace YamlDotNet.Test.Core
 		public void FoldedStylePreservesNewLines()
 		{
 			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
+			var events = MappingWith(
+				Scalar("Payload"),
+				FoldedScalar(input).ExplicitQuoted);
 
-			var yaml = Emit(
-				new MappingStart(),
-				new Scalar("Payload"),
-				new Scalar(null, null, input, ScalarStyle.Folded, true, false),
-				new MappingEnd()
-			);
+			var yaml = Emit(StreamedDocumentWith(events));
 			Dump.WriteLine(yaml);
 
 			var stream = new YamlStream();
@@ -235,9 +161,48 @@ namespace YamlDotNet.Test.Core
 			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
 			var value = (YamlScalarNode)mapping.Children.First().Value;
 
-			var output = value.Value;
-			Dump.WriteLine(output);
-			Assert.Equal(input, output);
+			Dump.WriteLine(value.Value);
+			value.Value.Should().Be(input);
+		}
+
+		private string Emit(IEnumerable<IParsingEvent> events)
+		{
+			return Emit(events, x => new Emitter(x));
+		}
+
+		private string Emit(IEnumerable<IParsingEvent> events, Func<TextWriter, Emitter> createEmitter)
+		{
+			var writer = new StringWriter();
+			var emitter = createEmitter(writer);
+			events.Run(emitter.Emit);
+			return writer.ToString();
+		}
+
+		private IEnumerable<IParsingEvent> StreamedDocumentWith(IEnumerable<IParsingEvent> events)
+		{
+			return Wrap(
+				Wrap(events, DocumentStart(Implicit), DocumentEnd(Implicit)),
+				StreamStart, StreamEnd);
+		}
+
+		private IEnumerable<IParsingEvent> SequenceWith(params ParsingEvent[] events)
+		{
+			return Wrap(events, (SequenceStart) BlockSequenceStart.Explicit, SequenceEnd);
+		}
+
+		private IEnumerable<IParsingEvent> MappingWith(params ParsingEvent[] events)
+		{
+			return Wrap(events, MappingStart, MappingEnd);
+		}
+
+		private IEnumerable<IParsingEvent> Wrap(IEnumerable<IParsingEvent> events, IParsingEvent start, IParsingEvent end)
+		{
+			yield return start;
+			foreach (var @event in events)
+			{
+				yield return @event;
+			}
+			yield return end;
 		}
 	}
 }

@@ -24,7 +24,7 @@ using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Test.Core
 {
-	public class ScannerTestHelper
+	public class TokenHelper
 	{
 		protected static StreamStart StreamStart
 		{
