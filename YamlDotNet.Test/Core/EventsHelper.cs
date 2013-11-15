@@ -73,6 +73,11 @@ namespace YamlDotNet.Test.Core
 			return new DocumentEnd(isImplicit);
 		}
 
+		protected ScalarBuilder Scalar(string text)
+		{
+			return new ScalarBuilder(text, ScalarStyle.Any);
+		}
+
 		protected ScalarBuilder PlainScalar(string text)
 		{
 			return new ScalarBuilder(text, ScalarStyle.Plain);
@@ -111,6 +116,11 @@ namespace YamlDotNet.Test.Core
 		protected SequenceEnd SequenceEnd
 		{
 			get { return new SequenceEnd(); }
+		}
+
+		protected MappingStart MappingStart
+		{
+			get { return new MappingStart(); }
 		}
 
 		protected MappingStartBuilder BlockMappingStart
@@ -192,12 +202,16 @@ namespace YamlDotNet.Test.Core
 
 		protected class SequenceStartBuilder
 		{
+			private const bool DefaultImplicit = true;
+
 			private readonly SequenceStyle style;
 			private string anchor;
+			private bool @implicit;
 
 			public SequenceStartBuilder(SequenceStyle style)
 			{
 				this.style = style;
+				@implicit = DefaultImplicit;
 			}
 
 			public SequenceStartBuilder A(string anchor)
@@ -206,9 +220,18 @@ namespace YamlDotNet.Test.Core
 				return this;
 			}
 
+			public SequenceStartBuilder Explicit
+			{
+				get
+				{
+					@implicit = false;
+					return this;
+				}
+			}
+
 			public static implicit operator SequenceStart(SequenceStartBuilder builder)
 			{
-				return new SequenceStart(builder.anchor, null, true, builder.style);
+				return new SequenceStart(builder.anchor, null, builder.@implicit, builder.style);
 			}
 		}
 

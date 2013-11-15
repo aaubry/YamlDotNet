@@ -32,7 +32,7 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Test.Core
 {
-	public class EmitterTests
+	public class EmitterTests : EventsHelper
 	{
 		[Theory]
 		[InlineData("01-directives.yaml")]
@@ -91,7 +91,7 @@ namespace YamlDotNet.Test.Core
 		[InlineData("CRLF hello\r\nworld")]
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
-			var events = SequenceWith(new Scalar(null, null, text, ScalarStyle.Folded, true, false));
+			var events = SequenceWith(FoldedScalar(text).ExplicitQuoted);
 
 			var yaml = Emit(StreamedDocumentWith(events));
 
@@ -102,7 +102,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
-			var events = SequenceWith(new Scalar(null, null, "hello\nworld", ScalarStyle.Any, true, false));
+			var events = SequenceWith(Scalar("hello\nworld").ExplicitQuoted);
 
 			var yaml = Emit(StreamedDocumentWith(events));
 
@@ -113,7 +113,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
-			var events = SequenceWith(new Scalar(null, null, "hello\nworld", ScalarStyle.Folded, true, false));
+			var events = SequenceWith(FoldedScalar("hello\nworld").ExplicitQuoted);
 
 			var yaml = Emit(StreamedDocumentWith(events));
 
@@ -130,7 +130,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
-			var events = SequenceWith(new Scalar(null, null, ">+\n", ScalarStyle.Folded, true, false));
+			var events = SequenceWith(FoldedScalar(">+\n").ExplicitQuoted);
 
 			var yaml = Emit(StreamedDocumentWith(events));
 
@@ -149,8 +149,8 @@ namespace YamlDotNet.Test.Core
 		{
 			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
 			var events = MappingWith(
-				new Scalar("Payload"),
-				new Scalar(null, null, input, ScalarStyle.Folded, true, false));
+				Scalar("Payload"),
+				FoldedScalar(input).ExplicitQuoted);
 
 			var yaml = Emit(StreamedDocumentWith(events));
 			Dump.WriteLine(yaml);
@@ -181,18 +181,18 @@ namespace YamlDotNet.Test.Core
 		private IEnumerable<IParsingEvent> StreamedDocumentWith(IEnumerable<IParsingEvent> events)
 		{
 			return Wrap(
-				Wrap(events, new DocumentStart(null, null, true), new DocumentEnd(true)),
-				new StreamStart(), new StreamEnd());
+				Wrap(events, DocumentStart(Implicit), DocumentEnd(Implicit)),
+				StreamStart, StreamEnd);
 		}
 
-		private IEnumerable<IParsingEvent> SequenceWith(params IParsingEvent[] events)
+		private IEnumerable<IParsingEvent> SequenceWith(params ParsingEvent[] events)
 		{
-			return Wrap(events, new SequenceStart(null, null, false, SequenceStyle.Block), new SequenceEnd());
+			return Wrap(events, (SequenceStart) BlockSequenceStart.Explicit, SequenceEnd);
 		}
 
-		private IEnumerable<IParsingEvent> MappingWith(params IParsingEvent[] events)
+		private IEnumerable<IParsingEvent> MappingWith(params ParsingEvent[] events)
 		{
-			return Wrap(events, new MappingStart(), new MappingEnd());
+			return Wrap(events, MappingStart, MappingEnd);
 		}
 
 		private IEnumerable<IParsingEvent> Wrap(IEnumerable<IParsingEvent> events, IParsingEvent start, IParsingEvent end)
