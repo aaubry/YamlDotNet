@@ -62,13 +62,13 @@ namespace YamlDotNet.Test.Core
 			emittedEvents.Should().Equal(originalEvents);
 		}
 
-		private IList<IParsingEvent> ParsingEventsOf(string text)
+		private IList<ParsingEvent> ParsingEventsOf(string text)
 		{
-			IParser parser = new Parser(new StringReader(text));
+			var parser = new Parser(new StringReader(text));
 			return EnumerationOf(parser).ToList();
 		}
 
-		private IEnumerable<IParsingEvent> EnumerationOf(IParser parser)
+		private IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
 		{
 			while (parser.MoveNext())
 			{
@@ -76,7 +76,7 @@ namespace YamlDotNet.Test.Core
 			}
 		}
 
-		private string EmittedTextFrom(IEnumerable<IParsingEvent> events)
+		private string EmittedTextFrom(IEnumerable<ParsingEvent> events)
 		{
 			return Emit(events, EmitterWithIndentCreator);
 		}
@@ -165,12 +165,12 @@ namespace YamlDotNet.Test.Core
 			value.Value.Should().Be(input);
 		}
 
-		private string Emit(IEnumerable<IParsingEvent> events)
+		private string Emit(IEnumerable<ParsingEvent> events)
 		{
 			return Emit(events, x => new Emitter(x));
 		}
 
-		private string Emit(IEnumerable<IParsingEvent> events, Func<TextWriter, Emitter> createEmitter)
+		private string Emit(IEnumerable<ParsingEvent> events, Func<TextWriter, Emitter> createEmitter)
 		{
 			var writer = new StringWriter();
 			var emitter = createEmitter(writer);
@@ -178,24 +178,24 @@ namespace YamlDotNet.Test.Core
 			return writer.ToString();
 		}
 
-		private IEnumerable<IParsingEvent> StreamedDocumentWith(IEnumerable<IParsingEvent> events)
+		private IEnumerable<ParsingEvent> StreamedDocumentWith(IEnumerable<ParsingEvent> events)
 		{
 			return Wrap(
 				Wrap(events, DocumentStart(Implicit), DocumentEnd(Implicit)),
 				StreamStart, StreamEnd);
 		}
 
-		private IEnumerable<IParsingEvent> SequenceWith(params ParsingEvent[] events)
+		private IEnumerable<ParsingEvent> SequenceWith(params ParsingEvent[] events)
 		{
-			return Wrap(events, (SequenceStart) BlockSequenceStart.Explicit, SequenceEnd);
+			return Wrap(events, BlockSequenceStart.Explicit, SequenceEnd);
 		}
 
-		private IEnumerable<IParsingEvent> MappingWith(params ParsingEvent[] events)
+		private IEnumerable<ParsingEvent> MappingWith(params ParsingEvent[] events)
 		{
 			return Wrap(events, MappingStart, MappingEnd);
 		}
 
-		private IEnumerable<IParsingEvent> Wrap(IEnumerable<IParsingEvent> events, IParsingEvent start, IParsingEvent end)
+		private IEnumerable<ParsingEvent> Wrap(IEnumerable<ParsingEvent> events, ParsingEvent start, ParsingEvent end)
 		{
 			yield return start;
 			foreach (var @event in events)

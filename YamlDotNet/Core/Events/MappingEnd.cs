@@ -19,14 +19,12 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core.Events
 {
 	/// <summary>
 	/// Represents a mapping end event.
 	/// </summary>
-	public class MappingEnd : ParsingEvent, IMappingEnd
+	public class MappingEnd : ParsingEvent
 	{
 		/// <summary>
 		/// Gets a value indicating the variation of depth caused by this event.

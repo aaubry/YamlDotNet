@@ -19,7 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Globalization;
 
 namespace YamlDotNet.Core.Events
@@ -27,7 +26,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a sequence start event.
 	/// </summary>
-	public class SequenceStart : NodeEvent, ISequenceStart
+	public class SequenceStart : NodeEvent
 	{
 		/// <summary>
 		/// Gets a value indicating the variation of depth caused by this event.

@@ -19,7 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Globalization;
 using YamlDotNet.Core.Tokens;
 
@@ -28,7 +27,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a document start event.
 	/// </summary>
-	public class DocumentStart : ParsingEvent, IDocumentStart
+	public class DocumentStart : ParsingEvent
 	{
 		/// <summary>
 		/// Gets a value indicating the variation of depth caused by this event.

@@ -19,22 +19,20 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core.Events
 {
 	/// <summary>
 	/// Base class for parsing events.
 	/// </summary>
-	public abstract class ParsingEvent : IParsingEvent
+	public abstract class ParsingEvent
 	{
 		/// <summary>
 		/// Gets a value indicating the variation of depth caused by this event.
 		/// The value can be either -1, 0 or 1. For start events, it will be 1,
 		/// for end events, it will be -1, and for the remaining events, it will be 0.
 		/// </summary>
-		public abstract int NestingIncrease {
-			get;
+		public virtual int NestingIncrease {
+			get { return 0; }
 		}
 
 		/// <summary>
