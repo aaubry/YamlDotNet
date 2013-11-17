@@ -20,7 +20,7 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.RepresentationModel.Serialization;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {

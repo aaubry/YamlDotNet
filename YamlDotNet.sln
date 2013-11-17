@@ -27,27 +27,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8DC198
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core.Test", "YamlDotNet.Core.Test\YamlDotNet.Core.Test.csproj", "{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.RepresentationModel.Test", "YamlDotNet.RepresentationModel.Test\YamlDotNet.RepresentationModel.Test.csproj", "{FF969DAA-C025-4636-89B2-46F16821FA02}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Dynamic", "YamlDotNet.Dynamic\YamlDotNet.Dynamic.csproj", "{57B52D79-04A0-4091-8EE2-B419C009C2A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Dynamic.Test", "YamlDotNet.Dynamic.Test\YamlDotNet.Dynamic.Test.csproj", "{6E3BEF5A-2DBA-4941-972D-BD6AF27B4A71}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet", "YamlDotNet\YamlDotNet.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests", "PerformanceTests", "{AB78A3C2-701D-476A-853F-7550D11A64E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Test", "YamlDotNet.Test\YamlDotNet.Test.csproj", "{A9F67018-0240-4D16-A4EA-BCB780D0AF05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.2.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.2.0\YamlDotNet.PerformanceTests.v2.2.0.csproj", "{C6E0B465-8422-4D6B-85CE-C59724A28E1F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests", "PerformanceTests", "{FFEB1B4B-D432-4268-B690-CD16598807CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.Lib", "PerformanceTests\YamlDotNet.PerformanceTests.Lib\YamlDotNet.PerformanceTests.Lib.csproj", "{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.3.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.3.0\YamlDotNet.PerformanceTests.v2.3.0.csproj", "{BE49A287-5F47-4E3B-90EB-97B51451934C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.Runner", "PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj", "{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v1.2.1", "PerformanceTests\YamlDotNet.PerformanceTests.v1.2.1\YamlDotNet.PerformanceTests.v1.2.1.csproj", "{0FB497EA-A116-406A-AE8C-A24933D8CB21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.2.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.2.0\YamlDotNet.PerformanceTests.v2.2.0.csproj", "{C6E0B465-8422-4D6B-85CE-C59724A28E1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.3.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.3.0\YamlDotNet.PerformanceTests.v2.3.0.csproj", "{BE49A287-5F47-4E3B-90EB-97B51451934C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,16 +69,6 @@ Global
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release|x86.ActiveCfg = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release|x86.Build.0 = Release|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{16D8043D-C3DB-4868-BFF3-B2EBDF537AAA}.Release|x86.ActiveCfg = Release|Any CPU
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -145,6 +133,16 @@ Global
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release|x86.ActiveCfg = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release|x86.Build.0 = Release|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -179,23 +177,13 @@ Global
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release|x86.ActiveCfg = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release|x86.Build.0 = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{FF969DAA-C025-4636-89B2-46F16821FA02}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C6E0B465-8422-4D6B-85CE-C59724A28E1F} = {AB78A3C2-701D-476A-853F-7550D11A64E5}
-		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17} = {AB78A3C2-701D-476A-853F-7550D11A64E5}
-		{BE49A287-5F47-4E3B-90EB-97B51451934C} = {AB78A3C2-701D-476A-853F-7550D11A64E5}
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9} = {AB78A3C2-701D-476A-853F-7550D11A64E5}
-		{0FB497EA-A116-406A-AE8C-A24933D8CB21} = {AB78A3C2-701D-476A-853F-7550D11A64E5}
+		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
+		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
+		{0FB497EA-A116-406A-AE8C-A24933D8CB21} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
+		{C6E0B465-8422-4D6B-85CE-C59724A28E1F} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
+		{BE49A287-5F47-4E3B-90EB-97B51451934C} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj

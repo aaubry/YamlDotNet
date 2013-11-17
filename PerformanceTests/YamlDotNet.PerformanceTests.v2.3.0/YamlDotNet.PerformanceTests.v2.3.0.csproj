@@ -46,4 +46,7 @@
       <Name>YamlDotNet.PerformanceTests.Lib</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

@@ -25,36 +25,36 @@ using System.IO;
 
 namespace YamlDotNet.Dynamic
 {
-    public static class Extensions
-    {
-        public static TextReader ToTextReader(this string str)
-        {
-            return str.IsNullOrEmpty() ? null : new StringReader(str);
-        }
+	public static class Extensions
+	{
+		public static TextReader ToTextReader(this string str)
+		{
+			return str.IsNullOrEmpty() ? null : new StringReader(str);
+		}
 
-        public static bool IsNullOrEmpty(this string str)
-        {
-            return string.IsNullOrEmpty(str);
-        }
+		public static bool IsNullOrEmpty(this string str)
+		{
+			return string.IsNullOrEmpty(str);
+		}
 
-        public static string Capitalize(this string str)
-        {
-            if (str.IsNullOrEmpty())
-            {
-                return str;
-            }
+		public static string Capitalize(this string str)
+		{
+			if (str.IsNullOrEmpty())
+			{
+				return str;
+			}
 
-            return char.ToUpper(str[0]) + str.Substring(1);
-        }
+			return char.ToUpper(str[0]) + str.Substring(1);
+		}
 
-        public static string Decapitalize(this string str)
-        {
-            if (str.IsNullOrEmpty())
-            {
-                return str;
-            }
+		public static string Decapitalize(this string str)
+		{
+			if (str.IsNullOrEmpty())
+			{
+				return str;
+			}
 
-            return char.ToLower(str[0]) + str.Substring(1);
-        }
-    }
+			return char.ToLower(str[0]) + str.Substring(1);
+		}
+	}
 }
