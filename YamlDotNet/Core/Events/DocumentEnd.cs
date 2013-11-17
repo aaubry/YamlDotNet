@@ -19,7 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Globalization;
 
 namespace YamlDotNet.Core.Events
@@ -27,7 +26,7 @@ namespace YamlDotNet.Core.Events
 	/// <summary>
 	/// Represents a document end event.
 	/// </summary>
-	public class DocumentEnd : ParsingEvent, IDocumentEnd
+	public class DocumentEnd : ParsingEvent
 	{
 		/// <summary>
 		/// Gets a value indicating the variation of depth caused by this event.

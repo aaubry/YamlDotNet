@@ -31,6 +31,6 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Emits an event.
 		/// </summary>
-		void Emit(IParsingEvent @event);
+		void Emit(ParsingEvent @event);
 	}
 }

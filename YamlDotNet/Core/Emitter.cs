@@ -27,7 +27,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core.Events;
-using Event = YamlDotNet.Core.Events.IParsingEvent;
+using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
 
@@ -46,7 +46,7 @@ namespace YamlDotNet.Core
 		private EmitterState state;
 
 		private readonly Stack<EmitterState> states = new Stack<EmitterState>();
-		private readonly Queue<Event> events = new Queue<Event>();
+		private readonly Queue<ParsingEvent> events = new Queue<ParsingEvent>();
 		private readonly Stack<int> indents = new Stack<int>();
 		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
 		private int indent;
@@ -188,13 +188,13 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Emit an evt.
 		/// </summary>
-		public void Emit(Event @event)
+		public void Emit(ParsingEvent @event)
 		{
 			events.Enqueue(@event);
 
 			while (!NeedMoreEvents())
 			{
-				Event current = events.Peek();
+				ParsingEvent current = events.Peek();
 				AnalyzeEvent(current);
 				StateMachine(current);
 
@@ -203,54 +203,54 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private static EventType GetEventType(IParsingEvent @event)
+		private static EventType GetEventType(ParsingEvent @event)
 		{
-			if (@event is IAnchorAlias)
+			if (@event is AnchorAlias)
 			{
 				return EventType.YAML_ALIAS_EVENT;
 			}
 
-			if (@event is IDocumentEnd)
+			if (@event is DocumentEnd)
 			{
 				return EventType.YAML_DOCUMENT_END_EVENT;
 			}
 
-			if (@event is IDocumentStart)
+			if (@event is DocumentStart)
 			{
 				return EventType.YAML_DOCUMENT_START_EVENT;
 			}
 
-			if (@event is IMappingEnd)
+			if (@event is MappingEnd)
 			{
 				return EventType.YAML_MAPPING_END_EVENT;
 			}
 
-			if (@event is IMappingStart)
+			if (@event is MappingStart)
 			{
 				return EventType.YAML_MAPPING_START_EVENT;
 			}
 
-			if (@event is IScalar)
+			if (@event is Scalar)
 			{
 				return EventType.YAML_SCALAR_EVENT;
 			}
 
-			if (@event is ISequenceEnd)
+			if (@event is SequenceEnd)
 			{
 				return EventType.YAML_SEQUENCE_END_EVENT;
 			}
 
-			if (@event is ISequenceStart)
+			if (@event is SequenceStart)
 			{
 				return EventType.YAML_SEQUENCE_START_EVENT;
 			}
 
-			if (@event is IStreamEnd)
+			if (@event is StreamEnd)
 			{
 				return EventType.YAML_STREAM_END_EVENT;
 			}
 
-			if (@event is IStreamStart)
+			if (@event is StreamStart)
 			{
 				return EventType.YAML_STREAM_START_EVENT;
 			}
@@ -332,7 +332,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Check if the evt data is valid.
 		/// </summary>
-		private void AnalyzeEvent(Event evt)
+		private void AnalyzeEvent(ParsingEvent evt)
 		{
 			anchorData.anchor = null;
 			tagData.handle = null;
@@ -588,7 +588,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// State dispatcher.
 		/// </summary>
-		private void StateMachine(Event evt)
+		private void StateMachine(ParsingEvent evt)
 		{
 			switch (state)
 			{
@@ -672,9 +672,9 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect STREAM-START.
 		/// </summary>
-		private void EmitStreamStart(Event evt)
+		private void EmitStreamStart(ParsingEvent evt)
 		{
-			if (!(evt is IStreamStart))
+			if (!(evt is StreamStart))
 			{
 				throw new ArgumentException("Expected STREAM-START.", "evt");
 			}
@@ -691,7 +691,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect DOCUMENT-START or STREAM-END.
 		/// </summary>
-		private void EmitDocumentStart(Event evt, bool isFirst)
+		private void EmitDocumentStart(ParsingEvent evt, bool isFirst)
 		{
 			DocumentStart documentStart = evt as DocumentStart;
 			if (documentStart != null)
@@ -758,7 +758,7 @@ namespace YamlDotNet.Core
 				state = EmitterState.YAML_EMIT_DOCUMENT_CONTENT_STATE;
 			}
 
-			else if (evt is IStreamEnd)
+			else if (evt is StreamEnd)
 			{
 				if (isOpenEnded)
 				{
@@ -905,7 +905,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect the root node.
 		/// </summary>
-		private void EmitDocumentContent(Event evt)
+		private void EmitDocumentContent(ParsingEvent evt)
 		{
 			states.Push(EmitterState.YAML_EMIT_DOCUMENT_END_STATE);
 			EmitNode(evt, true, false, false);
@@ -914,7 +914,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a node.
 		/// </summary>
-		private void EmitNode(IParsingEvent evt, bool isRoot, bool isMapping, bool isSimpleKey)
+		private void EmitNode(ParsingEvent evt, bool isRoot, bool isMapping, bool isSimpleKey)
 		{
 			isRootContext = isRoot;
 			isMappingContext = isMapping;
@@ -947,7 +947,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect SEQUENCE-START.
 		/// </summary>
-		private void EmitSequenceStart(Event evt)
+		private void EmitSequenceStart(ParsingEvent evt)
 		{
 			ProcessAnchor();
 			ProcessTag();
@@ -974,8 +974,8 @@ namespace YamlDotNet.Core
 				return false;
 			}
 
-			FakeList<Event> eventList = new FakeList<Event>(events);
-			return eventList[0] is ISequenceStart && eventList[1] is ISequenceEnd;
+			FakeList<ParsingEvent> eventList = new FakeList<ParsingEvent>(events);
+			return eventList[0] is SequenceStart && eventList[1] is SequenceEnd;
 		}
 
 		/// <summary>
@@ -988,8 +988,8 @@ namespace YamlDotNet.Core
 				return false;
 			}
 
-			FakeList<Event> eventList = new FakeList<Event>(events);
-			return eventList[0] is IMappingStart && eventList[1] is IMappingEnd;
+			FakeList<ParsingEvent> eventList = new FakeList<ParsingEvent>(events);
+			return eventList[0] is MappingStart && eventList[1] is MappingEnd;
 		}
 
 		/// <summary>
@@ -1021,7 +1021,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect MAPPING-START.
 		/// </summary>
-		private void EmitMappingStart(Event evt)
+		private void EmitMappingStart(ParsingEvent evt)
 		{
 			ProcessAnchor();
 			ProcessTag();
@@ -1041,7 +1041,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect SCALAR.
 		/// </summary>
-		private void EmitScalar(Event evt)
+		private void EmitScalar(ParsingEvent evt)
 		{
 			SelectScalarStyle(evt);
 			ProcessAnchor();
@@ -1462,7 +1462,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Determine an acceptable scalar style.
 		/// </summary>
-		private void SelectScalarStyle(Event evt)
+		private void SelectScalarStyle(ParsingEvent evt)
 		{
 			Scalar scalar = (Scalar)evt;
 
@@ -1562,7 +1562,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect DOCUMENT-END.
 		/// </summary>
-		private void EmitDocumentEnd(Event evt)
+		private void EmitDocumentEnd(ParsingEvent evt)
 		{
 			DocumentEnd documentEnd = evt as DocumentEnd;
 			if (documentEnd != null)
@@ -1589,7 +1589,7 @@ namespace YamlDotNet.Core
 		/// Expect a flow item node.
 		/// </summary>
 
-		private void EmitFlowSequenceItem(Event evt, bool isFirst)
+		private void EmitFlowSequenceItem(ParsingEvent evt, bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -1598,7 +1598,7 @@ namespace YamlDotNet.Core
 				++flowLevel;
 			}
 
-			if (evt is ISequenceEnd)
+			if (evt is SequenceEnd)
 			{
 				--flowLevel;
 				indent = indents.Pop();
@@ -1630,7 +1630,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a flow key node.
 		/// </summary>
-		private void EmitFlowMappingKey(Event evt, bool isFirst)
+		private void EmitFlowMappingKey(ParsingEvent evt, bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -1639,7 +1639,7 @@ namespace YamlDotNet.Core
 				++flowLevel;
 			}
 
-			if (evt is IMappingEnd)
+			if (evt is MappingEnd)
 			{
 				--flowLevel;
 				indent = indents.Pop();
@@ -1744,7 +1744,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a flow value node.
 		/// </summary>
-		private void EmitFlowMappingValue(Event evt, bool isSimple)
+		private void EmitFlowMappingValue(ParsingEvent evt, bool isSimple)
 		{
 			if (isSimple)
 			{
@@ -1765,14 +1765,14 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a block item node.
 		/// </summary>
-		private void EmitBlockSequenceItem(Event evt, bool isFirst)
+		private void EmitBlockSequenceItem(ParsingEvent evt, bool isFirst)
 		{
 			if (isFirst)
 			{
 				IncreaseIndent(false, (isMappingContext && !isIndentation));
 			}
 
-			if (evt is ISequenceEnd)
+			if (evt is SequenceEnd)
 			{
 				indent = indents.Pop();
 				state = states.Pop();
@@ -1789,14 +1789,14 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a block key node.
 		/// </summary>
-		private void EmitBlockMappingKey(Event evt, bool isFirst)
+		private void EmitBlockMappingKey(ParsingEvent evt, bool isFirst)
 		{
 			if (isFirst)
 			{
 				IncreaseIndent(false, false);
 			}
 
-			if (evt is IMappingEnd)
+			if (evt is MappingEnd)
 			{
 				indent = indents.Pop();
 				state = states.Pop();
@@ -1821,7 +1821,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Expect a block value node.
 		/// </summary>
-		private void EmitBlockMappingValue(Event evt, bool isSimple)
+		private void EmitBlockMappingValue(ParsingEvent evt, bool isSimple)
 		{
 			if (isSimple)
 			{

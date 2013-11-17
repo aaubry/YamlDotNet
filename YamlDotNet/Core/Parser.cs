@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core.Tokens;
-using Event = YamlDotNet.Core.Events.ParsingEvent;
+using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
 using SequenceStyle = YamlDotNet.Core.Events.SequenceStyle;
 using MappingStyle = YamlDotNet.Core.Events.MappingStyle;
 
@@ -40,7 +40,7 @@ namespace YamlDotNet.Core
 		private ParserState state;
 
 		private readonly Scanner scanner;
-		private Event current;
+		private ParsingEvent current;
 
 		private Token currentToken;
 
@@ -68,7 +68,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Gets the current event.
 		/// </summary>
-		public Event Current
+		public ParsingEvent Current
 		{
 			get
 			{
@@ -96,7 +96,7 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private Event StateMachine()
+		private ParsingEvent StateMachine()
 		{
 			switch (state)
 			{
@@ -189,7 +189,7 @@ namespace YamlDotNet.Core
 		/// stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
 		///              ************
 		/// </summary>
-		private Event ParseStreamStart()
+		private ParsingEvent ParseStreamStart()
 		{
 			StreamStart streamStart = GetCurrentToken() as StreamStart;
 			if (streamStart == null)
@@ -210,7 +210,7 @@ namespace YamlDotNet.Core
 		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
 		///                          *************************
 		/// </summary>
-		private Event ParseDocumentStart(bool isImplicit)
+		private ParsingEvent ParseDocumentStart(bool isImplicit)
 		{
 			// Parse extra document end indicators.
 
@@ -254,7 +254,7 @@ namespace YamlDotNet.Core
 
 				state = ParserState.YAML_PARSE_DOCUMENT_CONTENT_STATE;
 
-				Event evt = new Events.DocumentStart(versionDirective, directives, false, start, current.End);
+				ParsingEvent evt = new Events.DocumentStart(versionDirective, directives, false, start, current.End);
 				Skip();
 				return evt;
 			}
@@ -265,7 +265,7 @@ namespace YamlDotNet.Core
 			{
 				state = ParserState.YAML_PARSE_END_STATE;
 
-				Event evt = new Events.StreamEnd(GetCurrentToken().Start, GetCurrentToken().End);
+				ParsingEvent evt = new Events.StreamEnd(GetCurrentToken().Start, GetCurrentToken().End);
 				// Do not call skip here because that would throw an exception
 				if (scanner.InternalMoveNext())
 				{
@@ -346,7 +346,7 @@ namespace YamlDotNet.Core
 		/// explicit_document    ::= DIRECTIVE* DOCUMENT-START block_node? DOCUMENT-END*
 		///                                                    ***********
 		/// </summary>
-		private Event ParseDocumentContent()
+		private ParsingEvent ParseDocumentContent()
 		{
 			if (
 			    GetCurrentToken() is VersionDirective ||
@@ -368,7 +368,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Generate an empty scalar event.
 		/// </summary>
-		private static Event ProcessEmptyScalar(Mark position)
+		private static ParsingEvent ProcessEmptyScalar(Mark position)
 		{
 			return new Events.Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
 		}
@@ -401,13 +401,13 @@ namespace YamlDotNet.Core
 		/// flow_content         ::= flow_collection | SCALAR
 		///                                            ******
 		/// </summary>
-		private Event ParseNode(bool isBlock, bool isIndentlessSequence)
+		private ParsingEvent ParseNode(bool isBlock, bool isIndentlessSequence)
 		{
 			AnchorAlias alias = GetCurrentToken() as AnchorAlias;
 			if (alias != null)
 			{
 				state = states.Pop();
-				Event evt = new Events.AnchorAlias(alias.Value, alias.Start, alias.End);
+				ParsingEvent evt = new Events.AnchorAlias(alias.Value, alias.Start, alias.End);
 				Skip();
 				return evt;
 			}
@@ -489,7 +489,7 @@ namespace YamlDotNet.Core
 					}
 
 					state = states.Pop();
-					Event evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End);
+					ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End);
 
 					Skip();
 					return evt;
@@ -545,7 +545,7 @@ namespace YamlDotNet.Core
 		///                                                                *************
 		/// </summary>
 
-		private Event ParseDocumentEnd()
+		private ParsingEvent ParseDocumentEnd()
 		{
 			bool isImplicit = true;
 			Mark start = GetCurrentToken().Start;
@@ -570,7 +570,7 @@ namespace YamlDotNet.Core
 		///                    ********************  *********** *             *********
 		/// </summary>
 
-		private Event ParseBlockSequenceEntry(bool isFirst)
+		private ParsingEvent ParseBlockSequenceEntry(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -598,7 +598,7 @@ namespace YamlDotNet.Core
 			else if (GetCurrentToken() is BlockEnd)
 			{
 				state = states.Pop();
-				Event evt = new Events.SequenceEnd(GetCurrentToken().Start, GetCurrentToken().End);
+				ParsingEvent evt = new Events.SequenceEnd(GetCurrentToken().Start, GetCurrentToken().End);
 				Skip();
 				return evt;
 			}
@@ -615,7 +615,7 @@ namespace YamlDotNet.Core
 		/// indentless_sequence  ::= (BLOCK-ENTRY block_node?)+
 		///                           *********** *
 		/// </summary>
-		private Event ParseIndentlessSequenceEntry()
+		private ParsingEvent ParseIndentlessSequenceEntry()
 		{
 			if (GetCurrentToken() is BlockEntry)
 			{
@@ -651,7 +651,7 @@ namespace YamlDotNet.Core
 		///                          BLOCK-END
 		///                          *********
 		/// </summary>
-		private Event ParseBlockMappingKey(bool isFirst)
+		private ParsingEvent ParseBlockMappingKey(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -678,7 +678,7 @@ namespace YamlDotNet.Core
 			else if (GetCurrentToken() is BlockEnd)
 			{
 				state = states.Pop();
-				Event evt = new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
+				ParsingEvent evt = new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
 				Skip();
 				return evt;
 			}
@@ -701,7 +701,7 @@ namespace YamlDotNet.Core
 		///                          BLOCK-END
 		///
 		/// </summary>
-		private Event ParseBlockMappingValue()
+		private ParsingEvent ParseBlockMappingValue()
 		{
 			if (GetCurrentToken() is Value)
 			{
@@ -740,7 +740,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                          *
 		/// </summary>
-		private Event ParseFlowSequenceEntry(bool isFirst)
+		private ParsingEvent ParseFlowSequenceEntry(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -748,7 +748,7 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			Event evt;
+			ParsingEvent evt;
 			if (!(GetCurrentToken() is FlowSequenceEnd))
 			{
 				if (!isFirst)
@@ -789,7 +789,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                      *** *
 		/// </summary>
-		private Event ParseFlowSequenceEntryMappingKey()
+		private ParsingEvent ParseFlowSequenceEntryMappingKey()
 		{
 			if (!(GetCurrentToken() is Value || GetCurrentToken() is FlowEntry || GetCurrentToken() is FlowSequenceEnd))
 			{
@@ -810,7 +810,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                                      ***** *
 		/// </summary>
-		private Event ParseFlowSequenceEntryMappingValue()
+		private ParsingEvent ParseFlowSequenceEntryMappingValue()
 		{
 			if (GetCurrentToken() is Value)
 			{
@@ -830,7 +830,7 @@ namespace YamlDotNet.Core
 		/// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                                                      *
 		/// </summary>
-		private Event ParseFlowSequenceEntryMappingEnd()
+		private ParsingEvent ParseFlowSequenceEntryMappingEnd()
 		{
 			state = ParserState.YAML_PARSE_FLOW_SEQUENCE_ENTRY_STATE;
 			return new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
@@ -849,7 +849,7 @@ namespace YamlDotNet.Core
 		/// flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                          *           *** *
 		/// </summary>
-		private Event ParseFlowMappingKey(bool isFirst)
+		private ParsingEvent ParseFlowMappingKey(bool isFirst)
 		{
 			if (isFirst)
 			{
@@ -895,7 +895,7 @@ namespace YamlDotNet.Core
 			}
 
 			state = states.Pop();
-			Event evt = new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
+			ParsingEvent evt = new Events.MappingEnd(GetCurrentToken().Start, GetCurrentToken().End);
 			Skip();
 			return evt;
 		}
@@ -905,7 +905,7 @@ namespace YamlDotNet.Core
 		/// flow_mapping_entry   ::= flow_node | KEY flow_node? (VALUE flow_node?)?
 		///                                   *                  ***** *
 		/// </summary>
-		private Event ParseFlowMappingValue(bool isEmpty)
+		private ParsingEvent ParseFlowMappingValue(bool isEmpty)
 		{
 			if (isEmpty)
 			{
