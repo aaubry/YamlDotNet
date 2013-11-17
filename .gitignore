@@ -15,5 +15,6 @@ release/*
 /_ReSharper.*
 *.pidb
 *.userprefs
+packages
 packages/*
 !packages/repositories.config
