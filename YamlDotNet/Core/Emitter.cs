@@ -203,61 +203,6 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private static EventType GetEventType(ParsingEvent @event)
-		{
-			if (@event is AnchorAlias)
-			{
-				return EventType.Alias;
-			}
-
-			if (@event is DocumentEnd)
-			{
-				return EventType.DocumentEnd;
-			}
-
-			if (@event is DocumentStart)
-			{
-				return EventType.DocumentStart;
-			}
-
-			if (@event is MappingEnd)
-			{
-				return EventType.MappingEnd;
-			}
-
-			if (@event is MappingStart)
-			{
-				return EventType.MappingStart;
-			}
-
-			if (@event is Scalar)
-			{
-				return EventType.Scalar;
-			}
-
-			if (@event is SequenceEnd)
-			{
-				return EventType.SequenceEnd;
-			}
-
-			if (@event is SequenceStart)
-			{
-				return EventType.SequenceStart;
-			}
-
-			if (@event is StreamEnd)
-			{
-				return EventType.StreamEnd;
-			}
-
-			if (@event is StreamStart)
-			{
-				return EventType.StreamStart;
-			}
-
-			throw new ArgumentException("The specified event is of the wrong type.");
-		}
-
 		/// <summary>
 		/// Check if we need to accumulate more events before emitting.
 		/// 
@@ -274,7 +219,7 @@ namespace YamlDotNet.Core
 			}
 
 			int accumulate;
-			switch (GetEventType(events.Peek()))
+			switch (events.Peek().Type)
 			{
 				case EventType.DocumentStart:
 					accumulate = 1;
@@ -300,7 +245,7 @@ namespace YamlDotNet.Core
 			int level = 0;
 			foreach (var evt in events)
 			{
-				switch (GetEventType(evt))
+				switch (evt.Type)
 				{
 					case EventType.DocumentStart:
 					case EventType.SequenceStart:
@@ -920,8 +865,7 @@ namespace YamlDotNet.Core
 			isMappingContext = isMapping;
 			isSimpleKeyContext = isSimpleKey;
 
-			var eventType = GetEventType(evt);
-			switch (eventType)
+			switch (evt.Type)
 			{
 				case EventType.Alias:
 					EmitAlias();
@@ -940,7 +884,7 @@ namespace YamlDotNet.Core
 					break;
 
 				default:
-					throw new YamlException(string.Format("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {0}", eventType));
+					throw new YamlException(string.Format("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {0}", evt.Type));
 			}
 		}
 
@@ -1693,7 +1637,7 @@ namespace YamlDotNet.Core
 			}
 
 			int length;
-			switch (GetEventType(events.Peek()))
+			switch (events.Peek().Type)
 			{
 				case EventType.Alias:
 					length = SafeStringLength(anchorData.anchor);
