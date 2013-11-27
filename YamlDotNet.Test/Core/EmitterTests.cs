@@ -58,8 +58,10 @@ namespace YamlDotNet.Test.Core
 			var emittedText = EmittedTextFrom(originalEvents);
 			Dump.WriteLine(emittedText);
 			var emittedEvents = ParsingEventsOf(emittedText);
+			emittedEvents.Run(x => Dump.WriteLine(x));
 
-			emittedEvents.Should().Equal(originalEvents);
+			emittedEvents.ShouldAllBeEquivalentTo(originalEvents, opt => opt.Excluding(@event => @event.Start)
+			                                                                .Excluding(@event => @event.End));
 		}
 
 		private IList<ParsingEvent> ParsingEventsOf(string text)
