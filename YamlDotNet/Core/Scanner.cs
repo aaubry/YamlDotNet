@@ -2337,7 +2337,7 @@ namespace YamlDotNet.Core
 
 			if (simpleKeyAllowed)
 			{
-				SimpleKey key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, mark);
+				var key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, mark);
 
 				RemoveSimpleKey();
 
