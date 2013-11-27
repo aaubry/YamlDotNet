@@ -19,8 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core
 {
 	/// <summary>
@@ -28,31 +26,15 @@ namespace YamlDotNet.Core
 	/// </summary>
 	public class Version
 	{
-		private readonly int major;
-
 		/// <summary>
 		/// Gets the major version number.
 		/// </summary>
-		public int Major
-		{
-			get
-			{
-				return major;
-			}
-		}
-
-		private readonly int minor;
+		public int Major { get; private set; }
 
 		/// <summary>
 		/// Gets the minor version number.
 		/// </summary>
-		public int Minor
-		{
-			get
-			{
-				return minor;
-			}
-		}
+		public int Minor { get; private set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Version"/> class.
@@ -61,8 +43,8 @@ namespace YamlDotNet.Core
 		/// <param name="minor">The the minor version number.</param>
 		public Version(int major, int minor)
 		{
-			this.major = major;
-			this.minor = minor;
+			Major = major;
+			Minor = minor;
 		}
 
 		/// <summary>
@@ -74,8 +56,8 @@ namespace YamlDotNet.Core
 		/// </returns>
 		public override bool Equals(object obj)
 		{
-			Version other = obj as Version;
-			return other != null && major == other.major && minor == other.minor;
+			var that = obj as Version;
+			return that != null && Major == that.Major && Minor == that.Minor;
 		}
 
 		/// <summary>
@@ -86,7 +68,7 @@ namespace YamlDotNet.Core
 		/// </returns>
 		public override int GetHashCode()
 		{
-			return major.GetHashCode() ^ minor.GetHashCode();
+			return Major.GetHashCode() ^ Minor.GetHashCode();
 		}
 	}
 }

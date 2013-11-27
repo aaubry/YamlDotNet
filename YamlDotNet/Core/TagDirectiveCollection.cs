@@ -19,7 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using YamlDotNet.Core.Tokens;
@@ -44,7 +43,7 @@ namespace YamlDotNet.Core
 		/// <param name="tagDirectives">Initial content of the collection.</param>
 		public TagDirectiveCollection(IEnumerable<TagDirective> tagDirectives)
 		{
-			foreach(var tagDirective in tagDirectives)
+			foreach (var tagDirective in tagDirectives)
 			{
 				Add(tagDirective);
 			}
@@ -59,7 +58,8 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Gets a value indicating whether the collection contains a directive with the same handle
 		/// </summary>
-		public new bool Contains(TagDirective directive) {
+		public new bool Contains(TagDirective directive)
+		{
 			return Contains(GetKeyForItem(directive));
 		}
 	}
