@@ -63,32 +63,16 @@ namespace YamlDotNet.Core
 		/// <exception cref="YamlException">If the current event is not of the specified type.</exception>
 		public T Expect<T>() where T : ParsingEvent
 		{
-			var yamlEvent = Allow<T>();
-			if (yamlEvent == null)
+			var expectedEvent = Allow<T>();
+			if (expectedEvent == null)
 			{
 				// TODO: Throw a better exception
-				throw new YamlException(
-					parser.Current.Start,
-					parser.Current.End,
-				    string.Format(
-				        CultureInfo.InvariantCulture,
+				var @event = parser.Current;
+				throw new YamlException(@event.Start, @event.End, string.Format(CultureInfo.InvariantCulture,
 				        "Expected '{0}', got '{1}' (at line {2}, character {3}).",
-				        typeof(T).Name,
-				        parser.Current.GetType().Name,
-						parser.Current.Start.Line,
-						parser.Current.Start.Column
-				    )
-				);
+				        typeof(T).Name, @event.GetType().Name, @event.Start.Line, @event.Start.Column));
 			}
-			return yamlEvent;
-		}
-
-		/// <summary>
-		/// Moves to the next event.
-		/// </summary>
-		private void MoveNext()
-		{
-			endOfStream = !parser.MoveNext();
+			return expectedEvent;
 		}
 
 		/// <summary>
@@ -98,9 +82,16 @@ namespace YamlDotNet.Core
 		/// <returns>Returns true if the current event is of type <typeparamref name="T"/>. Otherwise returns false.</returns>
 		public bool Accept<T>() where T : ParsingEvent
 		{
-			EnsureNotAtEndOfStream();
-
+			ThrowIfAtEndOfStream();
 			return parser.Current is T;
+		}
+
+		private void ThrowIfAtEndOfStream()
+		{
+			if (endOfStream)
+			{
+				throw new EndOfStreamException();
+			}
 		}
 
 		/// <summary>
@@ -116,9 +107,9 @@ namespace YamlDotNet.Core
 			{
 				return null;
 			}
-			T yamlEvent = (T)parser.Current;
+			var @event = (T) parser.Current;
 			MoveNext();
-			return yamlEvent;
+			return @event;
 		}
 
 		/// <summary>
@@ -132,42 +123,26 @@ namespace YamlDotNet.Core
 			{
 				return null;
 			}
-			T yamlEvent = (T)parser.Current;
-			return yamlEvent;
+			return (T) parser.Current;
 		}
 
 		/// <summary>
-		/// Skips the current event and any "child" event.
+		/// Skips the current event and any nested event.
 		/// </summary>
-		public void Skip()
+		public void SkipThisAndNestedEvents()
 		{
-			int depth = 0;
-
+			var depth = 0;
 			do
 			{
-				if (Accept<SequenceStart>() || Accept<MappingStart>() || Accept<StreamStart>() || Accept<DocumentStart>())
-				{
-					++depth;
-				}
-				else if(Accept<SequenceEnd>() || Accept<MappingEnd>() || Accept<StreamEnd>() || Accept<DocumentEnd>())
-				{
-					--depth;
-				}
-
+				depth += Peek<ParsingEvent>().NestingIncrease;
 				MoveNext();
 			}
 			while(depth > 0);
 		}
 
-		/// <summary>
-		/// Throws an exception if Ensures the not at end of stream.
-		/// </summary>
-		private void EnsureNotAtEndOfStream()
+		private void MoveNext()
 		{
-			if (endOfStream)
-			{
-				throw new EndOfStreamException();
-			}
+			endOfStream = !parser.MoveNext();
 		}
 	}
 }

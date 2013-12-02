@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
 			if (isNull)
 			{
-				reader.Skip();
+				reader.SkipThisAndNestedEvents();
 			}
 			return isNull;
 		}
