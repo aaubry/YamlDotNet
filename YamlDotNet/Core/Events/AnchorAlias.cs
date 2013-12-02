@@ -33,7 +33,7 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		internal override EventType Type {
 			get {
-				return EventType.YAML_ALIAS_EVENT;
+				return EventType.Alias;
 			}
 		}
 		

@@ -44,7 +44,7 @@ namespace YamlDotNet.Core.Events
 		/// </summary>
 		internal override EventType Type {
 			get {
-				return EventType.YAML_DOCUMENT_END_EVENT;
+				return EventType.DocumentEnd;
 			}
 		}
 		

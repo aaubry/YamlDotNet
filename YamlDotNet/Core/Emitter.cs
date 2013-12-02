@@ -203,61 +203,6 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private static EventType GetEventType(ParsingEvent @event)
-		{
-			if (@event is AnchorAlias)
-			{
-				return EventType.YAML_ALIAS_EVENT;
-			}
-
-			if (@event is DocumentEnd)
-			{
-				return EventType.YAML_DOCUMENT_END_EVENT;
-			}
-
-			if (@event is DocumentStart)
-			{
-				return EventType.YAML_DOCUMENT_START_EVENT;
-			}
-
-			if (@event is MappingEnd)
-			{
-				return EventType.YAML_MAPPING_END_EVENT;
-			}
-
-			if (@event is MappingStart)
-			{
-				return EventType.YAML_MAPPING_START_EVENT;
-			}
-
-			if (@event is Scalar)
-			{
-				return EventType.YAML_SCALAR_EVENT;
-			}
-
-			if (@event is SequenceEnd)
-			{
-				return EventType.YAML_SEQUENCE_END_EVENT;
-			}
-
-			if (@event is SequenceStart)
-			{
-				return EventType.YAML_SEQUENCE_START_EVENT;
-			}
-
-			if (@event is StreamEnd)
-			{
-				return EventType.YAML_STREAM_END_EVENT;
-			}
-
-			if (@event is StreamStart)
-			{
-				return EventType.YAML_STREAM_START_EVENT;
-			}
-
-			throw new ArgumentException("The specified event is of the wrong type.");
-		}
-
 		/// <summary>
 		/// Check if we need to accumulate more events before emitting.
 		/// 
@@ -274,17 +219,17 @@ namespace YamlDotNet.Core
 			}
 
 			int accumulate;
-			switch (GetEventType(events.Peek()))
+			switch (events.Peek().Type)
 			{
-				case EventType.YAML_DOCUMENT_START_EVENT:
+				case EventType.DocumentStart:
 					accumulate = 1;
 					break;
 
-				case EventType.YAML_SEQUENCE_START_EVENT:
+				case EventType.SequenceStart:
 					accumulate = 2;
 					break;
 
-				case EventType.YAML_MAPPING_START_EVENT:
+				case EventType.MappingStart:
 					accumulate = 3;
 					break;
 
@@ -300,17 +245,17 @@ namespace YamlDotNet.Core
 			int level = 0;
 			foreach (var evt in events)
 			{
-				switch (GetEventType(evt))
+				switch (evt.Type)
 				{
-					case EventType.YAML_DOCUMENT_START_EVENT:
-					case EventType.YAML_SEQUENCE_START_EVENT:
-					case EventType.YAML_MAPPING_START_EVENT:
+					case EventType.DocumentStart:
+					case EventType.SequenceStart:
+					case EventType.MappingStart:
 						++level;
 						break;
 
-					case EventType.YAML_DOCUMENT_END_EVENT:
-					case EventType.YAML_SEQUENCE_END_EVENT:
-					case EventType.YAML_MAPPING_END_EVENT:
+					case EventType.DocumentEnd:
+					case EventType.SequenceEnd:
+					case EventType.MappingEnd:
 						--level;
 						break;
 				}
@@ -592,75 +537,75 @@ namespace YamlDotNet.Core
 		{
 			switch (state)
 			{
-				case EmitterState.YAML_EMIT_STREAM_START_STATE:
+				case EmitterState.StreamStart:
 					EmitStreamStart(evt);
 					break;
 
-				case EmitterState.YAML_EMIT_FIRST_DOCUMENT_START_STATE:
+				case EmitterState.FirstDocumentStart:
 					EmitDocumentStart(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_DOCUMENT_START_STATE:
+				case EmitterState.DocumentStart:
 					EmitDocumentStart(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_DOCUMENT_CONTENT_STATE:
+				case EmitterState.DocumentContent:
 					EmitDocumentContent(evt);
 					break;
 
-				case EmitterState.YAML_EMIT_DOCUMENT_END_STATE:
+				case EmitterState.DocumentEnd:
 					EmitDocumentEnd(evt);
 					break;
 
-				case EmitterState.YAML_EMIT_FLOW_SEQUENCE_FIRST_ITEM_STATE:
+				case EmitterState.FlowSequenceFirstItem:
 					EmitFlowSequenceItem(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_FLOW_SEQUENCE_ITEM_STATE:
+				case EmitterState.FlowSequenceItem:
 					EmitFlowSequenceItem(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_FLOW_MAPPING_FIRST_KEY_STATE:
+				case EmitterState.FlowMappingFirstKey:
 					EmitFlowMappingKey(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_FLOW_MAPPING_KEY_STATE:
+				case EmitterState.FlowMappingKey:
 					EmitFlowMappingKey(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_FLOW_MAPPING_SIMPLE_VALUE_STATE:
+				case EmitterState.FlowMappingSimpleValue:
 					EmitFlowMappingValue(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_FLOW_MAPPING_VALUE_STATE:
+				case EmitterState.FlowMappingValue:
 					EmitFlowMappingValue(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_BLOCK_SEQUENCE_FIRST_ITEM_STATE:
+				case EmitterState.BlockSequenceFirstItem:
 					EmitBlockSequenceItem(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_BLOCK_SEQUENCE_ITEM_STATE:
+				case EmitterState.BlockSequenceItem:
 					EmitBlockSequenceItem(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_BLOCK_MAPPING_FIRST_KEY_STATE:
+				case EmitterState.BlockMappingFirstKey:
 					EmitBlockMappingKey(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_BLOCK_MAPPING_KEY_STATE:
+				case EmitterState.BlockMappingKey:
 					EmitBlockMappingKey(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_BLOCK_MAPPING_SIMPLE_VALUE_STATE:
+				case EmitterState.BlockMappingSimpleValue:
 					EmitBlockMappingValue(evt, true);
 					break;
 
-				case EmitterState.YAML_EMIT_BLOCK_MAPPING_VALUE_STATE:
+				case EmitterState.BlockMappingValue:
 					EmitBlockMappingValue(evt, false);
 					break;
 
-				case EmitterState.YAML_EMIT_END_STATE:
+				case EmitterState.StreamEnd:
 					throw new YamlException("Expected nothing after STREAM-END");
 
 				default:
@@ -685,7 +630,7 @@ namespace YamlDotNet.Core
 			isWhitespace = true;
 			isIndentation = true;
 
-			state = EmitterState.YAML_EMIT_FIRST_DOCUMENT_START_STATE;
+			state = EmitterState.FirstDocumentStart;
 		}
 
 		/// <summary>
@@ -755,7 +700,7 @@ namespace YamlDotNet.Core
 					}
 				}
 
-				state = EmitterState.YAML_EMIT_DOCUMENT_CONTENT_STATE;
+				state = EmitterState.DocumentContent;
 			}
 
 			else if (evt is StreamEnd)
@@ -766,7 +711,7 @@ namespace YamlDotNet.Core
 					WriteIndent();
 				}
 
-				state = EmitterState.YAML_EMIT_END_STATE;
+				state = EmitterState.StreamEnd;
 			}
 			else
 			{
@@ -907,7 +852,7 @@ namespace YamlDotNet.Core
 		/// </summary>
 		private void EmitDocumentContent(ParsingEvent evt)
 		{
-			states.Push(EmitterState.YAML_EMIT_DOCUMENT_END_STATE);
+			states.Push(EmitterState.DocumentEnd);
 			EmitNode(evt, true, false, false);
 		}
 
@@ -920,27 +865,26 @@ namespace YamlDotNet.Core
 			isMappingContext = isMapping;
 			isSimpleKeyContext = isSimpleKey;
 
-			var eventType = GetEventType(evt);
-			switch (eventType)
+			switch (evt.Type)
 			{
-				case EventType.YAML_ALIAS_EVENT:
+				case EventType.Alias:
 					EmitAlias();
 					break;
 
-				case EventType.YAML_SCALAR_EVENT:
+				case EventType.Scalar:
 					EmitScalar(evt);
 					break;
 
-				case EventType.YAML_SEQUENCE_START_EVENT:
+				case EventType.SequenceStart:
 					EmitSequenceStart(evt);
 					break;
 
-				case EventType.YAML_MAPPING_START_EVENT:
+				case EventType.MappingStart:
 					EmitMappingStart(evt);
 					break;
 
 				default:
-					throw new YamlException(string.Format("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {0}", eventType));
+					throw new YamlException(string.Format("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {0}", evt.Type));
 			}
 		}
 
@@ -956,11 +900,11 @@ namespace YamlDotNet.Core
 
 			if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || CheckEmptySequence())
 			{
-				state = EmitterState.YAML_EMIT_FLOW_SEQUENCE_FIRST_ITEM_STATE;
+				state = EmitterState.FlowSequenceFirstItem;
 			}
 			else
 			{
-				state = EmitterState.YAML_EMIT_BLOCK_SEQUENCE_FIRST_ITEM_STATE;
+				state = EmitterState.BlockSequenceFirstItem;
 			}
 		}
 
@@ -1030,11 +974,11 @@ namespace YamlDotNet.Core
 
 			if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || CheckEmptyMapping())
 			{
-				state = EmitterState.YAML_EMIT_FLOW_MAPPING_FIRST_KEY_STATE;
+				state = EmitterState.FlowMappingFirstKey;
 			}
 			else
 			{
-				state = EmitterState.YAML_EMIT_BLOCK_MAPPING_FIRST_KEY_STATE;
+				state = EmitterState.BlockMappingFirstKey;
 			}
 		}
 
@@ -1574,7 +1518,7 @@ namespace YamlDotNet.Core
 					WriteIndent();
 				}
 
-				state = EmitterState.YAML_EMIT_DOCUMENT_START_STATE;
+				state = EmitterState.DocumentStart;
 
 				tagDirectives.Clear();
 			}
@@ -1622,7 +1566,7 @@ namespace YamlDotNet.Core
 				WriteIndent();
 			}
 
-			states.Push(EmitterState.YAML_EMIT_FLOW_SEQUENCE_ITEM_STATE);
+			states.Push(EmitterState.FlowSequenceItem);
 
 			EmitNode(evt, false, false, false);
 		}
@@ -1664,13 +1608,13 @@ namespace YamlDotNet.Core
 
 			if (!isCanonical && CheckSimpleKey())
 			{
-				states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_SIMPLE_VALUE_STATE);
+				states.Push(EmitterState.FlowMappingSimpleValue);
 				EmitNode(evt, false, true, true);
 			}
 			else
 			{
 				WriteIndicator("?", true, false, false);
-				states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_VALUE_STATE);
+				states.Push(EmitterState.FlowMappingValue);
 				EmitNode(evt, false, true, false);
 			}
 		}
@@ -1693,13 +1637,13 @@ namespace YamlDotNet.Core
 			}
 
 			int length;
-			switch (GetEventType(events.Peek()))
+			switch (events.Peek().Type)
 			{
-				case EventType.YAML_ALIAS_EVENT:
+				case EventType.Alias:
 					length = SafeStringLength(anchorData.anchor);
 					break;
 
-				case EventType.YAML_SCALAR_EVENT:
+				case EventType.Scalar:
 					if (scalarData.isMultiline)
 					{
 						return false;
@@ -1712,7 +1656,7 @@ namespace YamlDotNet.Core
 						SafeStringLength(scalarData.value);
 					break;
 
-				case EventType.YAML_SEQUENCE_START_EVENT:
+				case EventType.SequenceStart:
 					if (!CheckEmptySequence())
 					{
 						return false;
@@ -1723,7 +1667,7 @@ namespace YamlDotNet.Core
 						SafeStringLength(tagData.suffix);
 					break;
 
-				case EventType.YAML_MAPPING_START_EVENT:
+				case EventType.MappingStart:
 					if (!CheckEmptySequence())
 					{
 						return false;
@@ -1758,7 +1702,7 @@ namespace YamlDotNet.Core
 				}
 				WriteIndicator(":", true, false, false);
 			}
-			states.Push(EmitterState.YAML_EMIT_FLOW_MAPPING_KEY_STATE);
+			states.Push(EmitterState.FlowMappingKey);
 			EmitNode(evt, false, true, false);
 		}
 
@@ -1781,7 +1725,7 @@ namespace YamlDotNet.Core
 
 			WriteIndent();
 			WriteIndicator("-", true, false, true);
-			states.Push(EmitterState.YAML_EMIT_BLOCK_SEQUENCE_ITEM_STATE);
+			states.Push(EmitterState.BlockSequenceItem);
 
 			EmitNode(evt, false, false, false);
 		}
@@ -1807,13 +1751,13 @@ namespace YamlDotNet.Core
 
 			if (CheckSimpleKey())
 			{
-				states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_SIMPLE_VALUE_STATE);
+				states.Push(EmitterState.BlockMappingSimpleValue);
 				EmitNode(evt, false, true, true);
 			}
 			else
 			{
 				WriteIndicator("?", true, false, true);
-				states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_VALUE_STATE);
+				states.Push(EmitterState.BlockMappingValue);
 				EmitNode(evt, false, true, false);
 			}
 		}
@@ -1832,7 +1776,7 @@ namespace YamlDotNet.Core
 				WriteIndent();
 				WriteIndicator(":", true, false, true);
 			}
-			states.Push(EmitterState.YAML_EMIT_BLOCK_MAPPING_KEY_STATE);
+			states.Push(EmitterState.BlockMappingKey);
 			EmitNode(evt, false, true, false);
 		}
 

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+main () {
+  for f in $(find -iname "*.cs" | grep -v "./_ReSharper" | grep -v "/obj/")
+  do
+    license $f
+    crlf_endings $f
+  done
+}
+
 license () {
   f=$1
   if ! grep -q Copyright $f ;
@@ -11,12 +19,8 @@ license () {
 }
 
 crlf_endings () {
-  sed -i 's/\r\?$/\r/' $1
+  perl -pe 's/\r?\n/\r\n/' $1 >$1.new
+  mv $f.new $f
 }
 
-for f in $(find -iname "*.cs")
-do
-  license $f
-  crlf_endings $f
-done
-
+main
