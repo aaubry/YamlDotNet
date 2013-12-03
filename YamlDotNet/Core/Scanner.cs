@@ -38,11 +38,11 @@ namespace YamlDotNet.Core
 		private readonly Stack<int> indents = new Stack<int>();
 		private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
 		private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
+		private Cursor cursor;
 		private bool streamStartProduced;
 		private bool streamEndProduced;
 		private int indent = -1;
 		private bool simpleKeyAllowed;
-		private Mark mark;
 
 		/// <summary>
 		/// Gets the current position inside the input stream.
@@ -52,7 +52,7 @@ namespace YamlDotNet.Core
 		{
 			get
 			{
-				return mark;
+				return cursor.Mark();
 			}
 		}
 
@@ -116,8 +116,7 @@ namespace YamlDotNet.Core
 		public Scanner(TextReader input)
 		{
 			analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
-			mark.Column = 0;
-			mark.Line = 0;
+			cursor = new Cursor();
 		}
 
 		private Token current;
@@ -244,13 +243,14 @@ namespace YamlDotNet.Core
 				//  - is shorter than 1024 characters.
 
 
-				if (key.IsPossible && (key.Mark.Line < mark.Line || key.Mark.Index + 1024 < mark.Index))
+				if (key.IsPossible && (key.Mark.Line < cursor.Line || key.Mark.Index + 1024 < cursor.Index))
 				{
 
 					// Check if the potential simple key to be removed is required.
 
 					if (key.IsRequired)
 					{
+						var mark = cursor.Mark();
 						throw new SyntaxErrorException(mark, mark, "While scanning a simple key, could not find expected ':'.");
 					}
 
@@ -279,7 +279,7 @@ namespace YamlDotNet.Core
 
 			// Check the indentation level against the current column.
 
-			UnrollIndent(mark.Column);
+			UnrollIndent(cursor.Column);
 
 
 			// Ensure that the buffer contains at least 4 characters.  4 is the length
@@ -298,7 +298,7 @@ namespace YamlDotNet.Core
 
 			// Is it a directive?
 
-			if (mark.Column == 0 && analyzer.Check('%'))
+			if (cursor.Column == 0 && analyzer.Check('%'))
 			{
 				FetchDirective();
 				return;
@@ -307,7 +307,7 @@ namespace YamlDotNet.Core
 			// Is it the document start indicator?
 
 			bool isDocumentStart =
-				mark.Column == 0 &&
+				cursor.Column == 0 &&
 				analyzer.Check('-', 0) &&
 				analyzer.Check('-', 1) &&
 				analyzer.Check('-', 2) &&
@@ -322,7 +322,7 @@ namespace YamlDotNet.Core
 			// Is it the document end indicator?
 
 			bool isDocumentEnd =
-				mark.Column == 0 &&
+				cursor.Column == 0 &&
 				analyzer.Check('.', 0) &&
 				analyzer.Check('.', 1) &&
 				analyzer.Check('.', 2) &&
@@ -487,6 +487,7 @@ namespace YamlDotNet.Core
 			}
 
 			// If we don't determine the token type so far, it is an error.
+			var mark = cursor.Mark();
 			throw new SyntaxErrorException(mark, mark, "While scanning for the next token, find character that cannot start any token.");
 		}
 
@@ -497,7 +498,7 @@ namespace YamlDotNet.Core
 
 		private bool IsDocumentIndicator()
 		{
-			if (mark.Column == 0 && analyzer.IsBlankOrBreakOrZero(3))
+			if (cursor.Column == 0 && analyzer.IsBlankOrBreakOrZero(3))
 			{
 				bool isDocumentStart = analyzer.Check('-', 0) && analyzer.Check('-', 1) && analyzer.Check('-', 2);
 				bool isDocumentEnd = analyzer.Check('.', 0) && analyzer.Check('.', 1) && analyzer.Check('.', 2);
@@ -512,8 +513,7 @@ namespace YamlDotNet.Core
 
 		private void Skip()
 		{
-			++mark.Index;
-			++mark.Column;
+			cursor.Skip();
 			analyzer.Buffer.Skip(1);
 		}
 
@@ -521,16 +521,12 @@ namespace YamlDotNet.Core
 		{
 			if (analyzer.IsCrLf())
 			{
-				mark.Index += 2;
-				mark.Column = 0;
-				++mark.Line;
+				cursor.SkipLineByOffset(2);
 				analyzer.Buffer.Skip(2);
 			}
 			else if (analyzer.IsBreak())
 			{
-				++mark.Index;
-				mark.Column = 0;
-				++mark.Line;
+				cursor.SkipLineByOffset(1);
 				analyzer.Buffer.Skip(1);
 			}
 			else if (!analyzer.IsZero())
@@ -608,6 +604,7 @@ namespace YamlDotNet.Core
 
 			// Create the STREAM-START token and append it to the queue.
 
+			var mark = cursor.Mark();
 			tokens.Enqueue(new StreamStart(mark, mark));
 		}
 
@@ -632,6 +629,7 @@ namespace YamlDotNet.Core
 			{
 				// Create a token and append it to the queue.
 
+				var mark = cursor.Mark();
 				tokens.Enqueue(new BlockEnd(mark, mark));
 
 				// Pop the indentation level.
@@ -645,13 +643,7 @@ namespace YamlDotNet.Core
 		/// </summary>
 		private void FetchStreamEnd()
 		{
-			// Force new line.
-
-			if (mark.Column != 0)
-			{
-				mark.Column = 0;
-				++mark.Line;
-			}
+			cursor.ForceSkipLineAfterNonBreak();
 
 			// Reset the indentation level.
 
@@ -666,6 +658,7 @@ namespace YamlDotNet.Core
 			// Create the STREAM-END token and append it to the queue.
 
 			streamEndProduced = true;
+			var mark = cursor.Mark();
 			tokens.Enqueue(new StreamEnd(mark, mark));
 		}
 
@@ -703,7 +696,7 @@ namespace YamlDotNet.Core
 		{
 			// Eat '%'.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 
 			Skip();
 
@@ -725,7 +718,7 @@ namespace YamlDotNet.Core
 					break;
 
 				default:
-					throw new SyntaxErrorException(start, mark, "While scanning a directive, find uknown directive name.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find uknown directive name.");
 			}
 
 			// Eat the rest of the line including any comments.
@@ -747,7 +740,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBreakOrZero())
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a directive, did not find expected comment or line break.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
 			}
 
 			// Eat a line break.
@@ -778,13 +771,13 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 
 			Skip();
 			Skip();
 			Skip();
 
-			Token token = isStartToken ? (Token)new DocumentStart(start, mark) : new DocumentEnd(start, start);
+			Token token = isStartToken ? (Token)new DocumentStart(start, cursor.Mark()) : new DocumentEnd(start, start);
 			tokens.Enqueue(token);
 		}
 
@@ -808,7 +801,7 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 			Skip();
 
 			// Create the FLOW-SEQUENCE-START of FLOW-MAPPING-START token.
@@ -861,7 +854,7 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 			Skip();
 
 			Token token;
@@ -907,12 +900,12 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 			Skip();
 
 			// Create the FLOW-ENTRY token and append it to the queue.
 
-			tokens.Enqueue(new FlowEntry(start, mark));
+			tokens.Enqueue(new FlowEntry(start, cursor.Mark()));
 		}
 
 		/// <summary>
@@ -929,11 +922,12 @@ namespace YamlDotNet.Core
 
 				if (!simpleKeyAllowed)
 				{
+					var mark = cursor.Mark();
 					throw new SyntaxErrorException(mark, mark, "Block sequence entries are not allowed in this context.");
 				}
 
 				// Add the BLOCK-SEQUENCE-START token if needed.
-				RollIndent(mark.Column, -1, true, mark);
+				RollIndent(cursor.Column, -1, true, cursor.Mark());
 			}
 			else
 			{
@@ -954,12 +948,12 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 			Skip();
 
 			// Create the BLOCK-ENTRY token and append it to the queue.
 
-			tokens.Enqueue(new BlockEntry(start, mark));
+			tokens.Enqueue(new BlockEntry(start, cursor.Mark()));
 		}
 
 		/// <summary>
@@ -976,12 +970,13 @@ namespace YamlDotNet.Core
 
 				if (!simpleKeyAllowed)
 				{
+					var mark = cursor.Mark();
 					throw new SyntaxErrorException(mark, mark, "Mapping keys are not allowed in this context.");
 				}
 
 				// Add the BLOCK-MAPPING-START token if needed.
 
-				RollIndent(mark.Column, -1, false, mark);
+				RollIndent(cursor.Column, -1, false, cursor.Mark());
 			}
 
 			// Reset any potential simple keys on the current flow level.
@@ -994,12 +989,12 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 			Skip();
 
 			// Create the KEY token and append it to the queue.
 
-			tokens.Enqueue(new Key(start, mark));
+			tokens.Enqueue(new Key(start, cursor.Mark()));
 		}
 
 		/// <summary>
@@ -1042,12 +1037,13 @@ namespace YamlDotNet.Core
 
 					if (!simpleKeyAllowed)
 					{
+						var mark = cursor.Mark();
 						throw new SyntaxErrorException(mark, mark, "Mapping values are not allowed in this context.");
 					}
 
 					// Add the BLOCK-MAPPING-START token if needed.
 
-					RollIndent(mark.Column, -1, false, mark);
+					RollIndent(cursor.Column, -1, false, cursor.Mark());
 				}
 
 				// Simple keys after ':' are allowed in the block context.
@@ -1057,12 +1053,12 @@ namespace YamlDotNet.Core
 
 			// Consume the token.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 			Skip();
 
 			// Create the VALUE token and append it to the queue.
 
-			tokens.Enqueue(new Value(start, mark));
+			tokens.Enqueue(new Value(start, cursor.Mark()));
 		}
 
 		/// <summary>
@@ -1136,7 +1132,7 @@ namespace YamlDotNet.Core
 		{
 			// Eat the indicator character.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 
 			Skip();
 
@@ -1157,18 +1153,18 @@ namespace YamlDotNet.Core
 
 			if (value.Length == 0 || !(analyzer.IsBlankOrBreakOrZero() || analyzer.Check("?:,]}%@`")))
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning an anchor or alias, did not find expected alphabetic or numeric character.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning an anchor or alias, did not find expected alphabetic or numeric character.");
 			}
 
 			// Create a token.
 
 			if (isAlias)
 			{
-				return new AnchorAlias(value.ToString(), start, mark);
+				return new AnchorAlias(value.ToString(), start, cursor.Mark());
 			}
 			else
 			{
-				return new Anchor(value.ToString(), start, mark);
+				return new Anchor(value.ToString(), start, cursor.Mark());
 			}
 		}
 
@@ -1197,7 +1193,7 @@ namespace YamlDotNet.Core
 
 		Token ScanTag()
 		{
-			Mark start = mark;
+			Mark start = cursor.Mark();
 
 			// Check if the tag is in the canonical form.
 
@@ -1223,7 +1219,7 @@ namespace YamlDotNet.Core
 
 				if (!analyzer.Check('>'))
 				{
-					throw new SyntaxErrorException(start, mark, "While scanning a tag, did not find the expected '>'.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find the expected '>'.");
 				}
 
 				Skip();
@@ -1273,12 +1269,12 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a tag, did not find expected whitespace or line break.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find expected whitespace or line break.");
 			}
 
 			// Create a token.
 
-			return new Tag(handle, suffix, start, mark);
+			return new Tag(handle, suffix, start, cursor.Mark());
 		}
 
 		/// <summary>
@@ -1317,7 +1313,7 @@ namespace YamlDotNet.Core
 
 			// Eat the indicator '|' or '>'.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 
 			Skip();
 
@@ -1339,7 +1335,7 @@ namespace YamlDotNet.Core
 
 					if (analyzer.Check('0'))
 					{
-						throw new SyntaxErrorException(start, mark, "While scanning a block scalar, find an intendation indicator equal to 0.");
+						throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an intendation indicator equal to 0.");
 					}
 
 					// Get the intendation level and eat the indicator.
@@ -1356,7 +1352,7 @@ namespace YamlDotNet.Core
 			{
 				if (analyzer.Check('0'))
 				{
-					throw new SyntaxErrorException(start, mark, "While scanning a block scalar, find an intendation indicator equal to 0.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an intendation indicator equal to 0.");
 				}
 
 				increment = analyzer.AsDigit();
@@ -1390,7 +1386,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBreakOrZero())
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a block scalar, did not find expected comment or line break.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, did not find expected comment or line break.");
 			}
 
 			// Eat a line break.
@@ -1400,7 +1396,7 @@ namespace YamlDotNet.Core
 				SkipLine();
 			}
 
-			Mark end = mark;
+			Mark end = cursor.Mark();
 
 			// Set the intendation level if it was specified.
 
@@ -1415,7 +1411,7 @@ namespace YamlDotNet.Core
 
 			// Scan the block scalar content.
 
-			while (mark.Column == currentIndent && !analyzer.IsZero())
+			while (cursor.Column == currentIndent && !analyzer.IsZero())
 			{
 
 				// We are at the beginning of a non-empty line.
@@ -1495,7 +1491,7 @@ namespace YamlDotNet.Core
 		{
 			int maxIndent = 0;
 
-			end = mark;
+			end = cursor.Mark();
 
 			// Eat the intendation spaces and line breaks.
 
@@ -1503,21 +1499,21 @@ namespace YamlDotNet.Core
 			{
 				// Eat the intendation spaces.
 
-				while ((currentIndent == 0 || mark.Column < currentIndent) && analyzer.IsSpace())
+				while ((currentIndent == 0 || cursor.Column < currentIndent) && analyzer.IsSpace())
 				{
 					Skip();
 				}
 
-				if (mark.Column > maxIndent)
+				if (cursor.Column > maxIndent)
 				{
-					maxIndent = mark.Column;
+					maxIndent = cursor.Column;
 				}
 
 				// Check for a tab character messing the intendation.
 
-				if ((currentIndent == 0 || mark.Column < currentIndent) && analyzer.IsTab())
+				if ((currentIndent == 0 || cursor.Column < currentIndent) && analyzer.IsTab())
 				{
-					throw new SyntaxErrorException(start, mark, "While scanning a block scalar, find a tab character where an intendation space is expected.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find a tab character where an intendation space is expected.");
 				}
 
 				// Have we find a non-empty line?
@@ -1531,7 +1527,7 @@ namespace YamlDotNet.Core
 
 				breaks.Append(ReadLine());
 
-				end = mark;
+				end = cursor.Mark();
 			}
 
 			// Determine the indentation level if needed.
@@ -1571,7 +1567,7 @@ namespace YamlDotNet.Core
 		{
 			// Eat the left quote.
 
-			Mark start = mark;
+			Mark start = cursor.Mark();
 
 			Skip();
 
@@ -1587,14 +1583,14 @@ namespace YamlDotNet.Core
 
 				if (IsDocumentIndicator())
 				{
-					throw new SyntaxErrorException(start, mark, "While scanning a quoted scalar, find unexpected document indicator.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, find unexpected document indicator.");
 				}
 
 				// Check for EOF.
 
 				if (analyzer.IsZero())
 				{
-					throw new SyntaxErrorException(start, mark, "While scanning a quoted scalar, find unexpected end of stream.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, find unexpected end of stream.");
 				}
 
 				// Consume non-blank characters.
@@ -1660,7 +1656,7 @@ namespace YamlDotNet.Core
 								}
 								else
 								{
-									throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, find unknown escape character.");
+									throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, find unknown escape character.");
 								}
 								break;
 						}
@@ -1680,7 +1676,7 @@ namespace YamlDotNet.Core
 							{
 								if (!analyzer.IsHex(k))
 								{
-									throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, did not find expected hexdecimal number.");
+									throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, did not find expected hexdecimal number.");
 								}
 								character = (uint)((character << 4) + analyzer.AsHex(k));
 							}
@@ -1689,7 +1685,7 @@ namespace YamlDotNet.Core
 
 							if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
 							{
-								throw new SyntaxErrorException(start, mark, "While parsing a quoted scalar, find invalid Unicode character escape code.");
+								throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, find invalid Unicode character escape code.");
 							}
 
 							value.Append((char)character);
@@ -1821,8 +1817,8 @@ namespace YamlDotNet.Core
 			bool hasLeadingBlanks = false;
 			int currentIndent = indent + 1;
 
-			Mark start = mark;
-			Mark end = mark;
+			Mark start = cursor.Mark();
+			Mark end = start;
 
 			// Consume the content of the plain scalar.
 
@@ -1849,7 +1845,7 @@ namespace YamlDotNet.Core
 
 					if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsBlankOrBreakOrZero(1))
 					{
-						throw new SyntaxErrorException(start, mark, "While scanning a plain scalar, find unexpected ':'.");
+						throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find unexpected ':'.");
 					}
 
 					// Check for indicators that may end a plain scalar.
@@ -1900,7 +1896,7 @@ namespace YamlDotNet.Core
 
 					value.Append(ReadCurrentCharacter());
 
-					end = mark;
+					end = cursor.Mark();
 				}
 
 				// Is it the end?
@@ -1918,9 +1914,9 @@ namespace YamlDotNet.Core
 					{
 						// Check for tab character that abuse intendation.
 
-						if (hasLeadingBlanks && mark.Column < currentIndent && analyzer.IsTab())
+						if (hasLeadingBlanks && cursor.Column < currentIndent && analyzer.IsTab())
 						{
-							throw new SyntaxErrorException(start, mark, "While scanning a plain scalar, find a tab character that violate intendation.");
+							throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find a tab character that violate intendation.");
 						}
 
 						// Consume a space or a tab character.
@@ -1953,7 +1949,7 @@ namespace YamlDotNet.Core
 
 				// Check intendation level.
 
-				if (flowLevel == 0 && mark.Column < currentIndent)
+				if (flowLevel == 0 && cursor.Column < currentIndent)
 				{
 					break;
 				}
@@ -2016,14 +2012,14 @@ namespace YamlDotNet.Core
 
 			if (name.Length == 0)
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a directive, could not find expected directive name.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, could not find expected directive name.");
 			}
 
 			// Check for an blank character after the name.
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a directive, find unexpected non-alphabetical character.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find unexpected non-alphabetical character.");
 			}
 
 			return name.ToString();
@@ -2058,7 +2054,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.Check('.'))
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a %YAML directive, did not find expected digit or '.' character.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %YAML directive, did not find expected digit or '.' character.");
 			}
 
 			Skip();
@@ -2089,7 +2085,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlank())
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a %TAG directive, did not find expected whitespace.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %TAG directive, did not find expected whitespace.");
 			}
 
 			SkipWhitespaces();
@@ -2102,7 +2098,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.IsBlankOrBreakOrZero())
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a %TAG directive, did not find expected whitespace or line break.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %TAG directive, did not find expected whitespace or line break.");
 			}
 
 			return new TagDirective(handle, prefix, start, start);
@@ -2147,7 +2143,7 @@ namespace YamlDotNet.Core
 
 			if (tag.Length == 0)
 			{
-				throw new SyntaxErrorException(start, mark, "While parsing a tag, did not find expected tag URI.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, did not find expected tag URI.");
 			}
 
 			return tag.ToString();
@@ -2169,7 +2165,7 @@ namespace YamlDotNet.Core
 
 				if (!(analyzer.Check('%') && analyzer.IsHex(1) && analyzer.IsHex(2)))
 				{
-					throw new SyntaxErrorException(start, mark, "While parsing a tag, did not find URI escaped octet.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, did not find URI escaped octet.");
 				}
 
 				// Get the octet.
@@ -2187,7 +2183,7 @@ namespace YamlDotNet.Core
 
 					if (width == 0)
 					{
-						throw new SyntaxErrorException(start, mark, "While parsing a tag, find an incorrect leading UTF-8 octet.");
+						throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect leading UTF-8 octet.");
 					}
 				}
 				else
@@ -2196,7 +2192,7 @@ namespace YamlDotNet.Core
 
 					if ((octet & 0xC0) != 0x80)
 					{
-						throw new SyntaxErrorException(start, mark, "While parsing a tag, find an incorrect trailing UTF-8 octet.");
+						throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect trailing UTF-8 octet.");
 					}
 				}
 
@@ -2214,7 +2210,7 @@ namespace YamlDotNet.Core
 
 			if (characters.Length != 1)
 			{
-				throw new SyntaxErrorException(start, mark, "While parsing a tag, find an incorrect UTF-8 sequence.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect UTF-8 sequence.");
 			}
 
 			return characters[0];
@@ -2231,7 +2227,7 @@ namespace YamlDotNet.Core
 
 			if (!analyzer.Check('!'))
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a tag, did not find expected '!'.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find expected '!'.");
 			}
 
 			// Copy the '!' character.
@@ -2262,7 +2258,7 @@ namespace YamlDotNet.Core
 
 				if (isDirective && (tagHandle.Length != 1 || tagHandle[0] != '!'))
 				{
-					throw new SyntaxErrorException(start, mark, "While parsing a tag directive, did not find expected '!'.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag directive, did not find expected '!'.");
 				}
 			}
 
@@ -2291,7 +2287,7 @@ namespace YamlDotNet.Core
 
 				if (++length > MaxVersionNumberLength)
 				{
-					throw new SyntaxErrorException(start, mark, "While scanning a %YAML directive, find extremely long version number.");
+					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %YAML directive, find extremely long version number.");
 				}
 
 				value = value * 10 + analyzer.AsDigit();
@@ -2303,7 +2299,7 @@ namespace YamlDotNet.Core
 
 			if (length == 0)
 			{
-				throw new SyntaxErrorException(start, mark, "While scanning a %YAML directive, did not find expected version number.");
+				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %YAML directive, did not find expected version number.");
 			}
 
 			return value;
@@ -2322,7 +2318,7 @@ namespace YamlDotNet.Core
 			// level.
 
 
-			bool isRequired = (flowLevel == 0 && indent == mark.Column);
+			bool isRequired = (flowLevel == 0 && indent == cursor.Column);
 
 
 			// A simple key is required only when it is the first token in the current
@@ -2337,7 +2333,7 @@ namespace YamlDotNet.Core
 
 			if (simpleKeyAllowed)
 			{
-				SimpleKey key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, mark);
+				SimpleKey key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, cursor.Mark());
 
 				RemoveSimpleKey();
 
