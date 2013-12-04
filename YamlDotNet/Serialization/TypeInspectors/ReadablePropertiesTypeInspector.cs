@@ -88,9 +88,10 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
 			public T GetCustomAttribute<T>() where T : Attribute
 			{
-				return _propertyInfo.GetCustomAttributes(typeof(T), true)
-					.Cast<T>()
-					.SingleOrDefault();
+				var attributes = _propertyInfo.GetCustomAttributes(typeof(T), true);
+				return attributes.Length > 0
+					? (T)attributes[0]
+					: null;
 			}
 		}
 	}
