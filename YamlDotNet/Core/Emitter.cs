@@ -350,7 +350,7 @@ namespace YamlDotNet.Core
 			bool preceeded_by_whitespace = true;
 
 			CharacterAnalyzer<StringLookAheadBuffer> buffer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
-			bool followed_by_whitespace = buffer.IsBlankOrBreakOrZero(1);
+			bool followed_by_whitespace = buffer.IsWhiteBreakOrZero(1);
 
 			bool isFirst = true;
 			while (!buffer.EndOfInput)
@@ -454,11 +454,11 @@ namespace YamlDotNet.Core
 					previous_break = false;
 				}
 
-				preceeded_by_whitespace = buffer.IsBlankOrBreakOrZero();
+				preceeded_by_whitespace = buffer.IsWhiteBreakOrZero();
 				buffer.Skip(1);
 				if (!buffer.EndOfInput)
 				{
-					followed_by_whitespace = buffer.IsBlankOrBreakOrZero(1);
+					followed_by_whitespace = buffer.IsWhiteBreakOrZero(1);
 				}
 				isFirst = false;
 			}

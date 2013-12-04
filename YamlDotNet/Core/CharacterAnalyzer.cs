@@ -19,8 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace YamlDotNet.Core
 {
@@ -55,13 +55,9 @@ namespace YamlDotNet.Core
 			buffer.Skip(length);
 		}
 
-		/// <summary>
-		/// Check if the character at the specified position is an alphabetical
-		/// character, a digit, '_', or '-'.
-		/// </summary>
-		public bool IsAlpha(int offset)
+		public bool IsAlphaNumericDashOrUnderscore(int offset = 0)
 		{
-			char character = buffer.Peek(offset);
+			var character = buffer.Peek(offset);
 			return
 			    (character >= '0' && character <= '9') ||
 			    (character >= 'A' && character <= 'Z') ||
@@ -70,26 +66,14 @@ namespace YamlDotNet.Core
 			    character == '-';
 		}
 
-		public bool IsAlpha()
-		{
-			return IsAlpha(0);
-		}
-
-		/// <summary>
-		/// Check if the character is ASCII.
-		/// </summary>
-		public bool IsAscii(int offset)
+		public bool IsAscii(int offset = 0)
 		{
 			return buffer.Peek(offset) <= '\x7F';
 		}
 
-		public bool IsAscii()
+		public bool IsPrintable(int offset = 0)
 		{
-			return IsAscii(0);
-		}
-
-		public bool IsPrintable(int offset) {
-			char character = buffer.Peek(offset); 
+			var character = buffer.Peek(offset); 
 			return
 				character == '\x9' ||
 				character == '\xA' ||
@@ -100,197 +84,93 @@ namespace YamlDotNet.Core
 				(character >= '\xE000' && character <= '\xFFFD');
 		}
 
-		public bool IsPrintable() {
-			return IsPrintable(0);
-		}		
-		
-		/// <summary>
-		/// Check if the character at the specified position is a digit.
-		/// </summary>
-		public bool IsDigit(int offset)
+		public bool IsDigit(int offset = 0)
 		{
-			char character = buffer.Peek(offset);
+			var character = buffer.Peek(offset);
 			return character >= '0' && character <= '9';
 		}
 
-		public bool IsDigit()
-		{
-			return IsDigit(0);
-		}
-
-		/// <summary>
-		/// Get the value of a digit.
-		/// </summary>
-		public int AsDigit(int offset)
+		public int AsDigit(int offset = 0)
 		{
 			return buffer.Peek(offset) - '0';
 		}
 
-		public int AsDigit()
-		{
-			return AsDigit(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is a hex-digit.
-		/// </summary>
 		public bool IsHex(int offset)
 		{
-			char character = buffer.Peek(offset);
+			var character = buffer.Peek(offset);
 			return
 			    (character >= '0' && character <= '9') ||
 			    (character >= 'A' && character <= 'F') ||
 			    (character >= 'a' && character <= 'f');
 		}
 
-		/// <summary>
-		/// Get the value of a hex-digit.
-		/// </summary>
 		public int AsHex(int offset)
 		{
-			char character = buffer.Peek(offset);
+			var character = buffer.Peek(offset);
 
 			if (character <= '9')
 			{
 				return character - '0';
 			}
-			else if (character <= 'F')
+			if (character <= 'F')
 			{
 				return character - 'A' + 10;
 			}
-			else
-			{
-				return character - 'a' + 10;
-			}
+			return character - 'a' + 10;
 		}
 
-		public bool IsSpace(int offset)
+		public bool IsSpace(int offset = 0)
 		{
 			return Check(' ', offset);
 		}
 
-		public bool IsSpace()
-		{
-			return IsSpace(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is NUL.
-		/// </summary>
-		public bool IsZero(int offset)
+		public bool IsZero(int offset = 0)
 		{
 			return Check('\0', offset);
 		}
 
-		public bool IsZero()
-		{
-			return IsZero(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is tab.
-		/// </summary>
-		public bool IsTab(int offset)
+		public bool IsTab(int offset = 0)
 		{
 			return Check('\t', offset);
 		}
 
-		public bool IsTab()
-		{
-			return IsTab(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is blank (space or tab).
-		/// </summary>
-		public bool IsBlank(int offset)
+		public bool IsWhite(int offset = 0)
 		{
 			return IsSpace(offset) || IsTab(offset);
 		}
 
-		public bool IsBlank()
-		{
-			return IsBlank(0);
-		}
-
-		/// <summary>
-		/// Check if the character at the specified position is a line break.
-		/// </summary>
-		public bool IsBreak(int offset)
+		public bool IsBreak(int offset = 0)
 		{
 			return Check("\r\n\x85\x2028\x2029", offset);
 		}
 
-		public bool IsBreak()
-		{
-			return IsBreak(0);
-		}
-
-		public bool IsCrLf(int offset)
+		public bool IsCrLf(int offset = 0)
 		{
 			return Check('\r', offset) && Check('\n', offset + 1);
 		}
 
-		public bool IsCrLf()
-		{
-			return IsCrLf(0);
-		}
-
-		/// <summary>
-		/// Check if the character is a line break or NUL.
-		/// </summary>
-		public bool IsBreakOrZero(int offset)
+		public bool IsBreakOrZero(int offset = 0)
 		{
 			return IsBreak(offset) || IsZero(offset);
 		}
 
-		public bool IsBreakOrZero()
+		public bool IsWhiteBreakOrZero(int offset = 0)
 		{
-			return IsBreakOrZero(0);
+			return IsWhite(offset) || IsBreakOrZero(offset);
 		}
 
-		/// <summary>
-		/// Check if the character is a line break, space, tab, or NUL.
-		/// </summary>
-		public bool IsBlankOrBreakOrZero(int offset)
-		{
-			return IsBlank(offset) || IsBreakOrZero(offset);
-		}
-
-		public bool IsBlankOrBreakOrZero()
-		{
-			return IsBlankOrBreakOrZero(0);
-		}
-
-		public bool Check(char expected)
-		{
-			return Check(expected, 0);
-		}
-
-		public bool Check(char expected, int offset)
+		public bool Check(char expected, int offset = 0)
 		{
 			return buffer.Peek(offset) == expected;
 		}
 
-		public bool Check(string expectedCharacters)
+		public bool Check(string expectedCharacters, int offset = 0)
 		{
-			return Check(expectedCharacters, 0);
-		}
-
-		public bool Check(string expectedCharacters, int offset)
-		{
+			// Todo: using it this way doesn't break anything, it's not realy wrong...
 			Debug.Assert(expectedCharacters.Length > 1, "Use Check(char, int) instead.");
 
-			char character = buffer.Peek(offset);
-
-			foreach(var expected in expectedCharacters)
-			{
-				if (expected == character)
-				{
-					return true;
-				}
-			}
-			return false;
+			var character = buffer.Peek(offset);
+			return expectedCharacters.Any(expected => expected == character);
 		}
 	}
 }

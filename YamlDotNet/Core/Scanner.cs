@@ -311,7 +311,7 @@ namespace YamlDotNet.Core
 				analyzer.Check('-', 0) &&
 				analyzer.Check('-', 1) &&
 				analyzer.Check('-', 2) &&
-				analyzer.IsBlankOrBreakOrZero(3);
+				analyzer.IsWhiteBreakOrZero(3);
 
 			if (isDocumentStart)
 			{
@@ -326,7 +326,7 @@ namespace YamlDotNet.Core
 				analyzer.Check('.', 0) &&
 				analyzer.Check('.', 1) &&
 				analyzer.Check('.', 2) &&
-				analyzer.IsBlankOrBreakOrZero(3);
+				analyzer.IsWhiteBreakOrZero(3);
 
 			if (isDocumentEnd)
 			{
@@ -376,7 +376,7 @@ namespace YamlDotNet.Core
 
 			// Is it the block entry indicator?
 
-			if (analyzer.Check('-') && analyzer.IsBlankOrBreakOrZero(1))
+			if (analyzer.Check('-') && analyzer.IsWhiteBreakOrZero(1))
 			{
 				FetchBlockEntry();
 				return;
@@ -384,7 +384,7 @@ namespace YamlDotNet.Core
 
 			// Is it the key indicator?
 
-			if (analyzer.Check('?') && (flowLevel > 0 || analyzer.IsBlankOrBreakOrZero(1)))
+			if (analyzer.Check('?') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
 			{
 				FetchKey();
 				return;
@@ -392,7 +392,7 @@ namespace YamlDotNet.Core
 
 			// Is it the value indicator?
 
-			if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsBlankOrBreakOrZero(1)))
+			if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
 			{
 				FetchValue();
 				return;
@@ -473,12 +473,12 @@ namespace YamlDotNet.Core
 			// The last rule is more restrictive than the specification requires.
 
 
-			bool isInvalidPlainScalarCharacter = analyzer.IsBlankOrBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
+			bool isInvalidPlainScalarCharacter = analyzer.IsWhiteBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
 
 			bool isPlainScalar =
 				!isInvalidPlainScalarCharacter ||
-				(analyzer.Check('-') && !analyzer.IsBlank(1)) ||
-				(flowLevel == 0 && (analyzer.Check("?:")) && !analyzer.IsBlankOrBreakOrZero(1));
+				(analyzer.Check('-') && !analyzer.IsWhite(1)) ||
+				(flowLevel == 0 && (analyzer.Check("?:")) && !analyzer.IsWhiteBreakOrZero(1));
 
 			if (isPlainScalar)
 			{
@@ -498,7 +498,7 @@ namespace YamlDotNet.Core
 
 		private bool IsDocumentIndicator()
 		{
-			if (cursor.Column == 0 && analyzer.IsBlankOrBreakOrZero(3))
+			if (cursor.Column == 0 && analyzer.IsWhiteBreakOrZero(3))
 			{
 				bool isDocumentStart = analyzer.Check('-', 0) && analyzer.Check('-', 1) && analyzer.Check('-', 2);
 				bool isDocumentEnd = analyzer.Check('.', 0) && analyzer.Check('.', 1) && analyzer.Check('.', 2);
@@ -723,7 +723,7 @@ namespace YamlDotNet.Core
 
 			// Eat the rest of the line including any comments.
 
-			while (analyzer.IsBlank())
+			while (analyzer.IsWhite())
 			{
 				Skip();
 			}
@@ -1139,7 +1139,7 @@ namespace YamlDotNet.Core
 			// Consume the value.
 
 			StringBuilder value = new StringBuilder();
-			while (analyzer.IsAlpha())
+			while (analyzer.IsAlphaNumericDashOrUnderscore())
 			{
 				value.Append(ReadCurrentCharacter());
 			}
@@ -1151,7 +1151,7 @@ namespace YamlDotNet.Core
 			//      '?', ':', ',', ']', '}', '%', '@', '`'.
 
 
-			if (value.Length == 0 || !(analyzer.IsBlankOrBreakOrZero() || analyzer.Check("?:,]}%@`")))
+			if (value.Length == 0 || !(analyzer.IsWhiteBreakOrZero() || analyzer.Check("?:,]}%@`")))
 			{
 				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning an anchor or alias, did not find expected alphabetic or numeric character.");
 			}
@@ -1267,7 +1267,7 @@ namespace YamlDotNet.Core
 
 			// Check the character which ends the tag.
 
-			if (!analyzer.IsBlankOrBreakOrZero())
+			if (!analyzer.IsWhiteBreakOrZero())
 			{
 				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find expected whitespace or line break.");
 			}
@@ -1369,7 +1369,7 @@ namespace YamlDotNet.Core
 
 			// Eat whitespaces and comments to the end of the line.
 
-			while (analyzer.IsBlank())
+			while (analyzer.IsWhite())
 			{
 				Skip();
 			}
@@ -1419,7 +1419,7 @@ namespace YamlDotNet.Core
 
 				// Is it a trailing whitespace?
 
-				bool trailingBlank = analyzer.IsBlank();
+				bool trailingBlank = analyzer.IsWhite();
 
 				// Check if we need to fold the leading line break.
 
@@ -1447,7 +1447,7 @@ namespace YamlDotNet.Core
 
 				// Is it a leading whitespace?
 
-				leadingBlank = analyzer.IsBlank();
+				leadingBlank = analyzer.IsWhite();
 
 				// Consume the current line.
 
@@ -1597,7 +1597,7 @@ namespace YamlDotNet.Core
 
 				bool hasLeadingBlanks = false;
 
-				while (!analyzer.IsBlankOrBreakOrZero())
+				while (!analyzer.IsWhiteBreakOrZero())
 				{
 					// Check for an escaped single quote.
 
@@ -1713,9 +1713,9 @@ namespace YamlDotNet.Core
 
 				// Consume blank characters.
 
-				while (analyzer.IsBlank() || analyzer.IsBreak())
+				while (analyzer.IsWhite() || analyzer.IsBreak())
 				{
-					if (analyzer.IsBlank())
+					if (analyzer.IsWhite())
 					{
 						// Consume a space or a tab character.
 
@@ -1839,18 +1839,18 @@ namespace YamlDotNet.Core
 				}
 
 				// Consume non-blank characters.
-				while (!analyzer.IsBlankOrBreakOrZero())
+				while (!analyzer.IsWhiteBreakOrZero())
 				{
 					// Check for 'x:x' in the flow context. TODO: Fix the test "spec-08-13".
 
-					if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsBlankOrBreakOrZero(1))
+					if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsWhiteBreakOrZero(1))
 					{
 						throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find unexpected ':'.");
 					}
 
 					// Check for indicators that may end a plain scalar.
 
-					if ((analyzer.Check(':') && analyzer.IsBlankOrBreakOrZero(1)) || (flowLevel > 0 && analyzer.Check(",:?[]{}")))
+					if ((analyzer.Check(':') && analyzer.IsWhiteBreakOrZero(1)) || (flowLevel > 0 && analyzer.Check(",:?[]{}")))
 					{
 						break;
 					}
@@ -1901,16 +1901,16 @@ namespace YamlDotNet.Core
 
 				// Is it the end?
 
-				if (!(analyzer.IsBlank() || analyzer.IsBreak()))
+				if (!(analyzer.IsWhite() || analyzer.IsBreak()))
 				{
 					break;
 				}
 
 				// Consume blank characters.
 
-				while (analyzer.IsBlank() || analyzer.IsBreak())
+				while (analyzer.IsWhite() || analyzer.IsBreak())
 				{
-					if (analyzer.IsBlank())
+					if (analyzer.IsWhite())
 					{
 						// Check for tab character that abuse intendation.
 
@@ -2003,7 +2003,7 @@ namespace YamlDotNet.Core
 
 			// Consume the directive name.
 
-			while (analyzer.IsAlpha())
+			while (analyzer.IsAlphaNumericDashOrUnderscore())
 			{
 				name.Append(ReadCurrentCharacter());
 			}
@@ -2017,7 +2017,7 @@ namespace YamlDotNet.Core
 
 			// Check for an blank character after the name.
 
-			if (!analyzer.IsBlankOrBreakOrZero())
+			if (!analyzer.IsWhiteBreakOrZero())
 			{
 				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find unexpected non-alphabetical character.");
 			}
@@ -2029,7 +2029,7 @@ namespace YamlDotNet.Core
 		{
 			// Eat whitespaces.
 
-			while (analyzer.IsBlank())
+			while (analyzer.IsWhite())
 			{
 				Skip();
 			}
@@ -2083,7 +2083,7 @@ namespace YamlDotNet.Core
 
 			// Expect a whitespace.
 
-			if (!analyzer.IsBlank())
+			if (!analyzer.IsWhite())
 			{
 				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %TAG directive, did not find expected whitespace.");
 			}
@@ -2096,7 +2096,7 @@ namespace YamlDotNet.Core
 
 			// Expect a whitespace or line break.
 
-			if (!analyzer.IsBlankOrBreakOrZero())
+			if (!analyzer.IsWhiteBreakOrZero())
 			{
 				throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %TAG directive, did not find expected whitespace or line break.");
 			}
@@ -2125,7 +2125,7 @@ namespace YamlDotNet.Core
 			//      '%'.
 
 
-			while (analyzer.IsAlpha() || analyzer.Check(";/?:@&=+$,.!~*'()[]%"))
+			while (analyzer.IsAlphaNumericDashOrUnderscore() || analyzer.Check(";/?:@&=+$,.!~*'()[]%"))
 			{
 				// Check if it is a URI-escape sequence.
 
@@ -2237,7 +2237,7 @@ namespace YamlDotNet.Core
 
 			// Copy all subsequent alphabetical and numerical characters.
 
-			while (analyzer.IsAlpha())
+			while (analyzer.IsAlphaNumericDashOrUnderscore())
 			{
 				tagHandle.Append(ReadCurrentCharacter());
 			}
@@ -2333,7 +2333,7 @@ namespace YamlDotNet.Core
 
 			if (simpleKeyAllowed)
 			{
-				SimpleKey key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, cursor.Mark());
+				var key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, cursor.Mark());
 
 				RemoveSimpleKey();
 
