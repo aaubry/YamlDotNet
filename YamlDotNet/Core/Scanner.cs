@@ -279,7 +279,7 @@ namespace YamlDotNet.Core
 
 			// Check the indentation level against the current column.
 
-			UnrollIndent(cursor.Column);
+			UnrollIndent(cursor.LineOffset);
 
 
 			// Ensure that the buffer contains at least 4 characters.  4 is the length
@@ -298,7 +298,7 @@ namespace YamlDotNet.Core
 
 			// Is it a directive?
 
-			if (cursor.Column == 0 && analyzer.Check('%'))
+			if (cursor.LineOffset == 0 && analyzer.Check('%'))
 			{
 				FetchDirective();
 				return;
@@ -307,7 +307,7 @@ namespace YamlDotNet.Core
 			// Is it the document start indicator?
 
 			bool isDocumentStart =
-				cursor.Column == 0 &&
+				cursor.LineOffset == 0 &&
 				analyzer.Check('-', 0) &&
 				analyzer.Check('-', 1) &&
 				analyzer.Check('-', 2) &&
@@ -322,7 +322,7 @@ namespace YamlDotNet.Core
 			// Is it the document end indicator?
 
 			bool isDocumentEnd =
-				cursor.Column == 0 &&
+				cursor.LineOffset == 0 &&
 				analyzer.Check('.', 0) &&
 				analyzer.Check('.', 1) &&
 				analyzer.Check('.', 2) &&
@@ -498,7 +498,7 @@ namespace YamlDotNet.Core
 
 		private bool IsDocumentIndicator()
 		{
-			if (cursor.Column == 0 && analyzer.IsWhiteBreakOrZero(3))
+			if (cursor.LineOffset == 0 && analyzer.IsWhiteBreakOrZero(3))
 			{
 				bool isDocumentStart = analyzer.Check('-', 0) && analyzer.Check('-', 1) && analyzer.Check('-', 2);
 				bool isDocumentEnd = analyzer.Check('.', 0) && analyzer.Check('.', 1) && analyzer.Check('.', 2);
@@ -927,7 +927,7 @@ namespace YamlDotNet.Core
 				}
 
 				// Add the BLOCK-SEQUENCE-START token if needed.
-				RollIndent(cursor.Column, -1, true, cursor.Mark());
+				RollIndent(cursor.LineOffset, -1, true, cursor.Mark());
 			}
 			else
 			{
@@ -976,7 +976,7 @@ namespace YamlDotNet.Core
 
 				// Add the BLOCK-MAPPING-START token if needed.
 
-				RollIndent(cursor.Column, -1, false, cursor.Mark());
+				RollIndent(cursor.LineOffset, -1, false, cursor.Mark());
 			}
 
 			// Reset any potential simple keys on the current flow level.
@@ -1015,7 +1015,7 @@ namespace YamlDotNet.Core
 
 				// In the block context, we may need to add the BLOCK-MAPPING-START token.
 
-				RollIndent(simpleKey.Mark.Column, simpleKey.TokenNumber, false, simpleKey.Mark);
+				RollIndent(simpleKey.Mark.Column - 1, simpleKey.TokenNumber, false, simpleKey.Mark);
 
 				// Remove the simple key.
 
@@ -1043,7 +1043,7 @@ namespace YamlDotNet.Core
 
 					// Add the BLOCK-MAPPING-START token if needed.
 
-					RollIndent(cursor.Column, -1, false, cursor.Mark());
+					RollIndent(cursor.LineOffset, -1, false, cursor.Mark());
 				}
 
 				// Simple keys after ':' are allowed in the block context.
@@ -1411,7 +1411,7 @@ namespace YamlDotNet.Core
 
 			// Scan the block scalar content.
 
-			while (cursor.Column == currentIndent && !analyzer.IsZero())
+			while (cursor.LineOffset == currentIndent && !analyzer.IsZero())
 			{
 
 				// We are at the beginning of a non-empty line.
@@ -1499,19 +1499,19 @@ namespace YamlDotNet.Core
 			{
 				// Eat the intendation spaces.
 
-				while ((currentIndent == 0 || cursor.Column < currentIndent) && analyzer.IsSpace())
+				while ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsSpace())
 				{
 					Skip();
 				}
 
-				if (cursor.Column > maxIndent)
+				if (cursor.LineOffset > maxIndent)
 				{
-					maxIndent = cursor.Column;
+					maxIndent = cursor.LineOffset;
 				}
 
 				// Check for a tab character messing the intendation.
 
-				if ((currentIndent == 0 || cursor.Column < currentIndent) && analyzer.IsTab())
+				if ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsTab())
 				{
 					throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find a tab character where an intendation space is expected.");
 				}
@@ -1914,7 +1914,7 @@ namespace YamlDotNet.Core
 					{
 						// Check for tab character that abuse intendation.
 
-						if (hasLeadingBlanks && cursor.Column < currentIndent && analyzer.IsTab())
+						if (hasLeadingBlanks && cursor.LineOffset < currentIndent && analyzer.IsTab())
 						{
 							throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find a tab character that violate intendation.");
 						}
@@ -1949,7 +1949,7 @@ namespace YamlDotNet.Core
 
 				// Check intendation level.
 
-				if (flowLevel == 0 && cursor.Column < currentIndent)
+				if (flowLevel == 0 && cursor.LineOffset < currentIndent)
 				{
 					break;
 				}
@@ -2318,7 +2318,7 @@ namespace YamlDotNet.Core
 			// level.
 
 
-			bool isRequired = (flowLevel == 0 && indent == cursor.Column);
+			bool isRequired = (flowLevel == 0 && indent == cursor.LineOffset);
 
 
 			// A simple key is required only when it is the first token in the current

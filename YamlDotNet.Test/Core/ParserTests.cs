@@ -310,6 +310,18 @@ namespace YamlDotNet.Test.Core
 				StreamEnd);
 		}
 
+		[Fact]
+		public void LineAndColumnNumbersAreCorrectlyCalculated()
+		{
+			var reader = new EventReader(ParserFor("list.yaml"));
+			reader.Expect<StreamStart>();
+			reader.Expect<DocumentStart>();
+			var sut = reader.Expect<SequenceStart>();
+
+			sut.Start.Line.Should().Be(1, "The sequence should start on line 1");
+			sut.Start.Column.Should().Be(1, "The sequence should start on column 1");
+		}
+
 		private IParser ParserForEmptyContent()
 		{
 			return new Parser(new StringReader(string.Empty));

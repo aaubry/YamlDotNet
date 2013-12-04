@@ -25,32 +25,37 @@ namespace YamlDotNet.Core
 	{
 		public int Index { get; set; }
 		public int Line { get; set; }
-		public int Column { get; set; }
+		public int LineOffset { get; set; }
+
+		public Cursor()
+		{
+			Line = YamlDotNet.Core.Mark.InitialLineNumber;
+		}
 
 		public Mark Mark()
 		{
-			return new Mark(Index, Line, Column);
+			return new Mark(Index, Line, LineOffset + YamlDotNet.Core.Mark.InitialColumnNumber);
 		}
 
 		public void Skip()
 		{
 			Index++;
-			Column++;
+			LineOffset++;
 		}
 		
 		public void SkipLineByOffset(int offset)
 		{
 			Index += offset;
 			Line++;
-			Column = 0;
+			LineOffset = 0;
 		}
 
 		public void ForceSkipLineAfterNonBreak()
 		{
-			if (Column != 0)
+			if (LineOffset != 0)
 			{
 				Line++;
-				Column = 0;
+				LineOffset = 0;
 			}
 		}
 	}
