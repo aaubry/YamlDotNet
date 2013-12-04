@@ -131,13 +131,16 @@ namespace YamlDotNet.PerformanceTests.Runner
 
 		private static void ProcessTestResult(string data, List<TestResult> testResults)
 		{
-			var parts = data.Split('\t');
-			testResults.Add(new TestResult
+			if (data != null)
 			{
-				Version = parts[0],
-				Test = parts[1],
-				Duration = double.Parse(parts[2]),
-			});
+				var parts = data.Split('\t');
+				testResults.Add(new TestResult
+				{
+					Version = parts[0],
+					Test = parts[1],
+					Duration = double.Parse(parts[2]),
+				});
+			}
 		}
 	}
 }

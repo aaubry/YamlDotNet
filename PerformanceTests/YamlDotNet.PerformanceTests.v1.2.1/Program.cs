@@ -28,10 +28,10 @@ namespace YamlDotNet.PerformanceTests.v1_2_1
 {
 	public class Program : ISerializerAdapter
 	{
-		public static void Main()
+		public static void Main(string[] args)
 		{
 			var runner = new PerformanceTestRunner();
-			runner.Run(new Program());
+			runner.Run(new Program(), args);
 		}
 
 		private readonly Serializer _serializer = new Serializer();

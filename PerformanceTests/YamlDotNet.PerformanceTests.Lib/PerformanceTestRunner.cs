@@ -28,10 +28,14 @@ namespace YamlDotNet.PerformanceTests.Lib
 {
 	public class PerformanceTestRunner
 	{
-		private const int _iterations = 1000;
+		private const int _defaultIterations = 10000;
 
-		public void Run(ISerializerAdapter serializer)
+		public void Run(ISerializerAdapter serializer, string[] args)
 		{
+			var iterations = args.Length > 0
+				? int.Parse(args[0])
+				: _defaultIterations;
+
 			var adapterName = serializer.GetType().Namespace.Split('.').Last();
 
 			var tests = typeof(ISerializationTest).Assembly
@@ -54,12 +58,12 @@ namespace YamlDotNet.PerformanceTests.Lib
 				}
 
 				var timer = Stopwatch.StartNew();
-				for(var i = 0; i < _iterations; ++i)
+				for (var i = 0; i < iterations; ++i)
 				{
 					RunTest(serializer, graph);
 				}
 				var duration = timer.Elapsed;
-				Console.WriteLine("{0}", duration.TotalMilliseconds / _iterations);
+				Console.WriteLine("{0}", duration.TotalMilliseconds / iterations);
 			}
 		}
 
