@@ -29,12 +29,19 @@ namespace YamlDotNet.Core
 
 		public Cursor()
 		{
-			Line = YamlDotNet.Core.Mark.InitialLineNumber;
+			Line = 1;
+		}
+
+		public Cursor(Cursor cursor)
+		{
+			Index = cursor.Index;
+			Line = cursor.Line;
+			LineOffset = cursor.LineOffset;
 		}
 
 		public Mark Mark()
 		{
-			return new Mark(Index, Line, LineOffset + YamlDotNet.Core.Mark.InitialColumnNumber);
+			return new Mark(Index, Line, LineOffset + 1);
 		}
 
 		public void Skip()

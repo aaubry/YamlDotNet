@@ -243,7 +243,7 @@ namespace YamlDotNet.Core
 				//  - is shorter than 1024 characters.
 
 
-				if (key.IsPossible && (key.Mark.Line < cursor.Line || key.Mark.Index + 1024 < cursor.Index))
+				if (key.IsPossible && (key.Line < cursor.Line || key.Index + 1024 < cursor.Index))
 				{
 
 					// Check if the potential simple key to be removed is required.
@@ -1015,7 +1015,7 @@ namespace YamlDotNet.Core
 
 				// In the block context, we may need to add the BLOCK-MAPPING-START token.
 
-				RollIndent(simpleKey.Mark.Column - 1, simpleKey.TokenNumber, false, simpleKey.Mark);
+				RollIndent(simpleKey.LineOffset, simpleKey.TokenNumber, false, simpleKey.Mark);
 
 				// Remove the simple key.
 
@@ -2333,7 +2333,7 @@ namespace YamlDotNet.Core
 
 			if (simpleKeyAllowed)
 			{
-				var key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, cursor.Mark());
+				var key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, cursor);
 
 				RemoveSimpleKey();
 
