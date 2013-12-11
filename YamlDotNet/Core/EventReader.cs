@@ -69,8 +69,7 @@ namespace YamlDotNet.Core
 				// TODO: Throw a better exception
 				var @event = parser.Current;
 				throw new YamlException(@event.Start, @event.End, string.Format(CultureInfo.InvariantCulture,
-				        "Expected '{0}', got '{1}' (at line {2}, character {3}).",
-				        typeof(T).Name, @event.GetType().Name, @event.Start.Line, @event.Start.Column));
+				        "Expected '{0}', got '{1}' (at {2}).", typeof(T).Name, @event.GetType().Name, @event.Start));
 			}
 			return expectedEvent;
 		}

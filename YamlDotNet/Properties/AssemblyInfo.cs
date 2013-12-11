@@ -20,6 +20,9 @@
 //  SOFTWARE.
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("YamlDotNet.Core")]
 [assembly: AssemblyDescription("The core YamlDotNet library, which contains the implementation of the parser and the emitter.")]
+
+[assembly: InternalsVisibleTo("YamlDotNet.Test, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c1b7cb58b05e52f6a5ac5c594b0290ef81ce4f9ac8d9f6acd735ed305e11cfb95b5fce69ed1dc3d21522f252fab128f812eb213be599ac502bf8fb2527b08c3f7fe9b36ca001fe8b916b0bea8782ff924e36a240aebca712c87a10e8fbffc5a3d79cc62cb9217d527b77a16875ddafb3ddb3ffa9ec74ea9eb8dd641322c395be")]

@@ -29,9 +29,6 @@ namespace YamlDotNet.Core
 	[Serializable]
 	public class Mark
 	{
-		public const int InitialLineNumber = 1;
-		public const int InitialColumnNumber = 1;
-
 		/// <summary>
 		/// Gets a <see cref="Mark"/> with empty values.
 		/// </summary>
@@ -54,8 +51,8 @@ namespace YamlDotNet.Core
 
 		public Mark()
 		{
-			Line = InitialLineNumber;
-			Column = InitialColumnNumber;
+			Line = 1;
+			Column = 1;
 		}
 
 		public Mark(int index, int line, int column)
@@ -64,13 +61,13 @@ namespace YamlDotNet.Core
 			{
 				throw new ArgumentOutOfRangeException("index", "Index must be greater than or equal to zero.");
 			}
-			if (line < InitialLineNumber)
+			if (line < 1)
 			{
-				throw new ArgumentOutOfRangeException("line", string.Format("Line must be greater than or equal to {0}.", InitialLineNumber));
+				throw new ArgumentOutOfRangeException("line", "Line must be greater than or equal to 1.");
 			}
-			if (column < InitialColumnNumber)
+			if (column < 1)
 			{
-				throw new ArgumentOutOfRangeException("column", string.Format("Column must be greater than or equal to {0}.", InitialColumnNumber));
+				throw new ArgumentOutOfRangeException("column", "Column must be greater than or equal to 1.");
 			}
 
 			Index = index;
