@@ -493,7 +493,7 @@ namespace YamlDotNet.Core
 
 		private bool CheckWhiteSpace()
 		{
-			return analyzer.Check(' ') || ((flowLevel > 0 || !simpleKeyAllowed) && analyzer.Check('\t'));
+			return analyzer.Check(' ') || analyzer.Check('\t') || ((flowLevel > 0 || !simpleKeyAllowed) && analyzer.Check('\t'));
 		}
 
 		private bool IsDocumentIndicator()
