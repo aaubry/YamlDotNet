@@ -32,7 +32,7 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Test.Core
 {
-	public class EmitterTests : EventsHelper
+	public class EmitterTests : EmitterTestsHelper
 	{
 		[Theory]
 		[InlineData("01-directives.yaml")]
@@ -60,8 +60,9 @@ namespace YamlDotNet.Test.Core
 			var emittedEvents = ParsingEventsOf(emittedText);
 			emittedEvents.Run(x => Dump.WriteLine(x));
 
-			emittedEvents.ShouldAllBeEquivalentTo(originalEvents, opt => opt.Excluding(@event => @event.Start)
-			                                                                .Excluding(@event => @event.End));
+			emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
+				opt => opt.Excluding(@event => @event.Start)
+				          .Excluding(@event => @event.End));
 		}
 
 		private IList<ParsingEvent> ParsingEventsOf(string text)
@@ -78,14 +79,82 @@ namespace YamlDotNet.Test.Core
 			}
 		}
 
-		private string EmittedTextFrom(IEnumerable<ParsingEvent> events)
+		[Fact]
+		public void PlainScalarCanBeFollowedByImplicitDocument()
 		{
-			return Emit(events, EmitterWithIndentCreator);
+			var events = StreamOf(
+				DocumentWith(PlainScalar("test")),
+				DocumentWith(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			yaml.Should().Contain(Lines("--- test", "--- test"));
 		}
 
-		private Func<TextWriter, Emitter> EmitterWithIndentCreator
+		[Fact]
+		public void PlainScalarCanBeFollowedByDocumentWithVersion()
 		{
-			get { return writer => new Emitter(writer, 2, int.MaxValue, false); }
+			var events = StreamOf(
+				DocumentWith(PlainScalar("test")),
+				DocumentWithVersion(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+			yaml.Should().Contain(Lines("--- test", "...", "%YAML 1.1", "--- test"));
+		}
+
+		[Fact]
+		public void PlainScalarCanBeFollowedByDocumentWithTags()
+		{
+			var events = StreamOf(
+				DocumentWith(PlainScalar("test")),
+				DocumentWithDefaultTags(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+			yaml.Should().Contain(Lines("--- test", "...", ExTag, ExExTag, "--- test"));
+		}
+
+		[Fact]
+		public void BlockCanBeFollowedByImplicitDocument()
+		{
+			var events = StreamOf(
+				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+				DocumentWith(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+
+			yaml.Should().Contain(Lines("- 'test'", "--- test"));
+		}
+
+		[Fact]
+		public void BlockCanBeFollowedByDocumentWithVersion()
+		{
+			var events = StreamOf(
+				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+				DocumentWithVersion(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+			yaml.Should().Contain(Lines("- 'test'", "...", "%YAML 1.1", "--- test"));
+		}
+
+		[Fact]
+		public void BlockCanBeFollowedByDocumentWithTags()
+		{
+			var events = StreamOf(
+				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+				DocumentWithDefaultTags(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+			yaml.Should().Contain(Lines("- 'test'", "...", ExTag, ExExTag, "--- test"));
 		}
 
 		[Theory]
@@ -95,7 +164,7 @@ namespace YamlDotNet.Test.Core
 		{
 			var events = SequenceWith(FoldedScalar(text).ExplicitQuoted);
 
-			var yaml = Emit(StreamedDocumentWith(events));
+			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
 			Dump.WriteLine(yaml);
 			yaml.Should().Contain("world");
@@ -106,7 +175,7 @@ namespace YamlDotNet.Test.Core
 		{
 			var events = SequenceWith(Scalar("hello\nworld").ExplicitQuoted);
 
-			var yaml = Emit(StreamedDocumentWith(events));
+			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
 			Dump.WriteLine(yaml);
 			yaml.Should().Contain(">");
@@ -117,13 +186,13 @@ namespace YamlDotNet.Test.Core
 		{
 			var events = SequenceWith(FoldedScalar("hello\nworld").ExplicitQuoted);
 
-			var yaml = Emit(StreamedDocumentWith(events));
+			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
 			// Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
-			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-			var scalar = (YamlScalarNode)sequence.Children[0];
+			var sequence = (YamlSequenceNode) stream.Documents[0].RootNode;
+			var scalar = (YamlScalarNode) sequence.Children[0];
 
 			Dump.WriteLine(yaml);
 			scalar.Value.Should().Be("hello\nworld");
@@ -134,12 +203,12 @@ namespace YamlDotNet.Test.Core
 		{
 			var events = SequenceWith(FoldedScalar(">+\n").ExplicitQuoted);
 
-			var yaml = Emit(StreamedDocumentWith(events));
+			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
-			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-			var scalar = (YamlScalarNode)sequence.Children[0];
+			var sequence = (YamlSequenceNode) stream.Documents[0].RootNode;
+			var scalar = (YamlScalarNode) sequence.Children[0];
 
 			Dump.WriteLine("${0}$", yaml);
 			scalar.Value.Should().Be(">+\n");
@@ -154,57 +223,22 @@ namespace YamlDotNet.Test.Core
 				Scalar("Payload"),
 				FoldedScalar(input).ExplicitQuoted);
 
-			var yaml = Emit(StreamedDocumentWith(events));
+			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 			Dump.WriteLine(yaml);
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
 
-			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
-			var value = (YamlScalarNode)mapping.Children.First().Value;
+			var mapping = (YamlMappingNode) stream.Documents[0].RootNode;
+			var value = (YamlScalarNode) mapping.Children.First().Value;
 
 			Dump.WriteLine(value.Value);
 			value.Value.Should().Be(input);
 		}
 
-		private string Emit(IEnumerable<ParsingEvent> events)
+		private string Lines(params string[] lines)
 		{
-			return Emit(events, x => new Emitter(x));
-		}
-
-		private string Emit(IEnumerable<ParsingEvent> events, Func<TextWriter, Emitter> createEmitter)
-		{
-			var writer = new StringWriter();
-			var emitter = createEmitter(writer);
-			events.Run(emitter.Emit);
-			return writer.ToString();
-		}
-
-		private IEnumerable<ParsingEvent> StreamedDocumentWith(IEnumerable<ParsingEvent> events)
-		{
-			return Wrap(
-				Wrap(events, DocumentStart(Implicit), DocumentEnd(Implicit)),
-				StreamStart, StreamEnd);
-		}
-
-		private IEnumerable<ParsingEvent> SequenceWith(params ParsingEvent[] events)
-		{
-			return Wrap(events, BlockSequenceStart.Explicit, SequenceEnd);
-		}
-
-		private IEnumerable<ParsingEvent> MappingWith(params ParsingEvent[] events)
-		{
-			return Wrap(events, MappingStart, MappingEnd);
-		}
-
-		private IEnumerable<ParsingEvent> Wrap(IEnumerable<ParsingEvent> events, ParsingEvent start, ParsingEvent end)
-		{
-			yield return start;
-			foreach (var @event in events)
-			{
-				yield return @event;
-			}
-			yield return end;
+			return string.Join(Environment.NewLine, lines);
 		}
 	}
 }
