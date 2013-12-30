@@ -671,6 +671,20 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void BackreferencesAreMergedWithMappings()
+		{
+			var stream = Yaml.StreamFrom("backreference.yaml");
+
+			var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(stream);
+
+			var alias = result["alias"];
+			alias.Should()
+				.Contain("key1", "value1", "key1 should be inherited from the backreferenced mapping")
+				.And.Contain("key2", "Overriding key2", "key2 should be overriden by the actual mapping")
+				.And.Contain("key3", "value3", "key3 is defined in the actual mapping");
+		}
+
+		[Fact]
 		public void IgnoreExtraPropertiesIfWanted()
 		{
 			var text = Lines("aaa: hello", "bbb: world");
