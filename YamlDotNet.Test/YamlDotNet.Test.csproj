@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\EmitterTests.cs" />
+    <Compile Include="Core\EmitterTestsHelper.cs" />
     <Compile Include="Core\InsertionQueueTests.cs" />
     <Compile Include="Core\LookAheadBufferTests.cs" />
     <Compile Include="Core\EventsHelper.cs" />

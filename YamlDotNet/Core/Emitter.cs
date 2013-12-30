@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -38,6 +37,13 @@ namespace YamlDotNet.Core
 	/// </summary>
 	public class Emitter : IEmitter
 	{
+		private const int MinBestIndent = 2;
+		private const int MaxBestIndent = 9;
+		private const int MaxAliasLength = 128;
+
+		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
+			RegexOptions.Compiled | RegexOptions.Singleline);
+
 		private readonly TextWriter output;
 
 		private readonly bool isCanonical;
@@ -55,30 +61,29 @@ namespace YamlDotNet.Core
 		private bool isSimpleKeyContext;
 		private bool isRootContext;
 
-		private int line;
 		private int column;
 		private bool isWhitespace;
 		private bool isIndentation;
 
 		private bool isOpenEnded;
 
-		private struct AnchorData
+		private readonly AnchorData anchorData = new AnchorData();
+		private readonly TagData tagData = new TagData();
+		private readonly ScalarData scalarData = new ScalarData();
+
+		private class AnchorData
 		{
 			public string anchor;
 			public bool isAlias;
 		}
 
-		private AnchorData anchorData;
-
-		private struct TagData
+		private class TagData
 		{
 			public string handle;
 			public string suffix;
 		}
 
-		private TagData tagData;
-
-		private struct ScalarData
+		private class ScalarData
 		{
 			public string value;
 			public bool isMultiline;
@@ -88,24 +93,6 @@ namespace YamlDotNet.Core
 			public bool isBlockAllowed;
 			public ScalarStyle style;
 		}
-
-		private bool IsUnicode
-		{
-			get
-			{
-				return
-					output.Encoding == Encoding.UTF8 ||
-					output.Encoding == Encoding.Unicode ||
-					output.Encoding == Encoding.BigEndianUnicode ||
-					output.Encoding == Encoding.UTF7 ||
-					output.Encoding == Encoding.UTF32;
-			}
-		}
-
-		private ScalarData scalarData;
-
-		private const int MinBestIndent = 2;
-		private const int MaxBestIndent = 9;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Emitter"/> class.
@@ -137,7 +124,6 @@ namespace YamlDotNet.Core
 		{
 		}
 
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Emitter"/> class.
 		/// </summary>
@@ -149,7 +135,8 @@ namespace YamlDotNet.Core
 		{
 			if (bestIndent < MinBestIndent || bestIndent > MaxBestIndent)
 			{
-				throw new ArgumentOutOfRangeException("bestIndent", string.Format(CultureInfo.InvariantCulture, "The bestIndent parameter must be between {0} and {1}.", MinBestIndent, MaxBestIndent));
+				throw new ArgumentOutOfRangeException("bestIndent", string.Format(CultureInfo.InvariantCulture,
+					"The bestIndent parameter must be between {0} and {1}.", MinBestIndent, MaxBestIndent));
 			}
 
 			this.bestIndent = bestIndent;
@@ -166,25 +153,6 @@ namespace YamlDotNet.Core
 			this.output = output;
 		}
 
-		private void Write(char value)
-		{
-			output.Write(value);
-			++column;
-		}
-
-		private void Write(string value)
-		{
-			output.Write(value);
-			column += value.Length;
-		}
-
-		private void WriteBreak()
-		{
-			output.WriteLine();
-			column = 0;
-			++line;
-		}
-
 		/// <summary>
 		/// Emit an evt.
 		/// </summary>
@@ -194,7 +162,7 @@ namespace YamlDotNet.Core
 
 			while (!NeedMoreEvents())
 			{
-				ParsingEvent current = events.Peek();
+				var current = events.Peek();
 				AnalyzeEvent(current);
 				StateMachine(current);
 
@@ -242,7 +210,7 @@ namespace YamlDotNet.Core
 				return false;
 			}
 
-			int level = 0;
+			var level = 0;
 			foreach (var evt in events)
 			{
 				switch (evt.Type)
@@ -268,32 +236,23 @@ namespace YamlDotNet.Core
 			return true;
 		}
 
-		private void AnalyzeAnchor(string anchor, bool isAlias)
-		{
-			anchorData.anchor = anchor;
-			anchorData.isAlias = isAlias;
-		}
-
-		/// <summary>
-		/// Check if the evt data is valid.
-		/// </summary>
 		private void AnalyzeEvent(ParsingEvent evt)
 		{
 			anchorData.anchor = null;
 			tagData.handle = null;
 			tagData.suffix = null;
 
-			AnchorAlias alias = evt as AnchorAlias;
+			var alias = evt as AnchorAlias;
 			if (alias != null)
 			{
 				AnalyzeAnchor(alias.Value, true);
 				return;
 			}
 
-			NodeEvent nodeEvent = evt as NodeEvent;
+			var nodeEvent = evt as NodeEvent;
 			if (nodeEvent != null)
 			{
-				Scalar scalar = evt as Scalar;
+				var scalar = evt as Scalar;
 				if (scalar != null)
 				{
 					AnalyzeScalar(scalar.Value);
@@ -305,30 +264,17 @@ namespace YamlDotNet.Core
 				{
 					AnalyzeTag(nodeEvent.Tag);
 				}
-				return;
 			}
 		}
 
-		/// <summary>
-		/// Check if a scalar is valid.
-		/// </summary>
+		private void AnalyzeAnchor(string anchor, bool isAlias)
+		{
+			anchorData.anchor = anchor;
+			anchorData.isAlias = isAlias;
+		}
+
 		private void AnalyzeScalar(string value)
 		{
-			bool block_indicators = false;
-			bool flow_indicators = false;
-			bool line_breaks = false;
-			bool special_characters = false;
-
-			bool leading_space = false;
-			bool leading_break = false;
-			bool trailing_space = false;
-			bool trailing_break = false;
-			bool break_space = false;
-			bool space_break = false;
-
-			bool previous_space = false;
-			bool previous_break = false;
-
 			scalarData.value = value;
 
 			if (value.Length == 0)
@@ -341,154 +287,144 @@ namespace YamlDotNet.Core
 				return;
 			}
 
+			var flowIndicators = false;
+			var blockIndicators = false;
 			if (value.StartsWith("---", StringComparison.Ordinal) || value.StartsWith("...", StringComparison.Ordinal))
 			{
-				block_indicators = true;
-				flow_indicators = true;
+				flowIndicators = true;
+				blockIndicators = true;
 			}
 
-			bool preceeded_by_whitespace = true;
+			var buffer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
+			var preceededByWhitespace = true;
+			var followedByWhitespace = buffer.IsWhiteBreakOrZero(1);
 
-			CharacterAnalyzer<StringLookAheadBuffer> buffer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
-			bool followed_by_whitespace = buffer.IsWhiteBreakOrZero(1);
+			var leadingSpace = false;
+			var leadingBreak = false;
+			var trailingSpace = false;
+			var trailingBreak = false;
+			
+			var breakSpace = false;
+			var spaceBreak = false;
+			var previousSpace = false;
+			var previousBreak = false;
 
-			bool isFirst = true;
+			var lineBreaks = false;
+			var specialCharacters = false;
+
+			var isFirst = true;
 			while (!buffer.EndOfInput)
 			{
 				if (isFirst)
 				{
 					if (buffer.Check(@"#,[]{}&*!|>\""%@`"))
 					{
-						flow_indicators = true;
-						block_indicators = true;
+						flowIndicators = true;
+						blockIndicators = true;
 					}
 
 					if (buffer.Check("?:"))
 					{
-						flow_indicators = true;
-						if (followed_by_whitespace)
-						{
-							block_indicators = true;
-						}
+						flowIndicators = true;
+						if (followedByWhitespace)
+							blockIndicators = true;
 					}
 
-					if (buffer.Check('-') && followed_by_whitespace)
+					if (buffer.Check('-') && followedByWhitespace)
 					{
-						flow_indicators = true;
-						block_indicators = true;
+						flowIndicators = true;
+						blockIndicators = true;
 					}
 				}
 				else
 				{
 					if (buffer.Check(",?[]{}"))
-					{
-						flow_indicators = true;
-					}
+						flowIndicators = true;
 
 					if (buffer.Check(':'))
 					{
-						flow_indicators = true;
-						if (followed_by_whitespace)
-						{
-							block_indicators = true;
-						}
+						flowIndicators = true;
+						if (followedByWhitespace)
+							blockIndicators = true;
 					}
 
-					if (buffer.Check('#') && preceeded_by_whitespace)
+					if (buffer.Check('#') && preceededByWhitespace)
 					{
-						flow_indicators = true;
-						block_indicators = true;
+						flowIndicators = true;
+						blockIndicators = true;
 					}
 				}
 
-
-				if (!buffer.IsPrintable() || (!buffer.IsAscii() && !IsUnicode))
-				{
-					special_characters = true;
-				}
+				if (!buffer.IsPrintable() || (!buffer.IsAscii() && !IsUnicode(output.Encoding)))
+					specialCharacters = true;
 
 				if (buffer.IsBreak())
-				{
-					line_breaks = true;
-				}
+					lineBreaks = true;
 
 				if (buffer.IsSpace())
 				{
-					if(isFirst)
-					{
-						leading_space = true;
-					}
-					if(buffer.Buffer.Position >= buffer.Buffer.Length - 1)
-					{
-						trailing_space = true;
-					}
-					if(previous_break) {
-						break_space = true;
-					}
-					
-					previous_space = true;
-					previous_break = false;
-				}
+					if (isFirst)
+						leadingSpace = true;
 
+					if (buffer.Buffer.Position >= buffer.Buffer.Length - 1)
+						trailingSpace = true;
+
+					if (previousBreak)
+						breakSpace = true;
+
+					previousSpace = true;
+					previousBreak = false;
+				}
 				else if (buffer.IsBreak())
 				{
-					if(isFirst)
-					{
-						leading_break = true;
-					}
-					if(buffer.Buffer.Position >= buffer.Buffer.Length - 1)
-					{
-						trailing_break = true;
-					}
-					
-					if (previous_space)
-					{
-						space_break = true;
-					}
-					previous_space = false;
-					previous_break = true;
+					if (isFirst)
+						leadingBreak = true;
+
+					if (buffer.Buffer.Position >= buffer.Buffer.Length - 1)
+						trailingBreak = true;
+
+					if (previousSpace)
+						spaceBreak = true;
+
+					previousSpace = false;
+					previousBreak = true;
 				}
 				else
 				{
-					previous_space = false;
-					previous_break = false;
+					previousSpace = false;
+					previousBreak = false;
 				}
 
-				preceeded_by_whitespace = buffer.IsWhiteBreakOrZero();
+				preceededByWhitespace = buffer.IsWhiteBreakOrZero();
 				buffer.Skip(1);
 				if (!buffer.EndOfInput)
-				{
-					followed_by_whitespace = buffer.IsWhiteBreakOrZero(1);
-				}
+					followedByWhitespace = buffer.IsWhiteBreakOrZero(1);
+
 				isFirst = false;
 			}
-
-			scalarData.isMultiline = line_breaks;
 
 			scalarData.isFlowPlainAllowed = true;
 			scalarData.isBlockPlainAllowed = true;
 			scalarData.isSingleQuotedAllowed = true;
 			scalarData.isBlockAllowed = true;
 
-			if (leading_space || leading_break || trailing_space || trailing_break)
+			if (leadingSpace || leadingBreak || trailingSpace || trailingBreak)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
 			}
 
-			if(trailing_space)
-			{
+			if (trailingSpace)
 				scalarData.isBlockAllowed = false;
-			}
-			
-			if (break_space)
+
+			if (breakSpace)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
 				scalarData.isSingleQuotedAllowed = false;
 			}
 
-			if (space_break || special_characters)
+			if (spaceBreak || specialCharacters)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
@@ -496,26 +432,29 @@ namespace YamlDotNet.Core
 				scalarData.isBlockAllowed = false;
 			}
 
-			if (line_breaks)
+			scalarData.isMultiline = lineBreaks;
+			if (lineBreaks)
 			{
 				scalarData.isFlowPlainAllowed = false;
 				scalarData.isBlockPlainAllowed = false;
 			}
 
-			if (flow_indicators)
-			{
+			if (flowIndicators)
 				scalarData.isFlowPlainAllowed = false;
-			}
 
-			if (block_indicators)
-			{
+			if (blockIndicators)
 				scalarData.isBlockPlainAllowed = false;
-			}
 		}
 
-		/// <summary>
-		/// Check if a tag is valid.
-		/// </summary>
+		private bool IsUnicode(Encoding encoding)
+		{
+			return encoding.Equals(Encoding.UTF8) ||
+				encoding.Equals(Encoding.Unicode) ||
+				encoding.Equals(Encoding.BigEndianUnicode) ||
+				encoding.Equals(Encoding.UTF7) ||
+				encoding.Equals(Encoding.UTF32);
+		}
+
 		private void AnalyzeTag(string tag)
 		{
 			tagData.handle = tag;
@@ -530,9 +469,6 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/// <summary>
-		/// State dispatcher.
-		/// </summary>
 		private void StateMachine(ParsingEvent evt)
 		{
 			switch (state)
@@ -609,8 +545,7 @@ namespace YamlDotNet.Core
 					throw new YamlException("Expected nothing after STREAM-END");
 
 				default:
-					Debug.Assert(false, "Invalid state.");
-					throw new InvalidOperationException("Invalid state");
+					throw new InvalidOperationException();
 			}
 		}
 
@@ -625,7 +560,6 @@ namespace YamlDotNet.Core
 			}
 
 			indent = -1;
-			line = 0;
 			column = 0;
 			isWhitespace = true;
 			isIndentation = true;
@@ -638,11 +572,10 @@ namespace YamlDotNet.Core
 		/// </summary>
 		private void EmitDocumentStart(ParsingEvent evt, bool isFirst)
 		{
-			DocumentStart documentStart = evt as DocumentStart;
+			var documentStart = evt as DocumentStart;
 			if (documentStart != null)
 			{
-				bool isImplicit = documentStart.IsImplicit && isFirst && !isCanonical;
-
+				var isImplicit = documentStart.IsImplicit && isFirst && !isCanonical;
 
 				if (documentStart.Version != null && isOpenEnded)
 				{
@@ -719,81 +652,21 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		/// <summary>
-		/// Check if the document content is an empty scalar.
-		/// </summary>
-		private bool CheckEmptyDocument()
+		// ReSharper disable UnusedParameter.Local
+		private void AnalyzeVersionDirective(VersionDirective versionDirective)
 		{
-			int index = 0;
-			foreach (var parsingEvent in events)
+			if (versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor != Constants.MinorVersion)
 			{
-				if (++index == 2)
-				{
-					Scalar scalar = parsingEvent as Scalar;
-					if (scalar != null)
-					{
-						return string.IsNullOrEmpty(scalar.Value);
-					}
-					break;
-				}
+				throw new YamlException("Incompatible %YAML directive");
 			}
-
-			return false;
 		}
+		// ReSharper restore UnusedParameter.Local
 
-		private void WriteTagHandle(string value)
-		{
-			if (!isWhitespace)
-			{
-				Write(' ');
-			}
-
-			Write(value);
-
-			isWhitespace = false;
-			isIndentation = false;
-		}
-
-		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]", RegexOptions.Compiled | RegexOptions.Singleline);
-
-		private static string UrlEncode(string text)
-		{
-			return uriReplacer.Replace(text, delegate(Match match)
-			{
-				StringBuilder buffer = new StringBuilder();
-				foreach (var toEncode in Encoding.UTF8.GetBytes(match.Value))
-				{
-					buffer.AppendFormat("%{0:X02}", toEncode);
-				}
-				return buffer.ToString();
-			});
-		}
-
-		private void WriteTagContent(string value, bool needsWhitespace)
-		{
-			if (needsWhitespace && !isWhitespace)
-			{
-				Write(' ');
-			}
-
-			Write(UrlEncode(value));
-
-			isWhitespace = false;
-			isIndentation = false;
-		}
-
-		/// <summary>
-		/// Append a directive to the directives stack.
-		/// </summary>
 		private void AppendTagDirective(TagDirective value, bool allowDuplicates)
 		{
 			if (tagDirectives.Contains(value))
 			{
-				if (allowDuplicates)
-				{
-					return;
-				}
-				else
+				if (!allowDuplicates)
 				{
 					throw new YamlException("Duplicate %TAG directive.");
 				}
@@ -802,49 +675,6 @@ namespace YamlDotNet.Core
 			{
 				tagDirectives.Add(value);
 			}
-		}
-
-		/// <summary>
-		/// Check if a %YAML directive is valid.
-		/// </summary>
-		private static void AnalyzeVersionDirective(VersionDirective versionDirective)
-		{
-			if (versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor != Constants.MinorVersion)
-			{
-				throw new YamlException("Incompatible %YAML directive");
-			}
-		}
-
-		private void WriteIndicator(string indicator, bool needWhitespace, bool whitespace, bool indentation)
-		{
-			if (needWhitespace && !isWhitespace)
-			{
-				Write(' ');
-			}
-
-			Write(indicator);
-
-			isWhitespace = whitespace;
-			isIndentation &= indentation;
-			isOpenEnded = false;
-		}
-
-		private void WriteIndent()
-		{
-			int currentIndent = Math.Max(indent, 0);
-
-			if (!isIndentation || column > currentIndent || (column == currentIndent && !isWhitespace))
-			{
-				WriteBreak();
-			}
-
-			while (column < currentIndent)
-			{
-				Write(' ');
-			}
-
-			isWhitespace = true;
-			isIndentation = true;
 		}
 
 		/// <summary>
@@ -889,97 +719,12 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Expect SEQUENCE-START.
+		/// Expect ALIAS.
 		/// </summary>
-		private void EmitSequenceStart(ParsingEvent evt)
+		private void EmitAlias()
 		{
 			ProcessAnchor();
-			ProcessTag();
-
-			SequenceStart sequenceStart = (SequenceStart)evt;
-
-			if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || CheckEmptySequence())
-			{
-				state = EmitterState.FlowSequenceFirstItem;
-			}
-			else
-			{
-				state = EmitterState.BlockSequenceFirstItem;
-			}
-		}
-
-		/// <summary>
-		/// Check if the next events represent an empty sequence.
-		/// </summary>
-		private bool CheckEmptySequence()
-		{
-			if (events.Count < 2)
-			{
-				return false;
-			}
-
-			FakeList<ParsingEvent> eventList = new FakeList<ParsingEvent>(events);
-			return eventList[0] is SequenceStart && eventList[1] is SequenceEnd;
-		}
-
-		/// <summary>
-		/// Check if the next events represent an empty mapping.
-		/// </summary>
-		private bool CheckEmptyMapping()
-		{
-			if (events.Count < 2)
-			{
-				return false;
-			}
-
-			FakeList<ParsingEvent> eventList = new FakeList<ParsingEvent>(events);
-			return eventList[0] is MappingStart && eventList[1] is MappingEnd;
-		}
-
-		/// <summary>
-		/// Write a tag.
-		/// </summary>
-		private void ProcessTag()
-		{
-			if (tagData.handle == null && tagData.suffix == null)
-			{
-				return;
-			}
-
-			if (tagData.handle != null)
-			{
-				WriteTagHandle(tagData.handle);
-				if (tagData.suffix != null)
-				{
-					WriteTagContent(tagData.suffix, false);
-				}
-			}
-			else
-			{
-				WriteIndicator("!<", true, false, false);
-				WriteTagContent(tagData.suffix, false);
-				WriteIndicator(">", false, false, false);
-			}
-		}
-
-		/// <summary>
-		/// Expect MAPPING-START.
-		/// </summary>
-		private void EmitMappingStart(ParsingEvent evt)
-		{
-			ProcessAnchor();
-			ProcessTag();
-
-			MappingStart mappingStart = (MappingStart)evt;
-
-			if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || CheckEmptyMapping())
-			{
-				state = EmitterState.FlowMappingFirstKey;
-			}
-			else
-			{
-				state = EmitterState.BlockMappingFirstKey;
-			}
+			state = states.Pop();
 		}
 
 		/// <summary>
@@ -997,9 +742,68 @@ namespace YamlDotNet.Core
 			state = states.Pop();
 		}
 
-		/// <summary>
-		/// Write a scalar.
-		/// </summary>
+		private void SelectScalarStyle(ParsingEvent evt)
+		{
+			var scalar = (Scalar)evt;
+
+			var style = scalar.Style;
+			var noTag = tagData.handle == null && tagData.suffix == null;
+
+			if (noTag && !scalar.IsPlainImplicit && !scalar.IsQuotedImplicit)
+			{
+				throw new YamlException("Neither tag nor isImplicit flags are specified.");
+			}
+
+			if (style == ScalarStyle.Any)
+			{
+				style = scalarData.isMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
+			}
+
+			if (isCanonical)
+			{
+				style = ScalarStyle.DoubleQuoted;
+			}
+
+			if (isSimpleKeyContext && scalarData.isMultiline)
+			{
+				style = ScalarStyle.DoubleQuoted;
+			}
+
+			if (style == ScalarStyle.Plain)
+			{
+				if ((flowLevel != 0 && !scalarData.isFlowPlainAllowed) || (flowLevel == 0 && !scalarData.isBlockPlainAllowed))
+				{
+					style = ScalarStyle.SingleQuoted;
+				}
+				if (string.IsNullOrEmpty(scalarData.value) && (flowLevel != 0 || isSimpleKeyContext))
+				{
+					style = ScalarStyle.SingleQuoted;
+				}
+				if (noTag && !scalar.IsPlainImplicit)
+				{
+					style = ScalarStyle.SingleQuoted;
+				}
+			}
+
+			if (style == ScalarStyle.SingleQuoted)
+			{
+				if (!scalarData.isSingleQuotedAllowed)
+				{
+					style = ScalarStyle.DoubleQuoted;
+				}
+			}
+
+			if (style == ScalarStyle.Literal || style == ScalarStyle.Folded)
+			{
+				if (!scalarData.isBlockAllowed || flowLevel != 0 || isSimpleKeyContext)
+				{
+					style = ScalarStyle.DoubleQuoted;
+				}
+			}
+
+			scalarData.style = style;
+		}
+
 		private void ProcessScalar()
 		{
 			switch (scalarData.style)
@@ -1025,84 +829,28 @@ namespace YamlDotNet.Core
 					break;
 
 				default:
-					// Impossible.
 					throw new InvalidOperationException();
 			}
 		}
 
-		private static bool IsBreak(char character)
+		#region Write scalar Methods
+
+		private void WritePlainScalar(string value, bool allowBreaks)
 		{
-			return character == '\r' || character == '\n' || character == '\x85' || character == '\x2028' || character == '\x2029';
-		}
-
-		private static bool IsBlank(char character)
-		{
-			return character == ' ' || character == '\t';
-		}
-
-		/// <summary>
-		/// Check if the specified character is a space.
-		/// </summary>
-		private static bool IsSpace(char character)
-		{
-			return character == ' ';
-		}
-
-
-
-		private static bool IsPrintable(char character)
-		{
-			return
-				character == '\x9' ||
-				character == '\xA' ||
-				character == '\xD' ||
-				(character >= '\x20' && character <= '\x7E') ||
-				character == '\x85' ||
-				(character >= '\xA0' && character <= '\xD7FF') ||
-				(character >= '\xE000' && character <= '\xFFFD');
-		}
-
-		private void WriteFoldedScalar(string value)
-		{
-			bool previous_break = true;
-			bool leading_spaces = true;
-
-			WriteIndicator(">", true, false, false);
-			WriteBlockScalarHints(value);
-			WriteBreak();
-
-			isIndentation = true;
-			isWhitespace = true;
-
-			for (int i = 0; i < value.Length; ++i)
+			if (!isWhitespace)
 			{
-				char character = value[i];
-				if (IsBreak(character))
+				Write(' ');
+			}
+
+			var previousSpace = false;
+			var previousBreak = false;
+			for (var index = 0; index < value.Length; ++index)
+			{
+				var character = value[index];
+
+				if (IsSpace(character))
 				{
-					if (!previous_break && !leading_spaces && character == '\n')
-					{
-						int k = 0;
-						while (i + k < value.Length && IsBreak(value[i + k]))
-						{
-							++k;
-						}
-						if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k])))
-						{
-							WriteBreak();
-						}
-					}
-					WriteBreak();
-					isIndentation = true;
-					previous_break = true;
-				}
-				else
-				{
-					if (previous_break)
-					{
-						WriteIndent();
-						leading_spaces = IsBlank(character);
-					}
-					if (!previous_break && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
+					if (allowBreaks && !previousSpace && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ')
 					{
 						WriteIndent();
 					}
@@ -1110,53 +858,105 @@ namespace YamlDotNet.Core
 					{
 						Write(character);
 					}
-					isIndentation = false;
-					previous_break = false;
+					previousSpace = true;
 				}
-			}
-		}
-
-		private void WriteLiteralScalar(string value)
-		{
-			bool previous_break = true;
-
-			WriteIndicator("|", true, false, false);
-			WriteBlockScalarHints(value);
-			WriteBreak();
-
-			isIndentation = true;
-			isWhitespace = true;
-
-			foreach (var character in value)
-			{
-				if (IsBreak(character))
+				else if (IsBreak(character))
 				{
+					if (!previousBreak && character == '\n')
+					{
+						WriteBreak();
+					}
 					WriteBreak();
 					isIndentation = true;
-					previous_break = true;
+					previousBreak = true;
 				}
 				else
 				{
-					if (previous_break)
+					if (previousBreak)
 					{
 						WriteIndent();
 					}
 					Write(character);
 					isIndentation = false;
-					previous_break = false;
+					previousSpace = false;
+					previousBreak = false;
 				}
 			}
+
+			isWhitespace = false;
+			isIndentation = false;
+
+			if (isRootContext)
+			{
+				isOpenEnded = true;
+			}
+		}
+
+		private void WriteSingleQuotedScalar(string value, bool allowBreaks)
+		{
+			WriteIndicator("'", true, false, false);
+
+			var previousSpace = false;
+			var previousBreak = false;
+
+			for (var index = 0; index < value.Length; ++index)
+			{
+				var character = value[index];
+
+				if (character == ' ')
+				{
+					if (allowBreaks && !previousSpace && column > bestWidth && index != 0 && index + 1 < value.Length &&
+						value[index + 1] != ' ')
+					{
+						WriteIndent();
+					}
+					else
+					{
+						Write(character);
+					}
+					previousSpace = true;
+				}
+				else if (IsBreak(character))
+				{
+					if (!previousBreak && character == '\n')
+					{
+						WriteBreak();
+					}
+					WriteBreak();
+					isIndentation = true;
+					previousBreak = true;
+				}
+				else
+				{
+					if (previousBreak)
+					{
+						WriteIndent();
+					}
+					if (character == '\'')
+					{
+						Write(character);
+					}
+					Write(character);
+					isIndentation = false;
+					previousSpace = false;
+					previousBreak = false;
+				}
+			}
+
+			WriteIndicator("'", false, false, false);
+
+			isWhitespace = false;
+			isIndentation = false;
 		}
 
 		private void WriteDoubleQuotedScalar(string value, bool allowBreaks)
 		{
 			WriteIndicator("\"", true, false, false);
 
-			bool previous_space = false;
-			for (int index = 0; index < value.Length; ++index)
+			var previousSpace = false;
+			for (var index = 0; index < value.Length; ++index)
 			{
-				char character = value[index];
-
+				var character = value[index];
 
 				if (!IsPrintable(character) || IsBreak(character) || character == '"' || character == '\\')
 				{
@@ -1225,28 +1025,24 @@ namespace YamlDotNet.Core
 							break;
 
 						default:
-							short code = (short)character;
+							var code = (short) character;
 							if (code <= 0xFF)
 							{
 								Write('x');
 								Write(code.ToString("X02", CultureInfo.InvariantCulture));
 							}
 							else
-							{ //if (code <= 0xFFFF) {
+							{
 								Write('u');
 								Write(code.ToString("X04", CultureInfo.InvariantCulture));
 							}
-							//else {
-							//	Write('U');
-							//	Write(code.ToString("X08"));
-							//}
 							break;
 					}
-					previous_space = false;
+					previousSpace = false;
 				}
 				else if (character == ' ')
 				{
-					if (allowBreaks && !previous_space && column > bestWidth && index > 0 && index + 1 < value.Length)
+					if (allowBreaks && !previousSpace && column > bestWidth && index > 0 && index + 1 < value.Length)
 					{
 						WriteIndent();
 						if (value[index + 1] == ' ')
@@ -1258,12 +1054,12 @@ namespace YamlDotNet.Core
 					{
 						Write(character);
 					}
-					previous_space = true;
+					previousSpace = true;
 				}
 				else
 				{
 					Write(character);
-					previous_space = false;
+					previousSpace = false;
 				}
 			}
 
@@ -1273,20 +1069,79 @@ namespace YamlDotNet.Core
 			isIndentation = false;
 		}
 
-		private void WriteSingleQuotedScalar(string value, bool allowBreaks)
+		private void WriteLiteralScalar(string value)
 		{
-			WriteIndicator("'", true, false, false);
+			var previousBreak = true;
 
-			bool previous_space = false;
-			bool previous_break = false;
+			WriteIndicator("|", true, false, false);
+			WriteBlockScalarHints(value);
+			WriteBreak();
 
-			for (int index = 0; index < value.Length; ++index)
+			isIndentation = true;
+			isWhitespace = true;
+
+			foreach (var character in value)
 			{
-				char character = value[index];
-
-				if (character == ' ')
+				if (IsBreak(character))
 				{
-					if (allowBreaks && !previous_space && column > bestWidth && index != 0 && index + 1 < value.Length && value[index + 1] != ' ')
+					WriteBreak();
+					isIndentation = true;
+					previousBreak = true;
+				}
+				else
+				{
+					if (previousBreak)
+					{
+						WriteIndent();
+					}
+					Write(character);
+					isIndentation = false;
+					previousBreak = false;
+				}
+			}
+		}
+
+		private void WriteFoldedScalar(string value)
+		{
+			var previousBreak = true;
+			var leadingSpaces = true;
+
+			WriteIndicator(">", true, false, false);
+			WriteBlockScalarHints(value);
+			WriteBreak();
+
+			isIndentation = true;
+			isWhitespace = true;
+
+			for (var i = 0; i < value.Length; ++i)
+			{
+				var character = value[i];
+				if (IsBreak(character))
+				{
+					if (!previousBreak && !leadingSpaces && character == '\n')
+					{
+						var k = 0;
+						while (i + k < value.Length && IsBreak(value[i + k]))
+						{
+							++k;
+						}
+						if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k])))
+						{
+							WriteBreak();
+						}
+					}
+					WriteBreak();
+					isIndentation = true;
+					previousBreak = true;
+				}
+				else
+				{
+					if (previousBreak)
+					{
+						WriteIndent();
+						leadingSpaces = IsBlank(character);
+					}
+					if (!previousBreak && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
 					{
 						WriteIndent();
 					}
@@ -1294,198 +1149,83 @@ namespace YamlDotNet.Core
 					{
 						Write(character);
 					}
-					previous_space = true;
-				}
-				else if (IsBreak(character))
-				{
-					if (!previous_break && character == '\n')
-					{
-						WriteBreak();
-					}
-					WriteBreak();
-					isIndentation = true;
-					previous_break = true;
-				}
-				else
-				{
-					if (previous_break)
-					{
-						WriteIndent();
-					}
-					if (character == '\'')
-					{
-						Write(character);
-					}
-					Write(character);
 					isIndentation = false;
-					previous_space = false;
-					previous_break = false;
+					previousBreak = false;
 				}
 			}
-
-			WriteIndicator("'", false, false, false);
-
-			isWhitespace = false;
-			isIndentation = false;
 		}
 
-		private void WritePlainScalar(string value, bool allowBreaks)
+		// Todo: isn't this what CharacterAnalyser is for?
+		private static bool IsSpace(char character)
 		{
-			if (!isWhitespace)
-			{
-				Write(' ');
-			}
-
-			bool previous_space = false;
-			bool previous_break = false;
-			for (int index = 0; index < value.Length; ++index)
-			{
-				char character = value[index];
-
-				if (IsSpace(character))
-				{
-					if (allowBreaks && !previous_space && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ')
-					{
-						WriteIndent();
-					}
-					else
-					{
-						Write(character);
-					}
-					previous_space = true;
-				}
-				else if (IsBreak(character))
-				{
-					if (!previous_break && character == '\n')
-					{
-						WriteBreak();
-					}
-					WriteBreak();
-					isIndentation = true;
-					previous_break = true;
-				}
-				else
-				{
-					if (previous_break)
-					{
-						WriteIndent();
-					}
-					Write(character);
-					isIndentation = false;
-					previous_space = false;
-					previous_break = false;
-				}
-			}
-
-			isWhitespace = false;
-			isIndentation = false;
-
-			if(isRootContext)
-			{
-				isOpenEnded = true;
-			}
+			return character == ' ';
 		}
+
+		private static bool IsBreak(char character)
+		{
+			return character == '\r' || character == '\n' || character == '\x85' || character == '\x2028' ||
+				character == '\x2029';
+		}
+
+		private static bool IsBlank(char character)
+		{
+			return character == ' ' || character == '\t';
+		}
+
+		private static bool IsPrintable(char character)
+		{
+			return
+				character == '\x9' ||
+					character == '\xA' ||
+					character == '\xD' ||
+					(character >= '\x20' && character <= '\x7E') ||
+					character == '\x85' ||
+					(character >= '\xA0' && character <= '\xD7FF') ||
+					(character >= '\xE000' && character <= '\xFFFD');
+		}
+
+		#endregion
 
 		/// <summary>
-		/// Increase the indentation level.
+		/// Expect SEQUENCE-START.
 		/// </summary>
-		private void IncreaseIndent(bool isFlow, bool isIndentless)
-		{
-			indents.Push(indent);
-
-			if (indent < 0)
-			{
-				indent = isFlow ? bestIndent : 0;
-			}
-			else if (!isIndentless)
-			{
-				indent += bestIndent;
-			}
-		}
-
-		/// <summary>
-		/// Determine an acceptable scalar style.
-		/// </summary>
-		private void SelectScalarStyle(ParsingEvent evt)
-		{
-			Scalar scalar = (Scalar)evt;
-
-			ScalarStyle style = scalar.Style;
-			bool noTag = tagData.handle == null && tagData.suffix == null;
-
-			if (noTag && !scalar.IsPlainImplicit && !scalar.IsQuotedImplicit)
-			{
-				throw new YamlException("Neither tag nor isImplicit flags are specified.");
-			}
-
-			if (style == ScalarStyle.Any)
-			{
-				style = scalarData.isMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
-			}
-
-			if (isCanonical)
-			{
-				style = ScalarStyle.DoubleQuoted;
-			}
-
-			if (isSimpleKeyContext && scalarData.isMultiline)
-			{
-				style = ScalarStyle.DoubleQuoted;
-			}
-
-			if (style == ScalarStyle.Plain)
-			{
-				if ((flowLevel != 0 && !scalarData.isFlowPlainAllowed) || (flowLevel == 0 && !scalarData.isBlockPlainAllowed))
-				{
-					style = ScalarStyle.SingleQuoted;
-				}
-				if (string.IsNullOrEmpty(scalarData.value) && (flowLevel != 0 || isSimpleKeyContext))
-				{
-					style = ScalarStyle.SingleQuoted;
-				}
-				if (noTag && !scalar.IsPlainImplicit)
-				{
-					style = ScalarStyle.SingleQuoted;
-				}
-			}
-
-			if (style == ScalarStyle.SingleQuoted)
-			{
-				if (!scalarData.isSingleQuotedAllowed)
-				{
-					style = ScalarStyle.DoubleQuoted;
-				}
-			}
-
-			if (style == ScalarStyle.Literal || style == ScalarStyle.Folded)
-			{
-				if (!scalarData.isBlockAllowed || flowLevel != 0 || isSimpleKeyContext)
-				{
-					style = ScalarStyle.DoubleQuoted;
-				}
-			}
-
-			// TODO: What is this code supposed to mean?
-			//if (noTag && !scalar.IsQuotedImplicit && style != ScalarStyle.Plain)
-			//{
-			//    tagData.handle = "!";
-			//}
-
-			scalarData.style = style;
-		}
-
-		/// <summary>
-		/// Expect ALIAS.
-		/// </summary>
-		private void EmitAlias()
+		private void EmitSequenceStart(ParsingEvent evt)
 		{
 			ProcessAnchor();
-			state = states.Pop();
+			ProcessTag();
+
+			var sequenceStart = (SequenceStart) evt;
+
+			if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || CheckEmptySequence())
+			{
+				state = EmitterState.FlowSequenceFirstItem;
+			}
+			else
+			{
+				state = EmitterState.BlockSequenceFirstItem;
+			}
 		}
 
 		/// <summary>
-		/// Write an achor.
+		/// Expect MAPPING-START.
 		/// </summary>
+		private void EmitMappingStart(ParsingEvent evt)
+		{
+			ProcessAnchor();
+			ProcessTag();
+
+			var mappingStart = (MappingStart) evt;
+
+			if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || CheckEmptyMapping())
+			{
+				state = EmitterState.FlowMappingFirstKey;
+			}
+			else
+			{
+				state = EmitterState.BlockMappingFirstKey;
+			}
+		}
+
 		private void ProcessAnchor()
 		{
 			if (anchorData.anchor != null)
@@ -1495,12 +1235,27 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private void WriteAnchor(string value)
+		private void ProcessTag()
 		{
-			Write(value);
+			if (tagData.handle == null && tagData.suffix == null)
+			{
+				return;
+			}
 
-			isWhitespace = false;
-			isIndentation = false;
+			if (tagData.handle != null)
+			{
+				WriteTagHandle(tagData.handle);
+				if (tagData.suffix != null)
+				{
+					WriteTagContent(tagData.suffix, false);
+				}
+			}
+			else
+			{
+				WriteIndicator("!<", true, false, false);
+				WriteTagContent(tagData.suffix, false);
+				WriteIndicator(">", false, false, false);
+			}
 		}
 
 		/// <summary>
@@ -1508,7 +1263,7 @@ namespace YamlDotNet.Core
 		/// </summary>
 		private void EmitDocumentEnd(ParsingEvent evt)
 		{
-			DocumentEnd documentEnd = evt as DocumentEnd;
+			var documentEnd = evt as DocumentEnd;
 			if (documentEnd != null)
 			{
 				WriteIndent();
@@ -1529,10 +1284,8 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// 
 		/// Expect a flow item node.
 		/// </summary>
-
 		private void EmitFlowSequenceItem(ParsingEvent evt, bool isFirst)
 		{
 			if (isFirst)
@@ -1617,72 +1370,6 @@ namespace YamlDotNet.Core
 				states.Push(EmitterState.FlowMappingValue);
 				EmitNode(evt, false, true, false);
 			}
-		}
-
-		private const int MaxAliasLength = 128;
-
-		private static int SafeStringLength(string value)
-		{
-			return value != null ? value.Length : 0;
-		}
-
-		/// <summary>
-		/// Check if the next node can be expressed as a simple key.
-		/// </summary>
-		private bool CheckSimpleKey()
-		{
-			if (events.Count < 1)
-			{
-				return false;
-			}
-
-			int length;
-			switch (events.Peek().Type)
-			{
-				case EventType.Alias:
-					length = SafeStringLength(anchorData.anchor);
-					break;
-
-				case EventType.Scalar:
-					if (scalarData.isMultiline)
-					{
-						return false;
-					}
-
-					length =
-						SafeStringLength(anchorData.anchor) +
-						SafeStringLength(tagData.handle) +
-						SafeStringLength(tagData.suffix) +
-						SafeStringLength(scalarData.value);
-					break;
-
-				case EventType.SequenceStart:
-					if (!CheckEmptySequence())
-					{
-						return false;
-					}
-					length =
-						SafeStringLength(anchorData.anchor) +
-						SafeStringLength(tagData.handle) +
-						SafeStringLength(tagData.suffix);
-					break;
-
-				case EventType.MappingStart:
-					if (!CheckEmptySequence())
-					{
-						return false;
-					}
-					length =
-						SafeStringLength(anchorData.anchor) +
-						SafeStringLength(tagData.handle) +
-						SafeStringLength(tagData.suffix);
-					break;
-
-				default:
-					return false;
-			}
-
-			return length <= MaxAliasLength;
 		}
 
 		/// <summary>
@@ -1780,29 +1467,262 @@ namespace YamlDotNet.Core
 			EmitNode(evt, false, true, false);
 		}
 
+		private void IncreaseIndent(bool isFlow, bool isIndentless)
+		{
+			indents.Push(indent);
+
+			if (indent < 0)
+			{
+				indent = isFlow ? bestIndent : 0;
+			}
+			else if (!isIndentless)
+			{
+				indent += bestIndent;
+			}
+		}
+
+		#region Check Methods
+
+		/// <summary>
+		/// Check if the document content is an empty scalar.
+		/// </summary>
+		private bool CheckEmptyDocument()
+		{
+			var index = 0;
+			foreach (var parsingEvent in events)
+			{
+				index++;
+				if (index == 2)
+				{
+					var scalar = parsingEvent as Scalar;
+					if (scalar != null)
+					{
+						return string.IsNullOrEmpty(scalar.Value);
+					}
+					break;
+				}
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Check if the next node can be expressed as a simple key.
+		/// </summary>
+		private bool CheckSimpleKey()
+		{
+			if (events.Count < 1)
+			{
+				return false;
+			}
+
+			int length;
+			switch (events.Peek().Type)
+			{
+			case EventType.Alias:
+				length = SafeStringLength(anchorData.anchor);
+				break;
+
+			case EventType.Scalar:
+				if (scalarData.isMultiline)
+				{
+					return false;
+				}
+
+				length =
+					SafeStringLength(anchorData.anchor) +
+						SafeStringLength(tagData.handle) +
+						SafeStringLength(tagData.suffix) +
+						SafeStringLength(scalarData.value);
+				break;
+
+			case EventType.SequenceStart:
+				if (!CheckEmptySequence())
+				{
+					return false;
+				}
+				length =
+					SafeStringLength(anchorData.anchor) +
+						SafeStringLength(tagData.handle) +
+						SafeStringLength(tagData.suffix);
+				break;
+
+			case EventType.MappingStart:
+				if (!CheckEmptySequence())
+				{
+					return false;
+				}
+				length =
+					SafeStringLength(anchorData.anchor) +
+						SafeStringLength(tagData.handle) +
+						SafeStringLength(tagData.suffix);
+				break;
+
+			default:
+				return false;
+			}
+
+			return length <= MaxAliasLength;
+		}
+
+		private int SafeStringLength(string value)
+		{
+			return value == null? 0: value.Length;
+		}
+
+		private bool CheckEmptySequence()
+		{
+			if (events.Count < 2)
+			{
+				return false;
+			}
+
+			// Todo: must be something better than this FakeList
+			var eventList = new FakeList<ParsingEvent>(events);
+			return eventList[0] is SequenceStart && eventList[1] is SequenceEnd;
+		}
+
+		private bool CheckEmptyMapping()
+		{
+			if (events.Count < 2)
+			{
+				return false;
+			}
+
+			// Todo: must be something better than this FakeList
+			var eventList = new FakeList<ParsingEvent>(events);
+			return eventList[0] is MappingStart && eventList[1] is MappingEnd;
+		}
+
+		#endregion
+
+		#region Write Methods
+
 		private void WriteBlockScalarHints(string value)
 		{
 			var analyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
 
-			if(analyzer.IsSpace() || analyzer.IsBreak()) {
-				string indent_hint = string.Format(CultureInfo.InvariantCulture, "{0}\0", bestIndent);
-				WriteIndicator(indent_hint, false, false, false);
+			if (analyzer.IsSpace() || analyzer.IsBreak())
+			{
+				var indentHint = string.Format(CultureInfo.InvariantCulture, "{0}\0", bestIndent);
+				WriteIndicator(indentHint, false, false, false);
 			}
 
 			isOpenEnded = false;
 
-			string chomp_hint = null;
-			if(value.Length == 0 || !analyzer.IsBreak(value.Length - 1)) {
-				chomp_hint = "-";
+			string chompHint = null;
+			if (value.Length == 0 || !analyzer.IsBreak(value.Length - 1))
+			{
+				chompHint = "-";
 			}
-			else if(value.Length >= 2 && analyzer.IsBreak(value.Length - 2)) {
-				chomp_hint = "+";
+			else if (value.Length >= 2 && analyzer.IsBreak(value.Length - 2))
+			{
+				chompHint = "+";
 				isOpenEnded = true;
 			}
 
-			if(chomp_hint != null){
-				WriteIndicator(chomp_hint, false, false, false);
+			if (chompHint != null)
+			{
+				WriteIndicator(chompHint, false, false, false);
 			}
 		}
+
+		private void WriteIndicator(string indicator, bool needWhitespace, bool whitespace, bool indentation)
+		{
+			if (needWhitespace && !isWhitespace)
+			{
+				Write(' ');
+			}
+
+			Write(indicator);
+
+			isWhitespace = whitespace;
+			isIndentation &= indentation;
+			isOpenEnded = false;
+		}
+
+		private void WriteIndent()
+		{
+			var currentIndent = Math.Max(indent, 0);
+
+			if (!isIndentation || column > currentIndent || (column == currentIndent && !isWhitespace))
+			{
+				WriteBreak();
+			}
+
+			while (column < currentIndent)
+			{
+				Write(' ');
+			}
+
+			isWhitespace = true;
+			isIndentation = true;
+		}
+
+		private void WriteAnchor(string value)
+		{
+			Write(value);
+
+			isWhitespace = false;
+			isIndentation = false;
+		}
+
+		private void WriteTagHandle(string value)
+		{
+			if (!isWhitespace)
+			{
+				Write(' ');
+			}
+
+			Write(value);
+
+			isWhitespace = false;
+			isIndentation = false;
+		}
+
+		private void WriteTagContent(string value, bool needsWhitespace)
+		{
+			if (needsWhitespace && !isWhitespace)
+			{
+				Write(' ');
+			}
+
+			Write(UrlEncode(value));
+
+			isWhitespace = false;
+			isIndentation = false;
+		}
+
+		private string UrlEncode(string text)
+		{
+			return uriReplacer.Replace(text, delegate(Match match) {
+				var buffer = new StringBuilder();
+				foreach (var toEncode in Encoding.UTF8.GetBytes(match.Value))
+				{
+					buffer.AppendFormat("%{0:X02}", toEncode);
+				}
+				return buffer.ToString();
+			});
+		}
+
+		private void Write(char value)
+		{
+			output.Write(value);
+			++column;
+		}
+
+		private void Write(string value)
+		{
+			output.Write(value);
+			column += value.Length;
+		}
+
+		private void WriteBreak()
+		{
+			output.WriteLine();
+			column = 0;
+		}
+
+		#endregion
 	}
 }
