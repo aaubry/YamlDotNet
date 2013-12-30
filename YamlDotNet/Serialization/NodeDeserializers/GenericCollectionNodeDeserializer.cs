@@ -66,13 +66,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				var promise = value as IValuePromise;
 				if (promise == null)
 				{
-					result.Add((TItem)value);
+					result.Add(TypeConverter.ChangeType<TItem>(value));
 				}
 				else if(list != null)
 				{
 					var index = list.Count;
 					result.Add(default(TItem));
-					promise.ValueAvailable += v => list[index] = (TItem)v;
+					promise.ValueAvailable += v => list[index] = TypeConverter.ChangeType<TItem>(v);
 				}
 				else
 				{

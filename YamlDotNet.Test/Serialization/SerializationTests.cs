@@ -652,6 +652,21 @@ namespace YamlDotNet.Test.Serialization
 			A.CallTo(() => convention.Apply("FirstTest")).MustHaveHappened();
 			A.CallTo(() => convention.Apply("SecondTest")).MustHaveHappened();
 		}
+
+		[Fact]
+		public void TypeConverterIsUsedOnListItems()
+		{
+			var text = Lines(
+				"- !<!{type}>",
+				"  Left: hello",
+				"  Right: world")
+				.TemplatedOn<Convertible>();
+
+			var list = Deserializer.Deserialize<List<string>>(UsingReaderFor(text));
+
+			list
+				.Should().NotBeNull()
+				.And.ContainSingle(c => c == "[hello, world]");
+		}
 	}
 }
-

@@ -40,7 +40,12 @@ namespace YamlDotNet.Test
 		public static string TemplatedOn<T>(this TextReader reader)
 		{
 			var text = reader.ReadToEnd();
-			return Regex.Replace(text, @"{type}", match => 
+			return text.TemplatedOn<T>();
+		}
+
+		public static string TemplatedOn<T>(this string text)
+		{
+			return Regex.Replace(text, @"{type}", match =>
 				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Assembly.FullName)));
 		}
 	}
