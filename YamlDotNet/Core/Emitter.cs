@@ -167,6 +167,7 @@ namespace YamlDotNet.Core
 				StateMachine(current);
 
 				// Only dequeue after calling state_machine because it checks how many events are in the queue.
+				// Todo: well, move into StateMachine() then
 				events.Dequeue();
 			}
 		}
@@ -577,7 +578,9 @@ namespace YamlDotNet.Core
 			{
 				var isImplicit = documentStart.IsImplicit && isFirst && !isCanonical;
 
-				if (documentStart.Version != null && isOpenEnded)
+				var documentTagDirectives = NonDefaultTagsAmong(documentStart.Tags);
+
+				if ((documentStart.Version != null || documentTagDirectives.Count > 0) && isOpenEnded)
 				{
 					WriteIndicator("...", true, false, false);
 					WriteIndent();
@@ -589,27 +592,31 @@ namespace YamlDotNet.Core
 
 					isImplicit = false;
 					WriteIndicator("%YAML", true, false, false);
-					WriteIndicator(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Constants.MajorVersion, Constants.MinorVersion), true, false, false);
+					WriteIndicator(string.Format(CultureInfo.InvariantCulture,
+						"{0}.{1}", Constants.MajorVersion, Constants.MinorVersion),
+						true, false, false);
 					WriteIndent();
 				}
 
-				if (documentStart.Tags != null)
+				foreach (var tagDirective in documentTagDirectives)
 				{
-					foreach (var tagDirective in documentStart.Tags)
-					{
-						AppendTagDirective(tagDirective, false);
-					}
+					AppendTagDirectiveTo(tagDirective, false, tagDirectives);
 				}
 
 				foreach (var tagDirective in Constants.DefaultTagDirectives)
 				{
-					AppendTagDirective(tagDirective, true);
+					AppendTagDirectiveTo(tagDirective, true, tagDirectives);
 				}
 
-				if (documentStart.Tags != null && documentStart.Tags.Count != 0)
+				if (documentTagDirectives.Count > 0)
 				{
 					isImplicit = false;
-					foreach (var tagDirective in documentStart.Tags)
+					foreach (var tagDirective in Constants.DefaultTagDirectives)
+					{
+						AppendTagDirectiveTo(tagDirective, true, documentTagDirectives);
+					}
+
+					foreach (var tagDirective in documentTagDirectives)
 					{
 						WriteIndicator("%TAG", true, false, false);
 						WriteTagHandle(tagDirective.Handle);
@@ -652,6 +659,23 @@ namespace YamlDotNet.Core
 			}
 		}
 
+		private TagDirectiveCollection NonDefaultTagsAmong(IEnumerable<TagDirective> tagCollection)
+		{
+			var directives = new TagDirectiveCollection();
+			if (tagCollection == null)
+				return directives;
+
+			foreach (var tagDirective in tagCollection)
+			{
+				AppendTagDirectiveTo(tagDirective, false, directives);
+			}
+			foreach (var tagDirective in Constants.DefaultTagDirectives)
+			{
+				directives.Remove(tagDirective);
+			}
+			return directives;
+		}
+
 		// ReSharper disable UnusedParameter.Local
 		private void AnalyzeVersionDirective(VersionDirective versionDirective)
 		{
@@ -662,7 +686,7 @@ namespace YamlDotNet.Core
 		}
 		// ReSharper restore UnusedParameter.Local
 
-		private void AppendTagDirective(TagDirective value, bool allowDuplicates)
+		private void AppendTagDirectiveTo(TagDirective value, bool allowDuplicates, TagDirectiveCollection tagDirectives)
 		{
 			if (tagDirectives.Contains(value))
 			{

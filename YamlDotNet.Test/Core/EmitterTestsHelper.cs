@@ -10,6 +10,7 @@ namespace YamlDotNet.Test.Core
 {
 	public class EmitterTestsHelper : EventsHelper
 	{
+		protected const string FooTag = "%TAG !foo! tag:example.org:foo";
 		protected const string ExTag = "%TAG ! !";
 		protected const string ExExTag = "%TAG !! tag:yaml.org,2002:";
 
@@ -51,6 +52,13 @@ namespace YamlDotNet.Test.Core
 		protected IEnumerable<ParsingEvent> DocumentWithDefaultTags(params ParsingEvent[] events)
 		{
 			var tags = Constants.DefaultTagDirectives;
+			return Wrap(events, DocumentStart(Explicit, null, tags), DocumentEnd(Implicit));
+		}
+
+		protected IEnumerable<ParsingEvent> DocumentWithCustomTags(params ParsingEvent[] events)
+		{
+			var parts = FooTag.Split(' ');
+			var tags = new TagDirective(parts[1], parts[2]);
 			return Wrap(events, DocumentStart(Explicit, null, tags), DocumentEnd(Implicit));
 		}
 
