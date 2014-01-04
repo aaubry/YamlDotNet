@@ -66,6 +66,7 @@ namespace YamlDotNet.Core
 		private bool isIndentation;
 
 		private bool isOpenEnded;
+		private bool isDocumentEndWritten;
 
 		private readonly AnchorData anchorData = new AnchorData();
 		private readonly TagData tagData = new TagData();
@@ -580,8 +581,9 @@ namespace YamlDotNet.Core
 
 				var documentTagDirectives = NonDefaultTagsAmong(documentStart.Tags);
 
-				if ((documentStart.Version != null || documentTagDirectives.Count > 0) && isOpenEnded)
+				if (!isFirst && !isDocumentEndWritten && (documentStart.Version != null || documentTagDirectives.Count > 0))
 				{
+					isDocumentEndWritten = false;
 					WriteIndicator("...", true, false, false);
 					WriteIndent();
 				}
@@ -1295,6 +1297,7 @@ namespace YamlDotNet.Core
 				{
 					WriteIndicator("...", true, false, false);
 					WriteIndent();
+					isDocumentEndWritten = true;
 				}
 
 				state = EmitterState.DocumentStart;
