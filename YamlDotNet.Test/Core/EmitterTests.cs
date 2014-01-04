@@ -62,7 +62,8 @@ namespace YamlDotNet.Test.Core
 
 			emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
 				opt => opt.Excluding(@event => @event.Start)
-				          .Excluding(@event => @event.End));
+				          .Excluding(@event => @event.End)
+						  .Excluding((ParsingEvent @event) => ((DocumentEnd) @event).IsImplicit));
 		}
 
 		private IList<ParsingEvent> ParsingEventsOf(string text)
