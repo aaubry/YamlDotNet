@@ -145,9 +145,6 @@ namespace YamlDotNet.Test.Core
 
 		protected class ScalarBuilder
 		{
-			private const bool DefaultPlainImplicit = true;
-			private const bool DefaultQuotedImplicit = true;
-
 			private readonly string text;
 			private readonly ScalarStyle style;
 			private string tag;
@@ -158,35 +155,33 @@ namespace YamlDotNet.Test.Core
 			{
 				this.text = text;
 				this.style = style;
-				plainImplicit = DefaultPlainImplicit;
-				quotedImplicit = DefaultQuotedImplicit;
+				plainImplicit = style == ScalarStyle.Plain;
+				quotedImplicit = style != ScalarStyle.Plain &&
+					             style != ScalarStyle.Any;
 			}
 
 			public ScalarBuilder T(string tag)
 			{
 				this.tag = tag;
+				plainImplicit = false;
+				quotedImplicit = false;
 				return this;
 			}
 
-			public ScalarBuilder ExplicitPlain
+			public ScalarBuilder ImplicitPlain
 			{
 				get {
-					plainImplicit = false;
+					plainImplicit = true;
 					return this;
 				}
 			}
 
-			public ScalarBuilder ExplicitQuoted
+			public ScalarBuilder ImplicitQuoted
 			{
 				get {
-					quotedImplicit = false;
+					quotedImplicit = true;
 					return this;
 				}
-			}
-
-			public ScalarBuilder Explicit
-			{
-				get { return ExplicitPlain.ExplicitQuoted; }
 			}
 
 			public static implicit operator Scalar(ScalarBuilder builder)
