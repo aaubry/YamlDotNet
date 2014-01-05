@@ -62,7 +62,8 @@ namespace YamlDotNet.Test.Core
 
 			emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
 				opt => opt.Excluding(@event => @event.Start)
-				          .Excluding(@event => @event.End));
+				          .Excluding(@event => @event.End)
+						  .Excluding((ParsingEvent @event) => ((DocumentEnd) @event).IsImplicit));
 		}
 
 		private IList<ParsingEvent> ParsingEventsOf(string text)
@@ -88,7 +89,7 @@ namespace YamlDotNet.Test.Core
 
 			var yaml = EmittedTextFrom(events);
 
-			yaml.Should().Contain(Lines("--- test", "--- test"));
+			yaml.Should().Contain(Lines("test", "--- test"));
 		}
 
 		[Fact]
@@ -101,11 +102,11 @@ namespace YamlDotNet.Test.Core
 			var yaml = EmittedTextFrom(events);
 
 			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("--- test", "...", "%YAML 1.1", "--- test"));
+			yaml.Should().Contain(Lines("test", "...", "%YAML 1.1", "--- test"));
 		}
 
 		[Fact]
-		public void PlainScalarCanBeFollowedByDocumentWithTags()
+		public void PlainScalarCanBeFollowedByDocumentWithDefaultTags()
 		{
 			var events = StreamOf(
 				DocumentWith(PlainScalar("test")),
@@ -114,7 +115,20 @@ namespace YamlDotNet.Test.Core
 			var yaml = EmittedTextFrom(events);
 
 			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("--- test", "...", ExTag, ExExTag, "--- test"));
+			yaml.Should().Contain(Lines("test", "--- test"));
+		}
+
+		[Fact]
+		public void PlainScalarCanBeFollowedByDocumentWithCustomTags()
+		{
+			var events = StreamOf(
+				DocumentWith(PlainScalar("test")),
+				DocumentWithCustomTags(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+			yaml.Should().Contain(Lines("test", "...", FooTag, ExTag, ExExTag, "--- test"));
 		}
 
 		[Fact]
@@ -145,7 +159,7 @@ namespace YamlDotNet.Test.Core
 		}
 
 		[Fact]
-		public void BlockCanBeFollowedByDocumentWithTags()
+		public void BlockCanBeFollowedByDocumentWithDefaultTags()
 		{
 			var events = StreamOf(
 				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
@@ -154,7 +168,20 @@ namespace YamlDotNet.Test.Core
 			var yaml = EmittedTextFrom(events);
 
 			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("- 'test'", "...", ExTag, ExExTag, "--- test"));
+			yaml.Should().Contain(Lines("- 'test'", "--- test"));
+		}
+
+		[Fact]
+		public void BlockCanBeFollowedByDocumentWithCustomTags()
+		{
+			var events = StreamOf(
+				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+				DocumentWithCustomTags(PlainScalar("test")));
+
+			var yaml = EmittedTextFrom(events);
+
+			Dump.WriteLine(yaml);
+			yaml.Should().Contain(Lines("- 'test'", "...", FooTag, ExTag, ExExTag, "--- test"));
 		}
 
 		[Theory]
