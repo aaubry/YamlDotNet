@@ -666,7 +666,7 @@ namespace YamlDotNet.Test.Serialization
 
 			list
 				.Should().NotBeNull()
-				.And.ContainSingle(c => c == "[hello, world]");
+				.And.ContainSingle(c => c.Equals("[hello, world]"));
 		}
 	}
 }
