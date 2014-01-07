@@ -189,7 +189,7 @@ namespace YamlDotNet.Test.Core
 		[InlineData("CRLF hello\r\nworld")]
 		public void FoldedStyleDoesNotLooseCharacters(string text)
 		{
-			var events = SequenceWith(FoldedScalar(text).ExplicitQuoted);
+			var events = SequenceWith(FoldedScalar(text));
 
 			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -200,7 +200,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
 		{
-			var events = SequenceWith(Scalar("hello\nworld").ExplicitQuoted);
+			var events = SequenceWith(Scalar("hello\nworld").ImplicitPlain);
 
 			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -211,7 +211,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
 		{
-			var events = SequenceWith(FoldedScalar("hello\nworld").ExplicitQuoted);
+			var events = SequenceWith(FoldedScalar("hello\nworld"));
 
 			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -228,7 +228,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void FoldedStyleDoesNotCollapseLineBreaks()
 		{
-			var events = SequenceWith(FoldedScalar(">+\n").ExplicitQuoted);
+			var events = SequenceWith(FoldedScalar(">+\n"));
 
 			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -247,8 +247,8 @@ namespace YamlDotNet.Test.Core
 		{
 			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
 			var events = MappingWith(
-				Scalar("Payload"),
-				FoldedScalar(input).ExplicitQuoted);
+				Scalar("Payload").ImplicitPlain,
+				FoldedScalar(input));
 
 			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 			Dump.WriteLine(yaml);
