@@ -19,6 +19,24 @@ The most up-to-date version can always be found in the following NuGet packages:
 
 # Changelog
 
+## Version 3.0.0
+
+* Fix issue #26: Use the actual type of the objects instead of the statically detected one.
+* Merged the Core, Converters and RepresentationModel assemblies. **The NuGet packages YamlDotNet.Core and YamlDotNet.RepresentationModel are now a single package, named YamlDotNet**.
+* Removed YamlDotNet.Configuration and YamlDotNet.Converters.
+* Line numbers in error messages now start at one.
+* TypeConverter is now used to cast list items.
+* Various code improvements.
+* More and better unit tests.
+
+## Version 2.2.0
+
+TODO
+
+## Version 2.1.0
+
+TODO
+
 ## Version 2.0.0
 
 * YamlSerializer has been replaced by the Deserializer class. It offer the same functionality of YamlSerializer but is easier to maintain and extend.
