@@ -181,5 +181,14 @@ namespace YamlDotNet.Core.Events
 				isQuotedImplicit
 			);
 		}
-	}
+
+    /// <summary>
+    /// Accepts and invokes event handler for this ParsingEvent.
+    /// </summary>
+    /// <param name="handler"></param>
+    public override void Dispatch(IParsingEventHandler handler)
+    {
+      handler.Handle(this);
+    }
+  }
 }

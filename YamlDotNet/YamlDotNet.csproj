@@ -82,6 +82,7 @@
     <Compile Include="Core\Events\DocumentEnd.cs" />
     <Compile Include="Core\Events\DocumentStart.cs" />
     <Compile Include="Core\Events\EventType.cs" />
+    <Compile Include="Core\Events\IParsingEventHandler.cs" />
     <Compile Include="Core\Events\MappingStyle.cs" />
     <Compile Include="Core\Events\NodeEvent.cs" />
     <Compile Include="Core\Events\ParsingEvent.cs" />

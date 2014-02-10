@@ -68,6 +68,12 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
+    /// <summary>
+    /// Dispatch event to the specified event handler.
+    /// </summary>
+    /// <param name="handler"></param>
+    public abstract void Dispatch(IParsingEventHandler handler);
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ParsingEvent"/> class.
 		/// </summary>
