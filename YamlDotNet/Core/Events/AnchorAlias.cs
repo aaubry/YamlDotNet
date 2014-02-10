@@ -90,13 +90,13 @@ namespace YamlDotNet.Core.Events
 			return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", value);
 		}
 
-    /// <summary>
-    /// Accepts and invokes event handler for this ParsingEvent.
-    /// </summary>
-    /// <param name="handler"></param>
-    public override void Dispatch(IParsingEventHandler handler)
-    {
-      handler.Handle(this);
-    }
+		/// <summary>
+		/// Accepts and invokes event handler for this ParsingEvent.
+		/// </summary>
+		/// <param name="handler">Event handler</param>
+		public override void Dispatch(IParsingEventHandler handler)
+		{
+			handler.Handle(this);
+		}
 	}
 }
