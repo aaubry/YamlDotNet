@@ -183,12 +183,12 @@ namespace YamlDotNet.Core.Events
 		}
 
 		/// <summary>
-		/// Accepts and invokes event handler for this ParsingEvent.
+		/// Invokes run-time type specific Visit() method of the specified visitor.
 		/// </summary>
-		/// <param name="handler">Event handler</param>
-		public override void Dispatch(IParsingEventHandler handler)
+		/// <param name="visitor">visitor, may not be null.</param>
+		public override void Accept(IParsingEventVisitor visitor)
 		{
-			handler.Handle(this);
+			visitor.Visit(this);
 		}
 	}
 }

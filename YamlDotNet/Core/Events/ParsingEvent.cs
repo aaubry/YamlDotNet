@@ -69,10 +69,10 @@ namespace YamlDotNet.Core.Events
 		}
 
 		/// <summary>
-		/// Dispatch event to the specified event handler.
+		/// Accepts the specified visitor.
 		/// </summary>
-		/// <param name="handler"></param>
-		public abstract void Dispatch(IParsingEventHandler handler);
+		/// <param name="visitor">Visitor to accept, may not be null</param>
+		public abstract void Accept(IParsingEventVisitor visitor);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ParsingEvent"/> class.

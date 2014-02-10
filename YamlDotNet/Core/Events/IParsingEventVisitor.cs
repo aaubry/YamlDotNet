@@ -22,19 +22,19 @@
 namespace YamlDotNet.Core.Events
 {
 	/// <summary>
-	/// Callback interface for external event handler.
+	/// Callback interface for external event Visitr.
 	/// </summary>
-	public interface IParsingEventHandler
+	public interface IParsingEventVisitor
 	{
-		void Handle(AnchorAlias e);
-		void Handle(StreamStart e);
-		void Handle(StreamEnd e);
-		void Handle(DocumentStart e);
-		void Handle(DocumentEnd e);
-		void Handle(Scalar e);
-		void Handle(SequenceStart e);
-		void Handle(SequenceEnd e);
-		void Handle(MappingStart e);
-		void Handle(MappingEnd e);
+		void Visit(AnchorAlias e);
+		void Visit(StreamStart e);
+		void Visit(StreamEnd e);
+		void Visit(DocumentStart e);
+		void Visit(DocumentEnd e);
+		void Visit(Scalar e);
+		void Visit(SequenceStart e);
+		void Visit(SequenceEnd e);
+		void Visit(MappingStart e);
+		void Visit(MappingEnd e);
 	}
 }
