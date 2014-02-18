@@ -32,6 +32,7 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -694,6 +695,25 @@ namespace YamlDotNet.Test.Serialization
 			var des = new Deserializer(ignoreUnmatched: true);
 			var actual = des.Deserialize<Simple>(UsingReaderFor(text));
 			actual.aaa.Should().Be("hello");
+		}
+
+		[Fact]
+		public void IgnoreExtraPropertiesIfWantedNamingScheme()
+		{
+			var text = Lines(
+					"scratch: 'scratcher'",
+					"deleteScratch: false",
+					"notScratch: 9443",
+					"notScratch: 192.168.1.30",
+					"mappedScratch:",
+					"- '/work/'"
+				);
+
+			var des = new Deserializer(namingConvention: new CamelCaseNamingConvention(), ignoreUnmatched: true);
+			var actual = des.Deserialize<SimpleScratch>(UsingReaderFor(text));
+			actual.Scratch.Should().Be("scratcher");
+			actual.DeleteScratch.Should().Be(false);
+			actual.MappedScratch.Should().ContainInOrder(new[] {"/work/"});
 		}
 	}
 }

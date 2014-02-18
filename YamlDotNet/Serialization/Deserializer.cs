@@ -104,7 +104,7 @@ namespace YamlDotNet.Serialization
 			NodeDeserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
 			NodeDeserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
 			NodeDeserializers.Add(new EnumerableNodeDeserializer());
-			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched));
+			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched, namingConvention));
 
 			tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
 			TypeResolvers = new List<INodeTypeResolver>();

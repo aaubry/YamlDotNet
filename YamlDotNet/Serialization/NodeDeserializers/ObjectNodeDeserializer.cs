@@ -34,12 +34,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 		private readonly IObjectFactory _objectFactory;
 		private readonly ITypeInspector _typeDescriptor;
 		private readonly bool _ignoreUnmatched;
+		private readonly INamingConvention _naming;
 
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched)
+		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, INamingConvention naming)
 		{
 			_objectFactory = objectFactory;
 			_typeDescriptor = typeDescriptor;
 			_ignoreUnmatched = ignoreUnmatched;
+			_naming = naming;
 		}
 
 		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
@@ -52,7 +54,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			}
 			
 			value = _objectFactory.Create(expectedType);
-			var props = new HashSet<string>(expectedType.GetProperties().Select(x => x.Name));
+			var props = new HashSet<string>(expectedType.GetProperties().Select(x => _naming.Apply(x.Name)));
 			while (!reader.Accept<MappingEnd>())
 			{
 				var propertyName = reader.Expect<Scalar>();
