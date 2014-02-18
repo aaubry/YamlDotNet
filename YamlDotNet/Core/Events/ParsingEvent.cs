@@ -69,6 +69,12 @@ namespace YamlDotNet.Core.Events
 		}
 
 		/// <summary>
+		/// Accepts the specified visitor.
+		/// </summary>
+		/// <param name="visitor">Visitor to accept, may not be null</param>
+		public abstract void Accept(IParsingEventVisitor visitor);
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="ParsingEvent"/> class.
 		/// </summary>
 		/// <param name="start">The start position of the event.</param>

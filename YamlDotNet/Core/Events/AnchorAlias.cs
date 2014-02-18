@@ -89,5 +89,14 @@ namespace YamlDotNet.Core.Events
 		{
 			return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", value);
 		}
+
+		/// <summary>
+		/// Invokes run-time type specific Visit() method of the specified visitor.
+		/// </summary>
+		/// <param name="visitor">visitor, may not be null.</param>
+		public override void Accept(IParsingEventVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 	}
 }

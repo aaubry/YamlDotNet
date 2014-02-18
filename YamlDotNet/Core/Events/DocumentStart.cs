@@ -151,5 +151,14 @@ namespace YamlDotNet.Core.Events
 				isImplicit
 			);
 		}
+
+		/// <summary>
+		/// Invokes run-time type specific Visit() method of the specified visitor.
+		/// </summary>
+		/// <param name="visitor">visitor, may not be null.</param>
+		public override void Accept(IParsingEventVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 	}
 }
