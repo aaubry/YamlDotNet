@@ -32,6 +32,7 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -667,6 +668,52 @@ namespace YamlDotNet.Test.Serialization
 			list
 				.Should().NotBeNull()
 				.And.ContainSingle(c => c.Equals("[hello, world]"));
+		}
+
+		[Fact]
+		public void IgnoreExtraPropertiesIfWanted()
+		{
+			var text = Lines("aaa: hello", "bbb: world");
+			var des = new Deserializer(ignoreUnmatched: true);
+			var actual = des.Deserialize<Simple>(UsingReaderFor(text));
+			actual.aaa.Should().Be("hello");
+		}
+
+		[Fact]
+		public void DontIgnoreExtraPropertiesIfWanted()
+		{
+			var text = Lines("aaa: hello", "bbb: world");
+			var des = new Deserializer(ignoreUnmatched: false);
+			var actual = Record.Exception(() => des.Deserialize<Simple>(UsingReaderFor(text)));
+			Assert.IsType<System.Runtime.Serialization.SerializationException>(actual);
+		}
+
+		[Fact]
+		public void IgnoreExtraPropertiesIfWantedBefore()
+		{
+			var text = Lines("bbb: [200,100]", "aaa: hello");
+			var des = new Deserializer(ignoreUnmatched: true);
+			var actual = des.Deserialize<Simple>(UsingReaderFor(text));
+			actual.aaa.Should().Be("hello");
+		}
+
+		[Fact]
+		public void IgnoreExtraPropertiesIfWantedNamingScheme()
+		{
+			var text = Lines(
+					"scratch: 'scratcher'",
+					"deleteScratch: false",
+					"notScratch: 9443",
+					"notScratch: 192.168.1.30",
+					"mappedScratch:",
+					"- '/work/'"
+				);
+
+			var des = new Deserializer(namingConvention: new CamelCaseNamingConvention(), ignoreUnmatched: true);
+			var actual = des.Deserialize<SimpleScratch>(UsingReaderFor(text));
+			actual.Scratch.Should().Be("scratcher");
+			actual.DeleteScratch.Should().Be(false);
+			actual.MappedScratch.Should().ContainInOrder(new[] {"/work/"});
 		}
 	}
 }

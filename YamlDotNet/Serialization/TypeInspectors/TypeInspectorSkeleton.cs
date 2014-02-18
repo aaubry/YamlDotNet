@@ -31,15 +31,20 @@ namespace YamlDotNet.Serialization.TypeInspectors
 	{
 		public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container);
 
-		public IPropertyDescriptor GetProperty(Type type, object container, string name)
+		public IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)
 		{
 			var candidates = GetProperties(type, container)
 				.Where(p => p.Name == name);
-			
+
 			using(var enumerator = candidates.GetEnumerator())
 			{
 				if(!enumerator.MoveNext())
 				{
+					if (ignoreUnmatched)
+					{
+						return null;
+					}
+
 					throw new SerializationException(
 						string.Format(
 							CultureInfo.InvariantCulture,

@@ -343,6 +343,13 @@ namespace YamlDotNet.Test.Serialization
 		public string aaa { get; set; }
 	}
 
+    public class SimpleScratch
+    {
+        public string Scratch { get; set; }
+        public bool DeleteScratch { get; set; }
+        public IEnumerable<string> MappedScratch { get; set; }
+    }
+
 	public class Example
 	{
 		public bool MyFlag { get; set; }

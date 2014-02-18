@@ -43,7 +43,11 @@ namespace YamlDotNet.Serialization
 		/// <param name="type">The type whose properties are to be searched.</param>
 		/// <param name="container">The actual object of type <paramref name="type"/> whose properties are to be searched. Can be null.</param>
 		/// <param name="name">The name of the property.</param>
+		/// <param name="ignoreUnmatched">
+		/// Determines if an exception or null should be returned if <paramref name="name"/> can't be
+		/// found in <paramref name="type"/>
+		/// </param>
 		/// <returns></returns>
-		IPropertyDescriptor GetProperty(Type type, object container, string name);
+		IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched);
 	}
 }
