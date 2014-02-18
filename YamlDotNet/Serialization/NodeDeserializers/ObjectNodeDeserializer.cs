@@ -57,7 +57,10 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			{
 				var propertyName = reader.Expect<Scalar>();
 				if (_ignoreUnmatched && !props.Contains(propertyName.Value))
+				{
+					reader.SkipThisAndNestedEvents();
 					continue;
+				}
 				
 				var property = _typeDescriptor.GetProperty(expectedType, null, propertyName.Value);
 				var propertyValue = nestedObjectDeserializer(reader, property.Type);

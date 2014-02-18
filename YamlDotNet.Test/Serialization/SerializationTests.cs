@@ -686,5 +686,14 @@ namespace YamlDotNet.Test.Serialization
 			var actual = Record.Exception(() => des.Deserialize<Simple>(UsingReaderFor(text)));
 			Assert.IsType<System.Runtime.Serialization.SerializationException>(actual);
 		}
+
+		[Fact]
+		public void IgnoreExtraPropertiesIfWantedBefore()
+		{
+			var text = Lines("bbb: [200,100]", "aaa: hello");
+			var des = new Deserializer(ignoreUnmatched: true);
+			var actual = des.Deserialize<Simple>(UsingReaderFor(text));
+			actual.aaa.Should().Be("hello");
+		}
 	}
 }
