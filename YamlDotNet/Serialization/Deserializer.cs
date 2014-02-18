@@ -73,7 +73,10 @@ namespace YamlDotNet.Serialization
 			}
 		}
 		
-		public Deserializer(IObjectFactory objectFactory = null, INamingConvention namingConvention = null)
+		public Deserializer(
+			IObjectFactory objectFactory = null,
+			INamingConvention namingConvention = null,
+			bool ignoreUnmatched = false)
 		{
 			objectFactory = objectFactory ?? new DefaultObjectFactory();
 			namingConvention = namingConvention ?? new NullNamingConvention();
@@ -101,7 +104,7 @@ namespace YamlDotNet.Serialization
 			NodeDeserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
 			NodeDeserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
 			NodeDeserializers.Add(new EnumerableNodeDeserializer());
-			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor));
+			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched));
 
 			tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
 			TypeResolvers = new List<INodeTypeResolver>();

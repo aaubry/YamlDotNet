@@ -20,6 +20,9 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -30,11 +33,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 	{
 		private readonly IObjectFactory _objectFactory;
 		private readonly ITypeInspector _typeDescriptor;
+		private readonly bool _ignoreUnmatched;
 
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor)
+		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched)
 		{
 			_objectFactory = objectFactory;
 			_typeDescriptor = typeDescriptor;
+			_ignoreUnmatched = ignoreUnmatched;
 		}
 
 		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
@@ -47,9 +52,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			}
 			
 			value = _objectFactory.Create(expectedType);
+			var props = new HashSet<string>(expectedType.GetProperties().Select(x => x.Name));
 			while (!reader.Accept<MappingEnd>())
 			{
 				var propertyName = reader.Expect<Scalar>();
+				if (_ignoreUnmatched && !props.Contains(propertyName.Value))
+					continue;
 				
 				var property = _typeDescriptor.GetProperty(expectedType, null, propertyName.Value);
 				var propertyValue = nestedObjectDeserializer(reader, property.Type);

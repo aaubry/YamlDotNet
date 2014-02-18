@@ -668,5 +668,23 @@ namespace YamlDotNet.Test.Serialization
 				.Should().NotBeNull()
 				.And.ContainSingle(c => c.Equals("[hello, world]"));
 		}
+
+		[Fact]
+		public void IgnoreExtraPropertiesIfWanted()
+		{
+			var text = Lines("aaa: hello", "bbb: world");
+			var des = new Deserializer(ignoreUnmatched: true);
+			var actual = des.Deserialize<Simple>(UsingReaderFor(text));
+			actual.aaa.Should().Be("hello");
+		}
+
+		[Fact]
+		public void DontIgnoreExtraPropertiesIfWanted()
+		{
+			var text = Lines("aaa: hello", "bbb: world");
+			var des = new Deserializer(ignoreUnmatched: false);
+			var actual = Record.Exception(() => des.Deserialize<Simple>(UsingReaderFor(text)));
+			Assert.IsType<System.Runtime.Serialization.SerializationException>(actual);
+		}
 	}
 }
