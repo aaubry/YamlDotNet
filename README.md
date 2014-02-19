@@ -14,8 +14,7 @@ The library has now been successfully used in multiple projects and is considere
 
 The most up-to-date version can always be found in the following NuGet packages:
 
-* [http://nuget.org/packages/YamlDotNet.Core](http://nuget.org/packages/YamlDotNet.Core)
-* [http://nuget.org/packages/YamlDotNet.RepresentationModel](http://nuget.org/packages/YamlDotNet.RepresentationModel)
+* [http://www.nuget.org/packages/YamlDotNet](http://www.nuget.org/packages/YamlDotNet)
 
 # Changelog
 
