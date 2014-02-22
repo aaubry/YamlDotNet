@@ -67,9 +67,9 @@ namespace YamlDotNet.Serialization
 				return TypeDescriptor.GetProperties(type, container);
 			}
 
-			public IPropertyDescriptor GetProperty(Type type, object container, string name)
+			public IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)
 			{
-				return TypeDescriptor.GetProperty(type, container, name);
+				return TypeDescriptor.GetProperty(type, container, name, ignoreUnmatched);
 			}
 		}
 		
@@ -104,7 +104,7 @@ namespace YamlDotNet.Serialization
 			NodeDeserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
 			NodeDeserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
 			NodeDeserializers.Add(new EnumerableNodeDeserializer());
-			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched, namingConvention));
+			NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched));
 
 			tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
 			TypeResolvers = new List<INodeTypeResolver>();
