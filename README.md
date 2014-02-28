@@ -18,6 +18,10 @@ The most up-to-date version can always be found in the following NuGet packages:
 
 # Changelog
 
+## Version 3.1.0
+
+* Add a parameter to the deserializer to ignore unmapped properties in YAML.
+
 ## Version 3.0.0
 
 * Fix issue #26: Use the actual type of the objects instead of the statically detected one.
