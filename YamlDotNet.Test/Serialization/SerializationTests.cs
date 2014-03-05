@@ -564,7 +564,7 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
 			var writer = new StringWriter();
-			var obj = new IgnoreExample { IgnoreMe = "Some Text" };
+			var obj = new IgnoreExample();
 
 			Serializer.Serialize(writer, obj);
 			var serialized = writer.ToString();

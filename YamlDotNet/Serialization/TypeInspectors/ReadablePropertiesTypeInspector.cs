@@ -31,16 +31,16 @@ namespace YamlDotNet.Serialization.TypeInspectors
 	/// </summary>
 	public sealed class ReadablePropertiesTypeInspector : TypeInspectorSkeleton
 	{
-		private readonly ITypeResolver _reflectionPropertyDescriptorFactory;
+		private readonly ITypeResolver _typeResolver;
 
-		public ReadablePropertiesTypeInspector(ITypeResolver reflectionPropertyDescriptorFactory)
+		public ReadablePropertiesTypeInspector(ITypeResolver typeResolver)
 		{
-			if (reflectionPropertyDescriptorFactory == null)
+			if (typeResolver == null)
 			{
-				throw new ArgumentNullException("reflectionPropertyDescriptorFactory");
+				throw new ArgumentNullException("typeResolver");
 			}
 
-			_reflectionPropertyDescriptorFactory = reflectionPropertyDescriptorFactory;
+			_typeResolver = typeResolver;
 		}
 
 		private static bool IsValidProperty(PropertyInfo property)
@@ -54,34 +54,26 @@ namespace YamlDotNet.Serialization.TypeInspectors
 			return type
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.Where(IsValidProperty)
-				.Select(p =>
-				{
-					var propertyValue = container != null
-						? p.GetValue(container, null)
-						: null;
-
-					return (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, _reflectionPropertyDescriptorFactory.Resolve(p.PropertyType, propertyValue), propertyValue);
-				});
+				.Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, _typeResolver));
 		}
 
 		private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
 		{
 			private readonly PropertyInfo _propertyInfo;
+			private readonly ITypeResolver _typeResolver;
 
-			public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, Type type, object value)
+			public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, ITypeResolver typeResolver)
 			{
 				_propertyInfo = propertyInfo;
-				Type = type;
-				Value = value;
+				_typeResolver = typeResolver;
 			}
 
 			public string Name { get { return _propertyInfo.Name; } }
-			public Type Type { get; private set; }
-			public Type StaticType { get { return _propertyInfo.PropertyType; } }
-			public object Value { get; private set; }
+			public Type Type { get { return _propertyInfo.PropertyType; } }
+			public Type TypeOverride { get; set; }
 			public bool CanWrite { get { return _propertyInfo.CanWrite; } }
 
-			public void SetValue(object target, object value)
+			public void Write(object target, object value)
 			{
 				_propertyInfo.SetValue(target, value, null);
 			}
@@ -92,6 +84,13 @@ namespace YamlDotNet.Serialization.TypeInspectors
 				return attributes.Length > 0
 					? (T)attributes[0]
 					: null;
+			}
+
+			public IObjectDescriptor Read(object target)
+			{
+				var propertyValue = _propertyInfo.GetValue(target, null);
+				var actualType = TypeOverride ?? _typeResolver.Resolve(Type, propertyValue);
+				return new ObjectDescriptor(propertyValue, actualType, Type);
 			}
 		}
 	}

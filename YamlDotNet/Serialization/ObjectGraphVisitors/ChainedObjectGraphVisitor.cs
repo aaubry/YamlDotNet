@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			return nextVisitor.EnterMapping(key, value);
 		}
 
-		public virtual bool EnterMapping(IPropertyDescriptor key, object value)
+		public virtual bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
 		{
 			return nextVisitor.EnterMapping(key, value);
 		}

@@ -53,7 +53,7 @@ namespace YamlDotNet.Serialization
 		/// <param name="key">The <see cref="IPropertyDescriptor"/> that provided access to <paramref name="value"/>.</param>
 		/// <param name="value">The value of the mapping that is about to be entered.</param>
 		/// <returns>If the mapping is to be entered, returns true; otherwise returns false;</returns>
-		bool EnterMapping(IPropertyDescriptor key, object value);
+		bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value);
 
 		/// <summary>
 		/// Notifies the visitor that a scalar value has been encountered.

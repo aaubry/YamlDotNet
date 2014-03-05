@@ -45,14 +45,14 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			       && base.EnterMapping(key, value);
 		}
 
-		public override bool EnterMapping(IPropertyDescriptor key, object value)
+		public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
 		{
 			var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
 			var defaultValue = defaultValueAttribute != null
 				? defaultValueAttribute.Value
 				: GetDefault(key.Type);
 
-			return !_objectComparer.Equals(value, defaultValue)
+			return !_objectComparer.Equals(value.Value, defaultValue)
 				   && base.EnterMapping(key, value);
 		}
 	}

@@ -65,7 +65,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			return true;
 		}
 
-		bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, object value)
+		bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
 		{
 			return true;
 		}

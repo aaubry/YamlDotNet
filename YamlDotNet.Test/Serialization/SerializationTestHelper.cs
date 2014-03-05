@@ -378,7 +378,11 @@ namespace YamlDotNet.Test.Serialization
 	public class IgnoreExample
 	{
 		[YamlIgnore]
-		public String IgnoreMe { get; set; }
+		public String IgnoreMe
+		{
+			get { throw new NotImplementedException("Accessing a [YamlIgnore] property"); }
+			set { throw new NotImplementedException("Accessing a [YamlIgnore] property"); }
+		}
 	}
 
 	public class DefaultsExample

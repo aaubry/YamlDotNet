@@ -57,7 +57,7 @@ namespace YamlDotNet.Serialization
 					{
 						if (member.SerializeAs != null)
 						{
-							descriptor.Type = member.SerializeAs;
+							descriptor.TypeOverride = member.SerializeAs;
 						}
 					}
 

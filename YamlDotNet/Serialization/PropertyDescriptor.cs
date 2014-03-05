@@ -31,17 +31,16 @@ namespace YamlDotNet.Serialization
 		{
 			this.baseDescriptor = baseDescriptor;
 			Name = baseDescriptor.Name;
-			Type = baseDescriptor.Type;
-			StaticType = baseDescriptor.StaticType;
 		}
 
 		public string Name { get; set; }
-		public Type Type { get; set; }
-		public Type StaticType { get; set; }
 
-		public object Value
+		public Type Type { get { return baseDescriptor.Type; } }
+
+		public Type TypeOverride
 		{
-			get { return baseDescriptor.Value; }
+			get { return baseDescriptor.TypeOverride; }
+			set { baseDescriptor.TypeOverride = value; }
 		}
 
 		public bool CanWrite
@@ -49,14 +48,19 @@ namespace YamlDotNet.Serialization
 			get { return baseDescriptor.CanWrite; }
 		}
 
-		public void SetValue(object target, object value)
+		public void Write(object target, object value)
 		{
-			baseDescriptor.SetValue(target, value);
+			baseDescriptor.Write(target, value);
 		}
 
 		public T GetCustomAttribute<T>() where T : Attribute
 		{
 			return baseDescriptor.GetCustomAttribute<T>();
+		}
+
+		public IObjectDescriptor Read(object target)
+		{
+			return baseDescriptor.Read(target);
 		}
 	}
 }

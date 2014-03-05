@@ -228,12 +228,12 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
 			foreach (var propertyDescriptor in typeDescriptor.GetProperties(value.Type, value.Value))
 			{
-				var propertyValue = propertyDescriptor.Value;
+				var propertyValue = propertyDescriptor.Read(value.Value);
 
 				if (visitor.EnterMapping(propertyDescriptor, propertyValue))
 				{
 					Traverse(new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string)), visitor, currentDepth);
-					Traverse(propertyDescriptor, visitor, currentDepth);
+					Traverse(propertyValue, visitor, currentDepth);
 				}
 			}
 

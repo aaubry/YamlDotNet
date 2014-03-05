@@ -67,7 +67,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				if (propertyValuePromise == null)
 				{
 					var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
-					property.SetValue(value, convertedValue);
+					property.Write(value, convertedValue);
 				}
 				else
 				{
@@ -75,7 +75,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					propertyValuePromise.ValueAvailable += v =>
 					{
 						var convertedValue = TypeConverter.ChangeType(v, property.Type);
-						property.SetValue(valueRef, convertedValue);
+						property.Write(valueRef, convertedValue);
 					};
 				}
 			}
