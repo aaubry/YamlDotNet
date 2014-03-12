@@ -362,11 +362,12 @@ namespace YamlDotNet.Dynamic
 			}
 
 			var underlyingType = Nullable.GetUnderlyingType(type);
+			bool isNullableType = IsNullableType(type);
 			if (underlyingType != null)
 			{
 				type = underlyingType;
 			}
-			return TryConvertToBasicType(type, IsNullableType(type), out result);
+			return TryConvertToBasicType(type, isNullableType, out result);
 		}
 
 		private bool TryConvertToDictionary(Type type, out object result)
