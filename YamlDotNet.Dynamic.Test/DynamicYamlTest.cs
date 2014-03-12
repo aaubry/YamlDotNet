@@ -193,6 +193,19 @@ namespace YamlDotNet.Dynamic.Test
 			id.Should().NotHaveValue();
 		}
 
+		[Fact]
+		public void TestBool()
+		{
+			dynamic dynamicYaml = new DynamicYaml(MappingYaml);
+
+			bool[] values = dynamicYaml.valid;
+
+			values[0].Should().BeTrue();
+			values[1].Should().BeTrue();
+			values[2].Should().BeFalse();
+			values[3].Should().BeFalse();
+		}
+
 		private const string EnumYaml = @"---
             - stringComparisonMode: CurrentCultureIgnoreCase
             - stringComparisonMode: Ordinal";
@@ -216,6 +229,7 @@ namespace YamlDotNet.Dynamic.Test
 		private const string MappingYaml = @"---
             receipt:    Oz-Ware Purchase Invoice
             date:        2007-08-06
+            valid:        [true, True, False, false]
             customer:
                 given:   Dorothy
                 family:  Gale

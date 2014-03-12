@@ -43,7 +43,8 @@ namespace YamlDotNet.Dynamic
 			typeof(long),
 			typeof(float),
 			typeof(double),
-			typeof(decimal)
+			typeof(decimal),
+			typeof(bool)
 		};
 
 
@@ -267,6 +268,13 @@ namespace YamlDotNet.Dynamic
 				decimal decimalResult;
 				var success = decimal.TryParse(scalarNode.Value, out decimalResult);
 				result = success ? (object)decimalResult : null;
+				return success;
+			}
+			if (type == typeof(bool))
+			{
+				bool boolResult;
+				var success = bool.TryParse(scalarNode.Value, out boolResult);
+				result = success ? (object)boolResult : null;
 				return success;
 			}
 			if (type.IsEnum)
