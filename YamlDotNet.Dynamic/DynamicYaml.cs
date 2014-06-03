@@ -138,10 +138,21 @@ namespace YamlDotNet.Dynamic
 			{
 				return FailToGetValue(out result);
 			}
-			var yamlKey = new YamlScalarNode(key.Decapitalize());
-			var yamlKey2 = new YamlScalarNode(key.Capitalize());
-			return TryGetValueByYamlKeyAndType(yamlKey, type, out result) ||
-				TryGetValueByYamlKeyAndType(yamlKey2, type, out result);
+
+			// try and get an exact match to the key first
+			if (TryGetValueByYamlKeyAndType(key, type, out result))
+			{
+				return true;
+			}
+
+			// otherwise try and match the key with a different cased first character
+			var yamlKey = new YamlScalarNode(key.InverseFirstCapital());
+			if (TryGetValueByYamlKeyAndType(yamlKey, type, out result))
+			{
+				return true;
+			}
+
+			return IsNullableType(type) ? SuccessfullyGetValue(new DynamicYaml((YamlNode)null), out result) : FailToGetValue(out result);
 		}
 
 		private bool TryGetValueByYamlKeyAndType(YamlScalarNode yamlKey, Type type, out object result)
@@ -154,8 +165,8 @@ namespace YamlDotNet.Dynamic
 					return true;
 				}
 			}
-
-			return IsNullableType(type) ? SuccessfullyGetValue(new DynamicYaml((YamlNode)null), out result) : FailToGetValue(out result);
+			
+			return FailToGetValue(out result);
 		}
 
 		private static bool IsNullableType(Type type)

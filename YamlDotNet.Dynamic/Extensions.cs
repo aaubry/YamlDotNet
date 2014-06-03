@@ -37,24 +37,17 @@ namespace YamlDotNet.Dynamic
 			return string.IsNullOrEmpty(str);
 		}
 
-		public static string Capitalize(this string str)
+		public static string InverseFirstCapital(this string str)
 		{
 			if (str.IsNullOrEmpty())
 			{
 				return str;
 			}
 
-			return char.ToUpper(str[0]) + str.Substring(1);
-		}
+			char first = str[0];
+			first = char.IsUpper(first) ? char.ToLower(str[0]) : char.ToUpper(first);
 
-		public static string Decapitalize(this string str)
-		{
-			if (str.IsNullOrEmpty())
-			{
-				return str;
-			}
-
-			return char.ToLower(str[0]) + str.Substring(1);
+			return first + str.Substring(1);
 		}
 	}
 }
