@@ -76,12 +76,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					if (valuePromise == null)
 					{
 						// Happy path: both key and value are known
-						result.Add((TKey)key, (TValue)value);
+						result[(TKey)key] = (TValue)value;
 					}
 					else
 					{
 						// Key is known, value is pending
-						valuePromise.ValueAvailable += v => result.Add((TKey)key, (TValue)v);
+						valuePromise.ValueAvailable += v => result[(TKey)key] = (TValue)v;
 					}
 				}
 				else
@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					if (valuePromise == null)
 					{
 						// Key is pending, value is known
-						keyPromise.ValueAvailable += v => result.Add((TKey)v, (TValue)value);
+						keyPromise.ValueAvailable += v => result[(TKey)v] = (TValue)value;
 					}
 					else
 					{
@@ -100,7 +100,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						{
 							if (hasFirstPart)
 							{
-								result.Add((TKey)v, (TValue)value);
+								result[(TKey)v] = (TValue)value;
 							}
 							else
 							{
@@ -113,7 +113,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						{
 							if (hasFirstPart)
 							{
-								result.Add((TKey)key, (TValue)v);
+								result[(TKey)key] = (TValue)v;
 							}
 							else
 							{

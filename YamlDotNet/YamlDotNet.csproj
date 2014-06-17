@@ -103,6 +103,7 @@
     <Compile Include="Core\IScanner.cs" />
     <Compile Include="Core\LookAheadBuffer.cs" />
     <Compile Include="Core\Mark.cs" />
+    <Compile Include="Core\MergingParser.cs" />
     <Compile Include="Core\Parser.cs" />
     <Compile Include="Core\ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
