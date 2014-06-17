@@ -675,7 +675,8 @@ namespace YamlDotNet.Test.Serialization
 		{
 			var stream = Yaml.StreamFrom("backreference.yaml");
 
-			var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(stream);
+			var parser = new MergingParser(new Parser(stream));
+			var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(new EventReader(parser));
 
 			var alias = result["alias"];
 			alias.Should()
