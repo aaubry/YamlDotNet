@@ -206,6 +206,42 @@ namespace YamlDotNet.Dynamic.Test
 			values[3].Should().BeFalse();
 		}
 
+		[Fact]
+		public void TestNamingConventions()
+		{
+			dynamic dynamicYaml = new DynamicYaml(NamingConventionsYaml);
+
+			string snake = dynamicYaml.snake_case;
+			snake.Should().Be("should work", "the key was typed in snake case");
+
+			string pascal = dynamicYaml.PascalCase;
+			pascal.Should().Be("should work as well", "the key was typed in pascal case");
+
+			string camel = dynamicYaml.camelCase;
+			camel.Should().Be("will also work", "the key was typed in camel case");
+
+			string upper = dynamicYaml.UPPER_CASE;
+			upper.Should().Be("works as well", "the key was typed in upper case");
+		}
+
+		[Fact]
+		public void TestNamingConventionsWithFirstLetterCaseInsensitivity()
+		{
+			dynamic dynamicYaml = new DynamicYaml(NamingConventionsYaml);
+
+			string snake = dynamicYaml.Snake_case;
+			snake.Should().Be("should work", "the key was typed in snake case");
+
+			string pascal = dynamicYaml.pascalCase;
+			pascal.Should().Be("should work as well", "the key was typed in pascal case");
+
+			string camel = dynamicYaml.CamelCase;
+			camel.Should().Be("will also work", "the key was typed in camel case");
+
+			string upper = dynamicYaml.uPPER_CASE;
+			upper.Should().Be("works as well", "the key was typed in upper case");
+		}
+
 		private const string EnumYaml = @"---
             - stringComparisonMode: CurrentCultureIgnoreCase
             - stringComparisonMode: Ordinal";
@@ -225,6 +261,12 @@ namespace YamlDotNet.Dynamic.Test
 		private const string NestedSequenceYaml = @"---
             - [1, 2, 3]
             - [4, 5, 6]";
+
+		private const string NamingConventionsYaml = @"---
+            snake_case: should work
+            PascalCase: should work as well
+            camelCase: will also work
+            UPPER_CASE: works as well";
 
 		private const string MappingYaml = @"---
             receipt:    Oz-Ware Purchase Invoice
