@@ -148,9 +148,9 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 				}
 				else
 				{
-					throw new DuplicateAnchorException(alias.Start, alias.End, string.Format(
+					throw new DuplicateAnchorException(nodeEvent.Start, nodeEvent.End, string.Format(
 						"Anchor '{0}' already defined",
-						alias.Value
+						anchor
 					));
 				}
 			}
