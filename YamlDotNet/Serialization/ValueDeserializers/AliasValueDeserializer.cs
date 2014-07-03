@@ -41,9 +41,9 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 			this.innerDeserializer = innerDeserializer;
 		}
 
-		private sealed class AliasState : Dictionary<string, ValuePromise>, IDisposable
+		private sealed class AliasState : Dictionary<string, ValuePromise>, IPostDeserializationCallback
 		{
-			public void Dispose()
+			public void OnDeserialization()
 			{
 				foreach (var promise in Values)
 				{

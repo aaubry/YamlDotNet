@@ -18,6 +18,25 @@ The most up-to-date version can always be found in the following NuGet packages:
 
 # Changelog
 
+## Version 3.2.1
+
+* Fix AnchorNotFoundException when another exception occurs during deserialization.
+
+## Version 3.2.0
+
+This release adds merge key support: http://yaml.org/type/merge.html
+
+Example from BackreferencesAreMergedWithMappings unit test:
+
+```C#
+var reader = new EventReader(new MergingParser(new Parser(stream)));
+var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
+```
+
+## Version 3.1.1
+
+This is a bugfix release that fixes issue #90.
+
 ## Version 3.1.0
 
 * Add a parameter to the deserializer to ignore unmapped properties in YAML.

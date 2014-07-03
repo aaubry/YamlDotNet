@@ -184,6 +184,7 @@ namespace YamlDotNet.Serialization
 				using (var state = new SerializerState())
 				{
 					result = valueDeserializer.DeserializeValue(reader, type, state, valueDeserializer);
+					state.OnDeserialization();
 				}
 			}
 

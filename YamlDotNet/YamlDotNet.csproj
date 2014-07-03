@@ -212,6 +212,7 @@
     <Compile Include="Serialization\TypeInspectors\TypeInspectorSkeleton.cs" />
     <Compile Include="Serialization\TypeResolvers\DynamicTypeResolver.cs" />
     <Compile Include="Serialization\TypeResolvers\StaticTypeResolver.cs" />
+    <Compile Include="Serialization\Utilities\IPostDeserializationCallback.cs" />
     <Compile Include="Serialization\Utilities\ObjectAnchorCollection.cs" />
     <Compile Include="Serialization\Utilities\ReflectionUtility.cs" />
     <Compile Include="Serialization\Utilities\SerializerState.cs" />

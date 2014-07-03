@@ -45,6 +45,18 @@ namespace YamlDotNet.Serialization.Utilities
 			return (T)value;
 		}
 
+		/// <summary>
+		/// Invokes <see cref="IPostDeserializationCallback.OnDeserialization" /> on all
+		/// objects added to this collection that implement <see cref="IPostDeserializationCallback" />.
+		/// </summary>
+		public void OnDeserialization()
+		{
+			foreach (var callback in items.Values.OfType<IPostDeserializationCallback>())
+			{
+				callback.OnDeserialization();
+			}
+		}
+
 		public void Dispose()
 		{
 			foreach (var disposable in items.Values.OfType<IDisposable>())

@@ -18,3 +18,5 @@ release/*
 packages
 packages/*
 !packages/repositories.config
+
+README.html
