@@ -1,0 +1,6 @@
+%YAML 1.1
+%TAG !x! tag:example.com,2014:
+--- !x!foo
+x: 0
+--- !x!bar
+x: 1
