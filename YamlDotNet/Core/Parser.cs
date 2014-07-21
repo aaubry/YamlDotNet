@@ -303,11 +303,10 @@ namespace YamlDotNet.Core
 				}
 				else if ((tag = GetCurrentToken() as TagDirective) != null)
 				{
-					if (tagDirectives.Contains(tag.Handle))
+					if (tags.Contains(tag.Handle))
 					{
 						throw new SemanticErrorException(tag.Start, tag.End, "Found duplicate %TAG directive.");
 					}
-					tagDirectives.Add(tag);
 					tags.Add(tag);
 				}
 				else
@@ -319,7 +318,7 @@ namespace YamlDotNet.Core
 			}
 
 			AddTagDirectives(tags, Constants.DefaultTagDirectives);
-			AddTagDirectives(tagDirectives, Constants.DefaultTagDirectives);
+			AddTagDirectives(tagDirectives, tags);
 
 			return version;
 		}
