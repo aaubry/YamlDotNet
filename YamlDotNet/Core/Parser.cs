@@ -318,15 +318,15 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			AddDefaultTagDirectives(tags);
-			AddDefaultTagDirectives(tagDirectives);
+			AddTagDirectives(tags, Constants.DefaultTagDirectives);
+			AddTagDirectives(tagDirectives, Constants.DefaultTagDirectives);
 
 			return version;
 		}
 
-		private static void AddDefaultTagDirectives(TagDirectiveCollection directives)
+		private static void AddTagDirectives(TagDirectiveCollection directives, IEnumerable<TagDirective> source)
 		{
-			foreach(var directive in Constants.DefaultTagDirectives)
+			foreach(var directive in source)
 			{
 				if (!directives.Contains(directive))
 				{
