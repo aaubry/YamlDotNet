@@ -308,10 +308,7 @@ namespace YamlDotNet.Core
 						throw new SemanticErrorException(tag.Start, tag.End, "Found duplicate %TAG directive.");
 					}
 					tagDirectives.Add(tag);
-					if (tags != null)
-					{
-						tags.Add(tag);
-					}
+					tags.Add(tag);
 				}
 				else
 				{
@@ -321,10 +318,7 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			if (tags != null)
-			{
-				AddDefaultTagDirectives(tags);
-			}
+			AddDefaultTagDirectives(tags);
 			AddDefaultTagDirectives(tagDirectives);
 
 			return version;
