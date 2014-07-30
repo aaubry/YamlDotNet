@@ -19,28 +19,27 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 
 namespace YamlDotNetEditor
 {
-	internal static class FileAndContentTypeDefinitions
+	[Export(typeof(IClassifierProvider))]
+	[ContentType("yaml")]
+	internal class YamlClassifierProvider : IClassifierProvider
 	{
-#pragma warning disable 0649	// Field is never assigned
-		[Export]
-		[Name("yaml")]
-		[BaseDefinition("text")]
-		internal static ContentTypeDefinition hidingContentTypeDefinition;
+		/// <summary>
+		/// Import the classification registry to be used for getting a reference
+		/// to the custom classification type later.
+		/// </summary>
+		[Import]
+		internal IClassificationTypeRegistryService ClassificationRegistry = null; // Set via MEF
 
-		[Export]
-		[FileExtension(".yaml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYAMLFileExtensionDefinition;
-
-		[Export]
-		[FileExtension(".yml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYMLFileExtensionDefinition;
-#pragma warning restore 0649
+		public IClassifier GetClassifier(ITextBuffer buffer)
+		{
+			return buffer.Properties.GetOrCreateSingletonProperty<YamlClassifier>(delegate { return new YamlClassifier(ClassificationRegistry); });
+		}
 	}
 }

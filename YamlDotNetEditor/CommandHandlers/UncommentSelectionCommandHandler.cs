@@ -19,28 +19,30 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using Microsoft.VisualStudio.Utilities;
-using System.ComponentModel.Composition;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 
-namespace YamlDotNetEditor
+namespace YamlDotNetEditor.CommandHandlers
 {
-	internal static class FileAndContentTypeDefinitions
+	public sealed class UncommentSelectionCommandHandler : SelectionModifierCommandHandler
 	{
-#pragma warning disable 0649	// Field is never assigned
-		[Export]
-		[Name("yaml")]
-		[BaseDefinition("text")]
-		internal static ContentTypeDefinition hidingContentTypeDefinition;
+		public override VSConstants.VSStd2KCmdID CommandId
+		{
+			get { return VSConstants.VSStd2KCmdID.UNCOMMENT_BLOCK; }
+		}
 
-		[Export]
-		[FileExtension(".yaml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYAMLFileExtensionDefinition;
+		public override bool IsEnabled(ITextView textView)
+		{
+			return true;
+		}
 
-		[Export]
-		[FileExtension(".yml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYMLFileExtensionDefinition;
-#pragma warning restore 0649
+		protected override void Modify(ITextEdit edit, ITextSnapshotLine line)
+		{
+			if (line.GetText().StartsWith("#"))
+			{
+				edit.Delete(line.Start, 1);
+			}
+		}
 	}
 }

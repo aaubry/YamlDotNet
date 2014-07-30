@@ -1,4 +1,4 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,28 +19,16 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using Microsoft.VisualStudio.Utilities;
-using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Operations;
+using VSStd2KCmdID = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
 
-namespace YamlDotNetEditor
+namespace YamlDotNetEditor.CommandHandlers
 {
-	internal static class FileAndContentTypeDefinitions
+	public interface ICommandHandler
 	{
-#pragma warning disable 0649	// Field is never assigned
-		[Export]
-		[Name("yaml")]
-		[BaseDefinition("text")]
-		internal static ContentTypeDefinition hidingContentTypeDefinition;
-
-		[Export]
-		[FileExtension(".yaml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYAMLFileExtensionDefinition;
-
-		[Export]
-		[FileExtension(".yml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYMLFileExtensionDefinition;
-#pragma warning restore 0649
+		VSStd2KCmdID CommandId { get; }
+		bool IsEnabled(ITextView textView);
+		void Execute(ITextView textView, ITextUndoHistoryRegistry textUndoHistoryRegistry);
 	}
 }

@@ -1,5 +1,5 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
+//  This file is part of YamlDotNet - A .NET library for YAML.
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,50 +19,19 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Windows.Media;
+using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
-using Microsoft.VisualStudio.Utilities;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
-using Microsoft.VisualStudio.Language.StandardClassification;
-using System.Text.RegularExpressions;
 
 namespace YamlDotNetEditor
 {
-
-	#region Provider definition
-	/// <summary>
-	/// This class causes a classifier to be added to the set of classifiers. Since 
-	/// the content type is set to "text", this classifier applies to all text files
-	/// </summary>
-	[Export(typeof(IClassifierProvider))]
-	[ContentType("yaml")]
-	internal class YamlDotNetEditorProvider : IClassifierProvider
-	{
-		/// <summary>
-		/// Import the classification registry to be used for getting a reference
-		/// to the custom classification type later.
-		/// </summary>
-		[Import]
-		internal IClassificationTypeRegistryService ClassificationRegistry = null; // Set via MEF
-
-		public IClassifier GetClassifier(ITextBuffer buffer)
-		{
-			return buffer.Properties.GetOrCreateSingletonProperty<YamlDotNetEditor>(delegate { return new YamlDotNetEditor(ClassificationRegistry); });
-		}
-	}
-	#endregion //provider def
-
-	#region Classifier
-	/// <summary>
-	/// Classifier that classifies all text as an instance of the OrinaryClassifierType
-	/// </summary>
-	class YamlDotNetEditor : IClassifier
+	internal class YamlClassifier : IClassifier
 	{
 		private readonly IClassificationType _comment;
 		private readonly IClassificationType _anchor;
@@ -74,7 +43,7 @@ namespace YamlDotNetEditor
 		private readonly IClassificationType _directive;
 		private readonly IClassificationType _tab;
 
-		internal YamlDotNetEditor(IClassificationTypeRegistryService registry)
+		internal YamlClassifier(IClassificationTypeRegistryService registry)
 		{
 			_comment = registry.GetClassificationType(PredefinedClassificationTypeNames.Comment);
 			_anchor = registry.GetClassificationType("YamlAnchor");
@@ -203,5 +172,4 @@ namespace YamlDotNetEditor
 		public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 #pragma warning restore 67
 	}
-	#endregion //Classifier
 }

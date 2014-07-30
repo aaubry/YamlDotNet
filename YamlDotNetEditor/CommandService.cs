@@ -19,28 +19,39 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
+using YamlDotNetEditor.CommandHandlers;
 
 namespace YamlDotNetEditor
 {
-	internal static class FileAndContentTypeDefinitions
+	[Export(typeof(IVsTextViewCreationListener))]
+	[ContentType("yaml")]
+	[TextViewRole(PredefinedTextViewRoles.Editable)]
+	public sealed class CommandService : IVsTextViewCreationListener
 	{
-#pragma warning disable 0649	// Field is never assigned
-		[Export]
-		[Name("yaml")]
-		[BaseDefinition("text")]
-		internal static ContentTypeDefinition hidingContentTypeDefinition;
+		[Import]
+		internal IVsEditorAdaptersFactoryService EditorAdaptersFactoryService = null; // Set via MEF
 
-		[Export]
-		[FileExtension(".yaml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYAMLFileExtensionDefinition;
+		[Import]
+		internal ITextUndoHistoryRegistry TextUndoHistoryRegistry = null; // Set via MEF
 
-		[Export]
-		[FileExtension(".yml")]
-		[ContentType("yaml")]
-		internal static FileExtensionToContentTypeDefinition hiddenYMLFileExtensionDefinition;
-#pragma warning restore 0649
+		public void VsTextViewCreated(IVsTextView textViewAdapter)
+		{
+			ITextView textView = EditorAdaptersFactoryService.GetWpfTextView(textViewAdapter);
+			if (textView == null)
+				return;
+
+			var dispatcher = new CommandHandlerDispatcher(textViewAdapter, textView, TextUndoHistoryRegistry,
+				new CommentSelectionCommandHandler(),
+				new UncommentSelectionCommandHandler()
+			);
+
+			textView.Properties.AddProperty(typeof(CommandHandlerDispatcher), dispatcher);
+		}
 	}
 }
