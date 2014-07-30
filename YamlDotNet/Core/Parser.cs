@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -20,13 +20,13 @@
 //  SOFTWARE.
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using YamlDotNet.Core.Tokens;
+using MappingStyle = YamlDotNet.Core.Events.MappingStyle;
 using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
 using SequenceStyle = YamlDotNet.Core.Events.SequenceStyle;
-using MappingStyle = YamlDotNet.Core.Events.MappingStyle;
 
 namespace YamlDotNet.Core
 {
@@ -48,9 +48,19 @@ namespace YamlDotNet.Core
 		{
 			if (currentToken == null)
 			{
-				if (scanner.InternalMoveNext())
+				while (scanner.InternalMoveNext())
 				{
 					currentToken = scanner.Current;
+
+					var commentToken = currentToken as Comment;
+					if (commentToken != null)
+					{
+						pendingEvents.Enqueue(new Events.Comment(commentToken.Value, commentToken.IsInline, commentToken.Start, commentToken.End));
+					}
+					else
+					{
+						break;
+					}
 				}
 			}
 			return currentToken;
@@ -61,8 +71,16 @@ namespace YamlDotNet.Core
 		/// </summary>
 		/// <param name="input">The input where the YAML stream is to be read.</param>
 		public Parser(TextReader input)
+			: this(new Scanner(input))
 		{
-			scanner = new Scanner(input);
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Parser"/> class.
+		/// </summary>
+		public Parser(Scanner scanner)
+		{
+			this.scanner = scanner;
 		}
 
 		/// <summary>
@@ -76,6 +94,8 @@ namespace YamlDotNet.Core
 			}
 		}
 
+		private readonly Queue<Events.ParsingEvent> pendingEvents = new Queue<Events.ParsingEvent>();
+
 		/// <summary>
 		/// Moves to the next event.
 		/// </summary>
@@ -88,12 +108,14 @@ namespace YamlDotNet.Core
 				current = null;
 				return false;
 			}
-			else
+			else if (pendingEvents.Count == 0)
 			{
 				// Generate the next event.
-				current = StateMachine();
-				return true;
+				pendingEvents.Enqueue(StateMachine());
 			}
+
+			current = pendingEvents.Dequeue();
+			return true;
 		}
 
 		private ParsingEvent StateMachine()
@@ -594,7 +616,6 @@ namespace YamlDotNet.Core
 					return ProcessEmptyScalar(mark);
 				}
 			}
-
 			else if (GetCurrentToken() is BlockEnd)
 			{
 				state = states.Pop();
@@ -602,7 +623,6 @@ namespace YamlDotNet.Core
 				Skip();
 				return evt;
 			}
-
 			else
 			{
 				var current = GetCurrentToken();

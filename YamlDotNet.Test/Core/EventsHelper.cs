@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -141,6 +141,16 @@ namespace YamlDotNet.Test.Core
 		protected AnchorAlias AnchorAlias(string alias)
 		{
 			return new AnchorAlias(alias);
+		}
+
+		protected Comment StandaloneComment(string value)
+		{
+			return new Comment(value, false);
+		}
+
+		protected Comment InlineComment(string value)
+		{
+			return new Comment(value, true);
 		}
 
 		protected class ScalarBuilder

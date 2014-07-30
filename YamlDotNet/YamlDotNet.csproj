@@ -79,6 +79,7 @@
     <Compile Include="Core\EmitterState.cs" />
     <Compile Include="Core\EventReader.cs" />
     <Compile Include="Core\Events\AnchorAlias.cs" />
+    <Compile Include="Core\Events\Comment.cs" />
     <Compile Include="Core\Events\DocumentEnd.cs" />
     <Compile Include="Core\Events\DocumentStart.cs" />
     <Compile Include="Core\Events\EventType.cs" />

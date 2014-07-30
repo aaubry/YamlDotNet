@@ -1,5 +1,6 @@
 ﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2014 Leon Mlakar
+//  Copyright (c) 2014 Antoine Aubry
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +23,7 @@
 namespace YamlDotNet.Core.Events
 {
 	/// <summary>
-	/// Callback interface for external event Visitr.
+	/// Callback interface for external event Visitor.
 	/// </summary>
 	public interface IParsingEventVisitor
 	{
@@ -36,5 +37,6 @@ namespace YamlDotNet.Core.Events
 		void Visit(SequenceEnd e);
 		void Visit(MappingStart e);
 		void Visit(MappingEnd e);
+		void Visit(Comment e);
 	}
 }

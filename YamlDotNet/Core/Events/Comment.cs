@@ -1,16 +1,16 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
-    
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  Copyright (c) 2014 Antoine Aubry
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,21 +19,34 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+
 namespace YamlDotNet.Core.Events
 {
-	internal enum EventType
+	public class Comment : ParsingEvent
 	{
-		None,
-		StreamStart,
-		StreamEnd,
-		DocumentStart,
-		DocumentEnd,
-		Alias,
-		Scalar,
-		SequenceStart,
-		SequenceEnd,
-		MappingStart,
-		MappingEnd,
-		Comment,
+		public string Value { get; private set; }
+		public bool IsInline { get; private set; }
+
+		public Comment(string value, bool isInline)
+			: this(value, isInline, Mark.Empty, Mark.Empty)
+		{
+		}
+
+		public Comment(string value, bool isInline, Mark start, Mark end)
+			: base(start, end)
+		{
+			Value = value;
+			IsInline = isInline;
+		}
+
+		internal override EventType Type
+		{
+			get { return EventType.Comment; }
+		}
+
+		public override void Accept(IParsingEventVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 	}
 }

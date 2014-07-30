@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
 	
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,9 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.Collections;
-using System.IO;
 using FluentAssertions;
+using System.Collections;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -306,6 +305,64 @@ namespace YamlDotNet.Test.Core
 				PlainScalar("c"),
 				PlainScalar("-7"),
 				MappingEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
+		}
+
+		[Fact]
+		public void CommentsAreReturnedWhenRequested()
+		{
+			AssertSequenceOfEventsFrom(new Parser(new Scanner(Yaml.ReaderForText(@"
+					# Top comment
+					- first # Comment on first item
+					- second
+					- # a mapping
+					   ? key # my key
+					   : value # my value
+					# Bottom comment
+				"), skipComments: false)),
+				StreamStart,
+				StandaloneComment("Top comment"),
+				DocumentStart(Implicit),
+				BlockSequenceStart,
+				PlainScalar("first"),
+				InlineComment("Comment on first item"),
+				PlainScalar("second"),
+				InlineComment("a mapping"),
+				BlockMappingStart,
+				PlainScalar("key"),
+				InlineComment("my key"),
+				PlainScalar("value"),
+				InlineComment("my value"),
+				StandaloneComment("Bottom comment"),
+				MappingEnd,
+				SequenceEnd,
+				DocumentEnd(Implicit),
+				StreamEnd);
+		}
+
+		[Fact]
+		public void CommentsAreOmittedUnlessRequested()
+		{
+			AssertSequenceOfEventsFrom(Yaml.ParserForText(@"
+					# Top comment
+					- first # Comment on first item
+					- second
+					- # a mapping
+					   ? key # my key
+					   : value # my value
+					# Bottom comment
+				"),
+				StreamStart,
+				DocumentStart(Implicit),
+				BlockSequenceStart,
+				PlainScalar("first"),
+				PlainScalar("second"),
+				BlockMappingStart,
+				PlainScalar("key"),
+				PlainScalar("value"),
+				MappingEnd,
+				SequenceEnd,
 				DocumentEnd(Implicit),
 				StreamEnd);
 		}
