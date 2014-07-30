@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
-    
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,8 +62,8 @@ namespace YamlDotNet.Test.Core
 
 			emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
 				opt => opt.Excluding(@event => @event.Start)
-				          .Excluding(@event => @event.End)
-						  .Excluding((ParsingEvent @event) => ((DocumentEnd) @event).IsImplicit));
+						  .Excluding(@event => @event.End)
+						  .Excluding((ParsingEvent @event) => ((DocumentEnd)@event).IsImplicit));
 		}
 
 		private IList<ParsingEvent> ParsingEventsOf(string text)
@@ -218,8 +218,8 @@ namespace YamlDotNet.Test.Core
 			// Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
-			var sequence = (YamlSequenceNode) stream.Documents[0].RootNode;
-			var scalar = (YamlScalarNode) sequence.Children[0];
+			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			var scalar = (YamlScalarNode)sequence.Children[0];
 
 			Dump.WriteLine(yaml);
 			scalar.Value.Should().Be("hello\nworld");
@@ -234,8 +234,8 @@ namespace YamlDotNet.Test.Core
 
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
-			var sequence = (YamlSequenceNode) stream.Documents[0].RootNode;
-			var scalar = (YamlScalarNode) sequence.Children[0];
+			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+			var scalar = (YamlScalarNode)sequence.Children[0];
 
 			Dump.WriteLine("${0}$", yaml);
 			scalar.Value.Should().Be(">+\n");
@@ -256,11 +256,36 @@ namespace YamlDotNet.Test.Core
 			var stream = new YamlStream();
 			stream.Load(new StringReader(yaml));
 
-			var mapping = (YamlMappingNode) stream.Documents[0].RootNode;
-			var value = (YamlScalarNode) mapping.Children.First().Value;
+			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
+			var value = (YamlScalarNode)mapping.Children.First().Value;
 
 			Dump.WriteLine(value.Value);
 			value.Value.Should().Be(input);
+		}
+
+		[Fact]
+		public void EventsAreEmittedCorrectly()
+		{
+			var events = SequenceWith(
+				StandaloneComment("Top comment"),
+				StandaloneComment("Second line"),
+				Scalar("first").ImplicitPlain,
+				InlineComment("The first value"),
+				Scalar("second").ImplicitPlain,
+				InlineComment("The second value"),
+				StandaloneComment("Bottom comment")
+			);
+
+			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+
+			Dump.WriteLine("${0}$", yaml);
+			yaml.Should()
+				.Contain("# Top comment")
+				.And.Contain("# Second line")
+				.And.NotContain("# Top comment # Second line")
+				.And.Contain("first # The first value")
+				.And.Contain("second # The second value")
+				.And.Contain("# Bottom comment");
 		}
 
 		private string Lines(params string[] lines)

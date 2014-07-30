@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -164,12 +164,18 @@ namespace YamlDotNet.Core
 			while (!NeedMoreEvents())
 			{
 				var current = events.Peek();
-				AnalyzeEvent(current);
-				StateMachine(current);
+				try
+				{
 
-				// Only dequeue after calling state_machine because it checks how many events are in the queue.
-				// Todo: well, move into StateMachine() then
-				events.Dequeue();
+					AnalyzeEvent(current);
+					StateMachine(current);
+				}
+				finally
+				{
+					// Only dequeue after calling state_machine because it checks how many events are in the queue.
+					// Todo: well, move into StateMachine() then
+					events.Dequeue();
+				}
 			}
 		}
 
@@ -305,7 +311,7 @@ namespace YamlDotNet.Core
 			var leadingBreak = false;
 			var trailingSpace = false;
 			var trailingBreak = false;
-			
+
 			var breakSpace = false;
 			var spaceBreak = false;
 			var previousSpace = false;
@@ -473,6 +479,13 @@ namespace YamlDotNet.Core
 
 		private void StateMachine(ParsingEvent evt)
 		{
+			var comment = evt as Comment;
+			if (comment != null)
+			{
+				EmitComment(comment);
+				return;
+			}
+
 			switch (state)
 			{
 				case EmitterState.StreamStart:
@@ -549,6 +562,23 @@ namespace YamlDotNet.Core
 				default:
 					throw new InvalidOperationException();
 			}
+		}
+
+		private void EmitComment(Comment comment)
+		{
+			if (comment.IsInline)
+			{
+				Write(' ');
+			}
+			else
+			{
+				WriteBreak();
+			}
+
+			Write("# ");
+			Write(comment.Value);
+
+			isIndentation = true;
 		}
 
 		/// <summary>
