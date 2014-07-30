@@ -1,5 +1,5 @@
 ﻿//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
+//  Copyright (c) 2014 Antoine Aubry
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,40 +19,48 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.Utilities;
-using System.ComponentModel.Composition;
-using YamlDotNetEditor.CommandHandlers;
+using System.IO;
+using YamlDotNet.Core;
 
-namespace YamlDotNetEditor
+namespace YamlDotNetEditor.CommandHandlers
 {
-	[Export(typeof(IVsTextViewCreationListener))]
-	[ContentType("yaml")]
-	[TextViewRole(PredefinedTextViewRoles.Editable)]
-	public sealed class CommandService : IVsTextViewCreationListener
+	public sealed class FormatDocumentCommandHandler : ICommandHandler
 	{
-		[Import]
-		internal IVsEditorAdaptersFactoryService EditorAdaptersFactoryService = null; // Set via MEF
-
-		[Import]
-		internal ITextUndoHistoryRegistry TextUndoHistoryRegistry = null; // Set via MEF
-
-		public void VsTextViewCreated(IVsTextView textViewAdapter)
+		public VSConstants.VSStd2KCmdID CommandId
 		{
-			ITextView textView = EditorAdaptersFactoryService.GetWpfTextView(textViewAdapter);
-			if (textView == null)
-				return;
+			get { return VSConstants.VSStd2KCmdID.FORMATDOCUMENT; }
+		}
 
-			var dispatcher = new CommandHandlerDispatcher(textViewAdapter, textView, TextUndoHistoryRegistry,
-				new CommentSelectionCommandHandler(),
-				new UncommentSelectionCommandHandler(),
-				new FormatDocumentCommandHandler()
-			);
+		public bool IsEnabled(ITextView textView)
+		{
+			return true;
+		}
 
-			textView.Properties.AddProperty(typeof(CommandHandlerDispatcher), dispatcher);
+		public void Execute(ITextView textView, ITextUndoHistoryRegistry textUndoHistoryRegistry)
+		{
+			var undoHistory = textUndoHistoryRegistry.RegisterHistory(textView);
+			using (var transaction = undoHistory.CreateTransaction("Format Document"))
+			{
+				var text = textView.TextBuffer.CurrentSnapshot.GetText();
+
+				var formatted = new StringWriter();
+				var parser = new Parser(new Scanner(new StringReader(text), skipComments: false));
+				var emitter = new Emitter(formatted);
+
+				while (parser.MoveNext())
+				{
+					emitter.Emit(parser.Current);
+				}
+
+				var edit = textView.TextBuffer.CreateEdit();
+				edit.Replace(0, text.Length, formatted.ToString());
+				edit.Apply();
+
+				transaction.Complete();
+			}
 		}
 	}
 }

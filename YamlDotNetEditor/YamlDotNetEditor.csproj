@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandHandlerDispatcher.cs" />
+    <Compile Include="CommandHandlers\FormatDocumentCommandHandler.cs" />
     <Compile Include="CommandHandlers\CommentSelectionCommandHandler.cs" />
     <Compile Include="CommandHandlers\UncommentSelectionCommandHandler.cs" />
     <Compile Include="CommandHandlers\ICommandHandler.cs" />
