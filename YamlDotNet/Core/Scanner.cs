@@ -64,6 +64,7 @@ namespace YamlDotNet.Core
 		private bool tokenAvailable;
 
 		private static readonly IDictionary<char, char> simpleEscapeCodes = InitializeSimpleEscapeCodes();
+		public bool SkipComments { get; private set; }
 
 		private static IDictionary<char, char> InitializeSimpleEscapeCodes()
 		{
@@ -113,13 +114,16 @@ namespace YamlDotNet.Core
 		/// Initializes a new instance of the <see cref="Scanner"/> class.
 		/// </summary>
 		/// <param name="input">The input.</param>
-		public Scanner(TextReader input)
+		/// <param name="skipComments">Indicates whether comments should be ignored</param>
+		public Scanner(TextReader input, bool skipComments = true)
 		{
 			analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
 			cursor = new Cursor();
+			SkipComments = skipComments;
 		}
 
 		private Token current;
+		private Token previous;
 
 		/// <summary>
 		/// Gets the current token.
@@ -172,6 +176,7 @@ namespace YamlDotNet.Core
 		{
 			++tokensParsed;
 			tokenAvailable = false;
+			previous = current;
 			current = null;
 		}
 
@@ -556,15 +561,7 @@ namespace YamlDotNet.Core
 					Skip();
 				}
 
-				// Eat a comment until a line break.
-
-				if (analyzer.Check('#'))
-				{
-					while (!analyzer.IsBreakOrZero())
-					{
-						Skip();
-					}
-				}
+				ProcessComment();
 
 				// If it is a line break, eat it.
 
@@ -584,6 +581,37 @@ namespace YamlDotNet.Core
 					// We have find a token.
 
 					break;
+				}
+			}
+		}
+
+		private void ProcessComment()
+		{
+			if (analyzer.Check('#'))
+			{
+				// Eat '#'
+				Skip();
+
+				// Eat leading whitespace
+				while (analyzer.IsSpace())
+				{
+					Skip();
+				}
+
+				var start = cursor.Mark();
+				var text = new StringBuilder();
+				while (!analyzer.IsBreakOrZero())
+				{
+					text.Append(ReadCurrentCharacter());
+				}
+
+				if (!SkipComments)
+				{
+					var isInline = previous != null
+						&& previous.End.Line == start.Line
+						&& !(previous is StreamStart);
+
+					tokens.Enqueue(new Comment(text.ToString(), isInline, start, cursor.Mark()));
 				}
 			}
 		}
@@ -728,13 +756,7 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			if (analyzer.Check('#'))
-			{
-				while (!analyzer.IsBreakOrZero())
-				{
-					Skip();
-				}
-			}
+			ProcessComment();
 
 			// Check if we are at the end of the line.
 
@@ -1374,13 +1396,7 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			if (analyzer.Check('#'))
-			{
-				while (!analyzer.IsBreakOrZero())
-				{
-					Skip();
-				}
-			}
+			ProcessComment();
 
 			// Check if we are at the end of the line.
 

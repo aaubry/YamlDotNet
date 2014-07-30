@@ -33,7 +33,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void EmptyDocument()
 		{
-			AssertSequenceOfEventsFrom(ParserForEmptyContent(),
+			AssertSequenceOfEventsFrom(Yaml.ParserForEmptyContent(),
 				StreamStart,
 				StreamEnd);
 		}
@@ -41,7 +41,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyEventsOnExample1()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("01-directives.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("01-directives.yaml"),
 				StreamStart,
 				DocumentStart(Explicit, Version(1, 1),
 					TagDirective("!", "!foo"),
@@ -55,7 +55,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample2()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("02-scalar-in-imp-doc.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("02-scalar-in-imp-doc.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				SingleQuotedScalar("a scalar"),
@@ -66,7 +66,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample3()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("03-scalar-in-exp-doc.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("03-scalar-in-exp-doc.yaml"),
 				StreamStart,
 				DocumentStart(Explicit),
 				SingleQuotedScalar("a scalar"),
@@ -77,7 +77,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample4()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("04-scalars-in-multi-docs.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("04-scalars-in-multi-docs.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				SingleQuotedScalar("a scalar"),
@@ -94,7 +94,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample5()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("05-circular-sequence.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("05-circular-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				FlowSequenceStart.A("A"),
@@ -107,7 +107,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample6()
 		{
-			var parser = ParserFor("06-float-tag.yaml");
+			var parser = Yaml.ParserForResource("06-float-tag.yaml");
 			AssertSequenceOfEventsFrom(parser,
 				StreamStart,
 				DocumentStart(Implicit),
@@ -119,7 +119,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample7()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("07-scalar-styles.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("07-scalar-styles.yaml"),
 				StreamStart,
 				DocumentStart(Explicit),
 				PlainScalar(string.Empty),
@@ -145,7 +145,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample8()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("08-flow-sequence.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("08-flow-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				FlowSequenceStart,
@@ -160,7 +160,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample9()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("09-flow-mapping.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("09-flow-mapping.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				FlowMappingStart,
@@ -176,7 +176,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample10()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("10-mixed-nodes-in-sequence.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("10-mixed-nodes-in-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockSequenceStart,
@@ -200,7 +200,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample11()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("11-mixed-nodes-in-mapping.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("11-mixed-nodes-in-mapping.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockMappingStart,
@@ -228,7 +228,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample12()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("12-compact-sequence.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("12-compact-sequence.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockSequenceStart,
@@ -254,7 +254,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample13()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("13-compact-mapping.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("13-compact-mapping.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockMappingStart,
@@ -278,7 +278,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokensOnExample14()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("14-mapping-wo-indent.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("14-mapping-wo-indent.yaml"),
 				StreamStart,
 				DocumentStart(Implicit),
 				BlockMappingStart,
@@ -295,7 +295,7 @@ namespace YamlDotNet.Test.Core
 		[Fact]
 		public void VerifyTokenWithLocalTags()
 		{
-			AssertSequenceOfEventsFrom(ParserFor("local-tags.yaml"),
+			AssertSequenceOfEventsFrom(Yaml.ParserForResource("local-tags.yaml"),
 				StreamStart,
 				DocumentStart(Explicit),
 				BlockMappingStart.T("!MyObject").Explicit,
@@ -308,16 +308,6 @@ namespace YamlDotNet.Test.Core
 				MappingEnd,
 				DocumentEnd(Implicit),
 				StreamEnd);
-		}
-
-		private IParser ParserForEmptyContent()
-		{
-			return new Parser(new StringReader(string.Empty));
-		}
-
-		private IParser ParserFor(string name)
-		{
-			return new Parser(Yaml.StreamFrom(name));
 		}
 
 		private void AssertSequenceOfEventsFrom(IParser parser, params ParsingEvent[] events)

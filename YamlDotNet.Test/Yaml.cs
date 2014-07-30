@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -21,8 +21,10 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Test
 {
@@ -47,6 +49,61 @@ namespace YamlDotNet.Test
 		{
 			return Regex.Replace(text, @"{type}", match =>
 				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Assembly.FullName)));
+		}
+
+		public static IParser ParserForEmptyContent()
+		{
+			return new Parser(new StringReader(string.Empty));
+		}
+
+		public static IParser ParserForResource(string name)
+		{
+			return new Parser(Yaml.StreamFrom(name));
+		}
+
+		public static IParser ParserForText(string yamlText)
+		{
+			return new Parser(ReaderForText(yamlText));
+		}
+
+		public static Scanner ScannerForResource(string name)
+		{
+			return new Scanner(Yaml.StreamFrom(name));
+		}
+
+		public static Scanner ScannerForText(string yamlText)
+		{
+			return new Scanner(ReaderForText(yamlText));
+		}
+
+		public static StringReader ReaderForText(string yamlText)
+		{
+			var lines = yamlText
+				.Split('\n')
+				.Select(l => l.TrimEnd('\r', '\n'))
+				.SkipWhile(l => l.Trim(' ', '\t').Length == 0)
+				.ToList();
+
+			while (lines.Count > 0 && lines[lines.Count - 1].Trim(' ', '\t').Length == 0)
+			{
+				lines.RemoveAt(lines.Count - 1);
+			}
+
+			if (lines.Count > 0)
+			{
+				var indent = Regex.Match(lines[0], @"^(\t+)");
+				if (!indent.Success)
+				{
+					throw new ArgumentException("Invalid indentation");
+				}
+
+				lines = lines
+					.Select(l => l.Substring(indent.Groups[1].Length))
+					.ToList();
+			}
+
+			var reader = new StringReader(string.Join("\n", lines.ToArray()));
+			return reader;
 		}
 	}
 }

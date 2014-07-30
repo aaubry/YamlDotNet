@@ -1,16 +1,16 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry
-    
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
+//  Copyright (c) 2014 Antoine Aubry
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,47 +19,39 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core.Tokens
 {
 	/// <summary>
-	/// Represents an alias token.
+	/// Represents a comment
 	/// </summary>
-	public class AnchorAlias : Token
+	public class Comment : Token
 	{
-		private readonly string value;
+		/// <summary>
+		/// Gets the value of the comment
+		/// </summary>
+		public string Value { get; private set; }
 
 		/// <summary>
-		/// Gets the value of the alias.
+		/// Gets a value indicating whether the comment appears other tokens on that line.
 		/// </summary>
-		public string Value
-		{
-			get
-			{
-				return value;
-			}
-		}
+		public bool IsInline { get; private set; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="AnchorAlias"/> class.
+		/// Initializes a new instance of the <see cref="Comment"/> class.
 		/// </summary>
-		/// <param name="value">The value of the anchor.</param>
-		public AnchorAlias(string value)
-			: this(value, Mark.Empty, Mark.Empty)
+		public Comment(string value, bool isInline)
+			: this(value, isInline, Mark.Empty, Mark.Empty)
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="AnchorAlias"/> class.
+		/// Initializes a new instance of the <see cref="Comment"/> class.
 		/// </summary>
-		/// <param name="value">The value of the anchor.</param>
-		/// <param name="start">The start position of the event.</param>
-		/// <param name="end">The end position of the event.</param>
-		public AnchorAlias(string value, Mark start, Mark end)
+		public Comment(string value, bool isInline, Mark start, Mark end)
 			: base(start, end)
 		{
-			this.value = value;
+			IsInline = isInline;
+			Value = value;
 		}
 	}
 }

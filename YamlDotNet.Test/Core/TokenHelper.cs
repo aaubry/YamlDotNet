@@ -86,47 +86,58 @@ namespace YamlDotNet.Test.Core
 			return new Scalar(text, ScalarStyle.Folded);
 		}
 
-		protected static FlowSequenceStart FlowSequenceStart {
+		protected static FlowSequenceStart FlowSequenceStart
+		{
 			get { return new FlowSequenceStart(); }
 		}
 
-		protected static FlowSequenceEnd FlowSequenceEnd {
+		protected static FlowSequenceEnd FlowSequenceEnd
+		{
 			get { return new FlowSequenceEnd(); }
 		}
 
-		protected static BlockSequenceStart BlockSequenceStart {
+		protected static BlockSequenceStart BlockSequenceStart
+		{
 			get { return new BlockSequenceStart(); }
 		}
 
-		protected static FlowMappingStart FlowMappingStart {
+		protected static FlowMappingStart FlowMappingStart
+		{
 			get { return new FlowMappingStart(); }
 		}
 
-		protected static FlowMappingEnd FlowMappingEnd {
+		protected static FlowMappingEnd FlowMappingEnd
+		{
 			get { return new FlowMappingEnd(); }
 		}
 
-		protected static BlockMappingStart BlockMappingStart {
+		protected static BlockMappingStart BlockMappingStart
+		{
 			get { return new BlockMappingStart(); }
 		}
 
-		protected static Key Key {
+		protected static Key Key
+		{
 			get { return new Key(); }
 		}
 
-		protected static Value Value {
+		protected static Value Value
+		{
 			get { return new Value(); }
 		}
 
-		protected static FlowEntry FlowEntry {
+		protected static FlowEntry FlowEntry
+		{
 			get { return new FlowEntry(); }
 		}
 
-		protected static BlockEntry BlockEntry {
+		protected static BlockEntry BlockEntry
+		{
 			get { return new BlockEntry(); }
 		}
 
-		protected static BlockEnd BlockEnd {
+		protected static BlockEnd BlockEnd
+		{
 			get { return new BlockEnd(); }
 		}
 
@@ -138,6 +149,17 @@ namespace YamlDotNet.Test.Core
 		protected static AnchorAlias AnchorAlias(string alias)
 		{
 			return new AnchorAlias(alias);
+		}
+
+		protected static Comment StandaloneComment(string text)
+		{
+			return new Comment(text, false);
+		}
+
+
+		protected static Comment InlineComment(string text)
+		{
+			return new Comment(text, true);
 		}
 	}
 }
