@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNetEditor", "YamlDotNetEditor\YamlDotNetEditor.csproj", "{708C56D8-492C-4EED-A306-1FE75FC7D234}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69EE9636-55BA-49C2-827E-D5684221C345}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -20,8 +22,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{1EC10966-19C0-4CE3-949E-D11F600B8CA3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNetEditor", "YamlDotNetEditor\YamlDotNetEditor.csproj", "{708C56D8-492C-4EED-A306-1FE75FC7D234}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8DC198EF-4A39-4072-A66A-CA0DF8396F22}"
 	ProjectSection(SolutionItems) = preProject
