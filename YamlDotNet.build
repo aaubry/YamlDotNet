@@ -130,7 +130,10 @@
 		</foreach>
 	</target>
 	
-	<target name="package" depends="package-bin, package-src, package-doc">
+	<!--<target name="package" depends="package-bin, package-src, package-doc">
+	</target>-->
+
+	<target name="package" depends="package-bin, package-nuget">
 	</target>
 	
 </project>
