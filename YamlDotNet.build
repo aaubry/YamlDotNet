@@ -4,7 +4,7 @@
 	<!-- This build file requires .NET 4.0 and nant 0.91 alpha 2 or higher -->
 	<property name="nant.settings.currentframework" value="net-4.0"/>
 
-	<property name="version" value="3.2.1" />
+	<property name="version" value="3.2.2" />
 
 	<fileset id="binaries">
 		<include name="YamlDotNet/bin/Release/YamlDotNet.dll" />
