@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69EE9636-55BA-49C2-827E-D5684221C345}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -51,6 +49,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.3.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.3.0\YamlDotNet.PerformanceTests.v2.3.0.csproj", "{BE49A287-5F47-4E3B-90EB-97B51451934C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.vlatest", "PerformanceTests\YamlDotNet.PerformanceTests.vlatest\YamlDotNet.PerformanceTests.vlatest.csproj", "{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Droid", "YamlDotNet.Droid\YamlDotNet.Droid.csproj", "{30A8701F-B28B-493D-A43B-5B8549010E71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -106,6 +106,10 @@ Global
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30A8701F-B28B-493D-A43B-5B8549010E71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30A8701F-B28B-493D-A43B-5B8549010E71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30A8701F-B28B-493D-A43B-5B8549010E71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30A8701F-B28B-493D-A43B-5B8549010E71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
