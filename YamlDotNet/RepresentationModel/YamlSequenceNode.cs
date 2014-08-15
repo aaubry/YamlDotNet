@@ -33,6 +33,7 @@ namespace YamlDotNet.RepresentationModel
 	/// Represents a sequence node in the YAML document.
 	/// </summary>
 	[DebuggerDisplay("Count = {children.Count}")]
+	[Serializable]
 	public class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>
 	{
 		private readonly IList<YamlNode> children = new List<YamlNode>();

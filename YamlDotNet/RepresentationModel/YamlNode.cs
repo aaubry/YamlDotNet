@@ -29,6 +29,7 @@ namespace YamlDotNet.RepresentationModel
 	/// <summary>
 	/// Represents a single node in the YAML document.
 	/// </summary>
+	[Serializable]
 	public abstract class YamlNode
 	{
 		/// <summary>
