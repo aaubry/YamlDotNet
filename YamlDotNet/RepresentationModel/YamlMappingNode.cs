@@ -31,6 +31,7 @@ namespace YamlDotNet.RepresentationModel
 	/// <summary>
 	/// Represents a mapping node in the YAML document.
 	/// </summary>
+	[Serializable]
 	public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>
 	{
 		private readonly IDictionary<YamlNode, YamlNode> children = new Dictionary<YamlNode, YamlNode>();

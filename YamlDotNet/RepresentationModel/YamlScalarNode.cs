@@ -32,6 +32,7 @@ namespace YamlDotNet.RepresentationModel
 	/// Represents a scalar node in the YAML document.
 	/// </summary>
 	[DebuggerDisplay("{Value}")]
+	[Serializable]
 	public class YamlScalarNode : YamlNode
 	{
 		/// <summary>
