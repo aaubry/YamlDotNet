@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>YamlDotNet</id>
-		<version>x.x.x</version>
+		<version>$version$</version>
 		<authors>Antoine Aubry</authors>
 		<description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
 		<summary>This package contains the YAML parser and serializer.</summary>
@@ -13,7 +13,6 @@
 		<tags>yaml parser development library serialization</tags>
 	</metadata>
 	<files>
-		<file src="YamlDotNet\bin\Release\YamlDotNet.dll" target="lib\net35" />
-		<file src="YamlDotNet\bin\Release\YamlDotNet.pdb" target="lib\net35" />
+		<file src="bin\Release\YamlDotNet.pdb" target="lib\net35" />
 	</files>
 </package>
