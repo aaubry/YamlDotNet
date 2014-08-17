@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry and contributors
+//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -20,9 +20,45 @@
 //  SOFTWARE.
 
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("YamlDotNet.Core")]
-[assembly: AssemblyDescription("The core YamlDotNet library, which contains the implementation of the parser and the emitter.")]
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("YamlDotNet")]
+[assembly: AssemblyDescription("The YamlDotNet library.")]
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+#endif
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("YamlDotNet")]
+[assembly: AssemblyCopyright("Copyright © Antoine Aubry and contributors 2008, 2009, 2010, 2011, 2012, 2013, 2014")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
 
-[assembly: InternalsVisibleTo("YamlDotNet.Test, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c1b7cb58b05e52f6a5ac5c594b0290ef81ce4f9ac8d9f6acd735ed305e11cfb95b5fce69ed1dc3d21522f252fab128f812eb213be599ac502bf8fb2527b08c3f7fe9b36ca001fe8b916b0bea8782ff924e36a240aebca712c87a10e8fbffc5a3d79cc62cb9217d527b77a16875ddafb3ddb3ffa9ec74ea9eb8dd641322c395be")]
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("eb49cd18-fe25-4b2e-b47e-9deb9449c106")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Revision and Build Numbers
+// by using the '*' as shown below:
+[assembly: AssemblyVersion("2.0.1.*")]
+[assembly: AssemblyFileVersion("2.0.1")]
+
+[assembly: CLSCompliant(true)]
+[assembly: InternalsVisibleTo("YamlDotNet.Test")]

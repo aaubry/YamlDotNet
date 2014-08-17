@@ -1,0 +1,49 @@
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}
+
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+    - appveyor-tests
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Operating system (build VM template)
+os: Windows Server 2012 R2
+
+# scripts that run after cloning repository
+install:
+  - cmd: git submodule update --init
+  - cmd: nuget restore
+  - ps:  .\prebuild.ps1
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform: Any CPU
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
+
+build:
+  publish_nuget: true             # package projects with .nuspec files and push to artifacts
+
+#---------------------------------#
+#      artifacts configuration    #
+#---------------------------------#
+
+#artifacts:
+#
+#  - path: YamlDotNetEditor\bin\Release\YamlDotNetEditor.vsix
+#    name: VSIX Package
+#
