@@ -6,7 +6,7 @@ $version = Get-VersionFromTag
 Update-AppveyorBuild -Version "$version.$buildNumber"
 
 if($env:APPVEYOR_REPO_BRANCH -ne "release") {
-	$version = "$version-pre_$buildNumber"
+	$version = "$version-pre$buildNumber"
 }
 
 Patch-Xml "YamlDotNet\YamlDotNet.nuspec" $version "/package/metadata/version/text()" @{ }

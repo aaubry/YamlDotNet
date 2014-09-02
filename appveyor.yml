@@ -1,4 +1,4 @@
-version: 1.0.{build}
+version: 0.0.{build}
 branches:
   only:
     - master
@@ -16,3 +16,12 @@ configuration: Release
 
 build:
   publish_nuget: true
+
+deploy:
+  - provider: NuGet
+    server: (leave blank to push to NuGet.org)
+    api_key:
+      secure: GMc0xUTASI8qTPK1/eN/GFs6PBhPFBin1TT1hE5N8NlkU7VSBx3z4zQinSv/ICmx
+    artifact: /.*\.nupkg/
+    on:
+      branch: release
