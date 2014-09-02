@@ -1,0 +1,4 @@
+[submodule "BuildUtils"]
+	path = BuildUtils
+	url = https://github.com/aaubry/BuildUtils.git
+	branch = master
