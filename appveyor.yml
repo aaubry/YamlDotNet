@@ -17,6 +17,10 @@ configuration: Release
 build:
   publish_nuget: true
 
+artifacts:
+  - path: YamlDotNet\bin\$(configuration)
+    name: YamlDotNet.dll
+
 deploy:
   - provider: NuGet
     api_key:
