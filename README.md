@@ -18,6 +18,10 @@ The most up-to-date version can always be found in the following NuGet packages:
 
 # Changelog
 
+## Version 3.3.0
+
+* Make types in YamlDotNet.RepresentationModel serializable.
+
 ## Version 3.2.1
 
 * Fix AnchorNotFoundException when another exception occurs during deserialization.
