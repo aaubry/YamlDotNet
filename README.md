@@ -10,11 +10,9 @@ YAML, which stands for "YAML Ain't Markup Language", is described as "a human fr
 
 The library has now been successfully used in multiple projects and is considered fairly stable.
 
-## Where to get it?
+## More information
 
-The most up-to-date version can always be found in the following NuGet packages:
-
-* [http://www.nuget.org/packages/YamlDotNet](http://www.nuget.org/packages/YamlDotNet)
+More information can be found in the [official page of the project](http://aaubry.net/pages/yamldotnet.html).
 
 # Changelog
 
