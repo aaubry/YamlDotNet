@@ -7,9 +7,9 @@
 		<description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
 		<summary>This package contains the YAML parser and serializer.</summary>
 		<language>en-US</language>
-		<licenseUrl>http://www.aaubry.net/yamldotnet/license.aspx</licenseUrl>
-		<projectUrl>http://www.aaubry.net/yamldotnet.aspx</projectUrl>
-		<iconUrl>http://www.aaubry.net/IMAGES%2f2012%2f11%2fyamldotnet.png.jpgx</iconUrl>
+		<licenseUrl>http://aaubry.net/pages/license.html</licenseUrl>
+		<projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
+		<iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
 		<tags>yaml parser development library serialization</tags>
 	</metadata>
 	<files>
