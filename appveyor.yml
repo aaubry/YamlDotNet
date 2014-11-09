@@ -12,7 +12,9 @@ install:
   - cmd: nuget restore
 
 platform: Any CPU
-configuration: Release
+configuration:
+  - Release
+  - Release-Signed
 
 build:
   publish_nuget: true

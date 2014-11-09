@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
 	<metadata>
-		<id>YamlDotNet</id>
+		<id>$id$</id>
 		<version>$version$</version>
 		<authors>Antoine Aubry</authors>
 		<description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
