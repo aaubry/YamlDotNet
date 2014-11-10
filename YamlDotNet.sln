@@ -12,8 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{1EC10966-19C0-4CE3-949E-D11F600B8CA3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet", "YamlDotNet\YamlDotNet.csproj", "{BF32DE1B-6276-4341-B212-F8862ADBBA7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Test", "YamlDotNet.Test\YamlDotNet.Test.csproj", "{A9F67018-0240-4D16-A4EA-BCB780D0AF05}"
@@ -40,11 +38,6 @@ Global
 		Release-Signed|Any CPU = Release-Signed|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.PerformanceTests|Any CPU.ActiveCfg = Release|Any CPU
-		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EC10966-19C0-4CE3-949E-D11F600B8CA3}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.PerformanceTests|Any CPU.ActiveCfg = Release|Any CPU
