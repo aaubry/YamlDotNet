@@ -64,7 +64,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Signed|AnyCPU'">
     <OutputPath>bin\Release-Signed\</OutputPath>
     <DefineConstants>TRACE;SIGNED</DefineConstants>
-    <DocumentationFile>bin\Release\YamlDotNet.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-Signed\YamlDotNet.Signed.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
     <DebugType>pdbonly</DebugType>
