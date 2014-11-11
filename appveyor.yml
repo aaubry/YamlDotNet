@@ -12,18 +12,28 @@ install:
   - cmd: nuget restore YamlDotNet.Test\packages.config -SolutionDirectory .
 
 platform: Any CPU
-configuration:
-  - Release
-  - Release-Signed
-  - Release-Portable
-  - Release-Portable-Signed
+configuration: Release
 
 build:
   publish_nuget: true
 
+build_script:
+  - ps:  .\build.ps1
+
 artifacts:
-  - path: YamlDotNet\bin\$(configuration)
-    name: YamlDotNet.dll
+  - path: YamlDotNet\bin\Release-Unsigned
+    name: Release-Unsigned
+
+  - path: YamlDotNet\bin\Release-Signed
+    name: Release-Signed
+
+  - path: YamlDotNet\bin\Release-Portable-Unsigned
+    name: Release-Portable-Unsigned
+
+  - path: YamlDotNet\bin\Release-Portable-Signed
+    name: Release-Portable-Signed
+
+  - path: YamlDotNet\bin\*.nupkg
 
 deploy:
   - provider: NuGet

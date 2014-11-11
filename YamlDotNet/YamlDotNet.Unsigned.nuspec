@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
 	<metadata>
-		<id>$id$</id>
+		<id>YamlDotNet</id>
 		<version>$version$</version>
 		<authors>Antoine Aubry</authors>
 		<description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
@@ -13,6 +13,12 @@
 		<tags>yaml parser development library serialization</tags>
 	</metadata>
 	<files>
-		<file src="bin\$configuration$\$id$.pdb" target="lib\net35" />
+		<file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />
+		<file src="bin\Release-Unsigned\YamlDotNet.pdb" target="lib\net35" />
+		<file src="bin\Release-Unsigned\YamlDotNet.xml" target="lib\net35" />
+
+		<file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
+		<file src="bin\Release-Portable-Unsigned\YamlDotNet.pdb" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
+		<file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 	</files>
 </package>

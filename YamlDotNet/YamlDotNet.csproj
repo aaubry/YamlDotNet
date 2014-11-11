@@ -33,7 +33,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-	<ImportPortableTargets>false</ImportPortableTargets>
+    <ImportPortableTargets>false</ImportPortableTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,34 +49,33 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Unsigned|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release-Unsigned\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Release\YamlDotNet.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-Unsigned\YamlDotNet.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Signed|AnyCPU'">
     <OutputPath>bin\Release-Signed\</OutputPath>
     <DefineConstants>TRACE;SIGNED</DefineConstants>
-    <DocumentationFile>bin\Release-Signed\YamlDotNet.Signed.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-Signed\YamlDotNet.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <AssemblyName>YamlDotNet.Signed</AssemblyName>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Portable|AnyCPU'">
-    <OutputPath>bin\Release-Portable\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Portable-Unsigned|AnyCPU' ">
+    <OutputPath>bin\Release-Portable-Unsigned\</OutputPath>
     <DefineConstants>TRACE;PORTABLE</DefineConstants>
-    <DocumentationFile>bin\Release-Portable\YamlDotNet.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-Portable-Unsigned\YamlDotNet.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
     <DebugType>pdbonly</DebugType>
@@ -85,23 +84,22 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-	<ImportPortableTargets>true</ImportPortableTargets>
+    <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Portable-Signed|AnyCPU'">
     <OutputPath>bin\Release-Portable-Signed\</OutputPath>
     <DefineConstants>TRACE;PORTABLE;SIGNED</DefineConstants>
-    <DocumentationFile>bin\Release-Portable-Signed\YamlDotNet.Signed.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-Portable-Signed\YamlDotNet.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <AssemblyName>YamlDotNet.Signed</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-	<ImportPortableTargets>true</ImportPortableTargets>
+    <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -296,7 +294,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="YamlDotNet.nuspec" />
+    <None Include="YamlDotNet.Signed.nuspec" />
+    <None Include="YamlDotNet.Unsigned.nuspec" />
   </ItemGroup>
   <Import Condition="'$(ImportPortableTargets)' == 'false'" Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Condition="'$(ImportPortableTargets)' == 'true'" Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
