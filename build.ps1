@@ -1,10 +1,5 @@
 . .\BuildUtils\build_utils.ps1
 
-$logger = ""
-if(Test-Path "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll") {
-    $logger = '/logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
-}
-
 "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed" | % { $i = 0 } {
 
     if($i++ -gt 0) {
@@ -13,7 +8,11 @@ if(Test-Path "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll") 
         Write-Host ""
     }
 
-    msbuild YamlDotNet.sln $logger /p:Configuration=$_
+    if(Test-Path "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll") {
+        msbuild YamlDotNet.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=$_
+    } else {
+        msbuild YamlDotNet.sln /p:Configuration=$_
+    }
 }
 
 $version = $env:APPVEYOR_BUILD_VERSION
