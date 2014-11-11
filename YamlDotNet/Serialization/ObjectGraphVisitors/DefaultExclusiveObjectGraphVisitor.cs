@@ -34,8 +34,8 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
 		private static object GetDefault(Type type)
 		{
-			return type.IsValueType ? Activator.CreateInstance(type) : null;
-		}
+			return type.IsValueType() ? Activator.CreateInstance(type) : null;
+        }
 
 		private static readonly IEqualityComparer<object> _objectComparer = EqualityComparer<object>.Default;
 

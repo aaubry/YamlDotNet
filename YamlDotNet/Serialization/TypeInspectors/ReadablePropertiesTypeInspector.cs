@@ -52,7 +52,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 		{
 			return type
-				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+				.GetPublicProperties()
 				.Where(IsValidProperty)
 				.Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, _typeResolver));
 		}
@@ -81,9 +81,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 			public T GetCustomAttribute<T>() where T : Attribute
 			{
 				var attributes = _propertyInfo.GetCustomAttributes(typeof(T), true);
-				return attributes.Length > 0
-					? (T)attributes[0]
-					: null;
+				return (T)attributes.FirstOrDefault();
 			}
 
 			public IObjectDescriptor Read(object target)

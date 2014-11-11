@@ -63,8 +63,9 @@ namespace YamlDotNet.Core
 		public ForwardAnchorNotSupportedException(string message, Exception inner)
 			: base(message, inner)
 		{
-		}
+        }
 
+#if !PORTABLE
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
 		/// </summary>
@@ -76,5 +77,6 @@ namespace YamlDotNet.Core
 			: base(info, context)
 		{
 		}
-	}
+#endif
+    }
 }

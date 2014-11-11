@@ -179,7 +179,7 @@ namespace YamlDotNet.Test.Serialization
 
 		#region Unsupported Members
 
-		public TypeCode GetTypeCode()
+		public System.TypeCode GetTypeCode()
 		{
 			throw new NotSupportedException();
 		}

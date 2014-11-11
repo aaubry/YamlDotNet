@@ -36,11 +36,13 @@ namespace YamlDotNet.Serialization.Utilities
 	/// </summary>
 	public static class TypeConverter
 	{
+#if !PORTABLE
 		/// <summary>
 		/// Registers a <see cref="System.ComponentModel.TypeConverter"/> dynamically.
 		/// </summary>
 		/// <typeparam name="TConvertible">The type to which the coverter should be associated.</typeparam>
 		/// <typeparam name="TConverter">The type of the converter.</typeparam>
+		[System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
 		public static void RegisterTypeConverter<TConvertible, TConverter>()
 			where TConverter : System.ComponentModel.TypeConverter
 		{
@@ -53,6 +55,7 @@ namespace YamlDotNet.Serialization.Utilities
 				TypeDescriptor.AddAttributes(typeof(TConvertible), new TypeConverterAttribute(typeof(TConverter)));
 			}
 		}
+#endif
 
 		/// <summary>
 		/// Converts the specified value.
@@ -124,7 +127,7 @@ namespace YamlDotNet.Serialization.Utilities
 			// Handle null and DBNull
 			if (value == null || value is DBNull)
 			{
-				return destinationType.IsValueType ? Activator.CreateInstance(destinationType) : null;
+				return destinationType.IsValueType() ? Activator.CreateInstance(destinationType) : null;
 			}
 
 			var sourceType = value.GetType();
@@ -136,7 +139,7 @@ namespace YamlDotNet.Serialization.Utilities
 			}
 
 			// Nullable types get a special treatment
-			if (destinationType.IsGenericType)
+			if (destinationType.IsGenericType())
 			{
 				var genericTypeDefinition = destinationType.GetGenericTypeDefinition();
 				if (genericTypeDefinition == typeof(Nullable<>))
@@ -148,7 +151,7 @@ namespace YamlDotNet.Serialization.Utilities
 			}
 
 			// Enums also require special handling
-			if (destinationType.IsEnum)
+			if (destinationType.IsEnum())
 			{
 				var valueText = value as string;
 				return valueText != null ? Enum.Parse(destinationType, valueText, true) : value;
@@ -165,6 +168,7 @@ namespace YamlDotNet.Serialization.Utilities
 					return true;
 			}
 
+#if !PORTABLE
 			// Try with the source type's converter
 			var sourceConverter = TypeDescriptor.GetConverter(value);
 			if (sourceConverter != null && sourceConverter.CanConvertTo(destinationType))
@@ -178,11 +182,12 @@ namespace YamlDotNet.Serialization.Utilities
 			{
 				return destinationConverter.ConvertFrom(null, culture, value);
 			}
+#endif
 
 			// Try to find a casting operator in the source or destination type
 			foreach (var type in new[] { sourceType, destinationType })
 			{
-				foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
+				foreach (var method in type.GetPublicMethods())
 				{
 					var isCastingOperator =
 						method.IsSpecialName &&
@@ -218,14 +223,14 @@ namespace YamlDotNet.Serialization.Utilities
 				try
 				{
 					// Try with - public static T Parse(string, IFormatProvider)
-					var parseMethod = destinationType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(IFormatProvider) }, null);
+					var parseMethod = destinationType.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider));
 					if (parseMethod != null)
 					{
 						return parseMethod.Invoke(null, new object[] { value, culture });
 					}
 
 					// Try with - public static T Parse(string)
-					parseMethod = destinationType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
+					parseMethod = destinationType.GetPublicStaticMethod("Parse", typeof(string));
 					if (parseMethod != null)
 					{
 						return parseMethod.Invoke(null, new object[] { value });
@@ -247,22 +252,6 @@ namespace YamlDotNet.Serialization.Utilities
 			return Convert.ChangeType(value, destinationType, CultureInfo.InvariantCulture);
 		}
 
-		private class CultureInfoAdapter : CultureInfo
-		{
-			private readonly IFormatProvider _provider;
-
-			public CultureInfoAdapter(CultureInfo baseCulture, IFormatProvider provider)
-				: base(baseCulture.LCID)
-			{
-				_provider = provider;
-			}
-
-			public override object GetFormat(Type formatType)
-			{
-				return _provider.GetFormat(formatType);
-			}
-		}
-
 		/// <summary>
 		/// Tries to parse the specified value.
 		/// </summary>
@@ -271,7 +260,7 @@ namespace YamlDotNet.Serialization.Utilities
 		/// <returns></returns>
 		public static T? TryParse<T>(string value) where T : struct
 		{
-			switch (Type.GetTypeCode(typeof(T)))
+			switch (typeof(T).GetTypeCode())
 			{
 				case TypeCode.Boolean:
 					return (T?)(object)TryParse<bool>(value, bool.TryParse);

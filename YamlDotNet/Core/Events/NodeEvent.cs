@@ -29,7 +29,7 @@ namespace YamlDotNet.Core.Events
 	/// </summary>
 	public abstract class NodeEvent : ParsingEvent
 	{
-		internal static readonly Regex anchorValidator = new Regex(@"^[0-9a-zA-Z_\-]+$", RegexOptions.Compiled);
+		internal static readonly Regex anchorValidator = new Regex(@"^[0-9a-zA-Z_\-]+$", StandardRegexOptions.Compiled);
 
 		private readonly string anchor;
 

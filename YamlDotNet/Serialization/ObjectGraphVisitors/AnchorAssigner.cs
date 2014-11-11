@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 		bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
 		{
 			// Do not assign anchors to basic types
-			if (value.Value == null || Type.GetTypeCode(value.Type) != TypeCode.Object)
+			if (value.Value == null || value.Type.GetTypeCode() != TypeCode.Object)
 			{
 				return false;
 			}

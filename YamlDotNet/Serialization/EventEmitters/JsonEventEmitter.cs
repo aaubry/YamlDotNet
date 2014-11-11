@@ -44,7 +44,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 			eventInfo.Style = ScalarStyle.Plain;
 
 			var typeCode = eventInfo.Source.Value != null
-				? Type.GetTypeCode(eventInfo.Source.Type)
+				? eventInfo.Source.Type.GetTypeCode()
 				: TypeCode.Empty;
 
 			switch (typeCode)

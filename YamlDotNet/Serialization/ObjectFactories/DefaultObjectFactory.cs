@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
 		public object Create(Type type)
 		{
-			if (type.IsInterface)
+			if (type.IsInterface())
 			{
 				Type implementationType;
 				if (defaultInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out implementationType))
@@ -52,7 +52,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 			{
 				return Activator.CreateInstance(type);
 			}
-			catch (MissingMethodException err)
+			catch (Exception err)
 			{
 				var message = string.Format("Failed to create an instance of type '{0}'.", type);
 				throw new InvalidOperationException(message, err);

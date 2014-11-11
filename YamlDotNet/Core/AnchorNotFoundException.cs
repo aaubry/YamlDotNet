@@ -64,6 +64,7 @@ namespace YamlDotNet.Core
 		{
 		}
 
+#if !PORTABLE
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
 		/// </summary>
@@ -75,5 +76,6 @@ namespace YamlDotNet.Core
 			: base(info, context)
 		{
 		}
+#endif
 	}
 }

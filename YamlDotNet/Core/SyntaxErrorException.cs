@@ -62,8 +62,9 @@ namespace YamlDotNet.Core
 		public SyntaxErrorException(string message, Exception inner)
 			: base(message, inner)
 		{
-		}
+        }
 
+#if !PORTABLE
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SyntaxErrorException"/> class.
 		/// </summary>
@@ -75,5 +76,6 @@ namespace YamlDotNet.Core
 			: base(info, context)
 		{
 		}
-	}
+#endif
+    }
 }

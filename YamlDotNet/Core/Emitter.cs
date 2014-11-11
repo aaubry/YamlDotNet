@@ -42,7 +42,7 @@ namespace YamlDotNet.Core
 		private const int MaxAliasLength = 128;
 
 		private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
-			RegexOptions.Compiled | RegexOptions.Singleline);
+			StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
 		private readonly TextWriter output;
 
@@ -454,6 +454,14 @@ namespace YamlDotNet.Core
 				scalarData.isBlockPlainAllowed = false;
 		}
 
+#if PORTABLE
+		private bool IsUnicode(Encoding encoding)
+		{
+			return encoding.Equals(Encoding.UTF8) ||
+				encoding.Equals(Encoding.Unicode) ||
+				encoding.Equals(Encoding.BigEndianUnicode);
+		}
+#else
 		private bool IsUnicode(Encoding encoding)
 		{
 			return encoding.Equals(Encoding.UTF8) ||
@@ -462,6 +470,7 @@ namespace YamlDotNet.Core
 				encoding.Equals(Encoding.UTF7) ||
 				encoding.Equals(Encoding.UTF32);
 		}
+#endif
 
 		private void AnalyzeTag(string tag)
 		{

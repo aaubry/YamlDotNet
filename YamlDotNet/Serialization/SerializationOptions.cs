@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		/// <remarks>
 		/// If the serialization graph contains circular references and this flag is set,
-		/// a <see cref="StackOverflowException" /> will be thrown.
+		/// a StackOverflowException will be thrown.
 		/// If this flag is not set, there is a performance penalty because the entire
 		/// object graph must be walked twice.
 		/// </remarks>

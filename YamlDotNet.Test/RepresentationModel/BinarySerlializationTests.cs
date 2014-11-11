@@ -30,6 +30,7 @@ namespace YamlDotNet.Test.RepresentationModel
 {
 	using System.Runtime.Serialization.Formatters.Binary;
 
+#if !PORTABLE
 	public class BinarySerlializationTests
 	{
 		[Fact]
@@ -48,4 +49,5 @@ namespace YamlDotNet.Test.RepresentationModel
 			Assert.Equal(stream.Documents[0].RootNode, result);
 		}
 	}
+#endif
 }

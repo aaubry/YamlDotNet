@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
 		protected override void TraverseProperties(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
 		{
-			if (!ReflectionUtility.HasDefaultConstructor(value.Type) && !serializer.Converters.Any(c => c.Accepts(value.Type)))
+			if (!value.Type.HasDefaultConstructor() && !serializer.Converters.Any(c => c.Accepts(value.Type)))
 			{
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor or a type converter.", value.Type));
 			}

@@ -81,7 +81,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 				return;
 			}
 
-			var typeCode = Type.GetTypeCode(value.Type);
+			var typeCode = value.Type.GetTypeCode();
 			switch (typeCode)
 			{
 				case TypeCode.Boolean:

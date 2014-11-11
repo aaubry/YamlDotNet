@@ -38,13 +38,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				return false;
 			}
 
-			if (expectedType.IsEnum)
+			if (expectedType.IsEnum())
 			{
 				value = Enum.Parse(expectedType, scalar.Value);
 			}
 			else
 			{
-				TypeCode typeCode = Type.GetTypeCode(expectedType);
+				TypeCode typeCode = expectedType.GetTypeCode();
 				switch (typeCode)
 				{
 					case TypeCode.Boolean:
