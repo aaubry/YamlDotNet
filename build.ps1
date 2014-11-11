@@ -15,11 +15,6 @@
     }
 }
 
-$version = $env:APPVEYOR_BUILD_VERSION
-if($version -eq $null) {
-    $version = "0.0.1"
-}
-
 "Unsigned", "Signed" | % {
-    nuget pack YamlDotNet\YamlDotNet.$_.nuspec -Version $version -OutputDirectory YamlDotNet\bin
+    nuget pack YamlDotNet\YamlDotNet.$_.nuspec -OutputDirectory YamlDotNet\bin
 }

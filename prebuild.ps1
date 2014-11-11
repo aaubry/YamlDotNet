@@ -9,4 +9,6 @@ if($env:APPVEYOR_REPO_BRANCH -ne "release") {
 	$version = "$version-pre$buildNumber"
 }
 
+Patch-Xml "YamlDotNet\YamlDotNet.Unsigned.nuspec" $version "/package/metadata/version/text()" @{ }
+Patch-Xml "YamlDotNet\YamlDotNet.Signed.nuspec" $version "/package/metadata/version/text()" @{ }
 Patch-AssemblyInfo "YamlDotNet\Properties\AssemblyInfo.cs" $version
