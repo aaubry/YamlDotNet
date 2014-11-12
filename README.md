@@ -16,6 +16,10 @@ More information can be found in the [official page of the project](http://aaubr
 
 # Changelog
 
+## Version 3.3.1
+
+This release adds a signed package and portable versions of the library.
+
 ## Version 3.3.0
 
 * Make types in YamlDotNet.RepresentationModel serializable.
