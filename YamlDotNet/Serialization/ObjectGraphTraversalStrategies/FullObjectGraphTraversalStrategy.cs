@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
@@ -37,8 +38,9 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 		private readonly int maxRecursion;
 		private readonly ITypeInspector typeDescriptor;
 		private readonly ITypeResolver typeResolver;
+	    private INamingConvention namingConvention;
 
-		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
+		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
 		{
 			if (maxRecursion <= 0)
 			{
@@ -62,6 +64,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			this.typeResolver = typeResolver;
 
 			this.maxRecursion = maxRecursion;
+		    this.namingConvention = namingConvention;
 		}
 
 		void IObjectGraphTraversalStrategy.Traverse(IObjectDescriptor graph, IObjectGraphVisitor visitor)
@@ -182,21 +185,21 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			visitor.VisitMappingStart(dictionary, entryTypes[0], entryTypes[1]);
 
 			// Invoke TraverseGenericDictionaryHelper<,>
-			traverseGenericDictionaryHelper.Invoke(entryTypes, this, dictionary.Value, visitor, currentDepth);
+            traverseGenericDictionaryHelper.Invoke(entryTypes, this, dictionary.Value, visitor, currentDepth, namingConvention ?? new NullNamingConvention());
 
 			visitor.VisitMappingEnd(dictionary);
 		}
 
 		private static readonly GenericInstanceMethod<FullObjectGraphTraversalStrategy> traverseGenericDictionaryHelper =
-			new GenericInstanceMethod<FullObjectGraphTraversalStrategy>(s => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0));
+			new GenericInstanceMethod<FullObjectGraphTraversalStrategy>(s => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0, null));
 
 		private void TraverseGenericDictionaryHelper<TKey, TValue>(
 			IDictionary<TKey, TValue> dictionary,
-			IObjectGraphVisitor visitor, int currentDepth)
+			IObjectGraphVisitor visitor, int currentDepth, INamingConvention namingConvention)
 		{
 			foreach (var entry in dictionary)
 			{
-				var key = GetObjectDescriptor(entry.Key, typeof(TKey));
+                var key = GetObjectDescriptor(namingConvention.Apply(entry.Key.ToString()), typeof(TKey));
 				var value = GetObjectDescriptor(entry.Value, typeof(TValue));
 
 				if (visitor.EnterMapping(key, value))

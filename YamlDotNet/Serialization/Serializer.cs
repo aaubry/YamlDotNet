@@ -199,7 +199,7 @@ namespace YamlDotNet.Serialization
 			}
 			else
 			{
-				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50);
+				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50, namingConvention);
 			}
 		}
 	}

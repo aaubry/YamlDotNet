@@ -34,7 +34,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 	public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
 	{
 		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
-			: base(serializer, typeDescriptor, typeResolver, maxRecursion)
+			: base(serializer, typeDescriptor, typeResolver, maxRecursion, null)
 		{
 		}
 
