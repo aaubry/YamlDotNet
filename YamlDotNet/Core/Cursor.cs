@@ -19,8 +19,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
+
 namespace YamlDotNet.Core
 {
+	[Serializable]
 	internal class Cursor
 	{
 		public int Index { get; set; }

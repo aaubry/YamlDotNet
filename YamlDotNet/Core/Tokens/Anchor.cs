@@ -26,6 +26,7 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Represents an anchor token.
 	/// </summary>
+	[Serializable]
 	public class Anchor : Token
 	{
 		private readonly string value;

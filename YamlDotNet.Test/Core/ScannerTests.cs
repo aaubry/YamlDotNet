@@ -23,6 +23,8 @@ using Xunit;
 using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace YamlDotNet.Test.Core
 {
@@ -368,7 +370,44 @@ namespace YamlDotNet.Test.Core
 				StreamEnd);
 		}
 
-		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
+		[Fact]
+		public void ScannerIsSerializable()
+		{
+			var sut = Yaml.ScannerForText(@"
+				- one
+				- two
+				- three
+			");
+
+			AssertPartialSequenceOfTokensFrom(sut,
+				StreamStart,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("one"),
+				BlockEntry,
+				PlainScalar("two"));
+
+			var buffer = new MemoryStream();
+			var formatter = new BinaryFormatter();
+			formatter.Serialize(buffer, sut);
+
+			AssertSequenceOfTokensFrom(sut,
+				BlockEntry,
+				PlainScalar("three"),
+				BlockEnd,
+				StreamEnd);
+
+			buffer.Position = 0;
+			sut = (Scanner)formatter.Deserialize(buffer);
+
+			AssertSequenceOfTokensFrom(sut,
+				BlockEntry,
+				PlainScalar("three"),
+				BlockEnd,
+				StreamEnd);
+		}
+
+		private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
 		{
 			var tokenNumber = 1;
 			foreach (var expected in tokens)
@@ -377,6 +416,11 @@ namespace YamlDotNet.Test.Core
 				AssertToken(expected, scanner.Current, tokenNumber);
 				tokenNumber++;
 			}
+		}
+
+		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
+		{
+			AssertPartialSequenceOfTokensFrom(scanner, tokens);
 			scanner.MoveNext().Should().BeFalse("Found extra tokens");
 		}
 

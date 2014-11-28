@@ -26,6 +26,7 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Represents a stream start token.
 	/// </summary>
+	[Serializable]
 	public class StreamStart : Token
 	{
 		/// <summary>

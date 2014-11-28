@@ -31,18 +31,67 @@ namespace YamlDotNet.Core
 	/// <summary>
 	/// Converts a sequence of characters into a sequence of YAML tokens.
 	/// </summary>
+	[Serializable]
 	public class Scanner
 	{
 		private const int MaxVersionNumberLength = 9;
+		private const int MaxBufferLength = 8;
+
+		private static readonly IDictionary<char, char> simpleEscapeCodes = new SortedDictionary<char, char>
+		{
+			{ '0', '\0' },
+			{ 'a', '\x07' },
+			{ 'b', '\x08' },
+			{ 't', '\x09' },
+			{ '\t', '\x09' },
+			{ 'n', '\x0A' },
+			{ 'v', '\x0B' },
+			{ 'f', '\x0C' },
+			{ 'r', '\x0D' },
+			{ 'e', '\x1B' },
+			{ ' ', '\x20' },
+			{ '"', '"' },
+			{ '\'', '\'' },
+			{ '\\', '\\' },
+			{ 'N', '\x85' },
+			{ '_', '\xA0' },
+			{ 'L', '\x2028' },
+			{ 'P', '\x2029' },
+		};
 
 		private readonly Stack<int> indents = new Stack<int>();
 		private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
 		private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
+		private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
+		
 		private Cursor cursor;
 		private bool streamStartProduced;
 		private bool streamEndProduced;
 		private int indent = -1;
 		private bool simpleKeyAllowed;
+		private int flowLevel;
+		private int tokensParsed;
+		private bool tokenAvailable;
+		private Token previous;
+
+		public bool SkipComments { get; private set; }
+
+		/// <summary>
+		/// Gets the current token.
+		/// </summary>
+		public Token Current { get; private set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Scanner"/> class.
+		/// </summary>
+		/// <param name="input">The input.</param>
+		/// <param name="skipComments">Indicates whether comments should be ignored</param>
+		public Scanner(TextReader input, bool skipComments = true)
+		{
+			analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
+			cursor = new Cursor();
+			SkipComments = skipComments;
+		}
 
 		/// <summary>
 		/// Gets the current position inside the input stream.
@@ -56,38 +105,48 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private int flowLevel;
-		private int tokensParsed;
-
-		private const int MaxBufferLength = 8;
-		private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
-		private bool tokenAvailable;
-
-		private static readonly IDictionary<char, char> simpleEscapeCodes = InitializeSimpleEscapeCodes();
-		public bool SkipComments { get; private set; }
-
-		private static IDictionary<char, char> InitializeSimpleEscapeCodes()
+		/// <summary>
+		/// Moves to the next token.
+		/// </summary>
+		/// <returns></returns>
+		public bool MoveNext()
 		{
-			IDictionary<char, char> codes = new SortedDictionary<char, char>();
-			codes.Add('0', '\0');
-			codes.Add('a', '\x07');
-			codes.Add('b', '\x08');
-			codes.Add('t', '\x09');
-			codes.Add('\t', '\x09');
-			codes.Add('n', '\x0A');
-			codes.Add('v', '\x0B');
-			codes.Add('f', '\x0C');
-			codes.Add('r', '\x0D');
-			codes.Add('e', '\x1B');
-			codes.Add(' ', '\x20');
-			codes.Add('"', '"');
-			codes.Add('\'', '\'');
-			codes.Add('\\', '\\');
-			codes.Add('N', '\x85');
-			codes.Add('_', '\xA0');
-			codes.Add('L', '\x2028');
-			codes.Add('P', '\x2029');
-			return codes;
+			if (Current != null)
+			{
+				ConsumeCurrent();
+			}
+
+			return InternalMoveNext();
+		}
+
+		internal bool InternalMoveNext()
+		{
+			if (!tokenAvailable && !streamEndProduced)
+			{
+				FetchMoreTokens();
+			}
+			if (tokens.Count > 0)
+			{
+				Current = tokens.Dequeue();
+				tokenAvailable = false;
+				return true;
+			}
+			else
+			{
+				Current = null;
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Consumes the current token and increments the parsed token count
+		/// </summary>
+		internal void ConsumeCurrent()
+		{
+			++tokensParsed;
+			tokenAvailable = false;
+			previous = Current;
+			Current = null;
 		}
 
 		private char ReadCurrentCharacter()
@@ -108,76 +167,6 @@ namespace YamlDotNet.Core
 			char nextChar = analyzer.Peek(0); // LS|PS -> LS|PS
 			SkipLine();
 			return nextChar;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Scanner"/> class.
-		/// </summary>
-		/// <param name="input">The input.</param>
-		/// <param name="skipComments">Indicates whether comments should be ignored</param>
-		public Scanner(TextReader input, bool skipComments = true)
-		{
-			analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
-			cursor = new Cursor();
-			SkipComments = skipComments;
-		}
-
-		private Token current;
-		private Token previous;
-
-		/// <summary>
-		/// Gets the current token.
-		/// </summary>
-		public Token Current
-		{
-			get
-			{
-				return current;
-			}
-		}
-
-		/// <summary>
-		/// Moves to the next token.
-		/// </summary>
-		/// <returns></returns>
-		public bool MoveNext()
-		{
-			if (current != null)
-			{
-				ConsumeCurrent();
-			}
-
-			return InternalMoveNext();
-		}
-
-		internal bool InternalMoveNext()
-		{
-			if (!tokenAvailable && !streamEndProduced)
-			{
-				FetchMoreTokens();
-			}
-			if (tokens.Count > 0)
-			{
-				current = tokens.Dequeue();
-				tokenAvailable = false;
-				return true;
-			}
-			else
-			{
-				current = null;
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Consumes the current token and increments the parsed token count
-		/// </summary>
-		internal void ConsumeCurrent()
-		{
-			++tokensParsed;
-			tokenAvailable = false;
-			previous = current;
-			current = null;
 		}
 
 		private void FetchMoreTokens()

@@ -26,6 +26,7 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Represents a version directive token.
 	/// </summary>
+	[Serializable]
 	public class VersionDirective : Token
 	{
 		private readonly Version version;

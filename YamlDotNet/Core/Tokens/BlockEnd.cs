@@ -27,6 +27,7 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Represents a block end token.
 	/// </summary>
+	[Serializable]
 	public class BlockEnd : Token
 	{
 		/// <summary>

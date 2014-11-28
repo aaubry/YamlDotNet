@@ -27,6 +27,7 @@ namespace YamlDotNet.Core
 	/// <summary>
 	/// Generic queue on which items may be inserted
 	/// </summary>
+	[Serializable]
 	public class InsertionQueue<T>
 	{
 		// TODO: Use a more efficient data structure

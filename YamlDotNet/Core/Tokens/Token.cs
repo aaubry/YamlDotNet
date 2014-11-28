@@ -26,6 +26,7 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Base class for YAML tokens.
 	/// </summary>
+	[Serializable]
 	public abstract class Token
 	{
 		private readonly Mark start;

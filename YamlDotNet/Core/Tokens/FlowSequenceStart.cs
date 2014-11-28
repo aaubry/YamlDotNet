@@ -27,6 +27,7 @@ namespace YamlDotNet.Core.Tokens
 	/// <summary>
 	/// Represents a flow sequence start token.
 	/// </summary>
+	[Serializable]
 	public class FlowSequenceStart : Token
 	{
 		/// <summary>
