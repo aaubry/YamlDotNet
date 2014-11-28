@@ -492,8 +492,11 @@ namespace YamlDotNet.Core
 			}
 
 			// If we don't determine the token type so far, it is an error.
-			var mark = cursor.Mark();
-			throw new SyntaxErrorException(mark, mark, "While scanning for the next token, find character that cannot start any token.");
+			var start = cursor.Mark();
+			Skip();
+			var end = cursor.Mark();
+
+			throw new SyntaxErrorException(start, end, "While scanning for the next token, find character that cannot start any token.");
 		}
 
 		private bool CheckWhiteSpace()
