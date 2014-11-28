@@ -589,6 +589,8 @@ namespace YamlDotNet.Core
 		{
 			if (analyzer.Check('#'))
 			{
+				var start = cursor.Mark();
+
 				// Eat '#'
 				Skip();
 
@@ -598,7 +600,6 @@ namespace YamlDotNet.Core
 					Skip();
 				}
 
-				var start = cursor.Mark();
 				var text = new StringBuilder();
 				while (!analyzer.IsBreakOrZero())
 				{

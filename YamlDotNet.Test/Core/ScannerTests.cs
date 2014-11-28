@@ -329,6 +329,27 @@ namespace YamlDotNet.Test.Core
 		}
 
 		[Fact]
+		public void CommentsAreCorrectlyMarked()
+		{
+			var sut = new Scanner(Yaml.ReaderForText(@"
+				- first # Comment on first item
+			"), skipComments: false);
+
+			while(sut.MoveNext())
+			{
+				var comment = sut.Current as Comment;
+				if(comment != null)
+				{
+					Assert.Equal(8, comment.Start.Index);
+					Assert.Equal(31, comment.End.Index);
+
+					return;
+				}
+			}
+
+			Assert.True(false, "Did not find a comment");
+		}
+		[Fact]
 		public void CommentsAreOmittedUnlessRequested()
 		{
 			AssertSequenceOfTokensFrom(Yaml.ScannerForText(@"
