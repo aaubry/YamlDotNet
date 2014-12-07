@@ -16,6 +16,14 @@ More information can be found in the [official page of the project](http://aaubr
 
 # Changelog
 
+## Version 3.4.0
+
+Changes and fixes on the Scanner to make it more usable:
+
+* Report the location of comments correctly, when the scanner is created with "skipComments = false"
+* In case of syntax error, do not report an empty range and skip to the next token.
+* Make the scanner and related types serializable, so that the state of the scanner can be captured and then restored later (assuming that the TextReader is also serializable).
+
 ## Version 3.3.1
 
 This release adds a signed package and portable versions of the library.
