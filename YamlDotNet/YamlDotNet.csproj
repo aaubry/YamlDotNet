@@ -134,6 +134,7 @@
     <Compile Include="Core\Events\StreamStart.cs" />
     <Compile Include="Core\FakeList.cs" />
     <Compile Include="Core\ForwardAnchorNotSupportedException.cs" />
+    <Compile Include="Core\HashCode.cs" />
     <Compile Include="Core\IEmitter.cs" />
     <Compile Include="Core\ILookAheadBuffer.cs" />
     <Compile Include="Core\InsertionQueue.cs" />

@@ -27,7 +27,7 @@ namespace YamlDotNet.Core
 	/// Represents a location inside a file
 	/// </summary>
 	[Serializable]
-	public class Mark
+	public class Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
 	{
 		/// <summary>
 		/// Gets a <see cref="Mark"/> with empty values.
@@ -84,6 +84,59 @@ namespace YamlDotNet.Core
 		public override string ToString()
 		{
 			return string.Format("Line: {0}, Col: {1}, Idx: {2}", Line, Column, Index);
+		}
+
+		/// <summary />
+		public override bool Equals(object obj)
+		{
+			return Equals(obj as Mark);
+		}
+
+		/// <summary />
+		public bool Equals(Mark other)
+		{
+			return other != null
+				&& Index == other.Index
+				&& Line == other.Line
+				&& Column == other.Column;
+		}
+
+		/// <summary />
+		public override int GetHashCode()
+		{
+			return HashCode.CombineHashCodes(
+				Index.GetHashCode(),
+				HashCode.CombineHashCodes(
+					Line.GetHashCode(),
+					Column.GetHashCode()
+				)
+			);
+		}
+
+		/// <summary />
+		public int CompareTo(object obj)
+		{
+			if (obj == null)
+			{
+				throw new ArgumentNullException("obj");
+			}
+			return CompareTo(obj as Mark);
+		}
+
+		/// <summary />
+		public int CompareTo(Mark other)
+		{
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+
+			var cmp = Line.CompareTo(other.Line);
+			if (cmp == 0)
+			{
+				cmp = Column.CompareTo(other.Column);
+			}
+			return cmp;
 		}
 	}
 }
