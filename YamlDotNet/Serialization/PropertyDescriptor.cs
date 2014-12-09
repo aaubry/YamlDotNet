@@ -43,7 +43,9 @@ namespace YamlDotNet.Serialization
 			set { baseDescriptor.TypeOverride = value; }
 		}
 
-		public bool CanWrite
+	    public int Order { get; set; }
+
+	    public bool CanWrite
 		{
 			get { return baseDescriptor.CanWrite; }
 		}
