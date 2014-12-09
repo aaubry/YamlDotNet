@@ -61,8 +61,16 @@ namespace YamlDotNet.Serialization
 						}
 					}
 
+				    var order = p.GetCustomAttribute<YamlOrderAttribute>();
+				    if (order != null)
+				    {
+				        descriptor.Order = order.Value;
+				    }
+
 					return (IPropertyDescriptor)descriptor;
-				});
+				})
+                .OrderBy(p => p.Order)
+                .ThenBy(p => p.Name);
 		}
 	}
 }
