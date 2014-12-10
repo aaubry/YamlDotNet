@@ -231,6 +231,17 @@ namespace YamlDotNet.Test.Serialization
 				.Subject.As<Base>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
 		}
 
+	    [Fact]
+	    public void DeserializationOfOrderedProperties()
+	    {
+            TextReader stream = Yaml.StreamFrom("ordered-properties.yaml");
+
+            var orderExample = Deserializer.Deserialize<OrderExample>(stream);
+
+	        orderExample.Order1.Should().Be("Order1 value");
+	        orderExample.Order2.Should().Be("Order2 value");
+	    }
+
 		[Fact]
 		public void DeserializeEnumerable()
 		{
@@ -560,9 +571,24 @@ namespace YamlDotNet.Test.Serialization
 			result.MyString.Should().BeNull();
 		}
 
+        [Fact]
+        public void SerializationOfOrderedProperties()
+        {
+            var obj = new OrderExample();
+            var writer = new StringWriter();
+
+            Serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+            Dump.WriteLine(serialized);
+
+            serialized.Should()
+                .Be("Order1: Order1 value\r\nOrder2: Order2 value\r\n", "the properties should be in the right order");
+        }
+
 		[Fact]
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
+
 			var writer = new StringWriter();
 			var obj = new IgnoreExample();
 

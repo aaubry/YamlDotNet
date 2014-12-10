@@ -375,6 +375,21 @@ namespace YamlDotNet.Test.Serialization
 		}
 	}
 
+    public class OrderExample
+    {
+        public OrderExample()
+        {
+            this.Order1 = "Order1 value";
+            this.Order2 = "Order2 value";
+        }
+
+        [YamlOrder(2)]
+        public String Order2 { get; set; }
+
+        [YamlOrder(1)]
+        public String Order1 { get; set; }
+    }
+
 	public class IgnoreExample
 	{
 		[YamlIgnore]

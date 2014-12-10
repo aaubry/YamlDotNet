@@ -120,6 +120,7 @@
     <EmbeddedResource Include="files\09-flow-mapping.yaml" />
     <EmbeddedResource Include="files\convertible.template" />
     <EmbeddedResource Include="files\explicit-type.template" />
+    <EmbeddedResource Include="files\ordered-properties.yaml" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
