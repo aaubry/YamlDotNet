@@ -237,7 +237,7 @@ namespace YamlDotNet.Test.Serialization
 	        var stream = Yaml.StreamFrom("guid.yaml");
 	        var result = Deserializer.Deserialize<Guid>(stream);
 
-            //result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
+            result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
 	    }
 
 		[Fact]
@@ -490,7 +490,7 @@ namespace YamlDotNet.Test.Serialization
             Serializer.Serialize(writer, guid);
 	        var serialized = writer.ToString();
             Dump.WriteLine(writer.ToString());
-            Regex.IsMatch(serialized, "^" + guid.ToString("N")).Should().BeTrue("serialized content should contain the serialized guid");
+            Regex.IsMatch(serialized, "^" + guid.ToString("N")).Should().BeTrue("serialized content should contain the guid");
 	    }
 
 		[Fact]
