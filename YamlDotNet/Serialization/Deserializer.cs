@@ -94,6 +94,11 @@ namespace YamlDotNet.Serialization
 				);
 
 			converters = new List<IYamlTypeConverter>();
+            foreach (IYamlTypeConverter yamlTypeConverter in YamlTypeConverters.ExistingConverters)
+            {
+                converters.Add(yamlTypeConverter);
+            }
+
 			NodeDeserializers = new List<INodeDeserializer>();
 			NodeDeserializers.Add(new TypeConverterNodeDeserializer(converters));
 			NodeDeserializers.Add(new NullNodeDeserializer());
