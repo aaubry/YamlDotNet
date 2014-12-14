@@ -1137,7 +1137,7 @@ namespace YamlDotNet.Core
 		private void WriteLiteralScalar(string value)
 		{
 			var previousBreak = true;
-            var previousReturn = false;
+			var previousReturn = false;
 
 			WriteIndicator("|", true, false, false);
 			WriteBlockScalarHints(value);
@@ -1148,27 +1148,27 @@ namespace YamlDotNet.Core
 
 			foreach (var character in value)
 			{
-                if (IsBreak(character))
-                {
-                    if (!previousReturn || character != '\n')
-                    {
-                        WriteBreak();
-                        isIndentation = true;
-                        previousBreak = true;
-                    }
-                }
-                else
-                {
-                    if (previousBreak)
-                    {
-                        WriteIndent();
-                    }
-                    Write(character);
-                    isIndentation = false;
-                    previousBreak = false;
-                }
+				if (IsBreak(character))
+				{
+					if (!previousReturn || character != '\n')
+					{
+						WriteBreak();
+						isIndentation = true;
+						previousBreak = true;
+					}
+				}
+				else
+				{
+					if (previousBreak)
+					{
+						WriteIndent();
+					}
+					Write(character);
+					isIndentation = false;
+					previousBreak = false;
+				}
 
-                previousReturn = character == '\r';
+				previousReturn = character == '\r';
 			}
 		}
 
