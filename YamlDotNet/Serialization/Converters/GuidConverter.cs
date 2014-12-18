@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.Converters
         public void WriteYaml(Core.IEmitter emitter, object value, System.Type type)
         {
             var guid = (System.Guid) value;
-            emitter.Emit(new Core.Events.Scalar(guid.ToString("N")));
+            emitter.Emit(new Core.Events.Scalar(guid.ToString("D")));
         }
     }
 }
