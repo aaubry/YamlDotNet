@@ -19,35 +19,18 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System.Collections.Generic;
+using YamlDotNet.Serialization.Converters;
+
 namespace YamlDotNet.Serialization.Utilities
 {
-    using System.Linq;
+	internal static class YamlTypeConverters
+	{
+		private static readonly IEnumerable<IYamlTypeConverter> _builtInTypeConverters = new IYamlTypeConverter[]
+		{
+			new GuidConverter(),
+		};
 
-    internal static class YamlTypeConverters
-    {
-        private static System.Collections.Generic.List<IYamlTypeConverter> _existingTypeConverters;
-
-        public static System.Collections.Generic.IEnumerable<IYamlTypeConverter> ExistingConverters
-        {
-            get
-            {
-                if (_existingTypeConverters == null)
-                {
-                    System.Type interfaceType = typeof(IYamlTypeConverter);
-                    System.Collections.Generic.IEnumerable<System.Type> converters = System.Reflection.Assembly.GetExecutingAssembly()
-                        .GetTypes()
-                        .Where(t => !t.IsInterface && interfaceType.IsAssignableFrom(t));
-
-                    _existingTypeConverters = new System.Collections.Generic.List<IYamlTypeConverter>();
-
-                    foreach (System.Type converter in converters)
-                    {
-                        _existingTypeConverters.Add((IYamlTypeConverter) System.Activator.CreateInstance(converter));
-                    }
-                }
-
-                return _existingTypeConverters;
-            }
-        }
-    }
+		public static IEnumerable<IYamlTypeConverter> BuiltInConverters { get { return _builtInTypeConverters; } }
+	}
 }

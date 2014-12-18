@@ -73,7 +73,12 @@ namespace YamlDotNet
 
 		public static bool IsAssignableFrom(this Type type, Type source)
 		{
-			return type.GetTypeInfo().IsAssignableFrom(source.GetTypeInfo());
+			return type.IsAssignableFrom(source.GetTypeInfo());
+		}
+
+		public static bool IsAssignableFrom(this Type type, TypeInfo source)
+		{
+			return type.GetTypeInfo().IsAssignableFrom(source);
 		}
 
 		public static TypeCode GetTypeCode(this Type type)

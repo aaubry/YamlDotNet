@@ -89,6 +89,7 @@
     <Compile Include="Serialization\ObjectFactoryTests.cs" />
     <Compile Include="Serialization\SerializationTestHelper.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
+    <Compile Include="Serialization\CodeValidations.cs" />
     <Compile Include="Yaml.cs" />
   </ItemGroup>
   <ItemGroup>

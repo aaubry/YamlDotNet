@@ -55,7 +55,7 @@ namespace YamlDotNet.Serialization
 			this.namingConvention = namingConvention ?? new NullNamingConvention();
 
 			Converters = new List<IYamlTypeConverter>();
-            foreach (IYamlTypeConverter yamlTypeConverter in Utilities.YamlTypeConverters.ExistingConverters)
+            foreach (IYamlTypeConverter yamlTypeConverter in Utilities.YamlTypeConverters.BuiltInConverters)
 		    {
 		        Converters.Add(yamlTypeConverter);
 		    }
