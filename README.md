@@ -16,6 +16,15 @@ More information can be found in the [official page of the project](http://aaubr
 
 # Changelog
 
+## Version 3.5.0
+
+* Add native support of System.Guid serialization.
+* Add properties to YamlMemberAttribute:
+    * Order: specifies the order of the members when they are serialized.
+    * Alias: instructs the deserializer to use a different field name for serialization.
+* The YamlAliasAttribute is now obsolete. New code should use YamlMemberAttribute instead.
+* Throw proper exceptions, with correct marks, when deserialization of a node fails.
+
 ## Version 3.4.0
 
 Changes and fixes on the Scanner to make it more usable:
