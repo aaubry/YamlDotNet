@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -810,5 +811,22 @@ namespace YamlDotNet.Test.Serialization
 			actual.DeleteScratch.Should().Be(false);
 			actual.MappedScratch.Should().ContainInOrder(new[] {"/work/"});
 		}
+
+        [Fact]
+        public void SerializeDynamicPropertyAndApplyNamingConvention()
+        {
+            dynamic obj = new ExpandoObject();
+            obj.property_one = new ExpandoObject();
+            ((IDictionary<string, object>)obj.property_one).Add("new_key_here", "new_value");;
+            
+            var mockNamingConvention = A.Fake<INamingConvention>();
+            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+
+            var serializer = new Serializer(namingConvention: mockNamingConvention);
+            var writer = new StringWriter();
+            serializer.Serialize(writer, obj);
+
+            writer.ToString().Should().Contain("xxx: new_value");
+        }
 	}
 }
