@@ -231,6 +231,15 @@ namespace YamlDotNet.Test.Serialization
 				.Subject.As<Base>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
 		}
 
+	    [Fact]
+	    public void DeserializeGuid()
+	    {
+	        var stream = Yaml.StreamFrom("guid.yaml");
+	        var result = Deserializer.Deserialize<Guid>(stream);
+
+            result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
+	    }
+
 		[Fact]
 		public void DeserializeEnumerable()
 		{
@@ -470,6 +479,19 @@ namespace YamlDotNet.Test.Serialization
 			two.ShouldHave().AllProperties().EqualTo(new { aaa = "222" });
 			three.ShouldHave().AllProperties().EqualTo(new { aaa = "333" });
 		}
+
+	    [Fact]
+	    public void SerializeGuid()
+	    {
+            var guid = new Guid("{9462790D-5C44-4689-8542-5E2DD38EBD98}");
+
+	        var writer = new StringWriter();
+
+            Serializer.Serialize(writer, guid);
+	        var serialized = writer.ToString();
+            Dump.WriteLine(writer.ToString());
+            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid");
+	    }
 
 		[Fact]
 		public void SerializationOfNullInListsAreAlwaysEmittedWithoutUsingEmitDefaults()

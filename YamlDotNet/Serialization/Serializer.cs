@@ -55,7 +55,11 @@ namespace YamlDotNet.Serialization
 			this.namingConvention = namingConvention ?? new NullNamingConvention();
 
 			Converters = new List<IYamlTypeConverter>();
-
+            foreach (IYamlTypeConverter yamlTypeConverter in Utilities.YamlTypeConverters.ExistingConverters)
+		    {
+		        Converters.Add(yamlTypeConverter);
+		    }
+            
 			typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
 				? (ITypeResolver)new StaticTypeResolver()
 				: (ITypeResolver)new DynamicTypeResolver();
