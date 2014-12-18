@@ -231,19 +231,30 @@ namespace YamlDotNet.Test.Serialization
 				.Subject.As<Base>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
 		}
 
-	    [Fact]
-	    public void DeserializeGuid()
-	    {
-	        var stream = Yaml.StreamFrom("guid.yaml");
-	        var result = Deserializer.Deserialize<Guid>(stream);
+		[Fact]
+		public void DeserializeGuid()
+		{
+			var stream = Yaml.StreamFrom("guid.yaml");
+			var result = Deserializer.Deserialize<Guid>(stream);
 
-            result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
-	    }
+			result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
+		}
+
+		[Fact]
+		public void DeserializationOfOrderedProperties()
+		{
+			TextReader stream = Yaml.StreamFrom("ordered-properties.yaml");
+
+			var orderExample = Deserializer.Deserialize<OrderExample>(stream);
+
+			orderExample.Order1.Should().Be("Order1 value");
+			orderExample.Order2.Should().Be("Order2 value");
+		}
 
 		[Fact]
 		public void DeserializeEnumerable()
 		{
-			var obj = new[] { new Simple { aaa = "bbb" }};
+			var obj = new[] { new Simple { aaa = "bbb" } };
 
 			var result = DoRoundtripFromObjectTo<IEnumerable<Simple>>(obj);
 
@@ -480,18 +491,18 @@ namespace YamlDotNet.Test.Serialization
 			three.ShouldHave().AllProperties().EqualTo(new { aaa = "333" });
 		}
 
-	    [Fact]
-	    public void SerializeGuid()
-	    {
-            var guid = new Guid("{9462790D-5C44-4689-8542-5E2DD38EBD98}");
+		[Fact]
+		public void SerializeGuid()
+		{
+			var guid = new Guid("{9462790D-5C44-4689-8542-5E2DD38EBD98}");
 
-	        var writer = new StringWriter();
+			var writer = new StringWriter();
 
-            Serializer.Serialize(writer, guid);
-	        var serialized = writer.ToString();
-            Dump.WriteLine(writer.ToString());
-            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid");
-	    }
+			Serializer.Serialize(writer, guid);
+			var serialized = writer.ToString();
+			Dump.WriteLine(writer.ToString());
+			Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid");
+		}
 
 		[Fact]
 		public void SerializationOfNullInListsAreAlwaysEmittedWithoutUsingEmitDefaults()
@@ -583,8 +594,23 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void SerializationOfOrderedProperties()
+		{
+			var obj = new OrderExample();
+			var writer = new StringWriter();
+
+			Serializer.Serialize(writer, obj);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should()
+				.Be("Order1: Order1 value\r\nOrder2: Order2 value\r\n", "the properties should be in the right order");
+		}
+
+		[Fact]
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
+
 			var writer = new StringWriter();
 			var obj = new IgnoreExample();
 

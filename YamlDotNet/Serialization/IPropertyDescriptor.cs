@@ -29,6 +29,7 @@ namespace YamlDotNet.Serialization
 		bool CanWrite { get; }
 		Type Type { get; }
 		Type TypeOverride { get; set; }
+        int Order { get; set; }
 
 		T GetCustomAttribute<T>() where T : Attribute;
 

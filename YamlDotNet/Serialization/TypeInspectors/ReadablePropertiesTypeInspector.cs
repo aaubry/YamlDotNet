@@ -71,7 +71,8 @@ namespace YamlDotNet.Serialization.TypeInspectors
 			public string Name { get { return _propertyInfo.Name; } }
 			public Type Type { get { return _propertyInfo.PropertyType; } }
 			public Type TypeOverride { get; set; }
-			public bool CanWrite { get { return _propertyInfo.CanWrite; } }
+		    public int Order { get; set; }
+		    public bool CanWrite { get { return _propertyInfo.CanWrite; } }
 
 			public void Write(object target, object value)
 			{
