@@ -14,6 +14,17 @@ The library has now been successfully used in multiple projects and is considere
 
 More information can be found in the [official page of the project](http://aaubry.net/pages/yamldotnet.html).
 
+## Installing
+
+Just install the [YamlDotNet NuGet package](http://www.nuget.org/packages/YamlDotNet/):
+
+```
+PM> Install-Package YamlDotNet 
+```
+
+If you do not want to use NuGet, you can [download binaries here](https://ci.appveyor.com/project/aaubry/yamldotnet).
+
+
 # Changelog
 
 ## Version 3.5.0
