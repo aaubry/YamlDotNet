@@ -72,7 +72,8 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializeCircularReference()
 		{
 			var obj = new CircularReference();
-			obj.Child1 = new CircularReference {
+			obj.Child1 = new CircularReference
+			{
 				Child1 = obj,
 				Child2 = obj
 			};
@@ -205,7 +206,8 @@ namespace YamlDotNet.Test.Serialization
 		// Todo: is the assert on the string necessary?
 		public void RoundtripDerivedClass()
 		{
-			var obj = new InheritanceExample {
+			var obj = new InheritanceExample
+			{
 				SomeScalar = "Hello",
 				RegularBase = new Derived { BaseProperty = "foo", DerivedProperty = "bar" },
 			};
@@ -220,7 +222,8 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void RoundtripDerivedClassWithSerializeAs()
 		{
-			var obj = new InheritanceExample {
+			var obj = new InheritanceExample
+			{
 				SomeScalar = "Hello",
 				BaseWithSerializeAs = new Derived { BaseProperty = "foo", DerivedProperty = "bar" },
 			};
@@ -547,8 +550,8 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationIncludesKeyFromAnonymousTypeWhenEmittingDefaults()
 		{
 			var writer = new StringWriter();
-			var obj = new { MyString = (string) null };
-			
+			var obj = new { MyString = (string)null };
+
 			EmitDefaultsSerializer.Serialize(writer, obj, obj.GetType());
 			Dump.WriteLine(writer);
 
@@ -828,7 +831,7 @@ namespace YamlDotNet.Test.Serialization
 			var text = Lines("aaa: hello", "bbb: world");
 			var des = new Deserializer(ignoreUnmatched: false);
 			var actual = Record.Exception(() => des.Deserialize<Simple>(UsingReaderFor(text)));
-			Assert.IsType<System.Runtime.Serialization.SerializationException>(actual);
+			Assert.IsType<YamlException>(actual);
 		}
 
 		[Fact]
@@ -856,7 +859,19 @@ namespace YamlDotNet.Test.Serialization
 			var actual = des.Deserialize<SimpleScratch>(UsingReaderFor(text));
 			actual.Scratch.Should().Be("scratcher");
 			actual.DeleteScratch.Should().Be(false);
-			actual.MappedScratch.Should().ContainInOrder(new[] {"/work/"});
+			actual.MappedScratch.Should().ContainInOrder(new[] { "/work/" });
+		}
+
+		[Fact]
+		public void InvalidTypeConversionsProduceProperExceptions()
+		{
+			var text = Lines("- 1", "- two", "- 3");
+
+			var sut = new Deserializer();
+			var exception = Assert.Throws<YamlException>(() => sut.Deserialize<List<int>>(UsingReaderFor(text)));
+
+			Assert.Equal(2, exception.Start.Line);
+			Assert.Equal(3, exception.Start.Column);
 		}
 	}
 }
