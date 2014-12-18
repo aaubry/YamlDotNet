@@ -383,10 +383,10 @@ namespace YamlDotNet.Test.Serialization
             this.Order2 = "Order2 value";
         }
 
-        [YamlOrder(2)]
+        [YamlMember(Order = 2)]
         public String Order2 { get; set; }
 
-        [YamlOrder(1)]
+        [YamlMember(Order = 1)]
         public String Order1 { get; set; }
     }
 
