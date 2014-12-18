@@ -26,6 +26,7 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
 	/// </summary>
+	[Obsolete("Please use YamlMember instead")]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
 	public class YamlAliasAttribute : Attribute
 	{

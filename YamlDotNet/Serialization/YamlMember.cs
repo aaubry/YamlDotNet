@@ -39,6 +39,11 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public int Order { get; set; }
 
+		/// <summary>
+		/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
+		/// </summary>
+		public string Alias { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
         /// </summary>

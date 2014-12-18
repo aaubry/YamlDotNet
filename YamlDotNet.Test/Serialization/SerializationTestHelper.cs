@@ -504,7 +504,7 @@ namespace YamlDotNet.Test.Serialization
 		public string SecondTest { get; set; }
 		public string ThirdTest { get; set; }
 
-		[YamlAlias("fourthTest")]
+		[YamlMember(Alias = "fourthTest")]
 		public string AliasTest { get; set; }
 
 		[YamlIgnore]
