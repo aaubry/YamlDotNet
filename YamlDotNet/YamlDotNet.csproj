@@ -266,7 +266,6 @@
     <Compile Include="Serialization\YamlFormatter.cs" />
     <Compile Include="Serialization\YamlIgnoreAttribute.cs" />
     <Compile Include="Serialization\YamlMember.cs" />
-    <Compile Include="Serialization\YamlOrderAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

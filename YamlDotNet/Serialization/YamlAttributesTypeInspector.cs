@@ -59,13 +59,9 @@ namespace YamlDotNet.Serialization
 						{
 							descriptor.TypeOverride = member.SerializeAs;
 						}
-					}
 
-				    var order = p.GetCustomAttribute<YamlOrderAttribute>();
-				    if (order != null)
-				    {
-				        descriptor.Order = order.Value;
-				    }
+					    descriptor.Order = member.Order;
+					}
 
 					return (IPropertyDescriptor)descriptor;
 				})

@@ -34,6 +34,18 @@ namespace YamlDotNet.Serialization
 		/// </summary>
 		public Type SerializeAs { get; set; }
 
+        /// <summary>
+        /// Specifies the order priority of this property.
+        /// </summary>
+        public int Order { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
+        /// </summary>
+        public YamlMemberAttribute()
+        {
+        }
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
 		/// </summary>
