@@ -69,8 +69,7 @@ namespace YamlDotNet.Serialization
 
 					return (IPropertyDescriptor)descriptor;
 				})
-                .OrderBy(p => p.Order)
-                .ThenBy(p => p.Name);
+                .OrderBy(p => p.Order);
 		}
 	}
 }
