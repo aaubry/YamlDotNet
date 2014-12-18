@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -73,7 +73,8 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializeCircularReference()
 		{
 			var obj = new CircularReference();
-			obj.Child1 = new CircularReference {
+			obj.Child1 = new CircularReference
+			{
 				Child1 = obj,
 				Child2 = obj
 			};
@@ -206,7 +207,8 @@ namespace YamlDotNet.Test.Serialization
 		// Todo: is the assert on the string necessary?
 		public void RoundtripDerivedClass()
 		{
-			var obj = new InheritanceExample {
+			var obj = new InheritanceExample
+			{
 				SomeScalar = "Hello",
 				RegularBase = new Derived { BaseProperty = "foo", DerivedProperty = "bar" },
 			};
@@ -221,7 +223,8 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void RoundtripDerivedClassWithSerializeAs()
 		{
-			var obj = new InheritanceExample {
+			var obj = new InheritanceExample
+			{
 				SomeScalar = "Hello",
 				BaseWithSerializeAs = new Derived { BaseProperty = "foo", DerivedProperty = "bar" },
 			};
@@ -233,9 +236,29 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void DeserializeGuid()
+		{
+			var stream = Yaml.StreamFrom("guid.yaml");
+			var result = Deserializer.Deserialize<Guid>(stream);
+
+			result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
+		}
+
+		[Fact]
+		public void DeserializationOfOrderedProperties()
+		{
+			TextReader stream = Yaml.StreamFrom("ordered-properties.yaml");
+
+			var orderExample = Deserializer.Deserialize<OrderExample>(stream);
+
+			orderExample.Order1.Should().Be("Order1 value");
+			orderExample.Order2.Should().Be("Order2 value");
+		}
+
+		[Fact]
 		public void DeserializeEnumerable()
 		{
-			var obj = new[] { new Simple { aaa = "bbb" }};
+			var obj = new[] { new Simple { aaa = "bbb" } };
 
 			var result = DoRoundtripFromObjectTo<IEnumerable<Simple>>(obj);
 
@@ -473,6 +496,19 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void SerializeGuid()
+		{
+			var guid = new Guid("{9462790D-5C44-4689-8542-5E2DD38EBD98}");
+
+			var writer = new StringWriter();
+
+			Serializer.Serialize(writer, guid);
+			var serialized = writer.ToString();
+			Dump.WriteLine(writer.ToString());
+			Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid");
+		}
+
+		[Fact]
 		public void SerializationOfNullInListsAreAlwaysEmittedWithoutUsingEmitDefaults()
 		{
 			var writer = new StringWriter();
@@ -515,8 +551,8 @@ namespace YamlDotNet.Test.Serialization
 		public void SerializationIncludesKeyFromAnonymousTypeWhenEmittingDefaults()
 		{
 			var writer = new StringWriter();
-			var obj = new { MyString = (string) null };
-			
+			var obj = new { MyString = (string)null };
+
 			EmitDefaultsSerializer.Serialize(writer, obj, obj.GetType());
 			Dump.WriteLine(writer);
 
@@ -562,8 +598,23 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void SerializationOfOrderedProperties()
+		{
+			var obj = new OrderExample();
+			var writer = new StringWriter();
+
+			Serializer.Serialize(writer, obj);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should()
+				.Be("Order1: Order1 value\r\nOrder2: Order2 value\r\n", "the properties should be in the right order");
+		}
+
+		[Fact]
 		public void SerializationRespectsYamlIgnoreAttribute()
 		{
+
 			var writer = new StringWriter();
 			var obj = new IgnoreExample();
 
@@ -781,7 +832,7 @@ namespace YamlDotNet.Test.Serialization
 			var text = Lines("aaa: hello", "bbb: world");
 			var des = new Deserializer(ignoreUnmatched: false);
 			var actual = Record.Exception(() => des.Deserialize<Simple>(UsingReaderFor(text)));
-			Assert.IsType<System.Runtime.Serialization.SerializationException>(actual);
+			Assert.IsType<YamlException>(actual);
 		}
 
 		[Fact]
@@ -809,7 +860,19 @@ namespace YamlDotNet.Test.Serialization
 			var actual = des.Deserialize<SimpleScratch>(UsingReaderFor(text));
 			actual.Scratch.Should().Be("scratcher");
 			actual.DeleteScratch.Should().Be(false);
-			actual.MappedScratch.Should().ContainInOrder(new[] {"/work/"});
+			actual.MappedScratch.Should().ContainInOrder(new[] { "/work/" });
+		}
+
+		[Fact]
+		public void InvalidTypeConversionsProduceProperExceptions()
+		{
+			var text = Lines("- 1", "- two", "- 3");
+
+			var sut = new Deserializer();
+			var exception = Assert.Throws<YamlException>(() => sut.Deserialize<List<int>>(UsingReaderFor(text)));
+
+			Assert.Equal(2, exception.Start.Line);
+			Assert.Equal(3, exception.Start.Column);
 		}
 
         [Fact]

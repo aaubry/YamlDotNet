@@ -1,5 +1,5 @@
 ﻿//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2014 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,11 +19,14 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
+
 namespace YamlDotNet.Core.Tokens
 {
 	/// <summary>
 	/// Represents a comment
 	/// </summary>
+	[Serializable]
 	public class Comment : Token
 	{
 		/// <summary>

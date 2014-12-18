@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2013 Antoine Aubry and contributors
-    
+//  Copyright (c) Antoine Aubry and contributors
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,11 +46,13 @@ namespace YamlDotNet.Serialization
 				{
 					var descriptor = new PropertyDescriptor(p);
 
+#pragma warning disable 0618 // 'YamlDotNet.Serialization.YamlAliasAttribute' is obsolete: 'Please use YamlMember instead'
 					var alias = p.GetCustomAttribute<YamlAliasAttribute>();
 					if (alias != null)
 					{
 						descriptor.Name = alias.Alias;
 					}
+#pragma warning restore 0618 // 'YamlDotNet.Serialization.YamlAliasAttribute' is obsolete: 'Please use YamlMember instead'
 
 					var member = p.GetCustomAttribute<YamlMemberAttribute>();
 					if (member != null)
@@ -59,10 +61,22 @@ namespace YamlDotNet.Serialization
 						{
 							descriptor.TypeOverride = member.SerializeAs;
 						}
+
+						descriptor.Order = member.Order;
+
+						if (member.Alias != null)
+						{
+							if (alias != null)
+							{
+								throw new InvalidOperationException("Mixing YamlAlias(...) with YamlMember(Alias = ...) is an error. The YamlAlias attribute is obsolete and should be removed.");
+							}
+							descriptor.Name = member.Alias;
+						}
 					}
 
 					return (IPropertyDescriptor)descriptor;
-				});
+				})
+				.OrderBy(p => p.Order);
 		}
 	}
 }

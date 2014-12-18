@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2013 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -26,6 +26,7 @@ namespace YamlDotNet.Serialization
 	/// <summary>
 	/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
 	/// </summary>
+	[Obsolete("Please use YamlMember instead")]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
 	public class YamlAliasAttribute : Attribute
 	{

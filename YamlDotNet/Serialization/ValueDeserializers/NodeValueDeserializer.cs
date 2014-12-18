@@ -1,5 +1,5 @@
 // This file is part of YamlDotNet - A .NET library for YAML.
-// Copyright (c) 2013 Antoine Aubry and contributors
+// Copyright (c) Antoine Aubry and contributors
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -55,19 +55,31 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
 			var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
-			foreach (var deserializer in deserializers)
+			try
 			{
-				object value;
-				if (deserializer.Deserialize(reader, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out value))
+				foreach (var deserializer in deserializers)
 				{
-					return value;
+					object value;
+					if (deserializer.Deserialize(reader, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out value))
+					{
+						return value;
+					}
 				}
 			}
+			catch (YamlException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new YamlException(nodeEvent.Start, nodeEvent.End, "Exception during deserialization", ex);
+			}
 
-			throw new SerializationException(
+			throw new YamlException(
+				nodeEvent.Start,
+				nodeEvent.End,
 				string.Format(
-					"No node deserializer was able to deserialize the node at {0} into type {1}",
-					reader.Parser.Current.Start,
+					"No node deserializer was able to deserialize the node into type {0}",
 					expectedType.AssemblyQualifiedName
 				)
 			);

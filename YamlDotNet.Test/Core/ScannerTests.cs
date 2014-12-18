@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,8 @@ using Xunit;
 using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace YamlDotNet.Test.Core
 {
@@ -329,6 +331,27 @@ namespace YamlDotNet.Test.Core
 		}
 
 		[Fact]
+		public void CommentsAreCorrectlyMarked()
+		{
+			var sut = new Scanner(Yaml.ReaderForText(@"
+				- first # Comment on first item
+			"), skipComments: false);
+
+			while(sut.MoveNext())
+			{
+				var comment = sut.Current as Comment;
+				if(comment != null)
+				{
+					Assert.Equal(8, comment.Start.Index);
+					Assert.Equal(31, comment.End.Index);
+
+					return;
+				}
+			}
+
+			Assert.True(false, "Did not find a comment");
+		}
+		[Fact]
 		public void CommentsAreOmittedUnlessRequested()
 		{
 			AssertSequenceOfTokensFrom(Yaml.ScannerForText(@"
@@ -347,7 +370,44 @@ namespace YamlDotNet.Test.Core
 				StreamEnd);
 		}
 
-		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
+		[Fact]
+		public void ScannerIsSerializable()
+		{
+			var sut = Yaml.ScannerForText(@"
+				- one
+				- two
+				- three
+			");
+
+			AssertPartialSequenceOfTokensFrom(sut,
+				StreamStart,
+				BlockSequenceStart,
+				BlockEntry,
+				PlainScalar("one"),
+				BlockEntry,
+				PlainScalar("two"));
+
+			var buffer = new MemoryStream();
+			var formatter = new BinaryFormatter();
+			formatter.Serialize(buffer, sut);
+
+			AssertSequenceOfTokensFrom(sut,
+				BlockEntry,
+				PlainScalar("three"),
+				BlockEnd,
+				StreamEnd);
+
+			buffer.Position = 0;
+			sut = (Scanner)formatter.Deserialize(buffer);
+
+			AssertSequenceOfTokensFrom(sut,
+				BlockEntry,
+				PlainScalar("three"),
+				BlockEnd,
+				StreamEnd);
+		}
+
+		private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
 		{
 			var tokenNumber = 1;
 			foreach (var expected in tokens)
@@ -356,6 +416,11 @@ namespace YamlDotNet.Test.Core
 				AssertToken(expected, scanner.Current, tokenNumber);
 				tokenNumber++;
 			}
+		}
+
+		private void AssertSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
+		{
+			AssertPartialSequenceOfTokensFrom(scanner, tokens);
 			scanner.MoveNext().Should().BeFalse("Found extra tokens");
 		}
 

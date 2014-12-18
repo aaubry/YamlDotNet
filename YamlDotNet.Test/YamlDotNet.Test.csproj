@@ -89,6 +89,7 @@
     <Compile Include="Serialization\ObjectFactoryTests.cs" />
     <Compile Include="Serialization\SerializationTestHelper.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
+    <Compile Include="Serialization\CodeValidations.cs" />
     <Compile Include="Yaml.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +121,8 @@
     <EmbeddedResource Include="files\09-flow-mapping.yaml" />
     <EmbeddedResource Include="files\convertible.template" />
     <EmbeddedResource Include="files\explicit-type.template" />
+    <EmbeddedResource Include="files\guid.yaml" />
+    <EmbeddedResource Include="files\ordered-properties.yaml" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

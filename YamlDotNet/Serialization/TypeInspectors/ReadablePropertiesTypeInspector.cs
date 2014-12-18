@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2013 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -71,7 +71,8 @@ namespace YamlDotNet.Serialization.TypeInspectors
 			public string Name { get { return _propertyInfo.Name; } }
 			public Type Type { get { return _propertyInfo.PropertyType; } }
 			public Type TypeOverride { get; set; }
-			public bool CanWrite { get { return _propertyInfo.CanWrite; } }
+		    public int Order { get; set; }
+		    public bool CanWrite { get { return _propertyInfo.CanWrite; } }
 
 			public void Write(object target, object value)
 			{

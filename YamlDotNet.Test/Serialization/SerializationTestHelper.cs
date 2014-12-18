@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2013 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -375,6 +375,21 @@ namespace YamlDotNet.Test.Serialization
 		}
 	}
 
+    public class OrderExample
+    {
+        public OrderExample()
+        {
+            this.Order1 = "Order1 value";
+            this.Order2 = "Order2 value";
+        }
+
+        [YamlMember(Order = 2)]
+        public String Order2 { get; set; }
+
+        [YamlMember(Order = 1)]
+        public String Order1 { get; set; }
+    }
+
 	public class IgnoreExample
 	{
 		[YamlIgnore]
@@ -489,7 +504,7 @@ namespace YamlDotNet.Test.Serialization
 		public string SecondTest { get; set; }
 		public string ThirdTest { get; set; }
 
-		[YamlAlias("fourthTest")]
+		[YamlMember(Alias = "fourthTest")]
 		public string AliasTest { get; set; }
 
 		[YamlIgnore]

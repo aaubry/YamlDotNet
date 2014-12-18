@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2013 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -33,6 +33,23 @@ namespace YamlDotNet.Serialization
 		/// Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.
 		/// </summary>
 		public Type SerializeAs { get; set; }
+
+        /// <summary>
+        /// Specifies the order priority of this property.
+        /// </summary>
+        public int Order { get; set; }
+
+		/// <summary>
+		/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
+		/// </summary>
+		public string Alias { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
+        /// </summary>
+        public YamlMemberAttribute()
+        {
+        }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.

@@ -1,5 +1,5 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) 2008, 2009, 2010, 2011 Antoine Aubry and contributors
+//  Copyright (c) Antoine Aubry and contributors
     
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System.Collections.Generic;
 using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core
@@ -51,16 +52,5 @@ namespace YamlDotNet.Core
 		/// </summary>
 		/// <returns></returns>
 		bool MoveNext();
-
-		/// <summary>
-		/// Moves to the next token.
-		/// </summary>
-		/// <returns></returns>
-		bool ParserMoveNext();
-
-		/// <summary>
-		/// Consumes the current token and increments the parsed token count
-		/// </summary>
-		void ConsumeCurrent();
 	}
 }

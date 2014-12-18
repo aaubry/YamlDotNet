@@ -14,7 +14,35 @@ The library has now been successfully used in multiple projects and is considere
 
 More information can be found in the [official page of the project](http://aaubry.net/pages/yamldotnet.html).
 
+## Installing
+
+Just install the [YamlDotNet NuGet package](http://www.nuget.org/packages/YamlDotNet/):
+
+```
+PM> Install-Package YamlDotNet 
+```
+
+If you do not want to use NuGet, you can [download binaries here](https://ci.appveyor.com/project/aaubry/yamldotnet).
+
+
 # Changelog
+
+## Version 3.5.0
+
+* Add native support of System.Guid serialization.
+* Add properties to YamlMemberAttribute:
+    * Order: specifies the order of the members when they are serialized.
+    * Alias: instructs the deserializer to use a different field name for serialization.
+* The YamlAliasAttribute is now obsolete. New code should use YamlMemberAttribute instead.
+* Throw proper exceptions, with correct marks, when deserialization of a node fails.
+
+## Version 3.4.0
+
+Changes and fixes on the Scanner to make it more usable:
+
+* Report the location of comments correctly, when the scanner is created with "skipComments = false"
+* In case of syntax error, do not report an empty range and skip to the next token.
+* Make the scanner and related types serializable, so that the state of the scanner can be captured and then restored later (assuming that the TextReader is also serializable).
 
 ## Version 3.3.1
 
