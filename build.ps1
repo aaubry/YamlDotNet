@@ -13,8 +13,16 @@
     } else {
         msbuild YamlDotNet.sln /p:Configuration=$_
     }
+
+	if($LASTEXITCODE -ne 0) {
+		throw "Build failed"
+	}
 }
 
 "Unsigned", "Signed" | % {
     nuget pack YamlDotNet\YamlDotNet.$_.nuspec -OutputDirectory YamlDotNet\bin
+
+	if($LASTEXITCODE -ne 0) {
+		throw "Build failed"
+	}
 }
