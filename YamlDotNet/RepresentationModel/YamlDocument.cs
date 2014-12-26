@@ -169,14 +169,15 @@ namespace YamlDotNet.RepresentationModel
 			visitor.AssignAnchors(this);
 		}
 
-		internal void Save(IEmitter emitter)
-		{
-			AssignAnchors();
+        internal void Save(IEmitter emitter, bool assignAnchors = true)
+        {
+            if (assignAnchors)
+                AssignAnchors();
 
-			emitter.Emit(new DocumentStart());
-			RootNode.Save(emitter, new EmitterState());
-			emitter.Emit(new DocumentEnd(false));
-		}
+            emitter.Emit(new DocumentStart());
+            RootNode.Save(emitter, new EmitterState());
+            emitter.Emit(new DocumentEnd(false));
+        }
 
 		/// <summary>
 		/// Accepts the specified visitor by calling the appropriate Visit method on it.
