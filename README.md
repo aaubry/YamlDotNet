@@ -27,6 +27,12 @@ If you do not want to use NuGet, you can [download binaries here](https://ci.app
 
 # Changelog
 
+## Version 3.5.1
+
+Fix bug:
+
+* Scalars returned by the scanner do not have their Start and End properties set.
+
 ## Version 3.5.0
 
 * Add native support of System.Guid serialization.

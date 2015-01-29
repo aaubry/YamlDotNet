@@ -351,6 +351,7 @@ namespace YamlDotNet.Test.Core
 
 			Assert.True(false, "Did not find a comment");
 		}
+
 		[Fact]
 		public void CommentsAreOmittedUnlessRequested()
 		{
@@ -406,6 +407,22 @@ namespace YamlDotNet.Test.Core
 				BlockEnd,
 				StreamEnd);
 		}
+
+		[Fact]
+		public void MarksOnDoubleQuotedScalarsAreCorrect()
+		{
+			var scanner = Yaml.ScannerForText(@"
+				""x""
+			");
+
+			Scalar scalar = null;
+			while (scanner.MoveNext() && scalar == null)
+			{
+				scalar = scanner.Current as Scalar;
+			}
+			Assert.Equal(4, scalar.End.Column);
+		}
+
 
 		private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
 		{
