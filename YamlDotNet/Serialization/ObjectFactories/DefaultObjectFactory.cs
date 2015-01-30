@@ -50,7 +50,18 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
 			try
 			{
-				return Activator.CreateInstance(type);
+				var constructor = type.GetConstructor(
+				    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				    Type.DefaultBinder,
+				    Type.EmptyTypes, 
+				    null);
+				if (constructor.IsPublic)
+				{
+				    // better performance than ConstructorInfo.Invoke(),
+				    // but works only with public ctor
+				    return Activator.CreateInstance(type); 
+				}
+				return constructor.Invoke(null);
 			}
 			catch (Exception err)
 			{
