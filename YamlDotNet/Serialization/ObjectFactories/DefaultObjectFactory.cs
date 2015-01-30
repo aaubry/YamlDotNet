@@ -50,6 +50,10 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
 			try
 			{
+		                if(type.IsValueType)
+                		{
+                    			return Activator.CreateInstance(type); 
+                		}
 				var constructor = type.GetConstructor(
 				    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				    Type.DefaultBinder,
