@@ -1790,7 +1790,7 @@ namespace YamlDotNet.Core
 
 			Skip();
 
-			return new Scalar(value.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted);
+			return new Scalar(value.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted, start, cursor.Mark());
 		}
 
 		/// <summary>
