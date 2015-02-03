@@ -172,7 +172,9 @@ namespace YamlDotNet.RepresentationModel
 		internal void Save(IEmitter emitter, bool assignAnchors = true)
 		{
 			if (assignAnchors)
+			{
 				AssignAnchors();
+			}
 
 			emitter.Emit(new DocumentStart());
 			RootNode.Save(emitter, new EmitterState());
