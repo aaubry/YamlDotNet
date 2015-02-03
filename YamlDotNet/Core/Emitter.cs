@@ -1137,6 +1137,7 @@ namespace YamlDotNet.Core
 		private void WriteLiteralScalar(string value)
 		{
 			var previousBreak = true;
+			var previousReturn = false;
 
 			WriteIndicator("|", true, false, false);
 			WriteBlockScalarHints(value);
@@ -1149,9 +1150,12 @@ namespace YamlDotNet.Core
 			{
 				if (IsBreak(character))
 				{
-					WriteBreak();
-					isIndentation = true;
-					previousBreak = true;
+					if (!previousReturn || character != '\n')
+					{
+						WriteBreak();
+						isIndentation = true;
+						previousBreak = true;
+					}
 				}
 				else
 				{
@@ -1163,6 +1167,8 @@ namespace YamlDotNet.Core
 					isIndentation = false;
 					previousBreak = false;
 				}
+
+				previousReturn = character == '\r';
 			}
 		}
 
