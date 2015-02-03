@@ -98,7 +98,7 @@ namespace YamlDotNet.RepresentationModel
 		private class AnchorAssigningVisitor : YamlVisitor
 		{
 			private readonly HashSet<string> existingAnchors = new HashSet<string>();
-			private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>(new YamlNodeIdentityEqualityComparer());
+			private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>();
 
 			public void AssignAnchors(YamlDocument document)
 			{
