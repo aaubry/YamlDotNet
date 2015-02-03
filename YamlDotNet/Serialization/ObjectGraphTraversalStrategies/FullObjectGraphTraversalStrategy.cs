@@ -197,9 +197,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			IDictionary<TKey, TValue> dictionary,
 			IObjectGraphVisitor visitor, int currentDepth, INamingConvention namingConvention)
 		{
+            var isDynamic = dictionary.GetType().Name.Contains("ExpandoObject");
 			foreach (var entry in dictionary)
-			{
-                var key = GetObjectDescriptor(namingConvention.Apply(entry.Key.ToString()), typeof(TKey));
+			{   
+                var keyString = isDynamic ? namingConvention.Apply(entry.Key.ToString()) : entry.Key.ToString();
+                var key = GetObjectDescriptor(keyString, typeof(TKey));
 				var value = GetObjectDescriptor(entry.Value, typeof(TValue));
 
 				if (visitor.EnterMapping(key, value))
