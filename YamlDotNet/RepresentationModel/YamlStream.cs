@@ -106,8 +106,17 @@ namespace YamlDotNet.RepresentationModel
 		/// Saves the stream to the specified output.
 		/// </summary>
 		/// <param name="output">The output.</param>
+		public void Save(TextWriter output)
+		{
+			Save(output, true);
+		}
+
+		/// <summary>
+		/// Saves the stream to the specified output.
+		/// </summary>
+		/// <param name="output">The output.</param>
 		/// <param name="assignAnchors">Indicates whether or not to assign node anchors.</param>
-		public void Save(TextWriter output, bool assignAnchors = true)
+		public void Save(TextWriter output, bool assignAnchors)
 		{
 			IEmitter emitter = new Emitter(output);
 			emitter.Emit(new StreamStart());
