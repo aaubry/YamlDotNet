@@ -163,7 +163,7 @@ namespace YamlDotNet
 		{
 			var instancePublic = new Func<PropertyInfo, bool>(
 				p => !p.GetMethod.IsStatic && p.GetMethod.IsPublic);
-			return type.IsInterface
+			return type.IsInterface()
 				? (new Type[] { type })
 					.Concat(type.GetInterfaces())
 					.SelectMany(i => i.GetRuntimeProperties().Where(instancePublic))
