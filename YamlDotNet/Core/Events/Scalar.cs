@@ -143,7 +143,7 @@ namespace YamlDotNet.Core.Events
 		/// <param name="style">The style.</param>
 		/// <param name="isPlainImplicit">.</param>
 		/// <param name="isQuotedImplicit">.</param>
-		/// <param name="isStyleable">Indicates if this scalar's style can be changed</param>
+        /// <param name="isAlreadyStyled">Indicates if this scalar's style can be changed</param>
 		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, bool isAlreadyStyled)
 			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit)
 		{
