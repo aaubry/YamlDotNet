@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
@@ -47,9 +48,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			return nextVisitor.EnterMapping(key, value);
 		}
 
-		public virtual void VisitScalar(IObjectDescriptor scalar)
+		public virtual void VisitScalar(IObjectDescriptor scalar, ScalarStyle scalarStyle)
 		{
-			nextVisitor.VisitScalar(scalar);
+			nextVisitor.VisitScalar(scalar, scalarStyle);
 		}
 
 		public virtual void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)

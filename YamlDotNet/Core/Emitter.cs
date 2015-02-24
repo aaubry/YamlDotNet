@@ -811,6 +811,12 @@ namespace YamlDotNet.Core
 		{
 			var scalar = (Scalar)evt;
 
+			if (scalar.IsAlreadyStyled)
+			{
+				scalarData.style = scalar.Style;
+				return;
+			}
+
 			var style = scalar.Style;
 			var noTag = tagData.handle == null && tagData.suffix == null;
 

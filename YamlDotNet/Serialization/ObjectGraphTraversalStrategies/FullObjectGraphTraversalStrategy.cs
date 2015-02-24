@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;
 
@@ -72,7 +73,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			Traverse(graph, visitor, 0);
 		}
 
-		protected virtual void Traverse(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
+		protected virtual void Traverse(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth, ScalarStyle scalarStyle = ScalarStyle.Any)
 		{
 			if (++currentDepth > maxRecursion)
 			{
@@ -102,11 +103,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 				case TypeCode.String:
 				case TypeCode.Char:
 				case TypeCode.DateTime:
-					visitor.VisitScalar(value);
+					visitor.VisitScalar(value, scalarStyle);
 					break;
 
 				case TypeCode.DBNull:
-					visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)));
+					visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), scalarStyle);
 					break;
 
 				case TypeCode.Empty:
@@ -115,7 +116,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 				default:
 					if (value.Value == null || value.Type == typeof(TimeSpan))
 					{
-						visitor.VisitScalar(value);
+						visitor.VisitScalar(value, scalarStyle);
 						break;
 					}
 
@@ -124,7 +125,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 					{
 						// This is a nullable type, recursively handle it with its underlying type.
 						// Note that if it contains null, the condition above already took care of it
-						Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type), visitor, currentDepth);
+						Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type), visitor, currentDepth, scalarStyle);
 					}
 					else
 					{
@@ -238,7 +239,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 				if (visitor.EnterMapping(propertyDescriptor, propertyValue))
 				{
 					Traverse(new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string)), visitor, currentDepth);
-					Traverse(propertyValue, visitor, currentDepth);
+					Traverse(propertyValue, visitor, currentDepth, propertyDescriptor.ScalarStyle);
 				}
 			}
 
