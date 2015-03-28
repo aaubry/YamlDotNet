@@ -39,22 +39,22 @@ namespace YamlDotNet
 	{
 		public static bool IsValueType(this Type type)
 		{
-			return type.GetTypeInfo().IsValueType;
+			return type.IsValueType;
 		}
 
 		public static bool IsGenericType(this Type type)
 		{
-			return type.GetTypeInfo().IsGenericType;
+			return type.IsGenericType;
 		}
 
 		public static bool IsInterface(this Type type)
 		{
-			return type.GetTypeInfo().IsInterface;
+			return type.IsInterface;
 		}
 
 		public static bool IsEnum(this Type type)
 		{
-			return type.GetTypeInfo().IsEnum;
+			return type.IsEnum;
 		}
 
 		/// <summary>
@@ -66,24 +66,19 @@ namespace YamlDotNet
 		/// </returns>
 		public static bool HasDefaultConstructor(this Type type)
 		{
-			var typeInfo = type.GetTypeInfo();
-			return typeInfo.IsValueType || typeInfo.DeclaredConstructors
-				.Any(c => c.IsPublic && !c.IsStatic && c.GetParameters().Length == 0);
+			var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+			var constructor = type.GetConstructor(bindingFlags, null, Type.EmptyTypes, null);
+			return type.IsValueType || constructor != null;
 		}
 
 		public static bool IsAssignableFrom(this Type type, Type source)
 		{
-			return type.IsAssignableFrom(source.GetTypeInfo());
-		}
-
-		public static bool IsAssignableFrom(this Type type, TypeInfo source)
-		{
-			return type.GetTypeInfo().IsAssignableFrom(source);
+			return type.IsAssignableFrom(source);
 		}
 
 		public static TypeCode GetTypeCode(this Type type)
 		{
-			if (type.IsEnum())
+			if (type.IsEnum)
 			{
 				type = Enum.GetUnderlyingType(type);
 			}
@@ -154,46 +149,22 @@ namespace YamlDotNet
 			}
 		}
 
-		public static Type[] GetGenericArguments(this Type type)
-		{
-			return type.GetTypeInfo().GenericTypeArguments;
-		}
-
 		public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
 		{
-			return type.GetRuntimeProperties()
-				.Where(p => p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
+			if (type == null) throw new ArgumentNullException("type");
+			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
 		{
-			return type.GetRuntimeMethods()
-				.Where(m => m.IsPublic && !m.IsStatic);
+			if (type == null) throw new ArgumentNullException("type");
+			return type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
 		{
-			return type.GetRuntimeMethods()
-				.FirstOrDefault(m =>
-				{
-					if (m.IsPublic && m.IsStatic && m.Name.Equals(name))
-					{
-						var parameters = m.GetParameters();
-						return parameters.Length == parameterTypes.Length
-							&& parameters.Zip(parameterTypes, (pi, pt) => pi.Equals(pt)).All(r => r);
-					}
-					return false;
-				});
-		}
-
-		public static MethodInfo GetGetMethod(this PropertyInfo property)
-		{
-			return property.GetMethod;
-		}
-
-		public static IEnumerable<Type> GetInterfaces(this Type type)
-		{
-			return type.GetTypeInfo().ImplementedInterfaces;
+			if (type == null) throw new ArgumentNullException("type");
+			return type.GetMethod(name, BindingFlags.Public | BindingFlags.Static, null, parameterTypes, null);
 		}
 
 		public static Exception Unwrap(this TargetInvocationException ex)
