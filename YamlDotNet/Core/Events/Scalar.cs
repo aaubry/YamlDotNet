@@ -91,19 +91,6 @@ namespace YamlDotNet.Core.Events
 			}
 		}
 
-		private bool isAlreadyStyled { get; set; }
-
-		/// <summary>
-		/// Gets a value indicating whether the scalar has already been styled.
-		/// </summary>
-		public bool IsAlreadyStyled
-		{
-			get
-			{
-				return isAlreadyStyled;
-			}
-		}
-
 		/// <summary>
 		/// Gets a value indicating whether this instance is canonical.
 		/// </summary>
@@ -132,22 +119,6 @@ namespace YamlDotNet.Core.Events
 			this.style = style;
 			this.isPlainImplicit = isPlainImplicit;
 			this.isQuotedImplicit = isQuotedImplicit;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Scalar"/> class.
-		/// </summary>
-		/// <param name="anchor">The anchor.</param>
-		/// <param name="tag">The tag.</param>
-		/// <param name="value">The value.</param>
-		/// <param name="style">The style.</param>
-		/// <param name="isPlainImplicit">.</param>
-		/// <param name="isQuotedImplicit">.</param>
-        /// <param name="isAlreadyStyled">Indicates if this scalar's style can be changed</param>
-		public Scalar(string anchor, string tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, bool isAlreadyStyled)
-			: this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit)
-		{
-			this.isAlreadyStyled = isAlreadyStyled;
 		}
 
 		/// <summary>

@@ -60,18 +60,13 @@ namespace YamlDotNet.Serialization
 		public ScalarEventInfo(IObjectDescriptor source)
 			: base(source)
 		{
-			if (source.ScalarStyle != ScalarStyle.Any)
-			{
-				Style = source.ScalarStyle;
-				IsAlreadyStyled = true;
-			}
+			Style = source.ScalarStyle;
 		}
 
 		public string RenderedValue { get; set; }
 		public ScalarStyle Style { get; set; }
 		public bool IsPlainImplicit { get; set; }
 		public bool IsQuotedImplicit { get; set; }
-		public bool IsAlreadyStyled { get; set; }
 	}
 
 	public sealed class MappingStartEventInfo : ObjectEventInfo

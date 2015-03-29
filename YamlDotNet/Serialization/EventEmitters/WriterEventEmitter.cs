@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
 		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
 		{
-			emitter.Emit(new Scalar(eventInfo.Anchor, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit, eventInfo.IsAlreadyStyled));
+			emitter.Emit(new Scalar(eventInfo.Anchor, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
 		}
 
 		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)

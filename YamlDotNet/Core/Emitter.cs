@@ -811,13 +811,13 @@ namespace YamlDotNet.Core
 		{
 			var scalar = (Scalar)evt;
 
-			if (scalar.IsAlreadyStyled)
-			{
-				scalarData.style = scalar.Style;
-				return;
-			}
-
 			var style = scalar.Style;
+			//if (style != ScalarStyle.Any)
+			//{
+			//	scalarData.style = scalar.Style;
+			//	return;
+			//}
+
 			var noTag = tagData.handle == null && tagData.suffix == null;
 
 			if (noTag && !scalar.IsPlainImplicit && !scalar.IsQuotedImplicit)

@@ -37,7 +37,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
 		public override void Emit(ScalarEventInfo eventInfo)
 		{
-			var style = ScalarStyle.Plain;
+			var suggestedStyle = ScalarStyle.Plain;
 
 			var typeCode = eventInfo.Source.Value != null
 				? eventInfo.Source.Type.GetTypeCode()
@@ -73,7 +73,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 				case TypeCode.Char:
 					eventInfo.Tag = "tag:yaml.org,2002:str";
 					eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
-					style = ScalarStyle.Any;
+					suggestedStyle = ScalarStyle.Any;
 					break;
 
 				case TypeCode.DateTime:
@@ -97,9 +97,9 @@ namespace YamlDotNet.Serialization.EventEmitters
 			}
 
 			eventInfo.IsPlainImplicit = true;
-			if (!eventInfo.IsAlreadyStyled)
+			if (eventInfo.Style == ScalarStyle.Any)
 			{
-				eventInfo.Style = style;
+				eventInfo.Style = suggestedStyle;
 			}
 
 			base.Emit(eventInfo);
