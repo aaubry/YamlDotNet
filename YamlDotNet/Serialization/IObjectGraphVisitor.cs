@@ -60,8 +60,7 @@ namespace YamlDotNet.Serialization
 		/// Notifies the visitor that a scalar value has been encountered.
 		/// </summary>
 		/// <param name="scalar">The value of the scalar.</param>
-		/// <param name="scalarStyle">The desired style of the scalar.</param>
-		void VisitScalar(IObjectDescriptor scalar, ScalarStyle scalarStyle);
+		void VisitScalar(IObjectDescriptor scalar);
 
 		/// <summary>
 		/// Notifies the visitor that the traversal of a mapping is about to begin.

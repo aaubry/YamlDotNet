@@ -57,12 +57,12 @@ namespace YamlDotNet.Serialization
 
 	public sealed class ScalarEventInfo : ObjectEventInfo
 	{
-		public ScalarEventInfo(IObjectDescriptor source, ScalarStyle style)
+		public ScalarEventInfo(IObjectDescriptor source)
 			: base(source)
 		{
-			if (style != ScalarStyle.Any)
+			if (source.ScalarStyle != ScalarStyle.Any)
 			{
-				Style = style;
+				Style = source.ScalarStyle;
 				IsAlreadyStyled = true;
 			}
 		}

@@ -92,7 +92,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 			{
 				var propertyValue = _propertyInfo.GetValue(target, null);
 				var actualType = TypeOverride ?? _typeResolver.Resolve(Type, propertyValue);
-				return new ObjectDescriptor(propertyValue, actualType, Type);
+				return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
 			}
 		}
 	}

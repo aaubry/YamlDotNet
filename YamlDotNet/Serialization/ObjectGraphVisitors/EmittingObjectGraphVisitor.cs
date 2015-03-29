@@ -48,9 +48,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			return true;
 		}
 
-		void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar, ScalarStyle scalarStyle)
+		void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar)
 		{
-			eventEmitter.Emit(new ScalarEventInfo(scalar, scalarStyle));
+			eventEmitter.Emit(new ScalarEventInfo(scalar));
 		}
 
 		void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)

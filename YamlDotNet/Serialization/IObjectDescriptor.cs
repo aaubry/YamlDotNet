@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
@@ -42,5 +43,10 @@ namespace YamlDotNet.Serialization
 		/// The type of <see cref="Value" /> as determined by its container (e.g. a property).
 		/// </summary>
 		Type StaticType { get; }
+
+		/// <summary>
+		/// The style to be used for scalars.
+		/// </summary>
+		ScalarStyle ScalarStyle { get; }
 	}
 }

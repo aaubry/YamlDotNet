@@ -48,9 +48,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			return nextVisitor.EnterMapping(key, value);
 		}
 
-		public virtual void VisitScalar(IObjectDescriptor scalar, ScalarStyle scalarStyle)
+		public virtual void VisitScalar(IObjectDescriptor scalar)
 		{
-			nextVisitor.VisitScalar(scalar, scalarStyle);
+			nextVisitor.VisitScalar(scalar);
 		}
 
 		public virtual void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)

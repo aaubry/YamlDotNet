@@ -60,9 +60,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 			eventEmitter.Emit(new SequenceStartEventInfo(sequence) { Anchor = aliasProvider.GetAlias(sequence.Value) });
 		}
 
-		public override void VisitScalar(IObjectDescriptor scalar, ScalarStyle scalarStyle)
+		public override void VisitScalar(IObjectDescriptor scalar)
 		{
-			eventEmitter.Emit(new ScalarEventInfo(scalar, scalarStyle) { Anchor = aliasProvider.GetAlias(scalar.Value) });
+			eventEmitter.Emit(new ScalarEventInfo(scalar) { Anchor = aliasProvider.GetAlias(scalar.Value) });
 		}
 	}
 }
