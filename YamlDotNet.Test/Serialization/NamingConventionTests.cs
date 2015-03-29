@@ -20,7 +20,7 @@
 //  SOFTWARE.
 
 using FluentAssertions;
-using Xunit.Extensions;
+using Xunit;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
