@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;
 
@@ -124,7 +125,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 					{
 						// This is a nullable type, recursively handle it with its underlying type.
 						// Note that if it contains null, the condition above already took care of it
-						Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type), visitor, currentDepth);
+						Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth);
 					}
 					else
 					{

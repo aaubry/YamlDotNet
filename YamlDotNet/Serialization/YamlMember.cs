@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
@@ -45,17 +46,23 @@ namespace YamlDotNet.Serialization
 		public string Alias { get; set; }
 
         /// <summary>
+        /// Specifies the scalar style of the property when serialized. This will only affect the serialization of scalar properties.
+        /// </summary>
+        public ScalarStyle ScalarStyle { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
         /// </summary>
         public YamlMemberAttribute()
         {
+            ScalarStyle = ScalarStyle.Any;
         }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
 		/// </summary>
 		/// <param name="serializeAs">Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.</param>
-		public YamlMemberAttribute(Type serializeAs)
+		public YamlMemberAttribute(Type serializeAs) : this()
 		{
 			SerializeAs = serializeAs;
 		}

@@ -628,6 +628,20 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void SerializationRespectsScalarStyle()
+		{
+			var writer = new StringWriter();
+			var obj = new ScalarStyleExample();
+
+			Serializer.Serialize(writer, obj);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should()
+				.Be("LiteralString: |-\r\n  Test\r\nDoubleQuotedString: \"Test\"\r\n", "the properties should be specifically styled");
+		}
+
+		[Fact]
 		public void SerializationSkipsPropertyWhenUsingDefaultValueAttribute()
 		{
 			var writer = new StringWriter();

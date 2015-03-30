@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
@@ -30,6 +31,7 @@ namespace YamlDotNet.Serialization
 		Type Type { get; }
 		Type TypeOverride { get; set; }
         int Order { get; set; }
+		ScalarStyle ScalarStyle { get; set; }
 
 		T GetCustomAttribute<T>() where T : Attribute;
 

@@ -400,6 +400,22 @@ namespace YamlDotNet.Test.Serialization
 		}
 	}
 
+	public class ScalarStyleExample
+	{
+		public ScalarStyleExample()
+		{
+			var content = "Test";
+			this.LiteralString = content;
+			this.DoubleQuotedString = content;
+		}
+
+		[YamlMember(ScalarStyle = ScalarStyle.Literal)]
+		public String LiteralString { get; set; }
+
+		[YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
+		public String DoubleQuotedString { get; set; }
+	}
+
 	public class DefaultsExample
 	{
 		public const string DefaultValue = "myDefault";

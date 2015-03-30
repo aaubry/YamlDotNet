@@ -60,6 +60,7 @@ namespace YamlDotNet.Serialization
 		public ScalarEventInfo(IObjectDescriptor source)
 			: base(source)
 		{
+			Style = source.ScalarStyle;
 		}
 
 		public string RenderedValue { get; set; }

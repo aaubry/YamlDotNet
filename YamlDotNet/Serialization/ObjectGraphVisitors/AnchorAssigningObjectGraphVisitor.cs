@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
