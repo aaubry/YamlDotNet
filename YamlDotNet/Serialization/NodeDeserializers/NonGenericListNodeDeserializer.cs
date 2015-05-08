@@ -48,8 +48,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			var list = (IList)_objectFactory.Create(expectedType);
 			while (!reader.Accept<SequenceEnd>())
 			{
-				var current = reader.Parser.Current;
-
 				var item = nestedObjectDeserializer(reader, typeof(object));
 				var promise = item as IValuePromise;
 				if (promise == null)
