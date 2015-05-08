@@ -252,6 +252,7 @@ namespace YamlDotNet.Serialization.Utilities
 			return Convert.ChangeType(value, destinationType, CultureInfo.InvariantCulture);
 		}
 
+#if !UNITY
 		/// <summary>
 		/// Tries to parse the specified value.
 		/// </summary>
@@ -323,5 +324,6 @@ namespace YamlDotNet.Serialization.Utilities
 		/// Defines a method that is used to tentatively parse a string.
 		/// </summary>
 		public delegate bool TryParseDelegate<T>(string value, out T result);
+#endif
 	}
 }
