@@ -454,7 +454,7 @@ namespace YamlDotNet.Core
 				scalarData.isBlockPlainAllowed = false;
 		}
 
-#if PORTABLE
+#if (PORTABLE || UNITY)
 		private bool IsUnicode(Encoding encoding)
 		{
 			return encoding.Equals(Encoding.UTF8) ||

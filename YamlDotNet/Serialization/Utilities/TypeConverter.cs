@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.Utilities
 	/// </summary>
 	public static class TypeConverter
 	{
-#if !PORTABLE
+#if !(PORTABLE || UNITY)
 		/// <summary>
 		/// Registers a <see cref="System.ComponentModel.TypeConverter"/> dynamically.
 		/// </summary>
@@ -168,7 +168,7 @@ namespace YamlDotNet.Serialization.Utilities
 					return true;
 			}
 
-#if !PORTABLE
+#if !(PORTABLE || UNITY)
 			// Try with the source type's converter
 			var sourceConverter = TypeDescriptor.GetConverter(value);
 			if (sourceConverter != null && sourceConverter.CanConvertTo(destinationType))
