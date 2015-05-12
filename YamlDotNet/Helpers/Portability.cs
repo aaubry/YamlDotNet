@@ -29,6 +29,18 @@ using System.Text.RegularExpressions;
 namespace YamlDotNet
 {
 #if (PORTABLE || UNITY)
+	internal static class StandardRegexOptions
+	{
+		public const RegexOptions Compiled = RegexOptions.None;
+	}
+#else
+	internal static class StandardRegexOptions
+	{
+		public const RegexOptions Compiled = RegexOptions.Compiled;
+	}
+#endif
+
+#if PORTABLE
 	/// <summary>
 	/// Mock SerializableAttribute to avoid having to add #if all over the place
 	/// </summary>
@@ -39,38 +51,22 @@ namespace YamlDotNet
 	{
 		public static bool IsValueType(this Type type)
 		{
-#if UNITY
-			return type.IsValueType;
-#else
 			return type.GetTypeInfo().IsValueType;
-#endif
 		}
 
 		public static bool IsGenericType(this Type type)
 		{
-#if UNITY
-			return type.IsGenericType;
-#else
 			return type.GetTypeInfo().IsGenericType;
-#endif
 		}
 
 		public static bool IsInterface(this Type type)
 		{
-#if UNITY
-			return type.IsInterface;
-#else
 			return type.GetTypeInfo().IsInterface;
-#endif
 		}
 
 		public static bool IsEnum(this Type type)
 		{
-#if UNITY
-			return type.IsEnum;
-#else
 			return type.GetTypeInfo().IsEnum;
-#endif
 		}
 
 		/// <summary>
@@ -82,40 +78,24 @@ namespace YamlDotNet
 		/// </returns>
 		public static bool HasDefaultConstructor(this Type type)
 		{
-#if UNITY
-			var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-			var constructor = type.GetConstructor(bindingFlags, null, Type.EmptyTypes, null);
-			return type.IsValueType || constructor != null;
-#else
 			var typeInfo = type.GetTypeInfo();
 			return typeInfo.IsValueType || typeInfo.DeclaredConstructors
 				.Any(c => c.IsPublic && !c.IsStatic && c.GetParameters().Length == 0);
-#endif
 		}
 
 		public static bool IsAssignableFrom(this Type type, Type source)
 		{
-#if UNITY
-			return type.IsAssignableFrom(source);
-#else
 			return type.IsAssignableFrom(source.GetTypeInfo());
-#endif
 		}
 
-#if !UNITY
 		public static bool IsAssignableFrom(this Type type, TypeInfo source)
 		{
 			return type.GetTypeInfo().IsAssignableFrom(source);
 		}
-#endif
 
 		public static TypeCode GetTypeCode(this Type type)
 		{
-#if UNITY
-			bool isEnum = type.IsEnum;
-#else
 			bool isEnum = type.IsEnum();
-#endif
 			if (isEnum)
 			{
 				type = Enum.GetUnderlyingType(type);
@@ -187,41 +167,25 @@ namespace YamlDotNet
 			}
 		}
 
-#if !UNITY // Also... never used
 		public static Type[] GetGenericArguments(this Type type)
 		{
 			return type.GetTypeInfo().GenericTypeArguments;
 		}
-#endif
 
 		public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
 		{
-#if UNITY
-			if (type == null) throw new ArgumentNullException("type");
-			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-#else
 			return type.GetRuntimeProperties()
 				.Where(p => p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
-#endif
 		}
 
 		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
 		{
-#if UNITY
-			if (type == null) throw new ArgumentNullException("type");
-			return type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-#else
 			return type.GetRuntimeMethods()
 				.Where(m => m.IsPublic && !m.IsStatic);
-#endif
 		}
 
 		public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
 		{
-#if UNITY
-			if (type == null) throw new ArgumentNullException("type");
-			return type.GetMethod(name, BindingFlags.Public | BindingFlags.Static, null, parameterTypes, null);
-#else
 			return type.GetRuntimeMethods()
 				.FirstOrDefault(m =>
 				{
@@ -233,10 +197,8 @@ namespace YamlDotNet
 					}
 					return false;
 				});
-#endif
 		}
 
-#if !UNITY // Also... never used
 		public static MethodInfo GetGetMethod(this PropertyInfo property)
 		{
 			return property.GetMethod;
@@ -246,7 +208,6 @@ namespace YamlDotNet
 		{
 			return type.GetTypeInfo().ImplementedInterfaces;
 		}
-#endif
 
 		public static Exception Unwrap(this TargetInvocationException ex)
 		{
@@ -274,11 +235,6 @@ namespace YamlDotNet
 		Decimal = 15,
 		DateTime = 16,
 		String = 18,
-	}
-
-	internal static class StandardRegexOptions
-	{
-		public const RegexOptions Compiled = RegexOptions.None;
 	}
 
 	internal abstract class DBNull
@@ -370,11 +326,6 @@ namespace YamlDotNet
 			return result;
 		}
 	}
-	
-	internal static class StandardRegexOptions
-	{
-		public const RegexOptions Compiled = RegexOptions.Compiled;
-	}
 
 	internal sealed class CultureInfoAdapter : CultureInfo
 	{
@@ -392,5 +343,23 @@ namespace YamlDotNet
 		}
 	}
 
+#endif
+
+#if UNITY
+	internal static class PropertyInfoExtensions
+	{
+		public static object ReadValue(this PropertyInfo property, object target)
+		{
+			return property.GetGetMethod().Invoke(target, null);
+		}
+	}
+#else
+	internal static class PropertyInfoExtensions
+	{
+		public static object ReadValue(this PropertyInfo property, object target)
+		{
+			return property.GetValue(target, null);
+		}
+	}
 #endif
 }

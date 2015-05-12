@@ -87,11 +87,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
 			public IObjectDescriptor Read(object target)
 			{
-#if UNITY
-				var propertyValue = _propertyInfo.GetGetMethod().Invoke(target, null);
-#else
-				var propertyValue = _propertyInfo.GetValue(target, null);
-#endif
+				var propertyValue = _propertyInfo.ReadValue(target);
 				var actualType = TypeOverride ?? _typeResolver.Resolve(Type, propertyValue);
 				return new ObjectDescriptor(propertyValue, actualType, Type);
 			}
