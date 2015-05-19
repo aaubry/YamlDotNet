@@ -28,6 +28,18 @@ using System.Text.RegularExpressions;
 
 namespace YamlDotNet
 {
+#if (PORTABLE || UNITY)
+	internal static class StandardRegexOptions
+	{
+		public const RegexOptions Compiled = RegexOptions.None;
+	}
+#else
+	internal static class StandardRegexOptions
+	{
+		public const RegexOptions Compiled = RegexOptions.Compiled;
+	}
+#endif
+
 #if PORTABLE
 	/// <summary>
 	/// Mock SerializableAttribute to avoid having to add #if all over the place
@@ -83,7 +95,8 @@ namespace YamlDotNet
 
 		public static TypeCode GetTypeCode(this Type type)
 		{
-			if (type.IsEnum())
+			bool isEnum = type.IsEnum();
+			if (isEnum)
 			{
 				type = Enum.GetUnderlyingType(type);
 			}
@@ -229,11 +242,6 @@ namespace YamlDotNet
 		String = 18,
 	}
 
-	internal static class StandardRegexOptions
-	{
-		public const RegexOptions Compiled = RegexOptions.None;
-	}
-
 	internal abstract class DBNull
 	{
 		private DBNull() {}
@@ -328,11 +336,6 @@ namespace YamlDotNet
 			return result;
 		}
 	}
-	
-	internal static class StandardRegexOptions
-	{
-		public const RegexOptions Compiled = RegexOptions.Compiled;
-	}
 
 	internal sealed class CultureInfoAdapter : CultureInfo
 	{
@@ -350,5 +353,23 @@ namespace YamlDotNet
 		}
 	}
 
+#endif
+
+#if UNITY
+	internal static class PropertyInfoExtensions
+	{
+		public static object ReadValue(this PropertyInfo property, object target)
+		{
+			return property.GetGetMethod().Invoke(target, null);
+		}
+	}
+#else
+	internal static class PropertyInfoExtensions
+	{
+		public static object ReadValue(this PropertyInfo property, object target)
+		{
+			return property.GetValue(target, null);
+		}
+	}
 #endif
 }

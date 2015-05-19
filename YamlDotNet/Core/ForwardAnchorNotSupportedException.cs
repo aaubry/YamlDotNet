@@ -65,7 +65,7 @@ namespace YamlDotNet.Core
 		{
         }
 
-#if !PORTABLE
+#if !(PORTABLE || UNITY)
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
 		/// </summary>
