@@ -19,13 +19,28 @@ More information can be found in the [official page of the project](http://aaubr
 Just install the [YamlDotNet NuGet package](http://www.nuget.org/packages/YamlDotNet/):
 
 ```
-PM> Install-Package YamlDotNet 
+PM> Install-Package YamlDotNet
 ```
 
 If you do not want to use NuGet, you can [download binaries here](https://ci.appveyor.com/project/aaubry/yamldotnet).
 
+YamlDotNet is also available on the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/36292).
+
 
 # Changelog
+
+## Version 3.6.0
+
+New features:
+
+  * Ability to opt out of anchor assignment during `YamlStream.Save()`.
+  * Allow the style of scalar properties to be specified through the `YamlMember` attribute.
+  * Add solution configuration to target "Unity 3.5 .net Subset Base Class Libraries".
+
+Bug fixes:
+
+  * Do not compare nodes by value while assigning anchors. It is the responsibility of the user to use the same reference if they want an alias.
+  * Fixed #121: Finding properties in parent interfaces
 
 ## Version 3.5.1
 
