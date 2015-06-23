@@ -15,12 +15,13 @@ function Download-File($url, $path, $description) {
 
     $wc.DownloadFileAsync($url, $path)
 
-    Write-Host "Download complete"
     $e = Wait-Event "DownloadComplete"
     Remove-Event "DownloadComplete"
+
+    Write-Host "Download complete"
 }
 
-Download-File "https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi" "$env:TEMP\Unity.msi" "VS Tools for Unity "
+Download-File "https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi" "$env:TEMP\Unity.msi" "VS Tools for Unity"
 msiexec.exe /qn /lv "$env:TEMP\Unity.log" /i "$env:TEMP\Unity.msi" | Out-Null
 
 "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed", "Release-UnitySubset-v35" |
