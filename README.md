@@ -26,6 +26,9 @@ If you do not want to use NuGet, you can [download binaries here](https://ci.app
 
 YamlDotNet is also available on the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/36292).
 
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
