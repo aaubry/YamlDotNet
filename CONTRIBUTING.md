@@ -64,6 +64,7 @@ As long as you keep the code readable, I don't care too much about any specific 
   * The only acceptable exception is for small and closely related types.
 * Use sane indentation rules. Break long lines when needed, but don't be obsessive:
   * This is **OK**:
+  
     ```C#
     Traverse(
         new ObjectDescriptor(
@@ -77,6 +78,7 @@ As long as you keep the code readable, I don't care too much about any specific 
     );
     ```
   * This is **OK too**:
+  
     ```C#
     Traverse(
         new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle),
@@ -85,10 +87,12 @@ As long as you keep the code readable, I don't care too much about any specific 
     );
     ```
   * This is **not very good**:
+  
     ```C#
     Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth);
     ```
   * This is **awful**:
+  
     ```C#
     Traverse(new ObjectDescriptor(value.Value,
                                   underlyingType,
