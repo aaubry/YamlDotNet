@@ -32,6 +32,12 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 3.6.1
+
+Bug fixes:
+
+  * Bug in the GetPublicMethods implementation for portable.
+
 ## Version 3.6.0
 
 New features:
