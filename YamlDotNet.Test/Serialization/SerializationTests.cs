@@ -36,6 +36,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.ObjectFactories;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -235,6 +236,27 @@ namespace YamlDotNet.Test.Serialization
 
 			result.BaseWithSerializeAs.Should().BeOfType<Base>().And
 				.Subject.As<Base>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
+		}
+
+		[Fact]
+		public void RoundtripInterfaceProperties()
+		{
+			AssumingDeserializerWith(new LambdaObjectFactory(t =>
+			{
+				if (t == typeof(InterfaceExample)) { return new InterfaceExample(); }
+				else if (t == typeof(IDerived)) { return new Derived(); }
+				return null;
+			}));
+
+			var obj = new InterfaceExample
+			{
+				Derived = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
+			};
+
+			var result = DoRoundtripFromObjectTo<InterfaceExample>(obj);
+
+			result.Derived.Should().BeOfType<Derived>().And
+				.Subject.As<IDerived>().ShouldHave().SharedProperties().EqualTo(new { BaseProperty = "foo", DerivedProperty = "bar" });
 		}
 
 		[Fact]
@@ -625,6 +647,20 @@ namespace YamlDotNet.Test.Serialization
 			Dump.WriteLine(serialized);
 
 			serialized.Should().NotContain("IgnoreMe");
+		}
+
+		[Fact]
+		public void SerializationRespectsScalarStyle()
+		{
+			var writer = new StringWriter();
+			var obj = new ScalarStyleExample();
+
+			Serializer.Serialize(writer, obj);
+			var serialized = writer.ToString();
+			Dump.WriteLine(serialized);
+
+			serialized.Should()
+				.Be("LiteralString: |-\r\n  Test\r\nDoubleQuotedString: \"Test\"\r\n", "the properties should be specifically styled");
 		}
 
 		[Fact]

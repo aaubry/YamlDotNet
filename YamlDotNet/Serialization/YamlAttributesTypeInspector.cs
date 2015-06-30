@@ -63,6 +63,7 @@ namespace YamlDotNet.Serialization
 						}
 
 						descriptor.Order = member.Order;
+						descriptor.ScalarStyle = member.ScalarStyle;
 
 						if (member.Alias != null)
 						{

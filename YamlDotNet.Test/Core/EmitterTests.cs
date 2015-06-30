@@ -19,13 +19,12 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using FluentAssertions;
+using System.Linq;
 using Xunit;
-using Xunit.Extensions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel;

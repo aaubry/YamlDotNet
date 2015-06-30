@@ -174,14 +174,19 @@ namespace YamlDotNet
 
 		public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
 		{
-			return type.GetRuntimeProperties()
-				.Where(p => p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
+			var instancePublic = new Func<PropertyInfo, bool>(
+				p => !p.GetMethod.IsStatic && p.GetMethod.IsPublic);
+			return type.IsInterface()
+				? (new Type[] { type })
+					.Concat(type.GetInterfaces())
+					.SelectMany(i => i.GetRuntimeProperties().Where(instancePublic))
+				: type.GetRuntimeProperties().Where(instancePublic);
 		}
 
-		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
+		public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
 		{
 			return type.GetRuntimeMethods()
-				.Where(m => m.IsPublic && !m.IsStatic);
+				.Where(m => m.IsPublic && m.IsStatic);
 		}
 
 		public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
@@ -300,10 +305,15 @@ namespace YamlDotNet
  
 		public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
 		{
-			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+			var instancePublic = BindingFlags.Instance | BindingFlags.Public;
+			return type.IsInterface
+				? (new Type[] { type })
+					.Concat(type.GetInterfaces())
+					.SelectMany(i => i.GetProperties(instancePublic))
+				: type.GetProperties(instancePublic);
 		}
 
-		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
+		public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
 		{
 			return type.GetMethods(BindingFlags.Static | BindingFlags.Public);
 		}
@@ -354,7 +364,7 @@ namespace YamlDotNet
 		}
 	}
 #else
-	internal static class PropertyInfoExtensions
+    internal static class PropertyInfoExtensions
 	{
 		public static object ReadValue(this PropertyInfo property, object target)
 		{

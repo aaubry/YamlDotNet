@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {

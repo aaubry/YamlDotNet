@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
@@ -44,6 +45,12 @@ namespace YamlDotNet.Serialization
 		}
 
 	    public int Order { get; set; }
+
+		public ScalarStyle ScalarStyle
+		{
+			get { return baseDescriptor.ScalarStyle; }
+			set { baseDescriptor.ScalarStyle = value; }
+		}
 
 	    public bool CanWrite
 		{

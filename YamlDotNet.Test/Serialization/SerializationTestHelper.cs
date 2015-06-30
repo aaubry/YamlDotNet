@@ -320,12 +320,27 @@ namespace YamlDotNet.Test.Serialization
 		public Base BaseWithSerializeAs { get; set; }
 	}
 
-	public class Base
+	public class InterfaceExample
+	{
+		public IDerived Derived { get; set; }
+	}
+
+	public interface IBase
+	{
+		string BaseProperty { get; set; }
+	}
+
+	public interface IDerived : IBase
+	{
+		string DerivedProperty { get; set; }
+	}
+
+	public class Base : IBase
 	{
 		public string BaseProperty { get; set; }
 	}
 
-	public class Derived : Base
+	public class Derived : Base, IDerived
 	{
 		public string DerivedProperty { get; set; }
 	}
@@ -398,6 +413,22 @@ namespace YamlDotNet.Test.Serialization
 			get { throw new NotImplementedException("Accessing a [YamlIgnore] property"); }
 			set { throw new NotImplementedException("Accessing a [YamlIgnore] property"); }
 		}
+	}
+
+	public class ScalarStyleExample
+	{
+		public ScalarStyleExample()
+		{
+			var content = "Test";
+			this.LiteralString = content;
+			this.DoubleQuotedString = content;
+		}
+
+		[YamlMember(ScalarStyle = ScalarStyle.Literal)]
+		public String LiteralString { get; set; }
+
+		[YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
+		public String DoubleQuotedString { get; set; }
 	}
 
 	public class DefaultsExample

@@ -187,7 +187,7 @@ namespace YamlDotNet.Serialization.Utilities
 			// Try to find a casting operator in the source or destination type
 			foreach (var type in new[] { sourceType, destinationType })
 			{
-				foreach (var method in type.GetPublicMethods())
+                foreach (var method in type.GetPublicStaticMethods())
 				{
 					var isCastingOperator =
 						method.IsSpecialName &&
