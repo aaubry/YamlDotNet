@@ -38,6 +38,9 @@ artifacts:
   - path: YamlDotNet\bin\Release-Portable-Signed
     name: Release-Portable-Signed
 
+  - path: YamlDotNet\bin\Release-UnitySubset-v35
+    name: Release-UnitySubset-v35
+
   - path: YamlDotNet\bin\*.nupkg
 
 deploy:
