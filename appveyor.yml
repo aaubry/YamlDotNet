@@ -3,6 +3,7 @@ branches:
   only:
     - master
     - release
+    - test-build
 
 os: Windows Server 2012 R2
 
@@ -19,6 +20,10 @@ build:
 
 build_script:
   - ps:  .\build.ps1
+
+test_script:
+  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release\YamlDotNet.Test.dll" -appveyor'
+  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release-Portable\YamlDotNet.Test.Portable.dll" -appveyor'
 
 artifacts:
   - path: YamlDotNet\bin\Release-Unsigned
