@@ -183,10 +183,10 @@ namespace YamlDotNet
 				: type.GetRuntimeProperties().Where(instancePublic);
 		}
 
-		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
+		public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
 		{
 			return type.GetRuntimeMethods()
-				.Where(m => m.IsPublic && !m.IsStatic);
+				.Where(m => m.IsPublic && m.IsStatic);
 		}
 
 		public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
@@ -313,7 +313,7 @@ namespace YamlDotNet
 				: type.GetProperties(instancePublic);
 		}
 
-		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
+		public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
 		{
 			return type.GetMethods(BindingFlags.Static | BindingFlags.Public);
 		}
@@ -364,7 +364,7 @@ namespace YamlDotNet
 		}
 	}
 #else
-	internal static class PropertyInfoExtensions
+    internal static class PropertyInfoExtensions
 	{
 		public static object ReadValue(this PropertyInfo property, object target)
 		{
