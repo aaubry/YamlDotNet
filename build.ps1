@@ -6,6 +6,7 @@ function Download-File($url, $path, $description) {
   $wc = New-Object System.Net.WebClient
 
   Write-Host "Downloading $description"
+  Write-Host ": ‖---------|---------|---------|---------|---------|---------|---------|---------|---------|---------‖"
   Write-Host ": " -NoNewline
 
   $previousPercentage = 0
