@@ -371,6 +371,7 @@ namespace YamlDotNet.Test.Core
 				StreamEnd);
 		}
 
+#if !PORTABLE
 		[Fact]
 		public void ScannerIsSerializable()
 		{
@@ -407,6 +408,7 @@ namespace YamlDotNet.Test.Core
 				BlockEnd,
 				StreamEnd);
 		}
+#endif
 
 		[Fact]
 		public void MarksOnDoubleQuotedScalarsAreCorrect()
