@@ -21,6 +21,7 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -52,35 +53,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						break;
 
 					case TypeCode.Byte:
-						value = Byte.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.Int16:
-						value = Int16.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.Int32:
-						value = Int32.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.Int64:
-						value = Int64.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.SByte:
-						value = SByte.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.UInt16:
-						value = UInt16.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.UInt32:
-						value = UInt32.Parse(scalar.Value, numberFormat);
-						break;
-
 					case TypeCode.UInt64:
-						value = UInt64.Parse(scalar.Value, numberFormat);
+						value = DeserializeIntegerHelper(typeCode, scalar.Value, numberFormat);
 						break;
 
 					case TypeCode.Single:
@@ -122,6 +102,144 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				}
 			}
 			return true;
+		}
+
+		private object DeserializeIntegerHelper(TypeCode typeCode, string value, IFormatProvider formatProvider)
+		{
+			StringBuilder numberBuilder = new StringBuilder();
+			int currentIndex = 0;
+			bool isNegative = false;
+			int numberBase = 0;
+			long result = 0;
+
+			if (value[0] == '-')
+			{
+				currentIndex++;
+				isNegative = true;
+			}
+
+			else if (value[0] == '+')
+			{
+				currentIndex++;
+			}
+
+			if (value[currentIndex] == '0')
+			{
+				// Could be binary, octal, hex, decimal (0)
+
+				// If there are no characters remaining, it's a decimal zero
+				if (currentIndex == value.Length - 1)
+				{
+					numberBase = 10;
+					result = 0;
+				}
+
+				else
+				{
+					// Check the next character
+					currentIndex++;
+
+					if (value[currentIndex] == 'b')
+					{
+						// Binary
+						numberBase = 2;
+
+						currentIndex++;
+					}
+
+					else if (value[currentIndex] == 'x')
+					{
+						// Hex
+						numberBase = 16;
+
+						currentIndex++;
+					}
+
+					else
+					{
+						// Octal
+						numberBase = 8;
+					}
+				}
+
+				// Copy remaining digits to the number buffer (skip underscores)
+				while (currentIndex < value.Length)
+				{
+					if (value[currentIndex] != '_')
+					{
+						numberBuilder.Append(value[currentIndex]);
+					}
+					currentIndex++;
+				}
+
+				// Parse the magnitude of the number
+				switch (numberBase)
+				{
+					case 2:
+					case 8:
+						// TODO: how to incorporate the numberFormat?
+						result = Convert.ToInt64(numberBuilder.ToString(), numberBase);
+						break;
+
+					case 16:
+						result = Int64.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, numberFormat);
+						break;
+
+					case 10:
+						// Result is already zero
+						break;
+				}
+			}
+
+			else
+			{
+				// Could be decimal or base 60
+				string[] chunks = value.Split(':');
+				result = 0;
+
+				for (int chunkIndex = 0; chunkIndex < chunks.Length; chunkIndex++)
+				{
+					result *= 60;
+
+					// TODO: verify that chunks after the first are non-negative and less than 60
+					result += long.Parse(chunks[chunkIndex].Replace("_", ""));
+				}
+			}
+
+			if (isNegative)
+			{
+				result = -result;
+			}
+
+			switch (typeCode)
+			{
+				case TypeCode.Byte:
+					return (byte)result;
+
+				case TypeCode.Int16:
+					return (short)result;
+
+				case TypeCode.Int32:
+					return (int)result;
+
+				case TypeCode.Int64:
+					return result;
+
+				case TypeCode.SByte:
+					return (sbyte)result;
+
+				case TypeCode.UInt16:
+					return (uint)result;
+
+				case TypeCode.UInt32:
+					return (uint)result;
+
+				case TypeCode.UInt64:
+					return (ulong)result;
+
+				default:
+					return result;
+			}
 		}
 
 		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo

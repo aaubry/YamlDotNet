@@ -63,6 +63,54 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void DeserializeScalarZero()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("0"));
+
+			result.Should().Be(0);
+		}
+
+		[Fact]
+		public void DeserializeScalarDecimal()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("+1_234_567"));
+
+			result.Should().Be(1234567);
+		}
+
+		[Fact]
+		public void DeserializeScalarBinaryNumber()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("-0b1_0010_1001_0010"));
+
+			result.Should().Be(-4754);
+		}
+
+		[Fact]
+		public void DeserializeScalarOctalNumber()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("+071_352"));
+
+			result.Should().Be(29418);
+		}
+
+		[Fact]
+		public void DeserializeScalarHexNumber()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("-0x_0F_B9"));
+
+			result.Should().Be(-0xFB9);
+		}
+
+		[Fact]
+		public void DeserializeScalarLongBase60Number()
+		{
+			var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:6_2:10"));
+
+			result.Should().Be(77744246530L);
+		}
+
+		[Fact]
 		public void RoundtripEnums()
 		{
 			var flags = EnumExample.One | EnumExample.Two;
