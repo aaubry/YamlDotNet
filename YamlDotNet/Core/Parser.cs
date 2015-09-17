@@ -303,6 +303,7 @@ namespace YamlDotNet.Core
 		private VersionDirective ProcessDirectives(TagDirectiveCollection tags)
 		{
 			VersionDirective version = null;
+            bool hasOwnDirectives = false;
 
 			while (true)
 			{
@@ -322,18 +323,16 @@ namespace YamlDotNet.Core
 					}
 
 					version = currentVersion;
+                    hasOwnDirectives = true;
 				}
 				else if ((tag = GetCurrentToken() as TagDirective) != null)
 				{
-					if (tagDirectives.Contains(tag.Handle))
+                    if (tags.Contains(tag.Handle))
 					{
 						throw new SemanticErrorException(tag.Start, tag.End, "Found duplicate %TAG directive.");
 					}
-					tagDirectives.Add(tag);
-					if (tags != null)
-					{
-						tags.Add(tag);
-					}
+                    tags.Add(tag);
+                    hasOwnDirectives = true;
 				}
 				else
 				{
@@ -343,18 +342,21 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			if (tags != null)
+            AddTagDirectives(tags, Constants.DefaultTagDirectives);
+
+            if (hasOwnDirectives)
 			{
-				AddDefaultTagDirectives(tags);
+				tagDirectives.Clear();
 			}
-			AddDefaultTagDirectives(tagDirectives);
+
+            AddTagDirectives(tagDirectives, tags);
 
 			return version;
 		}
 
-		private static void AddDefaultTagDirectives(TagDirectiveCollection directives)
+        private static void AddTagDirectives(TagDirectiveCollection directives, IEnumerable<TagDirective> source)
 		{
-			foreach(var directive in Constants.DefaultTagDirectives)
+            foreach (var directive in source)
 			{
 				if (!directives.Contains(directive))
 				{
@@ -579,8 +581,6 @@ namespace YamlDotNet.Core
 				Skip();
 				isImplicit = false;
 			}
-
-			tagDirectives.Clear();
 
 			state = ParserState.DocumentStart;
 			return new Events.DocumentEnd(isImplicit, start, end);

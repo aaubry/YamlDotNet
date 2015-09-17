@@ -423,5 +423,28 @@ namespace YamlDotNet.Test.Core
 				}
 			}
 		}
+
+        [Fact]
+        public void VerifyTokenWithMultiDocTag()
+        {
+            AssertSequenceOfEventsFrom(Yaml.ParserForResource("multi-doc-tag.yaml"),
+                StreamStart,
+                DocumentStart(Explicit, Version(1, 1),
+                    TagDirective("!x!", "tag:example.com,2014:"),
+                    TagDirective("!", "!"),
+                    TagDirective("!!", TagYaml)),
+                BlockMappingStart.T("tag:example.com,2014:foo").Explicit,
+                PlainScalar("x"),
+                PlainScalar("0"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                DocumentStart(Explicit),
+                BlockMappingStart.T("tag:example.com,2014:bar").Explicit,
+                PlainScalar("x"),
+                PlainScalar("1"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
 	}
 }
