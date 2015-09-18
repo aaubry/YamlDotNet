@@ -96,8 +96,8 @@ namespace YamlDotNet.Test.Serialization
 			var result = Deserializer.Deserialize(stream);
 
 			result.Should().BeOfType<Point>().And
-				.Subject.As<Point>().ShouldHave()
-				.SharedProperties().EqualTo(new { X = 10, Y = 20 });
+				.Subject.As<Point>()
+				.ShouldBeEquivalentTo(new { X = 10, Y = 20 }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -129,8 +129,8 @@ namespace YamlDotNet.Test.Serialization
 
 			var result = Deserializer.Deserialize<Example>(UsingReaderFor(text));
 
-			result.ShouldHave().SharedProperties().EqualTo(
-				new { Nothing = "ForwardReference", MyString = "ForwardReference" });
+			result.ShouldBeEquivalentTo(
+				new { Nothing = "ForwardReference", MyString = "ForwardReference" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -152,7 +152,7 @@ namespace YamlDotNet.Test.Serialization
 
 			var result = DoRoundtripFromObjectTo<Example>(obj, RoundtripSerializer);
 
-			result.ShouldHave().AllProperties().EqualTo(obj);
+			result.ShouldBeEquivalentTo(obj);
 		}
 
 		[Fact]
@@ -162,7 +162,7 @@ namespace YamlDotNet.Test.Serialization
 
 			var result = DoRoundtripFromObjectTo<Example>(obj, RoundtripEmitDefaultsSerializer);
 
-			result.ShouldHave().AllProperties().EqualTo(obj);
+			result.ShouldBeEquivalentTo(obj);
 		}
 
 		[Fact]
@@ -220,7 +220,7 @@ namespace YamlDotNet.Test.Serialization
 
 			result.SomeScalar.Should().Be("Hello");
 			result.RegularBase.Should().BeOfType<Derived>().And
-				.Subject.As<Derived>().ShouldHave().SharedProperties().EqualTo(new { ChildProp = "bar" });
+				.Subject.As<Derived>().ShouldBeEquivalentTo(new { ChildProp = "bar" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -235,7 +235,7 @@ namespace YamlDotNet.Test.Serialization
 			var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, RoundtripSerializer);
 
 			result.BaseWithSerializeAs.Should().BeOfType<Base>().And
-				.Subject.As<Base>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
+				.Subject.As<Base>().ShouldBeEquivalentTo(new { ParentProp = "foo" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -256,7 +256,7 @@ namespace YamlDotNet.Test.Serialization
 			var result = DoRoundtripFromObjectTo<InterfaceExample>(obj);
 
 			result.Derived.Should().BeOfType<Derived>().And
-				.Subject.As<IDerived>().ShouldHave().SharedProperties().EqualTo(new { BaseProperty = "foo", DerivedProperty = "bar" });
+				.Subject.As<IDerived>().ShouldBeEquivalentTo(new { BaseProperty = "foo", DerivedProperty = "bar" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -492,8 +492,8 @@ namespace YamlDotNet.Test.Serialization
 			var one = Deserializer.Deserialize<Simple>(reader);
 			var two = Deserializer.Deserialize<Simple>(reader);
 
-			one.ShouldHave().AllProperties().EqualTo(new { aaa = "111" });
-			two.ShouldHave().AllProperties().EqualTo(new { aaa = "222" });
+			one.ShouldBeEquivalentTo(new { aaa = "111" });
+			two.ShouldBeEquivalentTo(new { aaa = "222" });
 		}
 
 		[Fact]
@@ -514,9 +514,9 @@ namespace YamlDotNet.Test.Serialization
 			var three = Deserializer.Deserialize<Simple>(reader);
 
 			reader.Accept<StreamEnd>().Should().BeTrue("reader should have reached StreamEnd");
-			one.ShouldHave().AllProperties().EqualTo(new { aaa = "111" });
-			two.ShouldHave().AllProperties().EqualTo(new { aaa = "222" });
-			three.ShouldHave().AllProperties().EqualTo(new { aaa = "333" });
+			one.ShouldBeEquivalentTo(new { aaa = "111" });
+			two.ShouldBeEquivalentTo(new { aaa = "222" });
+			three.ShouldBeEquivalentTo(new { aaa = "333" });
 		}
 
 		[Fact]
