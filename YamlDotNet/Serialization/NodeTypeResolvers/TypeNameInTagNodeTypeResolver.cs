@@ -30,14 +30,14 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 		{
 			if (!string.IsNullOrEmpty(nodeEvent.Tag))
 			{
-				// If type could not be loaded, make sure to return false
-				// to pass resolving to the next resolver
+				// If type could not be loaded, make sure to pass resolving
+				// to the next resolver
 				try
 				{
 					currentType = Type.GetType(nodeEvent.Tag.Substring(1), true);
 					return true;
 				}
-				catch {	}
+				catch { }
 			}
 			return false;
 		}
