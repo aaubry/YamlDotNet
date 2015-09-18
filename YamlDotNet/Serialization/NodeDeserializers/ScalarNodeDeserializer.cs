@@ -229,7 +229,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					return (sbyte)result;
 
 				case TypeCode.UInt16:
-					return (uint)result;
+					return (ushort)result;
 
 				case TypeCode.UInt32:
 					return (uint)result;
