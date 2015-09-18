@@ -39,7 +39,7 @@ namespace YamlDotNet.Core
 		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
 		private ParserState state;
 
-		private readonly Scanner scanner;
+        private readonly IScanner scanner;
 		private ParsingEvent current;
 
 		private Token currentToken;
@@ -48,7 +48,7 @@ namespace YamlDotNet.Core
 		{
 			if (currentToken == null)
 			{
-				while (scanner.InternalMoveNext())
+				while (scanner.MoveNextWithoutConsuming())
 				{
 					currentToken = scanner.Current;
 
@@ -78,7 +78,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Parser"/> class.
 		/// </summary>
-		public Parser(Scanner scanner)
+        public Parser(IScanner scanner)
 		{
 			this.scanner = scanner;
 		}
@@ -289,7 +289,7 @@ namespace YamlDotNet.Core
 
 				ParsingEvent evt = new Events.StreamEnd(GetCurrentToken().Start, GetCurrentToken().End);
 				// Do not call skip here because that would throw an exception
-				if (scanner.InternalMoveNext())
+				if (scanner.MoveNextWithoutConsuming())
 				{
 					throw new InvalidOperationException("The scanner should contain no more tokens.");
 				}
