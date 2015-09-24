@@ -60,19 +60,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					case TypeCode.UInt16:
 					case TypeCode.UInt32:
 					case TypeCode.UInt64:
-						value = DeserializeIntegerHelper(typeCode, scalar.Value, numberFormat);
+						value = DeserializeIntegerHelper(typeCode, scalar.Value, YamlFormatter.NumberFormat);
 						break;
 
 					case TypeCode.Single:
-						value = Single.Parse(scalar.Value, numberFormat);
+						value = Single.Parse(scalar.Value, YamlFormatter.NumberFormat);
 						break;
 
 					case TypeCode.Double:
-						value = Double.Parse(scalar.Value, numberFormat);
+						value = Double.Parse(scalar.Value, YamlFormatter.NumberFormat);
 						break;
 
 					case TypeCode.Decimal:
-						value = Decimal.Parse(scalar.Value, numberFormat);
+						value = Decimal.Parse(scalar.Value, YamlFormatter.NumberFormat);
 						break;
 
 					case TypeCode.String:
@@ -182,7 +182,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						break;
 
 					case 16:
-						result = Int64.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, numberFormat);
+						result = Int64.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
 						break;
 
 					case 10:
@@ -241,18 +241,5 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					return result;
 			}
 		}
-
-		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
-		{
-			CurrencyDecimalSeparator = ".",
-			CurrencyGroupSeparator = "_",
-			CurrencyGroupSizes = new[] { 3 },
-			CurrencySymbol = string.Empty,
-			CurrencyDecimalDigits = 99,
-			NumberDecimalSeparator = ".",
-			NumberGroupSeparator = "_",
-			NumberGroupSizes = new[] { 3 },
-			NumberDecimalDigits = 99
-		};
 	}
 }

@@ -961,129 +961,171 @@ namespace YamlDotNet.Test.Serialization
 			Assert.Equal(3, exception.Start.Column);
 		}
 
-        [Fact]
-        public void SerializeDynamicPropertyAndApplyNamingConvention()
-        {
-            dynamic obj = new ExpandoObject();
-            obj.property_one = new ExpandoObject();
-            ((IDictionary<string, object>)obj.property_one).Add("new_key_here", "new_value");
+		[Fact]
+		public void SerializeDynamicPropertyAndApplyNamingConvention()
+		{
+			dynamic obj = new ExpandoObject();
+			obj.property_one = new ExpandoObject();
+			((IDictionary<string, object>)obj.property_one).Add("new_key_here", "new_value");
 
-            var mockNamingConvention = A.Fake<INamingConvention>();
-            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+			var mockNamingConvention = A.Fake<INamingConvention>();
+			A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
 
-            var serializer = new Serializer(namingConvention: mockNamingConvention);
-            var writer = new StringWriter();
-            serializer.Serialize(writer, obj);
+			var serializer = new Serializer(namingConvention: mockNamingConvention);
+			var writer = new StringWriter();
+			serializer.Serialize(writer, obj);
 
-            writer.ToString().Should().Contain("xxx: new_value");
-        }
+			writer.ToString().Should().Contain("xxx: new_value");
+		}
 
-        [Fact]
-        public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
-        {
-            var obj = new Dictionary<string, object>();
-            obj["property_one"] = new GenericTestDictionary<string, object>();
-            ((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
+		[Fact]
+		public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
+		{
+			var obj = new Dictionary<string, object>();
+			obj["property_one"] = new GenericTestDictionary<string, object>();
+			((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
 
-            var mockNamingConvention = A.Fake<INamingConvention>();
-            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+			var mockNamingConvention = A.Fake<INamingConvention>();
+			A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
 
-            var serializer = new Serializer(namingConvention: mockNamingConvention);
-            var writer = new StringWriter();
-            serializer.Serialize(writer, obj);
+			var serializer = new Serializer(namingConvention: mockNamingConvention);
+			var writer = new StringWriter();
+			serializer.Serialize(writer, obj);
 
-            writer.ToString().Should().Contain("new_key_here: new_value");
-        }
-        #region Test Dictionary that implements IDictionary<,>, but not IDictionary
-        public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
-        {
-            private readonly Dictionary<TKey, TValue> _dictionary;
-            public GenericTestDictionary()
-            {
-                _dictionary = new Dictionary<TKey, TValue>();
-            }
-            public void Add(TKey key, TValue value)
-            {
-                _dictionary.Add(key, value);
-            }
+			writer.ToString().Should().Contain("new_key_here: new_value");
+		}
 
-            public bool ContainsKey(TKey key)
-            {
-                return _dictionary.ContainsKey(key);
-            }
+		[Fact]
+		public void SpecialFloatsAreDeserializedCorrectly()
+		{
+			var deserializer = new Deserializer();
+			var doubles = deserializer.Deserialize<List<double>>(Yaml.ReaderForText(@"
+				- .nan
+				- .inf
+				- -.inf
+				- 2.3e4
+				- 1
+			"));
 
-            public ICollection<TKey> Keys
-            {
-                get { return _dictionary.Keys; }
-            }
+			Assert.Equal(new double[]
+			{
+				double.NaN,
+				double.PositiveInfinity,
+				double.NegativeInfinity,
+				23000,
+				1.0
+			}, doubles);
+		}
 
-            public bool Remove(TKey key)
-            {
-                return _dictionary.Remove(key);
-            }
+		[Fact]
+		public void SpecialFloatsAreSerializedCorrectly()
+		{
+			var deserializer = new Serializer();
 
-            public bool TryGetValue(TKey key, out TValue value)
-            {
-                return _dictionary.TryGetValue(key, out value);
-            }
+			var buffer = new StringWriter();
+			deserializer.Serialize(buffer, new double[]
+			{
+				double.NaN,
+				double.PositiveInfinity,
+				double.NegativeInfinity,
+			});
 
-            public ICollection<TValue> Values
-            {
-                get { return _dictionary.Values; }
-            }
+			var text = buffer.ToString();
 
-            public TValue this[TKey key]
-            {
-                get { return _dictionary[key]; }
-                set { _dictionary[key] = value; }
-            }
+			Assert.Contains("- .nan", text);
+			Assert.Contains("- .inf", text);
+			Assert.Contains("- -.inf", text);
+		}
 
-            public void Add(KeyValuePair<TKey, TValue> item)
-            {
-                ((IDictionary<TKey, TValue>)_dictionary).Add(item);
-            }
+		#region Test Dictionary that implements IDictionary<,>, but not IDictionary
+		public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+		{
+			private readonly Dictionary<TKey, TValue> _dictionary;
+			public GenericTestDictionary()
+			{
+				_dictionary = new Dictionary<TKey, TValue>();
+			}
+			public void Add(TKey key, TValue value)
+			{
+				_dictionary.Add(key, value);
+			}
 
-            public void Clear()
-            {
-                _dictionary.Clear();
-            }
+			public bool ContainsKey(TKey key)
+			{
+				return _dictionary.ContainsKey(key);
+			}
 
-            public bool Contains(KeyValuePair<TKey, TValue> item)
-            {
-                return ((IDictionary<TKey, TValue>)_dictionary).Contains(item);
-            }
+			public ICollection<TKey> Keys
+			{
+				get { return _dictionary.Keys; }
+			}
 
-            public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-            {
-                ((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
-            }
+			public bool Remove(TKey key)
+			{
+				return _dictionary.Remove(key);
+			}
 
-            public int Count
-            {
-                get { return _dictionary.Count; }
-            }
+			public bool TryGetValue(TKey key, out TValue value)
+			{
+				return _dictionary.TryGetValue(key, out value);
+			}
 
-            public bool IsReadOnly
-            {
-                get { return false; }
-            }
+			public ICollection<TValue> Values
+			{
+				get { return _dictionary.Values; }
+			}
 
-            public bool Remove(KeyValuePair<TKey, TValue> item)
-            {
-                return ((IDictionary<TKey, TValue>)_dictionary).Remove(item);
-            }
+			public TValue this[TKey key]
+			{
+				get { return _dictionary[key]; }
+				set { _dictionary[key] = value; }
+			}
 
-            public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-            {
-                return _dictionary.GetEnumerator();
-            }
+			public void Add(KeyValuePair<TKey, TValue> item)
+			{
+				((IDictionary<TKey, TValue>)_dictionary).Add(item);
+			}
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return _dictionary.GetEnumerator();
-            }
-        }
-        #endregion
+			public void Clear()
+			{
+				_dictionary.Clear();
+			}
 
-    }
+			public bool Contains(KeyValuePair<TKey, TValue> item)
+			{
+				return ((IDictionary<TKey, TValue>)_dictionary).Contains(item);
+			}
+
+			public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+			{
+				((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
+			}
+
+			public int Count
+			{
+				get { return _dictionary.Count; }
+			}
+
+			public bool IsReadOnly
+			{
+				get { return false; }
+			}
+
+			public bool Remove(KeyValuePair<TKey, TValue> item)
+			{
+				return ((IDictionary<TKey, TValue>)_dictionary).Remove(item);
+			}
+
+			public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+			{
+				return _dictionary.GetEnumerator();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return _dictionary.GetEnumerator();
+			}
+		}
+		#endregion
+	}
 }
