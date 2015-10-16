@@ -12,7 +12,12 @@
 		<iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
 		<tags>yaml parser development library serialization signed strongname</tags>
 	</metadata>
-	<files>
+  <dependencies>
+    <group targetFramework="dotnet">
+      <dependency id="System.Collections" />
+    </group>
+  </dependencies>
+  <files>
 		<file src="bin\Release-Signed\YamlDotNet.dll" target="lib\net35" />
 		<file src="bin\Release-Signed\YamlDotNet.pdb" target="lib\net35" />
 		<file src="bin\Release-Signed\YamlDotNet.xml" target="lib\net35" />
