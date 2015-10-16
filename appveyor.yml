@@ -1,9 +1,9 @@
 version: 0.0.{build}
-branches:
-  only:
-    - master
-    - release
-    - test-build
+#branches:
+#  only:
+#    - master
+#    - release
+#    - test-build
 
 install:
   - cmd: git submodule update --init
