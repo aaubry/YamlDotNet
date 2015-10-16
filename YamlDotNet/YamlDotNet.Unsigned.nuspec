@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
-	<metadata>
+	<metadata minClientVersion="2.8">
 		<id>YamlDotNet</id>
 		<version>0.0.1</version>
 		<authors>Antoine Aubry</authors>
@@ -11,12 +11,13 @@
 		<projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
 		<iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
 		<tags>yaml parser development library serialization</tags>
+    
+    <dependencies>
+      <group targetFramework="dotnet">
+        <dependency id="System.Collections" />
+      </group>
+    </dependencies>
 	</metadata>
-  <dependencies>
-    <group targetFramework="dotnet">
-      <dependency id="System.Collections" />
-    </group>
-  </dependencies>
 	<files>
 		<file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />
 		<file src="bin\Release-Unsigned\YamlDotNet.pdb" target="lib\net35" />
