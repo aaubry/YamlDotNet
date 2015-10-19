@@ -46,7 +46,7 @@ if($build_unity) {
   Download-File "https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi" "$env:TEMP\Unity.msi" "VS Tools for Unity"
 
   Write-Host "Installing VS Tools for Unity... " -NoNewline
-  msiexec.exe /qn /lv "$env:TEMP\Unity.log" /i "$env:TEMP\Unity.msi" | Out-Null
+  & .\BuildUtils\MsiInstaller\bin\Release\MsiInstaller.exe "$env:TEMP\Unity.msi"
   Write-Host "Done"
 }
 

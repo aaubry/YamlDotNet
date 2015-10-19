@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
-	<metadata>
-		<id>YamlDotNet.Signed</id>
+  <metadata minClientVersion="2.8">
+    <id>YamlDotNet.Signed</id>
 		<version>0.0.1</version>
 		<authors>Antoine Aubry</authors>
 		<description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
@@ -11,8 +11,14 @@
 		<projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
 		<iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
 		<tags>yaml parser development library serialization signed strongname</tags>
-	</metadata>
-	<files>
+
+    <dependencies>
+      <group targetFramework="dotnet">
+        <dependency id="System.Collections" version="4.0.0-beta-23409" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
 		<file src="bin\Release-Signed\YamlDotNet.dll" target="lib\net35" />
 		<file src="bin\Release-Signed\YamlDotNet.pdb" target="lib\net35" />
 		<file src="bin\Release-Signed\YamlDotNet.xml" target="lib\net35" />
@@ -20,5 +26,9 @@
 		<file src="bin\Release-Portable-Signed\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 		<file src="bin\Release-Portable-Signed\YamlDotNet.pdb" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 		<file src="bin\Release-Portable-Signed\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
+
+		<file src="bin\Release-Portable-Signed\YamlDotNet.dll" target="lib\dotnet" />
+		<file src="bin\Release-Portable-Signed\YamlDotNet.pdb" target="lib\dotnet" />
+		<file src="bin\Release-Portable-Signed\YamlDotNet.xml" target="lib\dotnet" />
 	</files>
 </package>
