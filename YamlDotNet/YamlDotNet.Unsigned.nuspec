@@ -14,7 +14,7 @@
     
     <dependencies>
       <group targetFramework="dotnet">
-        <dependency id="System.Collections" />
+        <dependency id="System.Collections" version="4.0.0-beta-*" />
       </group>
     </dependencies>
 	</metadata>
