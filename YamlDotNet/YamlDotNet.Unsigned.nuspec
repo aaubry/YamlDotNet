@@ -11,12 +11,6 @@
 		<projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
 		<iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
 		<tags>yaml parser development library serialization</tags>
-    
-    <dependencies>
-      <group targetFramework="dotnet">
-        <dependency id="System.Collections" version="4.0.0-beta-23409" />
-      </group>
-    </dependencies>
 	</metadata>
 	<files>
 		<file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />

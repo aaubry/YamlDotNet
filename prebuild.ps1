@@ -13,4 +13,6 @@ Patch-Xml "YamlDotNet\YamlDotNet.Unsigned.nuspec" $version "/package/metadata/ve
 Patch-Xml "YamlDotNet\YamlDotNet.Signed.nuspec" $version "/package/metadata/version/text()" @{ }
 Patch-AssemblyInfo "YamlDotNet\Properties\AssemblyInfo.cs" $version
 
-nuget update -Self
+cd BuildUtils.UnityPrerequisites
+.\install.ps1
+cd ..

@@ -6,10 +6,6 @@ $targets = "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "R
 
 if($build_unity) {
   $targets += "Release-UnitySubset-v35"
-
-  cd BuildUtils.UnityPrerequisites
-  .\install.ps1
-  cd ..
 }
 
 $targets |
