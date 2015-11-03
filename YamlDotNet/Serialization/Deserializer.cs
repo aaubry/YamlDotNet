@@ -81,15 +81,17 @@ namespace YamlDotNet.Serialization
 			objectFactory = objectFactory ?? new DefaultObjectFactory();
 			namingConvention = namingConvention ?? new NullNamingConvention();
 			
-			typeDescriptor.TypeDescriptor = 
-				new YamlAttributesTypeInspector(
-					new NamingConventionTypeInspector(
-						new ReadableAndWritablePropertiesTypeInspector(
-							new ReadablePropertiesTypeInspector(
-								new StaticTypeResolver()
-							)
-						),
-						namingConvention
+			typeDescriptor.TypeDescriptor =
+				new CachedTypeInspector(
+					new YamlAttributesTypeInspector(
+						new NamingConventionTypeInspector(
+							new ReadableAndWritablePropertiesTypeInspector(
+								new ReadablePropertiesTypeInspector(
+									new StaticTypeResolver()
+								)
+							),
+							namingConvention
+						)
 					)
 				);
 

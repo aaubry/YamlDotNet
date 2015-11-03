@@ -273,6 +273,7 @@
     <Compile Include="Serialization\Serializer.cs" />
     <Compile Include="Serialization\StreamFragment.cs" />
     <Compile Include="Serialization\TagMappings.cs" />
+    <Compile Include="Serialization\TypeInspectors\CachedTypeInspector.cs" />
     <Compile Include="Serialization\TypeInspectors\NamingConventionTypeInspector.cs" />
     <Compile Include="Serialization\TypeInspectors\ReadableAndWritablePropertiesTypeInspector.cs" />
     <Compile Include="Serialization\TypeInspectors\ReadablePropertiesTypeInspector.cs" />

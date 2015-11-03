@@ -196,6 +196,10 @@ namespace YamlDotNet.Serialization
 
 			typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
 			typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
+			if (IsOptionSet(SerializationOptions.DefaultToStaticType))
+			{
+				typeDescriptor = new CachedTypeInspector(typeDescriptor);
+			}
 
 			if (IsOptionSet(SerializationOptions.Roundtrip))
 			{
