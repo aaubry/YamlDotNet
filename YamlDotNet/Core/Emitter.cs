@@ -263,7 +263,7 @@ namespace YamlDotNet.Core
 				var scalar = evt as Scalar;
 				if (scalar != null)
 				{
-					AnalyzeScalar(scalar.Value);
+					AnalyzeScalar(scalar);
 				}
 
 				AnalyzeAnchor(nodeEvent.Anchor, false);
@@ -281,17 +281,29 @@ namespace YamlDotNet.Core
 			anchorData.isAlias = isAlias;
 		}
 
-		private void AnalyzeScalar(string value)
+        private void AnalyzeScalar(Scalar scalar)
 		{
+            var value = scalar.Value;
 			scalarData.value = value;
 
 			if (value.Length == 0)
 			{
-				scalarData.isMultiline = false;
-				scalarData.isFlowPlainAllowed = false;
-				scalarData.isBlockPlainAllowed = true;
-				scalarData.isSingleQuotedAllowed = true;
-				scalarData.isBlockAllowed = false;
+                if (scalar.Tag == "tag:yaml.org,2002:null")
+                {
+                    scalarData.isMultiline = false;
+                    scalarData.isFlowPlainAllowed = false;
+                    scalarData.isBlockPlainAllowed = true;
+                    scalarData.isSingleQuotedAllowed = false;
+                    scalarData.isBlockAllowed = false;
+                }
+                else
+                {
+                    scalarData.isMultiline = false;
+                    scalarData.isFlowPlainAllowed = false;
+                    scalarData.isBlockPlainAllowed = false;
+                    scalarData.isSingleQuotedAllowed = true;
+                    scalarData.isBlockAllowed = false;
+                }
 				return;
 			}
 

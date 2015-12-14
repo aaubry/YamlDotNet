@@ -263,7 +263,7 @@ namespace YamlDotNet.Test.Core
 		}
 
 		[Fact]
-		public void EventsAreEmittedCorrectly()
+		public void CommentsAreEmittedCorrectly()
 		{
 			var events = SequenceWith(
 				StandaloneComment("Top comment"),
@@ -286,6 +286,18 @@ namespace YamlDotNet.Test.Core
 				.And.Contain("second # The second value")
 				.And.Contain("# Bottom comment");
 		}
+
+        [Fact]
+        public void EmptyStringsAreQuoted()
+        {
+            var events = SequenceWith(
+                Scalar(string.Empty).ImplicitPlain
+            );
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            yaml.Should()
+                .Contain("- ''");
+        }
 
 		private string Lines(params string[] lines)
 		{
