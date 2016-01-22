@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+#if !UNITY
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System;
@@ -60,5 +61,11 @@ using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliant(true)]
 #if !SIGNED
+#if PORTABLE
+[assembly: InternalsVisibleTo("YamlDotNet.Test.Portable")]
+#else
 [assembly: InternalsVisibleTo("YamlDotNet.Test")]
+#endif
+#endif
+
 #endif

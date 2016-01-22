@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,7 +39,7 @@ namespace YamlDotNet.Core
 		private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
 		private ParserState state;
 
-		private readonly Scanner scanner;
+		private readonly IScanner scanner;
 		private ParsingEvent current;
 
 		private Token currentToken;
@@ -48,7 +48,7 @@ namespace YamlDotNet.Core
 		{
 			if (currentToken == null)
 			{
-				while (scanner.InternalMoveNext())
+				while (scanner.MoveNextWithoutConsuming())
 				{
 					currentToken = scanner.Current;
 
@@ -78,7 +78,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Parser"/> class.
 		/// </summary>
-		public Parser(Scanner scanner)
+		public Parser(IScanner scanner)
 		{
 			this.scanner = scanner;
 		}
@@ -289,7 +289,7 @@ namespace YamlDotNet.Core
 
 				ParsingEvent evt = new Events.StreamEnd(GetCurrentToken().Start, GetCurrentToken().End);
 				// Do not call skip here because that would throw an exception
-				if (scanner.InternalMoveNext())
+				if (scanner.MoveNextWithoutConsuming())
 				{
 					throw new InvalidOperationException("The scanner should contain no more tokens.");
 				}
@@ -303,6 +303,7 @@ namespace YamlDotNet.Core
 		private VersionDirective ProcessDirectives(TagDirectiveCollection tags)
 		{
 			VersionDirective version = null;
+			bool hasOwnDirectives = false;
 
 			while (true)
 			{
@@ -322,18 +323,16 @@ namespace YamlDotNet.Core
 					}
 
 					version = currentVersion;
+					hasOwnDirectives = true;
 				}
 				else if ((tag = GetCurrentToken() as TagDirective) != null)
 				{
-					if (tagDirectives.Contains(tag.Handle))
+					if (tags.Contains(tag.Handle))
 					{
 						throw new SemanticErrorException(tag.Start, tag.End, "Found duplicate %TAG directive.");
 					}
-					tagDirectives.Add(tag);
-					if (tags != null)
-					{
-						tags.Add(tag);
-					}
+					tags.Add(tag);
+					hasOwnDirectives = true;
 				}
 				else
 				{
@@ -343,18 +342,21 @@ namespace YamlDotNet.Core
 				Skip();
 			}
 
-			if (tags != null)
+			AddTagDirectives(tags, Constants.DefaultTagDirectives);
+
+			if (hasOwnDirectives)
 			{
-				AddDefaultTagDirectives(tags);
+				tagDirectives.Clear();
 			}
-			AddDefaultTagDirectives(tagDirectives);
+
+			AddTagDirectives(tagDirectives, tags);
 
 			return version;
 		}
 
-		private static void AddDefaultTagDirectives(TagDirectiveCollection directives)
+		private static void AddTagDirectives(TagDirectiveCollection directives, IEnumerable<TagDirective> source)
 		{
-			foreach(var directive in Constants.DefaultTagDirectives)
+			foreach (var directive in source)
 			{
 				if (!directives.Contains(directive))
 				{
@@ -371,11 +373,11 @@ namespace YamlDotNet.Core
 		private ParsingEvent ParseDocumentContent()
 		{
 			if (
-			    GetCurrentToken() is VersionDirective ||
-			    GetCurrentToken() is TagDirective ||
-			    GetCurrentToken() is DocumentStart ||
-			    GetCurrentToken() is DocumentEnd ||
-			    GetCurrentToken() is StreamEnd
+				GetCurrentToken() is VersionDirective ||
+				GetCurrentToken() is TagDirective ||
+				GetCurrentToken() is DocumentStart ||
+				GetCurrentToken() is DocumentEnd ||
+				GetCurrentToken() is StreamEnd
 			)
 			{
 				state = states.Pop();
@@ -486,13 +488,13 @@ namespace YamlDotNet.Core
 				state = ParserState.IndentlessSequenceEntry;
 
 				return new Events.SequenceStart(
-				           anchorName,
-				           tagName,
-				           isImplicit,
-				           SequenceStyle.Block,
-				           start,
-				           GetCurrentToken().End
-				       );
+						   anchorName,
+						   tagName,
+						   isImplicit,
+						   SequenceStyle.Block,
+						   start,
+						   GetCurrentToken().End
+					   );
 			}
 			else
 			{
@@ -579,8 +581,6 @@ namespace YamlDotNet.Core
 				Skip();
 				isImplicit = false;
 			}
-
-			tagDirectives.Clear();
 
 			state = ParserState.DocumentStart;
 			return new Events.DocumentEnd(isImplicit, start, end);

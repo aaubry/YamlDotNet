@@ -1,10 +1,9 @@
 version: 0.0.{build}
-branches:
-  only:
-    - master
-    - release
-
-os: Windows Server 2012 R2
+#branches:
+#  only:
+#    - master
+#    - release
+#    - test-build
 
 install:
   - cmd: git submodule update --init
@@ -20,6 +19,10 @@ build:
 build_script:
   - ps:  .\build.ps1
 
+test_script:
+  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release\YamlDotNet.Test.dll" -appveyor'
+  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release-Portable\YamlDotNet.Test.Portable.dll" -appveyor'
+
 artifacts:
   - path: YamlDotNet\bin\Release-Unsigned
     name: Release-Unsigned
@@ -33,6 +36,9 @@ artifacts:
   - path: YamlDotNet\bin\Release-Portable-Signed
     name: Release-Portable-Signed
 
+  - path: YamlDotNet\bin\Release-UnitySubset-v35
+    name: Release-UnitySubset-v35
+
   - path: YamlDotNet\bin\*.nupkg
 
 deploy:
@@ -40,5 +46,5 @@ deploy:
     api_key:
       secure: GMc0xUTASI8qTPK1/eN/GFs6PBhPFBin1TT1hE5N8NlkU7VSBx3z4zQinSv/ICmx
     artifact: /.*\.nupkg/
-    on:
-      branch: release
+#    on:
+#      branch: release

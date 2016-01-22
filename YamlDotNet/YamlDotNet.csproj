@@ -101,6 +101,31 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-UnitySubset-v35|AnyCPU'">
+    <OutputPath>bin\Release-UnitySubset-v35\</OutputPath>
+    <DefineConstants>TRACE;UNITY</DefineConstants>
+    <DocumentationFile>bin\Release-Unsigned\YamlDotNet.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>1591</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+		<TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-UnitySubset-v35|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug-UnitySubset-v35\</OutputPath>
+    <DefineConstants>CODE_ANALYSIS;DEBUG;TRACE;UNITY</DefineConstants>
+    <DocumentationFile>bin\Debug\YamlDotNet.xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+		<TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+	</PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -248,6 +273,7 @@
     <Compile Include="Serialization\Serializer.cs" />
     <Compile Include="Serialization\StreamFragment.cs" />
     <Compile Include="Serialization\TagMappings.cs" />
+    <Compile Include="Serialization\TypeInspectors\CachedTypeInspector.cs" />
     <Compile Include="Serialization\TypeInspectors\NamingConventionTypeInspector.cs" />
     <Compile Include="Serialization\TypeInspectors\ReadableAndWritablePropertiesTypeInspector.cs" />
     <Compile Include="Serialization\TypeInspectors\ReadablePropertiesTypeInspector.cs" />

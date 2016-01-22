@@ -2,3 +2,7 @@
 	path = BuildUtils
 	url = https://github.com/aaubry/BuildUtils.git
 	branch = master
+[submodule "BuildUtils.UnityPrerequisites"]
+	path = BuildUtils.UnityPrerequisites
+	url = https://github.com/aaubry/BuildUtils.UnityPrerequisites.git
+	branch = master

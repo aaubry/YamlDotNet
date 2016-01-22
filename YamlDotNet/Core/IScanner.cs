@@ -48,9 +48,18 @@ namespace YamlDotNet.Core
 		}
 
 		/// <summary>
-		/// Moves to the next token.
+		/// Moves to the next token and consumes the current token.
 		/// </summary>
-		/// <returns></returns>
 		bool MoveNext();
+
+        /// <summary>
+        /// Moves to the next token without consuming the current token.
+        /// </summary>
+        bool MoveNextWithoutConsuming();
+
+        /// <summary>
+        /// Consumes the current token.
+        /// </summary>
+        void ConsumeCurrent();
 	}
 }

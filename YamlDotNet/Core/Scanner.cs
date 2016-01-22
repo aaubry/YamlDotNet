@@ -116,10 +116,10 @@ namespace YamlDotNet.Core
 				ConsumeCurrent();
 			}
 
-			return InternalMoveNext();
+			return MoveNextWithoutConsuming();
 		}
 
-		internal bool InternalMoveNext()
+		public bool MoveNextWithoutConsuming()
 		{
 			if (!tokenAvailable && !streamEndProduced)
 			{
@@ -141,7 +141,7 @@ namespace YamlDotNet.Core
 		/// <summary>
 		/// Consumes the current token and increments the parsed token count
 		/// </summary>
-		internal void ConsumeCurrent()
+		public void ConsumeCurrent()
 		{
 			++tokensParsed;
 			tokenAvailable = false;

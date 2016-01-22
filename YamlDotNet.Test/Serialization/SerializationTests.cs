@@ -63,6 +63,54 @@ namespace YamlDotNet.Test.Serialization
 		}
 
 		[Fact]
+		public void DeserializeScalarZero()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("0"));
+
+			result.Should().Be(0);
+		}
+
+		[Fact]
+		public void DeserializeScalarDecimal()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("+1_234_567"));
+
+			result.Should().Be(1234567);
+		}
+
+		[Fact]
+		public void DeserializeScalarBinaryNumber()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("-0b1_0010_1001_0010"));
+
+			result.Should().Be(-4754);
+		}
+
+		[Fact]
+		public void DeserializeScalarOctalNumber()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("+071_352"));
+
+			result.Should().Be(29418);
+		}
+
+		[Fact]
+		public void DeserializeScalarHexNumber()
+		{
+			var result = Deserializer.Deserialize<int>(UsingReaderFor("-0x_0F_B9"));
+
+			result.Should().Be(-0xFB9);
+		}
+
+		[Fact]
+		public void DeserializeScalarLongBase60Number()
+		{
+			var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:6_2:10"));
+
+			result.Should().Be(77744246530L);
+		}
+
+		[Fact]
 		public void RoundtripEnums()
 		{
 			var flags = EnumExample.One | EnumExample.Two;
@@ -96,8 +144,8 @@ namespace YamlDotNet.Test.Serialization
 			var result = Deserializer.Deserialize(stream);
 
 			result.Should().BeOfType<Point>().And
-				.Subject.As<Point>().ShouldHave()
-				.SharedProperties().EqualTo(new { X = 10, Y = 20 });
+				.Subject.As<Point>()
+				.ShouldBeEquivalentTo(new { X = 10, Y = 20 }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -129,8 +177,8 @@ namespace YamlDotNet.Test.Serialization
 
 			var result = Deserializer.Deserialize<Example>(UsingReaderFor(text));
 
-			result.ShouldHave().SharedProperties().EqualTo(
-				new { Nothing = "ForwardReference", MyString = "ForwardReference" });
+			result.ShouldBeEquivalentTo(
+				new { Nothing = "ForwardReference", MyString = "ForwardReference" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -152,7 +200,7 @@ namespace YamlDotNet.Test.Serialization
 
 			var result = DoRoundtripFromObjectTo<Example>(obj, RoundtripSerializer);
 
-			result.ShouldHave().AllProperties().EqualTo(obj);
+			result.ShouldBeEquivalentTo(obj);
 		}
 
 		[Fact]
@@ -162,7 +210,7 @@ namespace YamlDotNet.Test.Serialization
 
 			var result = DoRoundtripFromObjectTo<Example>(obj, RoundtripEmitDefaultsSerializer);
 
-			result.ShouldHave().AllProperties().EqualTo(obj);
+			result.ShouldBeEquivalentTo(obj);
 		}
 
 		[Fact]
@@ -220,7 +268,7 @@ namespace YamlDotNet.Test.Serialization
 
 			result.SomeScalar.Should().Be("Hello");
 			result.RegularBase.Should().BeOfType<Derived>().And
-				.Subject.As<Derived>().ShouldHave().SharedProperties().EqualTo(new { ChildProp = "bar" });
+				.Subject.As<Derived>().ShouldBeEquivalentTo(new { ChildProp = "bar" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -235,7 +283,7 @@ namespace YamlDotNet.Test.Serialization
 			var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, RoundtripSerializer);
 
 			result.BaseWithSerializeAs.Should().BeOfType<Base>().And
-				.Subject.As<Base>().ShouldHave().SharedProperties().EqualTo(new { ParentProp = "foo" });
+				.Subject.As<Base>().ShouldBeEquivalentTo(new { ParentProp = "foo" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -256,7 +304,7 @@ namespace YamlDotNet.Test.Serialization
 			var result = DoRoundtripFromObjectTo<InterfaceExample>(obj);
 
 			result.Derived.Should().BeOfType<Derived>().And
-				.Subject.As<IDerived>().ShouldHave().SharedProperties().EqualTo(new { BaseProperty = "foo", DerivedProperty = "bar" });
+				.Subject.As<IDerived>().ShouldBeEquivalentTo(new { BaseProperty = "foo", DerivedProperty = "bar" }, o => o.ExcludingMissingMembers());
 		}
 
 		[Fact]
@@ -492,8 +540,8 @@ namespace YamlDotNet.Test.Serialization
 			var one = Deserializer.Deserialize<Simple>(reader);
 			var two = Deserializer.Deserialize<Simple>(reader);
 
-			one.ShouldHave().AllProperties().EqualTo(new { aaa = "111" });
-			two.ShouldHave().AllProperties().EqualTo(new { aaa = "222" });
+			one.ShouldBeEquivalentTo(new { aaa = "111" });
+			two.ShouldBeEquivalentTo(new { aaa = "222" });
 		}
 
 		[Fact]
@@ -514,9 +562,9 @@ namespace YamlDotNet.Test.Serialization
 			var three = Deserializer.Deserialize<Simple>(reader);
 
 			reader.Accept<StreamEnd>().Should().BeTrue("reader should have reached StreamEnd");
-			one.ShouldHave().AllProperties().EqualTo(new { aaa = "111" });
-			two.ShouldHave().AllProperties().EqualTo(new { aaa = "222" });
-			three.ShouldHave().AllProperties().EqualTo(new { aaa = "333" });
+			one.ShouldBeEquivalentTo(new { aaa = "111" });
+			two.ShouldBeEquivalentTo(new { aaa = "222" });
+			three.ShouldBeEquivalentTo(new { aaa = "333" });
 		}
 
 		[Fact]
@@ -913,129 +961,171 @@ namespace YamlDotNet.Test.Serialization
 			Assert.Equal(3, exception.Start.Column);
 		}
 
-        [Fact]
-        public void SerializeDynamicPropertyAndApplyNamingConvention()
-        {
-            dynamic obj = new ExpandoObject();
-            obj.property_one = new ExpandoObject();
-            ((IDictionary<string, object>)obj.property_one).Add("new_key_here", "new_value");
+		[Fact]
+		public void SerializeDynamicPropertyAndApplyNamingConvention()
+		{
+			dynamic obj = new ExpandoObject();
+			obj.property_one = new ExpandoObject();
+			((IDictionary<string, object>)obj.property_one).Add("new_key_here", "new_value");
 
-            var mockNamingConvention = A.Fake<INamingConvention>();
-            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+			var mockNamingConvention = A.Fake<INamingConvention>();
+			A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
 
-            var serializer = new Serializer(namingConvention: mockNamingConvention);
-            var writer = new StringWriter();
-            serializer.Serialize(writer, obj);
+			var serializer = new Serializer(namingConvention: mockNamingConvention);
+			var writer = new StringWriter();
+			serializer.Serialize(writer, obj);
 
-            writer.ToString().Should().Contain("xxx: new_value");
-        }
+			writer.ToString().Should().Contain("xxx: new_value");
+		}
 
-        [Fact]
-        public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
-        {
-            var obj = new Dictionary<string, object>();
-            obj["property_one"] = new GenericTestDictionary<string, object>();
-            ((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
+		[Fact]
+		public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
+		{
+			var obj = new Dictionary<string, object>();
+			obj["property_one"] = new GenericTestDictionary<string, object>();
+			((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
 
-            var mockNamingConvention = A.Fake<INamingConvention>();
-            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+			var mockNamingConvention = A.Fake<INamingConvention>();
+			A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
 
-            var serializer = new Serializer(namingConvention: mockNamingConvention);
-            var writer = new StringWriter();
-            serializer.Serialize(writer, obj);
+			var serializer = new Serializer(namingConvention: mockNamingConvention);
+			var writer = new StringWriter();
+			serializer.Serialize(writer, obj);
 
-            writer.ToString().Should().Contain("new_key_here: new_value");
-        }
-        #region Test Dictionary that implements IDictionary<,>, but not IDictionary
-        public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
-        {
-            private readonly Dictionary<TKey, TValue> _dictionary;
-            public GenericTestDictionary()
-            {
-                _dictionary = new Dictionary<TKey, TValue>();
-            }
-            public void Add(TKey key, TValue value)
-            {
-                _dictionary.Add(key, value);
-            }
+			writer.ToString().Should().Contain("new_key_here: new_value");
+		}
 
-            public bool ContainsKey(TKey key)
-            {
-                return _dictionary.ContainsKey(key);
-            }
+		[Fact]
+		public void SpecialFloatsAreDeserializedCorrectly()
+		{
+			var deserializer = new Deserializer();
+			var doubles = deserializer.Deserialize<List<double>>(Yaml.ReaderForText(@"
+				- .nan
+				- .inf
+				- -.inf
+				- 2.3e4
+				- 1
+			"));
 
-            public ICollection<TKey> Keys
-            {
-                get { return _dictionary.Keys; }
-            }
+			Assert.Equal(new double[]
+			{
+				double.NaN,
+				double.PositiveInfinity,
+				double.NegativeInfinity,
+				23000,
+				1.0
+			}, doubles);
+		}
 
-            public bool Remove(TKey key)
-            {
-                return _dictionary.Remove(key);
-            }
+		[Fact]
+		public void SpecialFloatsAreSerializedCorrectly()
+		{
+			var deserializer = new Serializer();
 
-            public bool TryGetValue(TKey key, out TValue value)
-            {
-                return _dictionary.TryGetValue(key, out value);
-            }
+			var buffer = new StringWriter();
+			deserializer.Serialize(buffer, new double[]
+			{
+				double.NaN,
+				double.PositiveInfinity,
+				double.NegativeInfinity,
+			});
 
-            public ICollection<TValue> Values
-            {
-                get { return _dictionary.Values; }
-            }
+			var text = buffer.ToString();
 
-            public TValue this[TKey key]
-            {
-                get { return _dictionary[key]; }
-                set { _dictionary[key] = value; }
-            }
+			Assert.Contains("- .nan", text);
+			Assert.Contains("- .inf", text);
+			Assert.Contains("- -.inf", text);
+		}
 
-            public void Add(KeyValuePair<TKey, TValue> item)
-            {
-                ((IDictionary<TKey, TValue>)_dictionary).Add(item);
-            }
+		#region Test Dictionary that implements IDictionary<,>, but not IDictionary
+		public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+		{
+			private readonly Dictionary<TKey, TValue> _dictionary;
+			public GenericTestDictionary()
+			{
+				_dictionary = new Dictionary<TKey, TValue>();
+			}
+			public void Add(TKey key, TValue value)
+			{
+				_dictionary.Add(key, value);
+			}
 
-            public void Clear()
-            {
-                _dictionary.Clear();
-            }
+			public bool ContainsKey(TKey key)
+			{
+				return _dictionary.ContainsKey(key);
+			}
 
-            public bool Contains(KeyValuePair<TKey, TValue> item)
-            {
-                return ((IDictionary<TKey, TValue>)_dictionary).Contains(item);
-            }
+			public ICollection<TKey> Keys
+			{
+				get { return _dictionary.Keys; }
+			}
 
-            public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-            {
-                ((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
-            }
+			public bool Remove(TKey key)
+			{
+				return _dictionary.Remove(key);
+			}
 
-            public int Count
-            {
-                get { return _dictionary.Count; }
-            }
+			public bool TryGetValue(TKey key, out TValue value)
+			{
+				return _dictionary.TryGetValue(key, out value);
+			}
 
-            public bool IsReadOnly
-            {
-                get { return false; }
-            }
+			public ICollection<TValue> Values
+			{
+				get { return _dictionary.Values; }
+			}
 
-            public bool Remove(KeyValuePair<TKey, TValue> item)
-            {
-                return ((IDictionary<TKey, TValue>)_dictionary).Remove(item);
-            }
+			public TValue this[TKey key]
+			{
+				get { return _dictionary[key]; }
+				set { _dictionary[key] = value; }
+			}
 
-            public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-            {
-                return _dictionary.GetEnumerator();
-            }
+			public void Add(KeyValuePair<TKey, TValue> item)
+			{
+				((IDictionary<TKey, TValue>)_dictionary).Add(item);
+			}
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return _dictionary.GetEnumerator();
-            }
-        }
-        #endregion
+			public void Clear()
+			{
+				_dictionary.Clear();
+			}
 
-    }
+			public bool Contains(KeyValuePair<TKey, TValue> item)
+			{
+				return ((IDictionary<TKey, TValue>)_dictionary).Contains(item);
+			}
+
+			public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+			{
+				((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
+			}
+
+			public int Count
+			{
+				get { return _dictionary.Count; }
+			}
+
+			public bool IsReadOnly
+			{
+				get { return false; }
+			}
+
+			public bool Remove(KeyValuePair<TKey, TValue> item)
+			{
+				return ((IDictionary<TKey, TValue>)_dictionary).Remove(item);
+			}
+
+			public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+			{
+				return _dictionary.GetEnumerator();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return _dictionary.GetEnumerator();
+			}
+		}
+		#endregion
+	}
 }

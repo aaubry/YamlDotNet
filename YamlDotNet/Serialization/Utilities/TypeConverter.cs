@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.Utilities
 	/// </summary>
 	public static class TypeConverter
 	{
-#if !PORTABLE
+#if !(PORTABLE || UNITY)
 		/// <summary>
 		/// Registers a <see cref="System.ComponentModel.TypeConverter"/> dynamically.
 		/// </summary>
@@ -187,7 +187,7 @@ namespace YamlDotNet.Serialization.Utilities
 			// Try to find a casting operator in the source or destination type
 			foreach (var type in new[] { sourceType, destinationType })
 			{
-				foreach (var method in type.GetPublicMethods())
+                foreach (var method in type.GetPublicStaticMethods())
 				{
 					var isCastingOperator =
 						method.IsSpecialName &&
@@ -251,77 +251,5 @@ namespace YamlDotNet.Serialization.Utilities
 			// Default to the Convert class
 			return Convert.ChangeType(value, destinationType, CultureInfo.InvariantCulture);
 		}
-
-		/// <summary>
-		/// Tries to parse the specified value.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="value">The value.</param>
-		/// <returns></returns>
-		public static T? TryParse<T>(string value) where T : struct
-		{
-			switch (typeof(T).GetTypeCode())
-			{
-				case TypeCode.Boolean:
-					return (T?)(object)TryParse<bool>(value, bool.TryParse);
-
-				case TypeCode.Byte:
-					return (T?)(object)TryParse<byte>(value, byte.TryParse);
-
-				case TypeCode.DateTime:
-					return (T?)(object)TryParse<DateTime>(value, DateTime.TryParse);
-
-				case TypeCode.Decimal:
-					return (T?)(object)TryParse<decimal>(value, decimal.TryParse);
-
-				case TypeCode.Double:
-					return (T?)(object)TryParse<double>(value, double.TryParse);
-
-				case TypeCode.Int16:
-					return (T?)(object)TryParse<short>(value, short.TryParse);
-
-				case TypeCode.Int32:
-					return (T?)(object)TryParse<int>(value, int.TryParse);
-
-				case TypeCode.Int64:
-					return (T?)(object)TryParse<long>(value, long.TryParse);
-
-				case TypeCode.SByte:
-					return (T?)(object)TryParse<sbyte>(value, sbyte.TryParse);
-
-				case TypeCode.Single:
-					return (T?)(object)TryParse<float>(value, float.TryParse);
-
-				case TypeCode.UInt16:
-					return (T?)(object)TryParse<ushort>(value, ushort.TryParse);
-
-				case TypeCode.UInt32:
-					return (T?)(object)TryParse<uint>(value, uint.TryParse);
-
-				case TypeCode.UInt64:
-					return (T?)(object)TryParse<ulong>(value, ulong.TryParse);
-
-				default:
-					throw new NotSupportedException(string.Format("Cannot parse type '{0}'.", typeof(T).FullName));
-			}
-		}
-
-		/// <summary>
-		/// Tries to parse the specified value.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="value">The value to be parsed.</param>
-		/// <param name="parse">The parse function.</param>
-		/// <returns></returns>
-		public static T? TryParse<T>(string value, TryParseDelegate<T> parse) where T : struct
-		{
-			T result;
-			return parse(value, out result) ? (T?)result : null;
-		}
-
-		/// <summary>
-		/// Defines a method that is used to tentatively parse a string.
-		/// </summary>
-		public delegate bool TryParseDelegate<T>(string value, out T result);
 	}
 }
