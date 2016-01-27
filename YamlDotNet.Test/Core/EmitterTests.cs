@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -285,6 +286,35 @@ namespace YamlDotNet.Test.Core
 				.And.Contain("first # The first value")
 				.And.Contain("second # The second value")
 				.And.Contain("# Bottom comment");
+		}
+
+        [Theory]
+        [InlineData("Гранит", 28595)] // Cyrillic (ISO)
+        [InlineData("ГÀƊȽ˱ώҔׂۋᵷẁό₩וּﺪﺸﻸﭧ╬♫₹Ὰỗ᷁ݭ٭ӢР͞ʓǈĄë0", 65001)] // UTF-8
+        public void UnicodeInScalarsCanBeSingleQuotedWhenOutputEncodingSupportsIt(string text, int codePage)
+        {
+            var document = StreamedDocumentWith(
+                SequenceWith(
+                    SingleQuotedScalar(text)
+                )
+            );
+
+            var buffer = new MemoryStream();
+            var encoding = Encoding.GetEncoding(codePage);
+
+            using (var writer = new StreamWriter(buffer, encoding))
+            {
+                var emitter = new Emitter(writer, 2, int.MaxValue, false);
+                foreach (var evt in document)
+                {
+                    emitter.Emit(evt);
+                }
+            }
+
+            var yaml = encoding.GetString(buffer.ToArray());
+
+			yaml.Should()
+                .Contain("'" + text + "'");
 		}
 
 		private string Lines(params string[] lines)
