@@ -32,9 +32,16 @@ The PerformanceTests folder contains various projects that contain performance t
 
 ## Building / multiplatform
 
-This project is available on different platforms. Solution configurations are used
-to select the target platform. Building for Unity requires installing
+This project is available on different platforms. Solution configurations are used to select the target platform. The [build.ps1](https://github.com/aaubry/YamlDotNet/blob/master/build.ps1) script can be used to easily build the library for all targets. Simply open a "Developer Command Prompt" and run the script:
+
+```
+C:\YamlDotNet> powershell .\build.ps1
+```
+
+Building for Unity requires installing
 [Visual Studio Tools for Unity](https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi).
+
+The Portable versions target [Profile259](http://embed.plnkr.co/03ck2dCtnJogBKHJ9EjY/preview). If you do not have that profile installed, a workaround is to [get the reference assemblies from here](https://ci.appveyor.com/api/buildjobs/hrqgt7tibmar826q/artifacts/Profile259.zip) and extract them to `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.5\Profile\Profile259`.
 
 |       Configuration       |      Target       |   Defines    |           Description           |
 |---------------------------|-------------------|--------------|---------------------------------|
