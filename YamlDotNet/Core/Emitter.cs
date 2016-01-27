@@ -321,8 +321,7 @@ namespace YamlDotNet.Core
 
 			var lineBreaks = false;
 
-            var valueIsRepresentableInOutputEncoding = outputUsesUnicodeEncoding || output.Encoding.GetString(output.Encoding.GetBytes(value)).Equals(value);
-            var specialCharacters = !valueIsRepresentableInOutputEncoding;
+            var specialCharacters = !ValueIsRepresentableInOutputEncoding(value);
 
 			var isFirst = true;
 			while (!buffer.EndOfInput)
@@ -461,6 +460,29 @@ namespace YamlDotNet.Core
 			if (blockIndicators)
 				scalarData.isBlockPlainAllowed = false;
 		}
+
+        private bool ValueIsRepresentableInOutputEncoding(string value)
+        {
+            if (outputUsesUnicodeEncoding)
+            {
+                return true;
+            }
+
+            try
+            {
+                var encodedBytes = output.Encoding.GetBytes(value);
+                var decodedString = output.Encoding.GetString(encodedBytes, 0, encodedBytes.Length);
+                return decodedString.Equals(value);
+            }
+            catch (EncoderFallbackException)
+            {
+                return false;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return false;
+            }
+        }
 
         private bool IsUnicode(Encoding encoding)
 		{
