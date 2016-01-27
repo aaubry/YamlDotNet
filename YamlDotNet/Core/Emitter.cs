@@ -45,6 +45,7 @@ namespace YamlDotNet.Core
 			StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
 		private readonly TextWriter output;
+        private readonly bool outputUsesUnicodeEncoding;
 
 		private readonly bool isCanonical;
 		private readonly int bestIndent;
@@ -152,6 +153,7 @@ namespace YamlDotNet.Core
 			this.isCanonical = isCanonical;
 
 			this.output = output;
+            this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
 		}
 
 		/// <summary>
@@ -318,7 +320,9 @@ namespace YamlDotNet.Core
 			var previousBreak = false;
 
 			var lineBreaks = false;
-			var specialCharacters = false;
+
+            var valueIsRepresentableInOutputEncoding = outputUsesUnicodeEncoding || output.Encoding.GetString(output.Encoding.GetBytes(value)).Equals(value);
+            var specialCharacters = !valueIsRepresentableInOutputEncoding;
 
 			var isFirst = true;
 			while (!buffer.EndOfInput)
@@ -363,11 +367,15 @@ namespace YamlDotNet.Core
 					}
 				}
 
-				if (!buffer.IsPrintable() || (!buffer.IsAscii() && !IsUnicode(output.Encoding)))
-					specialCharacters = true;
+                if (!specialCharacters && !buffer.IsPrintable())
+                {
+                    specialCharacters = true;
+                }
 
-				if (buffer.IsBreak())
-					lineBreaks = true;
+                if (buffer.IsBreak())
+                {
+                    lineBreaks = true;
+                }
 
 				if (buffer.IsSpace())
 				{
@@ -454,23 +462,13 @@ namespace YamlDotNet.Core
 				scalarData.isBlockPlainAllowed = false;
 		}
 
-#if PORTABLE
-		private bool IsUnicode(Encoding encoding)
+        private bool IsUnicode(Encoding encoding)
 		{
-			return encoding.Equals(Encoding.UTF8) ||
-				encoding.Equals(Encoding.Unicode) ||
-				encoding.Equals(Encoding.BigEndianUnicode);
+			return encoding is UTF8Encoding ||
+				encoding is UnicodeEncoding ||
+				encoding is UTF7Encoding ||
+				encoding is UTF8Encoding;
 		}
-#else
-		private bool IsUnicode(Encoding encoding)
-		{
-			return encoding.Equals(Encoding.UTF8) ||
-				encoding.Equals(Encoding.Unicode) ||
-				encoding.Equals(Encoding.BigEndianUnicode) ||
-				encoding.Equals(Encoding.UTF7) ||
-				encoding.Equals(Encoding.UTF32);
-		}
-#endif
 
 		private void AnalyzeTag(string tag)
 		{
