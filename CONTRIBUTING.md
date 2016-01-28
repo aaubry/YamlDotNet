@@ -60,6 +60,12 @@ in the `Helpers/Portability.cs` file. An effective technique is to define an ext
 method that is used tourough the code, and has different implementations depending
 on the build variables.
 
+## AOT compatibility
+
+Some platforms - such as IOS - forbid dynamic code generation. This prevents Just-in-Time compilation (JIT) from being used. In those cases, one can use Mono's Ahead-of-Time compilation (AOT). This results on a precompiled assembly that does not rely on JIT. There are [some limitations](http://www.mono-project.com/docs/advanced/aot/#limitation-generic-interface-instantiation) however, most of them related to usage of generics.
+
+In order to ensure that YamlDotNet is compatible with AOT compilation, an automatic test has been created that runs on every commit on [Travis CI](https://travis-ci.org/aaubry/YamlDotNet). That test exercises the serialize and deserializer to help identify AOT-related problems.
+
 ## Coding style
 
 Attempt to follow the [SOLID](https://en.wikipedia.org/wiki/SOLID_%28object-oriented_design%29) principles. In particular, try to give each type a single responsibility, and favor composition to combine features.
@@ -71,7 +77,7 @@ As long as you keep the code readable, I don't care too much about any specific 
   * The only acceptable exception is for small and closely related types.
 * Use sane indentation rules. Break long lines when needed, but don't be obsessive:
   * This is **OK**:
-  
+
     ```C#
     Traverse(
         new ObjectDescriptor(
@@ -85,7 +91,7 @@ As long as you keep the code readable, I don't care too much about any specific 
     );
     ```
   * This is **OK too**:
-  
+
     ```C#
     Traverse(
         new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle),
@@ -94,12 +100,12 @@ As long as you keep the code readable, I don't care too much about any specific 
     );
     ```
   * This is **not very good**:
-  
+
     ```C#
     Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth);
     ```
   * This is **awful**:
-  
+
     ```C#
     Traverse(new ObjectDescriptor(value.Value,
                                   underlyingType,
