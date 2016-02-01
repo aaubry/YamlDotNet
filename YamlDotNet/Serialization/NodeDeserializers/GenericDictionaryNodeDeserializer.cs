@@ -20,7 +20,9 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -48,27 +50,22 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			reader.Expect<MappingStart>();
 
 			value = _objectFactory.Create(expectedType);
-			deserializeHelperMethod.Invoke(iDictionary.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
+			var genericTypes = iDictionary.GetGenericArguments();
+			DeserializeHelper(genericTypes[0], genericTypes[1], reader, expectedType, nestedObjectDeserializer, (IDictionary)value);
 
 			reader.Expect<MappingEnd>();
 
 			return true;
 		}
 
-		private static readonly GenericStaticMethod deserializeHelperMethod =
-			new GenericStaticMethod(() => DeserializeHelper<object, object>(null, null, null, null));
-
-		//private static MethodInfo _deserializeHelperMethod = typeof(GenericDictionaryNodeDeserializer)
-		//	.GetMethod("DeserializeHelper", BindingFlags.Static | BindingFlags.NonPublic);
-
-		private static void DeserializeHelper<TKey, TValue>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary<TKey, TValue> result)
+		private static void DeserializeHelper(Type tKey, Type tValue, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary result)
 		{
 			while (!reader.Accept<MappingEnd>())
 			{
-				var key = nestedObjectDeserializer(reader, typeof(TKey));
+				var key = nestedObjectDeserializer(reader, tKey);
 				var keyPromise = key as IValuePromise;
 
-				var value = nestedObjectDeserializer(reader, typeof(TValue));
+				var value = nestedObjectDeserializer(reader, tValue);
 				var valuePromise = value as IValuePromise;
 
 				if (keyPromise == null)
@@ -76,12 +73,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					if (valuePromise == null)
 					{
 						// Happy path: both key and value are known
-						result[(TKey)key] = (TValue)value;
+						result[key] = value;
 					}
 					else
 					{
 						// Key is known, value is pending
-						valuePromise.ValueAvailable += v => result[(TKey)key] = (TValue)v;
+						valuePromise.ValueAvailable += v => result[key] = v;
 					}
 				}
 				else
@@ -89,7 +86,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					if (valuePromise == null)
 					{
 						// Key is pending, value is known
-						keyPromise.ValueAvailable += v => result[(TKey)v] = (TValue)value;
+						keyPromise.ValueAvailable += v => result[v] = value;
 					}
 					else
 					{
@@ -100,7 +97,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						{
 							if (hasFirstPart)
 							{
-								result[(TKey)v] = (TValue)value;
+								result[v] = value;
 							}
 							else
 							{
@@ -113,7 +110,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 						{
 							if (hasFirstPart)
 							{
-								result[(TKey)key] = (TValue)v;
+								result[key] = v;
 							}
 							else
 							{

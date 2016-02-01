@@ -20,7 +20,9 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -46,33 +48,29 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			}
 
 			value = _objectFactory.Create(expectedType);
-			_deserializeHelper.Invoke(iCollection.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
+			DeserializeHelper(iCollection.GetGenericArguments()[0], reader, expectedType, nestedObjectDeserializer, (IList) value);
 
 			return true;
 		}
 
-		private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null, null));
-
-		internal static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
+		internal static void DeserializeHelper(Type tItem, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IList result)
 		{
-			var list = result as IList<TItem>;
-
 			reader.Expect<SequenceStart>();
 			while (!reader.Accept<SequenceEnd>())
 			{
 				var current = reader.Parser.Current;
 
-				var value = nestedObjectDeserializer(reader, typeof(TItem));
+				var value = nestedObjectDeserializer(reader, tItem);
 				var promise = value as IValuePromise;
 				if (promise == null)
 				{
-					result.Add(TypeConverter.ChangeType<TItem>(value));
+					result.Add(TypeConverter.ChangeType(value, tItem));
 				}
-				else if(list != null)
+				else if(result != null)
 				{
-					var index = list.Count;
-					result.Add(default(TItem));
-					promise.ValueAvailable += v => list[index] = TypeConverter.ChangeType<TItem>(v);
+					var index = result.Count;
+					result.Add(tItem.IsValueType ? Activator.CreateInstance(tItem) : null);
+					promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
 				}
 				else
 				{

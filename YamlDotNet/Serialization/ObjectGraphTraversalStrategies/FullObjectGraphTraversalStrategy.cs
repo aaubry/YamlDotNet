@@ -186,24 +186,21 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			visitor.VisitMappingStart(dictionary, entryTypes[0], entryTypes[1]);
 
 			// Invoke TraverseGenericDictionaryHelper<,>
-			traverseGenericDictionaryHelper.Invoke(entryTypes, this, dictionary.Value, visitor, currentDepth, namingConvention ?? new NullNamingConvention());
+			this.TraverseGenericDictionaryHelper(entryTypes[0], entryTypes[1], (IDictionary) dictionary.Value, visitor, currentDepth, namingConvention ?? new NullNamingConvention());
 
 			visitor.VisitMappingEnd(dictionary);
 		}
 
-		private static readonly GenericInstanceMethod<FullObjectGraphTraversalStrategy> traverseGenericDictionaryHelper =
-			new GenericInstanceMethod<FullObjectGraphTraversalStrategy>(s => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0, null));
-
-		private void TraverseGenericDictionaryHelper<TKey, TValue>(
-			IDictionary<TKey, TValue> dictionary,
+		private void TraverseGenericDictionaryHelper(Type tKey, Type tValue,
+			IDictionary dictionary,
 			IObjectGraphVisitor visitor, int currentDepth, INamingConvention namingConvention)
 		{
 			var isDynamic = dictionary.GetType().FullName.Equals("System.Dynamic.ExpandoObject");
-			foreach (var entry in dictionary)
+			foreach (DictionaryEntry entry in dictionary)
 			{
 				var keyString = isDynamic ? namingConvention.Apply(entry.Key.ToString()) : entry.Key.ToString();
-				var key = GetObjectDescriptor(keyString, typeof(TKey));
-				var value = GetObjectDescriptor(entry.Value, typeof(TValue));
+				var key = GetObjectDescriptor(keyString, tKey);
+				var value = GetObjectDescriptor(entry.Value, tValue);
 
 				if (visitor.EnterMapping(key, value))
 				{

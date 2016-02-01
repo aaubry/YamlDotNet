@@ -20,7 +20,9 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Utilities;
 
@@ -36,17 +38,29 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				return false;
 			}
 
-			value = _deserializeHelper.Invoke(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
+			value = DeserializeHelper(expectedType.GetElementType(), reader, expectedType, nestedObjectDeserializer);
 			return true;
 		}
 
-		private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null));
-
-		private static TItem[] DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+		private static object DeserializeHelper(Type tItem, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
 		{
-			var items = new List<TItem>();
-			GenericCollectionNodeDeserializer.DeserializeHelper(reader, expectedType, nestedObjectDeserializer, items);
-			return items.ToArray();
+			// Create typed list
+			IList items = (IList) typeof(List<object>).MakeGenericType( new Type[] { tItem } ).GetConstructor( new Type[] {} ).Invoke( new object[] {} );
+
+			GenericCollectionNodeDeserializer.DeserializeHelper(tItem, reader, expectedType, nestedObjectDeserializer, items);
+
+			// Create typed array
+			ConstructorInfo arrayTypeConstructor = tItem.MakeArrayType().GetConstructor( new Type[] { typeof(int) } );
+			object[] constructorArgs = new object[] { items.Count };
+			object array = arrayTypeConstructor.Invoke(constructorArgs);
+
+			// Assign from the list to the array
+			var asIList = (IList) array;
+			for (int i = 0; i < items.Count; i++) {
+				asIList[i] = items[i];
+			}
+
+			return array;
 		}
 	}
 }
