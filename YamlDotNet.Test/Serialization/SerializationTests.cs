@@ -1020,10 +1020,10 @@ namespace YamlDotNet.Test.Serialization
 		[Fact]
 		public void SpecialFloatsAreSerializedCorrectly()
 		{
-			var deserializer = new Serializer();
+			var serializer = new Serializer();
 
 			var buffer = new StringWriter();
-			deserializer.Serialize(buffer, new double[]
+			serializer.Serialize(buffer, new double[]
 			{
 				double.NaN,
 				double.PositiveInfinity,
@@ -1035,6 +1035,17 @@ namespace YamlDotNet.Test.Serialization
 			Assert.Contains("- .nan", text);
 			Assert.Contains("- .inf", text);
 			Assert.Contains("- -.inf", text);
+		}
+
+		[Fact]
+		public void NegativeIntegersCanBeDeserialized()
+		{
+			var deserializer = new Deserializer();
+
+			var value = deserializer.Deserialize<int>(Yaml.ReaderForText(@"
+				'-123'
+			"));
+			Assert.Equal(-123, value);
 		}
 
 		#region Test Dictionary that implements IDictionary<,>, but not IDictionary
