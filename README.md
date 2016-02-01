@@ -32,6 +32,30 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 3.8.0
+
+New features:
+
+* **Add support for different scalar integer bases.**  
+  Addresses issue [#113](https://github.com/aaubry/YamlDotNet/issues/113). Adds basic support for deserializing scalar integers
+  written in binary, octal, decimal, hex, and base 60, as allowed in the YAML
+  specification; see http://yaml.org/type/int.html. Adds unit tests for each
+  of these bases as well.
+* **Add dnx compatibility to the NuGet packages.**
+* Do not throw exception if a tag does not contain a valid type name.
+
+Fixes and improvements:
+
+* Cache type metadata.
+* Fix wrong type when deserializing UInt16.
+* Fix handling of special float values, such as NaN, PositiveInfinity and NegativeInfinity.
+* Properly quote empty strings.
+* Properly handle non-Unicode encodings when emitting scalars.
+
+## Version 3.7.0
+
+This is a minor update that simply adds an overload of YamlStream.Load to be able to specify the EventReader.
+
 ## Version 3.6.1
 
 Bug fixes:
