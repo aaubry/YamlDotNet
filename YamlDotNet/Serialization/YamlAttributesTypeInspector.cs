@@ -26,58 +26,58 @@ using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Serialization
 {
-	/// <summary>
-	/// Applies the Yaml* attributes to another <see cref="ITypeInspector"/>.
-	/// </summary>
-	public sealed class YamlAttributesTypeInspector : TypeInspectorSkeleton
-	{
-		private readonly ITypeInspector innerTypeDescriptor;
+    /// <summary>
+    /// Applies the Yaml* attributes to another <see cref="ITypeInspector"/>.
+    /// </summary>
+    public sealed class YamlAttributesTypeInspector : TypeInspectorSkeleton
+    {
+        private readonly ITypeInspector innerTypeDescriptor;
 
-		public YamlAttributesTypeInspector(ITypeInspector innerTypeDescriptor)
-		{
-			this.innerTypeDescriptor = innerTypeDescriptor;
-		}
+        public YamlAttributesTypeInspector(ITypeInspector innerTypeDescriptor)
+        {
+            this.innerTypeDescriptor = innerTypeDescriptor;
+        }
 
-		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
-		{
-			return innerTypeDescriptor.GetProperties(type, container)
-				.Where(p => p.GetCustomAttribute<YamlIgnoreAttribute>() == null)
-				.Select(p =>
-				{
-					var descriptor = new PropertyDescriptor(p);
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        {
+            return innerTypeDescriptor.GetProperties(type, container)
+                .Where(p => p.GetCustomAttribute<YamlIgnoreAttribute>() == null)
+                .Select(p =>
+                {
+                    var descriptor = new PropertyDescriptor(p);
 
 #pragma warning disable 0618 // 'YamlDotNet.Serialization.YamlAliasAttribute' is obsolete: 'Please use YamlMember instead'
-					var alias = p.GetCustomAttribute<YamlAliasAttribute>();
-					if (alias != null)
-					{
-						descriptor.Name = alias.Alias;
-					}
+                    var alias = p.GetCustomAttribute<YamlAliasAttribute>();
+                    if (alias != null)
+                    {
+                        descriptor.Name = alias.Alias;
+                    }
 #pragma warning restore 0618 // 'YamlDotNet.Serialization.YamlAliasAttribute' is obsolete: 'Please use YamlMember instead'
 
-					var member = p.GetCustomAttribute<YamlMemberAttribute>();
-					if (member != null)
-					{
-						if (member.SerializeAs != null)
-						{
-							descriptor.TypeOverride = member.SerializeAs;
-						}
+                    var member = p.GetCustomAttribute<YamlMemberAttribute>();
+                    if (member != null)
+                    {
+                        if (member.SerializeAs != null)
+                        {
+                            descriptor.TypeOverride = member.SerializeAs;
+                        }
 
-						descriptor.Order = member.Order;
-						descriptor.ScalarStyle = member.ScalarStyle;
+                        descriptor.Order = member.Order;
+                        descriptor.ScalarStyle = member.ScalarStyle;
 
-						if (member.Alias != null)
-						{
-							if (alias != null)
-							{
-								throw new InvalidOperationException("Mixing YamlAlias(...) with YamlMember(Alias = ...) is an error. The YamlAlias attribute is obsolete and should be removed.");
-							}
-							descriptor.Name = member.Alias;
-						}
-					}
+                        if (member.Alias != null)
+                        {
+                            if (alias != null)
+                            {
+                                throw new InvalidOperationException("Mixing YamlAlias(...) with YamlMember(Alias = ...) is an error. The YamlAlias attribute is obsolete and should be removed.");
+                            }
+                            descriptor.Name = member.Alias;
+                        }
+                    }
 
-					return (IPropertyDescriptor)descriptor;
-				})
-				.OrderBy(p => p.Order);
-		}
-	}
+                    return (IPropertyDescriptor)descriptor;
+                })
+                .OrderBy(p => p.Order);
+        }
+    }
 }

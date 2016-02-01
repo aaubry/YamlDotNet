@@ -24,26 +24,26 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
-	/// <summary>
-	/// Provides special Yaml serialization instructions.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-	public sealed class YamlMemberAttribute : Attribute
-	{
-		/// <summary>
-		/// Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.
-		/// </summary>
-		public Type SerializeAs { get; set; }
+    /// <summary>
+    /// Provides special Yaml serialization instructions.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public sealed class YamlMemberAttribute : Attribute
+    {
+        /// <summary>
+        /// Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.
+        /// </summary>
+        public Type SerializeAs { get; set; }
 
         /// <summary>
         /// Specifies the order priority of this property.
         /// </summary>
         public int Order { get; set; }
 
-		/// <summary>
-		/// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
-		/// </summary>
-		public string Alias { get; set; }
+        /// <summary>
+        /// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
+        /// </summary>
+        public string Alias { get; set; }
 
         /// <summary>
         /// Specifies the scalar style of the property when serialized. This will only affect the serialization of scalar properties.
@@ -58,13 +58,13 @@ namespace YamlDotNet.Serialization
             ScalarStyle = ScalarStyle.Any;
         }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
-		/// </summary>
-		/// <param name="serializeAs">Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.</param>
-		public YamlMemberAttribute(Type serializeAs) : this()
-		{
-			SerializeAs = serializeAs;
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
+        /// </summary>
+        /// <param name="serializeAs">Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.</param>
+        public YamlMemberAttribute(Type serializeAs) : this()
+        {
+            SerializeAs = serializeAs;
+        }
+    }
 }

@@ -23,8 +23,8 @@ using System;
 
 namespace YamlDotNet.PerformanceTests.Lib
 {
-	public interface ISerializationTest
-	{
-		object Graph { get; }
-	}
+    public interface ISerializationTest
+    {
+        object Graph { get; }
+    }
 }

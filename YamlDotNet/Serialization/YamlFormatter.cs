@@ -24,42 +24,42 @@ using System.Globalization;
 
 namespace YamlDotNet.Serialization
 {
-	internal static class YamlFormatter
-	{
-		public static readonly NumberFormatInfo NumberFormat = new NumberFormatInfo
-		{
-			CurrencyDecimalSeparator = ".",
-			CurrencyGroupSeparator = "_",
-			CurrencyGroupSizes = new[] { 3 },
-			CurrencySymbol = string.Empty,
-			CurrencyDecimalDigits = 99,
-			NumberDecimalSeparator = ".",
-			NumberGroupSeparator = "_",
-			NumberGroupSizes = new[] { 3 },
-			NumberDecimalDigits = 99,
-			NaNSymbol = ".nan",
-			PositiveInfinitySymbol = ".inf",
-			NegativeInfinitySymbol = "-.inf",
-		};
+    internal static class YamlFormatter
+    {
+        public static readonly NumberFormatInfo NumberFormat = new NumberFormatInfo
+        {
+            CurrencyDecimalSeparator = ".",
+            CurrencyGroupSeparator = "_",
+            CurrencyGroupSizes = new[] { 3 },
+            CurrencySymbol = string.Empty,
+            CurrencyDecimalDigits = 99,
+            NumberDecimalSeparator = ".",
+            NumberGroupSeparator = "_",
+            NumberGroupSizes = new[] { 3 },
+            NumberDecimalDigits = 99,
+            NaNSymbol = ".nan",
+            PositiveInfinitySymbol = ".inf",
+            NegativeInfinitySymbol = "-.inf",
+        };
 
-		public static string FormatNumber(object number)
-		{
-			return Convert.ToString(number, NumberFormat);
-		}
+        public static string FormatNumber(object number)
+        {
+            return Convert.ToString(number, NumberFormat);
+        }
 
-		public static string FormatBoolean(object boolean)
-		{
-			return boolean.Equals(true) ? "true" : "false";
-		}
+        public static string FormatBoolean(object boolean)
+        {
+            return boolean.Equals(true) ? "true" : "false";
+        }
 
-		public static string FormatDateTime(object dateTime)
-		{
-			return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
-		}
+        public static string FormatDateTime(object dateTime)
+        {
+            return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
+        }
 
-		public static string FormatTimeSpan(object timeSpan)
-		{
-			return ((TimeSpan)timeSpan).ToString();
-		}
-	}
+        public static string FormatTimeSpan(object timeSpan)
+        {
+            return ((TimeSpan)timeSpan).ToString();
+        }
+    }
 }

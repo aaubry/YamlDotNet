@@ -27,63 +27,63 @@ using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-	public sealed class GenericCollectionNodeDeserializer : INodeDeserializer
-	{
-		private readonly IObjectFactory _objectFactory;
+    public sealed class GenericCollectionNodeDeserializer : INodeDeserializer
+    {
+        private readonly IObjectFactory _objectFactory;
 
-		public GenericCollectionNodeDeserializer(IObjectFactory objectFactory)
-		{
-			_objectFactory = objectFactory;
-		}
+        public GenericCollectionNodeDeserializer(IObjectFactory objectFactory)
+        {
+            _objectFactory = objectFactory;
+        }
 
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
-		{
-			var iCollection = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
-			if (iCollection == null)
-			{
-				value = false;
-				return false;
-			}
+        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        {
+            var iCollection = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
+            if (iCollection == null)
+            {
+                value = false;
+                return false;
+            }
 
-			value = _objectFactory.Create(expectedType);
-			_deserializeHelper.Invoke(iCollection.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
+            value = _objectFactory.Create(expectedType);
+            _deserializeHelper.Invoke(iCollection.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
 
-			return true;
-		}
+            return true;
+        }
 
-		private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null, null));
+        private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null, null));
 
-		internal static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
-		{
-			var list = result as IList<TItem>;
+        internal static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
+        {
+            var list = result as IList<TItem>;
 
-			reader.Expect<SequenceStart>();
-			while (!reader.Accept<SequenceEnd>())
-			{
-				var current = reader.Parser.Current;
+            reader.Expect<SequenceStart>();
+            while (!reader.Accept<SequenceEnd>())
+            {
+                var current = reader.Parser.Current;
 
-				var value = nestedObjectDeserializer(reader, typeof(TItem));
-				var promise = value as IValuePromise;
-				if (promise == null)
-				{
-					result.Add(TypeConverter.ChangeType<TItem>(value));
-				}
-				else if(list != null)
-				{
-					var index = list.Count;
-					result.Add(default(TItem));
-					promise.ValueAvailable += v => list[index] = TypeConverter.ChangeType<TItem>(v);
-				}
-				else
-				{
-					throw new ForwardAnchorNotSupportedException(
-						current.Start,
-						current.End,
-						"Forward alias references are not allowed because this type does not implement IList<>"
-					);
-				}
-			}
-			reader.Expect<SequenceEnd>();
-		}
-	}
+                var value = nestedObjectDeserializer(reader, typeof(TItem));
+                var promise = value as IValuePromise;
+                if (promise == null)
+                {
+                    result.Add(TypeConverter.ChangeType<TItem>(value));
+                }
+                else if(list != null)
+                {
+                    var index = list.Count;
+                    result.Add(default(TItem));
+                    promise.ValueAvailable += v => list[index] = TypeConverter.ChangeType<TItem>(v);
+                }
+                else
+                {
+                    throw new ForwardAnchorNotSupportedException(
+                        current.Start,
+                        current.End,
+                        "Forward alias references are not allowed because this type does not implement IList<>"
+                    );
+                }
+            }
+            reader.Expect<SequenceEnd>();
+        }
+    }
 }

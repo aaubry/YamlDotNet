@@ -24,29 +24,29 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
-	/// <summary>
-	/// Represents an object along with its type.
-	/// </summary>
-	public interface IObjectDescriptor
-	{
-		/// <summary>
-		/// A reference to the object.
-		/// </summary>
-		object Value { get; }
+    /// <summary>
+    /// Represents an object along with its type.
+    /// </summary>
+    public interface IObjectDescriptor
+    {
+        /// <summary>
+        /// A reference to the object.
+        /// </summary>
+        object Value { get; }
 
-		/// <summary>
-		/// The type that should be used when to interpret the <see cref="Value" />.
-		/// </summary>
-		Type Type { get; }
+        /// <summary>
+        /// The type that should be used when to interpret the <see cref="Value" />.
+        /// </summary>
+        Type Type { get; }
 
-		/// <summary>
-		/// The type of <see cref="Value" /> as determined by its container (e.g. a property).
-		/// </summary>
-		Type StaticType { get; }
+        /// <summary>
+        /// The type of <see cref="Value" /> as determined by its container (e.g. a property).
+        /// </summary>
+        Type StaticType { get; }
 
-		/// <summary>
-		/// The style to be used for scalars.
-		/// </summary>
-		ScalarStyle ScalarStyle { get; }
-	}
+        /// <summary>
+        /// The style to be used for scalars.
+        /// </summary>
+        ScalarStyle ScalarStyle { get; }
+    }
 }

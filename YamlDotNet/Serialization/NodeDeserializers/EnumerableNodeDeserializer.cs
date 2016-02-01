@@ -27,31 +27,31 @@ using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-	public sealed class EnumerableNodeDeserializer : INodeDeserializer
-	{
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
-		{
-			Type itemsType;
-			if (expectedType == typeof(IEnumerable))
-			{
-				itemsType = typeof(object);
-			}
-			else
-			{
-				var iEnumerable = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IEnumerable<>));
-				if (iEnumerable != expectedType)
-				{
-					value = null;
-					return false;
-				}
+    public sealed class EnumerableNodeDeserializer : INodeDeserializer
+    {
+        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        {
+            Type itemsType;
+            if (expectedType == typeof(IEnumerable))
+            {
+                itemsType = typeof(object);
+            }
+            else
+            {
+                var iEnumerable = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IEnumerable<>));
+                if (iEnumerable != expectedType)
+                {
+                    value = null;
+                    return false;
+                }
 
-				itemsType = iEnumerable.GetGenericArguments()[0];
-			}
+                itemsType = iEnumerable.GetGenericArguments()[0];
+            }
 
-			var collectionType = typeof(List<>).MakeGenericType(itemsType);
-			value = nestedObjectDeserializer(reader, collectionType);
-			return true;
-		}
-	}
+            var collectionType = typeof(List<>).MakeGenericType(itemsType);
+            value = nestedObjectDeserializer(reader, collectionType);
+            return true;
+        }
+    }
 }
 

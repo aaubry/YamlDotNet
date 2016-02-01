@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
-	<metadata minClientVersion="2.8">
-		<id>YamlDotNet</id>
-		<version>0.0.1</version>
-		<authors>Antoine Aubry</authors>
-		<description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
-		<summary>This package contains the YAML parser and serializer.</summary>
-		<language>en-US</language>
-		<licenseUrl>http://aaubry.net/pages/license.html</licenseUrl>
-		<projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
-		<iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
-		<tags>yaml parser development library serialization</tags>
-	</metadata>
-	<files>
-		<file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />
-		<file src="bin\Release-Unsigned\YamlDotNet.pdb" target="lib\net35" />
-		<file src="bin\Release-Unsigned\YamlDotNet.xml" target="lib\net35" />
+    <metadata minClientVersion="2.8">
+        <id>YamlDotNet</id>
+        <version>0.0.1</version>
+        <authors>Antoine Aubry</authors>
+        <description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
+        <summary>This package contains the YAML parser and serializer.</summary>
+        <language>en-US</language>
+        <licenseUrl>http://aaubry.net/pages/license.html</licenseUrl>
+        <projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
+        <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
+        <tags>yaml parser development library serialization</tags>
+    </metadata>
+    <files>
+        <file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />
+        <file src="bin\Release-Unsigned\YamlDotNet.pdb" target="lib\net35" />
+        <file src="bin\Release-Unsigned\YamlDotNet.xml" target="lib\net35" />
 
-		<file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
-		<file src="bin\Release-Portable-Unsigned\YamlDotNet.pdb" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
-		<file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
+        <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
+        <file src="bin\Release-Portable-Unsigned\YamlDotNet.pdb" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
+        <file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 
     <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\dotnet" />
     <file src="bin\Release-Portable-Unsigned\YamlDotNet.pdb" target="lib\dotnet" />

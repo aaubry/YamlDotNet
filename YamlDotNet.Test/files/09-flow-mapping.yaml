@@ -1,4 +1,4 @@
 {
-	a simple key: a value,  # Note that the KEY token is produced.
-	? a complex key: another value,
+    a simple key: a value,  # Note that the KEY token is produced.
+    ? a complex key: another value,
 }

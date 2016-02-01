@@ -25,35 +25,35 @@ using System.ComponentModel;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-	public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
-	{
-		public DefaultExclusiveObjectGraphVisitor(IObjectGraphVisitor nextVisitor)
-			: base(nextVisitor)
-		{
-		}
-
-		private static object GetDefault(Type type)
-		{
-			return type.IsValueType() ? Activator.CreateInstance(type) : null;
+    public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
+    {
+        public DefaultExclusiveObjectGraphVisitor(IObjectGraphVisitor nextVisitor)
+            : base(nextVisitor)
+        {
         }
 
-		private static readonly IEqualityComparer<object> _objectComparer = EqualityComparer<object>.Default;
+        private static object GetDefault(Type type)
+        {
+            return type.IsValueType() ? Activator.CreateInstance(type) : null;
+        }
 
-		public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
-		{
-			return !_objectComparer.Equals(value, GetDefault(value.Type))
-			       && base.EnterMapping(key, value);
-		}
+        private static readonly IEqualityComparer<object> _objectComparer = EqualityComparer<object>.Default;
 
-		public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
-		{
-			var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
-			var defaultValue = defaultValueAttribute != null
-				? defaultValueAttribute.Value
-				: GetDefault(key.Type);
+        public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
+        {
+            return !_objectComparer.Equals(value, GetDefault(value.Type))
+                   && base.EnterMapping(key, value);
+        }
 
-			return !_objectComparer.Equals(value.Value, defaultValue)
-				   && base.EnterMapping(key, value);
-		}
-	}
+        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+        {
+            var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
+            var defaultValue = defaultValueAttribute != null
+                ? defaultValueAttribute.Value
+                : GetDefault(key.Type);
+
+            return !_objectComparer.Equals(value.Value, defaultValue)
+                   && base.EnterMapping(key, value);
+        }
+    }
 }

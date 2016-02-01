@@ -26,92 +26,92 @@ using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-	public sealed class NonGenericDictionaryNodeDeserializer : INodeDeserializer
-	{
-		private readonly IObjectFactory _objectFactory;
+    public sealed class NonGenericDictionaryNodeDeserializer : INodeDeserializer
+    {
+        private readonly IObjectFactory _objectFactory;
 
-		public NonGenericDictionaryNodeDeserializer(IObjectFactory objectFactory)
-		{
-			_objectFactory = objectFactory;
-		}
+        public NonGenericDictionaryNodeDeserializer(IObjectFactory objectFactory)
+        {
+            _objectFactory = objectFactory;
+        }
 
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
-		{
-			if(!typeof(IDictionary).IsAssignableFrom(expectedType))
-			{
-				value = false;
-				return false;
-			}
+        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        {
+            if(!typeof(IDictionary).IsAssignableFrom(expectedType))
+            {
+                value = false;
+                return false;
+            }
 
-			reader.Expect<MappingStart>();
+            reader.Expect<MappingStart>();
 
-			var dictionary = (IDictionary)_objectFactory.Create(expectedType);
-			while (!reader.Accept<MappingEnd>())
-			{
-				var key = nestedObjectDeserializer(reader, typeof(object));
-				var keyPromise = key as IValuePromise;
+            var dictionary = (IDictionary)_objectFactory.Create(expectedType);
+            while (!reader.Accept<MappingEnd>())
+            {
+                var key = nestedObjectDeserializer(reader, typeof(object));
+                var keyPromise = key as IValuePromise;
 
-				var keyValue = nestedObjectDeserializer(reader, typeof(object));
-				var valuePromise = keyValue as IValuePromise;
+                var keyValue = nestedObjectDeserializer(reader, typeof(object));
+                var valuePromise = keyValue as IValuePromise;
 
-				if (keyPromise == null)
-				{
-					if (valuePromise == null)
-					{
-						// Happy path: both key and value are known
-						dictionary.Add(key, keyValue);
-					}
-					else
-					{
-						// Key is known, value is pending
-						valuePromise.ValueAvailable += v => dictionary.Add(key, v);
-					}
-				}
-				else
-				{
-					if (valuePromise == null)
-					{
-						// Key is pending, value is known
-						keyPromise.ValueAvailable += v => dictionary.Add(v, keyValue);
-					}
-					else
-					{
-						// Both key and value are pending. We need to wait until both of them becom available.
-						var hasFirstPart = false;
+                if (keyPromise == null)
+                {
+                    if (valuePromise == null)
+                    {
+                        // Happy path: both key and value are known
+                        dictionary.Add(key, keyValue);
+                    }
+                    else
+                    {
+                        // Key is known, value is pending
+                        valuePromise.ValueAvailable += v => dictionary.Add(key, v);
+                    }
+                }
+                else
+                {
+                    if (valuePromise == null)
+                    {
+                        // Key is pending, value is known
+                        keyPromise.ValueAvailable += v => dictionary.Add(v, keyValue);
+                    }
+                    else
+                    {
+                        // Both key and value are pending. We need to wait until both of them becom available.
+                        var hasFirstPart = false;
 
-						keyPromise.ValueAvailable += v =>
-						{
-							if (hasFirstPart)
-							{
-								dictionary.Add(v, keyValue);
-							}
-							else
-							{
-								key = v;
-								hasFirstPart = true;
-							}
-						};
+                        keyPromise.ValueAvailable += v =>
+                        {
+                            if (hasFirstPart)
+                            {
+                                dictionary.Add(v, keyValue);
+                            }
+                            else
+                            {
+                                key = v;
+                                hasFirstPart = true;
+                            }
+                        };
 
-						valuePromise.ValueAvailable += v =>
-						{
-							if (hasFirstPart)
-							{
-								dictionary.Add(key, v);
-							}
-							else
-							{
-								keyValue = v;
-								hasFirstPart = true;
-							}
-						};
-					}
-				}
-			}
-			value = dictionary;
+                        valuePromise.ValueAvailable += v =>
+                        {
+                            if (hasFirstPart)
+                            {
+                                dictionary.Add(key, v);
+                            }
+                            else
+                            {
+                                keyValue = v;
+                                hasFirstPart = true;
+                            }
+                        };
+                    }
+                }
+            }
+            value = dictionary;
 
-			reader.Expect<MappingEnd>();
+            reader.Expect<MappingEnd>();
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }
