@@ -194,7 +194,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			else
 			{
 				// Could be decimal or base 60
-				string[] chunks = value.Split(':');
+				string[] chunks = value.Substring(currentIndex).Split(':');
 				result = 0;
 
 				for (int chunkIndex = 0; chunkIndex < chunks.Length; chunkIndex++)
