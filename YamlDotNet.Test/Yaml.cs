@@ -28,82 +28,82 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Test
 {
-	public static class Yaml
-	{
-		public static TextReader StreamFrom(string name)
-		{
-			var fromType = typeof(Yaml);
-			var assembly = Assembly.GetAssembly(fromType);
-			var stream = assembly.GetManifestResourceStream(name) ??
-						 assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
-			return new StreamReader(stream);
-		}
+    public static class Yaml
+    {
+        public static TextReader StreamFrom(string name)
+        {
+            var fromType = typeof(Yaml);
+            var assembly = Assembly.GetAssembly(fromType);
+            var stream = assembly.GetManifestResourceStream(name) ??
+                         assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
+            return new StreamReader(stream);
+        }
 
-		public static string TemplatedOn<T>(this TextReader reader)
-		{
-			var text = reader.ReadToEnd();
-			return text.TemplatedOn<T>();
-		}
+        public static string TemplatedOn<T>(this TextReader reader)
+        {
+            var text = reader.ReadToEnd();
+            return text.TemplatedOn<T>();
+        }
 
-		public static string TemplatedOn<T>(this string text)
-		{
-			return Regex.Replace(text, @"{type}", match =>
-				Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Assembly.FullName)));
-		}
+        public static string TemplatedOn<T>(this string text)
+        {
+            return Regex.Replace(text, @"{type}", match =>
+                Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Assembly.FullName)));
+        }
 
-		public static IParser ParserForEmptyContent()
-		{
-			return new Parser(new StringReader(string.Empty));
-		}
+        public static IParser ParserForEmptyContent()
+        {
+            return new Parser(new StringReader(string.Empty));
+        }
 
-		public static IParser ParserForResource(string name)
-		{
-			return new Parser(Yaml.StreamFrom(name));
-		}
+        public static IParser ParserForResource(string name)
+        {
+            return new Parser(Yaml.StreamFrom(name));
+        }
 
-		public static IParser ParserForText(string yamlText)
-		{
-			return new Parser(ReaderForText(yamlText));
-		}
+        public static IParser ParserForText(string yamlText)
+        {
+            return new Parser(ReaderForText(yamlText));
+        }
 
-		public static Scanner ScannerForResource(string name)
-		{
-			return new Scanner(Yaml.StreamFrom(name));
-		}
+        public static Scanner ScannerForResource(string name)
+        {
+            return new Scanner(Yaml.StreamFrom(name));
+        }
 
-		public static Scanner ScannerForText(string yamlText)
-		{
-			return new Scanner(ReaderForText(yamlText));
-		}
+        public static Scanner ScannerForText(string yamlText)
+        {
+            return new Scanner(ReaderForText(yamlText));
+        }
 
-		public static StringReader ReaderForText(string yamlText)
-		{
-			var lines = yamlText
-				.Split('\n')
-				.Select(l => l.TrimEnd('\r', '\n'))
-				.SkipWhile(l => l.Trim(' ', '\t').Length == 0)
-				.ToList();
+        public static StringReader ReaderForText(string yamlText)
+        {
+            var lines = yamlText
+                .Split('\n')
+                .Select(l => l.TrimEnd('\r', '\n'))
+                .SkipWhile(l => l.Trim(' ', '\t').Length == 0)
+                .ToList();
 
-			while (lines.Count > 0 && lines[lines.Count - 1].Trim(' ', '\t').Length == 0)
-			{
-				lines.RemoveAt(lines.Count - 1);
-			}
+            while (lines.Count > 0 && lines[lines.Count - 1].Trim(' ', '\t').Length == 0)
+            {
+                lines.RemoveAt(lines.Count - 1);
+            }
 
-			if (lines.Count > 0)
-			{
-				var indent = Regex.Match(lines[0], @"^(\t+)");
-				if (!indent.Success)
-				{
-					throw new ArgumentException("Invalid indentation");
-				}
+            if (lines.Count > 0)
+            {
+                var indent = Regex.Match(lines[0], @"^(\s+)");
+                if (!indent.Success)
+                {
+                    throw new ArgumentException("Invalid indentation");
+                }
 
-				lines = lines
-					.Select(l => l.Substring(indent.Groups[1].Length))
-					.ToList();
-			}
+                lines = lines
+                    .Select(l => l.Substring(indent.Groups[1].Length))
+                    .ToList();
+            }
 
-			var reader = new StringReader(string.Join("\n", lines.ToArray()));
-			return reader;
-		}
-	}
+            var reader = new StringReader(string.Join("\n", lines.ToArray()));
+            return reader;
+        }
+    }
 }

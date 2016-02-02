@@ -23,50 +23,50 @@ using System;
 
 namespace YamlDotNet.Core
 {
-	[Serializable]
-	internal class StringLookAheadBuffer : ILookAheadBuffer
-	{
-		private readonly string value;
+    [Serializable]
+    internal class StringLookAheadBuffer : ILookAheadBuffer
+    {
+        private readonly string value;
 
-		public int Position { get; private set; }
+        public int Position { get; private set; }
 
-		public StringLookAheadBuffer(string value)
-		{
-			this.value = value;
-		}
+        public StringLookAheadBuffer(string value)
+        {
+            this.value = value;
+        }
 
-		public int Length
-		{
-			get {
-				return value.Length;
-			}
-		}
+        public int Length
+        {
+            get {
+                return value.Length;
+            }
+        }
 
-		public bool EndOfInput
-		{
-			get {
-				return IsOutside(Position);
-			}
-		}
+        public bool EndOfInput
+        {
+            get {
+                return IsOutside(Position);
+            }
+        }
 
-		public char Peek(int offset)
-		{
-			var index = Position + offset;
-			return IsOutside(index) ? '\0' : value[index];
-		}
+        public char Peek(int offset)
+        {
+            var index = Position + offset;
+            return IsOutside(index) ? '\0' : value[index];
+        }
 
-		private bool IsOutside(int index)
-		{
-			return index >= value.Length;
-		}
+        private bool IsOutside(int index)
+        {
+            return index >= value.Length;
+        }
 
-		public void Skip(int length)
-		{
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", "The length must be positive.");
-			}
-			Position += length;
-		}
-	}
+        public void Skip(int length)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length", "The length must be positive.");
+            }
+            Position += length;
+        }
+    }
 }

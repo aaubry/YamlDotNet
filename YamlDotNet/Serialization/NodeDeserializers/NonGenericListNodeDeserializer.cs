@@ -26,47 +26,47 @@ using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-	public sealed class NonGenericListNodeDeserializer : INodeDeserializer
-	{
-		private readonly IObjectFactory _objectFactory;
+    public sealed class NonGenericListNodeDeserializer : INodeDeserializer
+    {
+        private readonly IObjectFactory _objectFactory;
 
-		public NonGenericListNodeDeserializer(IObjectFactory objectFactory)
-		{
-			_objectFactory = objectFactory;
-		}
+        public NonGenericListNodeDeserializer(IObjectFactory objectFactory)
+        {
+            _objectFactory = objectFactory;
+        }
 
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
-		{
-			if (!typeof(IList).IsAssignableFrom(expectedType))
-			{
-				value = false;
-				return false;
-			}
+        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        {
+            if (!typeof(IList).IsAssignableFrom(expectedType))
+            {
+                value = false;
+                return false;
+            }
 
-			reader.Expect<SequenceStart>();
+            reader.Expect<SequenceStart>();
 
-			var list = (IList)_objectFactory.Create(expectedType);
-			while (!reader.Accept<SequenceEnd>())
-			{
-				var item = nestedObjectDeserializer(reader, typeof(object));
-				var promise = item as IValuePromise;
-				if (promise == null)
-				{
-					list.Add(item);
-				}
-				else
-				{
-					var index = list.Count;
-					list.Add(null);
-					promise.ValueAvailable += v => list[index] = v;
-				}
-			}
-			value = list;
+            var list = (IList)_objectFactory.Create(expectedType);
+            while (!reader.Accept<SequenceEnd>())
+            {
+                var item = nestedObjectDeserializer(reader, typeof(object));
+                var promise = item as IValuePromise;
+                if (promise == null)
+                {
+                    list.Add(item);
+                }
+                else
+                {
+                    var index = list.Count;
+                    list.Add(null);
+                    promise.ValueAvailable += v => list[index] = v;
+                }
+            }
+            value = list;
 
-			reader.Expect<SequenceEnd>();
+            reader.Expect<SequenceEnd>();
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }
 

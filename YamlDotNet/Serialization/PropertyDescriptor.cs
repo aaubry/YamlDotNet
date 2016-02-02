@@ -24,52 +24,52 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
-	public sealed class PropertyDescriptor : IPropertyDescriptor
-	{
-		private readonly IPropertyDescriptor baseDescriptor;
+    public sealed class PropertyDescriptor : IPropertyDescriptor
+    {
+        private readonly IPropertyDescriptor baseDescriptor;
 
-		public PropertyDescriptor(IPropertyDescriptor baseDescriptor)
-		{
-			this.baseDescriptor = baseDescriptor;
-			Name = baseDescriptor.Name;
-		}
+        public PropertyDescriptor(IPropertyDescriptor baseDescriptor)
+        {
+            this.baseDescriptor = baseDescriptor;
+            Name = baseDescriptor.Name;
+        }
 
-		public string Name { get; set; }
+        public string Name { get; set; }
 
-		public Type Type { get { return baseDescriptor.Type; } }
+        public Type Type { get { return baseDescriptor.Type; } }
 
-		public Type TypeOverride
-		{
-			get { return baseDescriptor.TypeOverride; }
-			set { baseDescriptor.TypeOverride = value; }
-		}
+        public Type TypeOverride
+        {
+            get { return baseDescriptor.TypeOverride; }
+            set { baseDescriptor.TypeOverride = value; }
+        }
 
-	    public int Order { get; set; }
+        public int Order { get; set; }
 
-		public ScalarStyle ScalarStyle
-		{
-			get { return baseDescriptor.ScalarStyle; }
-			set { baseDescriptor.ScalarStyle = value; }
-		}
+        public ScalarStyle ScalarStyle
+        {
+            get { return baseDescriptor.ScalarStyle; }
+            set { baseDescriptor.ScalarStyle = value; }
+        }
 
-	    public bool CanWrite
-		{
-			get { return baseDescriptor.CanWrite; }
-		}
+        public bool CanWrite
+        {
+            get { return baseDescriptor.CanWrite; }
+        }
 
-		public void Write(object target, object value)
-		{
-			baseDescriptor.Write(target, value);
-		}
+        public void Write(object target, object value)
+        {
+            baseDescriptor.Write(target, value);
+        }
 
-		public T GetCustomAttribute<T>() where T : Attribute
-		{
-			return baseDescriptor.GetCustomAttribute<T>();
-		}
+        public T GetCustomAttribute<T>() where T : Attribute
+        {
+            return baseDescriptor.GetCustomAttribute<T>();
+        }
 
-		public IObjectDescriptor Read(object target)
-		{
-			return baseDescriptor.Read(target);
-		}
-	}
+        public IObjectDescriptor Read(object target)
+        {
+            return baseDescriptor.Read(target);
+        }
+    }
 }

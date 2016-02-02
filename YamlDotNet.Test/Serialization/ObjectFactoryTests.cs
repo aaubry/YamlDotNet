@@ -25,29 +25,29 @@ using YamlDotNet.Serialization.ObjectFactories;
 
 namespace YamlDotNet.Test.Serialization
 {
-	public class ObjectFactoryTests : SerializationTestHelper
-	{
-		[Fact]
-		public void NotSpecifyingObjectFactoryUsesDefault()
-		{
-			var text = "!empty {}";
-			
-			Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
-			var result = Deserializer.Deserialize(UsingReaderFor(text));
+    public class ObjectFactoryTests : SerializationTestHelper
+    {
+        [Fact]
+        public void NotSpecifyingObjectFactoryUsesDefault()
+        {
+            var text = "!empty {}";
+            
+            Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
+            var result = Deserializer.Deserialize(UsingReaderFor(text));
 
-			result.Should().BeOfType<EmptyBase>();
-		}
+            result.Should().BeOfType<EmptyBase>();
+        }
 
-		[Fact]
-		public void ObjectFactoryIsInvoked()
-		{
-			AssumingDeserializerWith(new LambdaObjectFactory(t => new EmptyDerived()));
-			var text = "!empty {}";
+        [Fact]
+        public void ObjectFactoryIsInvoked()
+        {
+            AssumingDeserializerWith(new LambdaObjectFactory(t => new EmptyDerived()));
+            var text = "!empty {}";
 
-			Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
-			var result = Deserializer.Deserialize(UsingReaderFor(text));
+            Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
+            var result = Deserializer.Deserialize(UsingReaderFor(text));
 
-			result.Should().BeOfType<EmptyDerived>();
-		}
-	}
+            result.Should().BeOfType<EmptyDerived>();
+        }
+    }
 }

@@ -26,19 +26,19 @@ using YamlDotNet.PerformanceTests.Lib;
 
 namespace YamlDotNet.PerformanceTests.v2_3_0
 {
-	public class Program : ISerializerAdapter
-	{
-		public static void Main(string[] args)
-		{
-			var runner = new PerformanceTestRunner();
-			runner.Run(new Program(), args);
-		}
+    public class Program : ISerializerAdapter
+    {
+        public static void Main(string[] args)
+        {
+            var runner = new PerformanceTestRunner();
+            runner.Run(new Program(), args);
+        }
 
-		private readonly Serializer _serializer = new Serializer();
+        private readonly Serializer _serializer = new Serializer();
 
-		public void Serialize (TextWriter writer, object graph)
-		{
-			_serializer.Serialize (writer, graph);
-		}
-	}
+        public void Serialize (TextWriter writer, object graph)
+        {
+            _serializer.Serialize (writer, graph);
+        }
+    }
 }

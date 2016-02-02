@@ -33,182 +33,182 @@ using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
-	/// <summary>
-	/// Writes objects to YAML.
-	/// </summary>
-	public sealed class Serializer
-	{
-		internal IList<IYamlTypeConverter> Converters { get; private set; }
+    /// <summary>
+    /// Writes objects to YAML.
+    /// </summary>
+    public sealed class Serializer
+    {
+        internal IList<IYamlTypeConverter> Converters { get; private set; }
 
-		private readonly SerializationOptions options;
-		private readonly INamingConvention namingConvention;
-		private readonly ITypeResolver typeResolver;
+        private readonly SerializationOptions options;
+        private readonly INamingConvention namingConvention;
+        private readonly ITypeResolver typeResolver;
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="options">Options that control how the serialization is to be performed.</param>
-		/// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-		public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
-		{
-			this.options = options;
-			this.namingConvention = namingConvention ?? new NullNamingConvention();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options">Options that control how the serialization is to be performed.</param>
+        /// <param name="namingConvention">Naming strategy to use for serialized property names</param>
+        public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+        {
+            this.options = options;
+            this.namingConvention = namingConvention ?? new NullNamingConvention();
 
-			Converters = new List<IYamlTypeConverter>();
+            Converters = new List<IYamlTypeConverter>();
             foreach (IYamlTypeConverter yamlTypeConverter in Utilities.YamlTypeConverters.BuiltInConverters)
-		    {
-		        Converters.Add(yamlTypeConverter);
-		    }
+            {
+                Converters.Add(yamlTypeConverter);
+            }
             
-			typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
-				? (ITypeResolver)new StaticTypeResolver()
-				: (ITypeResolver)new DynamicTypeResolver();
-		}
+            typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
+                ? (ITypeResolver)new StaticTypeResolver()
+                : (ITypeResolver)new DynamicTypeResolver();
+        }
 
-		private bool IsOptionSet(SerializationOptions option)
-		{
-			return (options & option) != 0;
-		}
+        private bool IsOptionSet(SerializationOptions option)
+        {
+            return (options & option) != 0;
+        }
 
-		/// <summary>
-		/// Registers a type converter to be used to serialize and deserialize specific types.
-		/// </summary>
-		public void RegisterTypeConverter(IYamlTypeConverter converter)
-		{
-			Converters.Add(converter);
-		}
+        /// <summary>
+        /// Registers a type converter to be used to serialize and deserialize specific types.
+        /// </summary>
+        public void RegisterTypeConverter(IYamlTypeConverter converter)
+        {
+            Converters.Add(converter);
+        }
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		public void Serialize(TextWriter writer, object graph)
-		{
-			Serialize(new Emitter(writer), graph);
-		}
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        public void Serialize(TextWriter writer, object graph)
+        {
+            Serialize(new Emitter(writer), graph);
+        }
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		/// <param name="type">The static type of the object to serialize.</param>
-		public void Serialize(TextWriter writer, object graph, Type type)
-		{
-			Serialize(new Emitter(writer), graph, type);
-		}
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param>
+        public void Serialize(TextWriter writer, object graph, Type type)
+        {
+            Serialize(new Emitter(writer), graph, type);
+        }
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		public void Serialize(IEmitter emitter, object graph)
-		{
-			if (emitter == null)
-			{
-				throw new ArgumentNullException("emitter");
-			}
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        public void Serialize(IEmitter emitter, object graph)
+        {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException("emitter");
+            }
 
-			EmitDocument(emitter, new ObjectDescriptor(graph, graph != null ? graph.GetType() : typeof(object), typeof(object)));
-		}
+            EmitDocument(emitter, new ObjectDescriptor(graph, graph != null ? graph.GetType() : typeof(object), typeof(object)));
+        }
 
-		/// <summary>
-		/// Serializes the specified object.
-		/// </summary>
-		/// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
-		/// <param name="graph">The object to serialize.</param>
-		/// <param name="type">The static type of the object to serialize.</param>
-		public void Serialize(IEmitter emitter, object graph, Type type)
-		{
-			if (emitter == null)
-			{
-				throw new ArgumentNullException("emitter");
-			}
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param>
+        public void Serialize(IEmitter emitter, object graph, Type type)
+        {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException("emitter");
+            }
 
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
 
-			EmitDocument(emitter, new ObjectDescriptor(graph, type, type));
-		}
+            EmitDocument(emitter, new ObjectDescriptor(graph, type, type));
+        }
 
-		private void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
-		{
-			var traversalStrategy = CreateTraversalStrategy();
-			var eventEmitter = CreateEventEmitter(emitter);
-			var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph);
+        private void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
+        {
+            var traversalStrategy = CreateTraversalStrategy();
+            var eventEmitter = CreateEventEmitter(emitter);
+            var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph);
 
-			emitter.Emit(new StreamStart());
-			emitter.Emit(new DocumentStart());
+            emitter.Emit(new StreamStart());
+            emitter.Emit(new DocumentStart());
 
-			traversalStrategy.Traverse(graph, emittingVisitor);
+            traversalStrategy.Traverse(graph, emittingVisitor);
 
-			emitter.Emit(new DocumentEnd(true));
-			emitter.Emit(new StreamEnd());
-		}
+            emitter.Emit(new DocumentEnd(true));
+            emitter.Emit(new StreamEnd());
+        }
 
-		private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
-		{
-			IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
+        private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
+        {
+            IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
-			emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
+            emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
 
-			if (!IsOptionSet(SerializationOptions.DisableAliases))
-			{
-				var anchorAssigner = new AnchorAssigner();
-				traversalStrategy.Traverse(graph, anchorAssigner);
+            if (!IsOptionSet(SerializationOptions.DisableAliases))
+            {
+                var anchorAssigner = new AnchorAssigner();
+                traversalStrategy.Traverse(graph, anchorAssigner);
 
-				emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
-			}
+                emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
+            }
 
-			if (!IsOptionSet(SerializationOptions.EmitDefaults))
-			{
-				emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
-			}
+            if (!IsOptionSet(SerializationOptions.EmitDefaults))
+            {
+                emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
+            }
 
-			return emittingVisitor;
-		}
+            return emittingVisitor;
+        }
 
-		private IEventEmitter CreateEventEmitter(IEmitter emitter)
-		{
-			var writer = new WriterEventEmitter(emitter);
+        private IEventEmitter CreateEventEmitter(IEmitter emitter)
+        {
+            var writer = new WriterEventEmitter(emitter);
 
-			if (IsOptionSet(SerializationOptions.JsonCompatible))
-			{
-				return new JsonEventEmitter(writer);
-			}
-			else
-			{
-				return new TypeAssigningEventEmitter(writer, IsOptionSet(SerializationOptions.Roundtrip));
-			}
-		}
+            if (IsOptionSet(SerializationOptions.JsonCompatible))
+            {
+                return new JsonEventEmitter(writer);
+            }
+            else
+            {
+                return new TypeAssigningEventEmitter(writer, IsOptionSet(SerializationOptions.Roundtrip));
+            }
+        }
 
-		private IObjectGraphTraversalStrategy CreateTraversalStrategy()
-		{
-			ITypeInspector typeDescriptor = new ReadablePropertiesTypeInspector(typeResolver);
-			if (IsOptionSet(SerializationOptions.Roundtrip))
-			{
-				typeDescriptor = new ReadableAndWritablePropertiesTypeInspector(typeDescriptor);
-			}
+        private IObjectGraphTraversalStrategy CreateTraversalStrategy()
+        {
+            ITypeInspector typeDescriptor = new ReadablePropertiesTypeInspector(typeResolver);
+            if (IsOptionSet(SerializationOptions.Roundtrip))
+            {
+                typeDescriptor = new ReadableAndWritablePropertiesTypeInspector(typeDescriptor);
+            }
 
-			typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
-			typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
-			if (IsOptionSet(SerializationOptions.DefaultToStaticType))
-			{
-				typeDescriptor = new CachedTypeInspector(typeDescriptor);
-			}
+            typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
+            typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
+            if (IsOptionSet(SerializationOptions.DefaultToStaticType))
+            {
+                typeDescriptor = new CachedTypeInspector(typeDescriptor);
+            }
 
-			if (IsOptionSet(SerializationOptions.Roundtrip))
-			{
-				return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50);
-			}
-			else
-			{
-				return new FullObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50, namingConvention);
-			}
-		}
-	}
+            if (IsOptionSet(SerializationOptions.Roundtrip))
+            {
+                return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50);
+            }
+            else
+            {
+                return new FullObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50, namingConvention);
+            }
+        }
+    }
 }

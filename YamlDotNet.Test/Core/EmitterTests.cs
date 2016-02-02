@@ -32,261 +32,261 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Test.Core
 {
-	public class EmitterTests : EmitterTestsHelper
-	{
-		[Theory]
-		[InlineData("01-directives.yaml")]
-		[InlineData("02-scalar-in-imp-doc.yaml")]
-		[InlineData("03-scalar-in-exp-doc.yaml")]
-		[InlineData("04-scalars-in-multi-docs.yaml")]
-		[InlineData("05-circular-sequence.yaml")]
-		[InlineData("06-float-tag.yaml")]
-		[InlineData("07-scalar-styles.yaml")]
-		[InlineData("08-flow-sequence.yaml")]
-		[InlineData("09-flow-mapping.yaml")]
-		[InlineData("10-mixed-nodes-in-sequence.yaml")]
-		[InlineData("11-mixed-nodes-in-mapping.yaml")]
-		[InlineData("12-compact-sequence.yaml")]
-		[InlineData("13-compact-mapping.yaml")]
-		[InlineData("14-mapping-wo-indent.yaml")]
-		public void CompareOriginalAndEmittedText(string filename)
-		{
-			var stream = Yaml.StreamFrom(filename);
+    public class EmitterTests : EmitterTestsHelper
+    {
+        [Theory]
+        [InlineData("01-directives.yaml")]
+        [InlineData("02-scalar-in-imp-doc.yaml")]
+        [InlineData("03-scalar-in-exp-doc.yaml")]
+        [InlineData("04-scalars-in-multi-docs.yaml")]
+        [InlineData("05-circular-sequence.yaml")]
+        [InlineData("06-float-tag.yaml")]
+        [InlineData("07-scalar-styles.yaml")]
+        [InlineData("08-flow-sequence.yaml")]
+        [InlineData("09-flow-mapping.yaml")]
+        [InlineData("10-mixed-nodes-in-sequence.yaml")]
+        [InlineData("11-mixed-nodes-in-mapping.yaml")]
+        [InlineData("12-compact-sequence.yaml")]
+        [InlineData("13-compact-mapping.yaml")]
+        [InlineData("14-mapping-wo-indent.yaml")]
+        public void CompareOriginalAndEmittedText(string filename)
+        {
+            var stream = Yaml.StreamFrom(filename);
 
-			var originalEvents = ParsingEventsOf(stream.ReadToEnd());
-			originalEvents.Run(x => Dump.WriteLine(x));
-			var emittedText = EmittedTextFrom(originalEvents);
-			Dump.WriteLine(emittedText);
-			var emittedEvents = ParsingEventsOf(emittedText);
-			emittedEvents.Run(x => Dump.WriteLine(x));
+            var originalEvents = ParsingEventsOf(stream.ReadToEnd());
+            originalEvents.Run(x => Dump.WriteLine(x));
+            var emittedText = EmittedTextFrom(originalEvents);
+            Dump.WriteLine(emittedText);
+            var emittedEvents = ParsingEventsOf(emittedText);
+            emittedEvents.Run(x => Dump.WriteLine(x));
 
-			emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
-				opt => opt.Excluding(@event => @event.Start)
-						  .Excluding(@event => @event.End)
-						  .Excluding((ParsingEvent @event) => ((DocumentEnd)@event).IsImplicit));
-		}
+            emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
+                opt => opt.Excluding(@event => @event.Start)
+                          .Excluding(@event => @event.End)
+                          .Excluding((ParsingEvent @event) => ((DocumentEnd)@event).IsImplicit));
+        }
 
-		private IList<ParsingEvent> ParsingEventsOf(string text)
-		{
-			var parser = new Parser(new StringReader(text));
-			return EnumerationOf(parser).ToList();
-		}
+        private IList<ParsingEvent> ParsingEventsOf(string text)
+        {
+            var parser = new Parser(new StringReader(text));
+            return EnumerationOf(parser).ToList();
+        }
 
-		private IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
-		{
-			while (parser.MoveNext())
-			{
-				yield return parser.Current;
-			}
-		}
+        private IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
+        {
+            while (parser.MoveNext())
+            {
+                yield return parser.Current;
+            }
+        }
 
-		[Fact]
-		public void PlainScalarCanBeFollowedByImplicitDocument()
-		{
-			var events = StreamOf(
-				DocumentWith(PlainScalar("test")),
-				DocumentWith(PlainScalar("test")));
+        [Fact]
+        public void PlainScalarCanBeFollowedByImplicitDocument()
+        {
+            var events = StreamOf(
+                DocumentWith(PlainScalar("test")),
+                DocumentWith(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			yaml.Should().Contain(Lines("test", "--- test"));
-		}
+            yaml.Should().Contain(Lines("test", "--- test"));
+        }
 
-		[Fact]
-		public void PlainScalarCanBeFollowedByDocumentWithVersion()
-		{
-			var events = StreamOf(
-				DocumentWith(PlainScalar("test")),
-				DocumentWithVersion(PlainScalar("test")));
+        [Fact]
+        public void PlainScalarCanBeFollowedByDocumentWithVersion()
+        {
+            var events = StreamOf(
+                DocumentWith(PlainScalar("test")),
+                DocumentWithVersion(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("test", "...", "%YAML 1.1", "--- test"));
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(Lines("test", "...", "%YAML 1.1", "--- test"));
+        }
 
-		[Fact]
-		public void PlainScalarCanBeFollowedByDocumentWithDefaultTags()
-		{
-			var events = StreamOf(
-				DocumentWith(PlainScalar("test")),
-				DocumentWithDefaultTags(PlainScalar("test")));
+        [Fact]
+        public void PlainScalarCanBeFollowedByDocumentWithDefaultTags()
+        {
+            var events = StreamOf(
+                DocumentWith(PlainScalar("test")),
+                DocumentWithDefaultTags(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("test", "--- test"));
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(Lines("test", "--- test"));
+        }
 
-		[Fact]
-		public void PlainScalarCanBeFollowedByDocumentWithCustomTags()
-		{
-			var events = StreamOf(
-				DocumentWith(PlainScalar("test")),
-				DocumentWithCustomTags(PlainScalar("test")));
+        [Fact]
+        public void PlainScalarCanBeFollowedByDocumentWithCustomTags()
+        {
+            var events = StreamOf(
+                DocumentWith(PlainScalar("test")),
+                DocumentWithCustomTags(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("test", "...", FooTag, ExTag, ExExTag, "--- test"));
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(Lines("test", "...", FooTag, ExTag, ExExTag, "--- test"));
+        }
 
-		[Fact]
-		public void BlockCanBeFollowedByImplicitDocument()
-		{
-			var events = StreamOf(
-				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
-				DocumentWith(PlainScalar("test")));
+        [Fact]
+        public void BlockCanBeFollowedByImplicitDocument()
+        {
+            var events = StreamOf(
+                DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+                DocumentWith(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
+            Dump.WriteLine(yaml);
 
-			yaml.Should().Contain(Lines("- 'test'", "--- test"));
-		}
+            yaml.Should().Contain(Lines("- 'test'", "--- test"));
+        }
 
-		[Fact]
-		public void BlockCanBeFollowedByDocumentWithVersion()
-		{
-			var events = StreamOf(
-				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
-				DocumentWithVersion(PlainScalar("test")));
+        [Fact]
+        public void BlockCanBeFollowedByDocumentWithVersion()
+        {
+            var events = StreamOf(
+                DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+                DocumentWithVersion(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("- 'test'", "...", "%YAML 1.1", "--- test"));
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(Lines("- 'test'", "...", "%YAML 1.1", "--- test"));
+        }
 
-		[Fact]
-		public void BlockCanBeFollowedByDocumentWithDefaultTags()
-		{
-			var events = StreamOf(
-				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
-				DocumentWithDefaultTags(PlainScalar("test")));
+        [Fact]
+        public void BlockCanBeFollowedByDocumentWithDefaultTags()
+        {
+            var events = StreamOf(
+                DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+                DocumentWithDefaultTags(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("- 'test'", "--- test"));
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(Lines("- 'test'", "--- test"));
+        }
 
-		[Fact]
-		public void BlockCanBeFollowedByDocumentWithCustomTags()
-		{
-			var events = StreamOf(
-				DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
-				DocumentWithCustomTags(PlainScalar("test")));
+        [Fact]
+        public void BlockCanBeFollowedByDocumentWithCustomTags()
+        {
+            var events = StreamOf(
+                DocumentWith(SequenceWith(SingleQuotedScalar("test"))),
+                DocumentWithCustomTags(PlainScalar("test")));
 
-			var yaml = EmittedTextFrom(events);
+            var yaml = EmittedTextFrom(events);
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(Lines("- 'test'", "...", FooTag, ExTag, ExExTag, "--- test"));
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(Lines("- 'test'", "...", FooTag, ExTag, ExExTag, "--- test"));
+        }
 
-		[Theory]
-		[InlineData("LF hello\nworld")]
-		[InlineData("CRLF hello\r\nworld")]
-		public void FoldedStyleDoesNotLooseCharacters(string text)
-		{
-			var events = SequenceWith(FoldedScalar(text));
+        [Theory]
+        [InlineData("LF hello\nworld")]
+        [InlineData("CRLF hello\r\nworld")]
+        public void FoldedStyleDoesNotLooseCharacters(string text)
+        {
+            var events = SequenceWith(FoldedScalar(text));
 
-			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain("world");
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain("world");
+        }
 
-		[Fact]
-		public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
-		{
-			var events = SequenceWith(Scalar("hello\nworld").ImplicitPlain);
+        [Fact]
+        public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
+        {
+            var events = SequenceWith(Scalar("hello\nworld").ImplicitPlain);
 
-			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-			Dump.WriteLine(yaml);
-			yaml.Should().Contain(">");
-		}
+            Dump.WriteLine(yaml);
+            yaml.Should().Contain(">");
+        }
 
-		[Fact]
-		public void FoldedStyleDoesNotGenerateExtraLineBreaks()
-		{
-			var events = SequenceWith(FoldedScalar("hello\nworld"));
+        [Fact]
+        public void FoldedStyleDoesNotGenerateExtraLineBreaks()
+        {
+            var events = SequenceWith(FoldedScalar("hello\nworld"));
 
-			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-			// Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
-			var stream = new YamlStream();
-			stream.Load(new StringReader(yaml));
-			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-			var scalar = (YamlScalarNode)sequence.Children[0];
+            // Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
+            var stream = new YamlStream();
+            stream.Load(new StringReader(yaml));
+            var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+            var scalar = (YamlScalarNode)sequence.Children[0];
 
-			Dump.WriteLine(yaml);
-			scalar.Value.Should().Be("hello\nworld");
-		}
+            Dump.WriteLine(yaml);
+            scalar.Value.Should().Be("hello\nworld");
+        }
 
-		[Fact]
-		public void FoldedStyleDoesNotCollapseLineBreaks()
-		{
-			var events = SequenceWith(FoldedScalar(">+\n"));
+        [Fact]
+        public void FoldedStyleDoesNotCollapseLineBreaks()
+        {
+            var events = SequenceWith(FoldedScalar(">+\n"));
 
-			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-			var stream = new YamlStream();
-			stream.Load(new StringReader(yaml));
-			var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-			var scalar = (YamlScalarNode)sequence.Children[0];
+            var stream = new YamlStream();
+            stream.Load(new StringReader(yaml));
+            var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
+            var scalar = (YamlScalarNode)sequence.Children[0];
 
-			Dump.WriteLine("${0}$", yaml);
-			scalar.Value.Should().Be(">+\n");
-		}
+            Dump.WriteLine("${0}$", yaml);
+            scalar.Value.Should().Be(">+\n");
+        }
 
-		[Fact]
-		[Trait("motive", "issue #39")]
-		public void FoldedStylePreservesNewLines()
-		{
-			var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
-			var events = MappingWith(
-				Scalar("Payload").ImplicitPlain,
-				FoldedScalar(input));
+        [Fact]
+        [Trait("motive", "issue #39")]
+        public void FoldedStylePreservesNewLines()
+        {
+            var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
+            var events = MappingWith(
+                Scalar("Payload").ImplicitPlain,
+                FoldedScalar(input));
 
-			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
-			Dump.WriteLine(yaml);
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            Dump.WriteLine(yaml);
 
-			var stream = new YamlStream();
-			stream.Load(new StringReader(yaml));
+            var stream = new YamlStream();
+            stream.Load(new StringReader(yaml));
 
-			var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
-			var value = (YamlScalarNode)mapping.Children.First().Value;
+            var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
+            var value = (YamlScalarNode)mapping.Children.First().Value;
 
-			Dump.WriteLine(value.Value);
-			value.Value.Should().Be(input);
-		}
+            Dump.WriteLine(value.Value);
+            value.Value.Should().Be(input);
+        }
 
-		[Fact]
-		public void CommentsAreEmittedCorrectly()
-		{
-			var events = SequenceWith(
-				StandaloneComment("Top comment"),
-				StandaloneComment("Second line"),
-				Scalar("first").ImplicitPlain,
-				InlineComment("The first value"),
-				Scalar("second").ImplicitPlain,
-				InlineComment("The second value"),
-				StandaloneComment("Bottom comment")
-			);
+        [Fact]
+        public void CommentsAreEmittedCorrectly()
+        {
+            var events = SequenceWith(
+                StandaloneComment("Top comment"),
+                StandaloneComment("Second line"),
+                Scalar("first").ImplicitPlain,
+                InlineComment("The first value"),
+                Scalar("second").ImplicitPlain,
+                InlineComment("The second value"),
+                StandaloneComment("Bottom comment")
+            );
 
-			var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-			Dump.WriteLine("${0}$", yaml);
-			yaml.Should()
-				.Contain("# Top comment")
-				.And.Contain("# Second line")
-				.And.NotContain("# Top comment # Second line")
-				.And.Contain("first # The first value")
-				.And.Contain("second # The second value")
-				.And.Contain("# Bottom comment");
-		}
+            Dump.WriteLine("${0}$", yaml);
+            yaml.Should()
+                .Contain("# Top comment")
+                .And.Contain("# Second line")
+                .And.NotContain("# Top comment # Second line")
+                .And.Contain("first # The first value")
+                .And.Contain("second # The second value")
+                .And.Contain("# Bottom comment");
+        }
 
         [Theory]
         [InlineData("Гранит", 28595)] // Cyrillic (ISO)
@@ -313,9 +313,9 @@ namespace YamlDotNet.Test.Core
 
             var yaml = encoding.GetString(buffer.ToArray());
 
-			yaml.Should()
+            yaml.Should()
                 .Contain("'" + text + "'");
-		}
+        }
 
         [Fact]
         public void EmptyStringsAreQuoted()
@@ -329,9 +329,9 @@ namespace YamlDotNet.Test.Core
                 .Contain("- ''");
         }
 
-		private string Lines(params string[] lines)
-		{
-			return string.Join(Environment.NewLine, lines);
-		}
-	}
+        private string Lines(params string[] lines)
+        {
+            return string.Join(Environment.NewLine, lines);
+        }
+    }
 }

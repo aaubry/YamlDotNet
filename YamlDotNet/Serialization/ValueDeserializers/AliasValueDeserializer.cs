@@ -27,135 +27,135 @@ using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ValueDeserializers
 {
-	public sealed class AliasValueDeserializer : IValueDeserializer
-	{
-		private readonly IValueDeserializer innerDeserializer;
-		
-		public AliasValueDeserializer(IValueDeserializer innerDeserializer)
-		{
-			if (innerDeserializer == null)
-			{
-				throw new ArgumentNullException ("innerDeserializer");			
-			}
-			
-			this.innerDeserializer = innerDeserializer;
-		}
+    public sealed class AliasValueDeserializer : IValueDeserializer
+    {
+        private readonly IValueDeserializer innerDeserializer;
+        
+        public AliasValueDeserializer(IValueDeserializer innerDeserializer)
+        {
+            if (innerDeserializer == null)
+            {
+                throw new ArgumentNullException ("innerDeserializer");            
+            }
+            
+            this.innerDeserializer = innerDeserializer;
+        }
 
-		private sealed class AliasState : Dictionary<string, ValuePromise>, IPostDeserializationCallback
-		{
-			public void OnDeserialization()
-			{
-				foreach (var promise in Values)
-				{
-					if (!promise.HasValue)
-					{
-						throw new AnchorNotFoundException(promise.Alias.Start, promise.Alias.End, string.Format(
-							"Anchor '{0}' not found",
-							promise.Alias.Value
-						));
-					}
-				}
-			}
-		}
+        private sealed class AliasState : Dictionary<string, ValuePromise>, IPostDeserializationCallback
+        {
+            public void OnDeserialization()
+            {
+                foreach (var promise in Values)
+                {
+                    if (!promise.HasValue)
+                    {
+                        throw new AnchorNotFoundException(promise.Alias.Start, promise.Alias.End, string.Format(
+                            "Anchor '{0}' not found",
+                            promise.Alias.Value
+                        ));
+                    }
+                }
+            }
+        }
 
-		private sealed class ValuePromise : IValuePromise
-		{
-			public event Action<object> ValueAvailable;
+        private sealed class ValuePromise : IValuePromise
+        {
+            public event Action<object> ValueAvailable;
 
-			public bool HasValue { get; private set; }
+            public bool HasValue { get; private set; }
 
-			private object value;
+            private object value;
 
-			public readonly AnchorAlias Alias;
+            public readonly AnchorAlias Alias;
 
-			public ValuePromise(AnchorAlias alias)
-			{
-				this.Alias = alias;
-			}
+            public ValuePromise(AnchorAlias alias)
+            {
+                this.Alias = alias;
+            }
 
-			public ValuePromise(object value)
-			{
-				HasValue = true;
-				this.value = value;
-			}
+            public ValuePromise(object value)
+            {
+                HasValue = true;
+                this.value = value;
+            }
 
-			public object Value
-			{
-				get
-				{
-					if (!HasValue)
-					{
-						throw new InvalidOperationException("Value not set");
-					}
-					return value;
-				}
-				set
-				{
-					if (HasValue)
-					{
-						throw new InvalidOperationException("Value already set");
-					}
-					HasValue = true;
-					this.value = value;
+            public object Value
+            {
+                get
+                {
+                    if (!HasValue)
+                    {
+                        throw new InvalidOperationException("Value not set");
+                    }
+                    return value;
+                }
+                set
+                {
+                    if (HasValue)
+                    {
+                        throw new InvalidOperationException("Value already set");
+                    }
+                    HasValue = true;
+                    this.value = value;
 
-					if (ValueAvailable != null)
-					{
-						ValueAvailable(value);
-					}
-				}
-			}
-		}
-		
-		public object DeserializeValue (EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
-		{
-			object value;
-			var alias = reader.Allow<AnchorAlias>();
-			if(alias != null)
-			{
-				var aliasState = state.Get<AliasState>();
-				ValuePromise valuePromise;
-				if(!aliasState.TryGetValue(alias.Value, out valuePromise))
-				{
-					valuePromise = new ValuePromise(alias);
-					aliasState.Add(alias.Value, valuePromise);
-				}
+                    if (ValueAvailable != null)
+                    {
+                        ValueAvailable(value);
+                    }
+                }
+            }
+        }
+        
+        public object DeserializeValue (EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        {
+            object value;
+            var alias = reader.Allow<AnchorAlias>();
+            if(alias != null)
+            {
+                var aliasState = state.Get<AliasState>();
+                ValuePromise valuePromise;
+                if(!aliasState.TryGetValue(alias.Value, out valuePromise))
+                {
+                    valuePromise = new ValuePromise(alias);
+                    aliasState.Add(alias.Value, valuePromise);
+                }
 
-				return valuePromise.HasValue ? valuePromise.Value : valuePromise;
-			}
-			
-			string anchor = null;
-			
-			var nodeEvent = reader.Peek<NodeEvent>();
-			if(nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
-			{
-				anchor = nodeEvent.Anchor;
-			}
-			
-			value = innerDeserializer.DeserializeValue(reader, expectedType, state, nestedObjectDeserializer);
-			
-			if(anchor != null)
-			{
-				var aliasState = state.Get<AliasState>();
+                return valuePromise.HasValue ? valuePromise.Value : valuePromise;
+            }
+            
+            string anchor = null;
+            
+            var nodeEvent = reader.Peek<NodeEvent>();
+            if(nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
+            {
+                anchor = nodeEvent.Anchor;
+            }
+            
+            value = innerDeserializer.DeserializeValue(reader, expectedType, state, nestedObjectDeserializer);
+            
+            if(anchor != null)
+            {
+                var aliasState = state.Get<AliasState>();
 
-				ValuePromise valuePromise;
-				if (!aliasState.TryGetValue(anchor, out valuePromise))
-				{
-					aliasState.Add(anchor, new ValuePromise(value));
-				}
-				else if (!valuePromise.HasValue)
-				{
-					valuePromise.Value = value;
-				}
-				else
-				{
-					throw new DuplicateAnchorException(nodeEvent.Start, nodeEvent.End, string.Format(
-						"Anchor '{0}' already defined",
-						anchor
-					));
-				}
-			}
-			
-			return value;
-		}
-	}
+                ValuePromise valuePromise;
+                if (!aliasState.TryGetValue(anchor, out valuePromise))
+                {
+                    aliasState.Add(anchor, new ValuePromise(value));
+                }
+                else if (!valuePromise.HasValue)
+                {
+                    valuePromise.Value = value;
+                }
+                else
+                {
+                    throw new DuplicateAnchorException(nodeEvent.Start, nodeEvent.End, string.Format(
+                        "Anchor '{0}' already defined",
+                        anchor
+                    ));
+                }
+            }
+            
+            return value;
+        }
+    }
 }

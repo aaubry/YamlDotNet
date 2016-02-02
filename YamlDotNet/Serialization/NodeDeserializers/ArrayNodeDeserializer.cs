@@ -26,28 +26,28 @@ using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-	public sealed class ArrayNodeDeserializer : INodeDeserializer
-	{
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
-		{
-			if (!expectedType.IsArray)
-			{
-				value = false;
-				return false;
-			}
+    public sealed class ArrayNodeDeserializer : INodeDeserializer
+    {
+        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        {
+            if (!expectedType.IsArray)
+            {
+                value = false;
+                return false;
+            }
 
-			value = _deserializeHelper.Invoke(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
-			return true;
-		}
+            value = _deserializeHelper.Invoke(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
+            return true;
+        }
 
-		private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null));
+        private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null));
 
-		private static TItem[] DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
-		{
-			var items = new List<TItem>();
-			GenericCollectionNodeDeserializer.DeserializeHelper(reader, expectedType, nestedObjectDeserializer, items);
-			return items.ToArray();
-		}
-	}
+        private static TItem[] DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        {
+            var items = new List<TItem>();
+            GenericCollectionNodeDeserializer.DeserializeHelper(reader, expectedType, nestedObjectDeserializer, items);
+            return items.ToArray();
+        }
+    }
 }
 

@@ -28,101 +28,101 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Test.Core
 {
-	public class InsertionQueueTests
-	{
-		[Fact]
-		public void ShouldThrowExceptionWhenDequeuingEmptyContainer()
-		{
-			var queue = CreateQueue();
+    public class InsertionQueueTests
+    {
+        [Fact]
+        public void ShouldThrowExceptionWhenDequeuingEmptyContainer()
+        {
+            var queue = CreateQueue();
 
-			Action action = () => queue.Dequeue();
+            Action action = () => queue.Dequeue();
 
-			action.ShouldThrow<InvalidOperationException>();
-		}
+            action.ShouldThrow<InvalidOperationException>();
+        }
 
-		[Fact]
-		public void ShouldThrowExceptionWhenDequeuingContainerThatBecomesEmpty()
-		{
-			var queue = CreateQueue();
+        [Fact]
+        public void ShouldThrowExceptionWhenDequeuingContainerThatBecomesEmpty()
+        {
+            var queue = CreateQueue();
 
-			queue.Enqueue(1);
-			queue.Dequeue();
-			Action action = () => queue.Dequeue();
+            queue.Enqueue(1);
+            queue.Dequeue();
+            Action action = () => queue.Dequeue();
 
-			action.ShouldThrow<InvalidOperationException>();
-		}
+            action.ShouldThrow<InvalidOperationException>();
+        }
 
-		[Fact]
-		public void ShouldCorrectlyDequeueElementsAfterEnqueuing()
-		{
-			var queue = CreateQueue();
+        [Fact]
+        public void ShouldCorrectlyDequeueElementsAfterEnqueuing()
+        {
+            var queue = CreateQueue();
 
-			WithTheRange(0, 10).Run(queue.Enqueue);
+            WithTheRange(0, 10).Run(queue.Enqueue);
 
-			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-		}
+            OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        }
 
-		[Fact]
-		public void ShouldCorrectlyDequeueElementsWhenIntermixingEnqueuing()
-		{
-			var queue = CreateQueue();
-			
-			WithTheRange(0, 10).Run(queue.Enqueue);
-			PerformTimes(5, queue.Dequeue);
-			WithTheRange(10, 15).Run(queue.Enqueue);
+        [Fact]
+        public void ShouldCorrectlyDequeueElementsWhenIntermixingEnqueuing()
+        {
+            var queue = CreateQueue();
+            
+            WithTheRange(0, 10).Run(queue.Enqueue);
+            PerformTimes(5, queue.Dequeue);
+            WithTheRange(10, 15).Run(queue.Enqueue);
 
-			OrderOfElementsIn(queue).Should().Equal(5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-		}
+            OrderOfElementsIn(queue).Should().Equal(5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+        }
 
-		[Fact]
-		public void ShouldThrowExceptionWhenDequeuingAfterInserting()
-		{
-			var queue = CreateQueue();
+        [Fact]
+        public void ShouldThrowExceptionWhenDequeuingAfterInserting()
+        {
+            var queue = CreateQueue();
 
-			queue.Enqueue(1);
-			queue.Insert(0, 99);
-			PerformTimes(2, queue.Dequeue);
-			Action action = () => queue.Dequeue();
+            queue.Enqueue(1);
+            queue.Insert(0, 99);
+            PerformTimes(2, queue.Dequeue);
+            Action action = () => queue.Dequeue();
 
-			action.ShouldThrow<InvalidOperationException>();
-		}
+            action.ShouldThrow<InvalidOperationException>();
+        }
 
-		[Fact]
-		public void ShouldCorrectlyDequeueElementsWhenInserting()
-		{
-			var queue = CreateQueue();
+        [Fact]
+        public void ShouldCorrectlyDequeueElementsWhenInserting()
+        {
+            var queue = CreateQueue();
 
-			WithTheRange(0, 10).Run(queue.Enqueue);
-			queue.Insert(5, 99);
+            WithTheRange(0, 10).Run(queue.Enqueue);
+            queue.Insert(5, 99);
 
-			OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 99, 5, 6, 7, 8, 9);
-		}
+            OrderOfElementsIn(queue).Should().Equal(0, 1, 2, 3, 4, 99, 5, 6, 7, 8, 9);
+        }
 
-		private static InsertionQueue<int> CreateQueue()
-		{
-			return new InsertionQueue<int>();
-		}
+        private static InsertionQueue<int> CreateQueue()
+        {
+            return new InsertionQueue<int>();
+        }
 
-		private IEnumerable<int> WithTheRange(int from, int to)
-		{
-			return Enumerable.Range(@from, to - @from);
-		}
+        private IEnumerable<int> WithTheRange(int from, int to)
+        {
+            return Enumerable.Range(@from, to - @from);
+        }
 
-		private IEnumerable<int> OrderOfElementsIn(InsertionQueue<int> queue)
-		{
-			while (true)
-			{
-				if (queue.Count == 0)
-				{
-					yield break;
-				}
-				yield return queue.Dequeue();
-			}
-		}
+        private IEnumerable<int> OrderOfElementsIn(InsertionQueue<int> queue)
+        {
+            while (true)
+            {
+                if (queue.Count == 0)
+                {
+                    yield break;
+                }
+                yield return queue.Dequeue();
+            }
+        }
 
-		public void PerformTimes(int times, Func<int> func)
-		{
-			WithTheRange(0, times).Run(x => func());
-		}
-	}
+        public void PerformTimes(int times, Func<int> func)
+        {
+            WithTheRange(0, times).Run(x => func());
+        }
+    }
 }

@@ -29,247 +29,247 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Test.Core
 {
-	public class LookAheadBufferTests
-	{
-		private const string TestString = "abcdefghi";
-		private const int Capacity = 4;
+    public class LookAheadBufferTests
+    {
+        private const string TestString = "abcdefghi";
+        private const int Capacity = 4;
 
-		[Fact]
-		public void ShouldHaveReadOnceWhenPeekingAtOffsetZero()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceWhenPeekingAtOffsetZero()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(0).Should().Be('a');
-			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-		}
+            buffer.Peek(0).Should().Be('a');
+            A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+        }
 
-		[Fact]
-		public void ShouldHaveReadTwiceWhenPeekingAtOffsetOne()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadTwiceWhenPeekingAtOffsetOne()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(0);
+            buffer.Peek(0);
 
-			buffer.Peek(1).Should().Be('b');
-			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
-		}
+            buffer.Peek(1).Should().Be('b');
+            A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
+        }
 
-		[Fact]
-		public void ShouldHaveReadThriceWhenPeekingAtOffsetTwo()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadThriceWhenPeekingAtOffsetTwo()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(0);
-			buffer.Peek(1);
+            buffer.Peek(0);
+            buffer.Peek(1);
 
-			buffer.Peek(2).Should().Be('c');
-			A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Times(3));
-		}
+            buffer.Peek(2).Should().Be('c');
+            A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Times(3));
+        }
 
-		[Fact]
-		public void ShouldNotHaveReadAfterSkippingOneCharacter()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldNotHaveReadAfterSkippingOneCharacter()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
+            buffer.Peek(2);
 
-			using (OnlyTheseCalls)
-			{
-				buffer.Skip(1);
+            using (OnlyTheseCalls)
+            {
+                buffer.Skip(1);
 
-				buffer.Peek(0).Should().Be('b');
-				buffer.Peek(1).Should().Be('c');
-				A.CallTo(() => reader.Read()).MustNotHaveHappened();
-			}
-		}
+                buffer.Peek(0).Should().Be('b');
+                buffer.Peek(1).Should().Be('c');
+                A.CallTo(() => reader.Read()).MustNotHaveHappened();
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingOneCharacter()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceAfterSkippingOneCharacter()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
+            buffer.Peek(2);
 
-			using (OnlyTheseCalls)
-			{
-				buffer.Skip(1);
+            using (OnlyTheseCalls)
+            {
+                buffer.Skip(1);
 
-				buffer.Peek(2).Should().Be('d');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-			}
-		}
+                buffer.Peek(2).Should().Be('d');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadTwiceAfterSkippingOneCharacter()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadTwiceAfterSkippingOneCharacter()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
+            buffer.Peek(2);
 
-			using (OnlyTheseCalls) {
-				buffer.Skip(1);
+            using (OnlyTheseCalls) {
+                buffer.Skip(1);
 
-				buffer.Peek(3).Should().Be('e');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
-			}
-		}
+                buffer.Peek(3).Should().Be('e');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingFiveCharacters()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceAfterSkippingFiveCharacters()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
-			buffer.Skip(1);
-			buffer.Peek(3);
+            buffer.Peek(2);
+            buffer.Skip(1);
+            buffer.Peek(3);
 
-			using (OnlyTheseCalls) {
-				buffer.Skip(4);
+            using (OnlyTheseCalls) {
+                buffer.Skip(4);
 
-				buffer.Peek(0).Should().Be('f');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-			}
-		}
+                buffer.Peek(0).Should().Be('f');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingSixCharacters()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceAfterSkippingSixCharacters()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
-			buffer.Skip(1);
-			buffer.Peek(3);
-			buffer.Skip(4);
-			buffer.Peek(0);
+            buffer.Peek(2);
+            buffer.Skip(1);
+            buffer.Peek(3);
+            buffer.Skip(4);
+            buffer.Peek(0);
 
-			using (OnlyTheseCalls) {
-				buffer.Skip(1);
+            using (OnlyTheseCalls) {
+                buffer.Skip(1);
 
-				buffer.Peek(0).Should().Be('g');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-			}
-		}
+                buffer.Peek(0).Should().Be('g');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingSevenCharacters() {
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceAfterSkippingSevenCharacters() {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
-			buffer.Skip(1);
-			buffer.Peek(3);
-			buffer.Skip(4);
-			buffer.Peek(1);
+            buffer.Peek(2);
+            buffer.Skip(1);
+            buffer.Peek(3);
+            buffer.Skip(4);
+            buffer.Peek(1);
 
-			using (OnlyTheseCalls) {
-				buffer.Skip(2);
+            using (OnlyTheseCalls) {
+                buffer.Skip(2);
 
-				buffer.Peek(0).Should().Be('h');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-			}
-		}
+                buffer.Peek(0).Should().Be('h');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingEightCharacters()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceAfterSkippingEightCharacters()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
-			buffer.Skip(1);
-			buffer.Peek(3);
-			buffer.Skip(4);
-			buffer.Peek(2);
+            buffer.Peek(2);
+            buffer.Skip(1);
+            buffer.Peek(3);
+            buffer.Skip(4);
+            buffer.Peek(2);
 
-			using (OnlyTheseCalls) {
-				buffer.Skip(3);
+            using (OnlyTheseCalls) {
+                buffer.Skip(3);
 
-				buffer.Peek(0).Should().Be('i');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-			}
-		}
+                buffer.Peek(0).Should().Be('i');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
 
-		[Fact]
-		public void ShouldHaveReadOnceAfterSkippingNineCharacters()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldHaveReadOnceAfterSkippingNineCharacters()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
-			buffer.Skip(1);
-			buffer.Peek(3);
-			buffer.Skip(4);
-			buffer.Peek(3);
+            buffer.Peek(2);
+            buffer.Skip(1);
+            buffer.Peek(3);
+            buffer.Skip(4);
+            buffer.Peek(3);
 
-			using (OnlyTheseCalls) {
-				buffer.Skip(4);
+            using (OnlyTheseCalls) {
+                buffer.Skip(4);
 
-				buffer.Peek(0).Should().Be('\0');
-				A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-			}
-		}
+                buffer.Peek(0).Should().Be('\0');
+                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
 
-		[Fact]
-		public void ShouldFindEndOfInput()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldFindEndOfInput()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(2);
-			buffer.Skip(1);
-			buffer.Peek(3);
-			buffer.Skip(4);
-			buffer.Peek(3);
-			buffer.Skip(4);
-			buffer.Peek(0);
+            buffer.Peek(2);
+            buffer.Skip(1);
+            buffer.Peek(3);
+            buffer.Skip(4);
+            buffer.Peek(3);
+            buffer.Skip(4);
+            buffer.Peek(0);
 
-			buffer.EndOfInput.Should().BeTrue();
-		}
+            buffer.EndOfInput.Should().BeTrue();
+        }
 
-		[Fact]
-		public void ShouldThrowWhenPeekingBeyondCapacity()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldThrowWhenPeekingBeyondCapacity()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			Action action = () => buffer.Peek(4);
+            Action action = () => buffer.Peek(4);
 
-			action.ShouldThrow<ArgumentOutOfRangeException>();
-		}
+            action.ShouldThrow<ArgumentOutOfRangeException>();
+        }
 
-		[Fact]
-		public void ShouldThrowWhenSkippingBeyondCurrentBuffer()
-		{
-			var reader = CreateFakeReader(TestString);
-			var buffer = CreateBuffer(reader, Capacity);
+        [Fact]
+        public void ShouldThrowWhenSkippingBeyondCurrentBuffer()
+        {
+            var reader = CreateFakeReader(TestString);
+            var buffer = CreateBuffer(reader, Capacity);
 
-			buffer.Peek(3);
-			Action action = () => buffer.Skip(5);
+            buffer.Peek(3);
+            Action action = () => buffer.Skip(5);
 
-			action.ShouldThrow<ArgumentOutOfRangeException>();
-		}
+            action.ShouldThrow<ArgumentOutOfRangeException>();
+        }
 
-		private static TextReader CreateFakeReader(string text)
-		{
-			return A.Fake<TextReader>(x => x.Wrapping(new StringReader(text)));
-		}
+        private static TextReader CreateFakeReader(string text)
+        {
+            return A.Fake<TextReader>(x => x.Wrapping(new StringReader(text)));
+        }
 
-		private static LookAheadBuffer CreateBuffer(TextReader reader, int capacity)
-		{
-			return new LookAheadBuffer(reader, capacity);
-		}
+        private static LookAheadBuffer CreateBuffer(TextReader reader, int capacity)
+        {
+            return new LookAheadBuffer(reader, capacity);
+        }
 
-		private static IFakeScope OnlyTheseCalls
-		{
-			get { return Fake.CreateScope(); }
-		}
-	}
+        private static IFakeScope OnlyTheseCalls
+        {
+            get { return Fake.CreateScope(); }
+        }
+    }
 }

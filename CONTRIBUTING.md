@@ -72,7 +72,7 @@ Attempt to follow the [SOLID](https://en.wikipedia.org/wiki/SOLID_%28object-orie
 
 As long as you keep the code readable, I don't care too much about any specific coding convention. There are only a few rules that should be honored:
 
-* Use **tabs** instead of spaces. The entire code base is tab-indented, and there's no value in changing.
+* Use **4 spaces** to indent.
 * Each class / interface / struct / delegate **goes to its own file**.
   * The only acceptable exception is for small and closely related types.
 * Use sane indentation rules. Break long lines when needed, but don't be obsessive:
