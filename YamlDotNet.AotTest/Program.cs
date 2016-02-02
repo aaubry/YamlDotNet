@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.AotTest
 {
@@ -67,33 +68,48 @@ namespace YamlDotNet.AotTest
 
             //Console.WriteLine(typeof(Dictionary<string, Item<int>>).AssemblyQualifiedName);
 
-            var deserializer = new Deserializer();
-            var deserialized = deserializer.Deserialize<object>(new StringReader(@"
-                - !<!YamlDotNet.AotTest.ArrayContainer%601%5B%5BYamlDotNet.AotTest.Item%601%5B%5BSystem.String%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089%5D%5D%2C%20YamlDotNet.AotTest%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull%5D%5D%2C%20YamlDotNet.AotTest%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull>
-                  Items:
-                    - Id: 1
-                      Value: abc
-                    - Id: 2
-                      Value: def
-                - !<!System.Collections.Generic.Dictionary%602%5B%5BSystem.String%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089%5D%2C%5BYamlDotNet.AotTest.Item%601%5B%5BSystem.Int32%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089%5D%5D%2C%20YamlDotNet.AotTest%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull%5D%5D%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089>
-                  first:
-                    Id: 1
-                    Value: 10
-                  second:
-                    Id: 2
-                    Value: 20
-            "));
+//            var deserializer = new Deserializer();
+//            var deserialized = deserializer.Deserialize<object>(new StringReader(@"
+//                - !<!YamlDotNet.AotTest.ArrayContainer%601%5B%5BYamlDotNet.AotTest.Item%601%5B%5BSystem.String%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089%5D%5D%2C%20YamlDotNet.AotTest%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull%5D%5D%2C%20YamlDotNet.AotTest%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull>
+//                  Items:
+//                    - Id: 1
+//                      Value: abc
+//                    - Id: 2
+//                      Value: def
+//                - !<!System.Collections.Generic.Dictionary%602%5B%5BSystem.String%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089%5D%2C%5BYamlDotNet.AotTest.Item%601%5B%5BSystem.Int32%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089%5D%5D%2C%20YamlDotNet.AotTest%2C%20Version%3D1.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Dnull%5D%5D%2C%20mscorlib%2C%20Version%3D2.0.0.0%2C%20Culture%3Dneutral%2C%20PublicKeyToken%3Db77a5c561934e089>
+//                  first:
+//                    Id: 1
+//                    Value: 10
+//                  second:
+//                    Id: 2
+//                    Value: 20
+//            "));
 
-            Console.WriteLine();
-            foreach (var item in (IEnumerable)deserialized)
-            {
-                Console.WriteLine(item.GetType().FullName);
-            }
-            Console.WriteLine();
+//            Console.WriteLine();
+//            foreach (var item in (IEnumerable)deserialized)
+//            {
+//                Console.WriteLine(item.GetType().FullName);
+//            }
+//            Console.WriteLine();
 
-            var serializer = new Serializer();
-            serializer.Serialize(Console.Out, deserialized);
+//            var serializer = new Serializer();
+//            serializer.Serialize(Console.Out, deserialized);
+
+            string doc =
+@"myDictionary:
+    winners: 3";
+
+        var input = new StringReader(doc);
+        var deserializer = new Deserializer(namingConvention: new CamelCaseNamingConvention());
+        var order = deserializer.Deserialize<MyObject>(input);
+
+        Console.WriteLine("winners: " + order.myDictionary["winners"]);
         }
+    }
+
+    public class MyObject
+    {
+        public Dictionary<string, int> myDictionary { get; set; }
     }
 
     public class ArrayContainer<T>
