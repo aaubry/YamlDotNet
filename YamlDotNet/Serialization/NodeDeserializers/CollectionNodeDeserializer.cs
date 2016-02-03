@@ -91,7 +91,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 else if (canUpdate)
                 {
-                    var index = result.Add(tItem.IsValueType ? Activator.CreateInstance(tItem) : null);
+                    var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
                     promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
                 }
                 else

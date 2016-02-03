@@ -40,12 +40,12 @@ namespace YamlDotNet.Helpers
         {
             this.genericCollection = genericCollection;
 
-            addMethod = genericCollectionType.GetMethod("Add");
-            countGetter = genericCollectionType.GetProperty("Count").GetGetMethod();
+            addMethod = genericCollectionType.GetPublicInstanceMethod("Add");
+            countGetter = genericCollectionType.GetPublicProperty("Count").GetGetMethod();
 
             if (genericListType != null)
             {
-                indexerSetter = genericListType.GetProperty("Item").GetSetMethod();
+                indexerSetter = genericListType.GetPublicProperty("Item").GetSetMethod();
             }
         }
 

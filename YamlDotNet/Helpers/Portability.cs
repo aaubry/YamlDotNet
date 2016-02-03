@@ -208,6 +208,11 @@ namespace YamlDotNet
             return type.GetTypeInfo().GenericTypeArguments;
         }
 
+        public static PropertyInfo GetPublicProperty(this Type type, string name)
+        {
+            return type.GetRuntimeProperty(name);
+        }
+
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
             var instancePublic = new Func<PropertyInfo, bool>(
@@ -240,9 +245,20 @@ namespace YamlDotNet
                 });
         }
 
+        public static MethodInfo GetPublicInstanceMethod(this Type type, string name)
+        {
+            return type.GetRuntimeMethods()
+                .FirstOrDefault(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name));
+        }
+
         public static MethodInfo GetGetMethod(this PropertyInfo property)
         {
             return property.GetMethod;
+        }
+
+        public static MethodInfo GetSetMethod(this PropertyInfo property)
+        {
+            return property.SetMethod;
         }
 
         public static IEnumerable<Type> GetInterfaces(this Type type)
@@ -338,6 +354,11 @@ namespace YamlDotNet
         {
             return Type.GetTypeCode(type);
         }
+  
+        public static PropertyInfo GetPublicProperty(this Type type, string name)
+        {
+            return type.GetProperty(name);
+        }
  
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
@@ -357,6 +378,11 @@ namespace YamlDotNet
         public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
         {
             return type.GetMethod(name, BindingFlags.Public | BindingFlags.Static, null, parameterTypes, null);
+        }
+
+        public static MethodInfo GetPublicInstanceMethod(this Type type, string name)
+        {
+            return type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance);
         }
 
         private static readonly FieldInfo remoteStackTraceField = typeof(Exception)

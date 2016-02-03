@@ -41,7 +41,7 @@ namespace YamlDotNet.Helpers
             this.genericDictionary = genericDictionary;
             this.genericDictionaryType = genericDictionaryType;
 
-            indexerSetter = genericDictionaryType.GetProperty("Item").GetSetMethod();
+            indexerSetter = genericDictionaryType.GetPublicProperty("Item").GetSetMethod();
         }
 
         public void Add(object key, object value)
@@ -137,8 +137,8 @@ namespace YamlDotNet.Helpers
                 var genericArguments = genericDictionaryType.GetGenericArguments();
                 var keyValuePairType = typeof(KeyValuePair<,>).MakeGenericType(genericArguments);
 
-                getKeyMethod = keyValuePairType.GetProperty("Key").GetGetMethod();
-                getValueMethod = keyValuePairType.GetProperty("Value").GetGetMethod();
+                getKeyMethod = keyValuePairType.GetPublicProperty("Key").GetGetMethod();
+                getValueMethod = keyValuePairType.GetPublicProperty("Value").GetGetMethod();
 
                 enumerator = ((IEnumerable)genericDictionary).GetEnumerator();
             }

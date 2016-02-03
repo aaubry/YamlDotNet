@@ -164,7 +164,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
         {
             visitor.VisitMappingStart(dictionary, keyType, valueType);
 
-            var isDynamic = dictionary.GetType().FullName.Equals("System.Dynamic.ExpandoObject");
+            var isDynamic = dictionary.Type.FullName.Equals("System.Dynamic.ExpandoObject");
             foreach (DictionaryEntry entry in (IDictionary)dictionary.Value)
             {
                 var keyString = isDynamic ? namingConvention.Apply(entry.Key.ToString()) : entry.Key.ToString();
