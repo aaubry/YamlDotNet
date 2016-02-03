@@ -22,9 +22,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -104,115 +104,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
             reader.Expect<SequenceEnd>();
-        }
-
-        /// <summary>
-        /// Adapts an <see cref="ICollection{T}" /> to <see cref="IList" />
-        /// because not all generic collections implement <see cref="IList" />.
-        /// </summary>
-        private sealed class GenericCollectionToNonGenericAdapter : IList
-        {
-            private readonly object genericCollection;
-            private readonly MethodInfo addMethod;
-            private readonly MethodInfo indexerSetter;
-            private readonly MethodInfo countGetter;
-
-            public GenericCollectionToNonGenericAdapter(object genericCollection, Type genericCollectionType, Type genericListType)
-            {
-                this.genericCollection = genericCollection;
-
-                addMethod = genericCollectionType.GetMethod("Add");
-                countGetter = genericCollectionType.GetProperty("Count").GetGetMethod();
-
-                if (genericListType != null)
-                {
-                    indexerSetter = genericListType.GetProperty("Item").GetSetMethod();
-                }
-            }
-
-            public int Add(object value)
-            {
-                var index = (int)countGetter.Invoke(genericCollection, null);
-                addMethod.Invoke(genericCollection, new object[] { value });
-                return index;
-            }
-
-            public void Clear()
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool Contains(object value)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int IndexOf(object value)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Insert(int index, object value)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool IsFixedSize
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public bool IsReadOnly
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public void Remove(object value)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void RemoveAt(int index)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object this[int index]
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    indexerSetter.Invoke(genericCollection, new object[] { index, value });
-                }
-            }
-
-            public void CopyTo(Array array, int index)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int Count
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public bool IsSynchronized
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public object SyncRoot
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public IEnumerator GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-        }
+        }        
     }
 }

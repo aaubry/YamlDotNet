@@ -261,6 +261,8 @@
     <Compile Include="Serialization\NodeDeserializers\EnumerableNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\CollectionNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\DictionaryNodeDeserializer.cs" />
+    <Compile Include="Helpers\GenericCollectionToNonGenericAdapter.cs" />
+    <Compile Include="Helpers\GenericDictionaryToNonGenericAdapter.cs" />
     <Compile Include="Serialization\NodeDeserializers\NullNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ObjectNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ScalarNodeDeserializer.cs" />
