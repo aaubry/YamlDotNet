@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.PerformanceTests.Runner
 {
@@ -43,7 +44,8 @@ namespace YamlDotNet.PerformanceTests.Runner
             var testPrograms = Directory.GetDirectories(baseDir)
                 .Select(d => Path.Combine(d, Path.Combine("bin", configuration)))
                 .Where(d => d != currentDir)
-                .SelectMany(d => Directory.GetFiles(d, "*.exe"));
+                .SelectMany(d => Directory.GetFiles(d, "*.exe"))
+                .Where(f => Regex.IsMatch(f, @"Release\\YamlDotNet.PerformanceTests.(vlatest|v\d+\.\d+\.\d+)\.exe$"));
 
             var testResults = new List<TestResult>();
             foreach(var testProgram in testPrograms)
