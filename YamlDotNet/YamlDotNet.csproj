@@ -111,8 +111,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-		<TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-	</PropertyGroup>
+    <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-UnitySubset-v35|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug-UnitySubset-v35\</OutputPath>
@@ -124,8 +124,8 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-		<TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-	</PropertyGroup>
+    <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -204,6 +204,7 @@
     <Compile Include="Core\Tokens\VersionDirective.cs" />
     <Compile Include="Core\Version.cs" />
     <Compile Include="Core\YamlException.cs" />
+    <Compile Include="Properties\AssemblyInfo.Generated.cs" />
     <Compile Include="RepresentationModel\DocumentLoadingState.cs" />
     <Compile Include="RepresentationModel\EmitterState.cs" />
     <Compile Include="RepresentationModel\IYamlVisitor.cs" />
@@ -328,11 +329,14 @@
   </ItemGroup>
   <Import Condition="'$(ImportPortableTargets)' == 'false'" Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Condition="'$(ImportPortableTargets)' == 'true'" Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="BeforeBuild">
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.Generated.cs" Lines="[assembly: System.Reflection.AssemblyConfiguration(&quot;$(Configuration)&quot;)]" Overwrite="true" Encoding="Unicode" />
+  </Target>
 </Project>
