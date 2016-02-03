@@ -19,18 +19,16 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FakeItEasy;
+using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Dynamic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using FakeItEasy;
-using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -1048,73 +1046,100 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(-123, value);
         }
 
+        [Fact]
+        public void GenericDictionaryThatDoesNotImplementIDictionaryCanBeDeserialized()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
+                a: 1
+                b: 2
+            "));
+
+            Assert.Equal("1", deserialized["a"]);
+            Assert.Equal("2", deserialized["b"]);
+        }
+
+        [Fact]
+        public void GenericListThatDoesNotImplementIListCanBeDeserialized()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<GenericTestList<string>>(Yaml.ReaderForText(@"
+                - a
+                - b
+            "));
+
+            Assert.Contains("a", deserialized);
+            Assert.Contains("b", deserialized);
+        }
+
         #region Test Dictionary that implements IDictionary<,>, but not IDictionary
         public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         {
-            private readonly Dictionary<TKey, TValue> _dictionary;
+            private readonly Dictionary<TKey, TValue> dictionary;
+
             public GenericTestDictionary()
             {
-                _dictionary = new Dictionary<TKey, TValue>();
+                dictionary = new Dictionary<TKey, TValue>();
             }
             public void Add(TKey key, TValue value)
             {
-                _dictionary.Add(key, value);
+                dictionary.Add(key, value);
             }
 
             public bool ContainsKey(TKey key)
             {
-                return _dictionary.ContainsKey(key);
+                return dictionary.ContainsKey(key);
             }
 
             public ICollection<TKey> Keys
             {
-                get { return _dictionary.Keys; }
+                get { return dictionary.Keys; }
             }
 
             public bool Remove(TKey key)
             {
-                return _dictionary.Remove(key);
+                return dictionary.Remove(key);
             }
 
             public bool TryGetValue(TKey key, out TValue value)
             {
-                return _dictionary.TryGetValue(key, out value);
+                return dictionary.TryGetValue(key, out value);
             }
 
             public ICollection<TValue> Values
             {
-                get { return _dictionary.Values; }
+                get { return dictionary.Values; }
             }
 
             public TValue this[TKey key]
             {
-                get { return _dictionary[key]; }
-                set { _dictionary[key] = value; }
+                get { return dictionary[key]; }
+                set { dictionary[key] = value; }
             }
 
             public void Add(KeyValuePair<TKey, TValue> item)
             {
-                ((IDictionary<TKey, TValue>)_dictionary).Add(item);
+                ((IDictionary<TKey, TValue>)dictionary).Add(item);
             }
 
             public void Clear()
             {
-                _dictionary.Clear();
+                dictionary.Clear();
             }
 
             public bool Contains(KeyValuePair<TKey, TValue> item)
             {
-                return ((IDictionary<TKey, TValue>)_dictionary).Contains(item);
+                return ((IDictionary<TKey, TValue>)dictionary).Contains(item);
             }
 
             public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
             {
-                ((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
+                ((IDictionary<TKey, TValue>)dictionary).CopyTo(array, arrayIndex);
             }
 
             public int Count
             {
-                get { return _dictionary.Count; }
+                get { return dictionary.Count; }
             }
 
             public bool IsReadOnly
@@ -1124,17 +1149,101 @@ namespace YamlDotNet.Test.Serialization
 
             public bool Remove(KeyValuePair<TKey, TValue> item)
             {
-                return ((IDictionary<TKey, TValue>)_dictionary).Remove(item);
+                return ((IDictionary<TKey, TValue>)dictionary).Remove(item);
             }
 
             public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
             {
-                return _dictionary.GetEnumerator();
+                return dictionary.GetEnumerator();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return _dictionary.GetEnumerator();
+                return dictionary.GetEnumerator();
+            }
+        }
+        #endregion
+
+        #region Test List that implements IList<>, but not IList
+        public class GenericTestList<T> : IList<T>
+        {
+            private readonly List<T> list;
+
+            public GenericTestList()
+            {
+                list = new List<T>();
+            }
+
+            public int IndexOf(T item)
+            {
+                return list.IndexOf(item);
+            }
+
+            public void Insert(int index, T item)
+            {
+                list.Insert(index, item);
+            }
+
+            public void RemoveAt(int index)
+            {
+                list.RemoveAt(index);
+            }
+
+            public T this[int index]
+            {
+                get
+                {
+                    return list[index];
+                }
+                set
+                {
+                    list[index] = value;
+                }
+            }
+
+            public void Add(T item)
+            {
+                list.Add(item);
+            }
+
+            public void Clear()
+            {
+                list.Clear();
+            }
+
+            public bool Contains(T item)
+            {
+                return list.Contains(item);
+            }
+
+            public void CopyTo(T[] array, int arrayIndex)
+            {
+                list.CopyTo(array, arrayIndex);
+            }
+
+            public int Count
+            {
+                get { return list.Count; }
+            }
+
+            public bool IsReadOnly
+            {
+                get { return false; }
+            }
+
+            public bool Remove(T item)
+            {
+                return list.Remove(item);
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return list.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return list.GetEnumerator();
             }
         }
         #endregion

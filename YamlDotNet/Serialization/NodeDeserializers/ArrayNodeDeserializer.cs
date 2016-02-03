@@ -20,9 +20,8 @@
 //  SOFTWARE.
 
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using YamlDotNet.Core;
-using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
@@ -36,17 +35,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            value = _deserializeHelper.Invoke(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
+            var itemType = expectedType.GetElementType();
+
+            var items = new ArrayList();
+            CollectionNodeDeserializer.DeserializeHelper(itemType, reader, expectedType, nestedObjectDeserializer, items, true);
+
+            var array = Array.CreateInstance(itemType, items.Count);
+            items.CopyTo(array);
+
+            value = array;
             return true;
-        }
-
-        private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null));
-
-        private static TItem[] DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
-        {
-            var items = new List<TItem>();
-            GenericCollectionNodeDeserializer.DeserializeHelper(reader, expectedType, nestedObjectDeserializer, items);
-            return items.ToArray();
         }
     }
 }

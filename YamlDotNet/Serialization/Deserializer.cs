@@ -106,10 +106,8 @@ namespace YamlDotNet.Serialization
             NodeDeserializers.Add(new NullNodeDeserializer());
             NodeDeserializers.Add(new ScalarNodeDeserializer());
             NodeDeserializers.Add(new ArrayNodeDeserializer());
-            NodeDeserializers.Add(new GenericDictionaryNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new NonGenericDictionaryNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new GenericCollectionNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new NonGenericListNodeDeserializer(objectFactory));
+            NodeDeserializers.Add(new DictionaryNodeDeserializer(objectFactory));
+            NodeDeserializers.Add(new CollectionNodeDeserializer(objectFactory));
             NodeDeserializers.Add(new EnumerableNodeDeserializer());
             NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched));
 
