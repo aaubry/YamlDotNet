@@ -98,6 +98,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepresentationModel\BinarySerlializationTests.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />
+    <Compile Include="Serialization\GenericTestDictionary.cs" />
+    <Compile Include="Serialization\GenericTestList.cs" />
     <Compile Include="Serialization\NamingConventionTests.cs" />
     <Compile Include="Serialization\ObjectFactoryTests.cs" />
     <Compile Include="Serialization\SerializationTestHelper.cs" />

@@ -27,6 +27,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\YamlDotNet.Test\Serialization\GenericTestDictionary.cs">
+      <Link>GenericTestDictionary.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
