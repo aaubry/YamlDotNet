@@ -259,10 +259,8 @@
     <Compile Include="Serialization\NamingConventions\UnderscoredNamingConvention.cs" />
     <Compile Include="Serialization\NodeDeserializers\ArrayNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\EnumerableNodeDeserializer.cs" />
-    <Compile Include="Serialization\NodeDeserializers\GenericCollectionNodeDeserializer.cs" />
-    <Compile Include="Serialization\NodeDeserializers\GenericDictionaryNodeDeserializer.cs" />
-    <Compile Include="Serialization\NodeDeserializers\NonGenericDictionaryNodeDeserializer.cs" />
-    <Compile Include="Serialization\NodeDeserializers\NonGenericListNodeDeserializer.cs" />
+    <Compile Include="Serialization\NodeDeserializers\CollectionNodeDeserializer.cs" />
+    <Compile Include="Serialization\NodeDeserializers\DictionaryNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\NullNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ObjectNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ScalarNodeDeserializer.cs" />
@@ -349,6 +347,6 @@
   </Target>
   -->
   <Target Name="BeforeBuild">
-    <WriteLinesToFile File="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.Generated.cs" Lines="[assembly: System.Reflection.AssemblyConfiguration(&quot;$(Configuration)&quot;)]" Overwrite="true" Encoding="Unicode" />
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)\Properties\AssemblyInfo.Generated.cs" Lines="[assembly: System.Reflection.AssemblyConfiguration(&quot;$(Configuration)&quot;)]" Overwrite="true" />
   </Target>
 </Project>
