@@ -20,9 +20,8 @@
 //  SOFTWARE.
 
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using YamlDotNet.Core;
-using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
@@ -36,17 +35,118 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            value = _deserializeHelper.Invoke(new[] { expectedType.GetElementType() }, reader, expectedType, nestedObjectDeserializer);
+            var itemType = expectedType.GetElementType();
+
+            var items = new ArrayList();
+            CollectionNodeDeserializer.DeserializeHelper(itemType, reader, expectedType, nestedObjectDeserializer, items, true);
+
+            var array = Array.CreateInstance(itemType, items.Count);
+            items.CopyTo(array, 0);
+
+            value = array;
             return true;
         }
 
-        private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null));
-
-        private static TItem[] DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        private sealed class ArrayList : IList
         {
-            var items = new List<TItem>();
-            GenericCollectionNodeDeserializer.DeserializeHelper(reader, expectedType, nestedObjectDeserializer, items);
-            return items.ToArray();
+            private object[] data;
+            private int count;
+
+            public ArrayList()
+            {
+                Clear();
+            }
+
+            public int Add(object value)
+            {
+                if (count == data.Length)
+                {
+                    Array.Resize(ref data, data.Length * 2);
+                }
+                data[count] = value;
+                return count++;
+            }
+
+            public void Clear()
+            {
+                data = new object[10];
+                count = 0;
+            }
+
+            public bool Contains(object value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int IndexOf(object value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Insert(int index, object value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool IsFixedSize
+            {
+                get { return false; }
+            }
+
+            public bool IsReadOnly
+            {
+                get { return false; }
+            }
+
+            public void Remove(object value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void RemoveAt(int index)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object this[int index]
+            {
+                get
+                {
+                    return data[index];
+                }
+                set
+                {
+                    data[index] = value;
+                }
+            }
+
+            public void CopyTo(Array array, int index)
+            {
+                Array.Copy(data, 0, array, index, count);
+            }
+
+            public int Count
+            {
+                get { return count; }
+            }
+
+            public bool IsSynchronized
+            {
+                get { return false; }
+            }
+
+            public object SyncRoot
+            {
+                get { return data; }
+            }
+
+            public IEnumerator GetEnumerator()
+            {
+                for (int i = 0; i < count; ++i)
+                {
+                    yield return data[i];
+                }
+            }
         }
     }
 }

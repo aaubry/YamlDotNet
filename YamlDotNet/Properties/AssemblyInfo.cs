@@ -30,11 +30,6 @@ using System.Runtime.CompilerServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("YamlDotNet")]
 [assembly: AssemblyDescription("The YamlDotNet library.")]
-#if DEBUG
-[assembly: AssemblyConfiguration("Debug")]
-#else
-[assembly: AssemblyConfiguration("Release")]
-#endif
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("YamlDotNet")]
 [assembly: AssemblyCopyright("Copyright © Antoine Aubry and contributors 2008, 2009, 2010, 2011, 2012, 2013, 2014")]

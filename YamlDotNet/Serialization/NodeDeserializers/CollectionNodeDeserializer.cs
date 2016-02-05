@@ -20,59 +20,79 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class GenericCollectionNodeDeserializer : INodeDeserializer
+    public sealed class CollectionNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory _objectFactory;
 
-        public GenericCollectionNodeDeserializer(IObjectFactory objectFactory)
+        public CollectionNodeDeserializer(IObjectFactory objectFactory)
         {
             _objectFactory = objectFactory;
         }
 
         bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
         {
-            var iCollection = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
-            if (iCollection == null)
+            IList list;
+            bool canUpdate = true;
+            Type itemType;
+            var genericCollectionType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
+            if (genericCollectionType != null)
+            {
+                var genericArguments = genericCollectionType.GetGenericArguments();
+                itemType = genericArguments[0];
+
+                value = _objectFactory.Create(expectedType);
+                list = value as IList;
+                if (list == null)
+                {
+                    var genericListType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IList<>));
+                    canUpdate = genericListType != null;
+                    list = new GenericCollectionToNonGenericAdapter(value, genericCollectionType, genericListType);
+                }
+            }
+            else if (typeof(IList).IsAssignableFrom(expectedType))
+            {
+                itemType = typeof(object);
+
+                value = _objectFactory.Create(expectedType);
+                list = (IList)value;
+            }
+            else
             {
                 value = false;
                 return false;
             }
 
-            value = _objectFactory.Create(expectedType);
-            _deserializeHelper.Invoke(iCollection.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
+            DeserializeHelper(itemType, reader, expectedType, nestedObjectDeserializer, list, canUpdate);
 
             return true;
         }
 
-        private static readonly GenericStaticMethod _deserializeHelper = new GenericStaticMethod(() => DeserializeHelper<object>(null, null, null, null));
-
-        internal static void DeserializeHelper<TItem>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, ICollection<TItem> result)
+        internal static void DeserializeHelper(Type tItem, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
         {
-            var list = result as IList<TItem>;
-
             reader.Expect<SequenceStart>();
             while (!reader.Accept<SequenceEnd>())
             {
                 var current = reader.Parser.Current;
 
-                var value = nestedObjectDeserializer(reader, typeof(TItem));
+                var value = nestedObjectDeserializer(reader, tItem);
                 var promise = value as IValuePromise;
                 if (promise == null)
                 {
-                    result.Add(TypeConverter.ChangeType<TItem>(value));
+                    result.Add(TypeConverter.ChangeType(value, tItem));
                 }
-                else if(list != null)
+                else if (canUpdate)
                 {
-                    var index = list.Count;
-                    result.Add(default(TItem));
-                    promise.ValueAvailable += v => list[index] = TypeConverter.ChangeType<TItem>(v);
+                    var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
+                    promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
                 }
                 else
                 {
@@ -84,6 +104,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
             reader.Expect<SequenceEnd>();
-        }
+        }        
     }
 }

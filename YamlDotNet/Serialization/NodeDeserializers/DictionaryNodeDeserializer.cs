@@ -20,55 +20,71 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class GenericDictionaryNodeDeserializer : INodeDeserializer
+    public sealed class DictionaryNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory _objectFactory;
 
-        public GenericDictionaryNodeDeserializer(IObjectFactory objectFactory)
+        public DictionaryNodeDeserializer(IObjectFactory objectFactory)
         {
             _objectFactory = objectFactory;
         }
-    
+
         bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
         {
-            var iDictionary = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IDictionary<,>));
-            if (iDictionary == null)
+            IDictionary dictionary;
+            Type keyType, valueType;
+            var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IDictionary<,>));
+            if (genericDictionaryType != null)
             {
-                value = false;
+                var genericArguments = genericDictionaryType.GetGenericArguments();
+                keyType = genericArguments[0];
+                valueType = genericArguments[1];
+
+                value = _objectFactory.Create(expectedType);
+
+                dictionary = value as IDictionary;
+                if (dictionary == null)
+                {
+                    dictionary = new GenericDictionaryToNonGenericAdapter(value, genericDictionaryType);
+                }
+            }
+            else if (typeof(IDictionary).IsAssignableFrom(expectedType))
+            {
+                keyType = typeof(object);
+                valueType = typeof(object);
+
+                value = _objectFactory.Create(expectedType);
+                dictionary = (IDictionary)value;
+            }
+            else
+            {
+                value = null;
                 return false;
             }
 
-            reader.Expect<MappingStart>();
-
-            value = _objectFactory.Create(expectedType);
-            deserializeHelperMethod.Invoke(iDictionary.GetGenericArguments(), reader, expectedType, nestedObjectDeserializer, value);
-
-            reader.Expect<MappingEnd>();
+            DeserializeHelper(keyType, valueType, reader, expectedType, nestedObjectDeserializer, dictionary);
 
             return true;
         }
 
-        private static readonly GenericStaticMethod deserializeHelperMethod =
-            new GenericStaticMethod(() => DeserializeHelper<object, object>(null, null, null, null));
-
-        //private static MethodInfo _deserializeHelperMethod = typeof(GenericDictionaryNodeDeserializer)
-        //    .GetMethod("DeserializeHelper", BindingFlags.Static | BindingFlags.NonPublic);
-
-        private static void DeserializeHelper<TKey, TValue>(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary<TKey, TValue> result)
+        private static void DeserializeHelper(Type tKey, Type tValue, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary result)
         {
+            reader.Expect<MappingStart>();
             while (!reader.Accept<MappingEnd>())
             {
-                var key = nestedObjectDeserializer(reader, typeof(TKey));
+                var key = nestedObjectDeserializer(reader, tKey);
                 var keyPromise = key as IValuePromise;
 
-                var value = nestedObjectDeserializer(reader, typeof(TValue));
+                var value = nestedObjectDeserializer(reader, tValue);
                 var valuePromise = value as IValuePromise;
 
                 if (keyPromise == null)
@@ -76,12 +92,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Happy path: both key and value are known
-                        result[(TKey)key] = (TValue)value;
+                        result[key] = value;
                     }
                     else
                     {
                         // Key is known, value is pending
-                        valuePromise.ValueAvailable += v => result[(TKey)key] = (TValue)v;
+                        valuePromise.ValueAvailable += v => result[key] = v;
                     }
                 }
                 else
@@ -89,7 +105,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Key is pending, value is known
-                        keyPromise.ValueAvailable += v => result[(TKey)v] = (TValue)value;
+                        keyPromise.ValueAvailable += v => result[v] = value;
                     }
                     else
                     {
@@ -100,7 +116,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[(TKey)v] = (TValue)value;
+                                result[v] = value;
                             }
                             else
                             {
@@ -113,7 +129,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[(TKey)key] = (TValue)v;
+                                result[key] = v;
                             }
                             else
                             {
@@ -124,6 +140,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                 }
             }
+            reader.Expect<MappingEnd>();
         }
     }
 }

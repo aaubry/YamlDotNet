@@ -17,7 +17,7 @@ build:
   publish_nuget: true
 
 build_script:
-  - ps:  .\build.ps1
+  - ps: .\build.ps1
 
 test_script:
   - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release\YamlDotNet.Test.dll" -appveyor'

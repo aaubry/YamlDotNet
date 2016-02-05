@@ -19,18 +19,16 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FakeItEasy;
+using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Dynamic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using FakeItEasy;
-using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -1048,95 +1046,30 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(-123, value);
         }
 
-        #region Test Dictionary that implements IDictionary<,>, but not IDictionary
-        public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+        [Fact]
+        public void GenericDictionaryThatDoesNotImplementIDictionaryCanBeDeserialized()
         {
-            private readonly Dictionary<TKey, TValue> _dictionary;
-            public GenericTestDictionary()
-            {
-                _dictionary = new Dictionary<TKey, TValue>();
-            }
-            public void Add(TKey key, TValue value)
-            {
-                _dictionary.Add(key, value);
-            }
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
+                a: 1
+                b: 2
+            "));
 
-            public bool ContainsKey(TKey key)
-            {
-                return _dictionary.ContainsKey(key);
-            }
-
-            public ICollection<TKey> Keys
-            {
-                get { return _dictionary.Keys; }
-            }
-
-            public bool Remove(TKey key)
-            {
-                return _dictionary.Remove(key);
-            }
-
-            public bool TryGetValue(TKey key, out TValue value)
-            {
-                return _dictionary.TryGetValue(key, out value);
-            }
-
-            public ICollection<TValue> Values
-            {
-                get { return _dictionary.Values; }
-            }
-
-            public TValue this[TKey key]
-            {
-                get { return _dictionary[key]; }
-                set { _dictionary[key] = value; }
-            }
-
-            public void Add(KeyValuePair<TKey, TValue> item)
-            {
-                ((IDictionary<TKey, TValue>)_dictionary).Add(item);
-            }
-
-            public void Clear()
-            {
-                _dictionary.Clear();
-            }
-
-            public bool Contains(KeyValuePair<TKey, TValue> item)
-            {
-                return ((IDictionary<TKey, TValue>)_dictionary).Contains(item);
-            }
-
-            public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-            {
-                ((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
-            }
-
-            public int Count
-            {
-                get { return _dictionary.Count; }
-            }
-
-            public bool IsReadOnly
-            {
-                get { return false; }
-            }
-
-            public bool Remove(KeyValuePair<TKey, TValue> item)
-            {
-                return ((IDictionary<TKey, TValue>)_dictionary).Remove(item);
-            }
-
-            public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-            {
-                return _dictionary.GetEnumerator();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return _dictionary.GetEnumerator();
-            }
+            Assert.Equal("1", deserialized["a"]);
+            Assert.Equal("2", deserialized["b"]);
         }
-        #endregion
+
+        [Fact]
+        public void GenericListThatDoesNotImplementIListCanBeDeserialized()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<GenericTestList<string>>(Yaml.ReaderForText(@"
+                - a
+                - b
+            "));
+
+            Assert.Contains("a", deserialized);
+            Assert.Contains("b", deserialized);
+        }
     }
 }
