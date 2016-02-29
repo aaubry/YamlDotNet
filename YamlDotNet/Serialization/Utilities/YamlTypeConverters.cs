@@ -26,11 +26,9 @@ namespace YamlDotNet.Serialization.Utilities
 {
     internal static class YamlTypeConverters
     {
-        private static readonly IEnumerable<IYamlTypeConverter> _builtInTypeConverters = new IYamlTypeConverter[]
+        public static IEnumerable<IYamlTypeConverter> GetBuiltInConverters(bool jsonCompatible)
         {
-            new GuidConverter(),
-        };
-
-        public static IEnumerable<IYamlTypeConverter> BuiltInConverters { get { return _builtInTypeConverters; } }
+            yield return new GuidConverter(jsonCompatible);
+        }
     }
 }

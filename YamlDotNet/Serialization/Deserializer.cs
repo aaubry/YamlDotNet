@@ -96,7 +96,7 @@ namespace YamlDotNet.Serialization
                 );
 
             converters = new List<IYamlTypeConverter>();
-            foreach (IYamlTypeConverter yamlTypeConverter in YamlTypeConverters.BuiltInConverters)
+            foreach (IYamlTypeConverter yamlTypeConverter in YamlTypeConverters.GetBuiltInConverters(false))
             {
                 converters.Add(yamlTypeConverter);
             }

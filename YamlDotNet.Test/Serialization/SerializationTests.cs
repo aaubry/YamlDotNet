@@ -575,7 +575,7 @@ namespace YamlDotNet.Test.Serialization
             Serializer.Serialize(writer, guid);
             var serialized = writer.ToString();
             Dump.WriteLine(writer.ToString());
-            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid");
+            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: " + serialized);
         }
 
         [Fact]
@@ -1070,6 +1070,20 @@ namespace YamlDotNet.Test.Serialization
 
             Assert.Contains("a", deserialized);
             Assert.Contains("b", deserialized);
+        }
+
+        [Fact]
+        public void GuidsShouldBeQuotedWhenSerializedAsJson()
+        {
+            var sut = new Serializer(SerializationOptions.JsonCompatible | SerializationOptions.EmitDefaults);
+
+            var yamlAsJson = new StringWriter();
+            sut.Serialize(yamlAsJson, new
+            {
+                id = Guid.Empty
+            });
+
+            Assert.Contains("\"00000000-0000-0000-0000-000000000000\"", yamlAsJson.ToString());
         }
     }
 }

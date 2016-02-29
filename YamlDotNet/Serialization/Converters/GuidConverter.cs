@@ -19,6 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using YamlDotNet.Core;
+
 namespace YamlDotNet.Serialization.Converters
 {
     /// <summary>
@@ -26,6 +28,13 @@ namespace YamlDotNet.Serialization.Converters
     /// </summary>
     public class GuidConverter : IYamlTypeConverter
     {
+        private readonly bool jsonCompatible;
+
+        public GuidConverter(bool jsonCompatible)
+        {
+            this.jsonCompatible = jsonCompatible;
+        }
+
         public bool Accepts(System.Type type)
         {
             return type == typeof (System.Guid);
@@ -41,7 +50,7 @@ namespace YamlDotNet.Serialization.Converters
         public void WriteYaml(Core.IEmitter emitter, object value, System.Type type)
         {
             var guid = (System.Guid) value;
-            emitter.Emit(new Core.Events.Scalar(guid.ToString("D")));
+            emitter.Emit(new Core.Events.Scalar(null, null, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }
 }

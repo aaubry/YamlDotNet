@@ -17,7 +17,7 @@ namespace YamlDotNet.Test.Serialization
                 .Where(t => !t.IsInterface && interfaceType.IsAssignableFrom(t));
 
             var unregisteredTypes = converterTypes
-                .Where(t => !YamlTypeConverters.BuiltInConverters.Any(c => c.GetType() == t))
+                .Where(t => !YamlTypeConverters.GetBuiltInConverters(false).Any(c => c.GetType() == t))
                 .ToArray();
 
             Assert.Equal(new Type[0], unregisteredTypes);
