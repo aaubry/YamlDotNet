@@ -75,7 +75,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public void RegisterTypeConverter(IYamlTypeConverter converter)
         {
-            Converters.Add(converter);
+            Converters.Insert(0, converter);
         }
 
         /// <summary>

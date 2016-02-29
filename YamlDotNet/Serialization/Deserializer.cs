@@ -133,7 +133,7 @@ namespace YamlDotNet.Serialization
 
         public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
         {
-            converters.Add(typeConverter);
+            converters.Insert(0, typeConverter);
         }
 
         public T Deserialize<T>(TextReader input)
