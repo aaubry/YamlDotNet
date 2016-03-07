@@ -1702,7 +1702,7 @@ namespace YamlDotNet.Core
 
             if (analyzer.IsSpace() || analyzer.IsBreak())
             {
-                var indentHint = string.Format(CultureInfo.InvariantCulture, "{0}\0", bestIndent);
+                var indentHint = string.Format(CultureInfo.InvariantCulture, "{0}", bestIndent);
                 WriteIndicator(indentHint, false, false, false);
             }
 
