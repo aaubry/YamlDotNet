@@ -76,7 +76,8 @@ namespace YamlDotNet.Serialization
         public Deserializer(
             IObjectFactory objectFactory = null,
             INamingConvention namingConvention = null,
-            bool ignoreUnmatched = false)
+            bool ignoreUnmatched = false,
+            YamlAttributeOverrides overrides = null)
         {
             objectFactory = objectFactory ?? new DefaultObjectFactory();
             namingConvention = namingConvention ?? new NullNamingConvention();
@@ -84,14 +85,17 @@ namespace YamlDotNet.Serialization
             typeDescriptor.TypeDescriptor =
                 new CachedTypeInspector(
                     new YamlAttributesTypeInspector(
-                        new NamingConventionTypeInspector(
-                            new ReadableAndWritablePropertiesTypeInspector(
-                                new ReadablePropertiesTypeInspector(
-                                    new StaticTypeResolver()
-                                )
-                            ),
-                            namingConvention
-                        )
+            			new YamlAttributeOverridesInspector(
+	                        new NamingConventionTypeInspector(
+	                            new ReadableAndWritablePropertiesTypeInspector(
+	                                new ReadablePropertiesTypeInspector(
+	                                    new StaticTypeResolver()
+	                                )
+	                            ),
+	                            namingConvention
+	                        ),
+            				overrides
+            			)
                     )
                 );
 

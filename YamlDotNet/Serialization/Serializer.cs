@@ -43,16 +43,19 @@ namespace YamlDotNet.Serialization
         private readonly SerializationOptions options;
         private readonly INamingConvention namingConvention;
         private readonly ITypeResolver typeResolver;
+        private readonly YamlAttributeOverrides overrides;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="options">Options that control how the serialization is to be performed.</param>
         /// <param name="namingConvention">Naming strategy to use for serialized property names</param>
-        public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null)
+        /// <param name="overrides">Yaml attribute overrides</param>
+        public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null, YamlAttributeOverrides overrides = null)
         {
             this.options = options;
             this.namingConvention = namingConvention ?? new NullNamingConvention();
+            this.overrides = overrides;
 
             Converters = new List<IYamlTypeConverter>();
             foreach (IYamlTypeConverter yamlTypeConverter in Utilities.YamlTypeConverters.GetBuiltInConverters(IsOptionSet(SerializationOptions.JsonCompatible)))
@@ -195,6 +198,9 @@ namespace YamlDotNet.Serialization
             }
 
             typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
+
+            typeDescriptor = new YamlAttributeOverridesInspector(typeDescriptor, overrides);
+
             typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
             if (IsOptionSet(SerializationOptions.DefaultToStaticType))
             {
