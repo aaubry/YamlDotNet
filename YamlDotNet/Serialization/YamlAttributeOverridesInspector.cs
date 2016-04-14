@@ -95,7 +95,7 @@ namespace YamlDotNet.Serialization
             public T GetCustomAttribute<T>() where T : Attribute
             {
                 // Check for a Property
-                var prop = classType.GetProperty(Name);
+                var prop = classType.GetPublicProperty(Name);
                 if (prop != null)
                 {
                     var attr = overrides.GetAttribute<T>(prop.DeclaringType, Name);

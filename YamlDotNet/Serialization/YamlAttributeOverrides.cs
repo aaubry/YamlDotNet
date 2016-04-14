@@ -84,7 +84,7 @@ namespace YamlDotNet.Serialization
             	dict.Add(member, list);
             }
             
-            if (list.Any(attr => attr.GetType().IsInstanceOfType(attribute)))
+            if (list.Any(attr => attr.GetType().IsInstanceOf(attribute)))
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Attribute ({3}) already set for Type {0}, Member {1}", type.FullName, member, attribute));
 
             list.Add(attribute);

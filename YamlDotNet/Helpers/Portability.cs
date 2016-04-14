@@ -270,6 +270,11 @@ namespace YamlDotNet
         {
             return ex.InnerException;
         }
+        
+        public static bool IsInstanceOf(this Type type, object o)
+        {
+        	return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type)
+        }
     }
 
     internal enum TypeCode
@@ -396,6 +401,11 @@ namespace YamlDotNet
                 remoteStackTraceField.SetValue(ex.InnerException, ex.InnerException.StackTrace + "\r\n");
             }
             return result;
+        }
+        
+        public static bool IsInstanceOf(this Type type, object o)
+        {
+        	return type.IsInstanceOfType(o);
         }
     }
 
