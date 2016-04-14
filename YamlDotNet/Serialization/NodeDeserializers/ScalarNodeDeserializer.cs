@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (expectedType.IsEnum())
             {
-                value = Enum.Parse(expectedType, scalar.Value);
+                value = Enum.Parse(expectedType, scalar.Value, true);
             }
             else
             {
