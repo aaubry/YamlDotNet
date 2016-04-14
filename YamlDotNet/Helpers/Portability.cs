@@ -273,7 +273,7 @@ namespace YamlDotNet
         
         public static bool IsInstanceOf(this Type type, object o)
         {
-        	return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type)
+        	return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type);
         }
     }
 
