@@ -336,6 +336,14 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
+        /// Gets the type of node.
+        /// </summary>
+        public override YamlNodeType NodeType
+        {
+            get { return YamlNodeType.Mapping; }
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>
