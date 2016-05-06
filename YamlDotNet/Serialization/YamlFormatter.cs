@@ -47,6 +47,16 @@ namespace YamlDotNet.Serialization
             return Convert.ToString(number, NumberFormat);
         }
 
+        public static string FormatNumber(double number)
+        {
+            return number.ToString("G17", NumberFormat);
+        }
+
+        public static string FormatNumber(float number)
+        {
+            return number.ToString("G17", NumberFormat);
+        }
+
         public static string FormatBoolean(object boolean)
         {
             return boolean.Equals(true) ? "true" : "false";
