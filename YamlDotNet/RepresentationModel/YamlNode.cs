@@ -204,5 +204,13 @@ namespace YamlDotNet.RepresentationModel
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the type of node.
+        /// </summary>
+        public abstract YamlNodeType NodeType
+        {
+            get;
+        }
     }
 }

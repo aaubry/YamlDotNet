@@ -38,6 +38,7 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
             Assert.Equal("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value);
+            Assert.Equal (YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
         }
         
         [Fact]

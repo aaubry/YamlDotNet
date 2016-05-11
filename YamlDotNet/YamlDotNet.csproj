@@ -225,6 +225,7 @@
     <Compile Include="RepresentationModel\YamlMappingNode.cs" />
     <Compile Include="RepresentationModel\YamlNode.cs" />
     <Compile Include="RepresentationModel\YamlNodeIdentityEqualityComparer.cs" />
+    <Compile Include="RepresentationModel\YamlNodeType.cs" />
     <Compile Include="RepresentationModel\YamlScalarNode.cs" />
     <Compile Include="RepresentationModel\YamlSequenceNode.cs" />
     <Compile Include="RepresentationModel\YamlStream.cs" />

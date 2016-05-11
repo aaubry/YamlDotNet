@@ -164,5 +164,13 @@ namespace YamlDotNet.RepresentationModel
         {
             get { yield return this; }
         }
+
+        /// <summary>
+        /// Gets the type of node.
+        /// </summary>
+        public override YamlNodeType NodeType
+        {
+            get { return YamlNodeType.Scalar; }
+        }
     }
 }
