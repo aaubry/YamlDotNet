@@ -251,6 +251,30 @@ namespace YamlDotNet.Test.Serialization
 
             output.AliasTest.Should().Be(input.AliasTest);
         }
+        
+        [Fact]
+        public void RoundtripAliasOverride()
+        {
+            var writer = new StringWriter();
+            var input = new NameConvention { AliasTest = "Fourth" };
+
+            var overrides = new YamlAttributeOverrides();
+            var attribute = new YamlMemberAttribute();
+            attribute.Alias = "fourthOverride";
+            overrides.Add(typeof(NameConvention), "AliasTest", attribute);
+            var serializer = new Serializer(overrides: overrides);
+            
+            serializer.Serialize(writer, input, input.GetType());
+            var text = writer.ToString();
+
+            // Todo: use RegEx once FluentAssertions 2.2 is released
+            text.TrimEnd('\r', '\n').Should().Be("fourthOverride: Fourth");
+
+            var deserializer = new Deserializer(overrides: overrides);
+            var output = deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
+
+            output.AliasTest.Should().Be(input.AliasTest);
+        }
 
         [Fact]
         // Todo: is the assert on the string necessary?
@@ -696,6 +720,25 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializationRespectsYamlIgnoreOverride()
+        {
+
+            var writer = new StringWriter();
+            var obj = new Simple();
+
+            var overrides = new YamlAttributeOverrides();
+            var ignore = new YamlIgnoreAttribute();
+            overrides.Add(typeof(Simple), "aaa", ignore);
+            var serializer = new Serializer(overrides: overrides);
+            
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+            Dump.WriteLine(serialized);
+
+            serialized.Should().NotContain("aaa");
+        }
+
+        [Fact]
         public void SerializationRespectsScalarStyle()
         {
             var writer = new StringWriter();
@@ -707,6 +750,70 @@ namespace YamlDotNet.Test.Serialization
 
             serialized.Should()
                 .Be("LiteralString: |-\r\n  Test\r\nDoubleQuotedString: \"Test\"\r\n", "the properties should be specifically styled");
+        }
+
+        [Fact]
+        public void SerializationRespectsScalarStyleOverride()
+        {
+            var writer = new StringWriter();
+            var obj = new ScalarStyleExample();
+
+            var overrides = new YamlAttributeOverrides();
+            var style1 = new YamlMemberAttribute();
+            style1.ScalarStyle = ScalarStyle.DoubleQuoted;
+            var style2 = new YamlMemberAttribute();
+            style2.ScalarStyle = ScalarStyle.Literal;
+            overrides.Add(typeof(ScalarStyleExample), "LiteralString", style1);
+            overrides.Add(typeof(ScalarStyleExample), "DoubleQuotedString", style2);
+            
+            var serializer = new Serializer(overrides: overrides);
+            
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+            Dump.WriteLine(serialized);
+
+            serialized.Should()
+                .Be("LiteralString: \"Test\"\r\nDoubleQuotedString: |-\r\n  Test\r\n", "the properties should be specifically styled");
+        }
+        
+        [Fact]
+        public void SerializationDerivedAttributeOverride()
+        {
+            var writer = new StringWriter();
+            var obj = new Derived { DerivedProperty = "Derived", BaseProperty = "Base" };
+
+            var overrides = new YamlAttributeOverrides();
+            var ignore = new YamlIgnoreAttribute();
+            overrides.Add(typeof(Derived), "DerivedProperty", ignore);
+            
+            var serializer = new Serializer(overrides: overrides);
+            
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+            Dump.WriteLine(serialized);
+
+            serialized.Should()
+                .Be("BaseProperty: Base\r\n", "the derived property should be specifically ignored");
+        }
+        
+        [Fact]
+        public void SerializationBaseAttributeOverride()
+        {
+            var writer = new StringWriter();
+            var obj = new Derived { DerivedProperty = "Derived", BaseProperty = "Base" };
+
+            var overrides = new YamlAttributeOverrides();
+            var ignore = new YamlIgnoreAttribute();
+            overrides.Add(typeof(Base), "BaseProperty", ignore);
+            
+            var serializer = new Serializer(overrides: overrides);
+            
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+            Dump.WriteLine(serialized);
+
+            serialized.Should()
+                .Be("DerivedProperty: Derived\r\n", "the base property should be specifically ignored");
         }
 
         [Fact]
