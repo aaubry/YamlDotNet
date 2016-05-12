@@ -19,6 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FluentAssertions;
+using System.Collections;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
@@ -271,6 +273,63 @@ namespace YamlDotNet.Test.Core
             public static implicit operator MappingStart(MappingStartBuilder builder)
             {
                 return new MappingStart(null, builder.tag, builder.@implicit, builder.style);
+            }
+        }
+
+        protected void AssertSequenceOfEventsFrom(IParser parser, params ParsingEvent[] events)
+        {
+            var eventNumber = 1;
+            foreach (var expected in events)
+            {
+                parser.MoveNext().Should().BeTrue("Missing parse event number {0}", eventNumber);
+                AssertEvent(expected, parser.Current, eventNumber);
+                eventNumber++;
+            }
+            parser.MoveNext().Should().BeFalse("Found extra parse events");
+        }
+
+        protected void AssertEvent(ParsingEvent expected, ParsingEvent actual, int eventNumber)
+        {
+            actual.GetType().Should().Be(expected.GetType(), "Parse event {0} is not of the expected type.", eventNumber);
+
+            foreach (var property in expected.GetType().GetProperties())
+            {
+                if (property.PropertyType == typeof(Mark) || !property.CanRead)
+                {
+                    continue;
+                }
+
+                var value = property.GetValue(actual, null);
+                var expectedValue = property.GetValue(expected, null);
+                if (expectedValue is IEnumerable && !(expectedValue is string))
+                {
+                    Dump.Write("\t{0} = {{", property.Name);
+                    Dump.Write(string.Join(", ", (IEnumerable)value));
+                    Dump.WriteLine("}");
+
+                    if (expectedValue is ICollection && value is ICollection)
+                    {
+                        var expectedCount = ((ICollection)expectedValue).Count;
+                        var valueCount = ((ICollection)value).Count;
+                        valueCount.Should().Be(expectedCount, "Compared size of collections in property {0} in parse event {1}",
+                            property.Name, eventNumber);
+                    }
+
+                    var values = ((IEnumerable)value).GetEnumerator();
+                    var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
+                    while (expectedValues.MoveNext())
+                    {
+                        values.MoveNext().Should().BeTrue("Property {0} in parse event {1} had too few elements", property.Name, eventNumber);
+                        values.Current.Should().Be(expectedValues.Current,
+                            "Compared element in property {0} in parse event {1}", property.Name, eventNumber);
+                    }
+                    values.MoveNext().Should().BeFalse("Property {0} in parse event {1} had too many elements", property.Name, eventNumber);
+                }
+                else
+                {
+                    Dump.WriteLine("\t{0} = {1}", property.Name, value);
+                    value.Should().Be(expectedValue, "Compared property {0} in parse event {1}", property.Name, eventNumber);
+                }
             }
         }
     }

@@ -329,6 +329,29 @@ namespace YamlDotNet.Test.Core
                 .Contain("- ''");
         }
 
+        [Theory]
+        [InlineData("b-carriage-return,b-line-feed\r\nlll", "b-carriage-return,b-line-feed\nlll")]
+        [InlineData("b-carriage-return\rlll", "b-carriage-return\nlll")]
+        [InlineData("b-line-feed\nlll", "b-line-feed\nlll")]
+        [InlineData("b-next-line\x85lll", "b-next-line\nlll")]
+        [InlineData("b-line-separator\x2028lll", "b-line-separator\x2028lll")]
+        [InlineData("b-paragraph-separator\x2029lll", "b-paragraph-separator\x2029lll")]
+        public void NewLinesAreNotDuplicatedWhenEmitted(string input, string expected)
+        {
+            var yaml = EmittedTextFrom(StreamOf(DocumentWith(
+                LiteralScalar(input)
+            )));
+
+            var parser = new Parser(new StringReader(yaml));
+
+            AssertSequenceOfEventsFrom(Yaml.ParserForText(yaml),
+                StreamStart,
+                DocumentStart(Implicit),
+                LiteralScalar(expected),
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
+
         private string Lines(params string[] lines)
         {
             return string.Join(Environment.NewLine, lines);
