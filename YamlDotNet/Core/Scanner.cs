@@ -1466,8 +1466,11 @@ namespace YamlDotNet.Core
                 }
 
                 // Consume the line break.
-
-                leadingBreak.Append(ReadLine());
+                var lineBreak = ReadLine();
+                if (lineBreak != '\0')
+                {
+                    leadingBreak.Append(lineBreak);
+                }
 
                 // Eat the following intendation spaces and line breaks.
 
