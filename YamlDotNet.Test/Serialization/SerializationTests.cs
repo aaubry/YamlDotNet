@@ -1123,25 +1123,45 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        public void SpecialFloatsAreSerializedCorrectly()
+        public void SpecialDoublesAreSerializedAndDeserializedCorrectly()
         {
-            var serializer = new Serializer();
-
-            var buffer = new StringWriter();
-            serializer.Serialize(buffer, new double[]
+            var expected = new double[]
             {
-                double.NaN,
-                double.PositiveInfinity,
-                double.NegativeInfinity,
-            });
+                double.MaxValue,
+                double.MinValue
+            };
+
+            var serializer = new Serializer();
+            var buffer = new StringWriter();
+            serializer.Serialize(buffer, expected);
 
             var text = buffer.ToString();
+            var deserializer = new Deserializer();
+            var value = deserializer.Deserialize<double[]>(new StringReader(text));
 
-            Assert.Contains("- .nan", text);
-            Assert.Contains("- .inf", text);
-            Assert.Contains("- -.inf", text);
+            Assert.Equal(expected, value);
         }
 
+        [Fact]
+        public void SpecialFloatsAreSerializedAndDeserializedCorrectly()
+        {
+            var expected = new float[]
+            {
+                float.MaxValue,
+                float.MinValue
+            };
+
+            var serializer = new Serializer();
+            var buffer = new StringWriter();
+            serializer.Serialize(buffer, expected);
+
+            var text = buffer.ToString();
+            var deserializer = new Deserializer();
+            var value = deserializer.Deserialize<float[]>(new StringReader(text));
+
+            Assert.Equal(expected, value);
+        }
+        
         [Fact]
         public void NegativeIntegersCanBeDeserialized()
         {

@@ -63,7 +63,15 @@ namespace YamlDotNet.Serialization.EventEmitters
                     break;
 
                 case TypeCode.Single:
+                    eventInfo.Tag = "tag:yaml.org,2002:float";
+                    eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)eventInfo.Source.Value);
+                    break;
+
                 case TypeCode.Double:
+                    eventInfo.Tag = "tag:yaml.org,2002:float";
+                    eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)eventInfo.Source.Value);
+                    break;
+
                 case TypeCode.Decimal:
                     eventInfo.Tag = "tag:yaml.org,2002:float";
                     eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
