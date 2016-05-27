@@ -18,6 +18,8 @@ release/*
 packages
 packages/*
 !packages/repositories.config
+.vs
+project.lock.json
 
 README.html
 
