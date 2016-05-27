@@ -3,16 +3,6 @@
   "dependencies": {
   },
   "frameworks": {
-    "net35": { },
-    "netstandard1.0": {
-      "buildOptions": {
-        "define": [ "PORTABLE" ]
-      },
-      "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24027",
-        "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24027"
-      }
-    },
     ".NETPortable,Version=v4.5,Profile=Profile259": {
       "buildOptions": {
         "define": [ "PORTABLE" ]
@@ -28,8 +18,24 @@
         "System.Reflection": "",
         "System.Runtime": "",
         "System.Runtime.Extensions": "",
+        "System.Runtime.Serialization": "",
         "System.Text.Encoding": "",
-        "System.Text.RegularExpressions": ""
+        "System.Text.Encoding.Extensions": "",
+        "System.Text.RegularExpressions": "",
+        "System.Diagnostics.Debug": "",
+        "System.Diagnostics.Tools": "",
+        "System.Reflection.Extensions": "",
+        "System.ObjectModel": ""
+      }
+    },
+    "net35": { },
+    "netstandard1.0": {
+      "buildOptions": {
+        "define": [ "PORTABLE" ]
+      },
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-rc2-24027",
+        "System.Runtime.Serialization.Primitives": "4.1.1-rc2-24027"
       }
     }
   }
