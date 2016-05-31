@@ -27,6 +27,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
@@ -251,7 +253,7 @@ namespace YamlDotNet.Test.Serialization
 
             output.AliasTest.Should().Be(input.AliasTest);
         }
-        
+
         [Fact]
         public void RoundtripAliasOverride()
         {
@@ -263,7 +265,7 @@ namespace YamlDotNet.Test.Serialization
             attribute.Alias = "fourthOverride";
             overrides.Add(typeof(NameConvention), "AliasTest", attribute);
             var serializer = new Serializer(overrides: overrides);
-            
+
             serializer.Serialize(writer, input, input.GetType());
             var text = writer.ToString();
 
@@ -730,7 +732,7 @@ namespace YamlDotNet.Test.Serialization
             var ignore = new YamlIgnoreAttribute();
             overrides.Add(typeof(Simple), "aaa", ignore);
             var serializer = new Serializer(overrides: overrides);
-            
+
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
             Dump.WriteLine(serialized);
@@ -765,9 +767,9 @@ namespace YamlDotNet.Test.Serialization
             style2.ScalarStyle = ScalarStyle.Literal;
             overrides.Add(typeof(ScalarStyleExample), "LiteralString", style1);
             overrides.Add(typeof(ScalarStyleExample), "DoubleQuotedString", style2);
-            
+
             var serializer = new Serializer(overrides: overrides);
-            
+
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
             Dump.WriteLine(serialized);
@@ -775,7 +777,7 @@ namespace YamlDotNet.Test.Serialization
             serialized.Should()
                 .Be("LiteralString: \"Test\"\r\nDoubleQuotedString: |-\r\n  Test\r\n", "the properties should be specifically styled");
         }
-        
+
         [Fact]
         public void SerializationDerivedAttributeOverride()
         {
@@ -785,9 +787,9 @@ namespace YamlDotNet.Test.Serialization
             var overrides = new YamlAttributeOverrides();
             var ignore = new YamlIgnoreAttribute();
             overrides.Add(typeof(Derived), "DerivedProperty", ignore);
-            
+
             var serializer = new Serializer(overrides: overrides);
-            
+
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
             Dump.WriteLine(serialized);
@@ -795,7 +797,7 @@ namespace YamlDotNet.Test.Serialization
             serialized.Should()
                 .Be("BaseProperty: Base\r\n", "the derived property should be specifically ignored");
         }
-        
+
         [Fact]
         public void SerializationBaseAttributeOverride()
         {
@@ -805,9 +807,9 @@ namespace YamlDotNet.Test.Serialization
             var overrides = new YamlAttributeOverrides();
             var ignore = new YamlIgnoreAttribute();
             overrides.Add(typeof(Base), "BaseProperty", ignore);
-            
+
             var serializer = new Serializer(overrides: overrides);
-            
+
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
             Dump.WriteLine(serialized);
@@ -1100,68 +1102,66 @@ namespace YamlDotNet.Test.Serialization
             writer.ToString().Should().Contain("new_key_here: new_value");
         }
 
-        [Fact]
-        public void SpecialFloatsAreDeserializedCorrectly()
+        [Theory, MemberData("SpecialFloats")]
+        public void SpecialFloatsAreHandledCorrectly(FloatTestCase testCase)
         {
-            var deserializer = new Deserializer();
-            var doubles = deserializer.Deserialize<List<double>>(Yaml.ReaderForText(@"
-                - .nan
-                - .inf
-                - -.inf
-                - 2.3e4
-                - 1
-            "));
-
-            Assert.Equal(new double[]
-            {
-                double.NaN,
-                double.PositiveInfinity,
-                double.NegativeInfinity,
-                23000,
-                1.0
-            }, doubles);
-        }
-
-        [Fact]
-        public void SpecialDoublesAreSerializedAndDeserializedCorrectly()
-        {
-            var expected = new double[]
-            {
-                double.MaxValue,
-                double.MinValue
-            };
-
             var serializer = new Serializer();
             var buffer = new StringWriter();
-            serializer.Serialize(buffer, expected);
+            serializer.Serialize(buffer, testCase.Value);
 
-            var text = buffer.ToString();
+            var firstLine = buffer.ToString().Split('\r', '\n')[0];
+            Assert.Equal(testCase.ExpectedTextRepresentation, firstLine);
+
             var deserializer = new Deserializer();
-            var value = deserializer.Deserialize<double[]>(new StringReader(text));
+            var deserializedValue = deserializer.Deserialize(new StringReader(buffer.ToString()), testCase.Value.GetType());
 
-            Assert.Equal(expected, value);
+            Assert.Equal(testCase.Value, deserializedValue);
         }
 
-        [Fact]
-        public void SpecialFloatsAreSerializedAndDeserializedCorrectly()
+        public class FloatTestCase
         {
-            var expected = new float[]
+            private readonly string description;
+            public object Value { get; private set; }
+            public string ExpectedTextRepresentation { get; private set; }
+
+            public FloatTestCase(string description, object value, string expectedTextRepresentation)
             {
-                float.MaxValue,
-                float.MinValue
-            };
+                this.description = description;
+                Value = value;
+                ExpectedTextRepresentation = expectedTextRepresentation;
+            }
 
-            var serializer = new Serializer();
-            var buffer = new StringWriter();
-            serializer.Serialize(buffer, expected);
-
-            var text = buffer.ToString();
-            var deserializer = new Deserializer();
-            var value = deserializer.Deserialize<float[]>(new StringReader(text));
-
-            Assert.Equal(expected, value);
+            public override string ToString()
+            {
+                return description;
+            }
         }
-        
+
+        public static IEnumerable<object[]> SpecialFloats
+        {
+            get
+            {
+                return
+                    new[]
+                    {
+                        new FloatTestCase("double.NaN", double.NaN, ".nan"),
+                        new FloatTestCase("double.PositiveInfinity", double.PositiveInfinity, ".inf"),
+                        new FloatTestCase("double.NegativeInfinity", double.NegativeInfinity, "-.inf"),
+                        new FloatTestCase("double.Epsilon", double.Epsilon, "4.9406564584124654E-324"),
+                        new FloatTestCase("double.MinValue", double.MinValue, "-1.7976931348623157E+308"),
+                        new FloatTestCase("double.MaxValue", double.MaxValue, "1.7976931348623157E+308"),
+                        
+                        new FloatTestCase("float.NaN", float.NaN, ".nan"),
+                        new FloatTestCase("float.PositiveInfinity", float.PositiveInfinity, ".inf"),
+                        new FloatTestCase("float.NegativeInfinity", float.NegativeInfinity, "-.inf"),
+                        new FloatTestCase("float.Epsilon", float.Epsilon, "1.40129846E-45"),
+                        new FloatTestCase("float.MinValue", float.MinValue, "-3.40282347E+38"),
+                        new FloatTestCase("float.MaxValue", float.MaxValue, "3.40282347E+38"),
+                    }
+                    .Select(tc => new object[] { tc });
+            }
+        }
+
         [Fact]
         public void NegativeIntegersCanBeDeserialized()
         {
