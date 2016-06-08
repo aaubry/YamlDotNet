@@ -18,6 +18,7 @@ release/*
 packages
 packages/*
 !packages/repositories.config
+.vscode
 
 README.html
 
