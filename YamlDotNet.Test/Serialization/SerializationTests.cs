@@ -42,6 +42,31 @@ namespace YamlDotNet.Test.Serialization
 {
     public class SerializationTests : SerializationTestHelper
     {
+        #region Test Cases
+
+        private static readonly string[] TrueStrings = new string[] { "true", "y", "yes", "on" };
+        private static readonly string[] FalseStrings = new string[] { "false", "n", "no", "off" };
+
+        public static IEnumerable<Object[]> DeserializeScalarBoolean_TestCases 
+        {
+            get 
+            {
+                foreach(var trueString in SerializationTests.TrueStrings) 
+                {
+                    yield return new Object[] { trueString, true };
+                    yield return new Object[] { trueString.ToUpper(), true };
+                }
+
+                foreach(var falseString in SerializationTests.FalseStrings) 
+                {
+                    yield return new Object[] { falseString, false };
+                    yield return new Object[] { falseString.ToUpper(), false };
+                }
+            }
+        }
+
+        #endregion
+
         [Fact]
         public void DeserializeEmptyDocument()
         {
@@ -60,6 +85,23 @@ namespace YamlDotNet.Test.Serialization
             var result = Deserializer.Deserialize(stream);
 
             result.Should().Be("a scalar");
+        }
+
+        [Theory]
+        [MemberData("DeserializeScalarBoolean_TestCases")]
+        public void DeserializeScalarBoolean(string value, bool expected) 
+        {
+            var result = Deserializer.Deserialize<bool>(UsingReaderFor(value));
+
+            result.Should().Be(expected);
+        }
+
+        [Fact]
+        public void DeserializeScalarBooleanThrowsWhenInvalid() 
+        {
+            Action action = () => Deserializer.Deserialize<bool>(UsingReaderFor("not-a-boolean"));
+
+            action.ShouldThrow<YamlException>().WithInnerException<FormatException>();
         }
 
         [Fact]

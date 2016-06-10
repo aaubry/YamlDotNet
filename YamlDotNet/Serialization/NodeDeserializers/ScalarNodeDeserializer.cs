@@ -22,6 +22,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -30,6 +31,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ScalarNodeDeserializer : INodeDeserializer
     {
+        private const string BooleanTruePattern = "^(true|y|yes|on)$";
+        private const string BooleanFalsePattern = "^(false|n|no|off)$";
+
         bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
         {
             var scalar = reader.Allow<Scalar>();
@@ -49,7 +53,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        value = bool.Parse(scalar.Value);
+                        value = DeserializeBooleanHelper(scalar.Value);
                         break;
 
                     case TypeCode.Byte:
@@ -102,6 +106,26 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
             return true;
+        }
+
+        private object DeserializeBooleanHelper(string value) 
+        {
+            bool result;
+
+            if(Regex.IsMatch(value, ScalarNodeDeserializer.BooleanTruePattern, RegexOptions.IgnoreCase)) 
+            {
+                result = true;
+            } 
+            else if(Regex.IsMatch(value, ScalarNodeDeserializer.BooleanFalsePattern, RegexOptions.IgnoreCase)) 
+            {
+                result = false;
+            } 
+            else 
+            {
+                throw new FormatException(String.Format("The value \"{0}\" is not a valid YAML Boolean", value));
+            }
+
+            return result;
         }
 
         private object DeserializeIntegerHelper(TypeCode typeCode, string value, IFormatProvider formatProvider)
