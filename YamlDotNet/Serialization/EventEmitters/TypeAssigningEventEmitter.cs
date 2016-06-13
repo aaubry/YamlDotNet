@@ -80,7 +80,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 case TypeCode.String:
                 case TypeCode.Char:
                     eventInfo.Tag = "tag:yaml.org,2002:str";
-                    eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
+                    eventInfo.RenderedValue = Escape(eventInfo.Source.Value.ToString());
                     suggestedStyle = ScalarStyle.Any;
                     break;
 
@@ -134,6 +134,13 @@ namespace YamlDotNet.Serialization.EventEmitters
                     eventInfo.Tag = "!" + eventInfo.Source.Type.AssemblyQualifiedName;
                 }
             }
+        }
+
+        private string Escape(string value)
+        {
+            return value.Contains("'")
+                ? string.Format("\"{0}\"", value)
+                : value;
         }
     }
 }
