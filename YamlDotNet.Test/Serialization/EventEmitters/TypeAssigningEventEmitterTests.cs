@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using Xunit;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.EventEmitters;
 
@@ -16,47 +17,58 @@ namespace YamlDotNet.Test.Serialization.EventEmitters
         }
 
         [Fact]
-        void Emit_StringValueWithSingleQuote_EscapedByDoubleQuotes()
+        void Emit_StringValueSingleQuote_SetsStyleToDoubleQuoted()
         {
-            string value = "'test";
+            string value = "'";
             var info = new ScalarEventInfo(CreateObjectDescriptor(value));
             
             _emitter.Emit(info);
             
-            Assert.Equal(EscapedValue(value), info.RenderedValue);
+            Assert.Equal(ScalarStyle.DoubleQuoted, info.Style);
         }
 
         [Fact]
-        void Emit_CharValueWithSingleQuote_EscapedByDoubleQuotes()
+        void Emit_StringValueTextWithSingleQuotes_SetsStyleToDoubleQuoted()
+        {
+            string value = "'asdf'";
+            var info = new ScalarEventInfo(CreateObjectDescriptor(value));
+
+            _emitter.Emit(info);
+
+            Assert.Equal(ScalarStyle.DoubleQuoted, info.Style);
+        }
+
+        [Fact]
+        void Emit_CharValueSingleQuote_SetsStyleToDoubleQuoted()
         {
             char value = '\'';
             var info = new ScalarEventInfo(CreateObjectDescriptor(value));
 
             _emitter.Emit(info);
 
-            Assert.Equal(EscapedValue(value.ToString()), info.RenderedValue);
+            Assert.Equal(ScalarStyle.DoubleQuoted, info.Style);
         }
-
+        
         [Fact]
-        void Emit_StringTypeWithNoSingleQuotes_RemainsUnchanged()
+        void Emit_StringValueWithNoSingleQuotes_SetsStyleToAny()
         {
             string value = "test";
             var info = new ScalarEventInfo(CreateObjectDescriptor(value));
 
             _emitter.Emit(info);
 
-            Assert.Equal(value, info.RenderedValue);
+            Assert.Equal(ScalarStyle.Any, info.Style);
         }
 
         [Fact]
-        void Emit_CharTypeWithNoSingleQuotes_RemainsUnchanged()
+        void Emit_CharValueWithNoSingleQuotes_SetsStyleToAny()
         {
             char value = 'a';
             var info = new ScalarEventInfo(CreateObjectDescriptor(value));
 
             _emitter.Emit(info);
 
-            Assert.Equal(value.ToString(), info.RenderedValue);
+            Assert.Equal(ScalarStyle.Any, info.Style);
         }
 
 
@@ -65,6 +77,7 @@ namespace YamlDotNet.Test.Serialization.EventEmitters
             var objectDescriptor = A.Fake<IObjectDescriptor>();
             A.CallTo(() => objectDescriptor.Type).Returns(typeof(T));
             A.CallTo(() => objectDescriptor.Value).Returns(value);
+            A.CallTo(() => objectDescriptor.ScalarStyle).Returns(ScalarStyle.Any);
             return objectDescriptor;
         }
 
