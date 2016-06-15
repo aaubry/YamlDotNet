@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -32,7 +33,7 @@ namespace YamlDotNet.RepresentationModel
     /// Represents a mapping node in the YAML document.
     /// </summary>
     [Serializable]
-    public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>
+    public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
         private readonly IDictionary<YamlNode, YamlNode> children = new Dictionary<YamlNode, YamlNode>();
 
@@ -61,8 +62,13 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal YamlMappingNode(EventReader events, DocumentLoadingState state)
         {
+            Load(events, state);
+        }
+
+        private void Load(EventReader events, DocumentLoadingState state)
+        {
             MappingStart mapping = events.Expect<MappingStart>();
-            Load(mapping, state);
+            base.Load(mapping, state);
 
             bool hasUnresolvedAliases = false;
             while (!events.Accept<MappingEnd>())
@@ -385,5 +391,15 @@ namespace YamlDotNet.RepresentationModel
         }
 
         #endregion
+
+        void IYamlConvertible.Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        {
+            Load(reader, new DocumentLoadingState());
+        }
+
+        void IYamlConvertible.Write(IEmitter emitter)
+        {
+            Emit(emitter, new EmitterState());
+        }
     }
 }

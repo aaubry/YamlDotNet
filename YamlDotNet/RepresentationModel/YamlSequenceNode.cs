@@ -26,6 +26,7 @@ using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using System.Text;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -34,7 +35,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     [DebuggerDisplay("Count = {children.Count}")]
     [Serializable]
-    public class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>
+    public class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible
     {
         private readonly IList<YamlNode> children = new List<YamlNode>();
 
@@ -64,8 +65,13 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal YamlSequenceNode(EventReader events, DocumentLoadingState state)
         {
+            Load(events, state);
+        }
+
+        private void Load(EventReader events, DocumentLoadingState state)
+        {
             SequenceStart sequence = events.Expect<SequenceStart>();
-            Load(sequence, state);
+            base.Load(sequence, state);
 
             bool hasUnresolvedAliases = false;
             while (!events.Accept<SequenceEnd>())
@@ -285,5 +291,15 @@ namespace YamlDotNet.RepresentationModel
         }
 
         #endregion
+
+        void IYamlConvertible.Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        {
+            Load(reader, new DocumentLoadingState());
+        }
+
+        void IYamlConvertible.Write(IEmitter emitter)
+        {
+            Emit(emitter, new EmitterState());
+        }
     }
 }
