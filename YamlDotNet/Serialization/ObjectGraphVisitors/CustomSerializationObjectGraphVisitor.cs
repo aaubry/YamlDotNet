@@ -48,12 +48,21 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 return false;
             }
 
-            var serializable = value as IYamlSerializable;
+            var convertible = value.Value as IYamlConvertible;
+            if (convertible != null)
+            {
+                convertible.Write(emitter);
+                return false;
+            }
+
+#pragma warning disable 0618 // IYamlSerializable is obsolete
+            var serializable = value.Value as IYamlSerializable;
             if (serializable != null)
             {
                 serializable.WriteYaml(emitter);
                 return false;
             }
+#pragma warning restore
 
             return base.Enter(value);
         }
