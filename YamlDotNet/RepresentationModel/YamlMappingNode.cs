@@ -70,6 +70,7 @@ namespace YamlDotNet.RepresentationModel
         {
             MappingStart mapping = events.Expect<MappingStart>();
             base.Load(mapping, state);
+            Style = mapping.Style;
 
             bool hasUnresolvedAliases = false;
             while (!events.Accept<MappingEnd>())

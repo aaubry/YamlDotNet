@@ -102,6 +102,7 @@
     <Compile Include="Serialization\GenericTestList.cs" />
     <Compile Include="Serialization\NamingConventionTests.cs" />
     <Compile Include="Serialization\ObjectFactoryTests.cs" />
+    <Compile Include="Serialization\RepresentationModelSerializationTests.cs" />
     <Compile Include="Serialization\SerializationTestHelper.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Serialization\CodeValidations.cs" />

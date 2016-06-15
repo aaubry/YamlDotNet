@@ -72,6 +72,7 @@ namespace YamlDotNet.RepresentationModel
         {
             SequenceStart sequence = events.Expect<SequenceStart>();
             base.Load(sequence, state);
+            Style = sequence.Style;
 
             bool hasUnresolvedAliases = false;
             while (!events.Accept<SequenceEnd>())
