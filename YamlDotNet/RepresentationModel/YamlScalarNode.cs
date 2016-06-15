@@ -133,16 +133,6 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="System.String"/> to <see cref="YamlDotNet.RepresentationModel.YamlScalarNode"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
-        public static implicit operator YamlScalarNode(string value)
-        {
-            return new YamlScalarNode(value);
-        }
-
-        /// <summary>
         /// Performs an explicit conversion from <see cref="YamlDotNet.RepresentationModel.YamlScalarNode"/> to <see cref="System.String"/>.
         /// </summary>
         /// <param name="value">The value.</param>

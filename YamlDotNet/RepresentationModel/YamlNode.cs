@@ -212,5 +212,15 @@ namespace YamlDotNet.RepresentationModel
         {
             get;
         }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="System.String"/> to <see cref="YamlDotNet.RepresentationModel.YamlNode"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static implicit operator YamlNode(string value)
+        {
+            return new YamlScalarNode(value);
+        }
     }
 }
