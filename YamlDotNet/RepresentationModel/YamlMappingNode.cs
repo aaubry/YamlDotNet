@@ -22,9 +22,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -32,7 +34,7 @@ namespace YamlDotNet.RepresentationModel
     /// Represents a mapping node in the YAML document.
     /// </summary>
     [Serializable]
-    public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>
+    public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
         private readonly IDictionary<YamlNode, YamlNode> children = new Dictionary<YamlNode, YamlNode>();
 
@@ -61,8 +63,14 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal YamlMappingNode(EventReader events, DocumentLoadingState state)
         {
+            Load(events, state);
+        }
+
+        private void Load(EventReader events, DocumentLoadingState state)
+        {
             MappingStart mapping = events.Expect<MappingStart>();
-            Load(mapping, state);
+            base.Load(mapping, state);
+            Style = mapping.Style;
 
             bool hasUnresolvedAliases = false;
             while (!events.Accept<MappingEnd>())
@@ -385,5 +393,38 @@ namespace YamlDotNet.RepresentationModel
         }
 
         #endregion
+
+        void IYamlConvertible.Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        {
+            Load(reader, new DocumentLoadingState());
+        }
+
+        void IYamlConvertible.Write(IEmitter emitter)
+        {
+            Emit(emitter, new EmitterState());
+        }
+
+        /// <summary>
+        /// Creates a <see cref="YamlMappingNode" /> containing a key-value pair for each property of the specified object.
+        /// </summary>
+        public static YamlMappingNode FromObject(object mapping)
+        {
+            if (mapping == null)
+            {
+                throw new ArgumentNullException("mapping");
+            }
+
+            var result = new YamlMappingNode();
+            foreach (var property in mapping.GetType().GetPublicProperties())
+            {
+                if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
+                {
+                    var value = property.GetValue(mapping, null);
+                    var valueNode = (value as YamlNode) ?? (Convert.ToString(value));
+                    result.Add(property.Name, valueNode);
+                }
+            }
+            return result;
+        }
     }
 }

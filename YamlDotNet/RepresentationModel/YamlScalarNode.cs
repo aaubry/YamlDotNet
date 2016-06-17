@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -33,7 +34,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     [DebuggerDisplay("{Value}")]
     [Serializable]
-    public class YamlScalarNode : YamlNode
+    public class YamlScalarNode : YamlNode, IYamlConvertible
     {
         /// <summary>
         /// Gets or sets the value of the node.
@@ -54,8 +55,13 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal YamlScalarNode(EventReader events, DocumentLoadingState state)
         {
+            Load(events, state);
+        }
+
+        private void Load(EventReader events, DocumentLoadingState state)
+        {
             Scalar scalar = events.Expect<Scalar>();
-            Load(scalar, state);
+            base.Load(scalar, state);
             Value = scalar.Value;
             Style = scalar.Style;
         }
@@ -92,7 +98,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new Scalar(Anchor, Tag, Value, Style, true, false));
+            emitter.Emit(new Scalar(Anchor, Tag, Value, Style, Tag == null, false));
         }
         
         /// <summary>
@@ -124,16 +130,6 @@ namespace YamlDotNet.RepresentationModel
                 base.GetHashCode(),
                 GetHashCode(Value)
             );
-        }
-
-        /// <summary>
-        /// Performs an implicit conversion from <see cref="System.String"/> to <see cref="YamlDotNet.RepresentationModel.YamlScalarNode"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
-        public static implicit operator YamlScalarNode(string value)
-        {
-            return new YamlScalarNode(value);
         }
 
         /// <summary>
@@ -171,6 +167,16 @@ namespace YamlDotNet.RepresentationModel
         public override YamlNodeType NodeType
         {
             get { return YamlNodeType.Scalar; }
+        }
+
+        void IYamlConvertible.Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        {
+            Load(reader, new DocumentLoadingState());
+        }
+
+        void IYamlConvertible.Write(IEmitter emitter)
+        {
+            Emit(emitter, new EmitterState());
         }
     }
 }

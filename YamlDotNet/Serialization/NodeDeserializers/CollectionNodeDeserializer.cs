@@ -67,7 +67,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
             else
             {
-                value = false;
+                value = null;
                 return false;
             }
 

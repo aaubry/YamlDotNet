@@ -106,6 +106,8 @@ namespace YamlDotNet.Serialization
             }
 
             NodeDeserializers = new List<INodeDeserializer>();
+            NodeDeserializers.Add(new YamlConvertibleNodeDeserializer(objectFactory));
+            NodeDeserializers.Add(new YamlSerializableNodeDeserializer(objectFactory));
             NodeDeserializers.Add(new TypeConverterNodeDeserializer(converters));
             NodeDeserializers.Add(new NullNodeDeserializer());
             NodeDeserializers.Add(new ScalarNodeDeserializer());
@@ -117,6 +119,8 @@ namespace YamlDotNet.Serialization
 
             tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
             TypeResolvers = new List<INodeTypeResolver>();
+            TypeResolvers.Add(new YamlConvertibleTypeResolver());
+            TypeResolvers.Add(new YamlSerializableTypeResolver());
             TypeResolvers.Add(new TagNodeTypeResolver(tagMappings));
             TypeResolvers.Add(new TypeNameInTagNodeTypeResolver());
             TypeResolvers.Add(new DefaultContainersNodeTypeResolver());

@@ -251,6 +251,7 @@
     <Compile Include="Serialization\ITypeResolver.cs" />
     <Compile Include="Serialization\IValueDeserializer.cs" />
     <Compile Include="Serialization\IValuePromise.cs" />
+    <Compile Include="Serialization\IYamlConvertible.cs" />
     <Compile Include="Serialization\IYamlSerializable.cs" />
     <Compile Include="Serialization\IYamlTypeConverter.cs" />
     <Compile Include="Serialization\NamingConventions\CamelCaseNamingConvention.cs" />
@@ -259,6 +260,7 @@
     <Compile Include="Serialization\NamingConventions\PascalCaseNamingConvention.cs" />
     <Compile Include="Serialization\NamingConventions\UnderscoredNamingConvention.cs" />
     <Compile Include="Serialization\NodeDeserializers\ArrayNodeDeserializer.cs" />
+    <Compile Include="Serialization\NodeDeserializers\YamlConvertibleNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\EnumerableNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\CollectionNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\DictionaryNodeDeserializer.cs" />
@@ -268,9 +270,12 @@
     <Compile Include="Serialization\NodeDeserializers\ObjectNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\ScalarNodeDeserializer.cs" />
     <Compile Include="Serialization\NodeDeserializers\TypeConverterNodeDeserializer.cs" />
+    <Compile Include="Serialization\NodeDeserializers\YamlSerializableNodeDeserializer.cs" />
+    <Compile Include="Serialization\NodeTypeResolvers\YamlConvertibleTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\DefaultContainersNodeTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\TagNodeTypeResolver.cs" />
     <Compile Include="Serialization\NodeTypeResolvers\TypeNameInTagNodeTypeResolver.cs" />
+    <Compile Include="Serialization\NodeTypeResolvers\YamlSerializableTypeResolver.cs" />
     <Compile Include="Serialization\ObjectDescriptor.cs" />
     <Compile Include="Serialization\ObjectFactories\DefaultObjectFactory.cs" />
     <Compile Include="Serialization\ObjectFactories\LambdaObjectFactory.cs" />
