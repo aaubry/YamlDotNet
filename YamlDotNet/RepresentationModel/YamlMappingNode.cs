@@ -415,7 +415,7 @@ namespace YamlDotNet.RepresentationModel
             }
 
             var result = new YamlMappingNode();
-            foreach (var property in mapping.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            foreach (var property in mapping.GetType().GetPublicProperties())
             {
                 if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
                 {
