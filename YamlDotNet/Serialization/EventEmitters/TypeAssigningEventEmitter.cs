@@ -81,9 +81,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 case TypeCode.Char:
                     eventInfo.Tag = "tag:yaml.org,2002:str";
                     eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
-                    suggestedStyle = eventInfo.RenderedValue.Contains("'")
-                        ? ScalarStyle.DoubleQuoted
-                        : ScalarStyle.Any;
+                    suggestedStyle = ScalarStyle.Any;
                     break;
 
                 case TypeCode.DateTime:

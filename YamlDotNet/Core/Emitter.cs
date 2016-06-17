@@ -340,7 +340,7 @@ namespace YamlDotNet.Core
             {
                 if (isFirst)
                 {
-                    if (buffer.Check(@"#,[]{}&*!|>\""%@`"))
+                    if (buffer.Check(@"#,[]{}&*!|>\""%@`'"))
                     {
                         flowIndicators = true;
                         blockIndicators = true;
@@ -477,6 +477,11 @@ namespace YamlDotNet.Core
                 scalarData.isBlockPlainAllowed = false;
                 scalarData.isSingleQuotedAllowed = false;
                 scalarData.isBlockAllowed = false;
+            }
+            
+            if (value.Contains("'"))
+            {
+                scalarData.isSingleQuotedAllowed = false;
             }
 
             scalarData.isMultiline = lineBreaks;
@@ -890,7 +895,7 @@ namespace YamlDotNet.Core
             {
                 if ((flowLevel != 0 && !scalarData.isFlowPlainAllowed) || (flowLevel == 0 && !scalarData.isBlockPlainAllowed))
                 {
-                    style = ScalarStyle.SingleQuoted;
+                    style = scalarData.isSingleQuotedAllowed ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted;
                 }
                 if (string.IsNullOrEmpty(scalarData.value) && (flowLevel != 0 || isSimpleKeyContext))
                 {
