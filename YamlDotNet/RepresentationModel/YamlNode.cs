@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using System.Collections.Generic;
@@ -221,6 +222,46 @@ namespace YamlDotNet.RepresentationModel
         public static implicit operator YamlNode(string value)
         {
             return new YamlScalarNode(value);
+        }
+
+        /// <summary>
+        /// Performs an implicit conversion from string[] to <see cref="YamlDotNet.RepresentationModel.YamlNode"/>.
+        /// </summary>
+        /// <param name="sequence">The value.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static implicit operator YamlNode(string[] sequence)
+        {
+            return new YamlSequenceNode(sequence.Select(i => (YamlNode)i));
+        }
+
+        /// <summary>
+        /// Converts a <see cref="YamlScalarNode" /> to a string by returning its value.
+        /// </summary>
+        public static explicit operator string(YamlNode scalar)
+        {
+            return ((YamlScalarNode)scalar).Value;
+        }
+
+        /// <summary>
+        /// Gets the nth element in a <see cref="YamlSequenceNode" />.
+        /// </summary>
+        public YamlNode this[int index]
+        {
+            get
+            {
+                return ((YamlSequenceNode)this).Children[index];
+            }
+        }
+
+        /// <summary>
+        /// Gets the value associated with a key in a <see cref="YamlMappingNode" />.
+        /// </summary>
+        public YamlNode this[YamlNode key]
+        {
+            get
+            {
+                return ((YamlMappingNode)this).Children[key];
+            }
         }
     }
 }

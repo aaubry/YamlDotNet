@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -400,6 +401,29 @@ namespace YamlDotNet.RepresentationModel
         void IYamlConvertible.Write(IEmitter emitter)
         {
             Emit(emitter, new EmitterState());
+        }
+
+        /// <summary>
+        /// Creates a <see cref="YamlMappingNode" /> containing a key-value pair for each property of the specified object.
+        /// </summary>
+        public static YamlMappingNode FromObject(object mapping)
+        {
+            if (mapping == null)
+            {
+                throw new ArgumentNullException("mapping");
+            }
+
+            var result = new YamlMappingNode();
+            foreach (var property in mapping.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
+                {
+                    var value = property.GetValue(mapping, null);
+                    var valueNode = (value as YamlNode) ?? (Convert.ToString(value));
+                    result.Add(property.Name, valueNode);
+                }
+            }
+            return result;
         }
     }
 }
