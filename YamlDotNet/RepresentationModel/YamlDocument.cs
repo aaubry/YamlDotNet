@@ -149,7 +149,7 @@ namespace YamlDotNet.RepresentationModel
 
             protected override void Visit(YamlScalarNode scalar)
             {
-                VisitNode(scalar);
+                // Do not assign anchors to scalars
             }
 
             protected override void Visit(YamlMappingNode mapping)
