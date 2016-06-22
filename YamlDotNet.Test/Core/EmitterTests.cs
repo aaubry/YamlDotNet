@@ -360,9 +360,9 @@ namespace YamlDotNet.Test.Core
         [InlineData("'test'")]
         public void SingleQuotesAreDoubleQuoted(string input)
         {
-            var events = StreamOf(DocumentWith(PlainScalar(input)));
+            var events = StreamOf(DocumentWith(new Scalar(input)));
             var yaml = EmittedTextFrom(events);
-
+            
             string expected = string.Format("\"{0}\"", input);
 
             yaml.Should().Contain(expected);

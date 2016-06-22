@@ -479,11 +479,6 @@ namespace YamlDotNet.Core
                 scalarData.isBlockAllowed = false;
             }
             
-            if (value.Contains("'"))
-            {
-                scalarData.isSingleQuotedAllowed = false;
-            }
-
             scalarData.isMultiline = lineBreaks;
             if (lineBreaks)
             {
@@ -878,7 +873,14 @@ namespace YamlDotNet.Core
 
             if (style == ScalarStyle.Any)
             {
-                style = scalarData.isMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
+                if (scalarData.value.Contains("'"))
+                {
+                    style = ScalarStyle.DoubleQuoted;
+                }
+                else
+                {
+                    style = scalarData.isMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
+                }
             }
 
             if (isCanonical)
