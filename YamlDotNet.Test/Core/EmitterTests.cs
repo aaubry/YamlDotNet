@@ -352,6 +352,23 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
+        [Theory]
+        [InlineData("'.'test")]
+        [InlineData("'")]
+        [InlineData("'.'")]
+        [InlineData("'test")]
+        [InlineData("'test'")]
+        public void SingleQuotesAreDoubleQuoted(string input)
+        {
+            var events = StreamOf(DocumentWith(new Scalar(input)));
+            var yaml = EmittedTextFrom(events);
+            
+            string expected = string.Format("\"{0}\"", input);
+
+            yaml.Should().Contain(expected);
+        }
+
+
         private string Lines(params string[] lines)
         {
             return string.Join(Environment.NewLine, lines);
