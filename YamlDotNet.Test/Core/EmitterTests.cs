@@ -368,6 +368,14 @@ namespace YamlDotNet.Test.Core
             yaml.Should().Contain(expected);
         }
 
+        [Theory]
+        [InlineData("hello\n'world")]
+        public void SingleQuotesAreNotDoubleQuotedUnlessNecessary(string input)
+        {
+            var events = StreamOf(DocumentWith(new Scalar(input)));
+            var yaml = EmittedTextFrom(events);
+            yaml.Should().NotContain("\"");
+        }
 
         private string Lines(params string[] lines)
         {
