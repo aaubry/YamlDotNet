@@ -93,6 +93,7 @@ namespace YamlDotNet.Core
             public bool isBlockPlainAllowed;
             public bool isSingleQuotedAllowed;
             public bool isBlockAllowed;
+            public bool hasSingleQuotes;
             public ScalarStyle style;
         }
 
@@ -325,6 +326,7 @@ namespace YamlDotNet.Core
             var leadingBreak = false;
             var trailingSpace = false;
             var trailingBreak = false;
+            var leadingQuote = false;
 
             var breakSpace = false;
             var spaceBreak = false;
@@ -334,23 +336,28 @@ namespace YamlDotNet.Core
             var lineBreaks = false;
 
             var specialCharacters = !ValueIsRepresentableInOutputEncoding(value);
+            var singleQuotes = false;
 
             var isFirst = true;
             while (!buffer.EndOfInput)
             {
                 if (isFirst)
                 {
-                    if (buffer.Check(@"#,[]{}&*!|>\""%@`"))
+                    if (buffer.Check(@"#,[]{}&*!|>\""%@`'"))
                     {
                         flowIndicators = true;
                         blockIndicators = true;
+                        leadingQuote = buffer.Check('\'');
+                        singleQuotes |= buffer.Check('\'');
                     }
 
                     if (buffer.Check("?:"))
                     {
                         flowIndicators = true;
                         if (followedByWhitespace)
+                        {
                             blockIndicators = true;
+                        }
                     }
 
                     if (buffer.Check('-') && followedByWhitespace)
@@ -380,6 +387,8 @@ namespace YamlDotNet.Core
                         flowIndicators = true;
                         blockIndicators = true;
                     }
+
+                    singleQuotes |= buffer.Check('\'');
                 }
 
                 if (!specialCharacters && !buffer.IsPrintable())
@@ -453,7 +462,7 @@ namespace YamlDotNet.Core
             scalarData.isSingleQuotedAllowed = true;
             scalarData.isBlockAllowed = true;
 
-            if (leadingSpace || leadingBreak || trailingSpace || trailingBreak)
+            if (leadingSpace || leadingBreak || trailingSpace || trailingBreak || leadingQuote)
             {
                 scalarData.isFlowPlainAllowed = false;
                 scalarData.isBlockPlainAllowed = false;
@@ -478,7 +487,7 @@ namespace YamlDotNet.Core
                 scalarData.isSingleQuotedAllowed = false;
                 scalarData.isBlockAllowed = false;
             }
-
+            
             scalarData.isMultiline = lineBreaks;
             if (lineBreaks)
             {
@@ -487,10 +496,16 @@ namespace YamlDotNet.Core
             }
 
             if (flowIndicators)
+            {
                 scalarData.isFlowPlainAllowed = false;
+            }
 
             if (blockIndicators)
+            {
                 scalarData.isBlockPlainAllowed = false;
+            }
+
+            scalarData.hasSingleQuotes = singleQuotes;
         }
 
         private bool ValueIsRepresentableInOutputEncoding(string value)
@@ -890,7 +905,7 @@ namespace YamlDotNet.Core
             {
                 if ((flowLevel != 0 && !scalarData.isFlowPlainAllowed) || (flowLevel == 0 && !scalarData.isBlockPlainAllowed))
                 {
-                    style = ScalarStyle.SingleQuoted;
+                    style = (scalarData.isSingleQuotedAllowed && !scalarData.hasSingleQuotes) ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted;
                 }
                 if (string.IsNullOrEmpty(scalarData.value) && (flowLevel != 0 || isSimpleKeyContext))
                 {
