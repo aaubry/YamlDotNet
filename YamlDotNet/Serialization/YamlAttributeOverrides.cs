@@ -93,14 +93,14 @@ namespace YamlDotNet.Serialization
                 while (currentType != null)
                 {
                     ++currentPriority;
-                    if (currentType == matchType)
+                    if (currentType == RegisteredType)
                     {
                         return currentPriority;
                     }
                     currentType = currentType.BaseType();
                 }
 
-                if (matchType.GetInterfaces().Contains(matchType))
+                if (matchType.GetInterfaces().Contains(RegisteredType))
                 {
                     return currentPriority;
                 }

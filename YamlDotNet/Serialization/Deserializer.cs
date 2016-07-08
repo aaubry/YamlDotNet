@@ -90,18 +90,18 @@ namespace YamlDotNet.Serialization
 
                 typeDescriptor.TypeDescriptor =
                     new CachedTypeInspector(
-                        new YamlAttributesTypeInspector(
-                            new YamlAttributeOverridesInspector(
-                                new NamingConventionTypeInspector(
+                        new NamingConventionTypeInspector(
+                            new YamlAttributesTypeInspector(
+                                new YamlAttributeOverridesInspector(
                                     new ReadableAndWritablePropertiesTypeInspector(
                                         new ReadablePropertiesTypeInspector(
                                             new StaticTypeResolver()
                                         )
                                     ),
-                                    namingConvention
-                                ),
-                                overrides
-                            )
+                                    overrides
+                                )
+                            ),
+                            namingConvention
                         )
                     );
 
@@ -244,6 +244,14 @@ namespace YamlDotNet.Serialization
             return new Deserializer(valueDeserializer);
         }
 
+        public T Deserialize<T>(string input)
+        {
+            using (var reader = new StringReader(input))
+            {
+                return (T)Deserialize(reader, typeof(T));
+            }
+        }
+
         public T Deserialize<T>(TextReader input)
         {
             return (T)Deserialize(input, typeof(T));
@@ -252,6 +260,14 @@ namespace YamlDotNet.Serialization
         public object Deserialize(TextReader input)
         {
             return Deserialize(input, typeof(object));
+        }
+
+        public object Deserialize(string input, Type type)
+        {
+            using (var reader = new StringReader(input))
+            {
+                return Deserialize(reader, type);
+            }
         }
 
         public object Deserialize(TextReader input, Type type)

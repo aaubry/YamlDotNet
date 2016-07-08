@@ -48,9 +48,9 @@ namespace YamlDotNet.Serialization
         public SerializerBuilder()
         {
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention != null ? new NamingConventionTypeInspector(inner, namingConvention) : inner);
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
-            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention != null ? new NamingConventionTypeInspector(inner, namingConvention) : inner);
 
             preProcessingPhaseObjectGraphVisitorFactories = new LazyComponentRegistrationList<Nothing, IObjectGraphVisitor>();
             preProcessingPhaseObjectGraphVisitorFactories.Add(typeof(AnchorAssigner), _ => new AnchorAssigner());
