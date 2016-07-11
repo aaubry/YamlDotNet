@@ -16,7 +16,7 @@ namespace YamlDotNet.Helpers
         public static PropertyInfo AsProperty(this LambdaExpression propertyAccessor)
         {
             var property = TryGetMemberExpression<PropertyInfo>(propertyAccessor);
-            if(property == null)
+            if (property == null)
             {
                 throw new ArgumentException("Expected a lambda expression in the form: x => x.SomeProperty", nameof(propertyAccessor));
             }
@@ -37,7 +37,7 @@ namespace YamlDotNet.Helpers
             var castExpression = body as UnaryExpression;
             if (castExpression != null)
             {
-                if(castExpression.NodeType != ExpressionType.Convert)
+                if (castExpression.NodeType != ExpressionType.Convert)
                 {
                     return null;
                 }

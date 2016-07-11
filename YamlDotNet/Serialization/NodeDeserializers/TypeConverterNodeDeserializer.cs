@@ -34,7 +34,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         {
             if (converters == null)
             {
-                throw new ArgumentNullException("converters");
+                throw new ArgumentNullException(nameof(converters));
             }
 
             this.converters = converters;

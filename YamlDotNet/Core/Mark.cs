@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,15 +59,15 @@ namespace YamlDotNet.Core
         {
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("index", "Index must be greater than or equal to zero.");
+                throw new ArgumentOutOfRangeException(nameof(index), "Index must be greater than or equal to zero.");
             }
             if (line < 1)
             {
-                throw new ArgumentOutOfRangeException("line", "Line must be greater than or equal to 1.");
+                throw new ArgumentOutOfRangeException(nameof(line), "Line must be greater than or equal to 1.");
             }
             if (column < 1)
             {
-                throw new ArgumentOutOfRangeException("column", "Column must be greater than or equal to 1.");
+                throw new ArgumentOutOfRangeException(nameof(column), "Column must be greater than or equal to 1.");
             }
 
             Index = index;
@@ -118,7 +118,7 @@ namespace YamlDotNet.Core
         {
             if (obj == null)
             {
-                throw new ArgumentNullException("obj");
+                throw new ArgumentNullException(nameof(obj));
             }
             return CompareTo(obj as Mark);
         }
@@ -128,7 +128,7 @@ namespace YamlDotNet.Core
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             var cmp = Line.CompareTo(other.Line);

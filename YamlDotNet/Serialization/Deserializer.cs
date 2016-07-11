@@ -215,8 +215,8 @@ namespace YamlDotNet.Serialization
         /// To customize the bahavior of the deserializer, use <see cref="DeserializerBuilder" />.
         /// </remarks>
         public Deserializer()
-            // TODO: When the backwards compatibility is dropped, uncomment the following line and remove the body of this constructor.
-            // : this(new DeserializerBuilder().BuildValueDeserializer())
+        // TODO: When the backwards compatibility is dropped, uncomment the following line and remove the body of this constructor.
+        // : this(new DeserializerBuilder().BuildValueDeserializer())
         {
             backwardsCompatibleConfiguration = new BackwardsCompatibleConfiguration(null, null, false, null);
             valueDeserializer = backwardsCompatibleConfiguration.valueDeserializer;

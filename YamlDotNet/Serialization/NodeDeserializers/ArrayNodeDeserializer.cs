@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var itemType = expectedType.GetElementType();
 
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, reader, expectedType, nestedObjectDeserializer, items, true);
+            CollectionNodeDeserializer.DeserializeHelper(itemType, reader, nestedObjectDeserializer, items, true);
 
             var array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);
@@ -75,17 +75,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             public bool Contains(object value)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public int IndexOf(object value)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public void Insert(int index, object value)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public bool IsFixedSize
@@ -100,12 +100,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             public void Remove(object value)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public void RemoveAt(int index)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public object this[int index]

@@ -8,10 +8,10 @@
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -68,15 +68,15 @@ namespace YamlDotNet.RepresentationModel
 
         private void Load(EventReader events, DocumentLoadingState state)
         {
-            MappingStart mapping = events.Expect<MappingStart>();
-            base.Load(mapping, state);
+            var mapping = events.Expect<MappingStart>();
+            Load(mapping, state);
             Style = mapping.Style;
 
             bool hasUnresolvedAliases = false;
             while (!events.Accept<MappingEnd>())
             {
-                YamlNode key = ParseNode(events, state);
-                YamlNode value = ParseNode(events, state);
+                var key = ParseNode(events, state);
+                var value = ParseNode(events, state);
 
                 try
                 {
@@ -283,10 +283,10 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary />
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            var obj = other as YamlMappingNode;
-            if (obj == null || !Equals(obj) || children.Count != obj.children.Count)
+            var other = obj as YamlMappingNode;
+            if (other == null || !Equals(other) || children.Count != other.children.Count)
             {
                 return false;
             }
@@ -294,7 +294,7 @@ namespace YamlDotNet.RepresentationModel
             foreach (var entry in children)
             {
                 YamlNode otherNode;
-                if (!obj.children.TryGetValue(entry.Key, out otherNode) || !SafeEquals(entry.Value, otherNode))
+                if (!other.children.TryGetValue(entry.Key, out otherNode) || !SafeEquals(entry.Value, otherNode))
                 {
                     return false;
                 }
@@ -411,7 +411,7 @@ namespace YamlDotNet.RepresentationModel
         {
             if (mapping == null)
             {
-                throw new ArgumentNullException("mapping");
+                throw new ArgumentNullException(nameof(mapping));
             }
 
             var result = new YamlMappingNode();

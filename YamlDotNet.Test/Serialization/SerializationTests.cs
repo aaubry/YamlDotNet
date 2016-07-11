@@ -44,20 +44,20 @@ namespace YamlDotNet.Test.Serialization
     {
         #region Test Cases
 
-        private static readonly string[] TrueStrings = new string[] { "true", "y", "yes", "on" };
-        private static readonly string[] FalseStrings = new string[] { "false", "n", "no", "off" };
+        private static readonly string[] TrueStrings = { "true", "y", "yes", "on" };
+        private static readonly string[] FalseStrings = { "false", "n", "no", "off" };
 
-        public static IEnumerable<Object[]> DeserializeScalarBoolean_TestCases 
+        public static IEnumerable<Object[]> DeserializeScalarBoolean_TestCases
         {
-            get 
+            get
             {
-                foreach(var trueString in SerializationTests.TrueStrings) 
+                foreach (var trueString in SerializationTests.TrueStrings)
                 {
                     yield return new Object[] { trueString, true };
                     yield return new Object[] { trueString.ToUpper(), true };
                 }
 
-                foreach(var falseString in SerializationTests.FalseStrings) 
+                foreach (var falseString in SerializationTests.FalseStrings)
                 {
                     yield return new Object[] { falseString, false };
                     yield return new Object[] { falseString.ToUpper(), false };
@@ -89,7 +89,7 @@ namespace YamlDotNet.Test.Serialization
 
         [Theory]
         [MemberData("DeserializeScalarBoolean_TestCases")]
-        public void DeserializeScalarBoolean(string value, bool expected) 
+        public void DeserializeScalarBoolean(string value, bool expected)
         {
             var result = Deserializer.Deserialize<bool>(UsingReaderFor(value));
 
@@ -97,7 +97,7 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        public void DeserializeScalarBooleanThrowsWhenInvalid() 
+        public void DeserializeScalarBooleanThrowsWhenInvalid()
         {
             Action action = () => Deserializer.Deserialize<bool>(UsingReaderFor("not-a-boolean"));
 
@@ -327,7 +327,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new InheritanceExample
             {
                 SomeScalar = "Hello",
-                RegularBase = new Derived { BaseProperty = "foo", DerivedProperty = "bar" },
+                RegularBase = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
             };
 
             var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, RoundtripSerializer);
@@ -343,7 +343,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new InheritanceExample
             {
                 SomeScalar = "Hello",
-                BaseWithSerializeAs = new Derived { BaseProperty = "foo", DerivedProperty = "bar" },
+                BaseWithSerializeAs = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
             };
 
             var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, RoundtripSerializer);
@@ -385,7 +385,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializationOfOrderedProperties()
         {
-            TextReader stream = Yaml.StreamFrom("ordered-properties.yaml");
+            var stream = Yaml.StreamFrom("ordered-properties.yaml");
 
             var orderExample = Deserializer.Deserialize<OrderExample>(stream);
 
@@ -525,7 +525,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new Dictionary<string, string> {
                 { "key1", "value1" },
                 { "key2", "value2" },
-                { "key3", "value3" },
+                { "key3", "value3" }
             };
 
             var result = DoRoundtripFromObjectTo<Dictionary<string, string>>(obj);
@@ -642,7 +642,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, guid);
             var serialized = writer.ToString();
-            Dump.WriteLine(writer.ToString());
             Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: " + serialized);
         }
 
@@ -654,7 +653,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             Regex.Matches(serialized, "-").Count.Should().Be(3, "there should have been 3 elements");
         }
@@ -667,7 +665,6 @@ namespace YamlDotNet.Test.Serialization
 
             EmitDefaultsSerializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             Regex.Matches(serialized, "-").Count.Should().Be(3, "there should have been 3 elements");
         }
@@ -679,7 +676,6 @@ namespace YamlDotNet.Test.Serialization
             var obj = new Example { MyString = null };
 
             EmitDefaultsSerializer.Serialize(writer, obj, typeof(Example));
-            Dump.WriteLine(writer);
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -692,7 +688,6 @@ namespace YamlDotNet.Test.Serialization
             var obj = new { MyString = (string)null };
 
             EmitDefaultsSerializer.Serialize(writer, obj, obj.GetType());
-            Dump.WriteLine(writer);
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -704,7 +699,6 @@ namespace YamlDotNet.Test.Serialization
             var obj = new Example { MyString = null };
 
             Serializer.Serialize(writer, obj, typeof(Example));
-            Dump.WriteLine(writer);
 
             writer.ToString().Should().NotContain("MyString");
         }
@@ -716,7 +710,6 @@ namespace YamlDotNet.Test.Serialization
             var obj = new Example { MyString = null };
 
             EmitDefaultsJsonCompatibleSerializer.Serialize(writer, obj, typeof(Example));
-            Dump.WriteLine(writer);
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -729,7 +722,6 @@ namespace YamlDotNet.Test.Serialization
             var obj = new Example { MyString = null };
 
             RoundtripEmitDefaultsJsonCompatibleSerializer.Serialize(writer, obj, typeof(Example));
-            Dump.WriteLine(writer);
             var result = Deserializer.Deserialize<Example>(UsingReaderFor(writer));
 
             result.MyString.Should().BeNull();
@@ -743,7 +735,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should()
                 .Be("Order1: Order1 value\r\nOrder2: Order2 value\r\n", "the properties should be in the right order");
@@ -758,7 +749,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should().NotContain("IgnoreMe");
         }
@@ -777,7 +767,6 @@ namespace YamlDotNet.Test.Serialization
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should().NotContain("aaa");
         }
@@ -790,7 +779,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should()
                 .Be("LiteralString: |-\r\n  Test\r\nDoubleQuotedString: \"Test\"\r\n", "the properties should be specifically styled");
@@ -814,7 +802,6 @@ namespace YamlDotNet.Test.Serialization
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should()
                 .Be("LiteralString: \"Test\"\r\nDoubleQuotedString: |-\r\n  Test\r\n", "the properties should be specifically styled");
@@ -834,7 +821,6 @@ namespace YamlDotNet.Test.Serialization
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should()
                 .Be("BaseProperty: Base\r\n", "the derived property should be specifically ignored");
@@ -854,7 +840,6 @@ namespace YamlDotNet.Test.Serialization
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should()
                 .Be("DerivedProperty: Derived\r\n", "the base property should be specifically ignored");
@@ -868,7 +853,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should().NotContain("Value");
         }
@@ -881,7 +865,6 @@ namespace YamlDotNet.Test.Serialization
 
             EmitDefaultsSerializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should().Contain("Value");
         }
@@ -894,7 +877,6 @@ namespace YamlDotNet.Test.Serialization
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
-            Dump.WriteLine(serialized);
 
             serialized.Should().Contain("Value");
         }
@@ -903,7 +885,7 @@ namespace YamlDotNet.Test.Serialization
         public void SerializingAGenericDictionaryShouldNotThrowTargetException()
         {
             var obj = new CustomGenericDictionary {
-                { "hello", "world" },
+                { "hello", "world" }
             };
 
             Action action = () => Serializer.Serialize(new StringWriter(), obj);
@@ -1194,13 +1176,13 @@ namespace YamlDotNet.Test.Serialization
                         new FloatTestCase("double.Epsilon", double.Epsilon, "4.9406564584124654E-324"),
                         new FloatTestCase("double.MinValue", double.MinValue, "-1.7976931348623157E+308"),
                         new FloatTestCase("double.MaxValue", double.MaxValue, "1.7976931348623157E+308"),
-                        
+
                         new FloatTestCase("float.NaN", float.NaN, ".nan"),
                         new FloatTestCase("float.PositiveInfinity", float.PositiveInfinity, ".inf"),
                         new FloatTestCase("float.NegativeInfinity", float.NegativeInfinity, "-.inf"),
                         new FloatTestCase("float.Epsilon", float.Epsilon, "1.40129846E-45"),
                         new FloatTestCase("float.MinValue", float.MinValue, "-3.40282347E+38"),
-                        new FloatTestCase("float.MaxValue", float.MaxValue, "3.40282347E+38"),
+                        new FloatTestCase("float.MaxValue", float.MaxValue, "3.40282347E+38")
                     }
                     .Select(tc => new object[] { tc });
             }

@@ -8,10 +8,10 @@
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -60,8 +60,8 @@ namespace YamlDotNet.RepresentationModel
 
         private void Load(EventReader events, DocumentLoadingState state)
         {
-            Scalar scalar = events.Expect<Scalar>();
-            base.Load(scalar, state);
+            var scalar = events.Expect<Scalar>();
+            Load(scalar, state);
             Value = scalar.Value;
             Style = scalar.Style;
         }
@@ -100,24 +100,25 @@ namespace YamlDotNet.RepresentationModel
         {
             emitter.Emit(new Scalar(Anchor, Tag, Value, Style, Tag == null, false));
         }
-        
+
         /// <summary>
         /// Accepts the specified visitor by calling the appropriate Visit method on it.
         /// </summary>
         /// <param name="visitor">
         /// A <see cref="IYamlVisitor"/>.
         /// </param>
-        public override void Accept(IYamlVisitor visitor) {
+        public override void Accept(IYamlVisitor visitor)
+        {
             visitor.Visit(this);
         }
-        
+
         /// <summary />
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            var obj = other as YamlScalarNode;
-            return obj != null && Equals(obj) && SafeEquals(Value, obj.Value);
+            var other = obj as YamlScalarNode;
+            return other != null && Equals(other) && SafeEquals(Value, other.Value);
         }
-            
+
         /// <summary>
         /// Serves as a hash function for a particular type.
         /// </summary>

@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
             else
             {
-                TypeCode typeCode = expectedType.GetTypeCode();
+                var typeCode = expectedType.GetTypeCode();
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
@@ -64,7 +64,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        value = DeserializeIntegerHelper(typeCode, scalar.Value, YamlFormatter.NumberFormat);
+                        value = DeserializeIntegerHelper(typeCode, scalar.Value);
                         break;
 
                     case TypeCode.Single:
@@ -108,19 +108,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        private object DeserializeBooleanHelper(string value) 
+        private object DeserializeBooleanHelper(string value)
         {
             bool result;
 
-            if(Regex.IsMatch(value, ScalarNodeDeserializer.BooleanTruePattern, RegexOptions.IgnoreCase)) 
+            if (Regex.IsMatch(value, ScalarNodeDeserializer.BooleanTruePattern, RegexOptions.IgnoreCase))
             {
                 result = true;
-            } 
-            else if(Regex.IsMatch(value, ScalarNodeDeserializer.BooleanFalsePattern, RegexOptions.IgnoreCase)) 
+            }
+            else if (Regex.IsMatch(value, ScalarNodeDeserializer.BooleanFalsePattern, RegexOptions.IgnoreCase))
             {
                 result = false;
-            } 
-            else 
+            }
+            else
             {
                 throw new FormatException(String.Format("The value \"{0}\" is not a valid YAML Boolean", value));
             }
@@ -128,9 +128,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return result;
         }
 
-        private object DeserializeIntegerHelper(TypeCode typeCode, string value, IFormatProvider formatProvider)
+        private object DeserializeIntegerHelper(TypeCode typeCode, string value)
         {
-            StringBuilder numberBuilder = new StringBuilder();
+            var numberBuilder = new StringBuilder();
             int currentIndex = 0;
             bool isNegative = false;
             int numberBase = 0;
@@ -218,7 +218,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             else
             {
                 // Could be decimal or base 60
-                string[] chunks = value.Substring(currentIndex).Split(':');
+                var chunks = value.Substring(currentIndex).Split(':');
                 result = 0;
 
                 for (int chunkIndex = 0; chunkIndex < chunks.Length; chunkIndex++)

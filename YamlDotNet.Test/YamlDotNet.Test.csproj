@@ -93,8 +93,8 @@
     <Compile Include="Core\ParserTests.cs" />
     <Compile Include="Core\TokenHelper.cs" />
     <Compile Include="Core\ScannerTests.cs" />
-    <Compile Include="Dump.cs" />
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepresentationModel\BinarySerlializationTests.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />

@@ -71,12 +71,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, reader, expectedType, nestedObjectDeserializer, list, canUpdate);
+            DeserializeHelper(itemType, reader, nestedObjectDeserializer, list, canUpdate);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, EventReader reader, Func<EventReader, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
         {
             reader.Expect<SequenceStart>();
             while (!reader.Accept<SequenceEnd>())
@@ -104,6 +104,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
             reader.Expect<SequenceEnd>();
-        }        
+        }
     }
 }

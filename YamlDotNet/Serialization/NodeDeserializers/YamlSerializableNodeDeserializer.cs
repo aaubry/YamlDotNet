@@ -30,9 +30,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         public YamlSerializableNodeDeserializer(IObjectFactory objectFactory)
         {
-			this.objectFactory = objectFactory;
+            this.objectFactory = objectFactory;
         }
-    
+
         public bool Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
         {
 #pragma warning disable 0618 // IYamlSerializable is obsolete

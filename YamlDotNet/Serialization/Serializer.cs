@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization
             {
                 Converters.Add(yamlTypeConverter);
             }
-            
+
             typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
                 ? (ITypeResolver)new StaticTypeResolver()
                 : (ITypeResolver)new DynamicTypeResolver();
@@ -111,7 +111,7 @@ namespace YamlDotNet.Serialization
         {
             if (emitter == null)
             {
-                throw new ArgumentNullException("emitter");
+                throw new ArgumentNullException(nameof(emitter));
             }
 
             EmitDocument(emitter, new ObjectDescriptor(graph, graph != null ? graph.GetType() : typeof(object), typeof(object)));
@@ -127,12 +127,12 @@ namespace YamlDotNet.Serialization
         {
             if (emitter == null)
             {
-                throw new ArgumentNullException("emitter");
+                throw new ArgumentNullException(nameof(emitter));
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             EmitDocument(emitter, new ObjectDescriptor(graph, type, type));

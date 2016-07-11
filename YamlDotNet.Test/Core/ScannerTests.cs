@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -54,7 +54,7 @@ namespace YamlDotNet.Test.Core
         [Fact]
         public void VerifyTokensOnExample3()
         {
-            Scanner scanner = Yaml.ScannerForResource("03-scalar-in-exp-doc.yaml");
+            var scanner = Yaml.ScannerForResource("03-scalar-in-exp-doc.yaml");
             AssertSequenceOfTokensFrom(scanner,
                 StreamStart,
                 DocumentStart,
@@ -74,8 +74,8 @@ namespace YamlDotNet.Test.Core
                 DocumentStart,
                 SingleQuotedScalar("yet another scalar"),
                 StreamEnd);
-        }        
-         
+        }
+
         [Fact]
         public void VerifyTokensOnExample5()
         {
@@ -223,7 +223,7 @@ namespace YamlDotNet.Test.Core
                 BlockEnd,
                 StreamEnd);
         }
-    
+
         [Fact]
         public void VerifyTokensOnExample12()
         {
@@ -258,7 +258,7 @@ namespace YamlDotNet.Test.Core
                 BlockEnd,
                 StreamEnd);
         }
-            
+
         [Fact]
         public void VerifyTokensOnExample13()
         {
@@ -290,7 +290,7 @@ namespace YamlDotNet.Test.Core
                 BlockEnd,
                 StreamEnd);
         }
-            
+
         [Fact]
         public void VerifyTokensOnExample14()
         {
@@ -337,10 +337,10 @@ namespace YamlDotNet.Test.Core
                 - first # Comment on first item
             "), skipComments: false);
 
-            while(sut.MoveNext())
+            while (sut.MoveNext())
             {
                 var comment = sut.Current as Comment;
-                if(comment != null)
+                if (comment != null)
                 {
                     Assert.Equal(8, comment.Start.Index);
                     Assert.Equal(31, comment.End.Index);
@@ -445,7 +445,6 @@ namespace YamlDotNet.Test.Core
 
         private void AssertToken(Token expected, Token actual, int tokenNumber)
         {
-            Dump.WriteLine(expected.GetType().Name);
             actual.Should().NotBeNull();
             actual.GetType().Should().Be(expected.GetType(), "Token {0} is not of the expected type", tokenNumber);
 
@@ -455,7 +454,6 @@ namespace YamlDotNet.Test.Core
                 {
                     var value = property.GetValue(actual, null);
                     var expectedValue = property.GetValue(expected, null);
-                    Dump.WriteLine("\t{0} = {1}", property.Name, value);
                     value.Should().Be(expectedValue, "Comparing property {0} in token {1}", property.Name, tokenNumber);
                 }
             }

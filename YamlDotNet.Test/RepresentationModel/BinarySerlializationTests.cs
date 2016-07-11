@@ -39,13 +39,13 @@ namespace YamlDotNet.Test.RepresentationModel
             var stream = new YamlStream();
             stream.Load(Yaml.StreamFrom("fail-backreference.yaml"));
 
-            
+
             var formatter = new BinaryFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize(memoryStream, stream.Documents[0].RootNode);
 
             memoryStream.Position = 0;
-            YamlNode result = (YamlNode)formatter.Deserialize(memoryStream);
+            var result = (YamlNode)formatter.Deserialize(memoryStream);
             Assert.Equal(stream.Documents[0].RootNode, result);
         }
     }

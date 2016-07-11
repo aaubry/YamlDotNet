@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -49,11 +49,11 @@ namespace YamlDotNet.Core
         {
             if (input == null)
             {
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             }
             if (capacity < 1)
             {
-                throw new ArgumentOutOfRangeException("capacity", "The capacity must be positive.");
+                throw new ArgumentOutOfRangeException(nameof(capacity), "The capacity must be positive.");
             }
 
             this.input = input;
@@ -91,7 +91,7 @@ namespace YamlDotNet.Core
         {
             if (offset < 0 || offset >= buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset", "The offset must be betwwen zero and the capacity of the buffer.");
+                throw new ArgumentOutOfRangeException(nameof(offset), "The offset must be betwwen zero and the capacity of the buffer.");
             }
 
             Cache(offset);
@@ -116,10 +116,10 @@ namespace YamlDotNet.Core
         {
             while (length >= count)
             {
-                int nextChar = input.Read();
+                var nextChar = input.Read();
                 if (nextChar >= 0)
                 {
-                    int lastIndex = GetIndexForOffset(count);
+                    var lastIndex = GetIndexForOffset(count);
                     buffer[lastIndex] = (char)nextChar;
                     ++count;
                 }
@@ -139,7 +139,7 @@ namespace YamlDotNet.Core
         {
             if (length < 1 || length > count)
             {
-                throw new ArgumentOutOfRangeException("length", "The length must be between 1 and the number of characters in the buffer. Use the Peek() and / or Cache() methods to fill the buffer.");
+                throw new ArgumentOutOfRangeException(nameof(length), "The length must be between 1 and the number of characters in the buffer. Use the Peek() and / or Cache() methods to fill the buffer.");
             }
             firstIndex = GetIndexForOffset(length);
             count -= length;

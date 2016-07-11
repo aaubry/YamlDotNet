@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 value = null;
                 return false;
             }
-            
+
             value = _objectFactory.Create(expectedType);
             while (!reader.Accept<MappingEnd>())
             {

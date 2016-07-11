@@ -37,7 +37,7 @@ namespace YamlDotNet.Serialization.Converters
 
         public bool Accepts(System.Type type)
         {
-            return type == typeof (System.Guid);
+            return type == typeof(System.Guid);
         }
 
         public object ReadYaml(Core.IParser parser, System.Type type)
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.Converters
 
         public void WriteYaml(Core.IEmitter emitter, object value, System.Type type)
         {
-            var guid = (System.Guid) value;
+            var guid = (System.Guid)value;
             emitter.Emit(new Core.Events.Scalar(null, null, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }

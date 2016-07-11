@@ -183,6 +183,7 @@
     <Compile Include="Core\Parser.cs" />
     <Compile Include="Core\ParserState.cs" />
     <Compile Include="Core\Tokens\Comment.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\ExpressionExtensions.cs" />
     <Compile Include="Helpers\Portability.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

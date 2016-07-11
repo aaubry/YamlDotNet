@@ -30,14 +30,14 @@ namespace YamlDotNet.Serialization.ValueDeserializers
     public sealed class AliasValueDeserializer : IValueDeserializer
     {
         private readonly IValueDeserializer innerDeserializer;
-        
+
         public AliasValueDeserializer(IValueDeserializer innerDeserializer)
         {
             if (innerDeserializer == null)
             {
-                throw new ArgumentNullException ("innerDeserializer");            
+                throw new ArgumentNullException(nameof(innerDeserializer));
             }
-            
+
             this.innerDeserializer = innerDeserializer;
         }
 
@@ -105,16 +105,16 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 }
             }
         }
-        
-        public object DeserializeValue (EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+
+        public object DeserializeValue(EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
             object value;
             var alias = reader.Allow<AnchorAlias>();
-            if(alias != null)
+            if (alias != null)
             {
                 var aliasState = state.Get<AliasState>();
                 ValuePromise valuePromise;
-                if(!aliasState.TryGetValue(alias.Value, out valuePromise))
+                if (!aliasState.TryGetValue(alias.Value, out valuePromise))
                 {
                     valuePromise = new ValuePromise(alias);
                     aliasState.Add(alias.Value, valuePromise);
@@ -122,18 +122,18 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
                 return valuePromise.HasValue ? valuePromise.Value : valuePromise;
             }
-            
+
             string anchor = null;
-            
+
             var nodeEvent = reader.Peek<NodeEvent>();
-            if(nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
+            if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
             {
                 anchor = nodeEvent.Anchor;
             }
-            
+
             value = innerDeserializer.DeserializeValue(reader, expectedType, state, nestedObjectDeserializer);
-            
-            if(anchor != null)
+
+            if (anchor != null)
             {
                 var aliasState = state.Get<AliasState>();
 
@@ -154,7 +154,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                     ));
                 }
             }
-            
+
             return value;
         }
     }

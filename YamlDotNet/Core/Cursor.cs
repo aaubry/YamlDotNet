@@ -52,7 +52,7 @@ namespace YamlDotNet.Core
             Index++;
             LineOffset++;
         }
-        
+
         public void SkipLineByOffset(int offset)
         {
             Index += offset;

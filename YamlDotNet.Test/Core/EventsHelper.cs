@@ -35,7 +35,8 @@ namespace YamlDotNet.Test.Core
         protected const bool Implicit = true;
         protected const string TagYaml = "tag:yaml.org,2002:";
 
-        protected static readonly TagDirective[] DefaultTags = new[] {
+        protected static readonly TagDirective[] DefaultTags =
+        {
             new TagDirective("!", "!"),
             new TagDirective("!!", TagYaml)
         };
@@ -182,7 +183,8 @@ namespace YamlDotNet.Test.Core
 
             public ScalarBuilder ImplicitPlain
             {
-                get {
+                get
+                {
                     plainImplicit = true;
                     return this;
                 }
@@ -190,7 +192,8 @@ namespace YamlDotNet.Test.Core
 
             public ScalarBuilder ImplicitQuoted
             {
-                get {
+                get
+                {
                     quotedImplicit = true;
                     return this;
                 }
@@ -264,7 +267,8 @@ namespace YamlDotNet.Test.Core
 
             public MappingStartBuilder Explicit
             {
-                get {
+                get
+                {
                     @implicit = false;
                     return this;
                 }
@@ -303,10 +307,6 @@ namespace YamlDotNet.Test.Core
                 var expectedValue = property.GetValue(expected, null);
                 if (expectedValue is IEnumerable && !(expectedValue is string))
                 {
-                    Dump.Write("\t{0} = {{", property.Name);
-                    Dump.Write(string.Join(", ", (IEnumerable)value));
-                    Dump.WriteLine("}");
-
                     if (expectedValue is ICollection && value is ICollection)
                     {
                         var expectedCount = ((ICollection)expectedValue).Count;
@@ -327,7 +327,6 @@ namespace YamlDotNet.Test.Core
                 }
                 else
                 {
-                    Dump.WriteLine("\t{0} = {1}", property.Name, value);
                     value.Should().Be(expectedValue, "Compared property {0} in parse event {1}", property.Name, eventNumber);
                 }
             }

@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -112,7 +112,8 @@ namespace YamlDotNet.Test.Core
 
             buffer.Peek(2);
 
-            using (OnlyTheseCalls) {
+            using (OnlyTheseCalls)
+            {
                 buffer.Skip(1);
 
                 buffer.Peek(3).Should().Be('e');
@@ -130,7 +131,8 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(1);
             buffer.Peek(3);
 
-            using (OnlyTheseCalls) {
+            using (OnlyTheseCalls)
+            {
                 buffer.Skip(4);
 
                 buffer.Peek(0).Should().Be('f');
@@ -150,7 +152,8 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(0);
 
-            using (OnlyTheseCalls) {
+            using (OnlyTheseCalls)
+            {
                 buffer.Skip(1);
 
                 buffer.Peek(0).Should().Be('g');
@@ -159,7 +162,8 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
-        public void ShouldHaveReadOnceAfterSkippingSevenCharacters() {
+        public void ShouldHaveReadOnceAfterSkippingSevenCharacters()
+        {
             var reader = CreateFakeReader(TestString);
             var buffer = CreateBuffer(reader, Capacity);
 
@@ -169,7 +173,8 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(1);
 
-            using (OnlyTheseCalls) {
+            using (OnlyTheseCalls)
+            {
                 buffer.Skip(2);
 
                 buffer.Peek(0).Should().Be('h');
@@ -189,7 +194,8 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(2);
 
-            using (OnlyTheseCalls) {
+            using (OnlyTheseCalls)
+            {
                 buffer.Skip(3);
 
                 buffer.Peek(0).Should().Be('i');
@@ -209,7 +215,8 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(3);
 
-            using (OnlyTheseCalls) {
+            using (OnlyTheseCalls)
+            {
                 buffer.Skip(4);
 
                 buffer.Peek(0).Should().Be('\0');

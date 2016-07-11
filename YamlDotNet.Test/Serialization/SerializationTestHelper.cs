@@ -52,7 +52,6 @@ namespace YamlDotNet.Test.Serialization
         {
             var writer = new StringWriter();
             serializer.Serialize(writer, obj);
-            Dump.WriteLine(writer);
             return deserializer.Deserialize<T>(UsingReaderFor(writer));
         }
 
@@ -65,7 +64,6 @@ namespace YamlDotNet.Test.Serialization
         {
             var writer = new StringWriter();
             serializer.Serialize(writer, obj, typeof(T));
-            Dump.WriteLine(writer);
             return new Deserializer().Deserialize<T>(UsingReaderFor(writer));
         }
 
@@ -425,8 +423,8 @@ namespace YamlDotNet.Test.Serialization
         [YamlIgnore]
         public String IgnoreMe
         {
-            get { throw new NotImplementedException("Accessing a [YamlIgnore] property"); }
-            set { throw new NotImplementedException("Accessing a [YamlIgnore] property"); }
+            get { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
+            set { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
         }
     }
 

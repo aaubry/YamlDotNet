@@ -138,7 +138,7 @@ namespace YamlDotNet.Core
         {
             if (bestIndent < MinBestIndent || bestIndent > MaxBestIndent)
             {
-                throw new ArgumentOutOfRangeException("bestIndent", string.Format(CultureInfo.InvariantCulture,
+                throw new ArgumentOutOfRangeException(nameof(bestIndent), string.Format(CultureInfo.InvariantCulture,
                     "The bestIndent parameter must be between {0} and {1}.", MinBestIndent, MaxBestIndent));
             }
 
@@ -146,7 +146,7 @@ namespace YamlDotNet.Core
 
             if (bestWidth <= bestIndent * 2)
             {
-                throw new ArgumentOutOfRangeException("bestWidth", "The bestWidth parameter must be greater than bestIndent * 2.");
+                throw new ArgumentOutOfRangeException(nameof(bestWidth), "The bestWidth parameter must be greater than bestIndent * 2.");
             }
 
             this.bestWidth = bestWidth;
@@ -379,8 +379,8 @@ namespace YamlDotNet.Core
                         if (followedByWhitespace)
                         {
                             blockIndicators = true;
-                    	}
-					}
+                        }
+                    }
 
                     if (buffer.Check('#') && preceededByWhitespace)
                     {
@@ -487,7 +487,7 @@ namespace YamlDotNet.Core
                 scalarData.isSingleQuotedAllowed = false;
                 scalarData.isBlockAllowed = false;
             }
-            
+
             scalarData.isMultiline = lineBreaks;
             if (lineBreaks)
             {
@@ -664,7 +664,7 @@ namespace YamlDotNet.Core
         {
             if (!(evt is StreamStart))
             {
-                throw new ArgumentException("Expected STREAM-START.", "evt");
+                throw new ArgumentException("Expected STREAM-START.", nameof(evt));
             }
 
             indent = -1;
@@ -794,7 +794,7 @@ namespace YamlDotNet.Core
         }
         // ReSharper restore UnusedParameter.Local
 
-        private void AppendTagDirectiveTo(TagDirective value, bool allowDuplicates, TagDirectiveCollection tagDirectives)
+        private static void AppendTagDirectiveTo(TagDirective value, bool allowDuplicates, TagDirectiveCollection tagDirectives)
         {
             if (tagDirectives.Contains(value))
             {
@@ -1055,7 +1055,7 @@ namespace YamlDotNet.Core
                     {
                         WriteBreak();
                     }
-					WriteBreak(breakCharacter);
+                    WriteBreak(breakCharacter);
                     isIndentation = true;
                     previousBreak = true;
                 }
@@ -1159,7 +1159,7 @@ namespace YamlDotNet.Core
                             break;
 
                         default:
-                            var code = (short) character;
+                            var code = (short)character;
                             if (code <= 0xFF)
                             {
                                 Write('x');
@@ -1224,7 +1224,7 @@ namespace YamlDotNet.Core
 
                 char breakCharacter;
                 if (IsBreak(character, out breakCharacter))
-				{
+                {
                     WriteBreak(breakCharacter);
                     isIndentation = true;
                     previousBreak = true;
@@ -1303,10 +1303,10 @@ namespace YamlDotNet.Core
             return character == ' ';
         }
 
-		private static bool IsBreak(char character, out char breakChar)
-		{
-            switch (character)
+        private static bool IsBreak(char character, out char breakChar)
         {
+            switch (character)
+            {
                 case '\r':
                 case '\n':
                 case '\x85':
@@ -1351,7 +1351,7 @@ namespace YamlDotNet.Core
             ProcessAnchor();
             ProcessTag();
 
-            var sequenceStart = (SequenceStart) evt;
+            var sequenceStart = (SequenceStart)evt;
 
             if (flowLevel != 0 || isCanonical || sequenceStart.Style == SequenceStyle.Flow || CheckEmptySequence())
             {
@@ -1371,7 +1371,7 @@ namespace YamlDotNet.Core
             ProcessAnchor();
             ProcessTag();
 
-            var mappingStart = (MappingStart) evt;
+            var mappingStart = (MappingStart)evt;
 
             if (flowLevel != 0 || isCanonical || mappingStart.Style == MappingStyle.Flow || CheckEmptyMapping())
             {
@@ -1677,47 +1677,47 @@ namespace YamlDotNet.Core
             int length;
             switch (events.Peek().Type)
             {
-            case EventType.Alias:
-                length = SafeStringLength(anchorData.anchor);
-                break;
+                case EventType.Alias:
+                    length = SafeStringLength(anchorData.anchor);
+                    break;
 
-            case EventType.Scalar:
-                if (scalarData.isMultiline)
-                {
+                case EventType.Scalar:
+                    if (scalarData.isMultiline)
+                    {
+                        return false;
+                    }
+
+                    length =
+                        SafeStringLength(anchorData.anchor) +
+                            SafeStringLength(tagData.handle) +
+                            SafeStringLength(tagData.suffix) +
+                            SafeStringLength(scalarData.value);
+                    break;
+
+                case EventType.SequenceStart:
+                    if (!CheckEmptySequence())
+                    {
+                        return false;
+                    }
+                    length =
+                        SafeStringLength(anchorData.anchor) +
+                            SafeStringLength(tagData.handle) +
+                            SafeStringLength(tagData.suffix);
+                    break;
+
+                case EventType.MappingStart:
+                    if (!CheckEmptySequence())
+                    {
+                        return false;
+                    }
+                    length =
+                        SafeStringLength(anchorData.anchor) +
+                            SafeStringLength(tagData.handle) +
+                            SafeStringLength(tagData.suffix);
+                    break;
+
+                default:
                     return false;
-                }
-
-                length =
-                    SafeStringLength(anchorData.anchor) +
-                        SafeStringLength(tagData.handle) +
-                        SafeStringLength(tagData.suffix) +
-                        SafeStringLength(scalarData.value);
-                break;
-
-            case EventType.SequenceStart:
-                if (!CheckEmptySequence())
-                {
-                    return false;
-                }
-                length =
-                    SafeStringLength(anchorData.anchor) +
-                        SafeStringLength(tagData.handle) +
-                        SafeStringLength(tagData.suffix);
-                break;
-
-            case EventType.MappingStart:
-                if (!CheckEmptySequence())
-                {
-                    return false;
-                }
-                length =
-                    SafeStringLength(anchorData.anchor) +
-                        SafeStringLength(tagData.handle) +
-                        SafeStringLength(tagData.suffix);
-                break;
-
-            default:
-                return false;
             }
 
             return length <= MaxAliasLength;
@@ -1725,7 +1725,7 @@ namespace YamlDotNet.Core
 
         private int SafeStringLength(string value)
         {
-            return value == null? 0: value.Length;
+            return value == null ? 0 : value.Length;
         }
 
         private bool CheckEmptySequence()
@@ -1853,7 +1853,8 @@ namespace YamlDotNet.Core
 
         private string UrlEncode(string text)
         {
-            return uriReplacer.Replace(text, delegate(Match match) {
+            return uriReplacer.Replace(text, delegate (Match match)
+            {
                 var buffer = new StringBuilder();
                 foreach (var toEncode in Encoding.UTF8.GetBytes(match.Value))
                 {
@@ -1876,10 +1877,10 @@ namespace YamlDotNet.Core
         }
 
         private void WriteBreak(char breakCharacter = '\n')
-		{
-            if (breakCharacter == '\n')
         {
-            output.WriteLine();
+            if (breakCharacter == '\n')
+            {
+                output.WriteLine();
             }
             else
             {

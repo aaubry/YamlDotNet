@@ -40,64 +40,64 @@ namespace YamlDotNet.Serialization
             this.innerTypeDescriptor = innerTypeDescriptor;
             this.overrides = overrides;
         }
-        
+
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
         {
             if (overrides == null)
                 return innerTypeDescriptor.GetProperties(type, container);
-            
+
             return innerTypeDescriptor.GetProperties(type, container)
                 .Select(p => (IPropertyDescriptor)new OverridePropertyDescriptor(p, overrides, type));
         }
-        
+
         public sealed class OverridePropertyDescriptor : IPropertyDescriptor
         {
             private readonly IPropertyDescriptor baseDescriptor;
             private readonly YamlAttributeOverrides overrides;
             private readonly Type classType;
-    
+
             public OverridePropertyDescriptor(IPropertyDescriptor baseDescriptor, YamlAttributeOverrides overrides, Type classType)
             {
                 this.baseDescriptor = baseDescriptor;
                 this.overrides = overrides;
                 this.classType = classType;
             }
-    
+
             public string Name { get { return baseDescriptor.Name; } }
-    
+
             public bool CanWrite { get { return baseDescriptor.CanWrite; } }
 
             public Type Type { get { return baseDescriptor.Type; } }
-    
+
             public Type TypeOverride
             {
                 get { return baseDescriptor.TypeOverride; }
                 set { baseDescriptor.TypeOverride = value; }
             }
-    
+
             public int Order
             {
                 get { return baseDescriptor.Order; }
                 set { baseDescriptor.Order = value; }
             }
-    
+
             public ScalarStyle ScalarStyle
             {
                 get { return baseDescriptor.ScalarStyle; }
                 set { baseDescriptor.ScalarStyle = value; }
             }
-        
+
             public void Write(object target, object value)
             {
                 baseDescriptor.Write(target, value);
             }
-    
+
             public T GetCustomAttribute<T>() where T : Attribute
             {
                 var attr = overrides.GetAttribute<T>(classType, Name);
                 return attr ?? baseDescriptor.GetCustomAttribute<T>();
             }
-    
+
             public IObjectDescriptor Read(object target)
             {
                 return baseDescriptor.Read(target);
