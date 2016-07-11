@@ -36,112 +36,209 @@ using YamlDotNet.Serialization.ValueDeserializers;
 namespace YamlDotNet.Serialization
 {
     /// <summary>
-    /// A façade for the YAML library with the standard configuration.
+    /// Deserializes objects from the YAML format.
+    /// To customize the behavior of <see cref="Deserializer" />,
+    /// use the <see cref="DeserializerBuilder" /> class.
     /// </summary>
     public sealed class Deserializer
     {
-        private static readonly Dictionary<string, Type> predefinedTagMappings = new Dictionary<string, Type>
+        #region Backwards compatibility
+        private class BackwardsCompatibleConfiguration
         {
-            { "tag:yaml.org,2002:map", typeof(Dictionary<object, object>) },
-            { "tag:yaml.org,2002:bool", typeof(bool) },
-            { "tag:yaml.org,2002:float", typeof(double) },
-            { "tag:yaml.org,2002:int", typeof(int) },
-            { "tag:yaml.org,2002:str", typeof(string) },
-            { "tag:yaml.org,2002:timestamp", typeof(DateTime) },
-        };
-
-        private readonly Dictionary<string, Type> tagMappings;
-        private readonly List<IYamlTypeConverter> converters;
-        private TypeDescriptorProxy typeDescriptor = new TypeDescriptorProxy();
-        private IValueDeserializer valueDeserializer;
-
-        public IList<INodeDeserializer> NodeDeserializers { get; private set; }
-        public IList<INodeTypeResolver> TypeResolvers { get; private set; }
-
-        private class TypeDescriptorProxy : ITypeInspector
-        {
-            public ITypeInspector TypeDescriptor;
-
-            public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+            private static readonly Dictionary<string, Type> predefinedTagMappings = new Dictionary<string, Type>
             {
-                return TypeDescriptor.GetProperties(type, container);
+                { "tag:yaml.org,2002:map", typeof(Dictionary<object, object>) },
+                { "tag:yaml.org,2002:bool", typeof(bool) },
+                { "tag:yaml.org,2002:float", typeof(double) },
+                { "tag:yaml.org,2002:int", typeof(int) },
+                { "tag:yaml.org,2002:str", typeof(string) },
+                { "tag:yaml.org,2002:timestamp", typeof(DateTime) }
+            };
+
+            private readonly Dictionary<string, Type> tagMappings;
+            private readonly List<IYamlTypeConverter> converters;
+            private TypeDescriptorProxy typeDescriptor = new TypeDescriptorProxy();
+            public IValueDeserializer valueDeserializer;
+
+            public IList<INodeDeserializer> NodeDeserializers { get; private set; }
+            public IList<INodeTypeResolver> TypeResolvers { get; private set; }
+
+            private class TypeDescriptorProxy : ITypeInspector
+            {
+                public ITypeInspector TypeDescriptor;
+
+                public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+                {
+                    return TypeDescriptor.GetProperties(type, container);
+                }
+
+                public IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)
+                {
+                    return TypeDescriptor.GetProperty(type, container, name, ignoreUnmatched);
+                }
             }
 
-            public IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)
+            public BackwardsCompatibleConfiguration(
+                IObjectFactory objectFactory,
+                INamingConvention namingConvention,
+                bool ignoreUnmatched,
+                YamlAttributeOverrides overrides)
             {
-                return TypeDescriptor.GetProperty(type, container, name, ignoreUnmatched);
+                objectFactory = objectFactory ?? new DefaultObjectFactory();
+                namingConvention = namingConvention ?? new NullNamingConvention();
+
+                typeDescriptor.TypeDescriptor =
+                    new CachedTypeInspector(
+                        new YamlAttributesTypeInspector(
+                            new YamlAttributeOverridesInspector(
+                                new NamingConventionTypeInspector(
+                                    new ReadableAndWritablePropertiesTypeInspector(
+                                        new ReadablePropertiesTypeInspector(
+                                            new StaticTypeResolver()
+                                        )
+                                    ),
+                                    namingConvention
+                                ),
+                                overrides
+                            )
+                        )
+                    );
+
+                converters = new List<IYamlTypeConverter>();
+                foreach (IYamlTypeConverter yamlTypeConverter in YamlTypeConverters.GetBuiltInConverters(false))
+                {
+                    converters.Add(yamlTypeConverter);
+                }
+
+                NodeDeserializers = new List<INodeDeserializer>();
+                NodeDeserializers.Add(new YamlConvertibleNodeDeserializer(objectFactory));
+                NodeDeserializers.Add(new YamlSerializableNodeDeserializer(objectFactory));
+                NodeDeserializers.Add(new TypeConverterNodeDeserializer(converters));
+                NodeDeserializers.Add(new NullNodeDeserializer());
+                NodeDeserializers.Add(new ScalarNodeDeserializer());
+                NodeDeserializers.Add(new ArrayNodeDeserializer());
+                NodeDeserializers.Add(new DictionaryNodeDeserializer(objectFactory));
+                NodeDeserializers.Add(new CollectionNodeDeserializer(objectFactory));
+                NodeDeserializers.Add(new EnumerableNodeDeserializer());
+                NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched));
+
+                tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
+                TypeResolvers = new List<INodeTypeResolver>();
+                TypeResolvers.Add(new YamlConvertibleTypeResolver());
+                TypeResolvers.Add(new YamlSerializableTypeResolver());
+                TypeResolvers.Add(new TagNodeTypeResolver(tagMappings));
+                TypeResolvers.Add(new TypeNameInTagNodeTypeResolver());
+                TypeResolvers.Add(new DefaultContainersNodeTypeResolver());
+
+                valueDeserializer =
+                    new AliasValueDeserializer(
+                        new NodeValueDeserializer(
+                            NodeDeserializers,
+                            TypeResolvers
+                        )
+                    );
+            }
+
+            public void RegisterTagMapping(string tag, Type type)
+            {
+                tagMappings.Add(tag, type);
+            }
+
+            public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
+            {
+                converters.Insert(0, typeConverter);
             }
         }
-        
+
+        private BackwardsCompatibleConfiguration backwardsCompatibleConfiguration;
+
+        private void ThrowUnlessInBackwardsCompatibleMode()
+        {
+            if (backwardsCompatibleConfiguration == null)
+            {
+                throw new InvalidOperationException("This method / property exists for backwards compatibility reasons, but the Deserializer was created using the new configuration mechanism. To configure the Deserializer, use the DeserializerBuilder.");
+            }
+        }
+
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
+        public IList<INodeDeserializer> NodeDeserializers
+        {
+            get
+            {
+                ThrowUnlessInBackwardsCompatibleMode();
+                return backwardsCompatibleConfiguration.NodeDeserializers;
+            }
+        }
+
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
+        public IList<INodeTypeResolver> TypeResolvers
+        {
+            get
+            {
+                ThrowUnlessInBackwardsCompatibleMode();
+                return backwardsCompatibleConfiguration.TypeResolvers;
+            }
+        }
+
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
         public Deserializer(
             IObjectFactory objectFactory = null,
             INamingConvention namingConvention = null,
             bool ignoreUnmatched = false,
             YamlAttributeOverrides overrides = null)
         {
-            objectFactory = objectFactory ?? new DefaultObjectFactory();
-            namingConvention = namingConvention ?? new NullNamingConvention();
-            
-            typeDescriptor.TypeDescriptor =
-                new CachedTypeInspector(
-                    new YamlAttributesTypeInspector(
-                        new YamlAttributeOverridesInspector(
-                            new NamingConventionTypeInspector(
-                                new ReadableAndWritablePropertiesTypeInspector(
-                                    new ReadablePropertiesTypeInspector(
-                                        new StaticTypeResolver()
-                                    )
-                                ),
-                                namingConvention
-                            ),
-                            overrides
-                        )
-                    )
-                );
-
-            converters = new List<IYamlTypeConverter>();
-            foreach (IYamlTypeConverter yamlTypeConverter in YamlTypeConverters.GetBuiltInConverters(false))
-            {
-                converters.Add(yamlTypeConverter);
-            }
-
-            NodeDeserializers = new List<INodeDeserializer>();
-            NodeDeserializers.Add(new YamlConvertibleNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new YamlSerializableNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new TypeConverterNodeDeserializer(converters));
-            NodeDeserializers.Add(new NullNodeDeserializer());
-            NodeDeserializers.Add(new ScalarNodeDeserializer());
-            NodeDeserializers.Add(new ArrayNodeDeserializer());
-            NodeDeserializers.Add(new DictionaryNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new CollectionNodeDeserializer(objectFactory));
-            NodeDeserializers.Add(new EnumerableNodeDeserializer());
-            NodeDeserializers.Add(new ObjectNodeDeserializer(objectFactory, typeDescriptor, ignoreUnmatched));
-
-            tagMappings = new Dictionary<string, Type>(predefinedTagMappings);
-            TypeResolvers = new List<INodeTypeResolver>();
-            TypeResolvers.Add(new YamlConvertibleTypeResolver());
-            TypeResolvers.Add(new YamlSerializableTypeResolver());
-            TypeResolvers.Add(new TagNodeTypeResolver(tagMappings));
-            TypeResolvers.Add(new TypeNameInTagNodeTypeResolver());
-            TypeResolvers.Add(new DefaultContainersNodeTypeResolver());
-            
-            valueDeserializer =
-                new AliasValueDeserializer(
-                    new NodeValueDeserializer(
-                        NodeDeserializers,
-                        TypeResolvers
-                    )
-                );
+            backwardsCompatibleConfiguration = new BackwardsCompatibleConfiguration(objectFactory, namingConvention, ignoreUnmatched, overrides);
+            valueDeserializer = backwardsCompatibleConfiguration.valueDeserializer;
         }
 
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
         public void RegisterTagMapping(string tag, Type type)
         {
-            tagMappings.Add(tag, type);
+            ThrowUnlessInBackwardsCompatibleMode();
+            backwardsCompatibleConfiguration.RegisterTagMapping(tag, type);
         }
 
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
         public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
         {
-            converters.Insert(0, typeConverter);
+            ThrowUnlessInBackwardsCompatibleMode();
+            backwardsCompatibleConfiguration.RegisterTypeConverter(typeConverter);
+        }
+        #endregion
+
+        private readonly IValueDeserializer valueDeserializer;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Deserializer" /> using the default configuration.
+        /// </summary>
+        /// <remarks>
+        /// To customize the bahavior of the deserializer, use <see cref="DeserializerBuilder" />.
+        /// </remarks>
+        public Deserializer()
+            // TODO: When the backwards compatibility is dropped, uncomment the following line and remove the body of this constructor.
+            // : this(new DeserializerBuilder().BuildValueDeserializer())
+        {
+            backwardsCompatibleConfiguration = new BackwardsCompatibleConfiguration(null, null, false, null);
+            valueDeserializer = backwardsCompatibleConfiguration.valueDeserializer;
+        }
+
+        /// <remarks>
+        /// This constructor is private to discourage its use.
+        /// To invoke it, call the <see cref="FromValueDeserializer"/> method.
+        /// </remarks>
+        private Deserializer(IValueDeserializer valueDeserializer)
+        {
+            this.valueDeserializer = valueDeserializer;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Deserializer" /> that uses the specified <see cref="IValueDeserializer" />.
+        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// deserializer is to use <see cref="DeserializerBuilder" />.
+        /// </summary>
+        public static Deserializer FromValueDeserializer(IValueDeserializer valueDeserializer)
+        {
+            return new Deserializer(valueDeserializer);
         }
 
         public T Deserialize<T>(TextReader input)
@@ -179,12 +276,12 @@ namespace YamlDotNet.Serialization
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             var hasStreamStart = reader.Allow<StreamStart>() != null;

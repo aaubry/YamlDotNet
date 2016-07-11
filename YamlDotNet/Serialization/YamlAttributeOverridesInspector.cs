@@ -94,17 +94,8 @@ namespace YamlDotNet.Serialization
     
             public T GetCustomAttribute<T>() where T : Attribute
             {
-                // Check for a Property
-                var prop = classType.GetPublicProperty(Name);
-                if (prop != null)
-                {
-                    var attr = overrides.GetAttribute<T>(prop.DeclaringType, Name);
-                    if (attr != null)
-                        return attr;
-                }
-                
-                // Default to base behavior
-                return baseDescriptor.GetCustomAttribute<T>();
+                var attr = overrides.GetAttribute<T>(classType, Name);
+                return attr ?? baseDescriptor.GetCustomAttribute<T>();
             }
     
             public IObjectDescriptor Read(object target)

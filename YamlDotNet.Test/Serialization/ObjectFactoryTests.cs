@@ -32,7 +32,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var text = "!empty {}";
             
-            Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
+            DeserializerBuilder.WithTagMapping("!empty", typeof(EmptyBase));
             var result = Deserializer.Deserialize(UsingReaderFor(text));
 
             result.Should().BeOfType<EmptyBase>();
@@ -44,7 +44,7 @@ namespace YamlDotNet.Test.Serialization
             AssumingDeserializerWith(new LambdaObjectFactory(t => new EmptyDerived()));
             var text = "!empty {}";
 
-            Deserializer.RegisterTagMapping("!empty", typeof(EmptyBase));
+            DeserializerBuilder.WithTagMapping("!empty", typeof(EmptyBase));
             var result = Deserializer.Deserialize(UsingReaderFor(text));
 
             result.Should().BeOfType<EmptyDerived>();

@@ -182,7 +182,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var stream = Yaml.StreamFrom("tags.yaml");
 
-            Deserializer.RegisterTagMapping("tag:yaml.org,2002:point", typeof(Point));
+            DeserializerBuilder.WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
             var result = Deserializer.Deserialize(stream);
 
             result.Should().BeOfType<Point>().And
@@ -273,7 +273,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new MissingDefaultCtor("Yo");
 
             RoundtripSerializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
-            Deserializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
+            DeserializerBuilder.WithTypeConverter(new MissingDefaultCtorConverter());
             var result = DoRoundtripFromObjectTo<MissingDefaultCtor>(obj, RoundtripSerializer, Deserializer);
 
             result.Value.Should().Be("Yo");
@@ -314,8 +314,8 @@ namespace YamlDotNet.Test.Serialization
             // Todo: use RegEx once FluentAssertions 2.2 is released
             text.TrimEnd('\r', '\n').Should().Be("fourthOverride: Fourth");
 
-            var deserializer = new Deserializer(overrides: overrides);
-            var output = deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
+            DeserializerBuilder.WithAttributeOverride<NameConvention>(n => n.AliasTest, attribute);
+            var output = Deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
 
             output.AliasTest.Should().Be(input.AliasTest);
         }
@@ -934,8 +934,8 @@ namespace YamlDotNet.Test.Serialization
                 "FirstTest: 1",
                 "SecondTest: 2");
 
-            var deserializer = new Deserializer(namingConvention: convention);
-            deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
+            DeserializerBuilder.WithNamingConvention(convention);
+            Deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
 
             A.CallTo(() => convention.Apply("FirstTest")).MustHaveHappened();
             A.CallTo(() => convention.Apply("SecondTest")).MustHaveHappened();
@@ -1056,8 +1056,8 @@ namespace YamlDotNet.Test.Serialization
         public void IgnoreExtraPropertiesIfWanted()
         {
             var text = Lines("aaa: hello", "bbb: world");
-            var des = new Deserializer(ignoreUnmatched: true);
-            var actual = des.Deserialize<Simple>(UsingReaderFor(text));
+            DeserializerBuilder.IgnoreUnmatchedProperties();
+            var actual = Deserializer.Deserialize<Simple>(UsingReaderFor(text));
             actual.aaa.Should().Be("hello");
         }
 
@@ -1065,8 +1065,7 @@ namespace YamlDotNet.Test.Serialization
         public void DontIgnoreExtraPropertiesIfWanted()
         {
             var text = Lines("aaa: hello", "bbb: world");
-            var des = new Deserializer(ignoreUnmatched: false);
-            var actual = Record.Exception(() => des.Deserialize<Simple>(UsingReaderFor(text)));
+            var actual = Record.Exception(() => Deserializer.Deserialize<Simple>(UsingReaderFor(text)));
             Assert.IsType<YamlException>(actual);
         }
 
@@ -1074,8 +1073,8 @@ namespace YamlDotNet.Test.Serialization
         public void IgnoreExtraPropertiesIfWantedBefore()
         {
             var text = Lines("bbb: [200,100]", "aaa: hello");
-            var des = new Deserializer(ignoreUnmatched: true);
-            var actual = des.Deserialize<Simple>(UsingReaderFor(text));
+            DeserializerBuilder.IgnoreUnmatchedProperties();
+            var actual = Deserializer.Deserialize<Simple>(UsingReaderFor(text));
             actual.aaa.Should().Be("hello");
         }
 
@@ -1091,8 +1090,11 @@ namespace YamlDotNet.Test.Serialization
                     "- '/work/'"
                 );
 
-            var des = new Deserializer(namingConvention: new CamelCaseNamingConvention(), ignoreUnmatched: true);
-            var actual = des.Deserialize<SimpleScratch>(UsingReaderFor(text));
+            DeserializerBuilder
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .IgnoreUnmatchedProperties();
+
+            var actual = Deserializer.Deserialize<SimpleScratch>(UsingReaderFor(text));
             actual.Scratch.Should().Be("scratcher");
             actual.DeleteScratch.Should().Be(false);
             actual.MappedScratch.Should().ContainInOrder(new[] { "/work/" });

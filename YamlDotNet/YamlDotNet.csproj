@@ -183,6 +183,7 @@
     <Compile Include="Core\Parser.cs" />
     <Compile Include="Core\ParserState.cs" />
     <Compile Include="Core\Tokens\Comment.cs" />
+    <Compile Include="Helpers\ExpressionExtensions.cs" />
     <Compile Include="Helpers\Portability.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\Scanner.cs" />
@@ -232,6 +233,7 @@
     <Compile Include="RepresentationModel\YamlVisitor.cs" />
     <Compile Include="Serialization\Converters\GuidConverter.cs" />
     <Compile Include="Serialization\Deserializer.cs" />
+    <Compile Include="Serialization\DeserializerBuilder.cs" />
     <Compile Include="Serialization\EventEmitters\ChainedEventEmitter.cs" />
     <Compile Include="Serialization\EventEmitters\JsonEventEmitter.cs" />
     <Compile Include="Serialization\EventEmitters\TypeAssigningEventEmitter.cs" />

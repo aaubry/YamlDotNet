@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,7 +36,7 @@ namespace YamlDotNet.Test.Serialization
     public class SerializationTestHelper
     {
         private Serializer serializer;
-        private Deserializer deserializer;
+        private DeserializerBuilder deserializerBuilder;
 
         protected T DoRoundtripFromObjectTo<T>(object obj)
         {
@@ -96,9 +96,11 @@ namespace YamlDotNet.Test.Serialization
 
         protected Serializer RoundtripEmitDefaultsJsonCompatibleSerializer
         {
-            get { return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults |
-                                                           SerializationOptions.JsonCompatible |
-                                                           SerializationOptions.Roundtrip));
+            get
+            {
+                return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults |
+                                                         SerializationOptions.JsonCompatible |
+                                                         SerializationOptions.Roundtrip));
             }
         }
 
@@ -107,14 +109,26 @@ namespace YamlDotNet.Test.Serialization
             return serializer = serializer ?? serializerFactory();
         }
 
+        protected DeserializerBuilder DeserializerBuilder
+        {
+            get
+            {
+                return deserializerBuilder = deserializerBuilder ?? new DeserializerBuilder();
+            }
+        }
+
         protected Deserializer Deserializer
         {
-            get { return deserializer = deserializer ?? new Deserializer(); }
+            get
+            {
+                return DeserializerBuilder.Build();
+            }
         }
 
         protected void AssumingDeserializerWith(IObjectFactory factory)
         {
-            deserializer = new Deserializer(factory);
+            deserializerBuilder = new DeserializerBuilder()
+                .WithObjectFactory(factory);
         }
 
         protected TextReader UsingReaderFor(TextWriter buffer)
@@ -274,7 +288,8 @@ namespace YamlDotNet.Test.Serialization
             if (!(value is string))
                 throw new InvalidOperationException();
             var parts = (value as string).Split(' ');
-            return new Convertible {
+            return new Convertible
+            {
                 Left = parts[0],
                 Right = parts[1]
             };
@@ -300,14 +315,14 @@ namespace YamlDotNet.Test.Serialization
 
         public object ReadYaml(IParser parser, Type type)
         {
-            var value = ((Scalar) parser.Current).Value;
+            var value = ((Scalar)parser.Current).Value;
             parser.MoveNext();
             return new MissingDefaultCtor(value);
         }
 
         public void WriteYaml(IEmitter emitter, object value, Type type)
         {
-            emitter.Emit(new Scalar(((MissingDefaultCtor) value).Value));
+            emitter.Emit(new Scalar(((MissingDefaultCtor)value).Value));
         }
     }
 
