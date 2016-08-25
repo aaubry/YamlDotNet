@@ -20,25 +20,30 @@
 //  SOFTWARE.
 
 using System;
-using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.PerformanceTests.Lib;
+using YamlDotNet.Core;
 
-namespace YamlDotNet.PerformanceTests.vlatest
+namespace YamlDotNet.Serialization
 {
-    public class Program : ISerializerAdapter
+    public sealed class SerializerParams
     {
-        public static void Main(string[] args)
-        {
-            var runner = new PerformanceTestRunner();
-            runner.Run(new Program(), args);
-        }
+        public Func<IEmitter, IObjectDescriptor, IObjectGraphVisitor> EmittingVisitorFactory { get; private set; }
+        public IObjectGraphTraversalStrategy TraversalStrategy { get; private set; }
 
-        private readonly Serializer _serializer = new SerializerBuilder().Build();
-
-        public void Serialize(TextWriter writer, object graph)
+        public SerializerParams(IObjectGraphTraversalStrategy traversalStrategy, Func<IEmitter, IObjectDescriptor, IObjectGraphVisitor> emittingVisitorFactory)
         {
-            _serializer.Serialize(writer, graph);
+            if (traversalStrategy == null)
+            {
+                throw new ArgumentNullException(nameof(traversalStrategy));
+            }
+
+            TraversalStrategy = traversalStrategy;
+
+            if (emittingVisitorFactory == null)
+            {
+                throw new ArgumentNullException(nameof(emittingVisitorFactory));
+            }
+
+            EmittingVisitorFactory = emittingVisitorFactory;
         }
     }
 }

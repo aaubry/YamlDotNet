@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
@@ -105,10 +106,7 @@ namespace YamlDotNet.Serialization
                     );
 
                 converters = new List<IYamlTypeConverter>();
-                foreach (IYamlTypeConverter yamlTypeConverter in YamlTypeConverters.GetBuiltInConverters(false))
-                {
-                    converters.Add(yamlTypeConverter);
-                }
+                converters.Add(new GuidConverter(false));
 
                 NodeDeserializers = new List<INodeDeserializer>();
                 NodeDeserializers.Add(new YamlConvertibleNodeDeserializer(objectFactory));
@@ -150,7 +148,7 @@ namespace YamlDotNet.Serialization
             }
         }
 
-        private BackwardsCompatibleConfiguration backwardsCompatibleConfiguration;
+        private readonly BackwardsCompatibleConfiguration backwardsCompatibleConfiguration;
 
         private void ThrowUnlessInBackwardsCompatibleMode()
         {
@@ -180,7 +178,7 @@ namespace YamlDotNet.Serialization
             }
         }
 
-        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This constructor will be removed in future releases.")]
         public Deserializer(
             IObjectFactory objectFactory = null,
             INamingConvention namingConvention = null,
@@ -191,14 +189,14 @@ namespace YamlDotNet.Serialization
             valueDeserializer = backwardsCompatibleConfiguration.valueDeserializer;
         }
 
-        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This method will be removed in future releases.")]
         public void RegisterTagMapping(string tag, Type type)
         {
             ThrowUnlessInBackwardsCompatibleMode();
             backwardsCompatibleConfiguration.RegisterTagMapping(tag, type);
         }
 
-        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This property will be removed in future releases.")]
+        [Obsolete("Please use DeserializerBuilder to customize the Deserializer. This method will be removed in future releases.")]
         public void RegisterTypeConverter(IYamlTypeConverter typeConverter)
         {
             ThrowUnlessInBackwardsCompatibleMode();
@@ -228,6 +226,11 @@ namespace YamlDotNet.Serialization
         /// </remarks>
         private Deserializer(IValueDeserializer valueDeserializer)
         {
+            if (valueDeserializer == null)
+            {
+                throw new ArgumentNullException(nameof(valueDeserializer));
+            }
+
             this.valueDeserializer = valueDeserializer;
         }
 

@@ -20,25 +20,38 @@
 //  SOFTWARE.
 
 using System;
-using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.PerformanceTests.Lib;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace YamlDotNet.PerformanceTests.vlatest
+namespace YamlDotNet.Serialization
 {
-    public class Program : ISerializerAdapter
+    internal static class LazyComponentRegistrationListExtensions
     {
-        public static void Main(string[] args)
+        public static TComponent BuildComponentChain<TComponent>(this LazyComponentRegistrationList<TComponent, TComponent> registrations, TComponent innerComponent)
         {
-            var runner = new PerformanceTestRunner();
-            runner.Run(new Program(), args);
+            var outerComponent = registrations.InReverseOrder.Aggregate(
+                innerComponent,
+                (inner, factory) => factory(inner)
+            );
+
+            return outerComponent;
         }
 
-        private readonly Serializer _serializer = new SerializerBuilder().Build();
-
-        public void Serialize(TextWriter writer, object graph)
+        public static TComponent BuildComponentChain<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TComponent innerComponent, Func<TComponent, TArgument> argumentBuilder)
         {
-            _serializer.Serialize(writer, graph);
+            var outerComponent = registrations.InReverseOrder.Aggregate(
+                innerComponent,
+                (inner, factory) => factory(argumentBuilder(inner))
+            );
+
+            return outerComponent;
+        }
+
+        public static List<TComponent> BuildComponentList<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
+        {
+            return registrations
+                .Select(factory => factory(null))
+                .ToList();
         }
     }
 }

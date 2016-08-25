@@ -22,13 +22,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
 using YamlDotNet.Serialization.ObjectFactories;
 using YamlDotNet.Serialization.TypeInspectors;
 using YamlDotNet.Serialization.TypeResolvers;
-using YamlDotNet.Serialization.Utilities;
 using YamlDotNet.Serialization.ValueDeserializers;
 
 namespace YamlDotNet.Serialization
@@ -39,8 +37,14 @@ namespace YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the deserializer
     /// with the desired customizations.
     /// </summary>
-    public sealed class DeserializerBuilder
+    public sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
     {
+        private IObjectFactory objectFactory = new DefaultObjectFactory();
+        private readonly LazyComponentRegistrationList<Nothing, INodeDeserializer> nodeDeserializerFactories;
+        private readonly LazyComponentRegistrationList<Nothing, INodeTypeResolver> nodeTypeResolverFactories;
+        private readonly Dictionary<string, Type> tagMappings;
+        private bool ignoreUnmatched;
+
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
         /// </summary>
@@ -56,26 +60,17 @@ namespace YamlDotNet.Serialization
                 { "tag:yaml.org,2002:timestamp", typeof(DateTime) }
             };
 
-            typeInspectorFactories = new LazyComponentRegistrationList<ITypeInspector, ITypeInspector>
-            {
-                { typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner) },
-                { typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner) },
-                { typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner },
-                { typeof(NamingConventionTypeInspector), inner => namingConvention != null ? new NamingConventionTypeInspector(inner, namingConvention) : inner },
-                { typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner) }
-            };
+            typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
+            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention != null ? new NamingConventionTypeInspector(inner, namingConvention) : inner);
+            typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner));
 
-            typeConverters = new LazyComponentRegistrationList<object, IYamlTypeConverter>();
-            foreach (var converter in YamlTypeConverters.GetBuiltInConverters(false))
-            {
-                typeConverters.Add(converter.GetType(), _ => converter);
-            }
-
-            nodeDeserializerFactories = new LazyComponentRegistrationList<object, INodeDeserializer>
+            nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
                 { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(objectFactory) },
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory) },
-                { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(typeConverters.Select(r => r.Factory(null)).ToList()) },
+                { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
                 { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer() },
                 { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
@@ -85,7 +80,7 @@ namespace YamlDotNet.Serialization
                 { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory, BuildTypeInspector(), ignoreUnmatched) }
             };
 
-            nodeTypeResolverFactories = new LazyComponentRegistrationList<object, INodeTypeResolver>
+            nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
             {
                 { typeof(YamlConvertibleTypeResolver), _ => new YamlConvertibleTypeResolver() },
                 { typeof(YamlSerializableTypeResolver), _ => new YamlSerializableTypeResolver() },
@@ -94,168 +89,10 @@ namespace YamlDotNet.Serialization
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
 
-            overrides = new YamlAttributeOverrides();
+            WithTypeResolver(new StaticTypeResolver());
         }
 
-        private ITypeInspector BuildTypeInspector()
-        {
-            ITypeInspector outerTypeInspector = new ReadablePropertiesTypeInspector(new StaticTypeResolver());
-            for (int i = typeInspectorFactories.Count - 1; i >= 0; --i)
-            {
-                outerTypeInspector = typeInspectorFactories[i].Factory(outerTypeInspector);
-            }
-            return outerTypeInspector;
-        }
-
-        private INamingConvention namingConvention;
-        private IObjectFactory objectFactory = new DefaultObjectFactory();
-        private readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
-        private readonly LazyComponentRegistrationList<object, INodeDeserializer> nodeDeserializerFactories;
-        private readonly LazyComponentRegistrationList<object, INodeTypeResolver> nodeTypeResolverFactories;
-        private readonly LazyComponentRegistrationList<object, IYamlTypeConverter> typeConverters;
-        private readonly Dictionary<string, Type> tagMappings;
-        private readonly YamlAttributeOverrides overrides;
-        private bool ignoreUnmatched;
-
-        private sealed class LazyComponentRegistration<TArgument, TComponent>
-        {
-            public readonly Type ComponentType;
-            public readonly Func<TArgument, TComponent> Factory;
-
-            public LazyComponentRegistration(Type componentType, Func<TArgument, TComponent> factory)
-            {
-                ComponentType = componentType;
-                Factory = factory;
-            }
-        }
-
-        private sealed class LazyComponentRegistrationList<TArgument, TComponent> : List<LazyComponentRegistration<TArgument, TComponent>>
-        {
-            public void Add(Type componentType, Func<TArgument, TComponent> factory)
-            {
-                Add(new LazyComponentRegistration<TArgument, TComponent>(componentType, factory));
-            }
-
-            public IRegistrationLocationSelectionSyntax<TComponent> CreateRegistrationLocationSelector(
-                Type componentType,
-                Func<TArgument, TComponent> factory
-            )
-            {
-                return new RegistrationLocationSelector(
-                    this,
-                    new LazyComponentRegistration<TArgument, TComponent>(componentType, factory)
-                );
-            }
-
-            private class RegistrationLocationSelector : IRegistrationLocationSelectionSyntax<TComponent>
-            {
-                private readonly LazyComponentRegistrationList<TArgument, TComponent> registrations;
-                private readonly LazyComponentRegistration<TArgument, TComponent> newRegistration;
-
-                public RegistrationLocationSelector(LazyComponentRegistrationList<TArgument, TComponent> registrations, LazyComponentRegistration<TArgument, TComponent> newRegistration)
-                {
-                    this.registrations = registrations;
-                    this.newRegistration = newRegistration;
-                }
-
-                private int IndexOfRegistration(Type registrationType)
-                {
-                    for (int i = 0; i < registrations.Count; ++i)
-                    {
-                        if (registrationType == registrations[i].ComponentType)
-                        {
-                            return i;
-                        }
-                    }
-                    return -1;
-                }
-
-                private void EnsureNoDuplicateRegistrationType()
-                {
-                    if (IndexOfRegistration(newRegistration.ComponentType) != -1)
-                    {
-                        throw new InvalidOperationException(string.Format("A component of type '{0}' has already been registered.", newRegistration.ComponentType.FullName));
-                    }
-                }
-
-                private int EnsureRegistrationExists<TRegistrationType>()
-                {
-                    var registrationIndex = IndexOfRegistration(typeof(TRegistrationType));
-                    if (registrationIndex == -1)
-                    {
-                        throw new InvalidOperationException(string.Format("A component of type '{0}' has not been registered.", typeof(TRegistrationType).FullName));
-                    }
-                    return registrationIndex;
-                }
-
-                void IRegistrationLocationSelectionSyntax<TComponent>.InsteadOf<TRegistrationType>()
-                {
-                    if (newRegistration.ComponentType != typeof(TRegistrationType))
-                    {
-                        EnsureNoDuplicateRegistrationType();
-                    }
-
-                    var registrationIndex = EnsureRegistrationExists<TRegistrationType>();
-                    registrations[registrationIndex] = newRegistration;
-                }
-
-                void IRegistrationLocationSelectionSyntax<TComponent>.After<TRegistrationType>()
-                {
-                    EnsureNoDuplicateRegistrationType();
-                    var registrationIndex = EnsureRegistrationExists<TRegistrationType>();
-                    registrations.Insert(registrationIndex + 1, newRegistration);
-                }
-
-                void IRegistrationLocationSelectionSyntax<TComponent>.Before<TRegistrationType>()
-                {
-                    EnsureNoDuplicateRegistrationType();
-                    var registrationIndex = EnsureRegistrationExists<TRegistrationType>();
-                    registrations.Insert(registrationIndex, newRegistration);
-                }
-
-                void IRegistrationLocationSelectionSyntax<TComponent>.OnBottom()
-                {
-                    EnsureNoDuplicateRegistrationType();
-                    registrations.Add(newRegistration);
-                }
-
-                void IRegistrationLocationSelectionSyntax<TComponent>.OnTop()
-                {
-                    EnsureNoDuplicateRegistrationType();
-                    registrations.Insert(0, newRegistration);
-                }
-            }
-        }
-
-        public delegate TTypeInspector TypeInspectorFactoryDelegate<TTypeInspector>(ITypeInspector innerTypeInspector) where TTypeInspector : ITypeInspector;
-
-        public interface IRegistrationLocationSelectionSyntax<TBaseRegistrationType>
-        {
-            /// <summary>
-            /// Registers the component in place of the already registered component of type <typeparamref name="TRegistrationType" />.
-            /// </summary>
-            void InsteadOf<TRegistrationType>() where TRegistrationType : TBaseRegistrationType;
-
-            /// <summary>
-            /// Registers the component before the already registered component of type <typeparamref name="TRegistrationType" />.
-            /// </summary>
-            void Before<TRegistrationType>() where TRegistrationType : TBaseRegistrationType;
-
-            /// <summary>
-            /// Registers the component after the already registered component of type <typeparamref name="TRegistrationType" />.
-            /// </summary>
-            void After<TRegistrationType>() where TRegistrationType : TBaseRegistrationType;
-
-            /// <summary>
-            /// Registers the component before every other previously registered component.
-            /// </summary>
-            void OnTop();
-
-            /// <summary>
-            /// Registers the component after every other previously registered component.
-            /// </summary>
-            void OnBottom();
-        }
+        protected override DeserializerBuilder Self { get { return this; } }
 
         /// <summary>
         /// Sets the <see cref="IObjectFactory" /> that will be used by the deserializer.
@@ -282,55 +119,6 @@ namespace YamlDotNet.Serialization
             }
 
             return WithObjectFactory(new LambdaObjectFactory(objectFactory));
-        }
-
-        /// <summary>
-        /// Sets the <see cref="INamingConvention" /> that will be used by the deserializer.
-        /// </summary>
-        public DeserializerBuilder WithNamingConvention(INamingConvention namingConvention)
-        {
-            if (namingConvention == null)
-            {
-                throw new ArgumentNullException(nameof(namingConvention));
-            }
-
-            this.namingConvention = namingConvention;
-            return this;
-        }
-
-        /// <summary>
-        /// Registers an additional <see cref="ITypeInspector" /> to be used by the deserializer.
-        /// </summary>
-        /// <param name="typeInspectorFactory">A function that instantiates the type inspector.</param>
-        public DeserializerBuilder WithTypeInspector<TTypeInspector>(TypeInspectorFactoryDelegate<TTypeInspector> typeInspectorFactory)
-            where TTypeInspector : ITypeInspector
-        {
-            return WithTypeInspector<TTypeInspector>(typeInspectorFactory, w => w.OnTop());
-        }
-
-        /// <summary>
-        /// Registers an additional <see cref="ITypeInspector" /> to be used by the deserializer.
-        /// </summary>
-        /// <param name="typeInspectorFactory">A function that instantiates the type inspector.</param>
-        /// <param name="where">Configures the location where to insert the <see cref="ITypeInspector" /></param>
-        public DeserializerBuilder WithTypeInspector<TTypeInspector>(
-            TypeInspectorFactoryDelegate<TTypeInspector> typeInspectorFactory,
-            Action<IRegistrationLocationSelectionSyntax<ITypeInspector>> where
-        )
-            where TTypeInspector : ITypeInspector
-        {
-            if (typeInspectorFactory == null)
-            {
-                throw new ArgumentNullException(nameof(typeInspectorFactory));
-            }
-
-            if (where == null)
-            {
-                throw new ArgumentNullException(nameof(where));
-            }
-
-            where(typeInspectorFactories.CreateRegistrationLocationSelector(typeof(TTypeInspector), inner => typeInspectorFactory(inner)));
-            return this;
         }
 
         /// <summary>
@@ -398,38 +186,6 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Registers an additional <see cref="IYamlTypeConverter" /> to be used by the deserializer.
-        /// </summary>
-        public DeserializerBuilder WithTypeConverter(IYamlTypeConverter typeConverter)
-        {
-            return WithTypeConverter(typeConverter, w => w.OnTop());
-        }
-
-        /// <summary>
-        /// Registers an additional <see cref="IYamlTypeConverter" /> to be used by the deserializer.
-        /// </summary>
-        /// <param name="typeConverter"></param>
-        /// <param name="where">Configures the location where to insert the <see cref="IYamlTypeConverter" /></param>
-        public DeserializerBuilder WithTypeConverter(
-            IYamlTypeConverter typeConverter,
-            Action<IRegistrationLocationSelectionSyntax<IYamlTypeConverter>> where
-        )
-        {
-            if (typeConverter == null)
-            {
-                throw new ArgumentNullException(nameof(typeConverter));
-            }
-
-            if (where == null)
-            {
-                throw new ArgumentNullException(nameof(where));
-            }
-
-            where(typeConverters.CreateRegistrationLocationSelector(typeConverter.GetType(), _ => typeConverter));
-            return this;
-        }
-
-        /// <summary>
         /// Registers a tag mapping.
         /// </summary>
         public DeserializerBuilder WithTagMapping(string tag, Type type)
@@ -458,35 +214,12 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Register an <see cref="Attribute"/> for for a given property.
-        /// </summary>
-        /// <typeparam name="TClass"></typeparam>
-        /// <param name="propertyAccessor">An expression in the form: x => x.SomeProperty</param>
-        /// <param name="attribute">The sttribute to register.</param>
-        /// <returns></returns>
-        public DeserializerBuilder WithAttributeOverride<TClass>(Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
-        {
-            overrides.Add(propertyAccessor, attribute);
-            return this;
-        }
-
-        /// <summary>
-        /// Register an <see cref="Attribute"/> for for a given property.
-        /// </summary>
-        public DeserializerBuilder WithAttributeOverride(Type type, string member, Attribute attribute)
-        {
-            overrides.Add(type, member, attribute);
-            return this;
-        }
-
-        /// <summary>
         /// Creates a new <see cref="Deserializer" /> according to the current configuration.
         /// </summary>
         public Deserializer Build()
         {
             return Deserializer.FromValueDeserializer(BuildValueDeserializer());
         }
-
 
         /// <summary>
         /// Creates a new <see cref="IValueDeserializer" /> that implements the current configuration.
@@ -497,8 +230,8 @@ namespace YamlDotNet.Serialization
         {
             return new AliasValueDeserializer(
                 new NodeValueDeserializer(
-                    nodeDeserializerFactories.Select(r => r.Factory(null)).ToList(),
-                    nodeTypeResolverFactories.Select(r => r.Factory(null)).ToList()
+                    nodeDeserializerFactories.BuildComponentList(),
+                    nodeTypeResolverFactories.BuildComponentList()
                 )
             );
         }

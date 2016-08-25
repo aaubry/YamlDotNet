@@ -34,20 +34,17 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
     /// </summary>
     public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
     {
-        protected readonly Serializer serializer;
         private readonly int maxRecursion;
         private readonly ITypeInspector typeDescriptor;
         private readonly ITypeResolver typeResolver;
         private INamingConvention namingConvention;
 
-        public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
+        public FullObjectGraphTraversalStrategy(ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
         {
             if (maxRecursion <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxRecursion), maxRecursion, "maxRecursion must be greater than 1");
             }
-
-            this.serializer = serializer;
 
             if (typeDescriptor == null)
             {

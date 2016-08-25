@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +27,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -35,7 +35,7 @@ namespace YamlDotNet.Test.Serialization
 {
     public class SerializationTestHelper
     {
-        private Serializer serializer;
+        private SerializerBuilder serializerBuilder;
         private DeserializerBuilder deserializerBuilder;
 
         protected T DoRoundtripFromObjectTo<T>(object obj)
@@ -67,44 +67,20 @@ namespace YamlDotNet.Test.Serialization
             return new Deserializer().Deserialize<T>(UsingReaderFor(writer));
         }
 
-        protected Serializer Serializer
-        {
-            get { return CurrentOrNew(() => new Serializer()); }
-        }
-
-        protected Serializer RoundtripSerializer
-        {
-            get { return CurrentOrNew(() => new Serializer(SerializationOptions.Roundtrip)); }
-        }
-
-        protected Serializer EmitDefaultsSerializer
-        {
-            get { return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults)); }
-        }
-
-        protected Serializer RoundtripEmitDefaultsSerializer
-        {
-            get { return CurrentOrNew(() => new Serializer(SerializationOptions.Roundtrip | SerializationOptions.EmitDefaults)); }
-        }
-
-        protected Serializer EmitDefaultsJsonCompatibleSerializer
-        {
-            get { return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults | SerializationOptions.JsonCompatible)); }
-        }
-
-        protected Serializer RoundtripEmitDefaultsJsonCompatibleSerializer
+        protected SerializerBuilder SerializerBuilder
         {
             get
             {
-                return CurrentOrNew(() => new Serializer(SerializationOptions.EmitDefaults |
-                                                         SerializationOptions.JsonCompatible |
-                                                         SerializationOptions.Roundtrip));
+                return serializerBuilder = serializerBuilder ?? new SerializerBuilder();
             }
         }
 
-        private Serializer CurrentOrNew(Func<Serializer> serializerFactory)
+        protected Serializer Serializer
         {
-            return serializer = serializer ?? serializerFactory();
+            get
+            {
+                return SerializerBuilder.Build();
+            }
         }
 
         protected DeserializerBuilder DeserializerBuilder

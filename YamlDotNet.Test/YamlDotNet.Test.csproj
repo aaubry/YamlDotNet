@@ -105,7 +105,6 @@
     <Compile Include="Serialization\RepresentationModelSerializationTests.cs" />
     <Compile Include="Serialization\SerializationTestHelper.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
-    <Compile Include="Serialization\CodeValidations.cs" />
     <Compile Include="Serialization\TypeConverterTests.cs" />
     <Compile Include="Yaml.cs" />
   </ItemGroup>

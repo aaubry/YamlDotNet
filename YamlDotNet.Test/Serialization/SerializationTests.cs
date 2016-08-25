@@ -172,7 +172,7 @@ namespace YamlDotNet.Test.Serialization
                 Child2 = obj
             };
 
-            Action action = () => RoundtripSerializer.Serialize(new StringWriter(), obj, typeof(CircularReference));
+            Action action = () => SerializerBuilder.EnsureRoundtrip().Build().Serialize(new StringWriter(), obj, typeof(CircularReference));
 
             action.ShouldNotThrow();
         }
@@ -240,7 +240,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var obj = new Example();
 
-            var result = DoRoundtripFromObjectTo<Example>(obj, RoundtripSerializer);
+            var result = DoRoundtripFromObjectTo<Example>(obj, SerializerBuilder.EnsureRoundtrip().Build());
 
             result.ShouldBeEquivalentTo(obj);
         }
@@ -250,7 +250,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var obj = new Example();
 
-            var result = DoRoundtripFromObjectTo<Example>(obj, RoundtripEmitDefaultsSerializer);
+            var result = DoRoundtripFromObjectTo<Example>(obj, SerializerBuilder.EnsureRoundtrip().EmitDefaults().Build());
 
             result.ShouldBeEquivalentTo(obj);
         }
@@ -272,9 +272,14 @@ namespace YamlDotNet.Test.Serialization
         {
             var obj = new MissingDefaultCtor("Yo");
 
-            RoundtripSerializer.RegisterTypeConverter(new MissingDefaultCtorConverter());
-            DeserializerBuilder.WithTypeConverter(new MissingDefaultCtorConverter());
-            var result = DoRoundtripFromObjectTo<MissingDefaultCtor>(obj, RoundtripSerializer, Deserializer);
+            SerializerBuilder
+                .EnsureRoundtrip()
+                .WithTypeConverter(new MissingDefaultCtorConverter());
+
+            DeserializerBuilder
+                .WithTypeConverter(new MissingDefaultCtorConverter());
+
+            var result = DoRoundtripFromObjectTo<MissingDefaultCtor>(obj, Serializer, Deserializer);
 
             result.Value.Should().Be("Yo");
         }
@@ -302,11 +307,12 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var input = new NameConvention { AliasTest = "Fourth" };
 
-            var overrides = new YamlAttributeOverrides();
             var attribute = new YamlMemberAttribute();
             attribute.Alias = "fourthOverride";
-            overrides.Add(typeof(NameConvention), "AliasTest", attribute);
-            var serializer = new Serializer(overrides: overrides);
+
+            var serializer = new SerializerBuilder()
+                .WithAttributeOverride<NameConvention>(nc => nc.AliasTest, attribute)
+                .Build();
 
             serializer.Serialize(writer, input, input.GetType());
             var text = writer.ToString();
@@ -330,7 +336,7 @@ namespace YamlDotNet.Test.Serialization
                 RegularBase = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
             };
 
-            var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, RoundtripSerializer);
+            var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, SerializerBuilder.EnsureRoundtrip().Build());
 
             result.SomeScalar.Should().Be("Hello");
             result.RegularBase.Should().BeOfType<Derived>().And
@@ -346,7 +352,7 @@ namespace YamlDotNet.Test.Serialization
                 BaseWithSerializeAs = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
             };
 
-            var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, RoundtripSerializer);
+            var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, SerializerBuilder.EnsureRoundtrip().Build());
 
             result.BaseWithSerializeAs.Should().BeOfType<Base>().And
                 .Subject.As<Base>().ShouldBeEquivalentTo(new { ParentProp = "foo" }, o => o.ExcludingMissingMembers());
@@ -464,7 +470,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var obj = new List<int> { 2, 4, 6 };
 
-            var result = DoRoundtripOn<List<int>>(obj, RoundtripSerializer);
+            var result = DoRoundtripOn<List<int>>(obj, SerializerBuilder.EnsureRoundtrip().Build());
 
             result.Should().Equal(obj);
         }
@@ -663,7 +669,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new[] { "foo", null, "bar" };
 
-            EmitDefaultsSerializer.Serialize(writer, obj);
+            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj);
             var serialized = writer.ToString();
 
             Regex.Matches(serialized, "-").Count.Should().Be(3, "there should have been 3 elements");
@@ -675,7 +681,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
 
-            EmitDefaultsSerializer.Serialize(writer, obj, typeof(Example));
+            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj, typeof(Example));
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -687,7 +693,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new { MyString = (string)null };
 
-            EmitDefaultsSerializer.Serialize(writer, obj, obj.GetType());
+            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj, obj.GetType());
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -709,7 +715,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
 
-            EmitDefaultsJsonCompatibleSerializer.Serialize(writer, obj, typeof(Example));
+            SerializerBuilder.EmitDefaults().JsonCompatible().Build().Serialize(writer, obj, typeof(Example));
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -721,7 +727,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
 
-            RoundtripEmitDefaultsJsonCompatibleSerializer.Serialize(writer, obj, typeof(Example));
+            SerializerBuilder.EnsureRoundtrip().EmitDefaults().JsonCompatible().Build().Serialize(writer, obj, typeof(Example));
             var result = Deserializer.Deserialize<Example>(UsingReaderFor(writer));
 
             result.MyString.Should().BeNull();
@@ -760,10 +766,10 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Simple();
 
-            var overrides = new YamlAttributeOverrides();
             var ignore = new YamlIgnoreAttribute();
-            overrides.Add(typeof(Simple), "aaa", ignore);
-            var serializer = new Serializer(overrides: overrides);
+            var serializer = new SerializerBuilder()
+                .WithAttributeOverride<Simple>(s => s.aaa, ignore)
+                .Build();
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
@@ -790,15 +796,10 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new ScalarStyleExample();
 
-            var overrides = new YamlAttributeOverrides();
-            var style1 = new YamlMemberAttribute();
-            style1.ScalarStyle = ScalarStyle.DoubleQuoted;
-            var style2 = new YamlMemberAttribute();
-            style2.ScalarStyle = ScalarStyle.Literal;
-            overrides.Add(typeof(ScalarStyleExample), "LiteralString", style1);
-            overrides.Add(typeof(ScalarStyleExample), "DoubleQuotedString", style2);
-
-            var serializer = new Serializer(overrides: overrides);
+            var serializer = new SerializerBuilder()
+                .WithAttributeOverride<ScalarStyleExample>(e => e.LiteralString, new YamlMemberAttribute { ScalarStyle = ScalarStyle.DoubleQuoted })
+                .WithAttributeOverride<ScalarStyleExample>(e => e.DoubleQuotedString, new YamlMemberAttribute { ScalarStyle = ScalarStyle.Literal })
+                .Build();
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
@@ -813,11 +814,10 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Derived { DerivedProperty = "Derived", BaseProperty = "Base" };
 
-            var overrides = new YamlAttributeOverrides();
             var ignore = new YamlIgnoreAttribute();
-            overrides.Add(typeof(Derived), "DerivedProperty", ignore);
-
-            var serializer = new Serializer(overrides: overrides);
+            var serializer = new SerializerBuilder()
+                .WithAttributeOverride<Derived>(d => d.DerivedProperty, ignore)
+                .Build();
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
@@ -832,11 +832,10 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Derived { DerivedProperty = "Derived", BaseProperty = "Base" };
 
-            var overrides = new YamlAttributeOverrides();
             var ignore = new YamlIgnoreAttribute();
-            overrides.Add(typeof(Base), "BaseProperty", ignore);
-
-            var serializer = new Serializer(overrides: overrides);
+            var serializer = new SerializerBuilder()
+                .WithAttributeOverride<Base>(b => b.BaseProperty, ignore)
+                .Build();
 
             serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
@@ -863,7 +862,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new DefaultsExample { Value = DefaultsExample.DefaultValue };
 
-            EmitDefaultsSerializer.Serialize(writer, obj);
+            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj);
             var serialized = writer.ToString();
 
             serialized.Should().Contain("Value");
@@ -900,7 +899,10 @@ namespace YamlDotNet.Test.Serialization
             A.CallTo(() => convention.Apply(A<string>._)).ReturnsLazily((string x) => x);
             var obj = new NameConvention { FirstTest = "1", SecondTest = "2" };
 
-            var serializer = new Serializer(namingConvention: convention);
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(convention)
+                .Build();
+
             serializer.Serialize(new StringWriter(), obj);
 
             A.CallTo(() => convention.Apply("FirstTest")).MustHaveHappened();
@@ -1104,7 +1106,10 @@ namespace YamlDotNet.Test.Serialization
             var mockNamingConvention = A.Fake<INamingConvention>();
             A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
 
-            var serializer = new Serializer(namingConvention: mockNamingConvention);
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(mockNamingConvention)
+                .Build();
+
             var writer = new StringWriter();
             serializer.Serialize(writer, obj);
 
@@ -1121,7 +1126,10 @@ namespace YamlDotNet.Test.Serialization
             var mockNamingConvention = A.Fake<INamingConvention>();
             A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
 
-            var serializer = new Serializer(namingConvention: mockNamingConvention);
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(mockNamingConvention)
+                .Build();
+
             var writer = new StringWriter();
             serializer.Serialize(writer, obj);
 
@@ -1131,9 +1139,8 @@ namespace YamlDotNet.Test.Serialization
         [Theory, MemberData("SpecialFloats")]
         public void SpecialFloatsAreHandledCorrectly(FloatTestCase testCase)
         {
-            var serializer = new Serializer();
             var buffer = new StringWriter();
-            serializer.Serialize(buffer, testCase.Value);
+            Serializer.Serialize(buffer, testCase.Value);
 
             var firstLine = buffer.ToString().Split('\r', '\n')[0];
             Assert.Equal(testCase.ExpectedTextRepresentation, firstLine);
@@ -1228,7 +1235,10 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void GuidsShouldBeQuotedWhenSerializedAsJson()
         {
-            var sut = new Serializer(SerializationOptions.JsonCompatible | SerializationOptions.EmitDefaults);
+            var sut = new SerializerBuilder()
+                .JsonCompatible()
+                .EmitDefaults()
+                .Build();
 
             var yamlAsJson = new StringWriter();
             sut.Serialize(yamlAsJson, new
