@@ -230,6 +230,7 @@
     <Compile Include="RepresentationModel\YamlSequenceNode.cs" />
     <Compile Include="RepresentationModel\YamlStream.cs" />
     <Compile Include="RepresentationModel\YamlVisitor.cs" />
+    <Compile Include="RepresentationModel\YamlVisitorBase.cs" />
     <Compile Include="Serialization\Converters\GuidConverter.cs" />
     <Compile Include="Serialization\Deserializer.cs" />
     <Compile Include="Serialization\EventEmitters\ChainedEventEmitter.cs" />
