@@ -42,9 +42,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             _ignoreUnmatched = ignoreUnmatched;
         }
 
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            var mapping = reader.Allow<MappingStart>();
+            var mapping = parser.Allow<MappingStart>();
             if (mapping == null)
             {
                 value = null;
@@ -52,17 +52,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
             
             value = _objectFactory.Create(expectedType);
-            while (!reader.Accept<MappingEnd>())
+            while (!parser.Accept<MappingEnd>())
             {
-                var propertyName = reader.Expect<Scalar>();
+                var propertyName = parser.Expect<Scalar>();
                 var property = _typeDescriptor.GetProperty(expectedType, null, propertyName.Value, _ignoreUnmatched);
                 if (property == null)
                 {
-                    reader.SkipThisAndNestedEvents();
+                    parser.SkipThisAndNestedEvents();
                     continue;
                 }
 
-                var propertyValue = nestedObjectDeserializer(reader, property.Type);
+                var propertyValue = nestedObjectDeserializer(parser, property.Type);
                 var propertyValuePromise = propertyValue as IValuePromise;
                 if (propertyValuePromise == null)
                 {
@@ -80,7 +80,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
 
-            reader.Expect<MappingEnd>();
+            parser.Expect<MappingEnd>();
             return true;
         }
     }

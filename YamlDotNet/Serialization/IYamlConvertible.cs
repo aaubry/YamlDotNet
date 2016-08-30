@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Reads this object's state from a YAML parser.
         /// </summary>
-        void Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer);
+        void Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer);
 
         /// <summary>
         /// Writes this object's state to a YAML emitter.

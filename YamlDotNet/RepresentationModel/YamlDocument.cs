@@ -59,17 +59,16 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlDocument"/> class.
         /// </summary>
-        /// <param name="events">The events.</param>
-        internal YamlDocument(EventReader events)
+        internal YamlDocument(IParser parser)
         {
             DocumentLoadingState state = new DocumentLoadingState();
 
-            events.Expect<DocumentStart>();
+            parser.Expect<DocumentStart>();
 
-            while (!events.Accept<DocumentEnd>())
+            while (!parser.Accept<DocumentEnd>())
             {
                 Debug.Assert(RootNode == null);
-                RootNode = YamlNode.ParseNode(events, state);
+                RootNode = YamlNode.ParseNode(parser, state);
 
                 if (RootNode is YamlAliasNode)
                 {
@@ -89,7 +88,7 @@ namespace YamlDotNet.RepresentationModel
             }
 #endif
 
-            events.Expect<DocumentEnd>();
+            parser.Expect<DocumentEnd>();
         }
 
         /// <summary>

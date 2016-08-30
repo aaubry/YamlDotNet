@@ -26,7 +26,8 @@ namespace YamlDotNet.RepresentationModel
     /// <summary>
     /// Abstract implementation of <see cref="IYamlVisitor"/> that knows how to walk a complete YAML object model.
     /// </summary>
-    public abstract class YamlVisitorBase : IYamlVisitor {
+    public abstract class YamlVisitorBase : IYamlVisitor
+    {
         /// <summary>
         /// Called when this object is visiting a <see cref="YamlStream"/>.
         /// </summary>

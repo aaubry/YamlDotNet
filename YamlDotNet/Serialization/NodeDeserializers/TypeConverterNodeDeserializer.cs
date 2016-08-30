@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.converters = converters;
         }
 
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
             if (converter == null)
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            value = converter.ReadYaml(reader.Parser, expectedType);
+            value = converter.ReadYaml(parser, expectedType);
             return true;
         }
     }

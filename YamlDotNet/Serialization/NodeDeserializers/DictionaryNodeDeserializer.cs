@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             _objectFactory = objectFactory;
         }
 
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             IDictionary dictionary;
             Type keyType, valueType;
@@ -71,20 +71,20 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(keyType, valueType, reader, expectedType, nestedObjectDeserializer, dictionary);
+            DeserializeHelper(keyType, valueType, parser, expectedType, nestedObjectDeserializer, dictionary);
 
             return true;
         }
 
-        private static void DeserializeHelper(Type tKey, Type tValue, EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, IDictionary result)
+        private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, IDictionary result)
         {
-            reader.Expect<MappingStart>();
-            while (!reader.Accept<MappingEnd>())
+            parser.Expect<MappingStart>();
+            while (!parser.Accept<MappingEnd>())
             {
-                var key = nestedObjectDeserializer(reader, tKey);
+                var key = nestedObjectDeserializer(parser, tKey);
                 var keyPromise = key as IValuePromise;
 
-                var value = nestedObjectDeserializer(reader, tValue);
+                var value = nestedObjectDeserializer(parser, tValue);
                 var valuePromise = value as IValuePromise;
 
                 if (keyPromise == null)
@@ -140,7 +140,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                 }
             }
-            reader.Expect<MappingEnd>();
+            parser.Expect<MappingEnd>();
         }
     }
 }
