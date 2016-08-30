@@ -34,7 +34,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     [DebuggerDisplay("{Value}")]
     [Serializable]
-    public class YamlScalarNode : YamlNode, IYamlConvertible
+    public sealed class YamlScalarNode : YamlNode, IYamlConvertible
     {
         /// <summary>
         /// Gets or sets the value of the node.

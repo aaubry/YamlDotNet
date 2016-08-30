@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -211,7 +211,7 @@ namespace YamlDotNet.Test.RepresentationModel
             }
         }
 
-        private class YamlDocumentStructureBuilder : YamlVisitor
+        private class YamlDocumentStructureBuilder : YamlVisitorBase
         {
             private readonly List<YamlNodeEvent> events = new List<YamlNodeEvent>();
 
@@ -222,28 +222,22 @@ namespace YamlDotNet.Test.RepresentationModel
                 }
             }
 
-            protected override void Visit(YamlScalarNode scalar)
+            public override void Visit(YamlScalarNode scalar)
             {
                 events.Add(new YamlNodeEvent(YamlNodeEventType.Scalar, scalar.Anchor, scalar.Tag, scalar.Value));
             }
 
-            protected override void Visit(YamlSequenceNode sequence)
+            public override void Visit(YamlSequenceNode sequence)
             {
                 events.Add(new YamlNodeEvent(YamlNodeEventType.SequenceStart, sequence.Anchor, sequence.Tag, null));
-            }
-
-            protected override void Visited(YamlSequenceNode sequence)
-            {
+                base.Visit(sequence);
                 events.Add(new YamlNodeEvent(YamlNodeEventType.SequenceEnd, sequence.Anchor, sequence.Tag, null));
             }
 
-            protected override void Visit(YamlMappingNode mapping)
+            public override void Visit(YamlMappingNode mapping)
             {
                 events.Add(new YamlNodeEvent(YamlNodeEventType.MappingStart, mapping.Anchor, mapping.Tag, null));
-            }
-
-            protected override void Visited(YamlMappingNode mapping)
-            {
+                base.Visit(mapping);
                 events.Add(new YamlNodeEvent(YamlNodeEventType.MappingEnd, mapping.Anchor, mapping.Tag, null));
             }
         }
