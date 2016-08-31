@@ -595,7 +595,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeTwoDocuments()
         {
-            var reader = EventReaderFor(Lines(
+            var reader = ParserFor(Lines(
                 "---",
                 "aaa: 111",
                 "---",
@@ -613,7 +613,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeThreeDocuments()
         {
-            var reader = EventReaderFor(Lines(
+            var reader = ParserFor(Lines(
                 "---",
                 "aaa: 111",
                 "---",
@@ -963,7 +963,7 @@ namespace YamlDotNet.Test.Serialization
             var stream = Yaml.StreamFrom("backreference.yaml");
 
             var parser = new MergingParser(new Parser(stream));
-            var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(new EventReader(parser));
+            var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
 
             var alias = result["alias"];
             alias.Should()
@@ -986,7 +986,7 @@ namespace YamlDotNet.Test.Serialization
                 useMyValue:
                   key: *myValue
             "));
-            var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(new EventReader(parser));
+            var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
 
             var alias = result["alias"];
             alias.Should()
@@ -1037,7 +1037,7 @@ namespace YamlDotNet.Test.Serialization
                     label: center/big
             "));
 
-            var result = Deserializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(new EventReader(parser));
+            var result = Deserializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(parser);
 
             int index = 0;
             foreach (var mapping in result["results"])

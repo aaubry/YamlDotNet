@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             if (!expectedType.IsArray)
             {
@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var itemType = expectedType.GetElementType();
 
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, reader, expectedType, nestedObjectDeserializer, items, true);
+            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, expectedType, nestedObjectDeserializer, items, true);
 
             var array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);

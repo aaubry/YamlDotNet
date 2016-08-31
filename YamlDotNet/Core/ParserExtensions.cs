@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,51 +19,26 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
 using System.Globalization;
+using System.IO;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core
 {
     /// <summary>
-    /// Reads events from a sequence of <see cref="ParsingEvent" />.
+    /// Extension methods that provide useful abstractions over <see cref="IParser"/>.
     /// </summary>
-    public class EventReader
+    public static class ParserExtensions
     {
-        private readonly IParser parser;
-        private bool endOfStream;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventReader"/> class.
-        /// </summary>
-        /// <param name="parser">The parser that provides the events.</param>
-        public EventReader(IParser parser)
-        {
-            this.parser = parser;
-            MoveNext();
-        }
-
-        /// <summary>
-        /// Gets the underlying parser.
-        /// </summary>
-        /// <value>The parser.</value>
-        public IParser Parser
-        {
-            get
-            {
-                return parser;
-            }
-        }
-
         /// <summary>
         /// Ensures that the current event is of the specified type, returns it and moves to the next event.
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
         /// <returns>Returns the current event.</returns>
         /// <exception cref="YamlException">If the current event is not of the specified type.</exception>
-        public T Expect<T>() where T : ParsingEvent
+        public static T Expect<T>(this IParser parser) where T : ParsingEvent
         {
-            var expectedEvent = Allow<T>();
+            var expectedEvent = parser.Allow<T>();
             if (expectedEvent == null)
             {
                 // TODO: Throw a better exception
@@ -79,18 +54,16 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <typeparam name="T">Type of the event.</typeparam>
         /// <returns>Returns true if the current event is of type <typeparamref name="T"/>. Otherwise returns false.</returns>
-        public bool Accept<T>() where T : ParsingEvent
+        public static bool Accept<T>(this IParser parser) where T : ParsingEvent
         {
-            ThrowIfAtEndOfStream();
-            return parser.Current is T;
-        }
-
-        private void ThrowIfAtEndOfStream()
-        {
-            if (endOfStream)
+            if(parser.Current == null)
             {
-                throw new EndOfStreamException();
+                if (!parser.MoveNext())
+                {
+                    throw new EndOfStreamException();
+                }
             }
+            return parser.Current is T;
         }
 
         /// <summary>
@@ -100,14 +73,14 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
         /// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
-        public T Allow<T>() where T : ParsingEvent
+        public static T Allow<T>(this IParser parser) where T : ParsingEvent
         {
-            if (!Accept<T>())
+            if (!parser.Accept<T>())
             {
                 return null;
             }
-            var @event = (T) parser.Current;
-            MoveNext();
+            var @event = (T)parser.Current;
+            parser.MoveNext();
             return @event;
         }
 
@@ -116,32 +89,27 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
         /// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
-        public T Peek<T>() where T : ParsingEvent
+        public static T Peek<T>(this IParser parser) where T : ParsingEvent
         {
-            if (!Accept<T>())
+            if (!parser.Accept<T>())
             {
                 return null;
             }
-            return (T) parser.Current;
+            return (T)parser.Current;
         }
 
         /// <summary>
         /// Skips the current event and any nested event.
         /// </summary>
-        public void SkipThisAndNestedEvents()
+        public static void SkipThisAndNestedEvents(this IParser parser)
         {
             var depth = 0;
             do
             {
-                depth += Peek<ParsingEvent>().NestingIncrease;
-                MoveNext();
+                depth += parser.Peek<ParsingEvent>().NestingIncrease;
+                parser.MoveNext();
             }
-            while(depth > 0);
-        }
-
-        private void MoveNext()
-        {
-            endOfStream = !parser.MoveNext();
+            while (depth > 0);
         }
     }
 }

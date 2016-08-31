@@ -106,10 +106,10 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             }
         }
         
-        public object DeserializeValue (EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
             object value;
-            var alias = reader.Allow<AnchorAlias>();
+            var alias = parser.Allow<AnchorAlias>();
             if(alias != null)
             {
                 var aliasState = state.Get<AliasState>();
@@ -125,13 +125,13 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             
             string anchor = null;
             
-            var nodeEvent = reader.Peek<NodeEvent>();
+            var nodeEvent = parser.Peek<NodeEvent>();
             if(nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
             {
                 anchor = nodeEvent.Anchor;
             }
             
-            value = innerDeserializer.DeserializeValue(reader, expectedType, state, nestedObjectDeserializer);
+            value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
             
             if(anchor != null)
             {

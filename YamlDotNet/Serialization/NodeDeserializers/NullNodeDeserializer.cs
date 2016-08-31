@@ -27,16 +27,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class NullNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             value = null;
-            var evt = reader.Peek<NodeEvent>();
+            var evt = parser.Peek<NodeEvent>();
             var isNull = evt != null
                 && NodeIsNull(evt);
 
             if (isNull)
             {
-                reader.SkipThisAndNestedEvents();
+                parser.SkipThisAndNestedEvents();
             }
             return isNull;
         }

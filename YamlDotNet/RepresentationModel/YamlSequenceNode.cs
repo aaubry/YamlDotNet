@@ -61,23 +61,21 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlSequenceNode"/> class.
         /// </summary>
-        /// <param name="events">The events.</param>
-        /// <param name="state">The state.</param>
-        internal YamlSequenceNode(EventReader events, DocumentLoadingState state)
+        internal YamlSequenceNode(IParser parser, DocumentLoadingState state)
         {
-            Load(events, state);
+            Load(parser, state);
         }
 
-        private void Load(EventReader events, DocumentLoadingState state)
+        private void Load(IParser parser, DocumentLoadingState state)
         {
-            SequenceStart sequence = events.Expect<SequenceStart>();
+            SequenceStart sequence = parser.Expect<SequenceStart>();
             base.Load(sequence, state);
             Style = sequence.Style;
 
             bool hasUnresolvedAliases = false;
-            while (!events.Accept<SequenceEnd>())
+            while (!parser.Accept<SequenceEnd>())
             {
-                YamlNode child = ParseNode(events, state);
+                YamlNode child = ParseNode(parser, state);
                 children.Add(child);
                 hasUnresolvedAliases |= child is YamlAliasNode;
             }
@@ -99,7 +97,7 @@ namespace YamlDotNet.RepresentationModel
             }
 #endif
 
-            events.Expect<SequenceEnd>();
+            parser.Expect<SequenceEnd>();
         }
 
         /// <summary>
@@ -293,9 +291,9 @@ namespace YamlDotNet.RepresentationModel
 
         #endregion
 
-        void IYamlConvertible.Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        void IYamlConvertible.Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer)
         {
-            Load(reader, new DocumentLoadingState());
+            Load(parser, new DocumentLoadingState());
         }
 
         void IYamlConvertible.Write(IEmitter emitter)

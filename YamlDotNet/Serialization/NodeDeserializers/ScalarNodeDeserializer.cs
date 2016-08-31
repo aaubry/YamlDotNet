@@ -34,9 +34,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private const string BooleanTruePattern = "^(true|y|yes|on)$";
         private const string BooleanFalsePattern = "^(false|n|no|off)$";
 
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            var scalar = reader.Allow<Scalar>();
+            var scalar = parser.Allow<Scalar>();
             if (scalar == null)
             {
                 value = null;

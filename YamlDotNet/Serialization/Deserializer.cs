@@ -156,28 +156,28 @@ namespace YamlDotNet.Serialization
 
         public object Deserialize(TextReader input, Type type)
         {
-            return Deserialize(new EventReader(new Parser(input)), type);
+            return Deserialize(new Parser(input), type);
         }
 
-        public T Deserialize<T>(EventReader reader)
+        public T Deserialize<T>(IParser parser)
         {
-            return (T)Deserialize(reader, typeof(T));
+            return (T)Deserialize(parser, typeof(T));
         }
 
-        public object Deserialize(EventReader reader)
+        public object Deserialize(IParser parser)
         {
-            return Deserialize(reader, typeof(object));
+            return Deserialize(parser, typeof(object));
         }
 
         /// <summary>
         /// Deserializes an object of the specified type.
         /// </summary>
-        /// <param name="reader">The <see cref="EventReader" /> where to deserialize the object.</param>
+        /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>
         /// <param name="type">The static type of the object to deserialize.</param>
         /// <returns>Returns the deserialized object.</returns>
-        public object Deserialize(EventReader reader, Type type)
+        public object Deserialize(IParser parser, Type type)
         {
-            if (reader == null)
+            if (parser == null)
             {
                 throw new ArgumentNullException("reader");
             }
@@ -187,28 +187,28 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException("type");
             }
 
-            var hasStreamStart = reader.Allow<StreamStart>() != null;
+            var hasStreamStart = parser.Allow<StreamStart>() != null;
 
-            var hasDocumentStart = reader.Allow<DocumentStart>() != null;
+            var hasDocumentStart = parser.Allow<DocumentStart>() != null;
 
             object result = null;
-            if (!reader.Accept<DocumentEnd>() && !reader.Accept<StreamEnd>())
+            if (!parser.Accept<DocumentEnd>() && !parser.Accept<StreamEnd>())
             {
                 using (var state = new SerializerState())
                 {
-                    result = valueDeserializer.DeserializeValue(reader, type, state, valueDeserializer);
+                    result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
                     state.OnDeserialization();
                 }
             }
 
             if (hasDocumentStart)
             {
-                reader.Expect<DocumentEnd>();
+                parser.Expect<DocumentEnd>();
             }
 
             if (hasStreamStart)
             {
-                reader.Expect<StreamEnd>();
+                parser.Expect<StreamEnd>();
             }
 
             return result;
