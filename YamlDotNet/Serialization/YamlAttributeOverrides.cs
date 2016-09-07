@@ -97,7 +97,7 @@ namespace YamlDotNet.Serialization
                     {
                         return currentPriority;
                     }
-                    currentType = currentType.BaseType;
+                    currentType = currentType.BaseType();
                 }
 
                 if (matchType.GetInterfaces().Contains(matchType))

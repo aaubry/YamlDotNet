@@ -85,6 +85,11 @@ namespace YamlDotNet
 
     internal static class ReflectionExtensions
     {
+        public static Type BaseType(this Type type)
+        {
+            return type.GetTypeInfo().BaseType;
+        }
+
         public static bool IsValueType(this Type type)
         {
             return type.GetTypeInfo().IsValueType;
@@ -323,6 +328,11 @@ namespace YamlDotNet
 
     internal static class ReflectionExtensions
     {
+        public static Type BaseType(this Type type)
+        {
+            return type.BaseType;
+        }
+
         public static bool IsValueType(this Type type)
         {
             return type.IsValueType;
