@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             _objectFactory = objectFactory;
         }
 
-        bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             IList list;
             bool canUpdate = true;
@@ -71,19 +71,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, reader, nestedObjectDeserializer, list, canUpdate);
+            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list, canUpdate);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, EventReader reader, Func<EventReader, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
         {
-            reader.Expect<SequenceStart>();
-            while (!reader.Accept<SequenceEnd>())
+            parser.Expect<SequenceStart>();
+            while (!parser.Accept<SequenceEnd>())
             {
-                var current = reader.Parser.Current;
+                var current = parser.Current;
 
-                var value = nestedObjectDeserializer(reader, tItem);
+                var value = nestedObjectDeserializer(parser, tItem);
                 var promise = value as IValuePromise;
                 if (promise == null)
                 {
@@ -103,7 +103,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     );
                 }
             }
-            reader.Expect<SequenceEnd>();
+            parser.Expect<SequenceEnd>();
         }
     }
 }

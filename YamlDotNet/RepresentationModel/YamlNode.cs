@@ -73,31 +73,29 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Parses the node represented by the next event in <paramref name="events" />.
+        /// Parses the node represented by the next event in <paramref name="parser" />.
         /// </summary>
-        /// <param name="events">The events.</param>
-        /// <param name="state">The state.</param>
         /// <returns>Returns the node that has been parsed.</returns>
-        static internal YamlNode ParseNode(EventReader events, DocumentLoadingState state)
+        static internal YamlNode ParseNode(IParser parser, DocumentLoadingState state)
         {
-            if (events.Accept<Scalar>())
+            if (parser.Accept<Scalar>())
             {
-                return new YamlScalarNode(events, state);
+                return new YamlScalarNode(parser, state);
             }
 
-            if (events.Accept<SequenceStart>())
+            if (parser.Accept<SequenceStart>())
             {
-                return new YamlSequenceNode(events, state);
+                return new YamlSequenceNode(parser, state);
             }
 
-            if (events.Accept<MappingStart>())
+            if (parser.Accept<MappingStart>())
             {
-                return new YamlMappingNode(events, state);
+                return new YamlMappingNode(parser, state);
             }
 
-            if (events.Accept<AnchorAlias>())
+            if (parser.Accept<AnchorAlias>())
             {
-                var alias = events.Expect<AnchorAlias>();
+                var alias = parser.Expect<AnchorAlias>();
                 return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
             }
 

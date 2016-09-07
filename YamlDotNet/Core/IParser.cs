@@ -29,7 +29,8 @@ namespace YamlDotNet.Core
     public interface IParser
     {
         /// <summary>
-        /// Gets the current event.
+        /// Gets the current event. Returns null before the first call to <see cref="MoveNext" />,
+        /// and also after <see cref="MoveNext" /> returns false.
         /// </summary>
         ParsingEvent Current { get; }
 

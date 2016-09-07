@@ -51,16 +51,14 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlScalarNode"/> class.
         /// </summary>
-        /// <param name="events">The events.</param>
-        /// <param name="state">The state.</param>
-        internal YamlScalarNode(EventReader events, DocumentLoadingState state)
+        internal YamlScalarNode(IParser parser, DocumentLoadingState state)
         {
-            Load(events, state);
+            Load(parser, state);
         }
 
-        private void Load(EventReader events, DocumentLoadingState state)
+        private void Load(IParser parser, DocumentLoadingState state)
         {
-            var scalar = events.Expect<Scalar>();
+            var scalar = parser.Expect<Scalar>();
             Load(scalar, state);
             Value = scalar.Value;
             Style = scalar.Style;
@@ -170,9 +168,9 @@ namespace YamlDotNet.RepresentationModel
             get { return YamlNodeType.Scalar; }
         }
 
-        void IYamlConvertible.Read(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer)
+        void IYamlConvertible.Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer)
         {
-            Load(reader, new DocumentLoadingState());
+            Load(parser, new DocumentLoadingState());
         }
 
         void IYamlConvertible.Write(IEmitter emitter)

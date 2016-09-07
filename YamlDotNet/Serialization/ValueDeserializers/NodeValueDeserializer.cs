@@ -49,9 +49,9 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             this.typeResolvers = typeResolvers;
         }
 
-        public object DeserializeValue(EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            var nodeEvent = reader.Peek<NodeEvent>();
+            var nodeEvent = parser.Peek<NodeEvent>();
 
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
@@ -60,7 +60,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 foreach (var deserializer in deserializers)
                 {
                     object value;
-                    if (deserializer.Deserialize(reader, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out value))
+                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out value))
                     {
                         return value;
                     }

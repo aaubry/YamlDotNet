@@ -88,22 +88,22 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="input">The input.</param>
         public void Load(TextReader input)
         {
-            Load(new EventReader(new Parser(input)));
+            Load(new Parser(input));
         }
 
         /// <summary>
-        /// Loads the stream from the specified <see cref="EventReader"/>.
+        /// Loads the stream from the specified <see cref="IParser"/>.
         /// </summary>
-        public void Load(EventReader reader)
+        public void Load(IParser parser)
         {
             documents.Clear();
-            reader.Expect<StreamStart>();
-            while (!reader.Accept<StreamEnd>())
+            parser.Expect<StreamStart>();
+            while (!parser.Accept<StreamEnd>())
             {
-                var document = new YamlDocument(reader);
+                var document = new YamlDocument(parser);
                 documents.Add(document);
             }
-            reader.Expect<StreamEnd>();
+            parser.Expect<StreamEnd>();
         }
 
         /// <summary>

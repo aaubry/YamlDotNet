@@ -33,12 +33,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.objectFactory = objectFactory;
         }
 
-        public bool Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             if (typeof(IYamlConvertible).IsAssignableFrom(expectedType))
             {
                 var convertible = (IYamlConvertible)objectFactory.Create(expectedType);
-                convertible.Read(reader, expectedType, nestedObjectDeserializer);
+                convertible.Read(parser, expectedType, nestedObjectDeserializer);
                 value = convertible;
                 return true;
             }

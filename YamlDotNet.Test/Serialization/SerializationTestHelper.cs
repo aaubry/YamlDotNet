@@ -115,9 +115,9 @@ namespace YamlDotNet.Test.Serialization
             return new StringReader(text);
         }
 
-        protected static EventReader EventReaderFor(string yaml)
+        protected static IParser ParserFor(string yaml)
         {
-            return new EventReader(new Parser(new StringReader(yaml)));
+            return new Parser(new StringReader(yaml));
         }
 
         protected string Lines(params string[] lines)
