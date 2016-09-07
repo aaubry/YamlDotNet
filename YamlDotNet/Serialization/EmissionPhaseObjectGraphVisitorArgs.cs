@@ -49,28 +49,28 @@ namespace YamlDotNet.Serialization
         {
             if (innerVisitor == null)
             {
-                throw new ArgumentNullException(nameof(innerVisitor));
+                throw new ArgumentNullException("innerVisitor");
             }
 
             InnerVisitor = innerVisitor;
 
             if (emitter == null)
             {
-                throw new ArgumentNullException(nameof(emitter));
+                throw new ArgumentNullException("emitter");
             }
 
             Emitter = emitter;
 
             if (eventEmitter == null)
             {
-                throw new ArgumentNullException(nameof(eventEmitter));
+                throw new ArgumentNullException("eventEmitter");
             }
 
             EventEmitter = eventEmitter;
 
             if (preProcessingPhaseVisitors == null)
             {
-                throw new ArgumentNullException(nameof(preProcessingPhaseVisitors));
+                throw new ArgumentNullException("preProcessingPhaseVisitors");
             }
 
             this.preProcessingPhaseVisitors = preProcessingPhaseVisitors;

@@ -43,19 +43,19 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
         {
             if (maxRecursion <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxRecursion), maxRecursion, "maxRecursion must be greater than 1");
+                throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
             }
 
             if (typeDescriptor == null)
             {
-                throw new ArgumentNullException(nameof(typeDescriptor));
+                throw new ArgumentNullException("typeDescriptor");
             }
 
             this.typeDescriptor = typeDescriptor;
 
             if (typeResolver == null)
             {
-                throw new ArgumentNullException(nameof(typeResolver));
+                throw new ArgumentNullException("typeResolver");
             }
 
             this.typeResolver = typeResolver;

@@ -65,7 +65,7 @@ namespace YamlDotNet.Serialization
         {
             if (namingConvention == null)
             {
-                throw new ArgumentNullException(nameof(namingConvention));
+                throw new ArgumentNullException("namingConvention");
             }
 
             this.namingConvention = namingConvention;
@@ -79,7 +79,7 @@ namespace YamlDotNet.Serialization
         {
             if (typeResolver == null)
             {
-                throw new ArgumentNullException(nameof(typeResolver));
+                throw new ArgumentNullException("typeResolver");
             }
 
             this.typeResolver = typeResolver;
@@ -128,12 +128,12 @@ namespace YamlDotNet.Serialization
         {
             if (typeConverter == null)
             {
-                throw new ArgumentNullException(nameof(typeConverter));
+                throw new ArgumentNullException("typeConverter");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             typeConvertersCache = null;
@@ -165,12 +165,12 @@ namespace YamlDotNet.Serialization
         {
             if (typeInspectorFactory == null)
             {
-                throw new ArgumentNullException(nameof(typeInspectorFactory));
+                throw new ArgumentNullException("typeInspectorFactory");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             where(typeInspectorFactories.CreateRegistrationLocationSelector(typeof(TTypeInspector), inner => typeInspectorFactory(inner)));

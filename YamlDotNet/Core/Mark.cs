@@ -59,15 +59,15 @@ namespace YamlDotNet.Core
         {
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Index must be greater than or equal to zero.");
+                throw new ArgumentOutOfRangeException("index", "Index must be greater than or equal to zero.");
             }
             if (line < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(line), "Line must be greater than or equal to 1.");
+                throw new ArgumentOutOfRangeException("line", "Line must be greater than or equal to 1.");
             }
             if (column < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(column), "Column must be greater than or equal to 1.");
+                throw new ArgumentOutOfRangeException("column", "Column must be greater than or equal to 1.");
             }
 
             Index = index;
@@ -118,7 +118,7 @@ namespace YamlDotNet.Core
         {
             if (obj == null)
             {
-                throw new ArgumentNullException(nameof(obj));
+                throw new ArgumentNullException("obj");
             }
             return CompareTo(obj as Mark);
         }
@@ -128,7 +128,7 @@ namespace YamlDotNet.Core
         {
             if (other == null)
             {
-                throw new ArgumentNullException(nameof(other));
+                throw new ArgumentNullException("other");
             }
 
             var cmp = Line.CompareTo(other.Line);

@@ -33,14 +33,14 @@ namespace YamlDotNet.Serialization
         {
             if (traversalStrategy == null)
             {
-                throw new ArgumentNullException(nameof(traversalStrategy));
+                throw new ArgumentNullException("traversalStrategy");
             }
 
             TraversalStrategy = traversalStrategy;
 
             if (emittingVisitorFactory == null)
             {
-                throw new ArgumentNullException(nameof(emittingVisitorFactory));
+                throw new ArgumentNullException("emittingVisitorFactory");
             }
 
             EmittingVisitorFactory = emittingVisitorFactory;

@@ -228,7 +228,7 @@ namespace YamlDotNet.Serialization
         {
             if (valueDeserializer == null)
             {
-                throw new ArgumentNullException(nameof(valueDeserializer));
+                throw new ArgumentNullException("valueDeserializer");
             }
 
             this.valueDeserializer = valueDeserializer;
@@ -279,12 +279,12 @@ namespace YamlDotNet.Serialization
         {
             if (reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw new ArgumentNullException("reader");
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException("type");
             }
 
             var hasStreamStart = reader.Allow<StreamStart>() != null;

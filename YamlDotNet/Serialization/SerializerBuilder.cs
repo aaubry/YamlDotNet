@@ -98,12 +98,12 @@ namespace YamlDotNet.Serialization
         {
             if (eventEmitterFactory == null)
             {
-                throw new ArgumentNullException(nameof(eventEmitterFactory));
+                throw new ArgumentNullException("eventEmitterFactory");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner)));
@@ -197,12 +197,12 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitor == null)
             {
-                throw new ArgumentNullException(nameof(objectGraphVisitor));
+                throw new ArgumentNullException("objectGraphVisitor");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             where(preProcessingPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), _ => objectGraphVisitor));
@@ -234,12 +234,12 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitorFactory == null)
             {
-                throw new ArgumentNullException(nameof(objectGraphVisitorFactory));
+                throw new ArgumentNullException("objectGraphVisitorFactory");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             where(emissionPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), args => objectGraphVisitorFactory(args)));

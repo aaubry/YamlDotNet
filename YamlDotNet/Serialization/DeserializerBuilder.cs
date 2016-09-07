@@ -101,7 +101,7 @@ namespace YamlDotNet.Serialization
         {
             if (objectFactory == null)
             {
-                throw new ArgumentNullException(nameof(objectFactory));
+                throw new ArgumentNullException("objectFactory");
             }
 
             this.objectFactory = objectFactory;
@@ -115,7 +115,7 @@ namespace YamlDotNet.Serialization
         {
             if (objectFactory == null)
             {
-                throw new ArgumentNullException(nameof(objectFactory));
+                throw new ArgumentNullException("objectFactory");
             }
 
             return WithObjectFactory(new LambdaObjectFactory(objectFactory));
@@ -141,12 +141,12 @@ namespace YamlDotNet.Serialization
         {
             if (nodeDeserializer == null)
             {
-                throw new ArgumentNullException(nameof(nodeDeserializer));
+                throw new ArgumentNullException("nodeDeserializer");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             where(nodeDeserializerFactories.CreateRegistrationLocationSelector(nodeDeserializer.GetType(), _ => nodeDeserializer));
@@ -173,12 +173,12 @@ namespace YamlDotNet.Serialization
         {
             if (nodeTypeResolver == null)
             {
-                throw new ArgumentNullException(nameof(nodeTypeResolver));
+                throw new ArgumentNullException("nodeTypeResolver");
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException(nameof(where));
+                throw new ArgumentNullException("where");
             }
 
             where(nodeTypeResolverFactories.CreateRegistrationLocationSelector(nodeTypeResolver.GetType(), _ => nodeTypeResolver));
@@ -192,12 +192,12 @@ namespace YamlDotNet.Serialization
         {
             if (tag == null)
             {
-                throw new ArgumentNullException(nameof(tag));
+                throw new ArgumentNullException("tag");
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException("type");
             }
 
             tagMappings.Add(tag, type);

@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
         {
             if (typeResolver == null)
             {
-                throw new ArgumentNullException(nameof(typeResolver));
+                throw new ArgumentNullException("typeResolver");
             }
 
             _typeResolver = typeResolver;

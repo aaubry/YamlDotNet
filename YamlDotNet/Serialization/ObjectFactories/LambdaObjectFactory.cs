@@ -34,7 +34,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
         {
             if (factory == null)
             {
-                throw new ArgumentNullException(nameof(factory));
+                throw new ArgumentNullException("factory");
             }
 
             _factory = factory;

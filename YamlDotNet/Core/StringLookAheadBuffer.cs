@@ -66,7 +66,7 @@ namespace YamlDotNet.Core
         {
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(length), "The length must be positive.");
+                throw new ArgumentOutOfRangeException("length", "The length must be positive.");
             }
             Position += length;
         }

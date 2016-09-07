@@ -205,7 +205,7 @@ namespace YamlDotNet.Serialization
         {
             if (serializerParams == null)
             {
-                throw new ArgumentNullException(nameof(serializerParams));
+                throw new ArgumentNullException("serializerParams");
             }
 
             this.traversalStrategy = serializerParams.TraversalStrategy;
@@ -252,7 +252,7 @@ namespace YamlDotNet.Serialization
         {
             if (emitter == null)
             {
-                throw new ArgumentNullException(nameof(emitter));
+                throw new ArgumentNullException("emitter");
             }
 
             EmitDocument(emitter, new ObjectDescriptor(graph, graph != null ? graph.GetType() : typeof(object), typeof(object)));
@@ -268,12 +268,12 @@ namespace YamlDotNet.Serialization
         {
             if (emitter == null)
             {
-                throw new ArgumentNullException(nameof(emitter));
+                throw new ArgumentNullException("emitter");
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException("type");
             }
 
             EmitDocument(emitter, new ObjectDescriptor(graph, type, type));

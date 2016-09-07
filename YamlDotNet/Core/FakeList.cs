@@ -71,7 +71,7 @@ namespace YamlDotNet.Core
                 {
                     if (!collection.MoveNext())
                     {
-                        throw new ArgumentOutOfRangeException(nameof(index));
+                        throw new ArgumentOutOfRangeException("index");
                     }
                     ++currentIndex;
                 }

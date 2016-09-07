@@ -49,11 +49,11 @@ namespace YamlDotNet.Core
         {
             if (input == null)
             {
-                throw new ArgumentNullException(nameof(input));
+                throw new ArgumentNullException("input");
             }
             if (capacity < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(capacity), "The capacity must be positive.");
+                throw new ArgumentOutOfRangeException("capacity", "The capacity must be positive.");
             }
 
             this.input = input;
@@ -91,7 +91,7 @@ namespace YamlDotNet.Core
         {
             if (offset < 0 || offset >= buffer.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(offset), "The offset must be betwwen zero and the capacity of the buffer.");
+                throw new ArgumentOutOfRangeException("offset", "The offset must be betwwen zero and the capacity of the buffer.");
             }
 
             Cache(offset);
@@ -139,7 +139,7 @@ namespace YamlDotNet.Core
         {
             if (length < 1 || length > count)
             {
-                throw new ArgumentOutOfRangeException(nameof(length), "The length must be between 1 and the number of characters in the buffer. Use the Peek() and / or Cache() methods to fill the buffer.");
+                throw new ArgumentOutOfRangeException("length", "The length must be between 1 and the number of characters in the buffer. Use the Peek() and / or Cache() methods to fill the buffer.");
             }
             firstIndex = GetIndexForOffset(length);
             count -= length;

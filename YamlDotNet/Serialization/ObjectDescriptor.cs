@@ -42,14 +42,14 @@ namespace YamlDotNet.Serialization
 
             if (type == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException("type");
             }
 
             Type = type;
 
             if (staticType == null)
             {
-                throw new ArgumentNullException(nameof(staticType));
+                throw new ArgumentNullException("staticType");
             }
 
             StaticType = staticType;

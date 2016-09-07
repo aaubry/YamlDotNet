@@ -37,7 +37,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
         {
             if (innerTypeDescriptor == null)
             {
-                throw new ArgumentNullException(nameof(innerTypeDescriptor));
+                throw new ArgumentNullException("innerTypeDescriptor");
             }
 
             this.innerTypeDescriptor = innerTypeDescriptor;
