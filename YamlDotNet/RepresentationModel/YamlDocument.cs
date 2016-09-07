@@ -94,7 +94,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Visitor that assigns anchors to nodes that are referenced more than once but have no anchor.
         /// </summary>
-        private class AnchorAssigningVisitor : YamlVisitor
+        private class AnchorAssigningVisitor : YamlVisitorBase
         {
             private readonly HashSet<string> existingAnchors = new HashSet<string>();
             private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>();
@@ -146,19 +146,21 @@ namespace YamlDotNet.RepresentationModel
                 }
             }
 
-            protected override void Visit(YamlScalarNode scalar)
+            public override void Visit(YamlScalarNode scalar)
             {
                 // Do not assign anchors to scalars
             }
 
-            protected override void Visit(YamlMappingNode mapping)
+            public override void Visit(YamlMappingNode mapping)
             {
                 VisitNode(mapping);
+                base.Visit(mapping);
             }
 
-            protected override void Visit(YamlSequenceNode sequence)
+            public override void Visit(YamlSequenceNode sequence)
             {
                 VisitNode(sequence);
+                base.Visit(sequence);
             }
         }
 

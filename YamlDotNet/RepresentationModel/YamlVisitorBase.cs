@@ -19,8 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.RepresentationModel
 {
     /// <summary>
@@ -34,20 +32,9 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="stream">
         /// The <see cref="YamlStream"/> that is being visited.
         /// </param>
-        protected virtual void Visit(YamlStream stream)
+        public virtual void Visit(YamlStream stream)
         {
             VisitChildren(stream);
-        }
-
-        /// <summary>
-        /// Called after this object finishes visiting a <see cref="YamlStream"/>.
-        /// </summary>
-        /// <param name="stream">
-        /// The <see cref="YamlStream"/> that has been visited.
-        /// </param>
-        protected virtual void Visited(YamlStream stream)
-        {
-            // Do nothing.
         }
 
         /// <summary>
@@ -56,20 +43,9 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="document">
         /// The <see cref="YamlDocument"/> that is being visited.
         /// </param>
-        protected virtual void Visit(YamlDocument document)
+        public virtual void Visit(YamlDocument document)
         {
             VisitChildren(document);
-        }
-
-        /// <summary>
-        /// Called after this object finishes visiting a <see cref="YamlDocument"/>.
-        /// </summary>
-        /// <param name="document">
-        /// The <see cref="YamlDocument"/> that has been visited.
-        /// </param>
-        protected virtual void Visited(YamlDocument document)
-        {
-            // Do nothing.
         }
 
         /// <summary>
@@ -78,18 +54,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="scalar">
         /// The <see cref="YamlScalarNode"/> that is being visited.
         /// </param>
-        protected virtual void Visit(YamlScalarNode scalar)
-        {
-            // Do nothing.
-        }
-
-        /// <summary>
-        /// Called after this object finishes visiting a <see cref="YamlScalarNode"/>.
-        /// </summary>
-        /// <param name="scalar">
-        /// The <see cref="YamlScalarNode"/> that has been visited.
-        /// </param>
-        protected virtual void Visited(YamlScalarNode scalar)
+        public virtual void Visit(YamlScalarNode scalar)
         {
             // Do nothing.
         }
@@ -100,20 +65,9 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="sequence">
         /// The <see cref="YamlSequenceNode"/> that is being visited.
         /// </param>
-        protected virtual void Visit(YamlSequenceNode sequence)
+        public virtual void Visit(YamlSequenceNode sequence)
         {
             VisitChildren(sequence);
-        }
-
-        /// <summary>
-        /// Called after this object finishes visiting a <see cref="YamlSequenceNode"/>.
-        /// </summary>
-        /// <param name="sequence">
-        /// The <see cref="YamlSequenceNode"/> that has been visited.
-        /// </param>
-        protected virtual void Visited(YamlSequenceNode sequence)
-        {
-            // Do nothing.
         }
 
         /// <summary>
@@ -122,20 +76,9 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="mapping">
         /// The <see cref="YamlMappingNode"/> that is being visited.
         /// </param>
-        protected virtual void Visit(YamlMappingNode mapping)
+        public virtual void Visit(YamlMappingNode mapping)
         {
             VisitChildren(mapping);
-        }
-
-        /// <summary>
-        /// Called after this object finishes visiting a <see cref="YamlMappingNode"/>.
-        /// </summary>
-        /// <param name="mapping">
-        /// The <see cref="YamlMappingNode"/> that has been visited.
-        /// </param>
-        protected virtual void Visited(YamlMappingNode mapping)
-        {
-            // Do nothing.
         }
 
         /// <summary>
@@ -203,36 +146,6 @@ namespace YamlDotNet.RepresentationModel
             {
                 VisitPair(pair.Key, pair.Value);
             }
-        }
-
-        void IYamlVisitor.Visit(YamlStream stream)
-        {
-            Visit(stream);
-            Visited(stream);
-        }
-
-        void IYamlVisitor.Visit(YamlDocument document)
-        {
-            Visit(document);
-            Visited(document);
-        }
-
-        void IYamlVisitor.Visit(YamlScalarNode scalar)
-        {
-            Visit(scalar);
-            Visited(scalar);
-        }
-
-        void IYamlVisitor.Visit(YamlSequenceNode sequence)
-        {
-            Visit(sequence);
-            Visited(sequence);
-        }
-
-        void IYamlVisitor.Visit(YamlMappingNode mapping)
-        {
-            Visit(mapping);
-            Visited(mapping);
         }
     }
 }

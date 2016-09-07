@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// An object that contains part of a YAML stream.
     /// </summary>
-    public sealed class StreamFragment : IYamlSerializable
+    public sealed class StreamFragment : IYamlConvertible
     {
         private readonly List<ParsingEvent> events = new List<ParsingEvent>();
 
@@ -50,8 +50,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Reads this object's state from a YAML parser.
         /// </summary>
-        /// <param name="parser"></param>
-        void IYamlSerializable.ReadYaml(IParser parser)
+        void IYamlConvertible.Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer)
         {
             events.Clear();
 
@@ -73,8 +72,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Writes this object's state to a YAML emitter.
         /// </summary>
-        /// <param name="emitter"></param>
-        void IYamlSerializable.WriteYaml(IEmitter emitter)
+        void IYamlConvertible.Write(IEmitter emitter)
         {
             foreach (var item in events)
             {
