@@ -71,12 +71,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(keyType, valueType, parser, expectedType, nestedObjectDeserializer, dictionary);
+            DeserializeHelper(keyType, valueType, parser, nestedObjectDeserializer, dictionary);
 
             return true;
         }
 
-        private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, IDictionary result)
+        private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object> nestedObjectDeserializer, IDictionary result)
         {
             parser.Expect<MappingStart>();
             while (!parser.Accept<MappingEnd>())

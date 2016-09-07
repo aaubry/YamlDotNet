@@ -32,12 +32,12 @@ namespace YamlDotNet.Serialization.Utilities
     public sealed class SerializerState : IDisposable
     {
         private readonly IDictionary<Type, object> items = new Dictionary<Type, object>();
-        
+
         public T Get<T>()
             where T : class, new()
         {
             object value;
-            if(!items.TryGetValue(typeof(T), out value))
+            if (!items.TryGetValue(typeof(T), out value))
             {
                 value = new T();
                 items.Add(typeof(T), value);

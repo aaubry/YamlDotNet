@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,9 +20,9 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 {
@@ -33,14 +33,17 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
     /// </summary>
     public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
     {
-        public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
-            : base(serializer, typeDescriptor, typeResolver, maxRecursion, null)
+        private readonly IEnumerable<IYamlTypeConverter> converters;
+
+        public RoundtripObjectGraphTraversalStrategy(IEnumerable<IYamlTypeConverter> converters, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
+            : base(typeDescriptor, typeResolver, maxRecursion, null)
         {
+            this.converters = converters;
         }
 
         protected override void TraverseProperties(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
         {
-            if (!value.Type.HasDefaultConstructor() && !serializer.Converters.Any(c => c.Accepts(value.Type)))
+            if (!value.Type.HasDefaultConstructor() && !converters.Any(c => c.Accepts(value.Type)))
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor or a type converter.", value.Type));
             }

@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.EventEmitters;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectGraphTraversalStrategies;
@@ -33,17 +34,132 @@ using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
-    /// <summary>
-    /// Writes objects to YAML.
-    /// </summary>
     public sealed class Serializer
     {
-        internal IList<IYamlTypeConverter> Converters { get; private set; }
+        private readonly IObjectGraphTraversalStrategy traversalStrategy;
+        private readonly Func<IEmitter, IObjectDescriptor, IObjectGraphVisitor> emittingVisitorFactory;
 
-        private readonly SerializationOptions options;
-        private readonly INamingConvention namingConvention;
-        private readonly ITypeResolver typeResolver;
-        private readonly YamlAttributeOverrides overrides;
+        #region Backwards compatibility
+        private class BackwardsCompatibleConfiguration
+        {
+            public IList<IYamlTypeConverter> Converters { get; private set; }
+            private readonly SerializationOptions options;
+            private readonly INamingConvention namingConvention;
+            private readonly ITypeResolver typeResolver;
+            private readonly YamlAttributeOverrides overrides;
+
+            public BackwardsCompatibleConfiguration(SerializationOptions options, INamingConvention namingConvention, YamlAttributeOverrides overrides)
+            {
+                this.options = options;
+                this.namingConvention = namingConvention ?? new NullNamingConvention();
+                this.overrides = overrides;
+
+                Converters = new List<IYamlTypeConverter>();
+                Converters.Add(new GuidConverter(IsOptionSet(SerializationOptions.JsonCompatible)));
+
+                typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
+                    ? (ITypeResolver)new StaticTypeResolver()
+                    : (ITypeResolver)new DynamicTypeResolver();
+            }
+
+            public bool IsOptionSet(SerializationOptions option)
+            {
+                return (options & option) != 0;
+            }
+
+            private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
+            {
+                IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
+
+                emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
+
+                if (!IsOptionSet(SerializationOptions.DisableAliases))
+                {
+                    var anchorAssigner = new AnchorAssigner();
+                    traversalStrategy.Traverse(graph, anchorAssigner);
+
+                    emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
+                }
+
+                if (!IsOptionSet(SerializationOptions.EmitDefaults))
+                {
+                    emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
+                }
+
+                return emittingVisitor;
+            }
+
+            private IEventEmitter CreateEventEmitter(IEmitter emitter)
+            {
+                var writer = new WriterEventEmitter(emitter);
+
+                if (IsOptionSet(SerializationOptions.JsonCompatible))
+                {
+                    return new JsonEventEmitter(writer);
+                }
+                else
+                {
+                    return new TypeAssigningEventEmitter(writer, IsOptionSet(SerializationOptions.Roundtrip));
+                }
+            }
+
+            private IObjectGraphTraversalStrategy CreateTraversalStrategy()
+            {
+                ITypeInspector typeDescriptor = new ReadablePropertiesTypeInspector(typeResolver);
+                if (IsOptionSet(SerializationOptions.Roundtrip))
+                {
+                    typeDescriptor = new ReadableAndWritablePropertiesTypeInspector(typeDescriptor);
+                }
+
+                typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
+
+                typeDescriptor = new YamlAttributeOverridesInspector(typeDescriptor, overrides);
+
+                typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
+                if (IsOptionSet(SerializationOptions.DefaultToStaticType))
+                {
+                    typeDescriptor = new CachedTypeInspector(typeDescriptor);
+                }
+
+                if (IsOptionSet(SerializationOptions.Roundtrip))
+                {
+                    return new RoundtripObjectGraphTraversalStrategy(Converters, typeDescriptor, typeResolver, 50);
+                }
+                else
+                {
+                    return new FullObjectGraphTraversalStrategy(typeDescriptor, typeResolver, 50, namingConvention);
+                }
+            }
+
+            public void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
+            {
+                var traversalStrategy = CreateTraversalStrategy();
+                var emittingVisitor = CreateEmittingVisitor(
+                    emitter,
+                    traversalStrategy,
+                    CreateEventEmitter(emitter),
+                    graph
+                );
+
+                emitter.Emit(new StreamStart());
+                emitter.Emit(new DocumentStart());
+
+                traversalStrategy.Traverse(graph, emittingVisitor);
+
+                emitter.Emit(new DocumentEnd(true));
+                emitter.Emit(new StreamEnd());
+            }
+        }
+
+        private readonly BackwardsCompatibleConfiguration backwardsCompatibleConfiguration;
+
+        private void ThrowUnlessInBackwardsCompatibleMode()
+        {
+            if (backwardsCompatibleConfiguration == null)
+            {
+                throw new InvalidOperationException("This method / property exists for backwards compatibility reasons, but the Serializer was created using the new configuration mechanism. To configure the Serializer, use the SerializerBuilder.");
+            }
+        }
 
         /// <summary>
         /// 
@@ -51,34 +167,59 @@ namespace YamlDotNet.Serialization
         /// <param name="options">Options that control how the serialization is to be performed.</param>
         /// <param name="namingConvention">Naming strategy to use for serialized property names</param>
         /// <param name="overrides">Yaml attribute overrides</param>
+        [Obsolete("Please use SerializerBuilder to customize the Serializer. This constructor will be removed in future releases.")]
         public Serializer(SerializationOptions options = SerializationOptions.None, INamingConvention namingConvention = null, YamlAttributeOverrides overrides = null)
         {
-            this.options = options;
-            this.namingConvention = namingConvention ?? new NullNamingConvention();
-            this.overrides = overrides;
-
-            Converters = new List<IYamlTypeConverter>();
-            foreach (IYamlTypeConverter yamlTypeConverter in Utilities.YamlTypeConverters.GetBuiltInConverters(IsOptionSet(SerializationOptions.JsonCompatible)))
-            {
-                Converters.Add(yamlTypeConverter);
-            }
-            
-            typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
-                ? (ITypeResolver)new StaticTypeResolver()
-                : (ITypeResolver)new DynamicTypeResolver();
-        }
-
-        private bool IsOptionSet(SerializationOptions option)
-        {
-            return (options & option) != 0;
+            backwardsCompatibleConfiguration = new BackwardsCompatibleConfiguration(options, namingConvention, overrides);
         }
 
         /// <summary>
         /// Registers a type converter to be used to serialize and deserialize specific types.
         /// </summary>
+        [Obsolete("Please use SerializerBuilder to customize the Serializer. This method will be removed in future releases.")]
         public void RegisterTypeConverter(IYamlTypeConverter converter)
         {
-            Converters.Insert(0, converter);
+            ThrowUnlessInBackwardsCompatibleMode();
+            backwardsCompatibleConfiguration.Converters.Insert(0, converter);
+        }
+        #endregion
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Serializer" /> using the default configuration.
+        /// </summary>
+        /// <remarks>
+        /// To customize the bahavior of the serializer, use <see cref="SerializerBuilder" />.
+        /// </remarks>
+        public Serializer()
+        // TODO: When the backwards compatibility is dropped, uncomment the following line and remove the body of this constructor.
+        //: this(new SerializerBuilder().BuildSerializerParams())
+        {
+            backwardsCompatibleConfiguration = new BackwardsCompatibleConfiguration(SerializationOptions.None, null, null);
+        }
+
+        /// <remarks>
+        /// This constructor is private to discourage its use.
+        /// To invoke it, call the <see cref="FromSerializerParams"/> method.
+        /// </remarks>
+        private Serializer(SerializerParams serializerParams)
+        {
+            if (serializerParams == null)
+            {
+                throw new ArgumentNullException("serializerParams");
+            }
+
+            this.traversalStrategy = serializerParams.TraversalStrategy;
+            this.emittingVisitorFactory = serializerParams.EmittingVisitorFactory;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Serializer" /> that uses the specified <see cref="IValueDeserializer" />.
+        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// deserializer is to use <see cref="SerializerBuilder" />.
+        /// </summary>
+        public static Serializer FromSerializerParams(SerializerParams serializerParams)
+        {
+            return new Serializer(serializerParams);
         }
 
         /// <summary>
@@ -140,9 +281,13 @@ namespace YamlDotNet.Serialization
 
         private void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
         {
-            var traversalStrategy = CreateTraversalStrategy();
-            var eventEmitter = CreateEventEmitter(emitter);
-            var emittingVisitor = CreateEmittingVisitor(emitter, traversalStrategy, eventEmitter, graph);
+            if(backwardsCompatibleConfiguration != null)
+            {
+                backwardsCompatibleConfiguration.EmitDocument(emitter, graph);
+                return;
+            }
+
+            var emittingVisitor = emittingVisitorFactory(emitter, graph);
 
             emitter.Emit(new StreamStart());
             emitter.Emit(new DocumentStart());
@@ -151,70 +296,6 @@ namespace YamlDotNet.Serialization
 
             emitter.Emit(new DocumentEnd(true));
             emitter.Emit(new StreamEnd());
-        }
-
-        private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
-        {
-            IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
-
-            emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
-
-            if (!IsOptionSet(SerializationOptions.DisableAliases))
-            {
-                var anchorAssigner = new AnchorAssigner();
-                traversalStrategy.Traverse(graph, anchorAssigner);
-
-                emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
-            }
-
-            if (!IsOptionSet(SerializationOptions.EmitDefaults))
-            {
-                emittingVisitor = new DefaultExclusiveObjectGraphVisitor(emittingVisitor);
-            }
-
-            return emittingVisitor;
-        }
-
-        private IEventEmitter CreateEventEmitter(IEmitter emitter)
-        {
-            var writer = new WriterEventEmitter(emitter);
-
-            if (IsOptionSet(SerializationOptions.JsonCompatible))
-            {
-                return new JsonEventEmitter(writer);
-            }
-            else
-            {
-                return new TypeAssigningEventEmitter(writer, IsOptionSet(SerializationOptions.Roundtrip));
-            }
-        }
-
-        private IObjectGraphTraversalStrategy CreateTraversalStrategy()
-        {
-            ITypeInspector typeDescriptor = new ReadablePropertiesTypeInspector(typeResolver);
-            if (IsOptionSet(SerializationOptions.Roundtrip))
-            {
-                typeDescriptor = new ReadableAndWritablePropertiesTypeInspector(typeDescriptor);
-            }
-
-            typeDescriptor = new NamingConventionTypeInspector(typeDescriptor, namingConvention);
-
-            typeDescriptor = new YamlAttributeOverridesInspector(typeDescriptor, overrides);
-
-            typeDescriptor = new YamlAttributesTypeInspector(typeDescriptor);
-            if (IsOptionSet(SerializationOptions.DefaultToStaticType))
-            {
-                typeDescriptor = new CachedTypeInspector(typeDescriptor);
-            }
-
-            if (IsOptionSet(SerializationOptions.Roundtrip))
-            {
-                return new RoundtripObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50);
-            }
-            else
-            {
-                return new FullObjectGraphTraversalStrategy(this, typeDescriptor, typeResolver, 50, namingConvention);
-            }
         }
     }
 }

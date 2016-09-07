@@ -32,23 +32,23 @@ namespace YamlDotNet.Serialization.ValueDeserializers
     {
         private readonly IList<INodeDeserializer> deserializers;
         private readonly IList<INodeTypeResolver> typeResolvers;
-        
+
         public NodeValueDeserializer(IList<INodeDeserializer> deserializers, IList<INodeTypeResolver> typeResolvers)
         {
-            if(deserializers == null)
+            if (deserializers == null)
             {
                 throw new ArgumentNullException("deserializers");
             }
 
             this.deserializers = deserializers;
-            
-            if(typeResolvers == null)
+
+            if (typeResolvers == null)
             {
                 throw new ArgumentNullException("typeResolvers");
             }
             this.typeResolvers = typeResolvers;
         }
-        
+
         public object DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
             var nodeEvent = parser.Peek<NodeEvent>();

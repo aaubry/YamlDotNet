@@ -40,7 +40,7 @@ namespace YamlDotNet.Core
         private ParserState state;
 
         private readonly IScanner scanner;
-        private ParsingEvent current;
+        private ParsingEvent currentEvent;
 
         private Token currentToken;
 
@@ -90,7 +90,7 @@ namespace YamlDotNet.Core
         {
             get
             {
-                return current;
+                return currentEvent;
             }
         }
 
@@ -105,7 +105,7 @@ namespace YamlDotNet.Core
             // No events after the end of the stream or error.
             if (state == ParserState.StreamEnd)
             {
-                current = null;
+                currentEvent = null;
                 return false;
             }
             else if (pendingEvents.Count == 0)
@@ -114,7 +114,7 @@ namespace YamlDotNet.Core
                 pendingEvents.Enqueue(StateMachine());
             }
 
-            current = pendingEvents.Dequeue();
+            currentEvent = pendingEvents.Dequeue();
             return true;
         }
 
@@ -213,7 +213,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private ParsingEvent ParseStreamStart()
         {
-            StreamStart streamStart = GetCurrentToken() as StreamStart;
+            var streamStart = GetCurrentToken() as StreamStart;
             if (streamStart == null)
             {
                 var current = GetCurrentToken();
@@ -248,7 +248,7 @@ namespace YamlDotNet.Core
 
             if (isImplicit && !(GetCurrentToken() is VersionDirective || GetCurrentToken() is TagDirective || GetCurrentToken() is DocumentStart || GetCurrentToken() is StreamEnd))
             {
-                TagDirectiveCollection directives = new TagDirectiveCollection();
+                var directives = new TagDirectiveCollection();
                 ProcessDirectives(directives);
 
                 states.Push(ParserState.DocumentEnd);
@@ -263,8 +263,8 @@ namespace YamlDotNet.Core
             else if (!(GetCurrentToken() is StreamEnd))
             {
                 Mark start = GetCurrentToken().Start;
-                TagDirectiveCollection directives = new TagDirectiveCollection();
-                VersionDirective versionDirective = ProcessDirectives(directives);
+                var directives = new TagDirectiveCollection();
+                var versionDirective = ProcessDirectives(directives);
 
                 var current = GetCurrentToken();
                 if (!(current is DocumentStart))
@@ -427,7 +427,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private ParsingEvent ParseNode(bool isBlock, bool isIndentlessSequence)
         {
-            AnchorAlias alias = GetCurrentToken() as AnchorAlias;
+            var alias = GetCurrentToken() as AnchorAlias;
             if (alias != null)
             {
                 state = states.Pop();
@@ -481,7 +481,7 @@ namespace YamlDotNet.Core
 
             string anchorName = anchor != null ? string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value : null;
 
-            bool isImplicit = string.IsNullOrEmpty(tagName);
+            var isImplicit = string.IsNullOrEmpty(tagName);
 
             if (isIndentlessSequence && GetCurrentToken() is BlockEntry)
             {
@@ -498,7 +498,7 @@ namespace YamlDotNet.Core
             }
             else
             {
-                Scalar scalar = GetCurrentToken() as Scalar;
+                var scalar = GetCurrentToken() as Scalar;
                 if (scalar != null)
                 {
                     bool isPlainImplicit = false;
@@ -519,14 +519,14 @@ namespace YamlDotNet.Core
                     return evt;
                 }
 
-                FlowSequenceStart flowSequenceStart = GetCurrentToken() as FlowSequenceStart;
+                var flowSequenceStart = GetCurrentToken() as FlowSequenceStart;
                 if (flowSequenceStart != null)
                 {
                     state = ParserState.FlowSequenceFirstEntry;
                     return new Events.SequenceStart(anchorName, tagName, isImplicit, SequenceStyle.Flow, start, flowSequenceStart.End);
                 }
 
-                FlowMappingStart flowMappingStart = GetCurrentToken() as FlowMappingStart;
+                var flowMappingStart = GetCurrentToken() as FlowMappingStart;
                 if (flowMappingStart != null)
                 {
                     state = ParserState.FlowMappingFirstKey;
@@ -535,14 +535,14 @@ namespace YamlDotNet.Core
 
                 if (isBlock)
                 {
-                    BlockSequenceStart blockSequenceStart = GetCurrentToken() as BlockSequenceStart;
+                    var blockSequenceStart = GetCurrentToken() as BlockSequenceStart;
                     if (blockSequenceStart != null)
                     {
                         state = ParserState.BlockSequenceFirstEntry;
                         return new Events.SequenceStart(anchorName, tagName, isImplicit, SequenceStyle.Block, start, blockSequenceStart.End);
                     }
 
-                    BlockMappingStart blockMappingStart = GetCurrentToken() as BlockMappingStart;
+                    var blockMappingStart = GetCurrentToken() as BlockMappingStart;
                     if (blockMappingStart != null)
                     {
                         state = ParserState.BlockMappingFirstKey;

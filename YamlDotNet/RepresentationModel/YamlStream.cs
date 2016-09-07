@@ -100,7 +100,7 @@ namespace YamlDotNet.RepresentationModel
             parser.Expect<StreamStart>();
             while (!parser.Accept<StreamEnd>())
             {
-                YamlDocument document = new YamlDocument(parser);
+                var document = new YamlDocument(parser);
                 documents.Add(document);
             }
             parser.Expect<StreamEnd>();

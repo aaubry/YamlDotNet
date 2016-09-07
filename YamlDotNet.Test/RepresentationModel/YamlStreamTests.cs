@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,21 +31,23 @@ namespace YamlDotNet.Test.RepresentationModel
     public class YamlStreamTests
     {
         [Fact]
-        public void LoadSimpleDocument() {
+        public void LoadSimpleDocument()
+        {
             var stream = new YamlStream();
             stream.Load(Yaml.StreamFrom("02-scalar-in-imp-doc.yaml"));
-            
+
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
             Assert.Equal("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value);
-            Assert.Equal (YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
+            Assert.Equal(YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
         }
-        
+
         [Fact]
-        public void BackwardAliasReferenceWorks() {
+        public void BackwardAliasReferenceWorks()
+        {
             var stream = new YamlStream();
             stream.Load(Yaml.StreamFrom("backwards-alias.yaml"));
-            
+
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
@@ -57,12 +59,13 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[2]).Value);
             Assert.Same(sequence.Children[0], sequence.Children[2]);
         }
-        
+
         [Fact]
-        public void ForwardAliasReferenceWorks() {
+        public void ForwardAliasReferenceWorks()
+        {
             var stream = new YamlStream();
             stream.Load(Yaml.StreamFrom("forward-alias.yaml"));
-            
+
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
@@ -186,8 +189,6 @@ namespace YamlDotNet.Test.RepresentationModel
             var buffer = new StringBuilder();
             original.Save(new StringWriter(buffer));
 
-            Dump.WriteLine(buffer);
-
             var final = new YamlStream();
             final.Load(new StringReader(buffer.ToString()));
 
@@ -197,8 +198,6 @@ namespace YamlDotNet.Test.RepresentationModel
             var finalBuilder = new YamlDocumentStructureBuilder();
             final.Accept(finalBuilder);
 
-            Dump.WriteLine("The original document produced {0} events.", originalBuilder.Events.Count);
-            Dump.WriteLine("The final document produced {0} events.", finalBuilder.Events.Count);
             Assert.Equal(originalBuilder.Events.Count, finalBuilder.Events.Count);
 
             for (var i = 0; i < originalBuilder.Events.Count; ++i)
@@ -217,7 +216,8 @@ namespace YamlDotNet.Test.RepresentationModel
 
             public IList<YamlNodeEvent> Events
             {
-                get {
+                get
+                {
                     return events;
                 }
             }
@@ -255,7 +255,8 @@ namespace YamlDotNet.Test.RepresentationModel
             public string Tag { get; private set; }
             public string Value { get; private set; }
 
-            public YamlNodeEvent(YamlNodeEventType type, string anchor, string tag, string value) {
+            public YamlNodeEvent(YamlNodeEventType type, string anchor, string tag, string value)
+            {
                 Type = type;
                 Anchor = anchor;
                 Tag = tag;

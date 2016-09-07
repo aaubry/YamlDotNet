@@ -1,16 +1,16 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,46 +19,31 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.Diagnostics;
+using System;
+using YamlDotNet.Core;
 
-namespace YamlDotNet.Test
+namespace YamlDotNet.Serialization
 {
-    public class Dump
+    public sealed class SerializerParams
     {
-        [Conditional("TEST_DUMP")]
-        public static void Write(object value)
-        {
-            Debug.Write(value);
-        }
+        public Func<IEmitter, IObjectDescriptor, IObjectGraphVisitor> EmittingVisitorFactory { get; private set; }
+        public IObjectGraphTraversalStrategy TraversalStrategy { get; private set; }
 
-        [Conditional("TEST_DUMP")]
-        public static void Write(string format, params object[] args)
+        public SerializerParams(IObjectGraphTraversalStrategy traversalStrategy, Func<IEmitter, IObjectDescriptor, IObjectGraphVisitor> emittingVisitorFactory)
         {
-            Debug.Write(string.Format(format, args));
-        }
+            if (traversalStrategy == null)
+            {
+                throw new ArgumentNullException("traversalStrategy");
+            }
 
-        [Conditional("TEST_DUMP")]
-        public static void WriteLine()
-        {
-            Debug.WriteLine(string.Empty);
-        }
+            TraversalStrategy = traversalStrategy;
 
-        [Conditional("TEST_DUMP")]
-        public static void WriteLine(string value)
-        {
-            WriteLine((object)value);
-        }
+            if (emittingVisitorFactory == null)
+            {
+                throw new ArgumentNullException("emittingVisitorFactory");
+            }
 
-        [Conditional("TEST_DUMP")]
-        public static void WriteLine(object value)
-        {
-            WriteLine("{0}", value);
-        }
-
-        [Conditional("TEST_DUMP")]
-        public static void WriteLine(string format, params object[] args)
-        {
-            Debug.WriteLine(format, args);
+            EmittingVisitorFactory = emittingVisitorFactory;
         }
     }
 }

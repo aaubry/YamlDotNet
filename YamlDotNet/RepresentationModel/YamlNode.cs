@@ -95,7 +95,7 @@ namespace YamlDotNet.RepresentationModel
 
             if (parser.Accept<AnchorAlias>())
             {
-                AnchorAlias alias = parser.Expect<AnchorAlias>();
+                var alias = parser.Expect<AnchorAlias>();
                 return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
             }
 

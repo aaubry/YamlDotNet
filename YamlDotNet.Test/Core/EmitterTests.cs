@@ -54,11 +54,8 @@ namespace YamlDotNet.Test.Core
             var stream = Yaml.StreamFrom(filename);
 
             var originalEvents = ParsingEventsOf(stream.ReadToEnd());
-            originalEvents.Run(x => Dump.WriteLine(x));
             var emittedText = EmittedTextFrom(originalEvents);
-            Dump.WriteLine(emittedText);
             var emittedEvents = ParsingEventsOf(emittedText);
-            emittedEvents.Run(x => Dump.WriteLine(x));
 
             emittedEvents.ShouldAllBeEquivalentTo(originalEvents,
                 opt => opt.Excluding(@event => @event.Start)
@@ -101,7 +98,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(Lines("test", "...", "%YAML 1.1", "--- test"));
         }
 
@@ -114,7 +110,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(Lines("test", "--- test"));
         }
 
@@ -127,7 +122,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(Lines("test", "...", FooTag, ExTag, ExExTag, "--- test"));
         }
 
@@ -139,8 +133,6 @@ namespace YamlDotNet.Test.Core
                 DocumentWith(PlainScalar("test")));
 
             var yaml = EmittedTextFrom(events);
-
-            Dump.WriteLine(yaml);
 
             yaml.Should().Contain(Lines("- 'test'", "--- test"));
         }
@@ -154,7 +146,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(Lines("- 'test'", "...", "%YAML 1.1", "--- test"));
         }
 
@@ -167,7 +158,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(Lines("- 'test'", "--- test"));
         }
 
@@ -180,7 +170,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(Lines("- 'test'", "...", FooTag, ExTag, ExExTag, "--- test"));
         }
 
@@ -193,7 +182,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain("world");
         }
 
@@ -204,7 +192,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-            Dump.WriteLine(yaml);
             yaml.Should().Contain(">");
         }
 
@@ -221,7 +208,6 @@ namespace YamlDotNet.Test.Core
             var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
             var scalar = (YamlScalarNode)sequence.Children[0];
 
-            Dump.WriteLine(yaml);
             scalar.Value.Should().Be("hello\nworld");
         }
 
@@ -237,7 +223,6 @@ namespace YamlDotNet.Test.Core
             var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
             var scalar = (YamlScalarNode)sequence.Children[0];
 
-            Dump.WriteLine("${0}$", yaml);
             scalar.Value.Should().Be(">+\n");
         }
 
@@ -251,7 +236,6 @@ namespace YamlDotNet.Test.Core
                 FoldedScalar(input));
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
-            Dump.WriteLine(yaml);
 
             var stream = new YamlStream();
             stream.Load(new StringReader(yaml));
@@ -259,7 +243,6 @@ namespace YamlDotNet.Test.Core
             var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
             var value = (YamlScalarNode)mapping.Children.First().Value;
 
-            Dump.WriteLine(value.Value);
             value.Value.Should().Be(input);
         }
 
@@ -278,7 +261,6 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-            Dump.WriteLine("${0}$", yaml);
             yaml.Should()
                 .Contain("# Top comment")
                 .And.Contain("# Second line")
@@ -362,8 +344,8 @@ namespace YamlDotNet.Test.Core
         {
             var events = StreamOf(DocumentWith(new Scalar(input)));
             var yaml = EmittedTextFrom(events);
-            
-            string expected = string.Format("\"{0}\"", input);
+
+            var expected = string.Format("\"{0}\"", input);
 
             yaml.Should().Contain(expected);
         }

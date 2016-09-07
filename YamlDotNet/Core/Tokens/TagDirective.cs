@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -69,7 +69,7 @@ namespace YamlDotNet.Core.Tokens
         }
 
         private static readonly Regex tagHandleValidator = new Regex(@"^!([0-9A-Za-z_\-]*!)?$", StandardRegexOptions.Compiled);
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TagDirective"/> class.
         /// </summary>
@@ -80,20 +80,23 @@ namespace YamlDotNet.Core.Tokens
         public TagDirective(string handle, string prefix, Mark start, Mark end)
             : base(start, end)
         {
-            if(string.IsNullOrEmpty(handle)) {
+            if (string.IsNullOrEmpty(handle))
+            {
                 throw new ArgumentNullException("handle", "Tag handle must not be empty.");
             }
-            
-            if(!tagHandleValidator.IsMatch(handle)) {
+
+            if (!tagHandleValidator.IsMatch(handle))
+            {
                 throw new ArgumentException("Tag handle must start and end with '!' and contain alphanumerical characters only.", "handle");
             }
-            
+
             this.handle = handle;
 
-            if(string.IsNullOrEmpty(prefix)) {
+            if (string.IsNullOrEmpty(prefix))
+            {
                 throw new ArgumentNullException("prefix", "Tag prefix must not be empty.");
             }
-            
+
             this.prefix = prefix;
         }
 
@@ -106,7 +109,7 @@ namespace YamlDotNet.Core.Tokens
         /// </returns>
         public override bool Equals(object obj)
         {
-            TagDirective other = obj as TagDirective;
+            var other = obj as TagDirective;
             return other != null && handle.Equals(other.handle) && prefix.Equals(other.prefix);
         }
 

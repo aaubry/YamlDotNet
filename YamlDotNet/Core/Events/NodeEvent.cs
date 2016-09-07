@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -63,7 +63,8 @@ namespace YamlDotNet.Core.Events
         /// Gets a value indicating whether this instance is canonical.
         /// </summary>
         /// <value></value>
-        public abstract bool IsCanonical {
+        public abstract bool IsCanonical
+        {
             get;
         }
 
@@ -77,20 +78,24 @@ namespace YamlDotNet.Core.Events
         protected NodeEvent(string anchor, string tag, Mark start, Mark end)
             : base(start, end)
         {
-            if(anchor != null) {
-                if(anchor.Length == 0) {
+            if (anchor != null)
+            {
+                if (anchor.Length == 0)
+                {
                     throw new ArgumentException("Anchor value must not be empty.", "anchor");
                 }
 
-                if(!anchorValidator.IsMatch(anchor)) {
+                if (!anchorValidator.IsMatch(anchor))
+                {
                     throw new ArgumentException("Anchor value must contain alphanumerical characters only.", "anchor");
                 }
             }
-                
-            if(tag != null && tag.Length == 0) {
+
+            if (tag != null && tag.Length == 0)
+            {
                 throw new ArgumentException("Tag value must not be empty.", "tag");
             }
-            
+
             this.anchor = anchor;
             this.tag = tag;
         }

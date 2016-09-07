@@ -36,9 +36,9 @@ namespace YamlDotNet.Serialization.TypeInspectors
             var candidates = GetProperties(type, container)
                 .Where(p => p.Name == name);
 
-            using(var enumerator = candidates.GetEnumerator())
+            using (var enumerator = candidates.GetEnumerator())
             {
-                if(!enumerator.MoveNext())
+                if (!enumerator.MoveNext())
                 {
                     if (ignoreUnmatched)
                     {
@@ -54,10 +54,10 @@ namespace YamlDotNet.Serialization.TypeInspectors
                         )
                     );
                 }
-                
+
                 var property = enumerator.Current;
-                
-                if(enumerator.MoveNext())
+
+                if (enumerator.MoveNext())
                 {
                     throw new SerializationException(
                         string.Format(

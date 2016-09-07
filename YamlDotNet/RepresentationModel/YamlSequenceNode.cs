@@ -8,10 +8,10 @@
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -68,14 +68,14 @@ namespace YamlDotNet.RepresentationModel
 
         private void Load(IParser parser, DocumentLoadingState state)
         {
-            SequenceStart sequence = parser.Expect<SequenceStart>();
-            base.Load(sequence, state);
+            var sequence = parser.Expect<SequenceStart>();
+            Load(sequence, state);
             Style = sequence.Style;
 
             bool hasUnresolvedAliases = false;
             while (!parser.Accept<SequenceEnd>())
             {
-                YamlNode child = ParseNode(parser, state);
+                var child = ParseNode(parser, state);
                 children.Add(child);
                 hasUnresolvedAliases |= child is YamlAliasNode;
             }
@@ -186,17 +186,17 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary />
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            var obj = other as YamlSequenceNode;
-            if (obj == null || !Equals(obj) || children.Count != obj.children.Count)
+            var other = obj as YamlSequenceNode;
+            if (other == null || !Equals(other) || children.Count != other.children.Count)
             {
                 return false;
             }
 
             for (int i = 0; i < children.Count; ++i)
             {
-                if (!SafeEquals(children[i], obj.children[i]))
+                if (!SafeEquals(children[i], other.children[i]))
                 {
                     return false;
                 }
@@ -260,7 +260,7 @@ namespace YamlDotNet.RepresentationModel
 
             foreach (var child in children)
             {
-                if(text.Length > 2)
+                if (text.Length > 2)
                 {
                     text.Append(", ");
                 }

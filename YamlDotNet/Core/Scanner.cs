@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -56,15 +56,15 @@ namespace YamlDotNet.Core
             { 'N', '\x85' },
             { '_', '\xA0' },
             { 'L', '\x2028' },
-            { 'P', '\x2029' },
+            { 'P', '\x2029' }
         };
 
         private readonly Stack<int> indents = new Stack<int>();
         private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
         private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
         private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
-        
-        private Cursor cursor;
+
+        private readonly Cursor cursor;
         private bool streamStartProduced;
         private bool streamEndProduced;
         private int indent = -1;
@@ -151,7 +151,7 @@ namespace YamlDotNet.Core
 
         private char ReadCurrentCharacter()
         {
-            char currentCharacter = analyzer.Peek(0);
+            var currentCharacter = analyzer.Peek(0);
             Skip();
             return currentCharacter;
         }
@@ -164,7 +164,7 @@ namespace YamlDotNet.Core
                 return '\n';
             }
 
-            char nextChar = analyzer.Peek(0); // LS|PS -> LS|PS
+            var nextChar = analyzer.Peek(0); // LS|PS -> LS|PS
             SkipLine();
             return nextChar;
         }
@@ -191,7 +191,7 @@ namespace YamlDotNet.Core
 
                     StaleSimpleKeys();
 
-                    foreach(var simpleKey in simpleKeys)
+                    foreach (var simpleKey in simpleKeys)
                     {
                         if (simpleKey.IsPossible && simpleKey.TokenNumber == tokensParsed)
                         {
@@ -228,7 +228,7 @@ namespace YamlDotNet.Core
         {
             // Check for a potential simple key for each flow level.
 
-            foreach(var key in simpleKeys)
+            foreach (var key in simpleKeys)
             {
 
                 // The specification requires that a simple key
@@ -536,7 +536,7 @@ namespace YamlDotNet.Core
         {
             // Until the next token is not find.
 
-            for (; ;)
+            for (;;)
             {
 
                 // Eat whitespaces.
@@ -697,7 +697,7 @@ namespace YamlDotNet.Core
 
             // Create the YAML-DIRECTIVE or TAG-DIRECTIVE token.
 
-            Token token = ScanDirective();
+            var token = ScanDirective();
 
             // Append the token to the queue.
 
@@ -717,13 +717,13 @@ namespace YamlDotNet.Core
         {
             // Eat '%'.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
 
             Skip();
 
             // Scan the directive name.
 
-            string name = ScanDirectiveName(start);
+            var name = ScanDirectiveName(start);
 
             // Is it a YAML directive?
 
@@ -786,7 +786,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
 
             Skip();
             Skip();
@@ -816,7 +816,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
             Skip();
 
             // Create the FLOW-SEQUENCE-START of FLOW-MAPPING-START token.
@@ -869,7 +869,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
             Skip();
 
             Token token;
@@ -915,7 +915,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
             Skip();
 
             // Create the FLOW-ENTRY token and append it to the queue.
@@ -963,7 +963,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
             Skip();
 
             // Create the BLOCK-ENTRY token and append it to the queue.
@@ -1004,7 +1004,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
             Skip();
 
             // Create the KEY token and append it to the queue.
@@ -1018,7 +1018,7 @@ namespace YamlDotNet.Core
 
         private void FetchValue()
         {
-            SimpleKey simpleKey = simpleKeys.Peek();
+            var simpleKey = simpleKeys.Peek();
 
             // Have we find a simple key?
 
@@ -1068,7 +1068,7 @@ namespace YamlDotNet.Core
 
             // Consume the token.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
             Skip();
 
             // Create the VALUE token and append it to the queue.
@@ -1147,13 +1147,13 @@ namespace YamlDotNet.Core
         {
             // Eat the indicator character.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
 
             Skip();
 
             // Consume the value.
 
-            StringBuilder value = new StringBuilder();
+            var value = new StringBuilder();
             while (analyzer.IsAlphaNumericDashOrUnderscore())
             {
                 value.Append(ReadCurrentCharacter());
@@ -1208,7 +1208,7 @@ namespace YamlDotNet.Core
 
         Token ScanTag()
         {
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
 
             // Check if the tag is in the canonical form.
 
@@ -1245,7 +1245,7 @@ namespace YamlDotNet.Core
 
                 // First, try to scan a handle.
 
-                string firstPart = ScanTagHandle(false, start);
+                var firstPart = ScanTagHandle(false, start);
 
                 // Check if it is, indeed, handle.
 
@@ -1317,9 +1317,9 @@ namespace YamlDotNet.Core
 
         Token ScanBlockScalar(bool isLiteral)
         {
-            StringBuilder value = new StringBuilder();
-            StringBuilder leadingBreak = new StringBuilder();
-            StringBuilder trailingBreaks = new StringBuilder();
+            var value = new StringBuilder();
+            var leadingBreak = new StringBuilder();
+            var trailingBreaks = new StringBuilder();
 
             int chomping = 0;
             int increment = 0;
@@ -1328,7 +1328,7 @@ namespace YamlDotNet.Core
 
             // Eat the indicator '|' or '>'.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
 
             Skip();
 
@@ -1338,7 +1338,7 @@ namespace YamlDotNet.Core
             {
                 // Set the chomping method and eat the indicator.
 
-                chomping = analyzer.Check('+') ? + 1 : -1;
+                chomping = analyzer.Check('+') ? +1 : -1;
 
                 Skip();
 
@@ -1376,7 +1376,7 @@ namespace YamlDotNet.Core
 
                 if (analyzer.Check("+-"))
                 {
-                    chomping = analyzer.Check('+') ? + 1 : -1;
+                    chomping = analyzer.Check('+') ? +1 : -1;
 
                     Skip();
                 }
@@ -1405,7 +1405,7 @@ namespace YamlDotNet.Core
                 SkipLine();
             }
 
-            Mark end = cursor.Mark();
+            var end = cursor.Mark();
 
             // Set the intendation level if it was specified.
 
@@ -1428,7 +1428,7 @@ namespace YamlDotNet.Core
 
                 // Is it a trailing whitespace?
 
-                bool trailingBlank = analyzer.IsWhite();
+                var trailingBlank = analyzer.IsWhite();
 
                 // Check if we need to fold the leading line break.
 
@@ -1507,7 +1507,7 @@ namespace YamlDotNet.Core
 
             // Eat the intendation spaces and line breaks.
 
-            for (; ;)
+            for (;;)
             {
                 // Eat the intendation spaces.
 
@@ -1579,17 +1579,17 @@ namespace YamlDotNet.Core
         {
             // Eat the left quote.
 
-            Mark start = cursor.Mark();
+            var start = cursor.Mark();
 
             Skip();
 
             // Consume the content of the quoted scalar.
 
-            StringBuilder value = new StringBuilder();
-            StringBuilder whitespaces = new StringBuilder();
-            StringBuilder leadingBreak = new StringBuilder();
-            StringBuilder trailingBreaks = new StringBuilder();
-            for (; ;)
+            var value = new StringBuilder();
+            var whitespaces = new StringBuilder();
+            var leadingBreak = new StringBuilder();
+            var trailingBreaks = new StringBuilder();
+            for (;;)
             {
                 // Check that there are no document indicators at the beginning of the line.
 
@@ -1645,7 +1645,7 @@ namespace YamlDotNet.Core
 
                         // Check the escape character.
 
-                        char escapeCharacter = analyzer.Peek(1);
+                        var escapeCharacter = analyzer.Peek(1);
                         switch (escapeCharacter)
                         {
                             case 'x':
@@ -1821,20 +1821,20 @@ namespace YamlDotNet.Core
 
         private Token ScanPlainScalar()
         {
-            StringBuilder value = new StringBuilder();
-            StringBuilder whitespaces = new StringBuilder();
-            StringBuilder leadingBreak = new StringBuilder();
-            StringBuilder trailingBreaks = new StringBuilder();
+            var value = new StringBuilder();
+            var whitespaces = new StringBuilder();
+            var leadingBreak = new StringBuilder();
+            var trailingBreaks = new StringBuilder();
 
             bool hasLeadingBlanks = false;
             int currentIndent = indent + 1;
 
-            Mark start = cursor.Mark();
-            Mark end = start;
+            var start = cursor.Mark();
+            var end = start;
 
             // Consume the content of the plain scalar.
 
-            for (; ;)
+            for (;;)
             {
                 // Check for a document indicator.
 
@@ -1986,7 +1986,7 @@ namespace YamlDotNet.Core
 
         private void RemoveSimpleKey()
         {
-            SimpleKey key = simpleKeys.Peek();
+            var key = simpleKeys.Peek();
 
             if (key.IsPossible && key.IsRequired)
             {
@@ -2011,7 +2011,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private string ScanDirectiveName(Mark start)
         {
-            StringBuilder name = new StringBuilder();
+            var name = new StringBuilder();
 
             // Consume the directive name.
 
@@ -2060,7 +2060,7 @@ namespace YamlDotNet.Core
 
             // Consume the major version number.
 
-            int major = ScanVersionDirectiveNumber(start);
+            var major = ScanVersionDirectiveNumber(start);
 
             // Eat '.'.
 
@@ -2073,7 +2073,7 @@ namespace YamlDotNet.Core
 
             // Consume the minor version number.
 
-            int minor = ScanVersionDirectiveNumber(start);
+            var minor = ScanVersionDirectiveNumber(start);
 
             return new VersionDirective(new Version(major, minor), start, start);
         }
@@ -2091,7 +2091,7 @@ namespace YamlDotNet.Core
 
             // Scan a handle.
 
-            string handle = ScanTagHandle(true, start);
+            var handle = ScanTagHandle(true, start);
 
             // Expect a whitespace.
 
@@ -2104,7 +2104,7 @@ namespace YamlDotNet.Core
 
             // Scan a prefix.
 
-            string prefix = ScanTagUri(null, start);
+            var prefix = ScanTagUri(null, start);
 
             // Expect a whitespace or line break.
 
@@ -2122,7 +2122,7 @@ namespace YamlDotNet.Core
 
         private string ScanTagUri(string head, Mark start)
         {
-            StringBuilder tag = new StringBuilder();
+            var tag = new StringBuilder();
             if (head != null && head.Length > 1)
             {
                 tag.Append(head.Substring(1));
@@ -2169,7 +2169,7 @@ namespace YamlDotNet.Core
         {
             // Decode the required number of characters.
 
-            List<byte> charBytes = new List<byte>();
+            var charBytes = new List<byte>();
             int width = 0;
             do
             {
@@ -2218,7 +2218,7 @@ namespace YamlDotNet.Core
             }
             while (--width > 0);
 
-            char[] characters = Encoding.UTF8.GetChars(charBytes.ToArray());
+            var characters = Encoding.UTF8.GetChars(charBytes.ToArray());
 
             if (characters.Length != 1)
             {
@@ -2244,7 +2244,7 @@ namespace YamlDotNet.Core
 
             // Copy the '!' character.
 
-            StringBuilder tagHandle = new StringBuilder();
+            var tagHandle = new StringBuilder();
             tagHandle.Append(ReadCurrentCharacter());
 
             // Copy all subsequent alphabetical and numerical characters.

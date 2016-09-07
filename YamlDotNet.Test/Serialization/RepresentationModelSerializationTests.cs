@@ -26,7 +26,8 @@ namespace YamlDotNet.Test.Serialization
             Assert.NotNull(node);
             Assert.Equal(expectedValue, node.Value);
 
-            var serializer = new Serializer();
+            var serializer = new SerializerBuilder()
+                .Build();
             var buffer = new StringWriter();
             serializer.Serialize(buffer, node);
             Assert.Equal(yaml, buffer.ToString().TrimEnd('\r', '\n', '.'));
@@ -48,7 +49,8 @@ namespace YamlDotNet.Test.Serialization
                 Assert.Equal(expectedValues[i], ((YamlScalarNode)node.Children[i]).Value);
             }
 
-            var serializer = new Serializer();
+            var serializer = new SerializerBuilder()
+                .Build();
             var buffer = new StringWriter();
             serializer.Serialize(buffer, node);
             Assert.Equal(yaml, buffer.ToString().TrimEnd('\r', '\n', '.'));
@@ -70,7 +72,8 @@ namespace YamlDotNet.Test.Serialization
                 Assert.Equal(expectedKeysAndValues[i + 1], ((YamlScalarNode)node.Children[expectedKeysAndValues[i]]).Value);
             }
 
-            var serializer = new Serializer();
+            var serializer = new SerializerBuilder()
+                .Build();
             var buffer = new StringWriter();
             serializer.Serialize(buffer, node);
             Assert.Equal(yaml, buffer.ToString().TrimEnd('\r', '\n', '.'));

@@ -32,12 +32,8 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
             {
                 // If type could not be loaded, make sure to pass resolving
                 // to the next resolver
-                try
-                {
-                    currentType = Type.GetType(nodeEvent.Tag.Substring(1), true);
-                    return true;
-                }
-                catch { }
+                currentType = Type.GetType(nodeEvent.Tag.Substring(1), throwOnError: false);
+                return currentType != null;
             }
             return false;
         }

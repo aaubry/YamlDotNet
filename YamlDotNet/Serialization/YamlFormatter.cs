@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization
             NumberDecimalDigits = 99,
             NaNSymbol = ".nan",
             PositiveInfinitySymbol = ".inf",
-            NegativeInfinitySymbol = "-.inf",
+            NegativeInfinitySymbol = "-.inf"
         };
 
         public static string FormatNumber(object number)

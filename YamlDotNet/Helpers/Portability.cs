@@ -85,6 +85,11 @@ namespace YamlDotNet
 
     internal static class ReflectionExtensions
     {
+        public static Type BaseType(this Type type)
+        {
+            return type.GetTypeInfo().BaseType;
+        }
+
         public static bool IsValueType(this Type type)
         {
             return type.GetTypeInfo().IsValueType;
@@ -323,6 +328,11 @@ namespace YamlDotNet
 
     internal static class ReflectionExtensions
     {
+        public static Type BaseType(this Type type)
+        {
+            return type.BaseType;
+        }
+
         public static bool IsValueType(this Type type)
         {
             return type.IsValueType;
@@ -359,12 +369,12 @@ namespace YamlDotNet
         {
             return Type.GetTypeCode(type);
         }
-  
+
         public static PropertyInfo GetPublicProperty(this Type type, string name)
         {
             return type.GetProperty(name);
         }
- 
+
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
             var instancePublic = BindingFlags.Instance | BindingFlags.Public;
@@ -402,10 +412,10 @@ namespace YamlDotNet
             }
             return result;
         }
-        
+
         public static bool IsInstanceOf(this Type type, object o)
         {
-        	return type.IsInstanceOfType(o);
+            return type.IsInstanceOfType(o);
         }
     }
 

@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 
             this.tagMappings = tagMappings;
         }
-        
+
         bool INodeTypeResolver.Resolve(NodeEvent nodeEvent, ref Type currentType)
         {
             Type predefinedType;

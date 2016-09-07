@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -58,7 +58,7 @@ namespace YamlDotNet.RepresentationModel
         {
             throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be saved.");
         }
-        
+
         /// <summary>
         /// Accepts the specified visitor by calling the appropriate Visit method on it.
         /// </summary>
@@ -69,14 +69,14 @@ namespace YamlDotNet.RepresentationModel
         {
             throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be visited.");
         }
-        
+
         /// <summary />
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            var obj = other as YamlAliasNode;
-            return obj != null && Equals(obj) && SafeEquals(Anchor, obj.Anchor);
+            var other = obj as YamlAliasNode;
+            return other != null && Equals(other) && SafeEquals(Anchor, other.Anchor);
         }
-        
+
         /// <summary>
         /// Serves as a hash function for a particular type.
         /// </summary>

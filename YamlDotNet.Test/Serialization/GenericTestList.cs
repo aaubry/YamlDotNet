@@ -25,7 +25,7 @@ using System.Collections.Generic;
 namespace YamlDotNet.Test.Serialization
 {
     /// <summary>
-    /// Test List that implements IList<>, but not IList
+    /// Test List that implements <see cref="IList{T}" />, but not <see cref="IList" />.
     /// </summary>
     public class GenericTestList<T> : IList<T>
     {
