@@ -42,14 +42,18 @@ namespace YamlDotNet.AotTest
         private static void TrySerialize<T>(string testName, T graph)
         {
             var output = new StringWriter();
-            var serializer = new Serializer(namingConvention: new CamelCaseNamingConvention());
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
             PerformTest(testName, () => serializer.Serialize(output, graph));
         }
 
         private static void TryDeserialize<T>(string testName, string yaml)
         {
             var input = new StringReader(yaml);
-            var deserializer = new Deserializer(namingConvention: new CamelCaseNamingConvention());
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
             PerformTest(testName, () => deserializer.Deserialize<T>(input));
         }
 
