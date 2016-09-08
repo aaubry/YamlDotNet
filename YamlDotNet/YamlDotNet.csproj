@@ -319,7 +319,6 @@
     <Compile Include="Serialization\Utilities\TypeConverter.cs" />
     <Compile Include="Serialization\ValueDeserializers\AliasValueDeserializer.cs" />
     <Compile Include="Serialization\ValueDeserializers\NodeValueDeserializer.cs" />
-    <Compile Include="Serialization\YamlAliasAttribute.cs" />
     <Compile Include="Serialization\YamlAttributeOverrides.cs" />
     <Compile Include="Serialization\YamlAttributeOverridesInspector.cs" />
     <Compile Include="Serialization\YamlAttributesTypeInspector.cs" />

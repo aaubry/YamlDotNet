@@ -45,15 +45,6 @@ namespace YamlDotNet.Serialization
                 .Select(p =>
                 {
                     var descriptor = new PropertyDescriptor(p);
-
-#pragma warning disable 0618 // 'YamlDotNet.Serialization.YamlAliasAttribute' is obsolete: 'Please use YamlMember instead'
-                    var alias = p.GetCustomAttribute<YamlAliasAttribute>();
-                    if (alias != null)
-                    {
-                        descriptor.Name = alias.Alias;
-                    }
-#pragma warning restore 0618 // 'YamlDotNet.Serialization.YamlAliasAttribute' is obsolete: 'Please use YamlMember instead'
-
                     var member = p.GetCustomAttribute<YamlMemberAttribute>();
                     if (member != null)
                     {
@@ -67,10 +58,6 @@ namespace YamlDotNet.Serialization
 
                         if (member.Alias != null)
                         {
-                            if (alias != null)
-                            {
-                                throw new InvalidOperationException("Mixing YamlAlias(...) with YamlMember(Alias = ...) is an error. The YamlAlias attribute is obsolete and should be removed.");
-                            }
                             descriptor.Name = member.Alias;
                         }
                     }
