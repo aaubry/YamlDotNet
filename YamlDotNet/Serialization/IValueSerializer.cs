@@ -1,5 +1,5 @@
 ﻿// This file is part of YamlDotNet - A .NET library for YAML.
-// Copyright (c) Antoine Aubry
+// Copyright (c) Antoine Aubry and contributors
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,10 @@
 using System;
 using YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization
 {
-    public sealed class YamlConvertibleNodeDeserializer : INodeDeserializer
+    public interface IValueSerializer
     {
-        private readonly IObjectFactory objectFactory;
-
-        public YamlConvertibleNodeDeserializer(IObjectFactory objectFactory)
-        {
-            this.objectFactory = objectFactory;
-        }
-
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
-        {
-            if (typeof(IYamlConvertible).IsAssignableFrom(expectedType))
-            {
-                var convertible = (IYamlConvertible)objectFactory.Create(expectedType);
-                convertible.Read(parser, expectedType, type => nestedObjectDeserializer(parser, type));
-                value = convertible;
-                return true;
-            }
-
-            value = null;
-            return false;
-        }
+        void SerializeValue(IEmitter emitter, object value, Type type);
     }
 }

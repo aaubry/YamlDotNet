@@ -32,11 +32,36 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Reads this object's state from a YAML parser.
         /// </summary>
-        void Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer);
+        /// <param name="parser">The parser where the object's state should be read from.</param>
+        /// <param name="expectedType">The type that the deserializer is expecting.</param>
+        /// <param name="nestedObjectDeserializer">
+        /// A function that will use the current deserializer
+        /// to read an object of the given type from the parser.
+        /// </param>
+        void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer);
 
         /// <summary>
         /// Writes this object's state to a YAML emitter.
         /// </summary>
-        void Write(IEmitter emitter);
+        /// <param name="emitter">The emitter where the object's state should be written to.</param>
+        /// <param name="nestedObjectSerializer">A function that will use the current serializer to write an object to the emitter.</param>
+        void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer);
     }
+
+    /// <summary>
+    /// Represents a function that is used to deserialize an object of the given type.
+    /// </summary>
+    /// <param name="type">The type that the deserializer should read.</param>
+    /// <returns>Returns the object that was deserialized.</returns>
+    public delegate object ObjectDeserializer(Type type);
+
+    /// <summary>
+    /// Represents a function that is used to serialize an object of the given type.
+    /// </summary>
+    /// <param name="value">The object to be serialized.</param>
+    /// <param name="type">
+    /// The type that should be considered when emitting the object.
+    /// If null, the actual type of the <paramref name="value" /> is used.
+    /// </param>
+    public delegate void ObjectSerializer(object value, Type type = null);
 }

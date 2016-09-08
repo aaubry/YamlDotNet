@@ -36,11 +36,10 @@ namespace YamlDotNet.Serialization
 {
     public sealed class Serializer
     {
-        private readonly IObjectGraphTraversalStrategy traversalStrategy;
-        private readonly Func<IEmitter, IObjectDescriptor, IObjectGraphVisitor> emittingVisitorFactory;
+        private readonly IValueSerializer valueSerializer;
 
         #region Backwards compatibility
-        private class BackwardsCompatibleConfiguration
+        private class BackwardsCompatibleConfiguration : IValueSerializer
         {
             public IList<IYamlTypeConverter> Converters { get; private set; }
             private readonly SerializationOptions options;
@@ -67,16 +66,18 @@ namespace YamlDotNet.Serialization
                 return (options & option) != 0;
             }
 
-            private IObjectGraphVisitor CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
+            private IObjectGraphVisitor<IEmitter> CreateEmittingVisitor(IEmitter emitter, IObjectGraphTraversalStrategy traversalStrategy, IEventEmitter eventEmitter, IObjectDescriptor graph)
             {
-                IObjectGraphVisitor emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
+                IObjectGraphVisitor<IEmitter> emittingVisitor = new EmittingObjectGraphVisitor(eventEmitter);
 
-                emittingVisitor = new CustomSerializationObjectGraphVisitor(emitter, emittingVisitor, Converters);
+                ObjectSerializer nestedObjectSerializer = (v, t) => SerializeValue(emitter, v, t);
+
+                emittingVisitor = new CustomSerializationObjectGraphVisitor(emittingVisitor, Converters, nestedObjectSerializer);
 
                 if (!IsOptionSet(SerializationOptions.DisableAliases))
                 {
                     var anchorAssigner = new AnchorAssigner();
-                    traversalStrategy.Traverse(graph, anchorAssigner);
+                    traversalStrategy.Traverse<Nothing>(graph, anchorAssigner, null);
 
                     emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);
                 }
@@ -89,9 +90,9 @@ namespace YamlDotNet.Serialization
                 return emittingVisitor;
             }
 
-            private IEventEmitter CreateEventEmitter(IEmitter emitter)
+            private IEventEmitter CreateEventEmitter()
             {
-                var writer = new WriterEventEmitter(emitter);
+                var writer = new WriterEventEmitter();
 
                 if (IsOptionSet(SerializationOptions.JsonCompatible))
                 {
@@ -130,23 +131,21 @@ namespace YamlDotNet.Serialization
                 }
             }
 
-            public void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
+            public void SerializeValue(IEmitter emitter, object value, Type type)
             {
+                var graph = type != null
+                    ? new ObjectDescriptor(value, type, type)
+                    : new ObjectDescriptor(value, value != null ? value.GetType() : typeof(object), typeof(object));
+
                 var traversalStrategy = CreateTraversalStrategy();
                 var emittingVisitor = CreateEmittingVisitor(
                     emitter,
                     traversalStrategy,
-                    CreateEventEmitter(emitter),
+                    CreateEventEmitter(),
                     graph
                 );
 
-                emitter.Emit(new StreamStart());
-                emitter.Emit(new DocumentStart());
-
-                traversalStrategy.Traverse(graph, emittingVisitor);
-
-                emitter.Emit(new DocumentEnd(true));
-                emitter.Emit(new StreamEnd());
+                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
             }
         }
 
@@ -198,27 +197,26 @@ namespace YamlDotNet.Serialization
 
         /// <remarks>
         /// This constructor is private to discourage its use.
-        /// To invoke it, call the <see cref="FromSerializerParams"/> method.
+        /// To invoke it, call the <see cref="FromValueSerializer"/> method.
         /// </remarks>
-        private Serializer(SerializerParams serializerParams)
+        private Serializer(IValueSerializer valueSerializer)
         {
-            if (serializerParams == null)
+            if (valueSerializer == null)
             {
-                throw new ArgumentNullException("serializerParams");
+                throw new ArgumentNullException("valueSerializer");
             }
 
-            this.traversalStrategy = serializerParams.TraversalStrategy;
-            this.emittingVisitorFactory = serializerParams.EmittingVisitorFactory;
+            this.valueSerializer = valueSerializer;
         }
 
         /// <summary>
-        /// Creates a new <see cref="Serializer" /> that uses the specified <see cref="IValueDeserializer" />.
+        /// Creates a new <see cref="Serializer" /> that uses the specified <see cref="IValueSerializer" />.
         /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
         /// deserializer is to use <see cref="SerializerBuilder" />.
         /// </summary>
-        public static Serializer FromSerializerParams(SerializerParams serializerParams)
+        public static Serializer FromValueSerializer(IValueSerializer valueSerializer)
         {
-            return new Serializer(serializerParams);
+            return new Serializer(valueSerializer);
         }
 
         /// <summary>
@@ -267,7 +265,7 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException("emitter");
             }
 
-            EmitDocument(emitter, new ObjectDescriptor(graph, graph != null ? graph.GetType() : typeof(object), typeof(object)));
+            EmitDocument(emitter, graph, null);
         }
 
         /// <summary>
@@ -288,23 +286,16 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException("type");
             }
 
-            EmitDocument(emitter, new ObjectDescriptor(graph, type, type));
+            EmitDocument(emitter, graph, type);
         }
 
-        private void EmitDocument(IEmitter emitter, IObjectDescriptor graph)
+        private void EmitDocument(IEmitter emitter, object graph, Type type)
         {
-            if (backwardsCompatibleConfiguration != null)
-            {
-                backwardsCompatibleConfiguration.EmitDocument(emitter, graph);
-                return;
-            }
-
-            var emittingVisitor = emittingVisitorFactory(emitter, graph);
-
             emitter.Emit(new StreamStart());
             emitter.Emit(new DocumentStart());
 
-            traversalStrategy.Traverse(graph, emittingVisitor);
+            IValueSerializer actualValueSerializer = backwardsCompatibleConfiguration ?? valueSerializer;
+            actualValueSerializer.SerializeValue(emitter, graph, type);
 
             emitter.Emit(new DocumentEnd(true));
             emitter.Emit(new StreamEnd());

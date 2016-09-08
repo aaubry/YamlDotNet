@@ -30,6 +30,16 @@ namespace YamlDotNet.Serialization
     {
         private readonly List<LazyComponentRegistration> entries = new List<LazyComponentRegistration>();
 
+        public LazyComponentRegistrationList<TArgument, TComponent> Clone()
+        {
+            var clone = new LazyComponentRegistrationList<TArgument, TComponent>();
+            foreach (var entry in entries)
+            {
+                clone.entries.Add(entry);
+            }
+            return clone;
+        }
+
         public sealed class LazyComponentRegistration
         {
             public readonly Type ComponentType;

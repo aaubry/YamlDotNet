@@ -291,12 +291,12 @@ namespace YamlDotNet.RepresentationModel
 
         #endregion
 
-        void IYamlConvertible.Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer)
+        void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
         {
             Load(parser, new DocumentLoadingState());
         }
 
-        void IYamlConvertible.Write(IEmitter emitter)
+        void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
         {
             Emit(emitter, new EmitterState());
         }

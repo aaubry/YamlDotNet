@@ -27,31 +27,32 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
     public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
     {
-        private readonly IEmitter emitter;
         private readonly IEnumerable<IYamlTypeConverter> typeConverters;
+        private readonly ObjectSerializer nestedObjectSerializer;
 
-        public CustomSerializationObjectGraphVisitor(IEmitter emitter, IObjectGraphVisitor nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters)
+        public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
             : base(nextVisitor)
         {
-            this.emitter = emitter;
             this.typeConverters = typeConverters != null
                 ? typeConverters.ToList()
                 : Enumerable.Empty<IYamlTypeConverter>();
+
+            this.nestedObjectSerializer = nestedObjectSerializer;
         }
 
-        public override bool Enter(IObjectDescriptor value)
+        public override bool Enter(IObjectDescriptor value, IEmitter context)
         {
             var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
             if (typeConverter != null)
             {
-                typeConverter.WriteYaml(emitter, value.Value, value.Type);
+                typeConverter.WriteYaml(context, value.Value, value.Type);
                 return false;
             }
 
             var convertible = value.Value as IYamlConvertible;
             if (convertible != null)
             {
-                convertible.Write(emitter);
+                convertible.Write(context, nestedObjectSerializer);
                 return false;
             }
 
@@ -59,12 +60,12 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             var serializable = value.Value as IYamlSerializable;
             if (serializable != null)
             {
-                serializable.WriteYaml(emitter);
+                serializable.WriteYaml(context);
                 return false;
             }
 #pragma warning restore
 
-            return base.Enter(value);
+            return base.Enter(value, context);
         }
     }
 }

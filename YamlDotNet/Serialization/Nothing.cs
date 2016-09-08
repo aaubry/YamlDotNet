@@ -25,7 +25,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// An empty type for cases where a type needs to be provided but won't be used.
     /// </summary>
-    internal sealed class Nothing
+    public sealed class Nothing
     {
         private Nothing() { }
     }

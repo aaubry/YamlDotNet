@@ -19,6 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using YamlDotNet.Core;
+
 namespace YamlDotNet.Serialization
 {
     /// <summary>
@@ -30,7 +32,8 @@ namespace YamlDotNet.Serialization
         /// Traverses the specified object graph.
         /// </summary>
         /// <param name="graph">The graph.</param>
-        /// <param name="visitor">An <see cref="IObjectGraphVisitor"/> that is to be notified during the traversal.</param>
-        void Traverse(IObjectDescriptor graph, IObjectGraphVisitor visitor);
+        /// <param name="visitor">An <see cref="IObjectGraphVisitor{TContext}"/> that is to be notified during the traversal.</param>
+        /// <param name="context">A <typeparamref name="TContext" /> that will be passed to the <paramref name="visitor" />.</param>
+        void Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context);
     }
 }

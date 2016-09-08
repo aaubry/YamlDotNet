@@ -24,7 +24,7 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor
+    public sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
     {
         private readonly IEventEmitter eventEmitter;
 
@@ -33,44 +33,44 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.eventEmitter = eventEmitter;
         }
 
-        bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
+        bool IObjectGraphVisitor<IEmitter>.Enter(IObjectDescriptor value, IEmitter context)
         {
             return true;
         }
 
-        bool IObjectGraphVisitor.EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
+        bool IObjectGraphVisitor<IEmitter>.EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
         {
             return true;
         }
 
-        bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+        bool IObjectGraphVisitor<IEmitter>.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {
             return true;
         }
 
-        void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar)
+        void IObjectGraphVisitor<IEmitter>.VisitScalar(IObjectDescriptor scalar, IEmitter context)
         {
-            eventEmitter.Emit(new ScalarEventInfo(scalar));
+            eventEmitter.Emit(new ScalarEventInfo(scalar), context);
         }
 
-        void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+        void IObjectGraphVisitor<IEmitter>.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context)
         {
-            eventEmitter.Emit(new MappingStartEventInfo(mapping));
+            eventEmitter.Emit(new MappingStartEventInfo(mapping), context);
         }
 
-        void IObjectGraphVisitor.VisitMappingEnd(IObjectDescriptor mapping)
+        void IObjectGraphVisitor<IEmitter>.VisitMappingEnd(IObjectDescriptor mapping, IEmitter context)
         {
-            eventEmitter.Emit(new MappingEndEventInfo(mapping));
+            eventEmitter.Emit(new MappingEndEventInfo(mapping), context);
         }
 
-        void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+        void IObjectGraphVisitor<IEmitter>.VisitSequenceStart(IObjectDescriptor sequence, Type elementType, IEmitter context)
         {
-            eventEmitter.Emit(new SequenceStartEventInfo(sequence));
+            eventEmitter.Emit(new SequenceStartEventInfo(sequence), context);
         }
 
-        void IObjectGraphVisitor.VisitSequenceEnd(IObjectDescriptor sequence)
+        void IObjectGraphVisitor<IEmitter>.VisitSequenceEnd(IObjectDescriptor sequence, IEmitter context)
         {
-            eventEmitter.Emit(new SequenceEndEventInfo(sequence));
+            eventEmitter.Emit(new SequenceEndEventInfo(sequence), context);
         }
     }
 }

@@ -33,12 +33,12 @@ namespace YamlDotNet.Serialization.EventEmitters
         {
         }
 
-        public override void Emit(AliasEventInfo eventInfo)
+        public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
         {
             throw new NotSupportedException("Aliases are not supported in JSON");
         }
 
-        public override void Emit(ScalarEventInfo eventInfo)
+        public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
         {
             eventInfo.IsPlainImplicit = true;
             eventInfo.Style = ScalarStyle.Plain;
@@ -91,21 +91,21 @@ namespace YamlDotNet.Serialization.EventEmitters
                     throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
             }
 
-            base.Emit(eventInfo);
+            base.Emit(eventInfo, emitter);
         }
 
-        public override void Emit(MappingStartEventInfo eventInfo)
+        public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
         {
             eventInfo.Style = MappingStyle.Flow;
 
-            base.Emit(eventInfo);
+            base.Emit(eventInfo, emitter);
         }
 
-        public override void Emit(SequenceStartEventInfo eventInfo)
+        public override void Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
         {
             eventInfo.Style = SequenceStyle.Flow;
 
-            base.Emit(eventInfo);
+            base.Emit(eventInfo, emitter);
         }
     }
 }

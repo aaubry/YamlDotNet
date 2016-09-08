@@ -31,21 +31,29 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Gets the next visitor that should be called by the current visitor.
         /// </summary>
-        public IObjectGraphVisitor InnerVisitor { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="IEmitter" /> that is to be used for serialization.
-        /// </summary>
-        public IEmitter Emitter { get; private set; }
+        public IObjectGraphVisitor<IEmitter> InnerVisitor { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="IEventEmitter" /> that is to be used for serialization.
         /// </summary>
         public IEventEmitter EventEmitter { get; private set; }
 
-        private readonly IEnumerable<IObjectGraphVisitor> preProcessingPhaseVisitors;
+        /// <summary>
+        /// Gets a function that, when called, serializes the specified object.
+        /// </summary>
+        public ObjectSerializer NestedObjectSerializer { get; private set; }
 
-        public EmissionPhaseObjectGraphVisitorArgs(IObjectGraphVisitor innerVisitor, IEmitter emitter, IEventEmitter eventEmitter, IEnumerable<IObjectGraphVisitor> preProcessingPhaseVisitors)
+        public IEnumerable<IYamlTypeConverter> TypeConverters { get; private set; }
+
+        private readonly IEnumerable<IObjectGraphVisitor<Nothing>> preProcessingPhaseVisitors;
+
+        public EmissionPhaseObjectGraphVisitorArgs(
+            IObjectGraphVisitor<IEmitter> innerVisitor,
+            IEventEmitter eventEmitter,
+            IEnumerable<IObjectGraphVisitor<Nothing>> preProcessingPhaseVisitors,
+            IEnumerable<IYamlTypeConverter> typeConverters,
+            ObjectSerializer nestedObjectSerializer
+        )
         {
             if (innerVisitor == null)
             {
@@ -53,13 +61,6 @@ namespace YamlDotNet.Serialization
             }
 
             InnerVisitor = innerVisitor;
-
-            if (emitter == null)
-            {
-                throw new ArgumentNullException("emitter");
-            }
-
-            Emitter = emitter;
 
             if (eventEmitter == null)
             {
@@ -74,6 +75,20 @@ namespace YamlDotNet.Serialization
             }
 
             this.preProcessingPhaseVisitors = preProcessingPhaseVisitors;
+
+            if (typeConverters == null)
+            {
+                throw new ArgumentNullException("typeConverters");
+            }
+
+            TypeConverters = typeConverters;
+
+            if (nestedObjectSerializer == null)
+            {
+                throw new ArgumentNullException("nestedObjectSerializer");
+            }
+
+            NestedObjectSerializer = nestedObjectSerializer;
         }
 
         /// <summary>
@@ -86,7 +101,7 @@ namespace YamlDotNet.Serialization
         /// or ore than one visitors registered are of type <typeparamref name="T"/>.
         /// </exception>
         public T GetPreProcessingPhaseObjectGraphVisitor<T>()
-            where T : IObjectGraphVisitor
+            where T : IObjectGraphVisitor<Nothing>
         {
             return preProcessingPhaseVisitors
                 .OfType<T>()

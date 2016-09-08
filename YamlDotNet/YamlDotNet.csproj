@@ -258,6 +258,7 @@
     <Compile Include="Serialization\ITypeResolver.cs" />
     <Compile Include="Serialization\IValueDeserializer.cs" />
     <Compile Include="Serialization\IValuePromise.cs" />
+    <Compile Include="Serialization\IValueSerializer.cs" />
     <Compile Include="Serialization\IYamlConvertible.cs" />
     <Compile Include="Serialization\IYamlSerializable.cs" />
     <Compile Include="Serialization\IYamlTypeConverter.cs" />
@@ -301,7 +302,6 @@
     <Compile Include="Serialization\SerializationOptions.cs" />
     <Compile Include="Serialization\Serializer.cs" />
     <Compile Include="Serialization\SerializerBuilder.cs" />
-    <Compile Include="Serialization\SerializerParams.cs" />
     <Compile Include="Serialization\StreamFragment.cs" />
     <Compile Include="Serialization\TagMappings.cs" />
     <Compile Include="Serialization\TypeInspectors\CachedTypeInspector.cs" />

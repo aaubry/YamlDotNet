@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             _assignTypeWhenDifferent = assignTypeWhenDifferent;
         }
 
-        public override void Emit(ScalarEventInfo eventInfo)
+        public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
         {
             var suggestedStyle = ScalarStyle.Plain;
 
@@ -110,19 +110,19 @@ namespace YamlDotNet.Serialization.EventEmitters
                 eventInfo.Style = suggestedStyle;
             }
 
-            base.Emit(eventInfo);
+            base.Emit(eventInfo, emitter);
         }
 
-        public override void Emit(MappingStartEventInfo eventInfo)
+        public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
         {
             AssignTypeIfDifferent(eventInfo);
-            base.Emit(eventInfo);
+            base.Emit(eventInfo, emitter);
         }
 
-        public override void Emit(SequenceStartEventInfo eventInfo)
+        public override void Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
         {
             AssignTypeIfDifferent(eventInfo);
-            base.Emit(eventInfo);
+            base.Emit(eventInfo, emitter);
         }
 
         private void AssignTypeIfDifferent(ObjectEventInfo eventInfo)

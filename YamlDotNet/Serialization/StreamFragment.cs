@@ -46,11 +46,11 @@ namespace YamlDotNet.Serialization
             }
         }
 
-        #region IYamlSerializable Members
+        #region IYamlConvertible Members
         /// <summary>
         /// Reads this object's state from a YAML parser.
         /// </summary>
-        void IYamlConvertible.Read(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer)
+        void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
         {
             events.Clear();
 
@@ -72,7 +72,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Writes this object's state to a YAML emitter.
         /// </summary>
-        void IYamlConvertible.Write(IEmitter emitter)
+        void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
         {
             foreach (var item in events)
             {

@@ -24,53 +24,53 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public abstract class ChainedObjectGraphVisitor : IObjectGraphVisitor
+    public abstract class ChainedObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
     {
-        private readonly IObjectGraphVisitor nextVisitor;
+        private readonly IObjectGraphVisitor<IEmitter> nextVisitor;
 
-        protected ChainedObjectGraphVisitor(IObjectGraphVisitor nextVisitor)
+        protected ChainedObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
         {
             this.nextVisitor = nextVisitor;
         }
 
-        public virtual bool Enter(IObjectDescriptor value)
+        public virtual bool Enter(IObjectDescriptor value, IEmitter context)
         {
-            return nextVisitor.Enter(value);
+            return nextVisitor.Enter(value, context);
         }
 
-        public virtual bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
+        public virtual bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            return nextVisitor.EnterMapping(key, value);
+            return nextVisitor.EnterMapping(key, value, context);
         }
 
-        public virtual bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+        public virtual bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            return nextVisitor.EnterMapping(key, value);
+            return nextVisitor.EnterMapping(key, value, context);
         }
 
-        public virtual void VisitScalar(IObjectDescriptor scalar)
+        public virtual void VisitScalar(IObjectDescriptor scalar, IEmitter context)
         {
-            nextVisitor.VisitScalar(scalar);
+            nextVisitor.VisitScalar(scalar, context);
         }
 
-        public virtual void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+        public virtual void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context)
         {
-            nextVisitor.VisitMappingStart(mapping, keyType, valueType);
+            nextVisitor.VisitMappingStart(mapping, keyType, valueType, context);
         }
 
-        public virtual void VisitMappingEnd(IObjectDescriptor mapping)
+        public virtual void VisitMappingEnd(IObjectDescriptor mapping, IEmitter context)
         {
-            nextVisitor.VisitMappingEnd(mapping);
+            nextVisitor.VisitMappingEnd(mapping, context);
         }
 
-        public virtual void VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+        public virtual void VisitSequenceStart(IObjectDescriptor sequence, Type elementType, IEmitter context)
         {
-            nextVisitor.VisitSequenceStart(sequence, elementType);
+            nextVisitor.VisitSequenceStart(sequence, elementType, context);
         }
 
-        public virtual void VisitSequenceEnd(IObjectDescriptor sequence)
+        public virtual void VisitSequenceEnd(IObjectDescriptor sequence, IEmitter context)
         {
-            nextVisitor.VisitSequenceEnd(sequence);
+            nextVisitor.VisitSequenceEnd(sequence, context);
         }
     }
 }
