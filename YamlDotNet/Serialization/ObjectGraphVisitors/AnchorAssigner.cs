@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
@@ -38,14 +37,8 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
         {
-            // Do not assign anchors to basic types
-            if (value.Value == null || value.Type.GetTypeCode() != TypeCode.Object)
-            {
-                return false;
-            }
-
             AnchorAssignment assignment;
-            if (assignments.TryGetValue(value.Value, out assignment))
+            if (value.Value != null && assignments.TryGetValue(value.Value, out assignment))
             {
                 if (assignment.Anchor == null)
                 {
@@ -54,11 +47,8 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 }
                 return false;
             }
-            else
-            {
-                assignments.Add(value.Value, new AnchorAssignment());
-                return true;
-            }
+
+            return true;
         }
 
         bool IObjectGraphVisitor.EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
@@ -71,11 +61,32 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             return true;
         }
 
-        void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar) { }
-        void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType) { }
+        void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar)
+        {
+            // Do not assign anchors to scalars
+        }
+
+        void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+        {
+            VisitObject(mapping);
+        }
+
         void IObjectGraphVisitor.VisitMappingEnd(IObjectDescriptor mapping) { }
-        void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType) { }
+
+        void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+        {
+            VisitObject(sequence);
+        }
+
         void IObjectGraphVisitor.VisitSequenceEnd(IObjectDescriptor sequence) { }
+
+        private void VisitObject(IObjectDescriptor value)
+        {
+            if(value.Value != null)
+            {
+                assignments.Add(value.Value, new AnchorAssignment());
+            }
+        }
 
         string IAliasProvider.GetAlias(object target)
         {
