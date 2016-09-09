@@ -174,6 +174,19 @@ namespace YamlDotNet.Test.Core
         }
 
         [Theory]
+        [InlineData("test", ">-\r\n  test\r\n")]    // No indentation indicator when no indent.
+        [InlineData("  test", ">2-\r\n    test\r\n")]
+        public void BlockStyleGeneratesIndentationIndicator(string input, string expected)
+        {
+            var events = StreamOf(
+                DocumentWith(FoldedScalar(input)));
+
+            var yaml = EmittedTextFrom(events);
+
+            yaml.Should().Be(expected);
+        }
+
+        [Theory]
         [InlineData("LF hello\nworld")]
         [InlineData("CRLF hello\r\nworld")]
         public void FoldedStyleDoesNotLooseCharacters(string text)
