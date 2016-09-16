@@ -320,8 +320,8 @@ namespace YamlDotNet.Test.Core
                     # Bottom comment
                 "), skipComments: false)),
                 StreamStart,
-                StandaloneComment("Top comment"),
                 DocumentStart(Implicit),
+                StandaloneComment("Top comment"),
                 BlockSequenceStart,
                 PlainScalar("first"),
                 InlineComment("Comment on first item"),

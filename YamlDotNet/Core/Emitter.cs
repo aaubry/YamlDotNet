@@ -648,11 +648,12 @@ namespace YamlDotNet.Core
             }
             else
             {
-                WriteBreak();
+                WriteIndent();
             }
 
             Write("# ");
             Write(comment.Value);
+            WriteBreak();
 
             isIndentation = true;
         }

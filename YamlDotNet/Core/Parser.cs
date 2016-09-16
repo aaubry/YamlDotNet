@@ -94,7 +94,7 @@ namespace YamlDotNet.Core
             }
         }
 
-        private readonly Queue<Events.ParsingEvent> pendingEvents = new Queue<Events.ParsingEvent>();
+        private readonly EventQueue pendingEvents = new EventQueue();
 
         /// <summary>
         /// Moves to the next event.
@@ -945,6 +945,44 @@ namespace YamlDotNet.Core
 
             state = ParserState.FlowMappingKey;
             return ProcessEmptyScalar(GetCurrentToken().Start);
+        }
+
+        private class EventQueue
+        {
+            // This class is specialized for our specific use case where there are exactly two priority levels.
+            // If more levels are required, a more generic implementation should be used instead.
+            private readonly Queue<ParsingEvent> highPriorityEvents = new Queue<ParsingEvent>();
+            private readonly Queue<ParsingEvent> normalPriorityEvents = new Queue<ParsingEvent>();
+
+            public void Enqueue(ParsingEvent @event)
+            {
+                switch (@event.Type)
+                {
+                    case Events.EventType.StreamStart:
+                    case Events.EventType.DocumentStart:
+                        highPriorityEvents.Enqueue(@event);
+                        break;
+
+                    default:
+                        normalPriorityEvents.Enqueue(@event);
+                        break;
+                }
+            }
+
+            public ParsingEvent Dequeue()
+            {
+                return highPriorityEvents.Count > 0
+                    ? highPriorityEvents.Dequeue()
+                    : normalPriorityEvents.Dequeue();
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return highPriorityEvents.Count + normalPriorityEvents.Count;
+                }
+            }
         }
     }
 }

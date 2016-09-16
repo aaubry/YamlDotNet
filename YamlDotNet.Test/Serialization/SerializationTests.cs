@@ -1302,5 +1302,46 @@ namespace YamlDotNet.Test.Serialization
             var deserializedFoo = deserializer.Deserialize<Foo>(yaml);
             Assert.True(deserializedFoo.IsRequired);
         }
+
+        [Fact]
+        public void YamlConvertiblesAreAbleToEmitAndParseComments()
+        {
+            var serializer = new Serializer();
+            var yaml = serializer.Serialize(new CommentWrapper<string> { Comment = "A comment", Value = "The value" });
+
+            var deserializer = new Deserializer();
+            var parser = new Parser(new Scanner(new StringReader(yaml), skipComments: false));
+            var parsed = deserializer.Deserialize<CommentWrapper<string>>(parser);
+
+            Assert.Equal("A comment", parsed.Comment);
+            Assert.Equal("The value", parsed.Value);
+        }
+
+        public class CommentWrapper<T> : IYamlConvertible
+        {
+            public string Comment { get; set; }
+            public T Value { get; set; }
+
+            public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
+            {
+                var comment = parser.Allow<Comment>();
+                if (comment != null)
+                {
+                    Comment = comment.Value;
+                }
+
+                Value = (T)nestedObjectDeserializer(typeof(T));
+            }
+
+            public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
+            {
+                if (!string.IsNullOrEmpty(Comment))
+                {
+                    emitter.Emit(new Comment(Comment, false));
+                }
+
+                nestedObjectSerializer(Value, typeof(T));
+            }
+        }
     }
 }

@@ -283,6 +283,23 @@ namespace YamlDotNet.Test.Core
                 .And.Contain("# Bottom comment");
         }
 
+        [Fact]
+        public void ACommentAsTheFirstEventAddsANewLine()
+        {
+            var events = new ParsingEvent[]
+            {
+                StandaloneComment("Top comment"),
+                Scalar("first").ImplicitPlain,
+            };
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+
+            yaml.Should()
+                .Contain("# Top comment")
+                .And.Contain("first")
+                .And.NotContain("# Top commentfirst");
+        }
+
         [Theory]
         [InlineData("Гранит", 28595)] // Cyrillic (ISO)
         [InlineData("ГÀƊȽ˱ώҔׂۋᵷẁό₩וּﺪﺸﻸﭧ╬♫₹Ὰỗ᷁ݭ٭ӢР͞ʓǈĄë0", 65001)] // UTF-8
