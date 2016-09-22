@@ -153,6 +153,14 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeScalarUlong()
+        {
+            var result = Deserializer.Deserialize<ulong>(UsingReaderFor("9223372036854775808"));
+
+            result.Should().Be(9223372036854775808UL);
+        }
+
+        [Fact]
         public void RoundtripEnums()
         {
             var flags = EnumExample.One | EnumExample.Two;
