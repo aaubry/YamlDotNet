@@ -226,7 +226,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     result *= 60;
 
                     // TODO: verify that chunks after the first are non-negative and less than 60
-                    result += long.Parse(chunks[chunkIndex].Replace("_", ""));
+                    var chunk = chunks[chunkIndex].Replace("_", "");
+
+                    try
+                    {
+                        result += long.Parse(chunk);
+                    }
+                    catch (OverflowException)
+                    {
+                        result += (long)ulong.Parse(chunk);
+                    }
                 }
             }
 
