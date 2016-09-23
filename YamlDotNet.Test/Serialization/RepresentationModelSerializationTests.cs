@@ -53,7 +53,7 @@ namespace YamlDotNet.Test.Serialization
                 .Build();
             var buffer = new StringWriter();
             serializer.Serialize(buffer, node);
-            Assert.Equal(yaml, buffer.ToString().TrimEnd('\r', '\n', '.'));
+            Assert.Equal(yaml.Replace("\r\n", Environment.NewLine), buffer.ToString().TrimEnd('\r', '\n', '.'));
         }
 
         [Theory]
@@ -76,7 +76,7 @@ namespace YamlDotNet.Test.Serialization
                 .Build();
             var buffer = new StringWriter();
             serializer.Serialize(buffer, node);
-            Assert.Equal(yaml, buffer.ToString().TrimEnd('\r', '\n', '.'));
+            Assert.Equal(yaml.Replace("\r\n", Environment.NewLine), buffer.ToString().TrimEnd('\r', '\n', '.'));
         }
     }
 

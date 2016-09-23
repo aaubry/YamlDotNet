@@ -183,7 +183,7 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            yaml.Should().Be(expected);
+            yaml.Should().Be(expected.Replace("\r\n", Environment.NewLine));
         }
 
         [Theory]
@@ -353,8 +353,6 @@ namespace YamlDotNet.Test.Core
             var yaml = EmittedTextFrom(StreamOf(DocumentWith(
                 LiteralScalar(input)
             )));
-
-            var parser = new Parser(new StringReader(yaml));
 
             AssertSequenceOfEventsFrom(Yaml.ParserForText(yaml),
                 StreamStart,
