@@ -134,7 +134,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             int currentIndex = 0;
             bool isNegative = false;
             int numberBase = 0;
-            long result = 0;
+            ulong result = 0;
 
             if (value[0] == '-')
             {
@@ -202,11 +202,11 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     case 2:
                     case 8:
                         // TODO: how to incorporate the numberFormat?
-                        result = Convert.ToInt64(numberBuilder.ToString(), numberBase);
+                        result = Convert.ToUInt64(numberBuilder.ToString(), numberBase);
                         break;
 
                     case 16:
-                        result = Int64.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
+                        result = ulong.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
                         break;
 
                     case 10:
@@ -226,43 +226,89 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     result *= 60;
 
                     // TODO: verify that chunks after the first are non-negative and less than 60
-                    result += long.Parse(chunks[chunkIndex].Replace("_", ""));
+                    result += ulong.Parse(chunks[chunkIndex].Replace("_", ""));
                 }
             }
 
             if (isNegative)
             {
-                result = -result;
+                return CastInteger(checked(-(long)result), typeCode);
             }
-
-            switch (typeCode)
+            else
             {
-                case TypeCode.Byte:
-                    return (byte)result;
+                return CastInteger(result, typeCode);
+            }
+        }
 
-                case TypeCode.Int16:
-                    return (short)result;
+        private static object CastInteger(long number, TypeCode typeCode)
+        {
+            checked
+            {
+                switch (typeCode)
+                {
+                    case TypeCode.Byte:
+                        return (byte)number;
 
-                case TypeCode.Int32:
-                    return (int)result;
+                    case TypeCode.Int16:
+                        return (short)number;
 
-                case TypeCode.Int64:
-                    return result;
+                    case TypeCode.Int32:
+                        return (int)number;
 
-                case TypeCode.SByte:
-                    return (sbyte)result;
+                    case TypeCode.Int64:
+                        return number;
 
-                case TypeCode.UInt16:
-                    return (ushort)result;
+                    case TypeCode.SByte:
+                        return (sbyte)number;
 
-                case TypeCode.UInt32:
-                    return (uint)result;
+                    case TypeCode.UInt16:
+                        return (ushort)number;
 
-                case TypeCode.UInt64:
-                    return (ulong)result;
+                    case TypeCode.UInt32:
+                        return (uint)number;
 
-                default:
-                    return result;
+                    case TypeCode.UInt64:
+                        return (ulong)number;
+
+                    default:
+                        return number;
+                }
+            }
+        }
+
+        private static object CastInteger(ulong number, TypeCode typeCode)
+        {
+            checked
+            {
+                switch (typeCode)
+                {
+                    case TypeCode.Byte:
+                        return (byte)number;
+
+                    case TypeCode.Int16:
+                        return (short)number;
+
+                    case TypeCode.Int32:
+                        return (int)number;
+
+                    case TypeCode.Int64:
+                        return (long)number;
+
+                    case TypeCode.SByte:
+                        return (sbyte)number;
+
+                    case TypeCode.UInt16:
+                        return (ushort)number;
+
+                    case TypeCode.UInt32:
+                        return (uint)number;
+
+                    case TypeCode.UInt64:
+                        return number;
+
+                    default:
+                        return number;
+                }
             }
         }
     }

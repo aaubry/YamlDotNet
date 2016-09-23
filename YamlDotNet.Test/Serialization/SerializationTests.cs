@@ -1343,5 +1343,31 @@ namespace YamlDotNet.Test.Serialization
                 nestedObjectSerializer(Value, typeof(T));
             }
         }
+
+        [Theory]
+        [InlineData(uint.MinValue)]
+        [InlineData(uint.MaxValue)]
+        [InlineData(0x8000000000000000UL)]
+        public void DeserializationOfUInt64Succeeds(ulong value)
+        {
+            var yaml = new Serializer().Serialize(value);
+            Assert.Contains(value.ToString(), yaml);
+
+            ulong parsed = new Deserializer().Deserialize<ulong>(yaml);
+            Assert.Equal(value, parsed);
+        }
+
+        [Theory]
+        [InlineData(int.MinValue)]
+        [InlineData(int.MaxValue)]
+        [InlineData(0L)]
+        public void DeserializationOfInt64Succeeds(long value)
+        {
+            var yaml = new Serializer().Serialize(value);
+            Assert.Contains(value.ToString(), yaml);
+
+            long parsed = new Deserializer().Deserialize<long>(yaml);
+            Assert.Equal(value, parsed);
+        }
     }
 }
