@@ -1,0 +1,33 @@
+﻿{
+    "version": "1.0.0-*",
+    "buildOptions": {
+        "compile": {
+            "include": "../YamlDotNet/**/*.cs"
+        }
+    },
+
+    "dependencies": {
+    },
+
+    "frameworks": {
+        "netstandard1.0": {
+            "buildOptions": {
+                "define": [ "PORTABLE" ]
+            },
+            "dependencies": {
+                "System.Collections": "4.0.11",
+                "System.Diagnostics.Debug": "4.0.11",
+                "System.Diagnostics.Tools": "4.0.1",
+                "System.Globalization": "4.0.11",
+                "System.Linq": "4.1.0",
+                "System.Linq.Expressions": "4.1.0",
+                "System.Reflection.Extensions": "4.0.1",
+                "System.Runtime.Extensions": "4.1.0",
+                "System.Runtime.Serialization.Primitives": "4.1.1",
+                "System.ObjectModel": "4.0.12",
+                "System.Text.Encoding.Extensions": "4.0.11",
+                "System.Text.RegularExpressions": "4.1.0"
+            }
+        }
+    }
+}

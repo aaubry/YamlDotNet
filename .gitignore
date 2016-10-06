@@ -24,3 +24,4 @@ README.html
 
 samples/dotnet/project.lock.json
 YamlDotNet/Properties/AssemblyInfo.Generated.cs
+project.lock.json
