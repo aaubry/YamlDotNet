@@ -20,7 +20,7 @@ All contributions should be submitted as pull requests.
 1. Always add one or more **unit tests** that prove that the feature / fix you are submitting is working correctly.
 
 1. Please **describe the motivation** behind the pull request. Explain what was the problem / requirement. Unless the implementation is self-explanatory, also describe the solution.
-  * Of course, there's no need to too verbose. Usually one or two lines will be enough.
+  * Of course, there's no need to be too verbose. Usually one or two lines will be enough.
 
 ## Project organization
 
@@ -57,14 +57,14 @@ There are a few differences between the various target platforms,
 mainly in the reflection API. In order to adapt the code to each platform,
 `#if ... #endif` sections are used. When possible, such sections should be placed
 in the `Helpers/Portability.cs` file. An effective technique is to define an extension
-method that is used tourough the code, and has different implementations depending
+method that is used through the code, and has different implementations depending
 on the build variables.
 
 ## AOT compatibility
 
 Some platforms - such as IOS - forbid dynamic code generation. This prevents Just-in-Time compilation (JIT) from being used. In those cases, one can use Mono's Ahead-of-Time compilation (AOT). This results on a precompiled assembly that does not rely on JIT. There are [some limitations](http://www.mono-project.com/docs/advanced/aot/#limitation-generic-interface-instantiation) however, most of them related to usage of generics.
 
-In order to ensure that YamlDotNet is compatible with AOT compilation, an automatic test has been created that runs on every commit on [Travis CI](https://travis-ci.org/aaubry/YamlDotNet). That test exercises the serialize and deserializer to help identify AOT-related problems.
+In order to ensure that YamlDotNet is compatible with AOT compilation, an automatic test has been created that runs on every commit on [Travis CI](https://travis-ci.org/aaubry/YamlDotNet). That test exercises the serializer and deserializer to help identify AOT-related problems.
 
 ## Coding style
 
