@@ -25,7 +25,7 @@ using System.Globalization;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class AnchorAssigner : IObjectGraphVisitor<Nothing>, IAliasProvider
+    public sealed class AnchorAssigner : PreProcessingPhaseObjectGraphVisitorSkeleton, IAliasProvider
     {
         private class AnchorAssignment
         {
@@ -35,7 +35,12 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
         private readonly IDictionary<object, AnchorAssignment> assignments = new Dictionary<object, AnchorAssignment>();
         private uint nextId;
 
-        bool IObjectGraphVisitor<Nothing>.Enter(IObjectDescriptor value, Nothing context)
+        public AnchorAssigner(IEnumerable<IYamlTypeConverter> typeConverters)
+            : base(typeConverters)
+        {
+        }
+
+        protected override bool Enter(IObjectDescriptor value)
         {
             AnchorAssignment assignment;
             if (value.Value != null && assignments.TryGetValue(value.Value, out assignment))
@@ -51,34 +56,34 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             return true;
         }
 
-        bool IObjectGraphVisitor<Nothing>.EnterMapping(IObjectDescriptor key, IObjectDescriptor value, Nothing context)
+        protected override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
         {
             return true;
         }
 
-        bool IObjectGraphVisitor<Nothing>.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, Nothing context)
+        protected override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
         {
             return true;
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitScalar(IObjectDescriptor scalar, Nothing context)
+        protected override void VisitScalar(IObjectDescriptor scalar)
         {
             // Do not assign anchors to scalars
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, Nothing context)
+        protected override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
         {
             VisitObject(mapping);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitMappingEnd(IObjectDescriptor mapping, Nothing context) { }
+        protected override void VisitMappingEnd(IObjectDescriptor mapping) { }
 
-        void IObjectGraphVisitor<Nothing>.VisitSequenceStart(IObjectDescriptor sequence, Type elementType, Nothing context)
+        protected override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
         {
             VisitObject(sequence);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitSequenceEnd(IObjectDescriptor sequence, Nothing context) { }
+        protected override void VisitSequenceEnd(IObjectDescriptor sequence) { }
 
         private void VisitObject(IObjectDescriptor value)
         {

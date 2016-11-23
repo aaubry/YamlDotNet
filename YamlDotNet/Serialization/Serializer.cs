@@ -76,7 +76,7 @@ namespace YamlDotNet.Serialization
 
                 if (!IsOptionSet(SerializationOptions.DisableAliases))
                 {
-                    var anchorAssigner = new AnchorAssigner();
+                    var anchorAssigner = new AnchorAssigner(Converters);
                     traversalStrategy.Traverse<Nothing>(graph, anchorAssigner, null);
 
                     emittingVisitor = new AnchorAssigningObjectGraphVisitor(emittingVisitor, eventEmitter, anchorAssigner);

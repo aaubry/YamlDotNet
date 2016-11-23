@@ -136,8 +136,6 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException("where");
             }
 
-            typeConvertersCache = null;
-
             where(typeConverterFactories.CreateRegistrationLocationSelector(typeConverter.GetType(), _ => typeConverter));
             return Self;
         }
@@ -177,15 +175,9 @@ namespace YamlDotNet.Serialization
             return Self;
         }
 
-        private IEnumerable<IYamlTypeConverter> typeConvertersCache;
-
         protected IEnumerable<IYamlTypeConverter> BuildTypeConverters()
         {
-            if (typeConvertersCache == null)
-            {
-                typeConvertersCache = typeConverterFactories.BuildComponentList();
-            }
-            return typeConvertersCache;
+            return typeConverterFactories.BuildComponentList();
         }
     }
 }

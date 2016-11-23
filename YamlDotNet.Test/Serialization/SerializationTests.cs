@@ -28,15 +28,16 @@ using System.Drawing;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -1368,6 +1369,94 @@ namespace YamlDotNet.Test.Serialization
 
             long parsed = new Deserializer().Deserialize<long>(yaml);
             Assert.Equal(value, parsed);
+        }
+
+        [Fact]
+        public void SerializeExceptionWithStackTrace()
+        {
+            var ex = GetExceptionWithStackTrace();
+            var serializer = new SerializerBuilder()
+                .WithTypeConverter(new MethodInfoConverter())
+                .Build();
+            string yaml = serializer.Serialize(ex);
+            Assert.Contains("GetExceptionWithStackTrace", yaml);
+        }
+
+        private class MethodInfoConverter : IYamlTypeConverter
+        {
+            public bool Accepts(Type type)
+            {
+                return typeof(MethodInfo).IsAssignableFrom(type);
+            }
+
+            public object ReadYaml(IParser parser, Type type)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void WriteYaml(IEmitter emitter, object value, Type type)
+            {
+                var method = (MethodInfo)value;
+                emitter.Emit(new Scalar(string.Format("{0}.{1}", method.DeclaringType.FullName, method.Name)));
+            }
+        }
+
+        static Exception GetExceptionWithStackTrace()
+        {
+            try
+            {
+                throw new ArgumentNullException("foo");
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+        }
+
+        [Fact]
+        public void RegisteringATypeConverterPreventsTheTypeFromBeingVisited()
+        {
+            var serializer = new SerializerBuilder()
+                .WithTypeConverter(new SystemTypeTypeConverter())
+                .Build();
+
+            var yaml = serializer.Serialize(new TypeContainer
+            {
+                Type = typeof(string),
+            });
+
+            var deserializer = new DeserializerBuilder()
+                .WithTypeConverter(new SystemTypeTypeConverter())
+                .Build();
+
+            var result = deserializer.Deserialize<TypeContainer>(yaml);
+
+            Assert.Equal(typeof(string), result.Type);
+        }
+
+        public class TypeContainer
+        {
+            public Type Type { get; set; }
+        }
+
+        public class SystemTypeTypeConverter : IYamlTypeConverter
+        {
+            public bool Accepts(Type type)
+            {
+                return typeof(Type).IsAssignableFrom(type);
+            }
+
+            public object ReadYaml(IParser parser, Type type)
+            {
+                var scalar = parser.Expect<Scalar>();
+                return Type.GetType(scalar.Value);
+            }
+
+            public void WriteYaml(IEmitter emitter, object value, Type type)
+            {
+                var typeName = ((Type)value).AssemblyQualifiedName;
+                emitter.Emit(new Scalar(typeName));
+            }
         }
     }
 }

@@ -53,5 +53,12 @@ namespace YamlDotNet.Serialization
                 .Select(factory => factory(null))
                 .ToList();
         }
+
+        public static List<TComponent> BuildComponentList<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TArgument argument)
+        {
+            return registrations
+                .Select(factory => factory(argument))
+                .ToList();
+        }
     }
 }

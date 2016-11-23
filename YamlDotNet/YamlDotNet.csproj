@@ -298,6 +298,7 @@
     <Compile Include="Serialization\ObjectGraphVisitors\CustomSerializationObjectGraphVisitor.cs" />
     <Compile Include="Serialization\ObjectGraphVisitors\DefaultExclusiveObjectGraphVisitor.cs" />
     <Compile Include="Serialization\ObjectGraphVisitors\EmittingObjectGraphVisitor.cs" />
+    <Compile Include="Serialization\ObjectGraphVisitors\PreProcessingPhaseObjectGraphVisitorSkeleton.cs" />
     <Compile Include="Serialization\PropertyDescriptor.cs" />
     <Compile Include="Serialization\SerializationOptions.cs" />
     <Compile Include="Serialization\Serializer.cs" />
