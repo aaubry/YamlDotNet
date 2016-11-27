@@ -1371,6 +1371,24 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(value, parsed);
         }
 
+        public class AnchorsOverwritingTestCase
+        {
+            public List<string> a { get; set; }
+            public List<string> b { get; set; }
+            public List<string> c { get; set; }
+            public List<string> d { get; set; }
+        }
+
+        [Fact]
+        public void DeserializationOfStreamWithDuplicateAnchorsSucceeds()
+        {
+            var yaml = Yaml.ParserForResource("anchors-overwriting.yaml");
+            var serializer = new DeserializerBuilder()
+                .IgnoreUnmatchedProperties()
+                .Build();
+            var deserialized = serializer.Deserialize<AnchorsOverwritingTestCase>(yaml);
+        }
+
         [Fact]
         public void SerializeExceptionWithStackTrace()
         {
