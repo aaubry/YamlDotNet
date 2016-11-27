@@ -1355,9 +1355,15 @@ namespace YamlDotNet.Core
                     (character >= '\xE000' && character <= '\xFFFD');
         }
 
-        private static bool IsHighSurrogate(char c) => 0xD800 <= c && c <= 0xDBFF;
+        private static bool IsHighSurrogate(char c)
+        {
+           return 0xD800 <= c && c <= 0xDBFF;
+        }
 
-        private static bool IsLowSurrogate(char c) => 0xDC00 <= c && c <= 0xDFFF;
+        private static bool IsLowSurrogate(char c)
+        {
+            return 0xDC00 <= c && c <= 0xDFFF;
+        }
 
         #endregion
 
