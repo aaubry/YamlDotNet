@@ -2,3 +2,8 @@ a : &anchor [foo]
 c : *anchor
 b : &anchor [bar]
 d : *anchor
+
+e : &anchor2 baz
+f : *anchor2
+g : &anchor2 foobar
+h : *anchor2
