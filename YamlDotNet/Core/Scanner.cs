@@ -2145,6 +2145,11 @@ namespace YamlDotNet.Core
                 {
                     tag.Append(ScanUriEscapes(start));
                 }
+                else if (analyzer.Check('+'))
+                {
+                    tag.Append(' ');
+                    Skip();
+                }
                 else
                 {
                     tag.Append(ReadCurrentCharacter());
