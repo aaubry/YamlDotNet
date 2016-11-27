@@ -1,0 +1,4 @@
+a : &anchor [foo]
+c : *anchor
+b : &anchor [bar]
+d : *anchor

@@ -179,6 +179,12 @@ namespace YamlDotNet.Test.RepresentationModel
         {
             RoundtripTest("unicode-32bits-escape.yaml");
         }
+        
+        [Fact]
+        public void AnchorsOverwriting()
+        {
+            RoundtripTest("anchors-overwriting.yaml");
+        }
 
         [Fact]
         public void AllAliasesMustBeResolved()
