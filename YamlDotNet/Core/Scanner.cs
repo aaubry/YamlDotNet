@@ -1680,7 +1680,7 @@ namespace YamlDotNet.Core
 
                         if (codeLength > 0)
                         {
-                            uint character = 0;
+                            int character = 0;
 
                             // Scan the character value.
 
@@ -1690,7 +1690,7 @@ namespace YamlDotNet.Core
                                 {
                                     throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, did not find expected hexdecimal number.");
                                 }
-                                character = (uint)((character << 4) + analyzer.AsHex(k));
+                                character = ((character << 4) + analyzer.AsHex(k));
                             }
 
                             // Check the value and write the character.
@@ -1700,7 +1700,7 @@ namespace YamlDotNet.Core
                                 throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, find invalid Unicode character escape code.");
                             }
 
-                            value.Append((char)character);
+                            value.Append(char.ConvertFromUtf32(character));
 
                             // Advance the pointer.
 
@@ -2170,11 +2170,12 @@ namespace YamlDotNet.Core
         /// Decode an URI-escape sequence corresponding to a single UTF-8 character.
         /// </summary>
 
-        private char ScanUriEscapes(Mark start)
+        private string ScanUriEscapes(Mark start)
         {
             // Decode the required number of characters.
 
-            var charBytes = new List<byte>();
+            byte[] charBytes = null;
+            int nextInsertionIndex = 0;
             int width = 0;
             do
             {
@@ -2202,6 +2203,8 @@ namespace YamlDotNet.Core
                     {
                         throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect leading UTF-8 octet.");
                     }
+
+                    charBytes = new byte[width];
                 }
                 else
                 {
@@ -2215,7 +2218,7 @@ namespace YamlDotNet.Core
 
                 // Copy the octet and move the pointers.
 
-                charBytes.Add((byte)octet);
+                charBytes[nextInsertionIndex++] = (byte)octet;
 
                 Skip();
                 Skip();
@@ -2223,14 +2226,14 @@ namespace YamlDotNet.Core
             }
             while (--width > 0);
 
-            var characters = Encoding.UTF8.GetChars(charBytes.ToArray());
+            var result = Encoding.UTF8.GetString(charBytes, 0, nextInsertionIndex);
 
-            if (characters.Length != 1)
+            if (result.Length == 0 || result.Length > 2)
             {
                 throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect UTF-8 sequence.");
             }
 
-            return characters[0];
+            return result;
         }
 
         /// <summary>
