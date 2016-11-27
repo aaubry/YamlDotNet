@@ -175,6 +175,12 @@ namespace YamlDotNet.Test.RepresentationModel
         }
 
         [Fact]
+        public void Roundtrip32BitsUnicodeEscape()
+        {
+            RoundtripTest("unicode-32bits-escape.yaml");
+        }
+
+        [Fact]
         public void AllAliasesMustBeResolved()
         {
             var original = new YamlStream();

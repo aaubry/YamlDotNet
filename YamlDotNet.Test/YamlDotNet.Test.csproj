@@ -140,6 +140,7 @@
     <EmbeddedResource Include="files\guid.yaml" />
     <EmbeddedResource Include="files\ordered-properties.yaml" />
     <EmbeddedResource Include="files\multi-doc-tag.yaml" />
+    <EmbeddedResource Include="files\unicode-32bits-escape.yaml" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
