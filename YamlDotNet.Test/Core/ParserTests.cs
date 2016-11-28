@@ -388,6 +388,28 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
+        [Fact]
+        public void VerifyTokenWithUrlEncodedTagContainingPlusSpaces()
+        {
+            AssertSequenceOfEventsFrom(Yaml.ParserForText("!(%20%20%20hello+you%20+) value"),
+                StreamStart,
+                DocumentStart(Implicit),
+                PlainScalar("value").T("!(   hello you  )"),
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
+
+        [Fact]
+        public void VerifyTokenWithUrlEncoded32BitsUnicodeTags()
+        {
+            AssertSequenceOfEventsFrom(Yaml.ParserForText("!hel%F4%8F%BF%BFlo%E2%99%A5+A%20 value"),
+                StreamStart,
+                DocumentStart(Implicit),
+                PlainScalar("value").T("!hel􏿿lo♥ A "),
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
+
         [Theory]
         [InlineData("|\n  b-carriage-return,b-line-feed\r\n  lll", "b-carriage-return,b-line-feed\nlll")]
         [InlineData("|\n  b-carriage-return\r  lll", "b-carriage-return\nlll")]
