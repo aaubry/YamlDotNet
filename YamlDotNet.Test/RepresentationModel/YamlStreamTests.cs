@@ -52,13 +52,24 @@ namespace YamlDotNet.Test.RepresentationModel
             // of just on AllNodes because in debug mode, AllNodes
             // is accessed after the document loads to check for unresolved aliases...
             var loadAndAccessAllNodes = new Action(() =>
-                {
-                    var stream = new YamlStream();
-                    stream.Load(Yaml.ParserForText("&a [*a]"));
-                    var allNodes = stream.Documents.Single().AllNodes.ToList();
-                });
+            {
+                var stream = new YamlStream();
+                stream.Load(Yaml.ParserForText("&a [*a]"));
+                var allNodes = stream.Documents.Single().AllNodes.ToList();
+            });
 
             loadAndAccessAllNodes.ShouldThrow<MaximumRecursionLevelReachedException>("because the document is infinitely recursive.");
+        }
+
+        [Fact]
+        public void InfinitelyRecursiveNodeToStringSucceeds()
+        {
+            var stream = new YamlStream();
+            stream.Load(Yaml.ParserForText("&a [*a]"));
+
+            var toString = stream.Documents.Single().RootNode.ToString();
+
+            toString.Should().Contain(YamlNode.MaximumRecursionLevelReachedToStringValue);
         }
 
         [Fact]
