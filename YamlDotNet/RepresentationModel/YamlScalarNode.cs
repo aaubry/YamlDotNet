@@ -147,7 +147,7 @@ namespace YamlDotNet.RepresentationModel
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString()
+        internal override string ToString(RecursionLevel level)
         {
             return Value;
         }

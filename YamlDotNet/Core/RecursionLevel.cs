@@ -50,6 +50,16 @@ namespace YamlDotNet.Core
             }
         }
 
+        /// <summary>
+        /// Increments the <see cref="Current"/> recursion level,
+        /// and returns whether <see cref="Current"/> is still less than <see cref="Maximum"/>.
+        /// </summary>
+        internal bool TryIncrement()
+        {
+            Current++;
+            return Current < Maximum;
+        }
+
         internal void Decrement()
         {
             Current--;
