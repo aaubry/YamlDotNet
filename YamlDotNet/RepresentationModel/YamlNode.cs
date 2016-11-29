@@ -198,11 +198,23 @@ namespace YamlDotNet.RepresentationModel
 
         /// <summary>
         /// Gets all nodes from the document, starting on the current node.
+        /// <see cref="MaximumRecursionLevelReachedException"/> is thrown if an infinite recursion is detected.
         /// </summary>
-        public abstract IEnumerable<YamlNode> AllNodes
+        public IEnumerable<YamlNode> AllNodes
         {
-            get;
+            get
+            {
+                var level = new RecursionLevel(1000);
+                return SafeAllNodes(level);
+            }
         }
+
+        /// <summary>
+        /// When implemented, recursively enumerates all the nodes from the document, starting on the current node.
+        /// If <see cref="RecursionLevel.Maximum"/> is reached, a <see cref="MaximumRecursionLevelReachedException"/> is thrown
+        /// instead of continuing and crashing with a <see cref="StackOverflowException"/>.
+        /// </summary>
+        internal abstract IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level);
 
         /// <summary>
         /// Gets the type of node.

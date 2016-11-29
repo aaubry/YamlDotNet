@@ -195,6 +195,7 @@ namespace YamlDotNet.RepresentationModel
 
         /// <summary>
         /// Gets all nodes from the document.
+        /// <see cref="MaximumRecursionLevelReachedException"/> is thrown if an infinite recursion is detected.
         /// </summary>
         public IEnumerable<YamlNode> AllNodes
         {
