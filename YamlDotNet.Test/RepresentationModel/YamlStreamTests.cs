@@ -19,8 +19,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Xunit;
 using YamlDotNet.Core;
@@ -40,6 +43,22 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
             Assert.Equal("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value);
             Assert.Equal(YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
+        }
+
+        [Fact]
+        public void AccessingAllNodesOnInfinitelyRecursiveDocumentThrows()
+        {
+            // We check the exception on the whole following block instead
+            // of just on AllNodes because in debug mode, AllNodes
+            // is accessed after the document loads to check for unresolved aliases...
+            var loadAndAccessAllNodes = new Action(() =>
+                {
+                    var stream = new YamlStream();
+                    stream.Load(Yaml.ParserForText("&a [*a]"));
+                    var allNodes = stream.Documents.Single().AllNodes.ToList();
+                });
+
+            loadAndAccessAllNodes.ShouldThrow<MaximumRecursionLevelReachedException>("because the document is infinitely recursive.");
         }
 
         [Fact]
