@@ -44,6 +44,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
+        private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
 
         public SerializerBuilder()
         {
@@ -71,6 +72,7 @@ namespace YamlDotNet.Serialization
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, 50, namingConvention ?? new NullNamingConvention());
 
             WithTypeResolver(new DynamicTypeResolver());
+            WithEventEmitter(inner => new CustomTagEventEmitter(inner, tagMappings));
         }
 
         protected override SerializerBuilder Self { get { return this; } }
@@ -108,6 +110,25 @@ namespace YamlDotNet.Serialization
 
             where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner)));
             return Self;
+        }
+
+        internal SerializerBuilder WithTagMapping(string tag, Type type)
+        {
+            if (tag == null)
+            {
+                throw new ArgumentNullException("tag");
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+            if(tagMappings.ContainsKey(type))
+            {
+                throw new ArgumentException(String.Format("Type already has a registered tag: {0}", tag), "tag");
+            }
+            tagMappings.Add(type, tag);
+            return this;
         }
 
         /// <summary>
