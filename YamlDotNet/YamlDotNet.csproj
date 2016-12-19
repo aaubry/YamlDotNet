@@ -182,6 +182,7 @@
     <Compile Include="Core\MergingParser.cs" />
     <Compile Include="Core\Parser.cs" />
     <Compile Include="Core\ParserState.cs" />
+    <Compile Include="Core\MaximumRecursionLevelReachedException.cs" />
     <Compile Include="Core\Tokens\Comment.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\ExpressionExtensions.cs" />
@@ -222,6 +223,7 @@
     <Compile Include="RepresentationModel\DocumentLoadingState.cs" />
     <Compile Include="RepresentationModel\EmitterState.cs" />
     <Compile Include="RepresentationModel\IYamlVisitor.cs" />
+    <Compile Include="Core\RecursionLevel.cs" />
     <Compile Include="RepresentationModel\YamlAliasNode.cs" />
     <Compile Include="RepresentationModel\YamlDocument.cs" />
     <Compile Include="RepresentationModel\YamlMappingNode.cs" />

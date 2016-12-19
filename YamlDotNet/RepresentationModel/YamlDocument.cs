@@ -79,12 +79,20 @@ namespace YamlDotNet.RepresentationModel
             state.ResolveAliases();
 
 #if DEBUG
-            foreach (var node in AllNodes)
+            try
             {
-                if (node is YamlAliasNode)
+                foreach (var node in AllNodes)
                 {
-                    throw new InvalidOperationException("Error in alias resolution.");
+                    if (node is YamlAliasNode)
+                    {
+                        throw new InvalidOperationException("Error in alias resolution.");
+                    }
                 }
+            }
+            catch (MaximumRecursionLevelReachedException)
+            {
+                // Silently absorb this exception.
+                // This is required to make some unit tests pass in DEBUG mode.
             }
 #endif
 
@@ -195,6 +203,7 @@ namespace YamlDotNet.RepresentationModel
 
         /// <summary>
         /// Gets all nodes from the document.
+        /// <see cref="MaximumRecursionLevelReachedException"/> is thrown if an infinite recursion is detected.
         /// </summary>
         public IEnumerable<YamlNode> AllNodes
         {

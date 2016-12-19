@@ -33,6 +33,9 @@ namespace YamlDotNet.RepresentationModel
     [Serializable]
     public abstract class YamlNode
     {
+        private const int MaximumRecursionLevel = 1000;
+        internal const string MaximumRecursionLevelReachedToStringValue = "WARNING! INFINITE RECURSION!";
+
         /// <summary>
         /// Gets or sets the anchor of the node.
         /// </summary>
@@ -196,13 +199,33 @@ namespace YamlDotNet.RepresentationModel
             return unchecked(((h1 << 5) + h1) ^ h2);
         }
 
+        public override string ToString()
+        {
+            var level = new RecursionLevel(MaximumRecursionLevel);
+            return ToString(level);
+        }
+
+        internal abstract string ToString(RecursionLevel level);
+
         /// <summary>
         /// Gets all nodes from the document, starting on the current node.
+        /// <see cref="MaximumRecursionLevelReachedException"/> is thrown if an infinite recursion is detected.
         /// </summary>
-        public abstract IEnumerable<YamlNode> AllNodes
+        public IEnumerable<YamlNode> AllNodes
         {
-            get;
+            get
+            {
+                var level = new RecursionLevel(MaximumRecursionLevel);
+                return SafeAllNodes(level);
+            }
         }
+
+        /// <summary>
+        /// When implemented, recursively enumerates all the nodes from the document, starting on the current node.
+        /// If <see cref="RecursionLevel.Maximum"/> is reached, a <see cref="MaximumRecursionLevelReachedException"/> is thrown
+        /// instead of continuing and crashing with a <see cref="StackOverflowException"/>.
+        /// </summary>
+        internal abstract IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level);
 
         /// <summary>
         /// Gets the type of node.
