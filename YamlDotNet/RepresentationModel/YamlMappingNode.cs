@@ -92,22 +92,6 @@ namespace YamlDotNet.RepresentationModel
             {
                 state.AddNodeWithUnresolvedAliases(this);
             }
-#if DEBUG
-            else
-            {
-                foreach (var child in children)
-                {
-                    if (child.Key is YamlAliasNode)
-                    {
-                        throw new InvalidOperationException("Error in alias resolution.");
-                    }
-                    if (child.Value is YamlAliasNode)
-                    {
-                        throw new InvalidOperationException("Error in alias resolution.");
-                    }
-                }
-            }
-#endif
 
             parser.Expect<MappingEnd>();
         }

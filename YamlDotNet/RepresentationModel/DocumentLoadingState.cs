@@ -97,16 +97,6 @@ namespace YamlDotNet.RepresentationModel
             foreach (var node in nodesWithUnresolvedAliases)
             {
                 node.ResolveAliases(this);
-
-#if DEBUG
-                foreach (var child in node.AllNodes)
-                {
-                    if (child is YamlAliasNode)
-                    {
-                        throw new InvalidOperationException("Error in alias resolution.");
-                    }
-                }
-#endif
             }
         }
     }

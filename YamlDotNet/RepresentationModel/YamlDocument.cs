@@ -78,24 +78,6 @@ namespace YamlDotNet.RepresentationModel
 
             state.ResolveAliases();
 
-#if DEBUG
-            try
-            {
-                foreach (var node in AllNodes)
-                {
-                    if (node is YamlAliasNode)
-                    {
-                        throw new InvalidOperationException("Error in alias resolution.");
-                    }
-                }
-            }
-            catch (MaximumRecursionLevelReachedException)
-            {
-                // Silently absorb this exception.
-                // This is required to make some unit tests pass in DEBUG mode.
-            }
-#endif
-
             parser.Expect<DocumentEnd>();
         }
 
