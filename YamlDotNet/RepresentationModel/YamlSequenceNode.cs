@@ -223,21 +223,22 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Gets all nodes from the document, starting on the current node.
+        /// Recursively enumerates all the nodes from the document, starting on the current node,
+        /// and throwing <see cref="MaximumRecursionLevelReachedException"/>
+        /// if <see cref="RecursionLevel.Maximum"/> is reached.
         /// </summary>
-        public override IEnumerable<YamlNode> AllNodes
+        internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
         {
-            get
+            level.Increment();
+            yield return this;
+            foreach (var child in children)
             {
-                yield return this;
-                foreach (var child in children)
+                foreach (var node in child.SafeAllNodes(level))
                 {
-                    foreach (var node in child.AllNodes)
-                    {
-                        yield return node;
-                    }
+                    yield return node;
                 }
             }
+            level.Decrement();
         }
 
         /// <summary>
@@ -254,8 +255,13 @@ namespace YamlDotNet.RepresentationModel
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString()
+        internal override string ToString(RecursionLevel level)
         {
+            if (!level.TryIncrement())
+            {
+                return MaximumRecursionLevelReachedToStringValue;
+            }
+
             var text = new StringBuilder("[ ");
 
             foreach (var child in children)
@@ -264,10 +270,12 @@ namespace YamlDotNet.RepresentationModel
                 {
                     text.Append(", ");
                 }
-                text.Append(child);
+                text.Append(child.ToString(level));
             }
 
             text.Append(" ]");
+
+            level.Decrement();
 
             return text.ToString();
         }

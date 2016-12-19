@@ -19,8 +19,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Xunit;
 using YamlDotNet.Core;
@@ -40,6 +43,28 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
             Assert.Equal("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value);
             Assert.Equal(YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
+        }
+
+        [Fact]
+        public void AccessingAllNodesOnInfinitelyRecursiveDocumentThrows()
+        {
+            var stream = new YamlStream();
+            stream.Load(Yaml.ParserForText("&a [*a]"));
+
+            var accessAllNodes = new Action(() => stream.Documents.Single().AllNodes.ToList());
+
+            accessAllNodes.ShouldThrow<MaximumRecursionLevelReachedException>("because the document is infinitely recursive.");
+        }
+
+        [Fact]
+        public void InfinitelyRecursiveNodeToStringSucceeds()
+        {
+            var stream = new YamlStream();
+            stream.Load(Yaml.ParserForText("&a [*a]"));
+
+            var toString = stream.Documents.Single().RootNode.ToString();
+
+            toString.Should().Contain(YamlNode.MaximumRecursionLevelReachedToStringValue);
         }
 
         [Fact]
@@ -172,6 +197,12 @@ namespace YamlDotNet.Test.RepresentationModel
         public void FailBackreference()
         {
             RoundtripTest("fail-backreference.yaml");
+        }
+
+        [Fact]
+        public void Roundtrip32BitsUnicodeEscape()
+        {
+            RoundtripTest("unicode-32bits-escape.yaml");
         }
 
         [Fact]
