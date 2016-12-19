@@ -192,6 +192,18 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializeCustomTags()
+        {
+            var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd();
+            SerializerBuilder.WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
+
+            var point = new Point(10, 20);
+            var result = Serializer.Serialize(point);
+
+            result.Should().Be(expectedResult);
+        }
+
+        [Fact]
         public void DeserializeExplicitType()
         {
             var text = Yaml.StreamFrom("explicit-type.template").TemplatedOn<Simple>();

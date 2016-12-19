@@ -237,6 +237,7 @@
     <Compile Include="Serialization\BuilderSkeleton.cs" />
     <Compile Include="RepresentationModel\YamlVisitorBase.cs" />
     <Compile Include="Serialization\Converters\GuidConverter.cs" />
+    <Compile Include="Serialization\EventEmitters\CustomTagEventEmitter.cs" />
     <Compile Include="Serialization\Deserializer.cs" />
     <Compile Include="Serialization\DeserializerBuilder.cs" />
     <Compile Include="Serialization\EmissionPhaseObjectGraphVisitorArgs.cs" />
