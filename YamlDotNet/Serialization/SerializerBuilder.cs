@@ -44,6 +44,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
+        private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
 
         public SerializerBuilder()
         {
@@ -71,6 +72,7 @@ namespace YamlDotNet.Serialization
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, 50, namingConvention ?? new NullNamingConvention());
 
             WithTypeResolver(new DynamicTypeResolver());
+            WithEventEmitter(inner => new CustomTagEventEmitter(inner, tagMappings));
         }
 
         protected override SerializerBuilder Self { get { return this; } }
@@ -108,6 +110,31 @@ namespace YamlDotNet.Serialization
 
             where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner)));
             return Self;
+        }
+
+        /// <summary>
+        /// Registers a tag mapping.
+        /// </summary>
+        public SerializerBuilder WithTagMapping(string tag, Type type)
+        {
+            if (tag == null)
+            {
+                throw new ArgumentNullException("tag");
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
+            string alreadyRegisteredTag;
+            if (tagMappings.TryGetValue(type, out alreadyRegisteredTag))
+            {
+                throw new ArgumentException(string.Format("Type already has a registered tag '{0}' for type '{1}'", alreadyRegisteredTag, type.FullName), "type");
+            }
+
+            tagMappings.Add(type, tag);
+            return this;
         }
 
         /// <summary>
