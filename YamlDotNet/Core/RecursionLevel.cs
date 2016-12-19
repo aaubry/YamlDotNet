@@ -19,17 +19,19 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
+
 namespace YamlDotNet.Core
 {
     /// <summary>
-    /// Keeps track of the <see cref="Current"/> recursion level,
+    /// Keeps track of the <see cref="current"/> recursion level,
     /// and throws <see cref="MaximumRecursionLevelReachedException"/>
     /// whenever <see cref="Maximum"/> is reached.
     /// </summary>
     internal class RecursionLevel
     {
-        public int Current { get; private set; }
-        public int Maximum { get; }
+        private int current;
+        public int Maximum { get; private set; }
 
         public RecursionLevel(int maximum)
         {
@@ -37,32 +39,42 @@ namespace YamlDotNet.Core
         }
 
         /// <summary>
-        /// Increments the <see cref="Current"/> recursion level,
+        /// Increments the <see cref="current"/> recursion level,
         /// and throws <see cref="MaximumRecursionLevelReachedException"/>
         /// if <see cref="Maximum"/> is reached.
         /// </summary>
-        internal void Increment()
+        public void Increment()
         {
-            Current++;
-            if (Current >= Maximum)
+            if (!TryIncrement())
             {
                 throw new MaximumRecursionLevelReachedException();
             }
         }
 
         /// <summary>
-        /// Increments the <see cref="Current"/> recursion level,
-        /// and returns whether <see cref="Current"/> is still less than <see cref="Maximum"/>.
+        /// Increments the <see cref="current"/> recursion level,
+        /// and returns whether <see cref="current"/> is still less than <see cref="Maximum"/>.
         /// </summary>
-        internal bool TryIncrement()
+        public bool TryIncrement()
         {
-            Current++;
-            return Current < Maximum;
+            if (current < Maximum)
+            {
+                ++current;
+                return true;
+            }
+            return false;
         }
 
-        internal void Decrement()
+        /// <summary>
+        /// Decrements the <see cref="current"/> recursion level.
+        /// </summary>
+        public void Decrement()
         {
-            Current--;
+            if (current == 0)
+            {
+                throw new InvalidOperationException("Attempted to decrement RecursionLevel to a negative value");
+            }
+            --current;
         }
     }
 }
