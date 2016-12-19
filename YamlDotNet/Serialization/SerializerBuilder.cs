@@ -112,7 +112,10 @@ namespace YamlDotNet.Serialization
             return Self;
         }
 
-        internal SerializerBuilder WithTagMapping(string tag, Type type)
+        /// <summary>
+        /// Registers a tag mapping.
+        /// </summary>
+        public SerializerBuilder WithTagMapping(string tag, Type type)
         {
             if (tag == null)
             {
@@ -123,10 +126,13 @@ namespace YamlDotNet.Serialization
             {
                 throw new ArgumentNullException("type");
             }
-            if(tagMappings.ContainsKey(type))
+
+            string alreadyRegisteredTag;
+            if (tagMappings.TryGetValue(type, out alreadyRegisteredTag))
             {
-                throw new ArgumentException(String.Format("Type already has a registered tag: {0}", tag), "tag");
+                throw new ArgumentException(string.Format("Type already has a registered tag '{0}' for type '{1}'", alreadyRegisteredTag, type.FullName), "type");
             }
+
             tagMappings.Add(type, tag);
             return this;
         }

@@ -200,6 +200,12 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException("type");
             }
 
+            Type alreadyRegisteredType;
+            if (tagMappings.TryGetValue(tag, out alreadyRegisteredType))
+            {
+                throw new ArgumentException(string.Format("Type already has a registered type '{0}' for tag '{1}'", alreadyRegisteredType.FullName, tag), "tag");
+            }
+
             tagMappings.Add(tag, type);
             return this;
         }
