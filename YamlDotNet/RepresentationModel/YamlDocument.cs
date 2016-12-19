@@ -82,11 +82,15 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Visitor that assigns anchors to nodes that are referenced more than once but have no anchor.
+        /// Visitor that assigns anchors to nodes that are referenced more than once.
+        /// Existing anchors are preserved as much as possible.
         /// </summary>
         private class AnchorAssigningVisitor : YamlVisitorBase
         {
             private readonly HashSet<string> existingAnchors = new HashSet<string>();
+            /// <summary>
+            /// Key: Node, Value: IsDuplicate
+            /// </summary>
             private readonly Dictionary<YamlNode, bool> visitedNodes = new Dictionary<YamlNode, bool>();
 
             public void AssignAnchors(YamlDocument document)
@@ -102,55 +106,61 @@ namespace YamlDotNet.RepresentationModel
                     if (visitedNode.Value)
                     {
                         string anchor;
-                        do
+                        // If the existing anchor is not already used, we can have it
+                        if (!string.IsNullOrEmpty(visitedNode.Key.Anchor) && !existingAnchors.Contains(visitedNode.Key.Anchor))
                         {
-                            anchor = random.Next().ToString(CultureInfo.InvariantCulture);
-                        } while (existingAnchors.Contains(anchor));
-                        existingAnchors.Add(anchor);
+                            anchor = visitedNode.Key.Anchor;
+                        }
+                        else
+                        {
+                            do
+                            {
+                                anchor = random.Next().ToString(CultureInfo.InvariantCulture);
+                            } while (existingAnchors.Contains(anchor));
+                        }
 
+                        existingAnchors.Add(anchor);
                         visitedNode.Key.Anchor = anchor;
                     }
                 }
             }
 
-            private void VisitNode(YamlNode node)
+            /// <summary>
+            /// Returns whether the visited node is a duplicate.
+            /// </summary>
+            private bool VisitNodeAndFindDuplicates(YamlNode node)
             {
-                if (string.IsNullOrEmpty(node.Anchor))
+                bool isDuplicate;
+                if (visitedNodes.TryGetValue(node, out isDuplicate))
                 {
-                    bool isDuplicate;
-                    if (visitedNodes.TryGetValue(node, out isDuplicate))
+                    if (!isDuplicate)
                     {
-                        if (!isDuplicate)
-                        {
-                            visitedNodes[node] = true;
-                        }
+                        visitedNodes[node] = true;
                     }
-                    else
-                    {
-                        visitedNodes.Add(node, false);
-                    }
+                    return !isDuplicate;
                 }
                 else
                 {
-                    existingAnchors.Add(node.Anchor);
+                    visitedNodes.Add(node, false);
+                    return false;
                 }
             }
 
             public override void Visit(YamlScalarNode scalar)
             {
-                // Do not assign anchors to scalars
+                VisitNodeAndFindDuplicates(scalar);
             }
 
             public override void Visit(YamlMappingNode mapping)
             {
-                VisitNode(mapping);
-                base.Visit(mapping);
+                if (!VisitNodeAndFindDuplicates(mapping))
+                    base.Visit(mapping);
             }
 
             public override void Visit(YamlSequenceNode sequence)
             {
-                VisitNode(sequence);
-                base.Visit(sequence);
+                if (!VisitNodeAndFindDuplicates(sequence))
+                    base.Visit(sequence);
             }
         }
 

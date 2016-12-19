@@ -106,7 +106,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             }
         }
 
-        public object DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
             object value;
             var alias = parser.Allow<AnchorAlias>();
@@ -148,10 +148,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 }
                 else
                 {
-                    throw new DuplicateAnchorException(nodeEvent.Start, nodeEvent.End, string.Format(
-                        "Anchor '{0}' already defined",
-                        anchor
-                    ));
+                    aliasState[anchor] = new ValuePromise(value);
                 }
             }
 

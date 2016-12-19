@@ -47,10 +47,12 @@ namespace YamlDotNet.RepresentationModel
 
             if (anchors.ContainsKey(node.Anchor))
             {
-                throw new DuplicateAnchorException(node.Start, node.End, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' already exists", node.Anchor));
+                anchors[node.Anchor] = node;
             }
-
-            anchors.Add(node.Anchor, node);
+            else
+            {
+                anchors.Add(node.Anchor, node);
+            }
         }
 
         /// <summary>

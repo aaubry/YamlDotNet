@@ -148,7 +148,6 @@
     <Compile Include="Core\CharacterAnalyzer.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="Core\Cursor.cs" />
-    <Compile Include="Core\DuplicateAnchorException.cs" />
     <Compile Include="Core\Emitter.cs" />
     <Compile Include="Core\EmitterState.cs" />
     <Compile Include="Core\ParserExtensions.cs" />
