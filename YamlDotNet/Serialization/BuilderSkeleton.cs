@@ -141,6 +141,29 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Unregisters an existing <see cref="IYamlTypeConverter" /> of type <typeparam name="TYamlTypeConverter" />.
+        /// </summary>
+        public TBuilder WithoutTypeConverter<TYamlTypeConverter>()
+            where TYamlTypeConverter : IYamlTypeConverter
+        {
+            return WithoutTypeConverter(typeof(TYamlTypeConverter));
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="IYamlTypeConverter" /> of type <param name="converterType" />.
+        /// </summary>
+        public TBuilder WithoutTypeConverter(Type converterType)
+        {
+            if (converterType == null)
+            {
+                throw new ArgumentNullException("converterType");
+            }
+
+            typeConverterFactories.Remove(converterType);
+            return Self;
+        }
+
+        /// <summary>
         /// Registers an additional <see cref="ITypeInspector" /> to be used by the (de)serializer.
         /// </summary>
         /// <param name="typeInspectorFactory">A function that instantiates the type inspector.</param>
@@ -172,6 +195,29 @@ namespace YamlDotNet.Serialization
             }
 
             where(typeInspectorFactories.CreateRegistrationLocationSelector(typeof(TTypeInspector), inner => typeInspectorFactory(inner)));
+            return Self;
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="ITypeInspector" /> of type <typeparam name="TTypeInspector" />.
+        /// </summary>
+        public TBuilder WithoutTypeInspector<TTypeInspector>()
+            where TTypeInspector : ITypeInspector
+        {
+            return WithoutTypeInspector(typeof(ITypeInspector));
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="ITypeInspector" /> of type <param name="inspectorType" />.
+        /// </summary>
+        public TBuilder WithoutTypeInspector(Type inspectorType)
+        {
+            if (inspectorType == null)
+            {
+                throw new ArgumentNullException("inspectorType");
+            }
+
+            typeInspectorFactories.Remove(inspectorType);
             return Self;
         }
 

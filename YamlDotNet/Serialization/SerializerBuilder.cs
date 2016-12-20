@@ -113,6 +113,29 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Unregisters an existing <see cref="IEventEmitter" /> of type <typeparam name="TEventEmitter" />.
+        /// </summary>
+        public SerializerBuilder WithoutEventEmitter<TEventEmitter>()
+            where TEventEmitter : IEventEmitter
+        {
+            return WithoutEventEmitter(typeof(TEventEmitter));
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="IEventEmitter" /> of type <param name="eventEmitterType" />.
+        /// </summary>
+        public SerializerBuilder WithoutEventEmitter(Type eventEmitterType)
+        {
+            if (eventEmitterType == null)
+            {
+                throw new ArgumentNullException("eventEmitterType");
+            }
+
+            eventEmitterFactories.Remove(eventEmitterType);
+            return this;
+        }
+
+        /// <summary>
         /// Registers a tag mapping.
         /// </summary>
         public SerializerBuilder WithTagMapping(string tag, Type type)
@@ -134,6 +157,23 @@ namespace YamlDotNet.Serialization
             }
 
             tagMappings.Add(type, tag);
+            return this;
+        }
+
+        /// <summary>
+        /// Unregisters an existing tag mapping.
+        /// </summary>
+        public SerializerBuilder WithoutTagMapping(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
+            if (!tagMappings.Remove(type))
+            {
+                throw new KeyNotFoundException(string.Format("Tag for type '{0}' is not registered", type.FullName));
+            }
             return this;
         }
 
@@ -237,6 +277,29 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Unregisters an existing <see cref="IObjectGraphVisitor{Nothing}" /> of type <typeparam name="TObjectGraphVisitor" />.
+        /// </summary>
+        public SerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>()
+            where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
+        {
+            return WithoutPreProcessingPhaseObjectGraphVisitor(typeof(TObjectGraphVisitor));
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="IObjectGraphVisitor{Nothing}" /> of type <param name="objectGraphVisitorType" />.
+        /// </summary>
+        public SerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor(Type objectGraphVisitorType)
+        {
+            if (objectGraphVisitorType == null)
+            {
+                throw new ArgumentNullException("objectGraphVisitorType");
+            }
+
+            preProcessingPhaseObjectGraphVisitorFactories.Remove(objectGraphVisitorType);
+            return this;
+        }
+
+        /// <summary>
         /// Registers an additional <see cref="IObjectGraphVisitor{IEmitter}" /> to be used by the serializer
         /// while emitting an object graph.
         /// </summary>
@@ -270,6 +333,29 @@ namespace YamlDotNet.Serialization
             }
 
             where(emissionPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), args => objectGraphVisitorFactory(args)));
+            return this;
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="IObjectGraphVisitor{IEmitter}" /> of type <typeparam name="TObjectGraphVisitor" />.
+        /// </summary>
+        public SerializerBuilder WithoutEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>()
+            where TObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
+        {
+            return WithoutEmissionPhaseObjectGraphVisitor(typeof(TObjectGraphVisitor));
+        }
+
+        /// <summary>
+        /// Unregisters an existing <see cref="IObjectGraphVisitor{IEmitter}" /> of type <param name="objectGraphVisitorType" />.
+        /// </summary>
+        public SerializerBuilder WithoutEmissionPhaseObjectGraphVisitor(Type objectGraphVisitorType)
+        {
+            if (objectGraphVisitorType == null)
+            {
+                throw new ArgumentNullException("objectGraphVisitorType");
+            }
+
+            emissionPhaseObjectGraphVisitorFactories.Remove(objectGraphVisitorType);
             return this;
         }
 
