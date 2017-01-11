@@ -66,6 +66,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
@@ -98,6 +99,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepresentationModel\BinarySerlializationTests.cs" />
     <Compile Include="RepresentationModel\YamlStreamTests.cs" />
+    <Compile Include="Samples\DeserializeObjectGraph.cs" />
+    <Compile Include="Samples\ConvertYamlToJson.cs" />
+    <Compile Include="Samples\Helpers\SampleAttribute.cs" />
+    <Compile Include="Samples\Helpers\TestOutputHelperExtensions.cs" />
+    <Compile Include="Samples\DeserializingMultipleDocuments.cs" />
+    <Compile Include="Samples\ValidatingDuringDeserialization.cs" />
+    <Compile Include="Samples\LoadingAYamlStream.cs" />
+    <Compile Include="Samples\SerializeObjectGraph.cs" />
     <Compile Include="Serialization\GenericTestDictionary.cs" />
     <Compile Include="Serialization\GenericTestList.cs" />
     <Compile Include="Serialization\NamingConventionTests.cs" />
