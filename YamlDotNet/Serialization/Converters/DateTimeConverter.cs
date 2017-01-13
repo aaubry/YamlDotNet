@@ -33,19 +33,22 @@ namespace YamlDotNet.Serialization.Converters
     /// </summary>
     public class DateTimeConverter : IYamlTypeConverter
     {
-        private readonly DateTimeKind _kind;
-        private readonly string[] _formats;
+        private readonly DateTimeKind kind;
+        private readonly IFormatProvider provider;
+        private readonly string[] formats;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DateTimeConverter"/> class.
         /// </summary>
         /// <param name="kind"><see cref="DateTimeKind"/> value. Default value is <see cref="DateTimeKind.Utc"/>. <see cref="DateTimeKind.Unspecified"/> is considered as <see cref="DateTimeKind.Utc"/>.</param>
+        /// <param name="provider"><see cref="IFormatProvider"/> instance. Default value is <see cref="CultureInfo.InvariantCulture"/>.</param>
         /// <param name="formats">List of date/time formats for parsing. Default value is "<c>G</c>".</param>
         /// <remarks>On deserializing, all formats in the list are used for conversion, while on serializing, the first format in the list is used.</remarks>
-        public DateTimeConverter(DateTimeKind kind = DateTimeKind.Utc, params string[] formats)
+        public DateTimeConverter(DateTimeKind kind = DateTimeKind.Utc, IFormatProvider provider = null, params string[] formats)
         {
-            this._kind = kind == DateTimeKind.Unspecified ? DateTimeKind.Utc : kind;
-            this._formats = formats.DefaultIfEmpty("G").ToArray();
+            this.kind = kind == DateTimeKind.Unspecified ? DateTimeKind.Utc : kind;
+            this.provider = provider ?? CultureInfo.InvariantCulture;
+            this.formats = formats.DefaultIfEmpty("G").ToArray();
         }
 
         /// <summary>
@@ -68,10 +71,10 @@ namespace YamlDotNet.Serialization.Converters
         public object ReadYaml(IParser parser, Type type)
         {
             var value = ((Scalar)parser.Current).Value;
-            var style = this._kind == DateTimeKind.Local ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal;
+            var style = this.kind == DateTimeKind.Local ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal;
 
-            var dt = DateTime.ParseExact(value, this._formats, CultureInfo.InvariantCulture, style);
-            dt = EnsureDateTimeKind(dt, this._kind);
+            var dt = DateTime.ParseExact(value, this.formats, this.provider, style);
+            dt = EnsureDateTimeKind(dt, this.kind);
 
             parser.MoveNext();
 
@@ -88,8 +91,8 @@ namespace YamlDotNet.Serialization.Converters
         public void WriteYaml(IEmitter emitter, object value, Type type)
         {
             var dt = (DateTime) value;
-            var adjusted = this._kind == DateTimeKind.Local ? dt.ToLocalTime() : dt.ToUniversalTime();
-            var formatted = adjusted.ToString(this._formats.First(), CultureInfo.InvariantCulture); // Always take the first format of the list.
+            var adjusted = this.kind == DateTimeKind.Local ? dt.ToLocalTime() : dt.ToUniversalTime();
+            var formatted = adjusted.ToString(this.formats.First(), this.provider); // Always take the first format of the list.
 
             emitter.Emit((ParsingEvent)new Scalar((string)null, (string)null, formatted, ScalarStyle.Any, true, false));
         }
