@@ -19,8 +19,7 @@ namespace YamlDotNet.Samples
 
         [Sample(
             Title = "Deserializing an object graph",
-            Description = "Shows how to convert a YAML document to an object graph.",
-            Skip = "Depends on issue #228 to be resolved"
+            Description = "Shows how to convert a YAML document to an object graph."
         )]
         public void Main()
         {
@@ -77,10 +76,10 @@ namespace YamlDotNet.Samples
             public Customer Customer { get; set; }
             public List<OrderItem> Items { get; set; }
 
-            [YamlMember(Alias = "bill-to")]
+            [YamlMember(Alias = "bill-to", ApplyNamingConventions = false)]
             public Address BillTo { get; set; }
 
-            [YamlMember(Alias = "ship-to")]
+            [YamlMember(Alias = "ship-to", ApplyNamingConventions = false)]
             public Address ShipTo { get; set; }
 
             public string SpecialDelivery { get; set; }
@@ -94,7 +93,7 @@ namespace YamlDotNet.Samples
 
         public class OrderItem
         {
-            [YamlMember(Alias = "part_no")]
+            [YamlMember(Alias = "part_no", ApplyNamingConventions = false)]
             public string PartNo { get; set; }
             public string Descrip { get; set; }
             public decimal Price { get; set; }

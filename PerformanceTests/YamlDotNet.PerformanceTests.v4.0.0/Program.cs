@@ -25,7 +25,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.PerformanceTests.Lib;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.PerformanceTests.v3_8_0
+namespace YamlDotNet.PerformanceTests.v4_0_0
 {
     public class Program : ISerializerAdapter
     {
@@ -35,11 +35,13 @@ namespace YamlDotNet.PerformanceTests.v3_8_0
             runner.Run(new Program(), args);
         }
 
-        private readonly Serializer _serializer = new Serializer(namingConvention: new CamelCaseNamingConvention());
+        private readonly Serializer _serializer = new SerializerBuilder()
+            .WithNamingConvention(new CamelCaseNamingConvention())
+            .Build();
 
-        public void Serialize (TextWriter writer, object graph)
+        public void Serialize(TextWriter writer, object graph)
         {
-            _serializer.Serialize (writer, graph);
+            _serializer.Serialize(writer, graph);
         }
     }
 }

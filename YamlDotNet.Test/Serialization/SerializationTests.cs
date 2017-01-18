@@ -906,7 +906,7 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        public void SerializaionUtilizeNamingConventions()
+        public void SerializationUtilizeNamingConventions()
         {
             var convention = A.Fake<INamingConvention>();
             A.CallTo(() => convention.Apply(A<string>._)).ReturnsLazily((string x) => x);
@@ -1465,6 +1465,38 @@ namespace YamlDotNet.Test.Serialization
             var result = deserializer.Deserialize<TypeContainer>(yaml);
 
             Assert.Equal(typeof(string), result.Type);
+        }
+
+        [Fact]
+        public void NamingConventionIsNotAppliedBySerializerWhenApplyNamingConventionsIsFalse()
+        {
+            var sut = new SerializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+
+            var yaml = sut.Serialize(new NamingConventionDisabled { NoConvention = "value" });
+
+            Assert.Contains("NoConvention", yaml);
+        }
+
+        [Fact]
+        public void NamingConventionIsNotAppliedByDeserializerWhenApplyNamingConventionsIsFalse()
+        {
+            var sut = new DeserializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+
+            var yaml = "NoConvention: value";
+
+            var parsed = sut.Deserialize<NamingConventionDisabled>(yaml);
+
+            Assert.Equal("value", parsed.NoConvention);
+        }
+
+        public class NamingConventionDisabled
+        {
+            [YamlMember(ApplyNamingConventions = false)]
+            public string NoConvention { get; set; }
         }
 
         public class TypeContainer
