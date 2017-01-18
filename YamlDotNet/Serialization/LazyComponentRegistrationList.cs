@@ -52,6 +52,18 @@ namespace YamlDotNet.Serialization
             }
         }
 
+        public sealed class TrackingLazyComponentRegistration
+        {
+            public readonly Type ComponentType;
+            public readonly Func<TComponent, TArgument, TComponent> Factory;
+
+            public TrackingLazyComponentRegistration(Type componentType, Func<TComponent, TArgument, TComponent> factory)
+            {
+                ComponentType = componentType;
+                Factory = factory;
+            }
+        }
+
         public void Add(Type componentType, Func<TArgument, TComponent> factory)
         {
             entries.Add(new LazyComponentRegistration(componentType, factory));
@@ -95,6 +107,17 @@ namespace YamlDotNet.Serialization
             );
         }
 
+        public ITrackingRegistrationLocationSelectionSyntax<TComponent> CreateTrackingRegistrationLocationSelector(
+            Type componentType,
+            Func<TComponent, TArgument, TComponent> factory
+        )
+        {
+            return new TrackingRegistrationLocationSelector(
+                this,
+                new TrackingLazyComponentRegistration(componentType, factory)
+            );
+        }
+
         public IEnumerator<Func<TArgument, TComponent>> GetEnumerator()
         {
             return entries.Select(e => e.Factory).GetEnumerator();
@@ -103,6 +126,36 @@ namespace YamlDotNet.Serialization
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        private int IndexOfRegistration(Type registrationType)
+        {
+            for (int i = 0; i < entries.Count; ++i)
+            {
+                if (registrationType == entries[i].ComponentType)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private void EnsureNoDuplicateRegistrationType(Type componentType)
+        {
+            if (IndexOfRegistration(componentType) != -1)
+            {
+                throw new InvalidOperationException(string.Format("A component of type '{0}' has already been registered.", componentType.FullName));
+            }
+        }
+
+        private int EnsureRegistrationExists<TRegistrationType>()
+        {
+            var registrationIndex = IndexOfRegistration(typeof(TRegistrationType));
+            if (registrationIndex == -1)
+            {
+                throw new InvalidOperationException(string.Format("A component of type '{0}' has not been registered.", typeof(TRegistrationType).FullName));
+            }
+            return registrationIndex;
         }
 
         private class RegistrationLocationSelector : IRegistrationLocationSelectionSyntax<TComponent>
@@ -116,71 +169,68 @@ namespace YamlDotNet.Serialization
                 this.newRegistration = newRegistration;
             }
 
-            private int IndexOfRegistration(Type registrationType)
-            {
-                for (int i = 0; i < registrations.entries.Count; ++i)
-                {
-                    if (registrationType == registrations.entries[i].ComponentType)
-                    {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-
-            private void EnsureNoDuplicateRegistrationType()
-            {
-                if (IndexOfRegistration(newRegistration.ComponentType) != -1)
-                {
-                    throw new InvalidOperationException(string.Format("A component of type '{0}' has already been registered.", newRegistration.ComponentType.FullName));
-                }
-            }
-
-            private int EnsureRegistrationExists<TRegistrationType>()
-            {
-                var registrationIndex = IndexOfRegistration(typeof(TRegistrationType));
-                if (registrationIndex == -1)
-                {
-                    throw new InvalidOperationException(string.Format("A component of type '{0}' has not been registered.", typeof(TRegistrationType).FullName));
-                }
-                return registrationIndex;
-            }
-
             void IRegistrationLocationSelectionSyntax<TComponent>.InsteadOf<TRegistrationType>()
             {
                 if (newRegistration.ComponentType != typeof(TRegistrationType))
                 {
-                    EnsureNoDuplicateRegistrationType();
+                    registrations.EnsureNoDuplicateRegistrationType(newRegistration.ComponentType);
                 }
 
-                var registrationIndex = EnsureRegistrationExists<TRegistrationType>();
+                var registrationIndex = registrations.EnsureRegistrationExists<TRegistrationType>();
                 registrations.entries[registrationIndex] = newRegistration;
             }
 
             void IRegistrationLocationSelectionSyntax<TComponent>.After<TRegistrationType>()
             {
-                EnsureNoDuplicateRegistrationType();
-                var registrationIndex = EnsureRegistrationExists<TRegistrationType>();
+                registrations.EnsureNoDuplicateRegistrationType(newRegistration.ComponentType);
+                var registrationIndex = registrations.EnsureRegistrationExists<TRegistrationType>();
                 registrations.entries.Insert(registrationIndex + 1, newRegistration);
             }
 
             void IRegistrationLocationSelectionSyntax<TComponent>.Before<TRegistrationType>()
             {
-                EnsureNoDuplicateRegistrationType();
-                var registrationIndex = EnsureRegistrationExists<TRegistrationType>();
+                registrations.EnsureNoDuplicateRegistrationType(newRegistration.ComponentType);
+                var registrationIndex = registrations.EnsureRegistrationExists<TRegistrationType>();
                 registrations.entries.Insert(registrationIndex, newRegistration);
             }
 
             void IRegistrationLocationSelectionSyntax<TComponent>.OnBottom()
             {
-                EnsureNoDuplicateRegistrationType();
+                registrations.EnsureNoDuplicateRegistrationType(newRegistration.ComponentType);
                 registrations.entries.Add(newRegistration);
             }
 
             void IRegistrationLocationSelectionSyntax<TComponent>.OnTop()
             {
-                EnsureNoDuplicateRegistrationType();
+                registrations.EnsureNoDuplicateRegistrationType(newRegistration.ComponentType);
                 registrations.entries.Insert(0, newRegistration);
+            }
+        }
+
+        private class TrackingRegistrationLocationSelector : ITrackingRegistrationLocationSelectionSyntax<TComponent>
+        {
+            private readonly LazyComponentRegistrationList<TArgument, TComponent> registrations;
+            private readonly TrackingLazyComponentRegistration newRegistration;
+
+            public TrackingRegistrationLocationSelector(LazyComponentRegistrationList<TArgument, TComponent> registrations, TrackingLazyComponentRegistration newRegistration)
+            {
+                this.registrations = registrations;
+                this.newRegistration = newRegistration;
+            }
+
+            void ITrackingRegistrationLocationSelectionSyntax<TComponent>.InsteadOf<TRegistrationType>()
+            {
+                if (newRegistration.ComponentType != typeof(TRegistrationType))
+                {
+                    registrations.EnsureNoDuplicateRegistrationType(newRegistration.ComponentType);
+                }
+
+                var registrationIndex = registrations.EnsureRegistrationExists<TRegistrationType>();
+                var innerComponentFactory = registrations.entries[registrationIndex].Factory;
+                registrations.entries[registrationIndex] = new LazyComponentRegistration(
+                    newRegistration.ComponentType,
+                    arg => newRegistration.Factory(innerComponentFactory(arg), arg)
+                );
             }
         }
     }

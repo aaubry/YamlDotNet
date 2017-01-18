@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
 using YamlDotNet.Serialization.ObjectFactories;
@@ -154,6 +153,31 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers an additional <see cref="INodeDeserializer" /> to be used by the deserializer.
+        /// </summary>
+        /// <param name="nodeDeserializerFactory">A factory that creates the <see cref="INodeDeserializer" /> based on a previously registered <see cref="INodeDeserializer" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="INodeDeserializer" /></param>
+        public DeserializerBuilder WithNodeDeserializer<TNodeDeserializer>(
+            WrapperFactory<INodeDeserializer, TNodeDeserializer> nodeDeserializerFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<INodeDeserializer>> where
+        )
+            where TNodeDeserializer : INodeDeserializer
+        {
+            if (nodeDeserializerFactory == null)
+            {
+                throw new ArgumentNullException("nodeDeserializerFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(nodeDeserializerFactories.CreateTrackingRegistrationLocationSelector(typeof(TNodeDeserializer), (wrapped, _) => nodeDeserializerFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
         /// Unregisters an existing <see cref="INodeDeserializer" /> of type <typeparam name="TNodeDeserializer" />.
         /// </summary>
         public DeserializerBuilder WithoutNodeDeserializer<TNodeDeserializer>()
@@ -205,6 +229,31 @@ namespace YamlDotNet.Serialization
             }
 
             where(nodeTypeResolverFactories.CreateRegistrationLocationSelector(nodeTypeResolver.GetType(), _ => nodeTypeResolver));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an additional <see cref="INodeTypeResolver" /> to be used by the deserializer.
+        /// </summary>
+        /// <param name="nodeTypeResolverFactory">A factory that creates the <see cref="INodeTypeResolver" /> based on a previously registered <see cref="INodeTypeResolver" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="INodeTypeResolver" /></param>
+        public DeserializerBuilder WithNodeTypeResolver<TNodeTypeResolver>(
+            WrapperFactory<INodeTypeResolver, TNodeTypeResolver> nodeTypeResolverFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<INodeTypeResolver>> where
+        )
+            where TNodeTypeResolver : INodeTypeResolver
+        {
+            if (nodeTypeResolverFactory == null)
+            {
+                throw new ArgumentNullException("nodeTypeResolverFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(nodeTypeResolverFactories.CreateTrackingRegistrationLocationSelector(typeof(TNodeTypeResolver), (wrapped, _) => nodeTypeResolverFactory(wrapped)));
             return this;
         }
 

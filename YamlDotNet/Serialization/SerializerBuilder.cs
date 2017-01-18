@@ -113,6 +113,31 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
+        /// </summary>
+        /// <param name="eventEmitterFactory">A function that instantiates the event emitter based on a previously registered <see cref="IEventEmitter" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
+        public SerializerBuilder WithEventEmitter<TEventEmitter>(
+            WrapperFactory<IEventEmitter, IEventEmitter, TEventEmitter> eventEmitterFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<IEventEmitter>> where
+        )
+            where TEventEmitter : IEventEmitter
+        {
+            if (eventEmitterFactory == null)
+            {
+                throw new ArgumentNullException("eventEmitterFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(eventEmitterFactories.CreateTrackingRegistrationLocationSelector(typeof(TEventEmitter), (wrapped, inner) => eventEmitterFactory(wrapped, inner)));
+            return Self;
+        }
+
+        /// <summary>
         /// Unregisters an existing <see cref="IEventEmitter" /> of type <typeparam name="TEventEmitter" />.
         /// </summary>
         public SerializerBuilder WithoutEventEmitter<TEventEmitter>()
@@ -277,6 +302,37 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers an additional <see cref="IObjectGraphVisitor{Nothing}" /> to be used by the serializer
+        /// before emitting an object graph.
+        /// </summary>
+        /// <remarks>
+        /// Registering a visitor in the pre-processing phase enables to traverse the object graph once
+        /// before actually emitting it. This allows a visitor to collect information about the graph that
+        /// can be used later by another visitor registered in the emission phase.
+        /// </remarks>
+        /// <param name="objectGraphVisitorFactory">A factory that creates the <see cref="IObjectGraphVisitor{Nothing}" /> based on a previously registered <see cref="IObjectGraphVisitor{Nothing}" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
+        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+            WrapperFactory<IObjectGraphVisitor<Nothing>, TObjectGraphVisitor> objectGraphVisitorFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<IObjectGraphVisitor<Nothing>>> where
+        )
+            where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
+        {
+            if (objectGraphVisitorFactory == null)
+            {
+                throw new ArgumentNullException("objectGraphVisitorFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(preProcessingPhaseObjectGraphVisitorFactories.CreateTrackingRegistrationLocationSelector(typeof(TObjectGraphVisitor), (wrapped, _) => objectGraphVisitorFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
         /// Unregisters an existing <see cref="IObjectGraphVisitor{Nothing}" /> of type <typeparam name="TObjectGraphVisitor" />.
         /// </summary>
         public SerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>()
@@ -333,6 +389,32 @@ namespace YamlDotNet.Serialization
             }
 
             where(emissionPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), args => objectGraphVisitorFactory(args)));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an additional <see cref="IObjectGraphVisitor{IEmitter}" /> to be used by the serializer
+        /// while emitting an object graph.
+        /// </summary>
+        /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector based on a previously registered <see cref="IObjectGraphVisitor{IEmitter}" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{IEmitter}" /></param>
+        public SerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+            WrapperFactory<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>, TObjectGraphVisitor> objectGraphVisitorFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<IObjectGraphVisitor<IEmitter>>> where
+        )
+            where TObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
+        {
+            if (objectGraphVisitorFactory == null)
+            {
+                throw new ArgumentNullException("objectGraphVisitorFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(emissionPhaseObjectGraphVisitorFactories.CreateTrackingRegistrationLocationSelector(typeof(TObjectGraphVisitor), (wrapped, args) => objectGraphVisitorFactory(wrapped, args)));
             return this;
         }
 

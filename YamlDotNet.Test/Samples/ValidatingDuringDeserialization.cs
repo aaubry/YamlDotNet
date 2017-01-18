@@ -55,18 +55,9 @@ namespace YamlDotNet.Test.Samples
         {
             // Then we wrap the existing ObjectNodeDeserializer
             // with our ValidatingNodeDeserializer:
-            var deserializer = new Deserializer();
-
-            var objectDeserializer = deserializer.NodeDeserializers
-                .Select((d, i) => new
-                {
-                    Deserializer = d as ObjectNodeDeserializer,
-                    Index = i
-                })
-                .First(d => d.Deserializer != null);
-
-            deserializer.NodeDeserializers[objectDeserializer.Index] =
-                new ValidatingNodeDeserializer(objectDeserializer.Deserializer);
+            var deserializer = new DeserializerBuilder()
+                .WithNodeDeserializer(inner => new ValidatingNodeDeserializer(inner), s => s.InsteadOf<ObjectNodeDeserializer>())
+                .Build();
 
             // This will fail with a validation exception
             var ex = Assert.Throws<YamlException>(() =>

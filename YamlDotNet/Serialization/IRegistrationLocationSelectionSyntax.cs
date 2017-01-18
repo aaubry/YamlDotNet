@@ -48,4 +48,12 @@ namespace YamlDotNet.Serialization
         /// </summary>
         void OnBottom();
     }
+
+    public interface ITrackingRegistrationLocationSelectionSyntax<TBaseRegistrationType>
+    {
+        /// <summary>
+        /// Registers the component in place of the already registered component of type <typeparamref name="TRegistrationType" />.
+        /// </summary>
+        void InsteadOf<TRegistrationType>() where TRegistrationType : TBaseRegistrationType;
+    }
 }
