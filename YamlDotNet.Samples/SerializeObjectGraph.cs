@@ -1,9 +1,9 @@
 ﻿using System;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
-using YamlDotNet.Test.Samples.Helpers;
+using YamlDotNet.Samples.Helpers;
 
-namespace YamlDotNet.Test.Samples
+namespace YamlDotNet.Samples
 {
     public class SerializeObjectGraph
     {

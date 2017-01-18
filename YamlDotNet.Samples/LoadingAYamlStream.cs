@@ -2,9 +2,9 @@
 using System.IO;
 using Xunit.Abstractions;
 using YamlDotNet.RepresentationModel;
-using YamlDotNet.Test.Samples.Helpers;
+using YamlDotNet.Samples.Helpers;
 
-namespace YamlDotNet.Test.Samples
+namespace YamlDotNet.Samples
 {
     public class LoadingAYamlStream
     {

@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace YamlDotNet.Test.Samples.Helpers
+namespace YamlDotNet.Samples.Helpers
 {
     /// <summary>
     /// Marks a test as being a code sample.

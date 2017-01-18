@@ -4,9 +4,9 @@ using System.IO;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Test.Samples.Helpers;
+using YamlDotNet.Samples.Helpers;
 
-namespace YamlDotNet.Test.Samples
+namespace YamlDotNet.Samples
 {
     public class DeserializeObjectGraph
     {
@@ -19,7 +19,8 @@ namespace YamlDotNet.Test.Samples
 
         [Sample(
             Title = "Deserializing an object graph",
-            Description = "Shows how to convert a YAML document to an object graph."
+            Description = "Shows how to convert a YAML document to an object graph.",
+            Skip = "Depends on issue #228 to be resolved"
         )]
         public void Main()
         {

@@ -7,9 +7,9 @@ using Xunit.Abstractions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Test.Samples.Helpers;
+using YamlDotNet.Samples.Helpers;
 
-namespace YamlDotNet.Test.Samples
+namespace YamlDotNet.Samples
 {
     public class ValidatingDuringDeserialization
     {

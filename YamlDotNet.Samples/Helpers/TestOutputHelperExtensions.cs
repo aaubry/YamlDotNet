@@ -1,6 +1,6 @@
 ﻿using Xunit.Abstractions;
 
-namespace YamlDotNet.Test.Samples.Helpers
+namespace YamlDotNet.Samples.Helpers
 {
     public static class TestOutputHelperExtensions
     {

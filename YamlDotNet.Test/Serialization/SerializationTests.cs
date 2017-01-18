@@ -931,8 +931,11 @@ namespace YamlDotNet.Test.Serialization
                 "FirstTest: 1",
                 "SecondTest: 2");
 
-            DeserializerBuilder.WithNamingConvention(convention);
-            Deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(convention)
+                .Build();
+
+            deserializer.Deserialize<NameConvention>(UsingReaderFor(text));
 
             A.CallTo(() => convention.Apply("FirstTest")).MustHaveHappened();
             A.CallTo(() => convention.Apply("SecondTest")).MustHaveHappened();
