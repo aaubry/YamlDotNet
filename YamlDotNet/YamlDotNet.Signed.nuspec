@@ -21,8 +21,7 @@
         <file src="bin\Release-Portable-Signed\YamlDotNet.pdb" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
         <file src="bin\Release-Portable-Signed\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 
-        <file src="bin\Release-Portable-Signed\YamlDotNet.dll" target="lib\dotnet" />
-        <file src="bin\Release-Portable-Signed\YamlDotNet.pdb" target="lib\dotnet" />
-        <file src="bin\Release-Portable-Signed\YamlDotNet.xml" target="lib\dotnet" />
+        <file src="D:\Git\YamlDotNet\YamlDotNet.NetCore\bin\Debug\netstandard1.0\YamlDotNet.NetCore.dll" target="lib\netstandard1.0" />
+        <file src="D:\Git\YamlDotNet\YamlDotNet.NetCore\bin\Debug\netstandard1.0\YamlDotNet.NetCore.pdb" target="lib\netstandard1.0" />
     </files>
 </package>
