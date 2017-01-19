@@ -19,11 +19,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using FakeItEasy;
+using FluentAssertions;
 using System;
 using System.IO;
-using FakeItEasy;
-using FakeItEasy.Core;
-using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 
@@ -77,73 +76,78 @@ namespace YamlDotNet.Test.Core
 
             buffer.Peek(2);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(1);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(() => { ++reads; });
 
-                buffer.Peek(0).Should().Be('b');
-                buffer.Peek(1).Should().Be('c');
-                A.CallTo(() => reader.Read()).MustNotHaveHappened();
-            }
+            buffer.Skip(1);
+
+            buffer.Peek(0).Should().Be('b');
+            buffer.Peek(1).Should().Be('c');
+
+            Assert.Equal(0, reads);
         }
 
         [Fact]
         public void ShouldHaveReadOnceAfterSkippingOneCharacter()
         {
-            var reader = CreateFakeReader(TestString);
+            var innerReader = new StringReader(TestString);
+            var reader = A.Fake<TextReader>(x => x.Wrapping(innerReader));
             var buffer = CreateBuffer(reader, Capacity);
 
             buffer.Peek(2);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(1);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(call => { ++reads; }).ReturnsLazily(call => innerReader.Read());
 
-                buffer.Peek(2).Should().Be('d');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-            }
+            buffer.Skip(1);
+            buffer.Peek(2).Should().Be('d');
+
+            Assert.Equal(1, reads);
         }
 
         [Fact]
         public void ShouldHaveReadTwiceAfterSkippingOneCharacter()
         {
-            var reader = CreateFakeReader(TestString);
+            var innerReader = new StringReader(TestString);
+            var reader = A.Fake<TextReader>(x => x.Wrapping(innerReader));
             var buffer = CreateBuffer(reader, Capacity);
 
             buffer.Peek(2);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(1);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(call => { ++reads; }).ReturnsLazily(call => innerReader.Read());
 
-                buffer.Peek(3).Should().Be('e');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Twice);
-            }
+            buffer.Skip(1);
+            buffer.Peek(3).Should().Be('e');
+
+            Assert.Equal(2, reads);
         }
 
         [Fact]
         public void ShouldHaveReadOnceAfterSkippingFiveCharacters()
         {
-            var reader = CreateFakeReader(TestString);
+            var innerReader = new StringReader(TestString);
+            var reader = A.Fake<TextReader>(x => x.Wrapping(innerReader));
             var buffer = CreateBuffer(reader, Capacity);
 
             buffer.Peek(2);
             buffer.Skip(1);
             buffer.Peek(3);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(4);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(call => { ++reads; }).ReturnsLazily(call => innerReader.Read());
 
-                buffer.Peek(0).Should().Be('f');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-            }
+            buffer.Skip(4);
+            buffer.Peek(0).Should().Be('f');
+
+            Assert.Equal(1, reads);
         }
 
         [Fact]
         public void ShouldHaveReadOnceAfterSkippingSixCharacters()
         {
-            var reader = CreateFakeReader(TestString);
+            var innerReader = new StringReader(TestString);
+            var reader = A.Fake<TextReader>(x => x.Wrapping(innerReader));
             var buffer = CreateBuffer(reader, Capacity);
 
             buffer.Peek(2);
@@ -152,19 +156,20 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(0);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(1);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(call => { ++reads; }).ReturnsLazily(call => innerReader.Read());
 
-                buffer.Peek(0).Should().Be('g');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-            }
+            buffer.Skip(1);
+            buffer.Peek(0).Should().Be('g');
+
+            Assert.Equal(1, reads);
         }
 
         [Fact]
         public void ShouldHaveReadOnceAfterSkippingSevenCharacters()
         {
-            var reader = CreateFakeReader(TestString);
+            var innerReader = new StringReader(TestString);
+            var reader = A.Fake<TextReader>(x => x.Wrapping(innerReader));
             var buffer = CreateBuffer(reader, Capacity);
 
             buffer.Peek(2);
@@ -173,19 +178,20 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(1);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(2);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(call => { ++reads; }).ReturnsLazily(call => innerReader.Read());
 
-                buffer.Peek(0).Should().Be('h');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-            }
+            buffer.Skip(2);
+            buffer.Peek(0).Should().Be('h');
+
+            Assert.Equal(1, reads);
         }
 
         [Fact]
         public void ShouldHaveReadOnceAfterSkippingEightCharacters()
         {
-            var reader = CreateFakeReader(TestString);
+            var innerReader = new StringReader(TestString);
+            var reader = A.Fake<TextReader>(x => x.Wrapping(innerReader));
             var buffer = CreateBuffer(reader, Capacity);
 
             buffer.Peek(2);
@@ -194,13 +200,13 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(2);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(3);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(call => { ++reads; }).ReturnsLazily(call => innerReader.Read());
 
-                buffer.Peek(0).Should().Be('i');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-            }
+            buffer.Skip(3);
+            buffer.Peek(0).Should().Be('i');
+
+            Assert.Equal(1, reads);
         }
 
         [Fact]
@@ -215,13 +221,13 @@ namespace YamlDotNet.Test.Core
             buffer.Skip(4);
             buffer.Peek(3);
 
-            using (OnlyTheseCalls)
-            {
-                buffer.Skip(4);
+            int reads = 0;
+            A.CallTo(() => reader.Read()).Invokes(() => { ++reads; });
 
-                buffer.Peek(0).Should().Be('\0');
-                A.CallTo(() => reader.Read()).MustHaveHappened(Repeated.Exactly.Once);
-            }
+            buffer.Skip(4);
+            buffer.Peek(0).Should().Be('\0');
+
+            Assert.Equal(1, reads);
         }
 
         [Fact]
@@ -272,11 +278,6 @@ namespace YamlDotNet.Test.Core
         private static LookAheadBuffer CreateBuffer(TextReader reader, int capacity)
         {
             return new LookAheadBuffer(reader, capacity);
-        }
-
-        private static IFakeScope OnlyTheseCalls
-        {
-            get { return Fake.CreateScope(); }
         }
     }
 }
