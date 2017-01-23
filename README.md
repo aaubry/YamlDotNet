@@ -41,6 +41,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 * 32bits Unicode code points in escape sequences and url-encoded tags [are now properly handled](https://github.com/aaubry/YamlDotNet/pull/219).
 * [Anchors can now be redefined](https://github.com/aaubry/YamlDotNet/pull/222) in a document.  
   This is to conform to [the 1.1 spec](http://yaml.org/spec/1.1/#id863390) as well as [the 1.2 spec](http://www.yaml.org/spec/1.2/spec.html#id2765878):
+  
   > #### 3.2.2.2. Anchors and Aliases
   > When composing a representation graph from serialized events, an alias node refers to the most recent node in the serialization having the specified anchor. Therefore, anchors need not be unique within a serialization.
 * Added support for [tag mappings on the serializer](https://github.com/aaubry/YamlDotNet/pull/229).  
