@@ -22,6 +22,7 @@ build_script:
 test_script:
   - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release\YamlDotNet.Test.dll" -appveyor'
   - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release-Portable\YamlDotNet.Test.Portable.dll" -appveyor'
+  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Samples\bin\Release\YamlDotNet.Samples.dll" -appveyor'
 
 artifacts:
   - path: YamlDotNet\bin\Release-Unsigned

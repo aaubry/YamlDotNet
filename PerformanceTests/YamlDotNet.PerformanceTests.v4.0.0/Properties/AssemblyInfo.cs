@@ -19,27 +19,24 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.PerformanceTests.Lib;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
-namespace YamlDotNet.PerformanceTests.v3_8_0
-{
-    public class Program : ISerializerAdapter
-    {
-        public static void Main(string[] args)
-        {
-            var runner = new PerformanceTestRunner();
-            runner.Run(new Program(), args);
-        }
-
-        private readonly Serializer _serializer = new Serializer(namingConvention: new CamelCaseNamingConvention());
-
-        public void Serialize (TextWriter writer, object graph)
-        {
-            _serializer.Serialize (writer, graph);
-        }
-    }
-}
+// Information about this assembly is defined by the following attributes.
+// Change them to the values specific to your project.
+[assembly: AssemblyTitle ("YamlDotNet.PerformanceTests.v4.0.0")]
+[assembly: AssemblyDescription ("")]
+[assembly: AssemblyConfiguration ("")]
+[assembly: AssemblyCompany ("")]
+[assembly: AssemblyProduct ("")]
+[assembly: AssemblyCopyright ("aaubry")]
+[assembly: AssemblyTrademark ("")]
+[assembly: AssemblyCulture ("")]
+// The assembly version has the format "{Major}.{Minor}.{Build}.{Revision}".
+// The form "{Major}.{Minor}.*" will automatically update the build and revision,
+// and "{Major}.{Minor}.{Build}.*" will update just the revision.
+[assembly: AssemblyVersion ("1.0.*")]
+// The following attributes are used to specify the signing key for the assembly,
+// if desired. See the Mono documentation for more information about signing.
+//[assembly: AssemblyDelaySign(false)]
+//[assembly: AssemblyKeyFile("")]

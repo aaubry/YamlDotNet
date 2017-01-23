@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69EE9636-55BA-49C2-827E-D5684221C345}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -33,6 +35,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.AotTest", "YamlDotNet.AotTest\YamlDotNet.AotTest.csproj", "{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v3.8.0", "PerformanceTests\YamlDotNet.PerformanceTests.v3.8.0\YamlDotNet.PerformanceTests.v3.8.0.csproj", "{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v4.0.0", "PerformanceTests\YamlDotNet.PerformanceTests.v4.0.0\YamlDotNet.PerformanceTests.v4.0.0.csproj", "{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -157,6 +163,27 @@ Global
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Debug-UnitySubset-v35|Any CPU.ActiveCfg = Debug|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.PerformanceTests|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.Build.0 = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Debug-UnitySubset-v35|Any CPU.ActiveCfg = Debug|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.PerformanceTests|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -169,6 +196,7 @@ Global
 		{BE49A287-5F47-4E3B-90EB-97B51451934C} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036} = {FFEB1B4B-D432-4268-B690-CD16598807CA}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj

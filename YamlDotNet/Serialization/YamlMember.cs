@@ -46,6 +46,11 @@ namespace YamlDotNet.Serialization
         public string Alias { get; set; }
 
         /// <summary>
+        /// When false, naming conventions will not be applied to this member. Defaults to true.
+        /// </summary>
+        public bool ApplyNamingConventions { get; set; }
+
+        /// <summary>
         /// Specifies the scalar style of the property when serialized. This will only affect the serialization of scalar properties.
         /// </summary>
         public ScalarStyle ScalarStyle { get; set; }
@@ -56,6 +61,7 @@ namespace YamlDotNet.Serialization
         public YamlMemberAttribute()
         {
             ScalarStyle = ScalarStyle.Any;
+            ApplyNamingConventions = true;
         }
 
         /// <summary>

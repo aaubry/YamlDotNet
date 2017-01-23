@@ -54,7 +54,15 @@ namespace YamlDotNet.Serialization.TypeInspectors
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
         {
             return innerTypeDescriptor.GetProperties(type, container)
-                .Select(p => (IPropertyDescriptor)new PropertyDescriptor(p) { Name = namingConvention.Apply(p.Name) });
+                .Select(p =>
+                {
+                    var attribute = p.GetCustomAttribute<YamlMemberAttribute>();
+                    if (attribute != null && !attribute.ApplyNamingConventions)
+                    {
+                        return p;
+                    }
+                    return (IPropertyDescriptor)new PropertyDescriptor(p) { Name = namingConvention.Apply(p.Name) };
+                });
         }
     }
 }

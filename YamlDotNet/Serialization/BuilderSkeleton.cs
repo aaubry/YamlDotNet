@@ -141,6 +141,31 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers an additional <see cref="IYamlTypeConverter" /> to be used by the (de)serializer.
+        /// </summary>
+        /// <param name="typeConverterFactory">A factory that creates the <see cref="IYamlTypeConverter" /> based on a previously registered <see cref="IYamlTypeConverter" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IYamlTypeConverter" /></param>
+        public TBuilder WithTypeConverter<TYamlTypeConverter>(
+            WrapperFactory<IYamlTypeConverter, IYamlTypeConverter> typeConverterFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<IYamlTypeConverter>> where
+        )
+            where TYamlTypeConverter : IYamlTypeConverter
+        {
+            if (typeConverterFactory == null)
+            {
+                throw new ArgumentNullException("typeConverterFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(typeConverterFactories.CreateTrackingRegistrationLocationSelector(typeof(TYamlTypeConverter), (wrapped, _) => typeConverterFactory(wrapped)));
+            return Self;
+        }
+
+        /// <summary>
         /// Unregisters an existing <see cref="IYamlTypeConverter" /> of type <typeparam name="TYamlTypeConverter" />.
         /// </summary>
         public TBuilder WithoutTypeConverter<TYamlTypeConverter>()
@@ -199,6 +224,31 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers an additional <see cref="ITypeInspector" /> to be used by the (de)serializer.
+        /// </summary>
+        /// <param name="typeInspectorFactory">A function that instantiates the type inspector based on a previously registered <see cref="ITypeInspector" />..</param>
+        /// <param name="where">Configures the location where to insert the <see cref="ITypeInspector" /></param>
+        public TBuilder WithTypeInspector<TTypeInspector>(
+            WrapperFactory<ITypeInspector, ITypeInspector, TTypeInspector> typeInspectorFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<ITypeInspector>> where
+        )
+            where TTypeInspector : ITypeInspector
+        {
+            if (typeInspectorFactory == null)
+            {
+                throw new ArgumentNullException("typeInspectorFactory");
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException("where");
+            }
+
+            where(typeInspectorFactories.CreateTrackingRegistrationLocationSelector(typeof(TTypeInspector), (wrapped, inner) => typeInspectorFactory(wrapped, inner)));
+            return Self;
+        }
+
+        /// <summary>
         /// Unregisters an existing <see cref="ITypeInspector" /> of type <typeparam name="TTypeInspector" />.
         /// </summary>
         public TBuilder WithoutTypeInspector<TTypeInspector>()
@@ -226,4 +276,24 @@ namespace YamlDotNet.Serialization
             return typeConverterFactories.BuildComponentList();
         }
     }
+
+    /// <summary>
+    /// A factory that creates instances of <typeparamref name="TComponent" /> based on an existing <typeparamref name="TComponentBase" />.
+    /// </summary>
+    /// <typeparam name="TComponentBase">The type of the wrapped component.</typeparam>
+    /// <typeparam name="TComponent">The type of the component that this factory creates.</typeparam>
+    /// <param name="wrapped">The component that is to be wrapped.</param>
+    /// <returns>Returns a new instance of <typeparamref name="TComponent" /> that is based on <paramref name="wrapped" />.</returns>
+    public delegate TComponent WrapperFactory<TComponentBase, TComponent>(TComponentBase wrapped) where TComponent : TComponentBase;
+
+    /// <summary>
+    /// A factory that creates instances of <typeparamref name="TComponent" /> based on an existing <typeparamref name="TComponentBase" /> and an argument.
+    /// </summary>
+    /// <typeparam name="TArgument">The type of the argument.</typeparam>
+    /// <typeparam name="TComponentBase">The type of the wrapped component.</typeparam>
+    /// <typeparam name="TComponent">The type of the component that this factory creates.</typeparam>
+    /// <param name="wrapped">The component that is to be wrapped.</param>
+    /// <param name="argument">The argument of the factory.</param>
+    /// <returns>Returns a new instance of <typeparamref name="TComponent" /> that is based on <paramref name="wrapped" /> and <paramref name="argument" />.</returns>
+    public delegate TComponent WrapperFactory<TArgument, TComponentBase, TComponent>(TComponentBase wrapped, TArgument argument) where TComponent : TComponentBase;
 }
