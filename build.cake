@@ -1,66 +1,105 @@
-#tool nuget:?package=NUnit.ConsoleRunner&version=3.4.0
+#tool "nuget:?package=xunit.runner.console"
+
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
 //////////////////////////////////////////////////////////////////////
 
 var target = Argument("target", "Default");
-var configuration = Argument("configuration", "Release");
+var releaseConfigurations = new[] { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed" };
+var configuration = Argument("configuration", "Release-Unsigned");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
 //////////////////////////////////////////////////////////////////////
 
 // Define directories.
-var buildDir = Directory("./src/Example/bin") + Directory(configuration);
-var testsDir = Directory("./YamlDotNet.Test/bin") + Directory(configuration);
+var buildDir = Directory("./YamlDotNet/bin") + Directory(configuration);
+
+var solutionPath = "./YamlDotNet.sln";
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
 //////////////////////////////////////////////////////////////////////
 
-// Task("Clean")
-//     .Does(() =>
-// {
-//     CleanDirectory(buildDir);
-// });
+Console.WriteLine(configuration);
 
-// Task("Restore-NuGet-Packages")
-//     .IsDependentOn("Clean")
-//     .Does(() =>
-// {
-//     NuGetRestore("./src/Example.sln");
-// });
-
-// Task("Build")
-//     .IsDependentOn("Restore-NuGet-Packages")
-//     .Does(() =>
-// {
-//     if(IsRunningOnWindows())
-//     {
-//       // Use MSBuild
-//       MSBuild("./src/Example.sln", settings =>
-//         settings.SetConfiguration(configuration));
-//     }
-//     else
-//     {
-//       // Use XBuild
-//       XBuild("./src/Example.sln", settings =>
-//         settings.SetConfiguration(configuration));
-//     }
-// });
-
-// Task("Run-Unit-Tests")
-//     .IsDependentOn("Build")
-//     .Does(() =>
-// {
-//     NUnit3("./src/**/bin/" + configuration + "/*.Tests.dll", new NUnit3Settings {
-//         NoResults = true
-//         });
-// });
-
-Task("Document")
+Task("Clean")
     .Does(() =>
     {
+        CleanDirectories(new[]
+        {
+            "./YamlDotNet/bin",
+            "./YamlDotNet.AotTest/bin",
+            "./YamlDotNet.Samples/bin",
+            "./YamlDotNet.Test/bin",
+        });
+    });
+
+Task("Restore-NuGet-Packages")
+    .IsDependentOn("Clean")
+    .Does(() =>
+    {
+        NuGetRestore(solutionPath);
+    });
+
+Task("Build")
+    .IsDependentOn("Restore-NuGet-Packages")
+    .Does(() =>
+    {
+        if(IsRunningOnWindows())
+        {
+            // Use MSBuild
+            MSBuild(solutionPath, settings =>
+                settings.SetConfiguration(configuration));
+        }
+        else
+        {
+            // Use XBuild
+            XBuild(solutionPath, settings =>
+                settings.SetConfiguration(configuration));
+        }
+    });
+
+Task("Run-Unit-Tests")
+    .IsDependentOn("Build")
+    .Does(() =>
+    {
+        XUnit2("YamlDotNet.Test/bin/" + configuration + "/YamlDotNet.Test*.dll");
+    });
+
+Task("Package")
+    .IsDependentOn("Restore-NuGet-Packages")
+    .Does(() =>
+    {
+        foreach(var releaseConfiguration in releaseConfigurations)
+        {
+            if(IsRunningOnWindows())
+            {
+                // Use MSBuild
+                MSBuild(solutionPath, settings =>
+                    settings.SetConfiguration(releaseConfiguration));
+            }
+            else
+            {
+                // Use XBuild
+                XBuild(solutionPath, settings =>
+                    settings.SetConfiguration(releaseConfiguration));
+            }
+
+            XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/YamlDotNet.Test*.dll");
+        }
+    });
+
+Task("Document")
+    // .IsDependentOn("Build")
+    .Does(() =>
+    {
+        XUnit2("YamlDotNet.Samples/bin/" + configuration + "/YamlDotNet.Samples.dll", new XUnit2Settings
+        {
+            OutputDirectory = Directory("YamlDotNet.Samples/bin/" + configuration),
+            XmlReport = true
+        });
+        
         // Console.WriteLine(testsDir + File("YamlDotNet.Test.dll"));
     });
 
@@ -69,8 +108,8 @@ Task("Document")
 //////////////////////////////////////////////////////////////////////
 
 Task("Default")
-     .IsDependentOn("Document");
-//     .IsDependentOn("Run-Unit-Tests");
+     // .IsDependentOn("Document");
+     .IsDependentOn("Run-Unit-Tests");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
