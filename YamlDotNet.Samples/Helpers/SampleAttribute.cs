@@ -1,13 +1,15 @@
-﻿using Xunit;
+﻿using System;
 
 namespace YamlDotNet.Samples.Helpers
 {
     /// <summary>
     /// Marks a test as being a code sample.
     /// </summary>
-    internal class SampleAttribute : FactAttribute
+    internal class SampleAttribute : Attribute
     {
         private string title;
+
+        public string DisplayName { get; private set; }
 
         public string Title
         {

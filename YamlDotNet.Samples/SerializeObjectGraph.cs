@@ -1,5 +1,4 @@
 ﻿using System;
-using Xunit.Abstractions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Samples.Helpers;
 
@@ -20,32 +19,32 @@ namespace YamlDotNet.Samples
         )]
         public void Main()
         {
-            var address = new
+            var address = new Address
             {
                 street = "123 Tornado Alley\nSuite 16",
                 city = "East Westville",
                 state = "KS"
             };
 
-            var receipt = new
+            var receipt = new Receipt
             {
                 receipt = "Oz-Ware Purchase Invoice",
                 date = new DateTime(2007, 8, 6),
-                customer = new
+                customer = new Customer
                 {
                     given = "Dorothy",
                     family = "Gale"
                 },
-                items = new[]
+                items = new Item[]
                 {
-                    new
+                    new Item
                     {
                         part_no = "A4786",
                         descrip = "Water Bucket (Filled)",
                         price = 1.47M,
                         quantity = 4
                     },
-                    new
+                    new Item
                     {
                         part_no = "E1628",
                         descrip = "High Heeled \"Ruby\" Slippers",
@@ -61,9 +60,37 @@ namespace YamlDotNet.Samples
                                   "man behind the curtain."
             };
 
-            var serializer = new Serializer();
+            var serializer = new SerializerBuilder().Build();
             var yaml = serializer.Serialize(receipt);
             output.WriteLine(yaml);
         }
+    }
+
+    public class Address {
+        public string street { get; set; }
+        public string city   { get; set; }
+        public string state  { get; set; }
+    }
+
+    public class Receipt {
+        public string   receipt         { get; set; }
+        public DateTime date            { get; set; }
+        public Customer customer        { get; set; }
+        public Item[]   items           { get; set; }
+        public Address  bill_to         { get; set; }
+        public Address  ship_to         { get; set; }
+        public string   specialDelivery { get; set; }
+    }
+
+    public class Customer {
+        public string given  { get; set; }
+        public string family { get; set; }
+    }
+
+    public class Item {
+        public string  part_no  { get; set; }
+        public string  descrip  { get; set; }
+        public decimal price    { get; set; }
+        public int     quantity { get; set; }
     }
 }

@@ -106,6 +106,13 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
         /// </summary>
+        public YamlMappingNode(int dummy) // dummy makes the call to the constructor unambiguous to buggy compilers like mono in Unity.
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="YamlMappingNode"/> class.
+        /// </summary>
         public YamlMappingNode(params KeyValuePair<YamlNode, YamlNode>[] children)
             : this((IEnumerable<KeyValuePair<YamlNode, YamlNode>>)children)
         {
@@ -404,7 +411,7 @@ namespace YamlDotNet.RepresentationModel
                 throw new ArgumentNullException("mapping");
             }
 
-            var result = new YamlMappingNode();
+            var result = new YamlMappingNode(0);
             foreach (var property in mapping.GetType().GetPublicProperties())
             {
                 if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)

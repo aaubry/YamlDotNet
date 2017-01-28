@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Xunit.Abstractions;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Samples.Helpers;
 
