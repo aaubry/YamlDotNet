@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Xunit.Abstractions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Samples.Helpers;
 
@@ -27,7 +26,7 @@ sequence:
   - one
   - two
 ");
-            var deserializer = new Deserializer();
+            var deserializer = new DeserializerBuilder().Build();
             var yamlObject = deserializer.Deserialize(r);
 
             var serializer = new SerializerBuilder()
