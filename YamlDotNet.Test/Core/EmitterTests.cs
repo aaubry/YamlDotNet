@@ -183,7 +183,7 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(events);
 
-            yaml.Should().Be(expected.Replace("\r\n", Environment.NewLine));
+            yaml.Should().Be(expected.NormalizeNewLines());
         }
 
         [Theory]

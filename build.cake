@@ -49,14 +49,14 @@ Task("Build")
         if(IsRunningOnWindows())
         {
             // Use MSBuild
-            MSBuild(solutionPath, settings =>
-                settings.SetConfiguration(configuration));
+            MSBuild(solutionPath, settings => settings
+                .SetConfiguration(configuration));
         }
         else
         {
             // Use XBuild
-            XBuild(solutionPath, settings =>
-                settings.SetConfiguration(configuration));
+            XBuild(solutionPath, settings => settings
+                .SetConfiguration(configuration));
         }
     });
 
@@ -76,14 +76,15 @@ Task("Package")
             if(IsRunningOnWindows())
             {
                 // Use MSBuild
-                MSBuild(solutionPath, settings =>
-                    settings.SetConfiguration(releaseConfiguration));
+                MSBuild(solutionPath, settings => settings
+                    .SetConfiguration(releaseConfiguration));
             }
             else
             {
                 // Use XBuild
-                XBuild(solutionPath, settings =>
-                    settings.SetConfiguration(releaseConfiguration));
+                XBuild(solutionPath, settings => settings
+                    .SetConfiguration(releaseConfiguration)
+                    .UseToolVersion(XBuildToolVersion.NET40));
             }
 
             XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/YamlDotNet.Test*.dll");

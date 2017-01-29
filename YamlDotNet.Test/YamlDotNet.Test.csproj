@@ -109,6 +109,7 @@
     <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Serialization\TypeConverterTests.cs" />
     <Compile Include="Yaml.cs" />
+    <Compile Include="StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="files\backreference.yaml" />
