@@ -1,4 +1,8 @@
 #tool "nuget:?package=xunit.runner.console"
+#tool "nuget:?package=Mono.TextTransform"
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -13,15 +17,11 @@ var configuration = Argument("configuration", "Release-Unsigned");
 //////////////////////////////////////////////////////////////////////
 
 // Define directories.
-var buildDir = Directory("./YamlDotNet/bin") + Directory(configuration);
-
 var solutionPath = "./YamlDotNet.sln";
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
 //////////////////////////////////////////////////////////////////////
-
-Console.WriteLine(configuration);
 
 Task("Clean")
     .Does(() =>
@@ -92,16 +92,65 @@ Task("Package")
     });
 
 Task("Document")
-    // .IsDependentOn("Build")
+    .IsDependentOn("Build")
     .Does(() =>
     {
-        XUnit2("YamlDotNet.Samples/bin/" + configuration + "/YamlDotNet.Samples.dll", new XUnit2Settings
+        var samplesBinDir = "YamlDotNet.Samples/bin/" + configuration;
+        var testAssemblyFileName = samplesBinDir + "/YamlDotNet.Samples.dll";
+        
+        var samplesAssembly = Assembly.LoadFrom(testAssemblyFileName);
+
+        XUnit2(testAssemblyFileName, new XUnit2Settings
         {
-            OutputDirectory = Directory("YamlDotNet.Samples/bin/" + configuration),
+            OutputDirectory = Directory(samplesBinDir),
             XmlReport = true
         });
         
-        // Console.WriteLine(testsDir + File("YamlDotNet.Test.dll"));
+        var samples = XDocument.Load(samplesBinDir + "/YamlDotNet.Samples.dll.xml")
+            .Descendants("test")
+            .Select(e => new
+            {
+                Title = e.Attribute("name").Value,
+                Type = samplesAssembly.GetType(e.Attribute("type").Value),
+                Method = e.Attribute("method").Value,
+                Output = e.Element("output") != null ? e.Element("output").Value : null,
+            });
+
+        var sampleList = new StringBuilder();
+
+        foreach (var sample in samples)
+        {
+            var fileName = sample.Type.Name;
+            Information("Generating sample documentation page for {0}", fileName);
+
+            var code = System.IO.File.ReadAllText("YamlDotNet.Samples/" + fileName + ".cs");
+            
+            var sampleAttr = sample.Type
+                .GetMethod(sample.Method)
+                .GetCustomAttributes()
+                .Single(a => a.GetType().Name == "SampleAttribute");
+
+            var description = UnIndent((string)sampleAttr.GetType().GetProperty("Description").GetValue(sampleAttr, null));
+
+            var samplePage = TransformTextFile("YamlDotNet.Samples/build/SampleTransform.md")
+                .WithToken("title", sample.Title)
+                .WithToken("description", description)
+                .WithToken("code", code)
+                .WithToken("output", sample.Output)
+                .ToString();
+
+            System.IO.File.WriteAllText("../YamlDotNet.wiki/Samples." + fileName + ".md", samplePage);
+
+            sampleList
+                .AppendFormat("* *[{0}](Samples.{1})*  \n", sample.Title, fileName)
+                .AppendFormat("  {0}\n", description.Replace("\n", "\n  "));
+        }
+
+        var sampleIndexPage = TransformTextFile("YamlDotNet.Samples/build/SampleIndexTransform.md")
+            .WithToken("sampleList", sampleList.ToString())
+            .ToString();
+
+        System.IO.File.WriteAllText("../YamlDotNet.wiki/Samples.md", sampleIndexPage);
     });
 
 //////////////////////////////////////////////////////////////////////
@@ -117,3 +166,36 @@ Task("Default")
 //////////////////////////////////////////////////////////////////////
 
 RunTarget(target);
+
+//////////////////////////////////////////////////////////////////////
+// HELPERS
+//////////////////////////////////////////////////////////////////////
+
+string UnIndent(string text)
+{
+    var lines = text
+        .Split('\n')
+        .Select(l => l.TrimEnd('\r', '\n'))
+        .SkipWhile(l => l.Trim(' ', '\t').Length == 0)
+        .ToList();
+
+    while (lines.Count > 0 && lines[lines.Count - 1].Trim(' ', '\t').Length == 0)
+    {
+        lines.RemoveAt(lines.Count - 1);
+    }
+
+    if (lines.Count > 0)
+    {
+        var indent = Regex.Match(lines[0], @"^(\s*)");
+        if (!indent.Success)
+        {
+            throw new ArgumentException("Invalid indentation");
+        }
+
+        lines = lines
+            .Select(l => l.Substring(indent.Groups[1].Length))
+            .ToList();
+    }
+
+    return string.Join("\n", lines.ToArray());
+}

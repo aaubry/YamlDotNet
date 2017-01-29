@@ -15,7 +15,7 @@ namespace YamlDotNet.Samples
         }
 
         [Sample(
-            Title = "Serializing an object graph",
+            DisplayName = "Serializing an object graph",
             Description = "Shows how to convert an object to its YAML representation."
         )]
         public void Main()

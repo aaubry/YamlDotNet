@@ -18,7 +18,7 @@ namespace YamlDotNet.Samples
         }
 
         [Sample(
-            Title = "Deserializing an object graph",
+            DisplayName = "Deserializing an object graph",
             Description = "Shows how to convert a YAML document to an object graph."
         )]
         public void Main()

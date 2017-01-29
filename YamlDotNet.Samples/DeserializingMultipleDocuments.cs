@@ -19,7 +19,7 @@ namespace YamlDotNet.Samples
         }
 
         [Sample(
-            Title = "Deserializing multiple documents",
+            DisplayName = "Deserializing multiple documents",
             Description = "Explains how to load multiple YAML documents from a stream."
         )]
         public void Main()

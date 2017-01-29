@@ -14,7 +14,7 @@ The library has now been successfully used in multiple projects and is considere
 
 ## More information
 
-More information can be found in the [official page of the project](http://aaubry.net/pages/yamldotnet.html).
+More information can be found in the [project's wiki](https://github.com/aaubry/YamlDotNet/wiki).
 
 ## Installing
 
