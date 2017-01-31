@@ -90,7 +90,7 @@ namespace YamlDotNet.Core
                 (character >= '\xE000' && character <= '\xFFFD');
         }
 
-        public bool IsDigit(int offset = 0)
+        public bool IsNumeric(int offset = 0)
         {
             var character = buffer.Peek(offset);
             return character >= '0' && character <= '9';
@@ -138,6 +138,11 @@ namespace YamlDotNet.Core
         public bool IsTab(int offset = 0)
         {
             return Check('\t', offset);
+        }
+
+        public bool IsPeriod(int offset = 0)
+        {
+            return Check('.', offset);
         }
 
         public bool IsWhite(int offset = 0)

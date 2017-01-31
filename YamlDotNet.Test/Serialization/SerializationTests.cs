@@ -1152,6 +1152,15 @@ namespace YamlDotNet.Test.Serialization
             writer.ToString().Should().Contain("new_key_here: new_value");
         }
 
+        [Fact]
+        public void SerializeQuotedFloatingPointString()
+        {
+            var expectedResult = Yaml.StreamFrom("quotedFloatingPoint.yaml").ReadToEnd();
+            var testDocument = new QuotedFloatingPoint("100.25", "100", 100.75);
+            var result = Serializer.Serialize(testDocument);
+            result.Should().Be(expectedResult);
+        }
+
         [Theory, MemberData("SpecialFloats")]
         public void SpecialFloatsAreHandledCorrectly(FloatTestCase testCase)
         {

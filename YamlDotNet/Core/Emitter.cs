@@ -321,6 +321,9 @@ namespace YamlDotNet.Core
             var buffer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
             var preceededByWhitespace = true;
             var followedByWhitespace = buffer.IsWhiteBreakOrZero(1);
+            var preceededByNumber = false;
+            var followedByNumber = false;
+            var isStringProperty = scalar.Tag == "tag:yaml.org,2002:str";
 
             var leadingSpace = false;
             var leadingBreak = false;
@@ -339,6 +342,7 @@ namespace YamlDotNet.Core
             var singleQuotes = false;
 
             var isFirst = true;
+            
             while (!buffer.EndOfInput)
             {
                 if (isFirst)
@@ -383,6 +387,13 @@ namespace YamlDotNet.Core
                     }
 
                     if (buffer.Check('#') && preceededByWhitespace)
+                    {
+                        flowIndicators = true;
+                        blockIndicators = true;
+                    }
+
+                    // if the original value is a string, but looks like a floating-point formatted number
+                    if (isStringProperty && buffer.IsPeriod() && preceededByNumber && followedByNumber)
                     {
                         flowIndicators = true;
                         blockIndicators = true;
@@ -448,10 +459,12 @@ namespace YamlDotNet.Core
                 }
 
                 preceededByWhitespace = buffer.IsWhiteBreakOrZero();
+                preceededByNumber = buffer.IsNumeric();
                 buffer.Skip(1);
                 if (!buffer.EndOfInput)
                 {
                     followedByWhitespace = buffer.IsWhiteBreakOrZero(1);
+                    followedByNumber = buffer.IsNumeric(1);
                 }
 
                 isFirst = false;
