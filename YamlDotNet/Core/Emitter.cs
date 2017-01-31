@@ -459,12 +459,12 @@ namespace YamlDotNet.Core
                 }
 
                 preceededByWhitespace = buffer.IsWhiteBreakOrZero();
-                preceededByNumber = buffer.IsNumeric();
+                preceededByNumber = buffer.IsDigit();
                 buffer.Skip(1);
                 if (!buffer.EndOfInput)
                 {
                     followedByWhitespace = buffer.IsWhiteBreakOrZero(1);
-                    followedByNumber = buffer.IsNumeric(1);
+                    followedByNumber = buffer.IsDigit(1);
                 }
 
                 isFirst = false;

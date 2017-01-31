@@ -90,7 +90,7 @@ namespace YamlDotNet.Core
                 (character >= '\xE000' && character <= '\xFFFD');
         }
 
-        public bool IsNumeric(int offset = 0)
+        public bool IsDigit(int offset = 0)
         {
             var character = buffer.Peek(offset);
             return character >= '0' && character <= '9';

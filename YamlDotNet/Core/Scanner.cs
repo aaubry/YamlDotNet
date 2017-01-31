@@ -1344,7 +1344,7 @@ namespace YamlDotNet.Core
 
                 // Check for an indentation indicator.
 
-                if (analyzer.IsNumeric())
+                if (analyzer.IsDigit())
                 {
                     // Check that the intendation is greater than 0.
 
@@ -1363,7 +1363,7 @@ namespace YamlDotNet.Core
 
             // Do the same as above, but in the opposite order.
 
-            else if (analyzer.IsNumeric())
+            else if (analyzer.IsDigit())
             {
                 if (analyzer.Check('0'))
                 {
@@ -2301,7 +2301,7 @@ namespace YamlDotNet.Core
 
             // Repeat while the next character is digit.
 
-            while (analyzer.IsNumeric())
+            while (analyzer.IsDigit())
             {
                 // Check if the number is too long.
 
