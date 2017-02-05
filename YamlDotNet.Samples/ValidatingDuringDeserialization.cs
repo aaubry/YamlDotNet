@@ -44,7 +44,7 @@ namespace YamlDotNet.Samples
         }
 
         [Sample(
-            Title = "Validating during deserialization",
+            DisplayName = "Validating during deserialization",
             Description = @"
                 By manipulating the list of node deserializers,
                 it is easy to add behavior to the deserializer.

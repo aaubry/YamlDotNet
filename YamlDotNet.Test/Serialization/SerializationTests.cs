@@ -194,7 +194,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void SerializeCustomTags()
         {
-            var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd();
+            var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
             SerializerBuilder.WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
 
             var point = new Point(10, 20);
@@ -756,7 +756,7 @@ namespace YamlDotNet.Test.Serialization
             var serialized = writer.ToString();
 
             serialized.Should()
-                .Be("Order1: Order1 value\r\nOrder2: Order2 value\r\n".Replace("\r\n", Environment.NewLine), "the properties should be in the right order");
+                .Be("Order1: Order1 value\r\nOrder2: Order2 value\r\n".NormalizeNewLines(), "the properties should be in the right order");
         }
 
         [Fact]
@@ -800,7 +800,7 @@ namespace YamlDotNet.Test.Serialization
             var serialized = writer.ToString();
 
             serialized.Should()
-                .Be("LiteralString: |-\r\n  Test\r\nDoubleQuotedString: \"Test\"\r\n".Replace("\r\n", Environment.NewLine), "the properties should be specifically styled");
+                .Be("LiteralString: |-\r\n  Test\r\nDoubleQuotedString: \"Test\"\r\n".NormalizeNewLines(), "the properties should be specifically styled");
         }
 
         [Fact]
@@ -818,7 +818,7 @@ namespace YamlDotNet.Test.Serialization
             var serialized = writer.ToString();
 
             serialized.Should()
-                .Be("LiteralString: \"Test\"\r\nDoubleQuotedString: |-\r\n  Test\r\n".Replace("\r\n", Environment.NewLine), "the properties should be specifically styled");
+                .Be("LiteralString: \"Test\"\r\nDoubleQuotedString: |-\r\n  Test\r\n".NormalizeNewLines(), "the properties should be specifically styled");
         }
 
         [Fact]
@@ -836,7 +836,7 @@ namespace YamlDotNet.Test.Serialization
             var serialized = writer.ToString();
 
             serialized.Should()
-                .Be("BaseProperty: Base\r\n".Replace("\r\n", Environment.NewLine), "the derived property should be specifically ignored");
+                .Be("BaseProperty: Base\r\n".NormalizeNewLines(), "the derived property should be specifically ignored");
         }
 
         [Fact]
@@ -854,7 +854,7 @@ namespace YamlDotNet.Test.Serialization
             var serialized = writer.ToString();
 
             serialized.Should()
-                .Be("DerivedProperty: Derived\r\n".Replace("\r\n", Environment.NewLine), "the base property should be specifically ignored");
+                .Be("DerivedProperty: Derived\r\n".NormalizeNewLines(), "the base property should be specifically ignored");
         }
 
         [Fact]

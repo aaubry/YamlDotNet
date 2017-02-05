@@ -15,7 +15,7 @@ namespace YamlDotNet.Samples
         }
 
         [Sample(
-            Title = "Convert YAML to JSON",
+            DisplayName = "Convert YAML to JSON",
             Description = "Shows how to convert a YAML document to JSON."
         )]
         public void Main()

@@ -1,14 +1,8 @@
 version: 0.0.{build}
-#branches:
-#  only:
-#    - master
-#    - release
-#    - test-build
 
 install:
   - cmd: git submodule update --init
   - ps:  .\prebuild.ps1
-  - cmd: nuget restore YamlDotNet.Test\packages.config -SolutionDirectory .
 
 platform: Any CPU
 configuration: Release
@@ -17,12 +11,7 @@ build:
   publish_nuget: true
 
 build_script:
-  - ps: .\build.ps1
-
-test_script:
-  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release\YamlDotNet.Test.dll" -appveyor'
-  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Test\bin\Release-Portable\YamlDotNet.Test.Portable.dll" -appveyor'
-  - '%xunit20%\xunit.console.x86 "C:\projects\yamldotnet\YamlDotNet.Samples\bin\Release\YamlDotNet.Samples.dll" -appveyor'
+  - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic
 
 artifacts:
   - path: YamlDotNet\bin\Release-Unsigned
@@ -47,5 +36,5 @@ deploy:
     api_key:
       secure: GMc0xUTASI8qTPK1/eN/GFs6PBhPFBin1TT1hE5N8NlkU7VSBx3z4zQinSv/ICmx
     artifact: /.*\.nupkg/
-#    on:
-#      branch: release
+
+test: off
