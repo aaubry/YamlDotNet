@@ -1,5 +1,6 @@
 #tool "nuget:?package=xunit.runner.console"
 #tool "nuget:?package=Mono.TextTransform"
+#tool "nuget:?package=GitVersion.CommandLine"
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -9,15 +10,25 @@ using System.Xml.Linq;
 //////////////////////////////////////////////////////////////////////
 
 var target = Argument("target", "Default");
-var releaseConfigurations = new[] { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed" };
 var configuration = Argument("configuration", "Release-Unsigned");
+var verbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("verbosity", "Verbose"), ignoreCase: true);
+var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVerbosity", "Minimal"), ignoreCase: true);
+var buildNumber = Argument("buildNumber", "");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
 //////////////////////////////////////////////////////////////////////
 
-// Define directories.
 var solutionPath = "./YamlDotNet.sln";
+
+var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed" };
+if(IsRunningOnWindows()) {
+    releaseConfigurations.Add("Release-UnitySubset-v35");
+}
+
+var packageTypes = new[] { "Unsigned", "Signed" };
+
+var nugetVersion = "0.0.1";
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
@@ -42,22 +53,31 @@ Task("Restore-NuGet-Packages")
         NuGetRestore(solutionPath);
     });
 
+Task("Set-Build-Version")
+    .Does(() =>
+    {
+        var version = GitVersion(new GitVersionSettings
+        {
+            UpdateAssemblyInfo = true,
+            UpdateAssemblyInfoFilePath = File("YamlDotNet/Properties/AssemblyInfo.cs"),
+        });
+        nugetVersion = version.NuGetVersion;
+
+        if(AppVeyor.IsRunningOnAppVeyor)
+        {
+            if (!string.IsNullOrEmpty(version.PreReleaseTag))
+            {
+                nugetVersion = string.Format("{0}-{1}{2}", version.MajorMinorPatch, version.PreReleaseLabel, AppVeyor.Environment.Build.Version.Replace("0.0.", "").PadLeft(4, '0'));
+            }
+            AppVeyor.UpdateBuildVersion(nugetVersion);
+        }
+    });
+
 Task("Build")
     .IsDependentOn("Restore-NuGet-Packages")
     .Does(() =>
     {
-        if(IsRunningOnWindows())
-        {
-            // Use MSBuild
-            MSBuild(solutionPath, settings => settings
-                .SetConfiguration(configuration));
-        }
-        else
-        {
-            // Use XBuild
-            XBuild(solutionPath, settings => settings
-                .SetConfiguration(configuration));
-        }
+        BuildSolution(solutionPath, configuration, buildVerbosity);
     });
 
 Task("Run-Unit-Tests")
@@ -67,27 +87,38 @@ Task("Run-Unit-Tests")
         XUnit2("YamlDotNet.Test/bin/" + configuration + "/YamlDotNet.Test*.dll");
     });
 
-Task("Package")
+Task("Build-Release-Configurations")
     .IsDependentOn("Restore-NuGet-Packages")
+    .IsDependentOn("Set-Build-Version")
     .Does(() =>
     {
         foreach(var releaseConfiguration in releaseConfigurations)
         {
-            if(IsRunningOnWindows())
-            {
-                // Use MSBuild
-                MSBuild(solutionPath, settings => settings
-                    .SetConfiguration(releaseConfiguration));
-            }
-            else
-            {
-                // Use XBuild
-                XBuild(solutionPath, settings => settings
-                    .SetConfiguration(releaseConfiguration)
-                    .UseToolVersion(XBuildToolVersion.NET40));
-            }
+            BuildSolution(solutionPath, releaseConfiguration, buildVerbosity);
+        }
+    });
 
+Task("Test-Release-Configurations")
+    .IsDependentOn("Build-Release-Configurations")
+    .Does(() =>
+    {
+        foreach(var releaseConfiguration in releaseConfigurations)
+        {
             XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/YamlDotNet.Test*.dll");
+        }
+    });
+
+Task("Package")
+    .IsDependentOn("Test-Release-Configurations")
+    .Does(() =>
+    {
+        foreach(var packageType in packageTypes)
+        {
+            NuGetPack("YamlDotNet/YamlDotNet." + packageType + ".nuspec", new NuGetPackSettings
+            {
+                Version = nugetVersion,
+                OutputDirectory = Directory("YamlDotNet/bin"),
+            });
         }
     });
 
@@ -198,4 +229,28 @@ string UnIndent(string text)
     }
 
     return string.Join("\n", lines.ToArray());
+}
+
+void BuildSolution(string solutionPath, string configuration, Verbosity verbosity)
+{
+    const string appVeyorLogger = @"""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll""";
+    if(IsRunningOnWindows())
+    {
+        // Use MSBuild
+        MSBuild(solutionPath, settings =>
+        {
+            if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
+            settings
+                .SetVerbosity(verbosity)
+                .SetConfiguration(configuration);
+        });
+    }
+    else
+    {
+        // Use XBuild
+        XBuild(solutionPath, settings => settings
+            .SetConfiguration(configuration)
+            .SetVerbosity(verbosity)
+            .UseToolVersion(XBuildToolVersion.NET40));
+    }
 }

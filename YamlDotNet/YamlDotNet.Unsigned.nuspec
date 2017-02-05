@@ -14,15 +14,12 @@
     </metadata>
     <files>
         <file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />
-        <file src="bin\Release-Unsigned\YamlDotNet.pdb" target="lib\net35" />
         <file src="bin\Release-Unsigned\YamlDotNet.xml" target="lib\net35" />
 
         <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
-        <file src="bin\Release-Portable-Unsigned\YamlDotNet.pdb" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
         <file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 
-    <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\dotnet" />
-    <file src="bin\Release-Portable-Unsigned\YamlDotNet.pdb" target="lib\dotnet" />
-    <file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\dotnet" />
-  </files>
+        <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\dotnet" />
+        <file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\dotnet" />
+    </files>
 </package>
