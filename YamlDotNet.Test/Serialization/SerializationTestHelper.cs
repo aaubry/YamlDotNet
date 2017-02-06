@@ -300,6 +300,20 @@ namespace YamlDotNet.Test.Serialization
         }
     }
 
+    public class QuotedFloatingPoint
+    {
+        public string FloatingPointString { get; }
+        public string IntegerString { get; }
+        public double FloatingPoint { get; }
+
+        public QuotedFloatingPoint(string floatingPointString, string integerString, double floatingPoint)
+        {
+            FloatingPointString = floatingPointString;
+            IntegerString = integerString;
+            FloatingPoint = floatingPoint;
+        }
+    }
+
     public class InheritanceExample
     {
         public object SomeScalar { get; set; }

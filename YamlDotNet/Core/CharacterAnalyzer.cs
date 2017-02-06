@@ -140,6 +140,11 @@ namespace YamlDotNet.Core
             return Check('\t', offset);
         }
 
+        public bool IsPeriod(int offset = 0)
+        {
+            return Check('.', offset);
+        }
+
         public bool IsWhite(int offset = 0)
         {
             return IsSpace(offset) || IsTab(offset);
