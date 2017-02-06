@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using Xunit.Abstractions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Samples.Helpers;
+using Xunit.Abstractions;
 
 namespace YamlDotNet.Samples
 {
@@ -26,7 +25,7 @@ namespace YamlDotNet.Samples
         {
             var input = new StringReader(Document);
 
-            var deserializer = new Deserializer();
+            var deserializer = new DeserializerBuilder().Build();
 
             var parser = new Parser(input);
 

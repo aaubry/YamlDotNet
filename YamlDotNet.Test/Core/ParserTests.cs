@@ -419,8 +419,6 @@ namespace YamlDotNet.Test.Core
         [InlineData("|\n  b-paragraph-separator\x2029  lll", "b-paragraph-separator\x2029lll")]
         public void NewLinesAreParsedAccordingToTheSpecification(string yaml, string expected)
         {
-            var parser = new Parser(new StringReader(yaml));
-
             AssertSequenceOfEventsFrom(Yaml.ParserForText(yaml),
                 StreamStart,
                 DocumentStart(Implicit),

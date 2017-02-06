@@ -55,7 +55,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter();
 
-            Action action = () => { var result = converter.ReadYaml(parser, typeof(DateTime)); };
+            Action action = () => { converter.ReadYaml(parser, typeof(DateTime)); };
 
             action.ShouldThrow<FormatException>();
         }

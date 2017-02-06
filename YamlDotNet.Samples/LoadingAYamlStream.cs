@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
-using Xunit.Abstractions;
+﻿using System.IO;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Samples.Helpers;
+using Xunit.Abstractions;
 
 namespace YamlDotNet.Samples
 {

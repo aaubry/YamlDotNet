@@ -11,9 +11,7 @@ using System.Xml.Linq;
 
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release-Unsigned");
-var verbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("verbosity", "Verbose"), ignoreCase: true);
 var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVerbosity", "Minimal"), ignoreCase: true);
-var buildNumber = Argument("buildNumber", "");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION

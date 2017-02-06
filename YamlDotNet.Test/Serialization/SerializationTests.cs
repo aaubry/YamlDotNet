@@ -1402,6 +1402,7 @@ namespace YamlDotNet.Test.Serialization
                 .IgnoreUnmatchedProperties()
                 .Build();
             var deserialized = serializer.Deserialize<AnchorsOverwritingTestCase>(yaml);
+            Assert.NotNull(deserialized);
         }
 
         [Fact]
