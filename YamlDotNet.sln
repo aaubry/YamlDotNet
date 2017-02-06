@@ -172,8 +172,8 @@ Global
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
-		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.Build.0 = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.ActiveCfg = Release-Unsigned|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.Build.0 = Release-Unsigned|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Debug-UnitySubset-v35|Any CPU.ActiveCfg = Debug|Any CPU
