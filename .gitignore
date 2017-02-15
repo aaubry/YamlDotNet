@@ -14,13 +14,13 @@ TestResults
 Help/*
 release/*
 /_ReSharper.*
-.vs/*
 *.pidb
 *.userprefs
 packages
 packages/*
 !packages/repositories.config
 .vscode
+.vs
 
 README.html
 
