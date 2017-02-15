@@ -363,7 +363,7 @@ namespace YamlDotNet
         public static bool HasDefaultConstructor(this Type type)
         {
             var left = type.IsValueType();
-            var right = type.GetTypeInfo().GetConstructor(null) != null;
+            var right = type.GetTypeInfo().GetConstructor(new Type[0]) != null;
             return left || right;
         }
 

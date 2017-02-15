@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("YamlDotNet.Standard")]
+[assembly: AssemblyProduct("YamlDotNet.Standard.Tests")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -15,7 +15,5 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
-[assembly: InternalsVisibleTo("YamlDotNet.Standard.Tests")]
-
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b04ddbb4-6afc-44a0-a4a1-a2b24717ef95")]
+[assembly: Guid("658968fd-4eb2-4478-b49a-f73c6bcb72bf")]
