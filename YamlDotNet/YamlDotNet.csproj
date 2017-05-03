@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net35;netstandard1.3</TargetFrameworks>
+    <!--<TargetFrameworks>net35;netstandard1.3</TargetFrameworks>-->
+    <TargetFrameworks>net35</TargetFrameworks>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
@@ -85,6 +86,19 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetCore|AnyCPU' ">
+    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <OutputPath>bin\Release-DotNetCore\</OutputPath>
+    <DefineConstants>TRACE;PORTABLE</DefineConstants>
+    <DocumentationFile>bin\Release-DotNetCore\YamlDotNet.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>1591</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Portable-Unsigned|AnyCPU' ">
     <OutputPath>bin\Release-Portable-Unsigned\</OutputPath>
