@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <!--<TargetFrameworks>net35;netstandard1.3</TargetFrameworks>-->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <TargetFrameworks>net35</TargetFrameworks>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>

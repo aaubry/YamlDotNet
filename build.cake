@@ -236,9 +236,6 @@ string UnIndent(string text)
 
 void BuildSolution(string solutionPath, string configuration, Verbosity verbosity)
 {
-    var assemblyInfo = System.IO.File.ReadAllText(@"YamlDotNet\Properties\AssemblyInfo.cs");
-    Information(assemblyInfo);
-
     const string appVeyorLogger = @"""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll""";
     if(IsRunningOnWindows())
     {
