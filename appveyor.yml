@@ -6,6 +6,8 @@ install:
 
 platform: Any CPU
 configuration: Release
+image:
+  - Visual Studio 2017
 
 build:
   publish_nuget: true
