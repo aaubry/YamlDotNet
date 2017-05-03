@@ -2,7 +2,7 @@ version: 0.0.{build}
 
 install:
   - cmd: git submodule update --init
-  - ps:  .\prebuild.ps1
+  #- ps:  .\prebuild.ps1
 
 platform: Any CPU
 configuration: Release

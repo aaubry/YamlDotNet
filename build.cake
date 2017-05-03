@@ -21,7 +21,7 @@ var solutionPath = "./YamlDotNet.sln";
 
 var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed" };
 if(IsRunningOnWindows()) {
-    releaseConfigurations.Add("Release-UnitySubset-v35");
+    // releaseConfigurations.Add("Release-UnitySubset-v35");
 }
 
 var packageTypes = new[] { "Unsigned", "Signed" };
