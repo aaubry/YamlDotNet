@@ -41,6 +41,10 @@ Task("Clean")
             "./YamlDotNet.AotTest/bin",
             "./YamlDotNet.Samples/bin",
             "./YamlDotNet.Test/bin",
+            "./YamlDotNet/obj",
+            "./YamlDotNet.AotTest/obj",
+            "./YamlDotNet.Samples/obj",
+            "./YamlDotNet.Test/obj",
         });
     });
 
