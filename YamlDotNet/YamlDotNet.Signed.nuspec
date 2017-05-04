@@ -13,8 +13,11 @@
         <tags>yaml parser development library serialization signed strongname</tags>
     </metadata>
     <files>
-        <file src="bin\Release-Signed\YamlDotNet.dll" target="lib\net35" />
-        <file src="bin\Release-Signed\YamlDotNet.xml" target="lib\net35" />
+        <file src="bin\Release-Signed\net35\YamlDotNet.dll" target="lib\net35" />
+        <file src="bin\Release-Signed\net35\YamlDotNet.xml" target="lib\net35" />
+
+        <file src="bin\Release-Signed\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
+        <file src="bin\Release-Signed\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
 
         <file src="bin\Release-Portable-Signed\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
         <file src="bin\Release-Portable-Signed\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
