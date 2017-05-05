@@ -9,6 +9,8 @@ configuration: Release
 
 build:
   publish_nuget: true
+image:
+  - Visual Studio 2017
 
 build_script:
   - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic
