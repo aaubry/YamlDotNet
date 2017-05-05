@@ -237,23 +237,24 @@ string UnIndent(string text)
 void BuildSolution(string solutionPath, string configuration, Verbosity verbosity)
 {
     const string appVeyorLogger = @"""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll""";
-    if(IsRunningOnWindows())
+    MSBuild(solutionPath, settings =>
     {
-        // Use MSBuild
-        MSBuild(solutionPath, settings =>
+        if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
+
+        if(IsRunningOnUnix())
         {
-            if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
-            settings
-                .SetVerbosity(verbosity)
-                .SetConfiguration(configuration);
-        });
-    }
-    else
-    {
-        // Use XBuild
-        XBuild(solutionPath, settings => settings
-            .SetConfiguration(configuration)
+            const string dotnetsdk = "/usr/share/dotnet/sdk/1.0.3";
+            settings.ToolPath = "/usr/bin/msbuild";
+            settings.EnvironmentVariables = new Dictionary<string, string>
+            {
+                { "MSBuildExtensionsPath", dotnetsdk },
+                { "MSBuildSDKsPath", dotnetsdk + "/Sdks" },
+                { "CscToolExe", dotnetsdk + "/Roslyn/RunCsc.sh" }
+            };
+        }
+
+        settings
             .SetVerbosity(verbosity)
-            .UseToolVersion(XBuildToolVersion.NET40));
-    }
+            .SetConfiguration(configuration);
+    });
 }
