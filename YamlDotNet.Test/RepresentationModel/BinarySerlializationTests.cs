@@ -28,9 +28,7 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Test.RepresentationModel
 {
-    using System.Runtime.Serialization.Formatters.Binary;
-
-#if !PORTABLE
+#if !PORTABLE && !NETCOREAPP1_0
     public class BinarySerlializationTests
     {
         [Fact]
@@ -40,7 +38,7 @@ namespace YamlDotNet.Test.RepresentationModel
             stream.Load(Yaml.StreamFrom("fail-backreference.yaml"));
 
 
-            var formatter = new BinaryFormatter();
+            var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize(memoryStream, stream.Documents[0].RootNode);
 

@@ -209,7 +209,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(yaml));
 
-            var culture = CultureInfo.GetCultureInfo("ko-KR"); // Sample specific culture
+            var culture = new CultureInfo("ko-KR"); // Sample specific culture
             var converter = new DateTimeConverter(provider: culture, formats: new[] { format1, format2 });
 
             var result = converter.ReadYaml(parser, typeof(DateTime));
@@ -363,7 +363,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("Y", "ko-KR", "2017년 1월")]
         public void Given_Yaml_WithLocaleAndTimeFormat_ReadYaml_ShouldReturn_Result(string format, string locale, string value)
         {
-            var culture = CultureInfo.GetCultureInfo(locale);
+            var culture = new CultureInfo(locale);
             var expected = DateTime.ParseExact(value, format, culture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
             var converter = new DateTimeConverter(provider: culture, formats: new[] { "d", "D", "f", "F", "g", "G", "M", "O", "R", "s", "t", "T", "u", "U", "Y" });
 
@@ -491,7 +491,7 @@ namespace YamlDotNet.Test.Serialization
         public void Given_Values_WithLocale_WriteYaml_ShouldReturn_Result(int year, int month, int day, int hour, int minute, int second, DateTimeKind kind, string locale)
         {
             var dt = new DateTime(year, month, day, hour, minute, second, kind);
-            var culture = CultureInfo.GetCultureInfo(locale);
+            var culture = new CultureInfo(locale);
             var formatted = dt.ToString("G", culture);
             var obj = new TestObject() { DateTime = dt };
 

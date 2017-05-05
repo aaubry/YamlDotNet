@@ -310,10 +310,14 @@ namespace YamlDotNet.Test.Core
                     SingleQuotedScalar(text)
                 )
             );
-
             var buffer = new MemoryStream();
+#if NETCOREAPP1_0
+            // Code pages such as Cyrillic are not recognized by default in
+            // .NET Core.  We need to register this provider.
+            // https://msdn.microsoft.com/en-us/library/mt643899(v=vs.110).aspx#Remarks
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
             var encoding = Encoding.GetEncoding(codePage);
-
             using (var writer = new StreamWriter(buffer, encoding))
             {
                 var emitter = new Emitter(writer, 2, int.MaxValue, false);

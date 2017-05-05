@@ -33,7 +33,7 @@ namespace YamlDotNet.Test
         public static TextReader StreamFrom(string name)
         {
             var fromType = typeof(Yaml);
-            var assembly = Assembly.GetAssembly(fromType);
+            var assembly = fromType.GetTypeInfo().Assembly;
             var stream = assembly.GetManifestResourceStream(name) ??
                          assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
             return new StreamReader(stream);
@@ -48,7 +48,7 @@ namespace YamlDotNet.Test
         public static string TemplatedOn<T>(this string text)
         {
             return Regex.Replace(text, @"{type}", match =>
-                Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).Assembly.FullName)));
+                Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).GetTypeInfo().Assembly.FullName)));
         }
 
         public static IParser ParserForEmptyContent()
