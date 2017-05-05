@@ -2,6 +2,7 @@
 #tool "nuget:?package=Mono.TextTransform"
 #tool "nuget:?package=GitVersion.CommandLine"
 #tool "nuget:?package=Cake.Incubator"
+
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -38,7 +39,7 @@ if (IsRunningOnWindows())
 else
 {
     // AOT requires mono
-    releaseConfigurations.Add("Debug-AOT");    
+    releaseConfigurations.Add("Debug-AOT");
 }
 
 var packageTypes = new[] { "Unsigned", "Signed" };
@@ -104,12 +105,18 @@ Task("Run-Unit-Tests")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        var settings = new XUnit2Settings();
+        var settings = new DotNetCoreTestSettings
+        {
+            Configuration = configuration,
+            NoBuild = true
+        };
+
         if(AppVeyor.IsRunningOnAppVeyor)
         {
             settings.ArgumentCustomization = args => args.Append("-appveyor");
         }
-        XUnit2("YamlDotNet.Test/bin/" + configuration + "/YamlDotNet.Test*.dll", settings);
+
+        DotNetCoreTest("./YamlDotNet.Test/YamlDotNet.Test.csproj", settings);
     });
 
 Task("Build-Release-Configurations")
@@ -131,15 +138,43 @@ Task("Test-Release-Configurations")
     .IsDependentOn("Build-Release-Configurations")
     .Does(() =>
     {
+        var path = MakeAbsolute(File("./YamlDotNet.Test/YamlDotNet.Test.csproj"));
+
         foreach(var releaseConfiguration in releaseConfigurations)
         {
-            XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/YamlDotNet.Test*.dll");
+            if (releaseConfiguration.EndsWith("-Signed"))
+            {
+                Information("Skipping signed builds. Configuration: " + releaseConfiguration);
+                continue;
+            }
 
-            if (releaseConfiguration == "Debug-AOT")
+            if (releaseConfiguration.Equals("Debug-AOT"))
             {
                 RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.dll");
                 RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
                 RunProcess("mono", "--full-aot", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
+            }
+            else if (releaseConfiguration.Contains("DotNetStandard"))
+            {
+                // Execute .NETCoreApp tests using `dotnet test`.
+                var settings = new DotNetCoreTestSettings
+                {
+                    Framework = "netcoreapp1.0",
+                    Configuration = releaseConfiguration,
+                    NoBuild = true
+                };
+
+                settings.ArgumentCustomization = args =>
+                    args.Append("--verbosity " + buildVerbosity);
+
+                Information("[" + releaseConfiguration + "] Executing dotnet test: " + path.FullPath);
+
+                DotNetCoreTest(path.FullPath, settings);
+            }
+            else
+            {
+                // Execute the full framework tests using xunit.console.runner.
+                XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/net452/YamlDotNet.Test*.dll");
             }
         }
     });
@@ -172,7 +207,7 @@ Task("Document")
     {
         var samplesBinDir = "YamlDotNet.Samples/bin/" + configuration;
         var testAssemblyFileName = samplesBinDir + "/YamlDotNet.Samples.dll";
-        
+
         var samplesAssembly = Assembly.LoadFrom(testAssemblyFileName);
 
         XUnit2(testAssemblyFileName, new XUnit2Settings
@@ -180,7 +215,7 @@ Task("Document")
             OutputDirectory = Directory(samplesBinDir),
             XmlReport = true
         });
-        
+
         var samples = XDocument.Load(samplesBinDir + "/YamlDotNet.Samples.dll.xml")
             .Descendants("test")
             .Select(e => new
@@ -199,7 +234,7 @@ Task("Document")
             Information("Generating sample documentation page for {0}", fileName);
 
             var code = System.IO.File.ReadAllText("YamlDotNet.Samples/" + fileName + ".cs");
-            
+
             var sampleAttr = sample.Type
                 .GetMethod(sample.Method)
                 .GetCustomAttributes()
