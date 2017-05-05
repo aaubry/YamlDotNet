@@ -56,10 +56,10 @@ using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliant(true)]
 #if !SIGNED
-#if PORTABLE
-[assembly: InternalsVisibleTo("YamlDotNet.Test.Portable")]
-#else
+#if NETSTANDARD1_3 || !PORTABLE
 [assembly: InternalsVisibleTo("YamlDotNet.Test")]
+#else
+[assembly: InternalsVisibleTo("YamlDotNet.Test.Portable")]
 #endif
 #endif
 
