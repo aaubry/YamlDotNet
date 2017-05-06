@@ -99,7 +99,6 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Portable-Unsigned|AnyCPU' ">
     <OutputPath>bin\Release-Portable-Unsigned\</OutputPath>
