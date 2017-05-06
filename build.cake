@@ -19,7 +19,8 @@ var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVer
 
 var solutionPath = "./YamlDotNet.sln";
 
-var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed", "Release-DotNetCore" };
+// var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed", "Release-DotNetCore" };
+var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-DotNetCore" };
 if(IsRunningOnWindows()) {
     // releaseConfigurations.Add("Release-UnitySubset-v35");
 }
