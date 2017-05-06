@@ -4,8 +4,8 @@ install:
   - cmd: git submodule update --init
   #- ps:  .\prebuild.ps1
 
-platform: Any CPU
-configuration: Release
+#platform: Any CPU
+#configuration: Release
 image: Visual Studio 2017
 
 build:
