@@ -103,6 +103,9 @@ Task("Build-Release-Configurations")
     {
         foreach(var releaseConfiguration in releaseConfigurations)
         {
+            Information("----------------------------------------");
+            Information("Building {0}", releaseConfiguration);
+            Information("----------------------------------------");
             BuildSolution(solutionPath, releaseConfiguration, buildVerbosity);
         }
     });
