@@ -1,6 +1,7 @@
 #tool "nuget:?package=xunit.runner.console"
 #tool "nuget:?package=Mono.TextTransform"
 #tool "nuget:?package=GitVersion.CommandLine"
+#tool "nuget:?package=Cake.Incubator"
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -19,8 +20,7 @@ var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVer
 
 var solutionPath = "./YamlDotNet.sln";
 
-// var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed", "Release-DotNetCore" };
-var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-DotNetCore" };
+var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed", "Release-DotNetCore" };
 if(IsRunningOnWindows()) {
     // releaseConfigurations.Add("Release-UnitySubset-v35");
 }
@@ -42,6 +42,10 @@ Task("Clean")
             "./YamlDotNet.AotTest/bin",
             "./YamlDotNet.Samples/bin",
             "./YamlDotNet.Test/bin",
+            "./YamlDotNet/obj",
+            "./YamlDotNet.AotTest/obj",
+            "./YamlDotNet.Samples/obj",
+            "./YamlDotNet.Test/obj",
         });
     });
 
@@ -50,6 +54,7 @@ Task("Restore-NuGet-Packages")
     .Does(() =>
     {
         NuGetRestore(solutionPath);
+        DotNetCoreRestore(solutionPath);
     });
 
 Task("Set-Build-Version")
@@ -244,14 +249,7 @@ void BuildSolution(string solutionPath, string configuration, Verbosity verbosit
 
         if(IsRunningOnUnix())
         {
-            const string dotnetsdk = "/usr/share/dotnet/sdk/1.0.3";
             settings.ToolPath = "/usr/bin/msbuild";
-            settings.EnvironmentVariables = new Dictionary<string, string>
-            {
-                { "MSBuildExtensionsPath", dotnetsdk },
-                { "MSBuildSDKsPath", dotnetsdk + "/Sdks" },
-                { "CscToolExe", dotnetsdk + "/Roslyn/RunCsc.sh" }
-            };
         }
 
         settings

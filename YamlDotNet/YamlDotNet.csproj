@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net35;netstandard1.3</TargetFrameworks>-->
+    <TargetFrameworks>net35;netstandard1.3</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFrameworks>net35</TargetFrameworks>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
@@ -52,6 +51,7 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-AOT|AnyCPU' ">
+    <TargetFrameworks>net35</TargetFrameworks>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -66,6 +66,7 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Unsigned|AnyCPU' ">
+    <TargetFrameworks>net35</TargetFrameworks>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release-Unsigned\</OutputPath>
@@ -77,6 +78,7 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Signed|AnyCPU'">
+    <TargetFrameworks>net35</TargetFrameworks>
     <OutputPath>bin\Release-Signed\</OutputPath>
     <DefineConstants>TRACE;SIGNED</DefineConstants>
     <DocumentationFile>bin\Release-Signed\YamlDotNet.xml</DocumentationFile>
@@ -90,8 +92,9 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetCore|AnyCPU' ">
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <OutputPath>bin\Release-DotNetCore\</OutputPath>
-    <DefineConstants>TRACE;PORTABLE</DefineConstants>
+    <DefineConstants>TRACE;NETSTANDARD1_3;PORTABLE</DefineConstants>
     <DocumentationFile>bin\Release-DotNetCore\YamlDotNet.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
@@ -101,6 +104,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Portable-Unsigned|AnyCPU' ">
+    <TargetFrameworks>net35</TargetFrameworks>
     <OutputPath>bin\Release-Portable-Unsigned\</OutputPath>
     <DefineConstants>TRACE;PORTABLE</DefineConstants>
     <DocumentationFile>bin\Release-Portable-Unsigned\YamlDotNet.xml</DocumentationFile>
@@ -115,6 +119,7 @@
     <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Portable-Signed|AnyCPU'">
+    <TargetFrameworks>net35</TargetFrameworks>
     <OutputPath>bin\Release-Portable-Signed\</OutputPath>
     <DefineConstants>TRACE;PORTABLE;SIGNED</DefineConstants>
     <DocumentationFile>bin\Release-Portable-Signed\YamlDotNet.xml</DocumentationFile>
@@ -130,6 +135,7 @@
     <ImportPortableTargets>true</ImportPortableTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-UnitySubset-v35|AnyCPU'">
+    <TargetFrameworks>net35</TargetFrameworks>
     <OutputPath>bin\Release-UnitySubset-v35\</OutputPath>
     <DefineConstants>TRACE;UNITY</DefineConstants>
     <DocumentationFile>bin\Release-Unsigned\YamlDotNet.xml</DocumentationFile>
@@ -142,6 +148,7 @@
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-UnitySubset-v35|AnyCPU'">
+    <TargetFrameworks>net35</TargetFrameworks>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug-UnitySubset-v35\</OutputPath>
     <DefineConstants>CODE_ANALYSIS;DEBUG;TRACE;UNITY</DefineConstants>
@@ -153,22 +160,6 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-  </PropertyGroup>
-
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
-    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <DefineConstants>NETSTANDARD1_3;PORTABLE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
