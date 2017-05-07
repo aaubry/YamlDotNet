@@ -21,6 +21,7 @@ packages/*
 !packages/repositories.config
 .vscode
 
+*.nuspec.tmp
 README.html
 
 samples/dotnet/project.lock.json

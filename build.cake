@@ -20,7 +20,16 @@ var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVer
 
 var solutionPath = "./YamlDotNet.sln";
 
-var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed", "Release-DotNetCore" };
+var releaseConfigurations = new List<string>
+{
+    "Release-Unsigned",
+    "Release-Signed",
+    "Release-Portable-Unsigned",
+    "Release-Portable-Signed",
+    "Release-DotNetCore-Unsigned",
+    "Release-DotNetCore-Signed",
+};
+
 if(IsRunningOnWindows()) {
     // releaseConfigurations.Add("Release-UnitySubset-v35");
 }
@@ -126,7 +135,15 @@ Task("Package")
     {
         foreach(var packageType in packageTypes)
         {
-            NuGetPack("YamlDotNet/YamlDotNet." + packageType + ".nuspec", new NuGetPackSettings
+            // Replace directory separator char
+            var baseNuspecFile = "YamlDotNet/YamlDotNet." + packageType + ".nuspec";
+            var nuspec = System.IO.File.ReadAllText(baseNuspecFile);
+
+            var finalNuspecFile = baseNuspecFile + ".tmp";
+            nuspec = nuspec.Replace('\\', System.IO.Path.DirectorySeparatorChar);
+            System.IO.File.WriteAllText(finalNuspecFile, nuspec);
+
+            NuGetPack(finalNuspecFile, new NuGetPackSettings
             {
                 Version = nugetVersion,
                 OutputDirectory = Directory("YamlDotNet/bin"),

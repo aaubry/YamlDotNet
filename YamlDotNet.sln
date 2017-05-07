@@ -48,7 +48,8 @@ Global
 		PerformanceTests|Any CPU = PerformanceTests|Any CPU
 		Release-Portable-Signed|Any CPU = Release-Portable-Signed|Any CPU
 		Release-Portable-Unsigned|Any CPU = Release-Portable-Unsigned|Any CPU
-		Release-DotNetCore|Any CPU = Release-DotNetCore|Any CPU
+		Release-DotNetCore-Signed|Any CPU = Release-DotNetCore-Signed|Any CPU
+		Release-DotNetCore-Unsigned|Any CPU = Release-DotNetCore-Unsigned|Any CPU
 		Release-Signed|Any CPU = Release-Signed|Any CPU
 		Release-UnitySubset-v35|Any CPU = Release-UnitySubset-v35|Any CPU
 		Release-Unsigned|Any CPU = Release-Unsigned|Any CPU
@@ -66,8 +67,10 @@ Global
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-Portable-Signed|Any CPU.Build.0 = Release-Portable-Signed|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release-Portable-Unsigned|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-Portable-Unsigned|Any CPU.Build.0 = Release-Portable-Unsigned|Any CPU
-		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-DotNetCore|Any CPU.ActiveCfg = Release-DotNetCore|Any CPU
-		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-DotNetCore|Any CPU.Build.0 = Release-DotNetCore|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release-DotNetCore-Signed|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-DotNetCore-Signed|Any CPU.Build.0 = Release-DotNetCore-Signed|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release-DotNetCore-Unsigned|Any CPU
+		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-DotNetCore-Unsigned|Any CPU.Build.0 = Release-DotNetCore-Unsigned|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-Signed|Any CPU.ActiveCfg = Release-Signed|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-Signed|Any CPU.Build.0 = Release-Signed|Any CPU
 		{BF32DE1B-6276-4341-B212-F8862ADBBA7A}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release-UnitySubset-v35|Any CPU
@@ -94,7 +97,8 @@ Global
 		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -105,7 +109,8 @@ Global
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -116,7 +121,8 @@ Global
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB497EA-A116-406A-AE8C-A24933D8CB21}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -127,7 +133,8 @@ Global
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E0B465-8422-4D6B-85CE-C59724A28E1F}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -138,7 +145,8 @@ Global
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{BE49A287-5F47-4E3B-90EB-97B51451934C}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -149,7 +157,8 @@ Global
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -160,7 +169,8 @@ Global
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.PerformanceTests|Any CPU.ActiveCfg = Debug-AOT|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-Portable-Signed|Any CPU.ActiveCfg = Debug-AOT|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Debug-AOT|Any CPU
-		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-DotNetCore|Any CPU.ActiveCfg = Debug-AOT|Any CPU
+		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Debug-AOT|Any CPU
+		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Debug-AOT|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-Signed|Any CPU.ActiveCfg = Debug-AOT|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Debug-AOT|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release-Unsigned|Any CPU.ActiveCfg = Debug-AOT|Any CPU
@@ -171,7 +181,8 @@ Global
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
@@ -182,7 +193,8 @@ Global
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.PerformanceTests|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Release-Unsigned|Any CPU.ActiveCfg = Release-Unsigned|Any CPU
@@ -194,7 +206,8 @@ Global
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.PerformanceTests|Any CPU.Build.0 = Release|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Portable-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-DotNetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-DotNetCore-Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-DotNetCore-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release|Any CPU
 		{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}.Release-Unsigned|Any CPU.ActiveCfg = Release|Any CPU
