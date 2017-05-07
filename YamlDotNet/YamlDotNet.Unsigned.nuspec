@@ -11,10 +11,20 @@
         <projectUrl>http://aaubry.net/pages/yamldotnet.html</projectUrl>
         <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
         <tags>yaml parser development library serialization</tags>
+        <dependencies>
+          <group targetFramework=".NETFramework3.5" />
+          <group targetFramework=".NETStandard1.3">
+            <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+            <dependency id="System.Runtime.Serialization.Formatters" version="4.3.0" exclude="Build,Analyzers" />
+          </group>
+        </dependencies>
     </metadata>
     <files>
-        <file src="bin\Release-Unsigned\YamlDotNet.dll" target="lib\net35" />
-        <file src="bin\Release-Unsigned\YamlDotNet.xml" target="lib\net35" />
+        <file src="bin\Release-Unsigned\net35\YamlDotNet.dll" target="lib\net35" />
+        <file src="bin\Release-Unsigned\net35\YamlDotNet.xml" target="lib\net35" />
+
+        <file src="bin\Release-Unsigned\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
+        <file src="bin\Release-Unsigned\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
 
         <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
         <file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
