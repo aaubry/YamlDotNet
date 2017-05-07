@@ -1,6 +1,8 @@
 #tool "nuget:?package=xunit.runner.console"
 #tool "nuget:?package=Mono.TextTransform"
 #tool "nuget:?package=GitVersion.CommandLine"
+#tool "nuget:?package=Cake.Incubator"
+
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -41,6 +43,10 @@ Task("Clean")
             "./YamlDotNet.AotTest/bin",
             "./YamlDotNet.Samples/bin",
             "./YamlDotNet.Test/bin",
+            "./YamlDotNet/obj",
+            "./YamlDotNet.AotTest/obj",
+            "./YamlDotNet.Samples/obj",
+            "./YamlDotNet.Test/obj",
         });
     });
 
@@ -49,6 +55,7 @@ Task("Restore-NuGet-Packages")
     .Does(() =>
     {
         NuGetRestore(solutionPath);
+        DotNetCoreRestore(solutionPath);
     });
 
 Task("Set-Build-Version")
@@ -131,7 +138,7 @@ Task("Document")
     {
         var samplesBinDir = "YamlDotNet.Samples/bin/" + configuration;
         var testAssemblyFileName = samplesBinDir + "/YamlDotNet.Samples.dll";
-        
+
         var samplesAssembly = Assembly.LoadFrom(testAssemblyFileName);
 
         XUnit2(testAssemblyFileName, new XUnit2Settings
@@ -139,7 +146,7 @@ Task("Document")
             OutputDirectory = Directory(samplesBinDir),
             XmlReport = true
         });
-        
+
         var samples = XDocument.Load(samplesBinDir + "/YamlDotNet.Samples.dll.xml")
             .Descendants("test")
             .Select(e => new
@@ -158,7 +165,7 @@ Task("Document")
             Information("Generating sample documentation page for {0}", fileName);
 
             var code = System.IO.File.ReadAllText("YamlDotNet.Samples/" + fileName + ".cs");
-            
+
             var sampleAttr = sample.Type
                 .GetMethod(sample.Method)
                 .GetCustomAttributes()
@@ -250,10 +257,14 @@ void BuildSolution(string solutionPath, string configuration, Verbosity verbosit
     }
     else
     {
-        // Use XBuild
-        XBuild(solutionPath, settings => settings
-            .SetConfiguration(configuration)
-            .SetVerbosity(verbosity)
-            .UseToolVersion(XBuildToolVersion.NET40));
+        var settings = new MSBuildSettings()
+        {
+            ToolPath = "/usr/bin/msbuild",
+            Configuration = configuration,
+            Verbosity = verbosity
+        };
+
+        // Use MSBuild 15.0
+        MSBuild(solutionPath, settings);
     }
 }
