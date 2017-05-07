@@ -112,6 +112,7 @@ Task("Build-Release-Configurations")
     {
         foreach(var releaseConfiguration in releaseConfigurations)
         {
+            Information("");
             Information("----------------------------------------");
             Information("Building {0}", releaseConfiguration);
             Information("----------------------------------------");

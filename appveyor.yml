@@ -27,6 +27,12 @@ artifacts:
   - path: YamlDotNet\bin\Release-Portable-Signed
     name: Release-Portable-Signed
 
+  - path: YamlDotNet\bin\Release-DotNetCore-Unsigned
+    name: Release-DotNetCore-Unsigned
+
+  - path: YamlDotNet\bin\Release-DotNetCore-Signed
+    name: Release-DotNetCore-Signed
+
   - path: YamlDotNet\bin\Release-UnitySubset-v35
     name: Release-UnitySubset-v35
 
