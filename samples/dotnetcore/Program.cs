@@ -5,7 +5,7 @@ namespace ConsoleApplication
 {
     public class Program
     {
-        public void Main(string[] args)
+        public static void Main(string[] args)
         {
             var serializer = new Serializer();
             serializer.Serialize(Console.Out, new { hello = "world" });
