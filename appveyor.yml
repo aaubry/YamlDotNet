@@ -1,9 +1,5 @@
 version: 0.0.{build}
 
-install:
-  - cmd: git submodule update --init
-  - ps:  .\prebuild.ps1
-
 image: Visual Studio 2017
 
 build:
@@ -13,10 +9,10 @@ build_script:
   - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic
 
 artifacts:
-  - path: YamlDotNet\bin\Release-Unsigned
+  - path: YamlDotNet\bin\Release-Unsigned\net35
     name: Release-Unsigned
 
-  - path: YamlDotNet\bin\Release-Signed
+  - path: YamlDotNet\bin\Release-Signed\net35
     name: Release-Signed
 
   - path: YamlDotNet\bin\Release-Portable-Unsigned
@@ -25,10 +21,10 @@ artifacts:
   - path: YamlDotNet\bin\Release-Portable-Signed
     name: Release-Portable-Signed
 
-  - path: YamlDotNet\bin\Release-DotNetCore-Unsigned
+  - path: YamlDotNet\bin\Release-DotNetCore-Unsigned\netstandard1.3
     name: Release-DotNetCore-Unsigned
 
-  - path: YamlDotNet\bin\Release-DotNetCore-Signed
+  - path: YamlDotNet\bin\Release-DotNetCore-Signed\netstandard1.3
     name: Release-DotNetCore-Signed
 
   - path: YamlDotNet\bin\Release-UnitySubset-v35

@@ -31,7 +31,7 @@ var releaseConfigurations = new List<string>
 };
 
 if(IsRunningOnWindows()) {
-    // releaseConfigurations.Add("Release-UnitySubset-v35");
+    releaseConfigurations.Add("Release-UnitySubset-v35");
 }
 
 var packageTypes = new[] { "Unsigned", "Signed" };

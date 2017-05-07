@@ -1,6 +1,0 @@
-[submodule "BuildUtils"]
-	path = BuildUtils
-	url = https://github.com/aaubry/BuildUtils.git
-[submodule "BuildUtils.UnityPrerequisites"]
-	path = BuildUtils.UnityPrerequisites
-	url = https://github.com/aaubry/BuildUtils.UnityPrerequisites.git
