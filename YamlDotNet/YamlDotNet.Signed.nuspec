@@ -19,7 +19,7 @@
         <file src="bin\Release-Portable-Signed\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
         <file src="bin\Release-Portable-Signed\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 
-        <file src="bin\Release-DotNetCore-Signed\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
-        <file src="bin\Release-DotNetCore-Signed\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
+        <file src="bin\Release-DotNetStandard-Signed\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
+        <file src="bin\Release-DotNetStandard-Signed\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
     </files>
 </package>

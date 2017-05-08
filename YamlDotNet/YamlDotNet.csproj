@@ -90,12 +90,12 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetCore-Unsigned|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetStandard-Unsigned|AnyCPU' ">
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <OutputPath>bin\Release-DotNetCore-Unsigned\</OutputPath>
+    <OutputPath>bin\Release-DotNetStandard-Unsigned\</OutputPath>
     <DefineConstants>TRACE;NETSTANDARD1_3;PORTABLE</DefineConstants>
-    <DocumentationFile>bin\Release-DotNetCore-Unsigned\netstandard1.3\YamlDotNet.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-DotNetStandard-Unsigned\netstandard1.3\YamlDotNet.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
     <DebugType>pdbonly</DebugType>
@@ -103,12 +103,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetCore-Signed|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetStandard-Signed|AnyCPU' ">
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <OutputPath>bin\Release-DotNetCore-Signed\</OutputPath>
+    <OutputPath>bin\Release-DotNetStandard-Signed\</OutputPath>
     <DefineConstants>TRACE;NETSTANDARD1_3;PORTABLE;SIGNED</DefineConstants>
-    <DocumentationFile>bin\Release-DotNetCore-Signed\netstandard1.3\YamlDotNet.xml</DocumentationFile>
+    <DocumentationFile>bin\Release-DotNetStandard-Signed\netstandard1.3\YamlDotNet.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <NoWarn>1591</NoWarn>
     <DebugType>pdbonly</DebugType>

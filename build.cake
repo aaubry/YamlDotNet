@@ -26,8 +26,8 @@ var releaseConfigurations = new List<string>
     "Release-Signed",
     "Release-Portable-Unsigned",
     "Release-Portable-Signed",
-    "Release-DotNetCore-Unsigned",
-    "Release-DotNetCore-Signed",
+    "Release-DotNetStandard-Unsigned",
+    "Release-DotNetStandard-Signed",
 };
 
 if (IsRunningOnWindows())

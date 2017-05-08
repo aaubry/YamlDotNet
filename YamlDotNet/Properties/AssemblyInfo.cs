@@ -50,9 +50,9 @@ using System.Runtime.CompilerServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("0.0.1")]
-[assembly: AssemblyFileVersion("0.0.0")]
-[assembly: AssemblyInformationalVersion("0.0.0")]
+[assembly: AssemblyVersion("4.1.1.0")]
+[assembly: AssemblyFileVersion("4.1.1.0")]
+[assembly: AssemblyInformationalVersion("4.1.1-netstandard.1+33.Branch.netstandard.Sha.c93cba8a239d7215007f464c84ed12f369e044bc")]
 
 [assembly: CLSCompliant(true)]
 #if !SIGNED

@@ -21,11 +21,11 @@ artifacts:
   - path: YamlDotNet\bin\Release-Portable-Signed
     name: Release-Portable-Signed
 
-  - path: YamlDotNet\bin\Release-DotNetCore-Unsigned\netstandard1.3
-    name: Release-DotNetCore-Unsigned
+  - path: YamlDotNet\bin\Release-DotNetStandard-Unsigned\netstandard1.3
+    name: Release-DotNetStandard-Unsigned
 
-  - path: YamlDotNet\bin\Release-DotNetCore-Signed\netstandard1.3
-    name: Release-DotNetCore-Signed
+  - path: YamlDotNet\bin\Release-DotNetStandard-Signed\netstandard1.3
+    name: Release-DotNetStandard-Signed
 
   - path: YamlDotNet\bin\Release-UnitySubset-v35
     name: Release-UnitySubset-v35
