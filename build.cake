@@ -30,8 +30,15 @@ var releaseConfigurations = new List<string>
     "Release-DotNetCore-Signed",
 };
 
-if(IsRunningOnWindows()) {
+if (IsRunningOnWindows())
+{
+    // Unity can only be built on Windows
     releaseConfigurations.Add("Release-UnitySubset-v35");
+}
+else
+{
+    // AOT requires mono
+    releaseConfigurations.Add("Debug-AOT");    
 }
 
 var packageTypes = new[] { "Unsigned", "Signed" };
@@ -127,6 +134,13 @@ Task("Test-Release-Configurations")
         foreach(var releaseConfiguration in releaseConfigurations)
         {
             XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/YamlDotNet.Test*.dll");
+
+            if (releaseConfiguration == "Debug-AOT")
+            {
+                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.dll");
+                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
+                RunProcess("mono", "--full-aot", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
+            }
         }
     });
 
@@ -277,4 +291,20 @@ void BuildSolution(string solutionPath, string configuration, Verbosity verbosit
             .SetVerbosity(verbosity)
             .SetConfiguration(configuration);
     });
+}
+
+void RunProcess(string processName, params string[] arguments)
+{
+    var exitCode = StartProcess(processName, new ProcessSettings().WithArguments(a =>
+    {
+        foreach (var argument in arguments)
+        {
+            a.Append(argument);
+        }
+    }));
+
+    if (exitCode != 0)
+    {
+        throw new Exception(string.Format("{0} failed with exit code {1}", processName, exitCode));
+    }
 }
