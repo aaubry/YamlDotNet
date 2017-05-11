@@ -85,6 +85,9 @@ Global
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-Portable-Signed|Any CPU.ActiveCfg = Release-Portable-Unsigned|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-Portable-Unsigned|Any CPU.ActiveCfg = Release-Portable-Unsigned|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-Portable-Unsigned|Any CPU.Build.0 = Release-Portable-Unsigned|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-DotNetStandard-Signed|Any CPU.ActiveCfg = Release-DotNetStandard-Unsigned|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-DotNetStandard-Unsigned|Any CPU.ActiveCfg = Release-DotNetStandard-Unsigned|Any CPU
+		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-DotNetStandard-Unsigned|Any CPU.Build.0 = Release-DotNetStandard-Unsigned|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-Signed|Any CPU.ActiveCfg = Release-Unsigned|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-Signed|Any CPU.ActiveCfg = Release-Unsigned|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release-UnitySubset-v35|Any CPU.ActiveCfg = Release-Unsigned|Any CPU
