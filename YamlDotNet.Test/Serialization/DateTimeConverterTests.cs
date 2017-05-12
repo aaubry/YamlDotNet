@@ -364,7 +364,18 @@ namespace YamlDotNet.Test.Serialization
         public void Given_Yaml_WithLocaleAndTimeFormat_ReadYaml_ShouldReturn_Result(string format, string locale, string value)
         {
             var culture = new CultureInfo(locale);
-            var expected = DateTime.ParseExact(value, format, culture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+            
+            var expected = default(DateTime);
+            try
+            {
+                expected = DateTime.ParseExact(value, format, culture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+            }
+            catch(Exception ex)
+            {
+                var message = string.Format("Failed to parse the test argument to DateTime. The expected date format should look like this: '{0}'", DateTime.Now.ToString(format, culture));
+                throw new Exception(message, ex);
+            }
+
             var converter = new DateTimeConverter(provider: culture, formats: new[] { "d", "D", "f", "F", "g", "G", "M", "O", "R", "s", "t", "T", "u", "U", "Y" });
 
             var parser = A.Fake<IParser>();
