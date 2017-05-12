@@ -325,10 +325,10 @@ void RunUnitTests(string configurationName)
             NoBuild = true
         };
 
-        if (AppVeyor.IsRunningOnAppVeyor)
-        {
-            settings.ArgumentCustomization = args => args.Append("-appveyor");
-        }
+        // if (AppVeyor.IsRunningOnAppVeyor)
+        // {
+        //     settings.ArgumentCustomization = args => args.Append("-appveyor");
+        // }
 
         var path = MakeAbsolute(File("./YamlDotNet.Test/YamlDotNet.Test.csproj"));
         DotNetCoreTest(path.FullPath, settings);
@@ -341,10 +341,10 @@ void RunUnitTests(string configurationName)
             Parallelism = ParallelismOption.All
         };
 
-        if (AppVeyor.IsRunningOnAppVeyor)
-        {
-            settings.ArgumentCustomization = args => args.Append("-appveyor");
-        }
+        // if (AppVeyor.IsRunningOnAppVeyor)
+        // {
+        //     settings.ArgumentCustomization = args => args.Append("-appveyor");
+        // }
 
         XUnit2("YamlDotNet.Test/bin/" + configurationName + "/net452/YamlDotNet.Test*.dll");
     }
