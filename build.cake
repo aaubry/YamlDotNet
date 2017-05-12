@@ -1,6 +1,8 @@
 #tool "nuget:?package=xunit.runner.console"
 #tool "nuget:?package=Mono.TextTransform"
 #tool "nuget:?package=GitVersion.CommandLine"
+#tool "nuget:?package=Cake.Incubator"
+
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -19,9 +21,25 @@ var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVer
 
 var solutionPath = "./YamlDotNet.sln";
 
-var releaseConfigurations = new List<string> { "Release-Unsigned", "Release-Signed", "Release-Portable-Unsigned", "Release-Portable-Signed" };
-if(IsRunningOnWindows()) {
+var releaseConfigurations = new List<string>
+{
+    "Release-Unsigned",
+    "Release-Signed",
+    "Release-Portable-Unsigned",
+    "Release-Portable-Signed",
+    "Release-DotNetStandard-Unsigned",
+    "Release-DotNetStandard-Signed",
+};
+
+if (IsRunningOnWindows())
+{
+    // Unity can only be built on Windows
     releaseConfigurations.Add("Release-UnitySubset-v35");
+}
+else
+{
+    // AOT requires mono
+    releaseConfigurations.Add("Debug-AOT");
 }
 
 var packageTypes = new[] { "Unsigned", "Signed" };
@@ -41,6 +59,10 @@ Task("Clean")
             "./YamlDotNet.AotTest/bin",
             "./YamlDotNet.Samples/bin",
             "./YamlDotNet.Test/bin",
+            "./YamlDotNet/obj",
+            "./YamlDotNet.AotTest/obj",
+            "./YamlDotNet.Samples/obj",
+            "./YamlDotNet.Test/obj",
         });
     });
 
@@ -49,6 +71,7 @@ Task("Restore-NuGet-Packages")
     .Does(() =>
     {
         NuGetRestore(solutionPath);
+        DotNetCoreRestore(solutionPath);
     });
 
 Task("Set-Build-Version")
@@ -82,12 +105,7 @@ Task("Run-Unit-Tests")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        var settings = new XUnit2Settings();
-        if(AppVeyor.IsRunningOnAppVeyor)
-        {
-            settings.ArgumentCustomization = args => args.Append("-appveyor");
-        }
-        XUnit2("YamlDotNet.Test/bin/" + configuration + "/YamlDotNet.Test*.dll", settings);
+        RunUnitTests(configuration);
     });
 
 Task("Build-Release-Configurations")
@@ -97,6 +115,10 @@ Task("Build-Release-Configurations")
     {
         foreach(var releaseConfiguration in releaseConfigurations)
         {
+            Information("");
+            Information("----------------------------------------");
+            Information("Building {0}", releaseConfiguration);
+            Information("----------------------------------------");
             BuildSolution(solutionPath, releaseConfiguration, buildVerbosity);
         }
     });
@@ -107,7 +129,22 @@ Task("Test-Release-Configurations")
     {
         foreach(var releaseConfiguration in releaseConfigurations)
         {
-            XUnit2("YamlDotNet.Test/bin/" + releaseConfiguration + "/YamlDotNet.Test*.dll");
+            if (releaseConfiguration.EndsWith("-Signed"))
+            {
+                Information("Skipping signed builds. Configuration: " + releaseConfiguration);
+                continue;
+            }
+
+            if (releaseConfiguration.Equals("Debug-AOT"))
+            {
+                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.dll");
+                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
+                RunProcess("mono", "--full-aot", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
+            }
+            else
+            {
+                RunUnitTests(releaseConfiguration);
+            }
         }
     });
 
@@ -117,7 +154,15 @@ Task("Package")
     {
         foreach(var packageType in packageTypes)
         {
-            NuGetPack("YamlDotNet/YamlDotNet." + packageType + ".nuspec", new NuGetPackSettings
+            // Replace directory separator char
+            var baseNuspecFile = "YamlDotNet/YamlDotNet." + packageType + ".nuspec";
+            var nuspec = System.IO.File.ReadAllText(baseNuspecFile);
+
+            var finalNuspecFile = baseNuspecFile + ".tmp";
+            nuspec = nuspec.Replace('\\', System.IO.Path.DirectorySeparatorChar);
+            System.IO.File.WriteAllText(finalNuspecFile, nuspec);
+
+            NuGetPack(finalNuspecFile, new NuGetPackSettings
             {
                 Version = nugetVersion,
                 OutputDirectory = Directory("YamlDotNet/bin"),
@@ -131,7 +176,7 @@ Task("Document")
     {
         var samplesBinDir = "YamlDotNet.Samples/bin/" + configuration;
         var testAssemblyFileName = samplesBinDir + "/YamlDotNet.Samples.dll";
-        
+
         var samplesAssembly = Assembly.LoadFrom(testAssemblyFileName);
 
         XUnit2(testAssemblyFileName, new XUnit2Settings
@@ -139,7 +184,7 @@ Task("Document")
             OutputDirectory = Directory(samplesBinDir),
             XmlReport = true
         });
-        
+
         var samples = XDocument.Load(samplesBinDir + "/YamlDotNet.Samples.dll.xml")
             .Descendants("test")
             .Select(e => new
@@ -158,7 +203,7 @@ Task("Document")
             Information("Generating sample documentation page for {0}", fileName);
 
             var code = System.IO.File.ReadAllText("YamlDotNet.Samples/" + fileName + ".cs");
-            
+
             var sampleAttr = sample.Type
                 .GetMethod(sample.Method)
                 .GetCustomAttributes()
@@ -237,23 +282,70 @@ string UnIndent(string text)
 void BuildSolution(string solutionPath, string configuration, Verbosity verbosity)
 {
     const string appVeyorLogger = @"""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll""";
-    if(IsRunningOnWindows())
+    MSBuild(solutionPath, settings =>
     {
-        // Use MSBuild
-        MSBuild(solutionPath, settings =>
+        if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
+
+        if(IsRunningOnUnix())
         {
-            if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
-            settings
-                .SetVerbosity(verbosity)
-                .SetConfiguration(configuration);
-        });
+            settings.ToolPath = "/usr/bin/msbuild";
+        }
+
+        settings
+            .SetVerbosity(verbosity)
+            .SetConfiguration(configuration);
+    });
+}
+
+void RunProcess(string processName, params string[] arguments)
+{
+    var exitCode = StartProcess(processName, new ProcessSettings().WithArguments(a =>
+    {
+        foreach (var argument in arguments)
+        {
+            a.Append(argument);
+        }
+    }));
+
+    if (exitCode != 0)
+    {
+        throw new Exception(string.Format("{0} failed with exit code {1}", processName, exitCode));
+    }
+}
+
+void RunUnitTests(string configurationName)
+{
+    if (configurationName.Contains("DotNetStandard"))
+    {
+        // Execute .NETCoreApp tests using `dotnet test`.
+        var settings = new DotNetCoreTestSettings
+        {
+            Framework = "netcoreapp1.0",
+            Configuration = configurationName,
+            NoBuild = true
+        };
+
+        // if (AppVeyor.IsRunningOnAppVeyor)
+        // {
+        //     settings.ArgumentCustomization = args => args.Append("-appveyor");
+        // }
+
+        var path = MakeAbsolute(File("./YamlDotNet.Test/YamlDotNet.Test.csproj"));
+        DotNetCoreTest(path.FullPath, settings);
     }
     else
     {
-        // Use XBuild
-        XBuild(solutionPath, settings => settings
-            .SetConfiguration(configuration)
-            .SetVerbosity(verbosity)
-            .UseToolVersion(XBuildToolVersion.NET40));
+        // Execute the full framework tests using xunit.console.runner.
+        var settings = new XUnit2Settings
+        {
+            Parallelism = ParallelismOption.All
+        };
+
+        // if (AppVeyor.IsRunningOnAppVeyor)
+        // {
+        //     settings.ArgumentCustomization = args => args.Append("-appveyor");
+        // }
+
+        XUnit2("YamlDotNet.Test/bin/" + configurationName + "/net452/YamlDotNet.Test*.dll");
     }
 }

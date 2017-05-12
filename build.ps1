@@ -42,10 +42,10 @@ http://cakebuild.net
 Param(
     [string]$Script = "build.cake",
     [string]$Target = "Default",
-    [ValidateSet("Debug", "Debug-AOT", "Debug-UnitySubset-v35", "PerformanceTests", "Release-Portable-Signed", "Release-Portable-Unsigned", "Release-Signed", "Release-UnitySubset-v35", "Release-Unsigned")]
+    [ValidateSet("Debug", "Debug-AOT", "Debug-UnitySubset-v35", "PerformanceTests", "Release-Portable-Signed", "Release-Portable-Unsigned", "Release-Signed", "Release-UnitySubset-v35", "Release-Unsigned", "Release-DotNetStandard-Unsigned", "Release-DotNetStandard-Signed")]
     [string]$Configuration = "Release-Unsigned",
     [ValidateSet("Quiet", "Minimal", "Normal", "Verbose", "Diagnostic")]
-    [string]$Verbosity = "Verbose",
+    [string]$Verbosity = "Minimal",
     [switch]$Experimental,
     [Alias("DryRun","Noop")]
     [switch]$WhatIf,

@@ -21,6 +21,7 @@
 
 using FluentAssertions;
 using System.Collections;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
@@ -296,7 +297,7 @@ namespace YamlDotNet.Test.Core
         {
             actual.GetType().Should().Be(expected.GetType(), "Parse event {0} is not of the expected type.", eventNumber);
 
-            foreach (var property in expected.GetType().GetProperties())
+            foreach (var property in expected.GetType().GetTypeInfo().GetProperties())
             {
                 if (property.PropertyType == typeof(Mark) || !property.CanRead)
                 {

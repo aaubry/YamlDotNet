@@ -23,8 +23,12 @@ using Xunit;
 using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Reflection;
+
+#if !PORTABLE && !NETCOREAPP1_0
+using System.Runtime.Serialization.Formatters.Binary;
+#endif
 
 namespace YamlDotNet.Test.Core
 {
@@ -371,7 +375,7 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
-#if !PORTABLE
+#if !PORTABLE && !NETCOREAPP1_0
         [Fact]
         public void ScannerIsSerializable()
         {
@@ -448,7 +452,7 @@ namespace YamlDotNet.Test.Core
             actual.Should().NotBeNull();
             actual.GetType().Should().Be(expected.GetType(), "Token {0} is not of the expected type", tokenNumber);
 
-            foreach (var property in expected.GetType().GetProperties())
+            foreach (var property in expected.GetType().GetTypeInfo().GetProperties())
             {
                 if (property.PropertyType != typeof(Mark) && property.CanRead)
                 {
