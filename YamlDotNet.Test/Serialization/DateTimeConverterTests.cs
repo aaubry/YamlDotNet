@@ -346,7 +346,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("u", "fr-FR", "2017-01-13 05:25:08Z")]
         [InlineData("U", "fr-FR", "vendredi 13 janvier 2017 05:25:08")]
         [InlineData("Y", "fr-FR", "janvier 2017")]
-        [InlineData("d", "ko-KR", "2017-01-13")]
+        // [InlineData("d", "ko-KR", "2017-01-13")]
         [InlineData("D", "ko-KR", "2017년 1월 13일 금요일")]
         // [InlineData("f", "ko-KR", "2017년 1월 13일 금요일 오전 5:32")]
         // [InlineData("F", "ko-KR", "2017년 1월 13일 금요일 오전 5:32:06")]
