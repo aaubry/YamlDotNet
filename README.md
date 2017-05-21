@@ -34,6 +34,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.2.1
+
+Bug fixes:
+
+* **Fix parser behavior when skipComments == false**  
+  In most cases, the parser failed to parse after encountering a comment.
+
 ## Version 4.2.0
 
 ### New features
