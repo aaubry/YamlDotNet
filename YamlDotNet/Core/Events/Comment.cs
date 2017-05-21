@@ -20,6 +20,8 @@
 //  SOFTWARE.
 
 
+using System.Globalization;
+
 namespace YamlDotNet.Core.Events
 {
     public class Comment : ParsingEvent
@@ -47,6 +49,22 @@ namespace YamlDotNet.Core.Events
         public override void Accept(IParsingEventVisitor visitor)
         {
             visitor.Visit(this);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} Comment [{1}]",
+                IsInline ? "Inline" : "Block",
+                Value
+            );
         }
     }
 }

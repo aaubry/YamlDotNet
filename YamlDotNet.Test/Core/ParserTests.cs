@@ -340,6 +340,24 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void CommentsDoNotInfluenceParsing_Issue_260()
+        {
+            AssertSequenceOfEventsFrom(new Parser(new Scanner(Yaml.ReaderForText(@"
+                    # Some comment
+                    key: value
+                "), skipComments: false)),
+                StreamStart,
+                DocumentStart(Implicit),
+                StandaloneComment("Some comment"),
+                BlockMappingStart,
+                PlainScalar("key"),
+                PlainScalar("value"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
+
+        [Fact]
         public void CommentsAreOmittedUnlessRequested()
         {
             AssertSequenceOfEventsFrom(Yaml.ParserForText(@"
