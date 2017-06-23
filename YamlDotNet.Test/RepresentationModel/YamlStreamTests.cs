@@ -64,7 +64,7 @@ namespace YamlDotNet.Test.RepresentationModel
 
             var toString = stream.Documents.Single().RootNode.ToString();
 
-            toString.Should().Contain(YamlNode.MaximumRecursionLevelReachedToStringValue);
+            toString.Should().Contain("WARNING! INFINITE RECURSION!");
         }
 
         [Fact]

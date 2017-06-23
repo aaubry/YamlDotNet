@@ -1,19 +1,29 @@
 ﻿using System;
-using System.Reflection;
 using System.Linq.Expressions;
+using System.Reflection;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Helpers
+namespace YamlDotNet.Test
 {
-    public static class ExpressionExtensions
+#if NET20
+    internal static class Portability
     {
-#if !NET20
-        /// <summary>
-        /// Returns the <see cref="PropertyInfo" /> that describes the property that
-        /// is being returned in an expression in the form:
-        /// <code>
-        ///   x => x.SomeProperty
-        /// </code>
-        /// </summary>
+        public static SerializerBuilder WithAttributeOverride<TClass>(this SerializerBuilder builder, Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
+        {
+            return builder.WithAttributeOverride(typeof(TClass), propertyAccessor.AsProperty().Name, attribute);
+        }
+
+        public static DeserializerBuilder WithAttributeOverride<TClass>(this DeserializerBuilder builder, Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
+        {
+            return builder.WithAttributeOverride(typeof(TClass), propertyAccessor.AsProperty().Name, attribute);
+        }
+
+        public static void Add<TClass>(this YamlAttributeOverrides overrides, Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
+        {
+            var property = propertyAccessor.AsProperty();
+            overrides.Add(typeof(TClass), property.Name, attribute);
+        }
+
         public static PropertyInfo AsProperty(this LambdaExpression propertyAccessor)
         {
             var property = TryGetMemberExpression<PropertyInfo>(propertyAccessor);
@@ -59,6 +69,6 @@ namespace YamlDotNet.Helpers
 
             return memberExpression.Member as TMemberInfo;
         }
-#endif
     }
+#endif
 }

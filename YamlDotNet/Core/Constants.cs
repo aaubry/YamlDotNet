@@ -27,7 +27,7 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Defines constants thar relate to the YAML specification.
     /// </summary>
-    internal static class Constants
+    public static class Constants
     {
         public static readonly TagDirective[] DefaultTagDirectives =
         {

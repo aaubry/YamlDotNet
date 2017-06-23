@@ -24,7 +24,7 @@ using System;
 namespace YamlDotNet.Core
 {
     [Serializable]
-    internal class Cursor
+    public class Cursor
     {
         public int Index { get; set; }
         public int Line { get; set; }

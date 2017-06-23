@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -455,3 +456,298 @@ namespace YamlDotNet
     }
 #endif
 }
+
+#if NET20
+    namespace System.Runtime.CompilerServices
+    {
+        [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+        internal sealed class ExtensionAttribute : Attribute { }
+    }
+
+    namespace YamlDotNet // To allow these to be public without clashing with the standard ones on platforms > 2.0
+    {
+        public delegate TResult Func<TArg, TResult>(TArg arg);
+        public delegate TResult Func<TArg1, TArg2, TResult>(TArg1 arg1, TArg2 arg2);
+        public delegate TResult Func<TArg1, TArg2, TArg3, TResult>(TArg1 arg1, TArg2 arg2, TArg3 arg3);
+    }
+
+    namespace System.Linq
+    {
+        using YamlDotNet;
+
+        internal static class Enumerable
+        {
+            public static List<T> ToList<T>(this IEnumerable<T> sequence)
+            {
+                return new List<T>(sequence);
+            }
+
+            public static T[] ToArray<T>(this IEnumerable<T> sequence)
+            {
+                return sequence.ToList().ToArray();
+            }
+
+            public static IEnumerable<T> OrderBy<T, TKey>(this IEnumerable<T> sequence, Func<T, TKey> orderBy)
+            {
+                var comparer = Comparer<TKey>.Default;
+                var list = sequence.ToList();
+                list.Sort((a, b) => comparer.Compare(orderBy(a), orderBy(b)));
+                return list;
+            }
+
+            public static IEnumerable<T> Empty<T>()
+            {
+                yield break;
+            }
+
+            public static IEnumerable<T> Where<T>(this IEnumerable<T> sequence, Func<T, bool> predicate)
+            {
+                foreach (var item in sequence)
+                {
+                    if (predicate(item))
+                    {
+                        yield return item;
+                    }
+                }
+            }
+
+            public static IEnumerable<T2> Select<T1, T2>(this IEnumerable<T1> sequence, Func<T1, T2> selector)
+            {
+                foreach (var item in sequence)
+                {
+                    yield return selector(item);
+                }
+            }
+
+            public static IEnumerable<T> OfType<T>(this IEnumerable sequence)
+            {
+                foreach (var item in sequence)
+                {
+                    if (item is T)
+                    {
+                        yield return (T)item;
+                    }
+                }
+            }
+
+            public static IEnumerable<T2> SelectMany<T1, T2>(this IEnumerable<T1> sequence, Func<T1, IEnumerable<T2>> selector)
+            {
+                foreach (var item in sequence)
+                {
+                    foreach (var subitem in selector(item))
+                    {
+                        yield return subitem;
+                    }
+                }
+            }
+
+            public static T First<T>(this IEnumerable<T> sequence)
+            {
+                foreach (var item in sequence)
+                {
+                    return item;
+                }
+                throw new InvalidOperationException();
+            }
+
+            public static T FirstOrDefault<T>(this IEnumerable<T> sequence)
+            {
+                foreach (var item in sequence)
+                {
+                    return item;
+                }
+                return default(T);
+            }
+
+            public static T SingleOrDefault<T>(this IEnumerable<T> sequence)
+            {
+                using (var enumerator = sequence.GetEnumerator())
+                {
+                    if (!enumerator.MoveNext())
+                    {
+                        return default(T);
+                    }
+                    var result = enumerator.Current;
+                    if (enumerator.MoveNext())
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    return result;
+                }
+            }
+
+            public static T Single<T>(this IEnumerable<T> sequence)
+            {
+                using (var enumerator = sequence.GetEnumerator())
+                {
+                    if (!enumerator.MoveNext())
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    var result = enumerator.Current;
+                    if (enumerator.MoveNext())
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    return result;
+                }
+            }
+
+            public static T FirstOrDefault<T>(this IEnumerable<T> sequence, Func<T, bool> predicate)
+            {
+                return sequence.Where(predicate).FirstOrDefault();
+            }
+
+            public static IEnumerable<T> Concat<T>(this IEnumerable<T> first, IEnumerable<T> second)
+            {
+                foreach (var item in first)
+                {
+                    yield return item;
+                }
+                foreach (var item in second)
+                {
+                    yield return item;
+                }
+            }
+
+            public static IEnumerable<T> Skip<T>(this IEnumerable<T> sequence, int skipCount)
+            {
+                foreach (var item in sequence)
+                {
+                    if (skipCount <= 0)
+                    {
+                        yield return item;
+                    }
+                    else
+                    {
+                        --skipCount;
+                    }
+                }
+            }
+
+            public static IEnumerable<T> SkipWhile<T>(this IEnumerable<T> sequence, Func<T, bool> predicate)
+            {
+                var skip = true;
+                foreach (var item in sequence)
+                {
+                    skip = skip && predicate(item);
+                    if (!skip)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+
+            public static IEnumerable<T> TakeWhile<T>(this IEnumerable<T> sequence, Func<T, bool> predicate)
+            {
+                var take = true;
+                foreach (var item in sequence)
+                {
+                    take = take && predicate(item);
+                    if (take)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+
+            public static IEnumerable<T> DefaultIfEmpty<T>(this IEnumerable<T> sequence, T defaultValue)
+            {
+                var isEmpty = true;
+                foreach (var item in sequence)
+                {
+                    yield return item;
+                    isEmpty = false;
+                }
+                if (isEmpty)
+                {
+                    yield return defaultValue;
+                }
+            }
+
+            public static bool Any<T>(this IEnumerable<T> sequence)
+            {
+                foreach (var item in sequence)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            public static bool Any<T>(this IEnumerable<T> sequence, Func<T, bool> predicate)
+            {
+                return sequence.Where(predicate).Any();
+            }
+
+            public static bool Contains<T>(this IEnumerable<T> sequence, T value)
+            {
+                foreach (var item in sequence)
+                {
+                    if (item.Equals(value))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public static TSource Aggregate<TSource>(this IEnumerable<TSource> source, Func<TSource, TSource, TSource> func)
+            {
+                using (var enumerator = source.GetEnumerator())
+                {
+                    if (!enumerator.MoveNext())
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    var accumulator = enumerator.Current;
+                    while (enumerator.MoveNext())
+                    {
+                        accumulator = func(accumulator, enumerator.Current);
+                    }
+                    return accumulator;
+                }
+            }
+
+            public static TAccumulate Aggregate<TSource, TAccumulate>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func)
+            {
+                var accumulator = seed;
+                foreach (var item in source)
+                {
+                    accumulator = func(accumulator, item);
+                }
+                return accumulator;
+            }
+        }
+    }
+
+    namespace System.Collections.Generic
+    {
+        internal class HashSet<T>
+        {
+            private readonly Dictionary<T, object> items = new Dictionary<T, object>();
+
+            public bool Add(T value)
+            {
+                if (Contains(value))
+                {
+                    return false;
+                }
+                else
+                {
+                    items.Add(value, null);
+                    return true;
+                }
+            }
+
+            public bool Contains(T value)
+            {
+                return items.ContainsKey(value);
+            }
+
+            public void Clear()
+            {
+                items.Clear();
+            }
+        }
+    }
+#endif

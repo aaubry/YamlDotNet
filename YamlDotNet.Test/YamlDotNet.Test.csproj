@@ -25,6 +25,16 @@
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-Net20|AnyCPU' ">
+    <TargetFrameworks>net452</TargetFrameworks>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug-Net20\</OutputPath>
+    <DefineConstants>TRACE;NET20;DEBUG;TEST_DUMP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Unsigned|AnyCPU' ">
     <TargetFrameworks>net452</TargetFrameworks>
     <DebugType>pdbonly</DebugType>

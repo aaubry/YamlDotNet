@@ -25,6 +25,7 @@ var releaseConfigurations = new List<string>
 {
     "Release-Unsigned",
     "Release-Signed",
+    "Release-Net20-Unsigned",
     "Release-Portable-Unsigned",
     "Release-Portable-Signed",
     "Release-DotNetStandard-Unsigned",

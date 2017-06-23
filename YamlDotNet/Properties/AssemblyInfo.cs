@@ -55,12 +55,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyInformationalVersion("0.0.0")]
 
 [assembly: CLSCompliant(true)]
-#if !SIGNED
-#if NETSTANDARD1_3 || !PORTABLE
-[assembly: InternalsVisibleTo("YamlDotNet.Test")]
-#else
-[assembly: InternalsVisibleTo("YamlDotNet.Test.Portable")]
-#endif
-#endif
 
 #endif

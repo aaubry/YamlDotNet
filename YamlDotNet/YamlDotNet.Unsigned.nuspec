@@ -16,6 +16,9 @@
         <file src="bin\Release-Unsigned\net35\YamlDotNet.dll" target="lib\net35" />
         <file src="bin\Release-Unsigned\net35\YamlDotNet.xml" target="lib\net35" />
 
+        <file src="bin\Release-Net20-Unsigned\net20\YamlDotNet.dll" target="lib\net20" />
+        <file src="bin\Release-Net20-Unsigned\net20\YamlDotNet.xml" target="lib\net20" />
+
         <file src="bin\Release-Portable-Unsigned\YamlDotNet.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
         <file src="bin\Release-Portable-Unsigned\YamlDotNet.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1" />
 
