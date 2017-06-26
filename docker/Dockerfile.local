@@ -6,7 +6,8 @@ RUN groupadd -g $groupId build
 
 ARG userId=1001
 RUN useradd -u $userId -g $groupId -ms /bin/bash build
-RUN ln -s /root/.nuget /home/build/.nuget
+RUN mv /root/.nuget /home/build/.nuget
+RUN chown -R build:build /home/build/.nuget
 USER $userId
 
 CMD [ "bash" ]

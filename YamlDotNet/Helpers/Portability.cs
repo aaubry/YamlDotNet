@@ -471,6 +471,12 @@ namespace YamlDotNet
         public delegate TResult Func<TArg1, TArg2, TArg3, TResult>(TArg1 arg1, TArg2 arg2, TArg3 arg3);
     }
 
+    namespace System.Linq.Expressions
+    {
+        // Do not remove.
+        // Avoids code breaking on .NET 2.0 due to using System.Linq.Expressions.
+    }
+
     namespace System.Linq
     {
         using YamlDotNet;

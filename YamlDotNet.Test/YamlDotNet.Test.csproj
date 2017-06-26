@@ -44,6 +44,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Net20-Unsigned|AnyCPU' ">
+    <TargetFrameworks>net452</TargetFrameworks>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release-Net20-Unsigned\</OutputPath>
+    <DefineConstants>TRACE;NET20</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-DotNetStandard-Unsigned|AnyCPU' ">
     <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
     <DebugType>pdbonly</DebugType>

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if !NET20
+
+using System;
 using System.Reflection;
 using System.Linq.Expressions;
 
@@ -6,7 +8,6 @@ namespace YamlDotNet.Helpers
 {
     public static class ExpressionExtensions
     {
-#if !NET20
         /// <summary>
         /// Returns the <see cref="PropertyInfo" /> that describes the property that
         /// is being returned in an expression in the form:
@@ -59,6 +60,6 @@ namespace YamlDotNet.Helpers
 
             return memberExpression.Member as TMemberInfo;
         }
-#endif
     }
 }
+#endif
