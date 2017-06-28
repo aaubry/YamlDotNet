@@ -24,6 +24,12 @@ Just install the [YamlDotNet NuGet package](http://www.nuget.org/packages/YamlDo
 PM> Install-Package YamlDotNet
 ```
 
+If you need signed assemblies, install the [YamlDotNet.Signed NuGet package](http://www.nuget.org/packages/YamlDotNet.Signed/) instead:
+
+```
+PM> Install-Package YamlDotNet.Signed
+```
+
 If you do not want to use NuGet, you can [download binaries here](https://ci.appveyor.com/project/aaubry/yamldotnet).
 
 YamlDotNet is also available on the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/36292).
