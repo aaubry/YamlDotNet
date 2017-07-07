@@ -32,26 +32,56 @@ The PerformanceTests folder contains various projects that contain performance t
 
 ## Building / multiplatform
 
-This project is available on different platforms. Solution configurations are used to select the target platform. The [build.ps1](https://github.com/aaubry/YamlDotNet/blob/master/build.ps1) script can be used to easily build the library for all targets. Simply open a "Developer Command Prompt" and run the script:
+The project uses a [cake](http://cakebuild.net/) script to specify the build recipe.
+If you are on Windows, use the `buid.ps1` script to build the project:
+```
+.\build.ps1 -Target Package
+```
+You should see an [output similar to this](https://ci.appveyor.com/project/aaubry/yamldotnet/build/4.2.1#L15).
 
+If you are on Linux, use `build.sh`:
 ```
-C:\YamlDotNet> powershell .\build.ps1
+.\build.sh --target Package
 ```
+Alternatively, if you want to avoid installing the build tools, there is another script that uses a docker container to build. Just replace `build.sh` by `docker-build.sh`:
+```
+.\docker-build.sh --target Package
+```
+
+### Build targets
+
+The following table describes the most important build targets:
+
+|           Target             |                   Description                      |                          Example                            |
+|------------------------------|----------------------------------------------------|-------------------------------------------------------------|
+| Clean                        | Deletes the build output.                          | `.\build.ps1 -Target Clean`                                 |
+| Build                        | Builds a single configuration.                     | `.\build.ps1 -Target Build -Configuration Release-Unsigned` |
+| Test                         | Runs unit tests on a single configuration.         | `.\build.ps1 -Target Test -Configuration Release-Unsigned`  |
+| Build-Release-Configurations | Builds all the release configurations.             | `.\build.ps1 -Target Build-Release-Configurations`          |
+| Test-Release-Configurations  | Runs unit tests on all the release configurations. | `.\build.ps1 -Target Test-Release-Configurations`           |
+| Package                      | Build the NuGet package.                           | `.\build.ps1 -Target Package`                               |
+| Document                     | Generates the samples documentation.               | `.\build.ps1 -Target Document`                              |
 
 Building for Unity requires installing
 [Visual Studio Tools for Unity](https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi).
 
 The Portable versions target [Profile259](http://embed.plnkr.co/03ck2dCtnJogBKHJ9EjY/preview). If you do not have that profile installed, a workaround is to [get the reference assemblies from here](https://ci.appveyor.com/api/buildjobs/hrqgt7tibmar826q/artifacts/Profile259.zip) and extract them to `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.5\Profile\Profile259`.
 
-|       Configuration       |      Target       |   Defines    |           Description           |
-|---------------------------|-------------------|--------------|---------------------------------|
-| Debug                     | .NET 3.5          | DEBUG        | Default debug build.            |
-| Release-Unsigned          | .NET 3.5          |              | Release build, not signed.      |
-| Release-Signed            | .NET 3.5          | SIGNED       | Release build, signed.          |
-| Release-Portable-Unsigned | .NET 4.5 portable [Profile259](http://embed.plnkr.co/03ck2dCtnJogBKHJ9EjY/preview) | PORTABLE         | Portable class library, not signed. |
-| Release-Portable-Signed   | .NET 4.5 portable [Profile259](http://embed.plnkr.co/03ck2dCtnJogBKHJ9EjY/preview) | PORTABLE; SIGNED | Portable class library, signed.     |
-| Debug-UnitySubset-v35     | Unity Subset v3.5 | DEBUG; UNITY | Debug build for Unity target.   |
-| Release-UnitySubset-v35   | Unity Subset v3.5 | UNITY        | Release build for Unity target. |
+### Build configurations
+
+The following table describes the available build configurations:
+
+|         Configuration           |            Target            |             Defines              |             Description              |
+|---------------------------------|------------------------------|----------------------------------|--------------------------------------|
+| Debug                           | .NET 3.5                     | DEBUG                            | Default debug build.                 |
+| Release-Unsigned                | .NET 3.5                     |                                  | Release build, not signed.           |
+| Release-Signed                  | .NET 3.5                     | SIGNED                           | Release build, signed.               |
+| Release-DotNetStandard-Unsigned | .NET Core (netstandard 1.3)  | NETSTANDARD1_3; PORTABLE         | Release .NET Core build, not signed. |
+| Release-DotNetStandard-Signed   | .NET Core (netstandard 1.3)  | NETSTANDARD1_3; PORTABLE; SIGNED | Release .NET Core build, signed.     |
+| Release-Portable-Unsigned       | .NET 4.5 portable Profile259 | PORTABLE                         | Portable class library, not signed.  |
+| Release-Portable-Signed         | .NET 4.5 portable Profile259 | PORTABLE; SIGNED                 | Portable class library, signed.      |
+| Debug-UnitySubset-v35           | Unity Subset v3.5            | DEBUG; UNITY                     | Debug build for Unity target.        |
+| Release-UnitySubset-v35         | Unity Subset v3.5            | UNITY                            | Release build for Unity target.      |
 
 There are a few differences between the various target platforms,
 mainly in the reflection API. In order to adapt the code to each platform,

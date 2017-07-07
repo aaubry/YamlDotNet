@@ -101,7 +101,7 @@ Task("Build")
         BuildSolution(solutionPath, configuration, buildVerbosity);
     });
 
-Task("Run-Unit-Tests")
+Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
     {
@@ -238,7 +238,7 @@ Task("Document")
 
 Task("Default")
      // .IsDependentOn("Document");
-     .IsDependentOn("Run-Unit-Tests");
+     .IsDependentOn("Test");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
