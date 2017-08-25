@@ -1,7 +1,7 @@
 # Contributing to YamlDotNet
 
 **Welcome!**  
-Thanks for you interest in contributing to this project. Any contribution will
+Thanks for your interest in contributing to this project. Any contribution will
 be gladly accepted, provided that they are generally useful and follow the
 conventions of the project.
 
@@ -33,7 +33,7 @@ The PerformanceTests folder contains various projects that contain performance t
 ## Building / multiplatform
 
 The project uses a [cake](http://cakebuild.net/) script to specify the build recipe.
-If you are on Windows, use the `buid.ps1` script to build the project:
+If you are on Windows, use the `build.ps1` script to build the project:
 ```
 .\build.ps1 -Target Package
 ```
