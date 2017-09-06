@@ -104,6 +104,12 @@ namespace YamlDotNet.Test.RepresentationModel
         }
 
         [Fact]
+        public void RoundTripVCRExample()
+        {
+            RoundtripTest("vcr-example-file.yaml");
+        }
+
+        [Fact]
         public void RoundtripExample1()
         {
             RoundtripTest("01-directives.yaml");

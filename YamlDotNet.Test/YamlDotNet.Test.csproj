@@ -104,6 +104,7 @@
     <EmbeddedResource Include="files\multi-doc-tag.yaml" />
     <EmbeddedResource Include="files\unicode-32bits-escape.yaml" />
     <EmbeddedResource Include="files\anchors-overwriting.yaml" />
+    <EmbeddedResource Include="files\vcr-example-file.yaml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
