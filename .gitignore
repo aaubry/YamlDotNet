@@ -3,6 +3,10 @@ bin
 obj
 tools
 
+# Visual Studio local cache
+.vs/
+
+
 # mstest test results
 TestResults
 *.suo
