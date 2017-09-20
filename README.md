@@ -2,7 +2,7 @@
 
 | Travis | Appveyor | NuGet |
 |--------|----------|-------|
-|[![Travis CI](https://travis-ci.org/aaubry/YamlDotNet.svg?branch=master)](https://travis-ci.org/aaubry/YamlDotNet/builds#)|[![Build status](https://ci.appveyor.com/api/projects/status/github/aaubry/yamldotnet?svg=true)](https://ci.appveyor.com/project/aaubry/yamldotnet/branch/master)|  [![NuGet](https://img.shields.io/nuget/v/YamlDotNet.png)](https://www.nuget.org/packages/YamlDotNet/)
+|[![Travis CI](https://travis-ci.org/aaubry/YamlDotNet.svg?branch=master)](https://travis-ci.org/aaubry/YamlDotNet/builds#)|[![Build status](https://ci.appveyor.com/api/projects/status/github/aaubry/yamldotnet?svg=true)](https://ci.appveyor.com/project/aaubry/yamldotnet/branch/master)|  [![NuGet](https://img.shields.io/nuget/v/YamlDotNet.svg)](https://www.nuget.org/packages/YamlDotNet/)
 
 
 YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.
