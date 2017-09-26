@@ -49,6 +49,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             if (!cache.TryGetValue(type, out list))
             {
                 list = new List<IPropertyDescriptor>(innerTypeDescriptor.GetProperties(type, container));
+                cache.Add(type, list);
             }
             return list;
         }
