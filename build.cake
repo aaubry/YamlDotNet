@@ -29,14 +29,10 @@ var releaseConfigurations = new List<string>
     "Release-Portable-Signed",
     "Release-DotNetStandard-Unsigned",
     "Release-DotNetStandard-Signed",
+    "Release-UnitySubset-v35",
 };
 
-if (IsRunningOnWindows())
-{
-    // Unity can only be built on Windows
-    releaseConfigurations.Add("Release-UnitySubset-v35");
-}
-else
+if (!IsRunningOnWindows())
 {
     // AOT requires mono
     releaseConfigurations.Add("Debug-AOT");
@@ -336,10 +332,10 @@ void RunUnitTests(string configurationName)
     else
     {
         // Execute the full framework tests using xunit.console.runner.
-        var settings = new XUnit2Settings
-        {
-            Parallelism = ParallelismOption.All
-        };
+        // var settings = new XUnit2Settings
+        // {
+        //     Parallelism = ParallelismOption.All
+        // };
 
         // if (AppVeyor.IsRunningOnAppVeyor)
         // {

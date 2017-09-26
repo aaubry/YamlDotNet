@@ -5,8 +5,11 @@ image: Visual Studio 2017
 build:
   publish_nuget: true
 
+install:
+  - cmd: git submodule update --init
+
 build_script:
-  - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic
+  - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic -buildVerbosity=Verbose
 
 artifacts:
   - path: YamlDotNet\bin\Release-Unsigned\net35

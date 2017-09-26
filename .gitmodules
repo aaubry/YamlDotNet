@@ -1,0 +1,3 @@
+[submodule "BuildUtils.UnityPrerequisites"]
+	path = BuildUtils.UnityPrerequisites
+	url = https://github.com/aaubry/BuildUtils.UnityPrerequisites.git
