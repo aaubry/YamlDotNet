@@ -45,6 +45,12 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.2.2
+
+Bug fixes:
+
+* Actualy cache in CachedTypeInspector.
+
 ## Version 4.2.1
 
 Bug fixes:
