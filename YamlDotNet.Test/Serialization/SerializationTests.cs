@@ -1053,6 +1053,43 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void MergeNestedReferenceCorrectly()
+        {
+            var parser = new MergingParser(Yaml.ParserForText(@"
+                base1: &level1
+                  key: X
+                  level: 1
+                base2: &level2
+                  <<: *level1
+                  key: Y
+                  level: 2
+                derived1:
+                  <<: *level1
+                  key: D1
+                derived2: 
+                  <<: *level2
+                  key: D2
+                derived3: 
+                  <<: [ *level1, *level2 ]
+                  key: D3
+            "));
+
+            var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
+
+            result["derived1"].Should()
+                .Contain("key", "D1", "key should be overriden by the actual mapping")
+                .And.Contain("level", "1", "level should should be inherited from the backreferenced mapping");
+
+            result["derived2"].Should()
+                .Contain("key", "D2", "key should be overriden by the actual mapping")
+                .And.Contain("level", "2", "level should should be inherited from the backreferenced mapping");
+
+            result["derived3"].Should()
+                .Contain("key", "D3", "key should be overriden by the actual mapping")
+                .And.Contain("level", "2", "level should should be inherited from the backreferenced mapping");
+        }
+
+        [Fact]
         public void IgnoreExtraPropertiesIfWanted()
         {
             var text = Lines("aaa: hello", "bbb: world");
