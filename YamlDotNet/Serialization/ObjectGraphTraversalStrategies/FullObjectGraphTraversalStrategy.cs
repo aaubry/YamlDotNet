@@ -164,7 +164,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             var isDynamic = dictionary.Type.FullName.Equals("System.Dynamic.ExpandoObject");
             foreach (DictionaryEntry entry in (IDictionary)dictionary.Value)
             {
-                var keyString = isDynamic ? namingConvention.Apply(entry.Key.ToString()) : entry.Key.ToString();
+                var keyString = isDynamic ? namingConvention.Apply(entry.Key.ToString()) : entry.Key;
                 var key = GetObjectDescriptor(keyString, keyType);
                 var value = GetObjectDescriptor(entry.Value, valueType);
 
