@@ -45,6 +45,14 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.2.3
+
+Bug fixes:
+
+* Fix nested reference merging.
+* Don't force coercion of dictionary keys to string.
+* Fix public static method determining in PORTABLE mode.
+
 ## Version 4.2.2
 
 Bug fixes:
