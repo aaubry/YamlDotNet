@@ -244,7 +244,7 @@ namespace YamlDotNet
                     {
                         var parameters = m.GetParameters();
                         return parameters.Length == parameterTypes.Length
-                            && parameters.Zip(parameterTypes, (pi, pt) => pi.Equals(pt)).All(r => r);
+                            && parameters.Zip(parameterTypes, (pi, pt) => pi.ParameterType == pt).All(r => r);
                     }
                     return false;
                 });
