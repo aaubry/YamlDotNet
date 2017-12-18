@@ -20,23 +20,24 @@
 //  SOFTWARE.
 
 using System;
-using System.Reflection;
+using System.Globalization;
 using Xunit;
 
 namespace YamlDotNet.Test.Helpers
 {
-    public class PortabilytyTests
+    public class PortabilityTests
     {
-#if PORTABLE
         [Fact]
         public void GetPublicStaticMethodReturnsCorrectMethodInfo()
         {
+            var expected = DateTimeOffset.UtcNow;
+
             var type = typeof(DateTimeOffset);
-            var expected = type.GetMethod("Parse", new [] { typeof(string), typeof(IFormatProvider) });
             var method = type.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider));
 
-            Assert.Equal(expected, method);
+            var actual = (DateTimeOffset)method.Invoke(null, new object[] { expected.ToString("o"), CultureInfo.InvariantCulture });
+
+            Assert.Equal(expected, actual);
         }
-#endif
     }
 }
