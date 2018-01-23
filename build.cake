@@ -24,12 +24,7 @@ var solutionPath = "./YamlDotNet.sln";
 var releaseConfigurations = new List<string>
 {
     "Release-Unsigned",
-    "Release-Signed",
-    "Release-Portable-Unsigned",
-    "Release-Portable-Signed",
-    "Release-DotNetStandard-Unsigned",
-    "Release-DotNetStandard-Signed",
-    "Release-UnitySubset-v35",
+    "Release-Signed"
 };
 
 if (!IsRunningOnWindows())
@@ -67,7 +62,6 @@ Task("Restore-NuGet-Packages")
     .Does(() =>
     {
         NuGetRestore(solutionPath);
-        DotNetCoreRestore(solutionPath);
     });
 
 Task("Set-Build-Version")
@@ -75,8 +69,7 @@ Task("Set-Build-Version")
     {
         var version = GitVersion(new GitVersionSettings
         {
-            UpdateAssemblyInfo = true,
-            UpdateAssemblyInfoFilePath = File("YamlDotNet/Properties/AssemblyInfo.cs"),
+            UpdateAssemblyInfo = false
         });
         nugetVersion = version.NuGetVersion;
 
@@ -289,7 +282,8 @@ void BuildSolution(string solutionPath, string configuration, Verbosity verbosit
 
         settings
             .SetVerbosity(verbosity)
-            .SetConfiguration(configuration);
+            .SetConfiguration(configuration)
+            .WithProperty("Version", nugetVersion);
     });
 }
 
