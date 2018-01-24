@@ -21,9 +21,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.TypeInspectors;
+using System.Linq.Expressions;
 
 namespace YamlDotNet.Serialization
 {
@@ -86,6 +86,7 @@ namespace YamlDotNet.Serialization
             return Self;
         }
 
+#if !NET20
         /// <summary>
         /// Register an <see cref="Attribute"/> for for a given property.
         /// </summary>
@@ -98,6 +99,7 @@ namespace YamlDotNet.Serialization
             overrides.Add(propertyAccessor, attribute);
             return Self;
         }
+#endif
 
         /// <summary>
         /// Register an <see cref="Attribute"/> for for a given property.

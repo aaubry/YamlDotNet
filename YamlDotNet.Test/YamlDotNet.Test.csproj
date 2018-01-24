@@ -26,12 +26,31 @@
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-Net20|AnyCPU' ">
+    <TargetFrameworks>net452</TargetFrameworks>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug-Net20\</OutputPath>
+    <DefineConstants>TRACE;NET20;DEBUG;TEST_DUMP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Unsigned|AnyCPU' ">
     <TargetFrameworks>net452</TargetFrameworks>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release-Unsigned\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-Net20-Unsigned|AnyCPU' ">
+    <TargetFrameworks>net452</TargetFrameworks>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release-Net20-Unsigned\</OutputPath>
+    <DefineConstants>TRACE;NET20</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -58,7 +77,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.2" />
-    <PackageReference Include="FakeItEasy" Version="3.3.2" />
+    <PackageReference Include="FakeItEasy" Version="4.3.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="15.0.0" />

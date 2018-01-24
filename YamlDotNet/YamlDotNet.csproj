@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;net35;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;net20;net35;net40;net45</TargetFrameworks>
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
@@ -13,7 +13,7 @@
     <NoWarn>1591;1574</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
     <FrameworkPathOverride>$(SolutionDir)BuildUtils.UnityPrerequisites\Unity Subset v3.5</FrameworkPathOverride>
     <DefineConstants>$(DefineConstants);UNITY</DefineConstants>
   </PropertyGroup>
@@ -32,6 +32,8 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
     <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3' And '$(TargetFramework)' != 'net20'">
     <Reference Include="System.Core" />
   </ItemGroup>
 

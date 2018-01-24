@@ -23,9 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using YamlDotNet.Core;
 using YamlDotNet.Helpers;
+using System.Linq.Expressions;
 
 namespace YamlDotNet.Serialization
 {
@@ -163,6 +163,7 @@ namespace YamlDotNet.Serialization
             mappings.Add(mapping);
         }
 
+#if !NET20
         /// <summary>
         /// Adds a Member Attribute Override
         /// </summary>
@@ -171,6 +172,7 @@ namespace YamlDotNet.Serialization
             var property = propertyAccessor.AsProperty();
             Add(typeof(TClass), property.Name, attribute);
         }
+#endif
 
         /// <summary>
         /// Creates a copy of this instance.

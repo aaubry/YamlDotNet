@@ -45,6 +45,19 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.2.4
+
+* Refactored the project and solution so that they load and build cleanly in VS2017.
+* Reviewed the target platforms.
+  * **The currently supported platforms are now:**
+    * .NET Framework 4.5
+    * .NET Framework 3.5
+    * .NET Framework 2.0 (**experimental**)
+    * .NET Standard 1.3
+    * Unity Subset v3.5
+  * **The following platforms are no longer supported:**
+    * Profile259 (please upgrade to netstandard)
+
 ## Version 4.2.3
 
 Bug fixes:

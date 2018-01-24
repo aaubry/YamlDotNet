@@ -67,21 +67,29 @@ Building for Unity requires installing
 
 The Portable versions target [Profile259](http://embed.plnkr.co/03ck2dCtnJogBKHJ9EjY/preview). If you do not have that profile installed, a workaround is to [get the reference assemblies from here](https://ci.appveyor.com/api/buildjobs/hrqgt7tibmar826q/artifacts/Profile259.zip) and extract them to `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.5\Profile\Profile259`.
 
+### Target platforms
+
+The project targets the following platforms:
+
+* .NET Framework 4.5
+* .NET Framework 3.5
+* .NET Framework 2.0
+* .NET Standard 1.3
+* Unity Subset v3.5
+
+In the csproj, the `TargetFrameworks` element also targets net40, but that is a hack used to target Unity. That target is overriden and in reality it targets Unity Subset v3.5.
+
 ### Build configurations
 
 The following table describes the available build configurations:
 
-|         Configuration           |            Target            |             Defines              |             Description              |
-|---------------------------------|------------------------------|----------------------------------|--------------------------------------|
-| Debug                           | .NET 3.5                     | DEBUG                            | Default debug build.                 |
-| Release-Unsigned                | .NET 3.5                     |                                  | Release build, not signed.           |
-| Release-Signed                  | .NET 3.5                     | SIGNED                           | Release build, signed.               |
-| Release-DotNetStandard-Unsigned | .NET Core (netstandard 1.3)  | NETSTANDARD1_3; PORTABLE         | Release .NET Core build, not signed. |
-| Release-DotNetStandard-Signed   | .NET Core (netstandard 1.3)  | NETSTANDARD1_3; PORTABLE; SIGNED | Release .NET Core build, signed.     |
-| Release-Portable-Unsigned       | .NET 4.5 portable Profile259 | PORTABLE                         | Portable class library, not signed.  |
-| Release-Portable-Signed         | .NET 4.5 portable Profile259 | PORTABLE; SIGNED                 | Portable class library, signed.      |
-| Debug-UnitySubset-v35           | Unity Subset v3.5            | DEBUG; UNITY                     | Debug build for Unity target.        |
-| Release-UnitySubset-v35         | Unity Subset v3.5            | UNITY                            | Release build for Unity target.      |
+|         Configuration    |             Description                                                             |
+|--------------------------|-------------------------------------------------------------------------------------|
+| Debug                    | Default debug build.                                                                |
+| Release-Unsigned         | Release build, not signed.                                                          |
+| Release-Signed           | Release build, signed.                                                              |
+| Debug-AOT                | Builds the AOT tests project, that tests compatibility with mono's AOT compilation. |
+| Release-PerformanceTests | Builds the performance tests projects.                                              |
 
 There are a few differences between the various target platforms,
 mainly in the reflection API. In order to adapt the code to each platform,
