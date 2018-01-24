@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.PerformanceTests.Lib;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.PerformanceTests.vlatest
 {

@@ -28,7 +28,7 @@ using System.Text.RegularExpressions;
 
 namespace YamlDotNet
 {
-#if (PORTABLE || UNITY)
+#if (NETSTANDARD1_3 || UNITY)
     internal static class StandardRegexOptions
     {
         public const RegexOptions Compiled = RegexOptions.None;
@@ -40,11 +40,11 @@ namespace YamlDotNet
     }
 #endif
 
-#if PORTABLE
-     /// <summary>
+#if NETSTANDARD1_3
+    /// <summary>
     /// Mock UTF7Encoding to avoid having to add #if all over the place
     /// </summary>
-   internal sealed class UTF7Encoding : System.Text.Encoding
+    internal sealed class UTF7Encoding : System.Text.Encoding
     {
         public override int GetByteCount(char[] chars, int index, int count)
         {
@@ -455,3 +455,15 @@ namespace YamlDotNet
     }
 #endif
 }
+
+#if NETSTANDARD1_3
+namespace System.Runtime.Serialization
+{
+    public class SerializationException : Exception
+    {
+        public SerializationException(string message) : base(message)
+        {
+        }
+    }
+}
+#endif

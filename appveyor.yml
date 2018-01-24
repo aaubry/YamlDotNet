@@ -12,25 +12,19 @@ build_script:
   - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic -buildVerbosity=Verbose
 
 artifacts:
-  - path: YamlDotNet\bin\Release-Unsigned\net35
+  - path: YamlDotNet\bin\Release-Unsigned\net45
     name: Release-Unsigned
 
-  - path: YamlDotNet\bin\Release-Signed\net35
+  - path: YamlDotNet\bin\Release-Signed\net45
     name: Release-Signed
 
-  - path: YamlDotNet\bin\Release-Portable-Unsigned
-    name: Release-Portable-Unsigned
-
-  - path: YamlDotNet\bin\Release-Portable-Signed
-    name: Release-Portable-Signed
-
-  - path: YamlDotNet\bin\Release-DotNetStandard-Unsigned\netstandard1.3
+  - path: YamlDotNet\bin\Release-Unsigned\netstandard1.3
     name: Release-DotNetStandard-Unsigned
 
-  - path: YamlDotNet\bin\Release-DotNetStandard-Signed\netstandard1.3
+  - path: YamlDotNet\bin\Release-Signed\netstandard1.3
     name: Release-DotNetStandard-Signed
 
-  - path: YamlDotNet\bin\Release-UnitySubset-v35
+  - path: YamlDotNet\bin\Release-Unsigned\net35
     name: Release-UnitySubset-v35
 
   - path: YamlDotNet\bin\*.nupkg
