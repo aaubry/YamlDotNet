@@ -1488,21 +1488,21 @@ namespace YamlDotNet.Test.Serialization
         public void RegisteringATypeConverterPreventsTheTypeFromBeingVisited()
         {
             var serializer = new SerializerBuilder()
-                .WithTypeConverter(new SystemTypeTypeConverter())
+                .WithTypeConverter(new NonSerializableTypeConverter())
                 .Build();
 
-            var yaml = serializer.Serialize(new TypeContainer
+            var yaml = serializer.Serialize(new NonSerializableContainer
             {
-                Type = typeof(string),
+                Value = new NonSerializable { Text = "hello" },
             });
 
             var deserializer = new DeserializerBuilder()
-                .WithTypeConverter(new SystemTypeTypeConverter())
+                .WithTypeConverter(new NonSerializableTypeConverter())
                 .Build();
 
-            var result = deserializer.Deserialize<TypeContainer>(yaml);
+            var result = deserializer.Deserialize<NonSerializableContainer>(yaml);
 
-            Assert.Equal(typeof(string), result.Type);
+            Assert.Equal("hello", result.Value.Text);
         }
 
         [Fact]
@@ -1531,34 +1531,62 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal("value", parsed.NoConvention);
         }
 
+        [Fact]
+        public void TypesAreSerializable()
+        {
+            var sut = new SerializerBuilder()
+                .Build();
+
+            var yaml = sut.Serialize(typeof(string));
+
+            Assert.Contains(typeof(string).AssemblyQualifiedName, yaml);
+        }
+
+        [Fact]
+        public void TypesAreDeserializable()
+        {
+            var sut = new DeserializerBuilder()
+                .Build();
+
+            var type = sut.Deserialize<Type>(typeof(string).AssemblyQualifiedName);
+
+            Assert.Equal(typeof(string), type);
+        }
+
         public class NamingConventionDisabled
         {
             [YamlMember(ApplyNamingConventions = false)]
             public string NoConvention { get; set; }
         }
 
-        public class TypeContainer
+        public class NonSerializableContainer
         {
-            public Type Type { get; set; }
+            public NonSerializable Value { get; set; }
         }
 
-        public class SystemTypeTypeConverter : IYamlTypeConverter
+        public class NonSerializable
+        {
+            public string WillThrow { get { throw new Exception(); } }
+
+            public string Text { get; set; }
+        }
+
+        public class NonSerializableTypeConverter : IYamlTypeConverter
         {
             public bool Accepts(Type type)
             {
-                return typeof(Type).IsAssignableFrom(type);
+                return typeof(NonSerializable).IsAssignableFrom(type);
             }
 
             public object ReadYaml(IParser parser, Type type)
             {
                 var scalar = parser.Expect<Scalar>();
-                return Type.GetType(scalar.Value);
+                return new NonSerializable { Text = scalar.Value };
             }
 
             public void WriteYaml(IEmitter emitter, object value, Type type)
             {
-                var typeName = ((Type)value).AssemblyQualifiedName;
-                emitter.Emit(new Scalar(typeName));
+                emitter.Emit(new Scalar(((NonSerializable)value).Text));
             }
         }
     }

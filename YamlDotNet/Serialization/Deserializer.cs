@@ -107,6 +107,7 @@ namespace YamlDotNet.Serialization
 
                 converters = new List<IYamlTypeConverter>();
                 converters.Add(new GuidConverter(false));
+                converters.Add(new SystemTypeConverter());
 
                 NodeDeserializers = new List<INodeDeserializer>();
                 NodeDeserializers.Add(new YamlConvertibleNodeDeserializer(objectFactory));

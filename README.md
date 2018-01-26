@@ -45,6 +45,10 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.3.0
+
+* Add support for (de)serialization of System.Type
+
 ## Version 4.2.4
 
 * Refactored the project and solution so that they load and build cleanly in VS2017.

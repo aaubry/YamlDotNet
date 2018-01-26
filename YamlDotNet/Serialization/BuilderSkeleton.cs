@@ -21,9 +21,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.TypeInspectors;
-using System.Linq.Expressions;
 
 namespace YamlDotNet.Serialization
 {
@@ -45,6 +45,7 @@ namespace YamlDotNet.Serialization
 
             typeConverterFactories = new LazyComponentRegistrationList<Nothing, IYamlTypeConverter>();
             typeConverterFactories.Add(typeof(GuidConverter), _ => new GuidConverter(false));
+            typeConverterFactories.Add(typeof(SystemTypeConverter), _ => new SystemTypeConverter());
 
             typeInspectorFactories = new LazyComponentRegistrationList<ITypeInspector, ITypeInspector>();
         }

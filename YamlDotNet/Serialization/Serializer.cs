@@ -55,6 +55,7 @@ namespace YamlDotNet.Serialization
 
                 Converters = new List<IYamlTypeConverter>();
                 Converters.Add(new GuidConverter(IsOptionSet(SerializationOptions.JsonCompatible)));
+                Converters.Add(new SystemTypeConverter());
 
                 typeResolver = IsOptionSet(SerializationOptions.DefaultToStaticType)
                     ? (ITypeResolver)new StaticTypeResolver()
