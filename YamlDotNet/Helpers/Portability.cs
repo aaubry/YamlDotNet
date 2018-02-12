@@ -457,18 +457,6 @@ namespace YamlDotNet
 #endif
 }
 
-#if NETSTANDARD1_3
-namespace System.Runtime.Serialization
-{
-    public class SerializationException : Exception
-    {
-        public SerializationException(string message) : base(message)
-        {
-        }
-    }
-}
-#endif
-
 #if NET20
 namespace System.Runtime.CompilerServices
 {
