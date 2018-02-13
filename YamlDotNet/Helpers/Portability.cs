@@ -78,12 +78,6 @@ namespace YamlDotNet
         }
     }
 
-    /// <summary>
-    /// Mock SerializableAttribute to avoid having to add #if all over the place
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    internal sealed class SerializableAttribute : Attribute { }
-
     internal static class ReflectionExtensions
     {
         public static Type BaseType(this Type type)
@@ -303,11 +297,6 @@ namespace YamlDotNet
         Decimal = 15,
         DateTime = 16,
         String = 18,
-    }
-
-    internal abstract class DBNull
-    {
-        private DBNull() {}
     }
 
     internal sealed class CultureInfoAdapter : CultureInfo
