@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet", "YamlDotNet\YamlDotNet.csproj", "{ABFC2E37-119B-439D-82B6-49E9680EEA90}"
 EndProject
@@ -28,6 +28,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.Runner", "PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj", "{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.AotTest", "YamlDotNet.AotTest\YamlDotNet.AotTest.csproj", "{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB11D2D9-6E3D-45BF-8BCD-A04BCB1F8020}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		build.cake = build.cake
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE = LICENSE
+		LICENSE-libyaml = LICENSE-libyaml
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
