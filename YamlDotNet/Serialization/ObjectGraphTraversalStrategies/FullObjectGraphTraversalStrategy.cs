@@ -102,14 +102,15 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                     visitor.VisitScalar(value, context);
                     break;
 
-                case TypeCode.DBNull:
-                    visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
-                    break;
-
                 case TypeCode.Empty:
                     throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
                 default:
+                    if (value.IsDbNull())
+                    {
+                        visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
+                    }
+
                     if (value.Value == null || value.Type == typeof(TimeSpan))
                     {
                         visitor.VisitScalar(value, context);

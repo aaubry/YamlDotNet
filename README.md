@@ -45,6 +45,10 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.3.1
+
+* Avoid definition of SerializationException (and some other types) on NET Standard
+
 ## Version 4.3.0
 
 * Add support for (de)serialization of System.Type

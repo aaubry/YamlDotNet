@@ -534,9 +534,8 @@ namespace YamlDotNet.Core
         private bool IsUnicode(Encoding encoding)
         {
             return encoding is UTF8Encoding ||
-                encoding is UnicodeEncoding ||
-                encoding is UTF7Encoding ||
-                encoding is UTF8Encoding;
+                   encoding is UnicodeEncoding ||
+                   encoding is UTF7Encoding;
         }
 
         private void AnalyzeTag(string tag)
