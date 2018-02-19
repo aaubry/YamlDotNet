@@ -106,7 +106,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                     throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
 
                 default:
-                    if (value.Type == typeof(DBNull))
+                    if (value.IsDbNull())
                     {
                         visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
                     }

@@ -125,7 +125,7 @@ namespace YamlDotNet.Serialization.Utilities
         public static object ChangeType(object value, Type destinationType, CultureInfo culture)
         {
             // Handle null and DBNull
-            if (value == null || value is DBNull)
+            if (value == null || value.IsDbNull())
             {
                 return destinationType.IsValueType() ? Activator.CreateInstance(destinationType) : null;
             }

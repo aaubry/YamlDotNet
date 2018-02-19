@@ -167,6 +167,11 @@ namespace YamlDotNet
             }
         }
 
+        public static bool IsDbNull(this object value)
+        {
+            return value?.GetType()?.FullName == "System.DBNull";
+        }
+
         public static Type[] GetGenericArguments(this Type type)
         {
             return type.GetTypeInfo().GenericTypeArguments;
@@ -283,6 +288,11 @@ namespace YamlDotNet
         public static bool IsEnum(this Type type)
         {
             return type.IsEnum;
+        }
+
+        public static bool IsDbNull(this object value)
+        {
+            return value is DBNull;
         }
 
         /// <summary>
