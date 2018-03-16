@@ -347,6 +347,11 @@ namespace YamlDotNet.Test.Serialization
         public string aaa { get; set; }
     }
 
+    public class SimpleField
+    {
+        public string theField;
+    }
+
     public class SimpleScratch
     {
         public string Scratch { get; set; }

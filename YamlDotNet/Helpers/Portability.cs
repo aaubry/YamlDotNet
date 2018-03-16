@@ -184,13 +184,27 @@ namespace YamlDotNet
 
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
-            var instancePublic = new Func<PropertyInfo, bool>(
+            return type.GetPublicMembers(
+                RuntimeReflectionExtensions.GetRuntimeProperties,
                 p => !p.GetMethod.IsStatic && p.GetMethod.IsPublic);
+        }
+
+        public static IEnumerable<FieldInfo> GetPublicFields(this Type type)
+        {
+            return type.GetPublicMembers(
+                RuntimeReflectionExtensions.GetRuntimeFields,
+                f => !f.IsStatic && f.IsPublic);
+        }
+
+        private static IEnumerable<TMember> GetPublicMembers<TMember>(
+            this Type type, Func<Type, IEnumerable<TMember>> getMembers, Func<TMember, bool> instancePublic)
+            where TMember : MemberInfo
+        {
             return type.IsInterface()
                 ? (new Type[] { type })
                     .Concat(type.GetInterfaces())
-                    .SelectMany(i => i.GetRuntimeProperties().Where(instancePublic))
-                : type.GetRuntimeProperties().Where(instancePublic);
+                    .SelectMany(i => getMembers(i).Where(instancePublic))
+                : getMembers(type).Where(instancePublic);
         }
 
         public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
@@ -239,7 +253,7 @@ namespace YamlDotNet
         {
             return ex.InnerException;
         }
-        
+
         public static bool IsInstanceOf(this Type type, object o)
         {
             return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type);
@@ -312,6 +326,7 @@ namespace YamlDotNet
             return Type.GetTypeCode(type);
         }
 
+
         public static PropertyInfo GetPublicProperty(this Type type, string name)
         {
             return type.GetProperty(name);
@@ -319,12 +334,24 @@ namespace YamlDotNet
 
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
+            return type.GetPublicMembers((t, bindings) => t.GetProperties(bindings));
+        }
+
+        public static IEnumerable<FieldInfo> GetPublicFields(this Type type)
+        {
+            return type.GetPublicMembers((t, bindings) => t.GetFields(bindings));
+        }
+
+        private static IEnumerable<TMember> GetPublicMembers<TMember>(
+            this Type type, Func<Type, BindingFlags, IEnumerable<TMember>> getMembers)
+            where TMember : MemberInfo
+        {
             var instancePublic = BindingFlags.Instance | BindingFlags.Public;
-            return type.IsInterface
+            return type.IsInterface()
                 ? (new Type[] { type })
                     .Concat(type.GetInterfaces())
-                    .SelectMany(i => i.GetProperties(instancePublic))
-                : type.GetProperties(instancePublic);
+                    .SelectMany(i => getMembers(i, instancePublic))
+                : getMembers(type, instancePublic);
         }
 
         public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)

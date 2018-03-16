@@ -52,48 +52,98 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
         {
-            return type
+            var properties = type
                 .GetPublicProperties()
                 .Where(IsValidProperty)
                 .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, _typeResolver));
+            
+            var fields = type
+                .GetPublicFields()
+                .Select(f => (IPropertyDescriptor)new ReflectionFieldDescriptor(f, _typeResolver));
+
+            return properties.Concat(fields);
         }
 
-        private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
+        private abstract class ReflectionMemberDescriptor : IPropertyDescriptor
         {
-            private readonly PropertyInfo _propertyInfo;
-            private readonly ITypeResolver _typeResolver;
+            protected readonly MemberInfo _memberInfo;
+            protected readonly ITypeResolver _typeResolver;
 
-            public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, ITypeResolver typeResolver)
+            public ReflectionMemberDescriptor(MemberInfo memberInfo, ITypeResolver typeResolver)
             {
-                _propertyInfo = propertyInfo;
+                _memberInfo = memberInfo;
                 _typeResolver = typeResolver;
                 ScalarStyle = ScalarStyle.Any;
             }
 
-            public string Name { get { return _propertyInfo.Name; } }
-            public Type Type { get { return _propertyInfo.PropertyType; } }
+            public string Name { get { return _memberInfo.Name; } }
+            public abstract Type Type { get; }
             public Type TypeOverride { get; set; }
             public int Order { get; set; }
-            public bool CanWrite { get { return _propertyInfo.CanWrite; } }
+            public abstract bool CanWrite { get; }
             public ScalarStyle ScalarStyle { get; set; }
 
-            public void Write(object target, object value)
-            {
-                _propertyInfo.SetValue(target, value, null);
-            }
+            public abstract void Write(object target, object value);
+            protected abstract object GetValue(object target);
 
             public T GetCustomAttribute<T>() where T : Attribute
             {
-                var attributes = _propertyInfo.GetCustomAttributes(typeof(T), true);
+                var attributes = _memberInfo.GetCustomAttributes(typeof(T), true);
                 return (T)attributes.FirstOrDefault();
             }
 
             public IObjectDescriptor Read(object target)
             {
-                var propertyValue = _propertyInfo.ReadValue(target);
+                var propertyValue = GetValue(target);
                 var actualType = TypeOverride ?? _typeResolver.Resolve(Type, propertyValue);
                 return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
             }
         }
+
+        private sealed class ReflectionPropertyDescriptor : ReflectionMemberDescriptor
+        {
+            public ReflectionPropertyDescriptor(PropertyInfo memberInfo, ITypeResolver typeResolver)
+                : base(memberInfo, typeResolver)
+            {
+            }
+
+            private PropertyInfo PropertyInfo { get { return ((PropertyInfo)_memberInfo); } }
+            public override Type Type { get { return PropertyInfo.PropertyType; } }
+            public override bool CanWrite { get { return PropertyInfo.CanWrite; } }
+
+			protected override object GetValue(object target)
+			{
+                return PropertyInfo.ReadValue(target);
+			}
+
+			public override void Write(object target, object value)
+            {
+                PropertyInfo.SetValue(target, value, null);
+            }
+
+        }
+
+        private sealed class ReflectionFieldDescriptor : ReflectionMemberDescriptor
+        {
+            public ReflectionFieldDescriptor(FieldInfo memberInfo, ITypeResolver typeResolver)
+                : base(memberInfo, typeResolver)
+            {
+            }
+
+            private FieldInfo FieldInfo { get { return ((FieldInfo)_memberInfo); } }
+            public override Type Type { get { return FieldInfo.FieldType; } }
+            public override bool CanWrite { get { return true; } }
+
+            protected override object GetValue(object target)
+            {
+                return FieldInfo.GetValue(target);
+            }
+
+            public override void Write(object target, object value)
+            {
+                FieldInfo.SetValue(target, value);
+            }
+        }
+
     }
 }
