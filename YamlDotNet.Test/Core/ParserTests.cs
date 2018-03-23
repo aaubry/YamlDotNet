@@ -427,6 +427,18 @@ namespace YamlDotNet.Test.Core
                 DocumentEnd(Implicit),
                 StreamEnd);
         }
+        
+        [Fact]
+        public void VerifyCommentTypeAfterScalarBlock()
+        {
+            AssertSequenceOfEventsFrom(new Parser(new Scanner(Yaml.ReaderForText("|-\r\n  text\r\n#comment"), false)),
+                StreamStart,
+                DocumentStart(Implicit),
+                LiteralScalar("text"),
+                StandaloneComment("comment"),
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
 
         [Theory]
         [InlineData("|\n  b-carriage-return,b-line-feed\r\n  lll", "b-carriage-return,b-line-feed\nlll")]
