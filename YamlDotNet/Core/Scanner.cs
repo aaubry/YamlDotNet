@@ -602,6 +602,7 @@ namespace YamlDotNet.Core
                 {
                     var isInline = previous != null
                         && previous.End.Line == start.Line
+                        && previous.End.Column != 1
                         && !(previous is StreamStart);
 
                     tokens.Enqueue(new Comment(text.ToString(), isInline, start, cursor.Mark()));
