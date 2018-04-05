@@ -632,7 +632,7 @@ namespace YamlDotNet.Core
 
         /// <summary>
         /// Pop indentation levels from the indents stack until the current level
-        /// becomes less or equal to the column.  For each intendation level, append
+        /// becomes less or equal to the column.  For each indentation level, append
         /// the BLOCK-END token.
         /// </summary>
 
@@ -645,7 +645,7 @@ namespace YamlDotNet.Core
                 return;
             }
 
-            // Loop through the intendation levels in the stack.
+            // Loop through the indentation levels in the stack.
 
             while (indent > column)
             {
@@ -1347,14 +1347,14 @@ namespace YamlDotNet.Core
 
                 if (analyzer.IsDigit())
                 {
-                    // Check that the intendation is greater than 0.
+                    // Check that the indentation is greater than 0.
 
                     if (analyzer.Check('0'))
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an intendation indicator equal to 0.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an indentation indicator equal to 0.");
                     }
 
-                    // Get the intendation level and eat the indicator.
+                    // Get the indentation level and eat the indicator.
 
                     increment = analyzer.AsDigit();
 
@@ -1368,7 +1368,7 @@ namespace YamlDotNet.Core
             {
                 if (analyzer.Check('0'))
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an intendation indicator equal to 0.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an indentation indicator equal to 0.");
                 }
 
                 increment = analyzer.AsDigit();
@@ -1408,7 +1408,7 @@ namespace YamlDotNet.Core
 
             var end = cursor.Mark();
 
-            // Set the intendation level if it was specified.
+            // Set the indentation level if it was specified.
 
             if (increment != 0)
             {
@@ -1473,7 +1473,7 @@ namespace YamlDotNet.Core
                     leadingBreak.Append(lineBreak);
                 }
 
-                // Eat the following intendation spaces and line breaks.
+                // Eat the following indentation spaces and line breaks.
 
                 currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, start, ref end);
             }
@@ -1496,8 +1496,8 @@ namespace YamlDotNet.Core
         }
 
         /// <summary>
-        /// Scan intendation spaces and line breaks for a block scalar.  Determine the
-        /// intendation level if needed.
+        /// Scan indentation spaces and line breaks for a block scalar.  Determine the
+        /// indentation level if needed.
         /// </summary>
 
         private int ScanBlockScalarBreaks(int currentIndent, StringBuilder breaks, Mark start, ref Mark end)
@@ -1506,11 +1506,11 @@ namespace YamlDotNet.Core
 
             end = cursor.Mark();
 
-            // Eat the intendation spaces and line breaks.
+            // Eat the indentation spaces and line breaks.
 
             for (;;)
             {
-                // Eat the intendation spaces.
+                // Eat the indentation spaces.
 
                 while ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsSpace())
                 {
@@ -1522,11 +1522,11 @@ namespace YamlDotNet.Core
                     maxIndent = cursor.LineOffset;
                 }
 
-                // Check for a tab character messing the intendation.
+                // Check for a tab character messing the indentation.
 
                 if ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsTab())
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find a tab character where an intendation space is expected.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find a tab character where an indentation space is expected.");
                 }
 
                 // Have we find a non-empty line?
@@ -1925,11 +1925,11 @@ namespace YamlDotNet.Core
                 {
                     if (analyzer.IsWhite())
                     {
-                        // Check for tab character that abuse intendation.
+                        // Check for tab character that abuse indentation.
 
                         if (hasLeadingBlanks && cursor.LineOffset < currentIndent && analyzer.IsTab())
                         {
-                            throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find a tab character that violate intendation.");
+                            throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find a tab character that violate indentation.");
                         }
 
                         // Consume a space or a tab character.
@@ -1960,7 +1960,7 @@ namespace YamlDotNet.Core
                     }
                 }
 
-                // Check intendation level.
+                // Check indentation level.
 
                 if (flowLevel == 0 && cursor.LineOffset < currentIndent)
                 {
