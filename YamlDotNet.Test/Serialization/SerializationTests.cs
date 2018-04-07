@@ -224,6 +224,17 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void TypeConverterIsUsedWhenAvailable()
+        {
+            var text = Yaml.ParserForText("hello world");
+
+            var result = Deserializer.Deserialize<NonConvertible>(text);
+
+            result.Left.Should().Be("hello");
+            result.Right.Should().Be("world");
+        }
+
+        [Fact]
         public void DeserializationOfObjectsHandlesForwardReferences()
         {
             var text = Lines(

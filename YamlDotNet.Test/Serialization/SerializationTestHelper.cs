@@ -270,6 +270,38 @@ namespace YamlDotNet.Test.Serialization
         }
     }
 
+    [TypeConverter(typeof(NonConvertibleConverter))]
+    public class NonConvertible
+    {
+        public string Left { get; set; }
+        public string Right { get; set; }
+    }
+
+    public class NonConvertibleConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return sourceType == typeof(string);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            return false;
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            if (!(value is string))
+                throw new InvalidOperationException();
+            var parts = (value as string).Split(' ');
+            return new NonConvertible
+            {
+                Left = parts[0],
+                Right = parts[1]
+            };
+        }
+    }
+
     public class MissingDefaultCtor
     {
         public string Value;
