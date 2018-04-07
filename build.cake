@@ -90,6 +90,12 @@ Task("Build")
         BuildSolution(solutionPath, configuration, buildVerbosity);
     });
 
+Task("Quick-Build")
+    .Does(() =>
+    {
+        BuildSolution(solutionPath, configuration, buildVerbosity);
+    });
+
 Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
