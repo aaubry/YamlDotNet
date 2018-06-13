@@ -45,6 +45,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 4.3.2
+
+* Fix issue #308: Comment on line start parsed as `inline`
+* Fix bug where TypeConverter was being ignored on all platforms except .NET 3.5
+* Remove serialization support from exceptions.
+ * This is actually a breaking change, but I don't think that anyone relies on this.
+
 ## Version 4.3.1
 
 * Avoid definition of SerializationException (and some other types) on NET Standard
