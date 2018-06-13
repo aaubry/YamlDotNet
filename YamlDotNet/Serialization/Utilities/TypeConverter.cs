@@ -133,7 +133,7 @@ namespace YamlDotNet.Serialization.Utilities
             var sourceType = value.GetType();
 
             // If the source type is compatible with the destination type, no conversion is needed
-            if (destinationType.IsAssignableFrom(sourceType))
+            if (destinationType == sourceType || destinationType.IsAssignableFrom(sourceType))
             {
                 return value;
             }

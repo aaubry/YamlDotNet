@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                     object value;
                     if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out value))
                     {
-                        return value;
+                        return TypeConverter.ChangeType(value, expectedType);
                     }
                 }
             }

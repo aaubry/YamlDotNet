@@ -109,7 +109,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        // Both key and value are pending. We need to wait until both of them becom available.
+                        // Both key and value are pending. We need to wait until both of them become available.
                         var hasFirstPart = false;
 
                         keyPromise.ValueAvailable += v =>

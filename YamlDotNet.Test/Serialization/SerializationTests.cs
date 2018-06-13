@@ -24,10 +24,12 @@ using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
@@ -1551,6 +1553,72 @@ namespace YamlDotNet.Test.Serialization
             var type = sut.Deserialize<Type>(typeof(string).AssemblyQualifiedName);
 
             Assert.Equal(typeof(string), type);
+        }
+
+        [Fact]
+        public void TypesAreConvertedWhenNeededFromScalars()
+        {
+            var sut = new DeserializerBuilder()
+                .WithTagMapping("!dbl", typeof(DoublyConverted))
+                .Build();
+
+            var result = sut.Deserialize<int>("!dbl hello");
+
+            Assert.Equal(5, result);
+        }
+
+        [Fact]
+        public void TypesAreConvertedWhenNeededInsideLists()
+        {
+            var sut = new DeserializerBuilder()
+                .WithTagMapping("!dbl", typeof(DoublyConverted))
+                .Build();
+
+            var result = sut.Deserialize<List<int>>("- !dbl hello");
+
+            Assert.Equal(5, result[0]);
+        }
+
+        [Fact]
+        public void TypesAreConvertedWhenNeededInsideDictionary()
+        {
+            var sut = new DeserializerBuilder()
+                .WithTagMapping("!dbl", typeof(DoublyConverted))
+                .Build();
+
+            var result = sut.Deserialize<Dictionary<int, int>>("!dbl hello: !dbl you");
+
+            Assert.True(result.ContainsKey(5));
+            Assert.Equal(3, result[5]);
+        }
+
+        [TypeConverter(typeof(DoublyConvertedTypeConverter))]
+        public class DoublyConverted
+        {
+            public string Value { get; set; }
+        }
+
+        public class DoublyConvertedTypeConverter : TypeConverter
+        {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                return destinationType == typeof(int);
+            }
+            
+            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            {
+                return ((DoublyConverted)value).Value.Length;
+            }
+
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                return sourceType == typeof(string);
+            }
+            
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                return new DoublyConverted { Value = (string)value };
+            }
         }
 
         public class NamingConventionDisabled
