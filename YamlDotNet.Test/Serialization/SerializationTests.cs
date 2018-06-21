@@ -210,7 +210,10 @@ namespace YamlDotNet.Test.Serialization
         {
             var text = Yaml.StreamFrom("explicit-type.template").TemplatedOn<Simple>();
 
-            var result = Deserializer.Deserialize<Simple>(UsingReaderFor(text));
+            var result = new DeserializerBuilder()
+                .WithTagMapping("!Simple", typeof(Simple))
+                .Build()
+                .Deserialize<Simple>(UsingReaderFor(text));
 
             result.aaa.Should().Be("bbb");
         }
@@ -220,7 +223,10 @@ namespace YamlDotNet.Test.Serialization
         {
             var text = Yaml.StreamFrom("convertible.template").TemplatedOn<Convertible>();
 
-            var result = Deserializer.Deserialize<Simple>(UsingReaderFor(text));
+            var result = new DeserializerBuilder()
+                .WithTagMapping("!Convertible", typeof(Convertible))
+                .Build()
+                .Deserialize<Simple>(UsingReaderFor(text));
 
             result.aaa.Should().Be("[hello, world]");
         }
@@ -255,7 +261,17 @@ namespace YamlDotNet.Test.Serialization
         {
             var obj = new Example();
 
-            var result = DoRoundtripFromObjectTo<Example>(obj, SerializerBuilder.EnsureRoundtrip().Build());
+            var result = DoRoundtripFromObjectTo<Example>(
+                obj,
+                new SerializerBuilder()
+                    .WithTagMapping("!Example", typeof(Example))
+                    .EnsureRoundtrip()
+                    .EmitDefaults()
+                    .Build(),
+                new DeserializerBuilder()
+                    .WithTagMapping("!Example", typeof(Example))
+                    .Build()
+            );
 
             result.ShouldBeEquivalentTo(obj);
         }
@@ -265,7 +281,17 @@ namespace YamlDotNet.Test.Serialization
         {
             var obj = new Example();
 
-            var result = DoRoundtripFromObjectTo<Example>(obj, SerializerBuilder.EnsureRoundtrip().EmitDefaults().Build());
+            var result = DoRoundtripFromObjectTo<Example>(
+                obj,
+                new SerializerBuilder()
+                    .WithTagMapping("!Example", typeof(Example))
+                    .EnsureRoundtrip()
+                    .EmitDefaults()
+                    .Build(),
+                new DeserializerBuilder()
+                    .WithTagMapping("!Example", typeof(Example))
+                    .Build()
+            );
 
             result.ShouldBeEquivalentTo(obj);
         }
@@ -351,7 +377,18 @@ namespace YamlDotNet.Test.Serialization
                 RegularBase = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
             };
 
-            var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, SerializerBuilder.EnsureRoundtrip().Build());
+            var result = DoRoundtripFromObjectTo<InheritanceExample>(
+                obj,
+                new SerializerBuilder()
+                    .WithTagMapping("!InheritanceExample", typeof(InheritanceExample))
+                    .WithTagMapping("!Derived", typeof(Derived))
+                    .EnsureRoundtrip()
+                    .Build(),
+                new DeserializerBuilder()
+                    .WithTagMapping("!InheritanceExample", typeof(InheritanceExample))
+                    .WithTagMapping("!Derived", typeof(Derived))
+                    .Build()
+            );
 
             result.SomeScalar.Should().Be("Hello");
             result.RegularBase.Should().BeOfType<Derived>().And
@@ -367,7 +404,16 @@ namespace YamlDotNet.Test.Serialization
                 BaseWithSerializeAs = new Derived { BaseProperty = "foo", DerivedProperty = "bar" }
             };
 
-            var result = DoRoundtripFromObjectTo<InheritanceExample>(obj, SerializerBuilder.EnsureRoundtrip().Build());
+            var result = DoRoundtripFromObjectTo<InheritanceExample>(
+                obj,
+                new SerializerBuilder()
+                    .WithTagMapping("!InheritanceExample", typeof(InheritanceExample))
+                    .EnsureRoundtrip()
+                    .Build(),
+                new DeserializerBuilder()
+                    .WithTagMapping("!InheritanceExample", typeof(InheritanceExample))
+                    .Build()
+            );
 
             result.BaseWithSerializeAs.Should().BeOfType<Base>().And
                 .Subject.As<Base>().ShouldBeEquivalentTo(new { ParentProp = "foo" }, o => o.ExcludingMissingMembers());
@@ -450,7 +496,10 @@ namespace YamlDotNet.Test.Serialization
         {
             var stream = Yaml.StreamFrom("list-explicit.yaml");
 
-            var result = Deserializer.Deserialize(stream);
+            var result = new DeserializerBuilder()
+                .WithTagMapping("!List", typeof(List<int>))
+                .Build()
+                .Deserialize(stream);
 
             result.Should().BeAssignableTo<IList<int>>().And
                 .Subject.As<IList<int>>().Should().Equal(3, 4, 5);
@@ -531,7 +580,10 @@ namespace YamlDotNet.Test.Serialization
         {
             var stream = Yaml.StreamFrom("dictionary-explicit.yaml");
 
-            var result = Deserializer.Deserialize(stream);
+            var result = new DeserializerBuilder()
+                .WithTagMapping("!Dictionary", typeof(Dictionary<string, int>))
+                .Build()
+                .Deserialize(stream);
 
             result.Should().BeAssignableTo<IDictionary<string, int>>().And.Subject
                 .As<IDictionary<string, int>>().Should().Equal(new Dictionary<string, int> {
@@ -947,12 +999,15 @@ namespace YamlDotNet.Test.Serialization
         public void TypeConverterIsUsedOnListItems()
         {
             var text = Lines(
-                "- !<!{type}>",
+                "- !{type}",
                 "  Left: hello",
                 "  Right: world")
                 .TemplatedOn<Convertible>();
 
-            var list = Deserializer.Deserialize<List<string>>(UsingReaderFor(text));
+            var list = new DeserializerBuilder()
+                .WithTagMapping("!Convertible", typeof(Convertible))
+                .Build()
+                .Deserialize<List<string>>(UsingReaderFor(text));
 
             list
                 .Should().NotBeNull()

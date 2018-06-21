@@ -1,4 +1,4 @@
 aaa:
-  !<!{type}>
+  !{type}
   Left: hello
   Right: world

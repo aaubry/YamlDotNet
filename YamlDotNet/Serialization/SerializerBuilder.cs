@@ -67,12 +67,11 @@ namespace YamlDotNet.Serialization
                 args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor));
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>();
-            eventEmitterFactories.Add(typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false));
+            eventEmitterFactories.Add(typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings));
 
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, 50, namingConvention ?? new NullNamingConvention());
 
             WithTypeResolver(new DynamicTypeResolver());
-            WithEventEmitter(inner => new CustomTagEventEmitter(inner, tagMappings));
         }
 
         protected override SerializerBuilder Self { get { return this; } }
@@ -214,7 +213,7 @@ namespace YamlDotNet.Serialization
                 typeResolver,
                 50
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 

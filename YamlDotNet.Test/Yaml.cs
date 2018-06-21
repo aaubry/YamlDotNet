@@ -48,7 +48,7 @@ namespace YamlDotNet.Test
         public static string TemplatedOn<T>(this string text)
         {
             return Regex.Replace(text, @"{type}", match =>
-                Uri.EscapeDataString(String.Format("{0}, {1}", typeof(T).FullName, typeof(T).GetTypeInfo().Assembly.FullName)));
+                Uri.EscapeDataString(typeof(T).Name));
         }
 
         public static IParser ParserForEmptyContent()

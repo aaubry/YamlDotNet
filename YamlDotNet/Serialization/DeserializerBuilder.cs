@@ -84,7 +84,7 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlConvertibleTypeResolver), _ => new YamlConvertibleTypeResolver() },
                 { typeof(YamlSerializableTypeResolver), _ => new YamlSerializableTypeResolver() },
                 { typeof(TagNodeTypeResolver), _ => new TagNodeTypeResolver(tagMappings) },
-                { typeof(TypeNameInTagNodeTypeResolver), _ => new TypeNameInTagNodeTypeResolver() },
+                { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
 

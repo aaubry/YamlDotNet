@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using YamlDotNet.Core;
 
@@ -27,12 +28,14 @@ namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
-        private readonly bool _assignTypeWhenDifferent;
+        private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
+        private IDictionary<Type, string> tagMappings;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool assignTypeWhenDifferent)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, string> tagMappings)
             : base(nextEmitter)
         {
-            _assignTypeWhenDifferent = assignTypeWhenDifferent;
+            this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
+            this.tagMappings = tagMappings;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -115,24 +118,31 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
         {
-            AssignTypeIfDifferent(eventInfo);
+            AssignTypeIfNeeded(eventInfo);
             base.Emit(eventInfo, emitter);
         }
 
         public override void Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
         {
-            AssignTypeIfDifferent(eventInfo);
+            AssignTypeIfNeeded(eventInfo);
             base.Emit(eventInfo, emitter);
         }
 
-        private void AssignTypeIfDifferent(ObjectEventInfo eventInfo)
+        private void AssignTypeIfNeeded(ObjectEventInfo eventInfo)
         {
-            if (_assignTypeWhenDifferent && eventInfo.Source.Value != null)
+            if (tagMappings.TryGetValue(eventInfo.Source.Type, out string tag))
             {
-                if (eventInfo.Source.Type != eventInfo.Source.StaticType)
-                {
-                    eventInfo.Tag = "!" + eventInfo.Source.Type.AssemblyQualifiedName;
-                }
+                eventInfo.Tag = tag;
+            }
+            else if (requireTagWhenStaticAndActualTypesAreDifferent && eventInfo.Source.Value != null && eventInfo.Source.Type != eventInfo.Source.StaticType)
+            {
+                throw new YamlException(
+                    $"Cannot serialize type '{eventInfo.Source.Type.FullName}' where a '{eventInfo.Source.StaticType.FullName}' was expected " +
+                    $"because no tag mapping has been registered for '{eventInfo.Source.Type.FullName}', " + 
+                    $"which means that it won't be possible to deserialize the document.\n" +
+                    $"Register a tag mapping using the SerializerBuilder.WithTagMapping method.\n\n" +
+                    $"E.g: builder.WithTagMapping(\"!{eventInfo.Source.Type.Name}\", typeof({eventInfo.Source.Type.FullName}));"
+                );
             }
         }
     }
