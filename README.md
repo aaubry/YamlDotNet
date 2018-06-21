@@ -45,6 +45,41 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.0.0
+
+/!\ This release fixes a security issue. It is strongly recommended to upgrade,
+mainly if you are parsing documents from sources that you do not trust.
+
+* **Remove the legacy backwards-compatibe syntax that enabled to create
+  `Serializer` and `Deserializer` directly then changing their configutation.**  
+  In most cases, the calls to the constructors should be replaced by
+  instantiations of `SerializerBuilder` and `DeserializerBuilder`.
+  These can be configured at will, then used to create instances of
+  (De)serializer.
+  It is still possible to use the default constructors, if no configuration is needed. 
+
+* **Drop support for specifying arbitrary type names in tags.**  
+  Support for automatically resolving a fully qualified type name
+  from a tag has been discontinued. That feature was poorly designed
+  and not standard.  
+  During deserialization, each tag mapping must be explicitly registered.
+  During serialization, when using the `EnsureRoundtrip` method, it is necessary to
+  register tag mappings for each type that will require a tag, that is, any type that
+  is used as the value of a property with a different declared type.  
+
+* Fix bug where deserialized values were not being converted to the destination type.  
+  ```c#
+  var sut = new DeserializerBuilder()
+      .WithTagMapping("!dbl", typeof(DoublyConverted))
+      .Build();
+
+  // The scalar "hello" will first be converted to DoublyConverted
+  // then that value will be converted to int.
+  var result = sut.Deserialize<int>("!dbl hello");
+
+  Assert.Equal(5, result);
+  ```
+
 ## Version 4.3.2
 
 * Fix issue #308: Comment on line start parsed as `inline`
