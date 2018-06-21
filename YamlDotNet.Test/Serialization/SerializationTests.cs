@@ -1309,28 +1309,6 @@ namespace YamlDotNet.Test.Serialization
             public bool IsRequired { get; set; }
         }
 
-#pragma warning disable 0618  // 'Deserializer.Deserializer(IObjectFactory, INamingConvention, bool, YamlAttributeOverrides)' is obsolete: 'Please use DeserializerBuilder to customize the Deserializer. This constructor will be removed in future releases.'  YamlDotNet.Test C:\Users\aau02\work\YamlDotNet\YamlDotNet.Test\Serialization\SerializationTests.cs  1268    Active
-        [Fact]
-        public void AttributeOverridesAndNamingConventionDoNotConflictInLegacyConfiguration()
-        {
-            var overrides = new YamlAttributeOverrides();
-            overrides.Add<Foo>(f => f.IsRequired, new YamlMemberAttribute
-            {
-                Alias = "Required"
-            });
-
-            var namingConvention = new CamelCaseNamingConvention();
-
-            var serializer = new Serializer(namingConvention: namingConvention, overrides: overrides);
-            var yaml = serializer.Serialize(new Foo { IsRequired = true });
-            Assert.Contains("required: true", yaml);
-
-            var deserializer = new Deserializer(namingConvention: namingConvention, overrides: overrides);
-            var deserializedFoo = deserializer.Deserialize<Foo>(yaml);
-            Assert.True(deserializedFoo.IsRequired);
-        }
-#pragma warning restore 0618  // 'Deserializer.Deserializer(IObjectFactory, INamingConvention, bool, YamlAttributeOverrides)' is obsolete: 'Please use DeserializerBuilder to customize the Deserializer. This constructor will be removed in future releases.'  YamlDotNet.Test C:\Users\aau02\work\YamlDotNet\YamlDotNet.Test\Serialization\SerializationTests.cs  1268    Active
-
         [Fact]
         public void AttributeOverridesAndNamingConventionDoNotConflict()
         {
