@@ -10,6 +10,7 @@
         <licenseUrl>https://github.com/aaubry/YamlDotNet/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/aaubry/YamlDotNet/wiki</projectUrl>
         <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
+        <repository type="git" url="https://github.com/aaubry/YamlDotNet.git" />
         <tags>yaml parser development library serialization</tags>
     </metadata>
     <files>
