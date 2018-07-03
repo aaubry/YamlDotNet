@@ -50,6 +50,8 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 /!\ This release fixes a security issue. It is strongly recommended to upgrade,
 mainly if you are parsing documents from sources that you do not trust.
 
+**Many thanks to [Kurt Boberg](mailto:kurt.boberg@docusign.com), from the DocuSign Application Security Team, who identified this issue and provided feedback on mitigation strategies.**
+
 * **Remove the legacy backwards-compatibe syntax that enabled to create
   `Serializer` and `Deserializer` directly then changing their configutation.**  
   In most cases, the calls to the constructors should be replaced by
