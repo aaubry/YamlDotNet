@@ -37,6 +37,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("[a]", new[] { "a" })]
         [InlineData("['a']", new[] { "a" })]
         [InlineData("- a\r\n- b", new[] { "a", "b" })]
+        [InlineData("!bla [a]", new[] { "a" })]
         public void SequenceIsSerializable(string yaml, string[] expectedValues)
         {
             var deserializer = new Deserializer();
