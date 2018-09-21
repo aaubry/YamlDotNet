@@ -334,7 +334,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Creates a new <see cref="Deserializer" /> according to the current configuration.
         /// </summary>
-        public Deserializer Build()
+        public IDeserializer Build()
         {
             return Deserializer.FromValueDeserializer(BuildValueDeserializer());
         }

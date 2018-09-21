@@ -443,7 +443,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Creates a new <see cref="Serializer" /> according to the current configuration.
         /// </summary>
-        public Serializer Build()
+        public ISerializer Build()
         {
             return Serializer.FromValueSerializer(BuildValueSerializer());
         }

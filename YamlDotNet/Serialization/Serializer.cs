@@ -34,7 +34,7 @@ using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
-    public sealed class Serializer
+    public sealed class Serializer : ISerializer
     {
         private readonly IValueSerializer valueSerializer;
 

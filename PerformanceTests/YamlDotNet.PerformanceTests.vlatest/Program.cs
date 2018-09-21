@@ -35,7 +35,7 @@ namespace YamlDotNet.PerformanceTests.vlatest
             runner.Run(new Program(), args);
         }
 
-        private readonly Serializer _serializer = new SerializerBuilder()
+        private readonly ISerializer _serializer = new SerializerBuilder()
             .WithNamingConvention(new CamelCaseNamingConvention())
             .Build();
 
