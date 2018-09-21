@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -20,16 +20,25 @@
 //  SOFTWARE.
 
 #if !UNITY
-using System;
-using System.Runtime.CompilerServices;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
-[assembly: CLSCompliant(true)]
-#if !SIGNED
-#if NETSTANDARD1_3 || !PORTABLE
-[assembly: InternalsVisibleTo("YamlDotNet.Test")]
-#else
-[assembly: InternalsVisibleTo("YamlDotNet.Test.Portable")]
-#endif
-#endif
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Revision and Build Numbers
+// by using the '*' as shown below:
+[assembly: AssemblyVersion("<%assemblyVersion%>")]
+[assembly: AssemblyFileVersion("<%assemblyFileVersion%>")]
+[assembly: AssemblyInformationalVersion("<%assemblyInformationalVersion%>")]
 
 #endif

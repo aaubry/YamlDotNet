@@ -69,9 +69,17 @@ Task("Set-Build-Version")
     {
         var version = GitVersion(new GitVersionSettings
         {
-            UpdateAssemblyInfo = false
+            UpdateAssemblyInfo = false,
         });
         nugetVersion = version.NuGetVersion;
+
+        var assemblyInfo = TransformTextFile("YamlDotNet/Properties/AssemblyInfo.template")
+            .WithToken("assemblyVersion", $"{version.Major}.0.0.0")
+            .WithToken("assemblyFileVersion", $"{version.MajorMinorPatch}.0")
+            .WithToken("assemblyInformationalVersion", nugetVersion)
+            .ToString();
+
+        System.IO.File.WriteAllText("YamlDotNet/Properties/AssemblyInfo.cs", assemblyInfo);
 
         if(AppVeyor.IsRunningOnAppVeyor)
         {
