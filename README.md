@@ -45,6 +45,14 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.1.0
+
+Improvements:
+* Add interfaces for serializer and deserializer (fixes #350).
+
+Fixes:
+* Fixed issue #348 that caused the assembly to have version 0.0.0.0.
+
 ## Version 5.0.0
 
 /!\ This release fixes a security issue. It is strongly recommended to upgrade,
