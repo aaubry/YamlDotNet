@@ -43,12 +43,12 @@ namespace YamlDotNet.Test.Serialization
             return DoRoundtripFromObjectTo<T>(obj, Serializer);
         }
 
-        protected T DoRoundtripFromObjectTo<T>(object obj, Serializer serializer)
+        protected T DoRoundtripFromObjectTo<T>(object obj, ISerializer serializer)
         {
             return DoRoundtripFromObjectTo<T>(obj, serializer, Deserializer);
         }
 
-        protected T DoRoundtripFromObjectTo<T>(object obj, Serializer serializer, Deserializer deserializer)
+        protected T DoRoundtripFromObjectTo<T>(object obj, ISerializer serializer, IDeserializer deserializer)
         {
             var writer = new StringWriter();
             serializer.Serialize(writer, obj);
@@ -60,7 +60,7 @@ namespace YamlDotNet.Test.Serialization
             return DoRoundtripOn<T>(obj, Serializer);
         }
 
-        protected T DoRoundtripOn<T>(object obj, Serializer serializer)
+        protected T DoRoundtripOn<T>(object obj, ISerializer serializer)
         {
             var writer = new StringWriter();
             serializer.Serialize(writer, obj, typeof(T));
@@ -75,7 +75,7 @@ namespace YamlDotNet.Test.Serialization
             }
         }
 
-        protected Serializer Serializer
+        protected ISerializer Serializer
         {
             get
             {
@@ -91,7 +91,7 @@ namespace YamlDotNet.Test.Serialization
             }
         }
 
-        protected Deserializer Deserializer
+        protected IDeserializer Deserializer
         {
             get
             {
