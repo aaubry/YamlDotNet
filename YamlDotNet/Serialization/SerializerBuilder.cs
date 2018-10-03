@@ -45,6 +45,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
         private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
+        private int maximumRecursion = 50;
 
         public SerializerBuilder()
         {
@@ -69,12 +70,26 @@ namespace YamlDotNet.Serialization
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>();
             eventEmitterFactories.Add(typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings));
 
-            objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, 50, namingConvention ?? new NullNamingConvention());
+            objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention ?? new NullNamingConvention());
 
             WithTypeResolver(new DynamicTypeResolver());
         }
 
         protected override SerializerBuilder Self { get { return this; } }
+
+        /// <summary>
+        /// Sets the maximum recursion that is allowed while traversing the object graph. The default value is 50.
+        /// <summary>
+        public SerializerBuilder WithMaximumRecursion(int maximumRecursion)
+        {
+            if (maximumRecursion <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumRecursion), $"The maximum recursion specified ({maximumRecursion}) is invalid. It should be a positive integer.");
+            }
+
+            this.maximumRecursion = maximumRecursion;
+            return this;
+        }
 
         /// <summary>
         /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
@@ -211,7 +226,7 @@ namespace YamlDotNet.Serialization
                 typeConverters,
                 typeInspector,
                 typeResolver,
-                50
+                maximumRecursion
             );
             WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
