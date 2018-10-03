@@ -45,6 +45,11 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.2.0
+
+Improvements:
+* Allow to specify the maximum recusion limit (fixes #352) with the [WithMaximumRecursion](https://github.com/aaubry/YamlDotNet/pull/353/files#diff-86074b6acff29ccad667aca741f62ac5R83) method.
+
 ## Version 5.1.0
 
 Improvements:
