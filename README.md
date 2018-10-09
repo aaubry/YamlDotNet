@@ -45,6 +45,11 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.2.1
+
+Bug fixes:
+* Fix roundtripping of tags on sequences (#347)
+
 ## Version 5.2.0
 
 Improvements:
