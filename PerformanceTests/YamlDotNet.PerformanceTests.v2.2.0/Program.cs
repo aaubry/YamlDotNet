@@ -20,26 +20,15 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.PerformanceTests.Lib;
-using System.IO;
-using YamlDotNet.RepresentationModel.Serialization;
-using YamlDotNet.RepresentationModel.Serialization.NamingConventions;
+using BenchmarkDotNet.Running;
 
 namespace YamlDotNet.PerformanceTests.v2_2_0
 {
-    public class Program : ISerializerAdapter
+    public class Program
     {
         public static void Main(string[] args)
         {
-            var runner = new PerformanceTestRunner();
-            runner.Run(new Program(), args);
-        }
-
-        private readonly Serializer _serializer = new Serializer(namingConvention: new CamelCaseNamingConvention());
-
-        public void Serialize (TextWriter writer, object graph)
-        {
-            _serializer.Serialize (writer, graph);
+            var summary = BenchmarkRunner.Run<ReceiptTest>();
         }
     }
 }

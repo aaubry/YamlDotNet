@@ -1,16 +1,16 @@
 //  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
-    
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
 //  the Software without restriction, including without limitation the rights to
 //  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 //  of the Software, and to permit persons to whom the Software is furnished to do
 //  so, subject to the following conditions:
-    
+
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-    
+
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,7 +24,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Extensions;
+using BenchmarkDotNet.Running;
 
 namespace YamlDotNet.PerformanceTests.Runner
 {
@@ -32,69 +36,97 @@ namespace YamlDotNet.PerformanceTests.Runner
     {
         public static void Main(string[] args)
         {
-            var configuration = Path.GetFileName(Directory.GetCurrentDirectory());
-
             var currentDir = Directory.GetCurrentDirectory();
+            
             var baseDir = currentDir;
-            for(var i = 0; i < 3; ++i)
+            for (var i = 0; i < 4; ++i)
             {
                 baseDir = Path.GetDirectoryName(baseDir);
             }
 
+            var baseDirLength = currentDir.IndexOf($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}");
+
+            var configuration = currentDir.Substring(baseDirLength, currentDir.Length - baseDirLength).Trim(Path.DirectorySeparatorChar);
+
+            Console.WriteLine($"Configuration: {configuration}\n");
+
             var testPrograms = Directory.GetDirectories(baseDir)
-                .Select(d => Path.Combine(d, Path.Combine("bin", configuration)))
+                .Select(d => Path.Combine(d, configuration))
                 .Where(d => d != currentDir)
+                .Where(Directory.Exists)
                 .SelectMany(d => Directory.GetFiles(d, "*.exe"))
-                .Where(f => Regex.IsMatch(f, @"Release\\YamlDotNet.PerformanceTests.(vlatest|v\d+\.\d+\.\d+)\.exe$"));
+                .Where(f => Regex.IsMatch(f, @"YamlDotNet.PerformanceTests.(vlatest|v\d+\.\d+\.\d+)\.exe$"));
 
             var testResults = new List<TestResult>();
-            foreach(var testProgram in testPrograms)
+            foreach (var testProgram in testPrograms)
             {
                 Console.Error.WriteLine("Running {0}", Path.GetFileName(testProgram));
+
                 RunTest(testProgram, testResults);
             }
 
-            var versions = testResults
-                .Select(r => r.Version)
+            PrintResult(testResults);
+        }
+
+        private static void PrintResult(List<TestResult> testResults)
+        {
+            var tests = testResults
+                .Select(r => r.Test)
                 .Distinct()
                 .OrderBy(r => r)
                 .ToList();
 
-            const int columnWidth = 10;
-            var initialColumnWidth = testResults.Max(r => r.Test.Length) + 1;
+            const int columnWidth = 9;
+            const int metricsCount = 6;
 
-            Console.WriteLine();
-            Console.Write(new String(' ', initialColumnWidth));
-            foreach(var version in versions)
+            foreach (var test in tests)
             {
-                Console.Write("{0}", version.PadLeft(10));
-            }
-            Console.WriteLine();
+                var resultsFromTest = testResults.Where(r => r.Test == test).OrderBy(p => p.Version).ToList();
 
-            Console.WriteLine(new String('-', initialColumnWidth + columnWidth * versions.Count));
+                var initialColumnWidth = resultsFromTest.Max(r => r.Version.Length);
+                var tableWith = initialColumnWidth + (columnWidth + 2) * metricsCount + metricsCount + 4;
+                Console.WriteLine();
 
-            foreach(var resultGroup in testResults.GroupBy(r => r.Test))
-            {
-                Console.Write(resultGroup.Key.PadRight(initialColumnWidth));
+                PrintLine(tableWith);
 
-                foreach(var version in versions)
-                {
-                    var result = resultGroup.FirstOrDefault(r => r.Version == version);
-                    if(result != null)
-                    {
-                        Console.Write(result.Duration.ToString("##0.00 ms").PadLeft(columnWidth));
-                    }
-                    else
-                    {
-                        Console.Write("N/A".PadRight(columnWidth));
-                    }
-                }
+                Console.WriteLine($"| {test.PadRight(tableWith - 3)}|");
+
+                PrintLine(tableWith);
+
+                Console.Write($"| {string.Empty.PadLeft(initialColumnWidth)} |");
+                Console.Write($" {nameof(TestResult.Mean).PadLeft(columnWidth)} |");
+                Console.Write($" {nameof(TestResult.Error).PadLeft(columnWidth)} |");
+                Console.Write($" {nameof(TestResult.StdDev).PadLeft(columnWidth)} |");
+                Console.Write($" {nameof(TestResult.Gen0).PadLeft(columnWidth)} |");
+                Console.Write($" {nameof(TestResult.Gen1).PadLeft(columnWidth)} |");
+                Console.Write($" {nameof(TestResult.Allocated).PadLeft(columnWidth)} |");
 
                 Console.WriteLine();
+
+                PrintLine(tableWith);
+
+                foreach (var result in resultsFromTest)
+                {
+                    Console.Write($"| {result.Version.PadRight(initialColumnWidth)} |");
+                    Console.Write($" {result.Mean?.PadLeft(columnWidth)} |");
+                    Console.Write($" {result.Error?.PadLeft(columnWidth)} |");
+                    Console.Write($" {result.StdDev?.PadLeft(columnWidth)} |");
+                    Console.Write($" {result.Gen0?.PadLeft(columnWidth)} |");
+                    Console.Write($" {result.Gen1?.PadLeft(columnWidth)} |");
+                    Console.Write($" {result.Allocated?.PadLeft(columnWidth)} |");
+
+                    Console.WriteLine();
+                }
+                PrintLine(tableWith);
             }
 
             Console.Error.WriteLine();
             Console.Error.WriteLine("Done.");
+        }
+
+        private static void PrintLine(int tableWith)
+        {
+            Console.WriteLine(new String('-', tableWith));
         }
 
         private static void RunTest(string testProgram, List<TestResult> testResults)
@@ -105,7 +137,7 @@ namespace YamlDotNet.PerformanceTests.Runner
                 RedirectStandardOutput = true,
             };
 
-            switch(Environment.OSVersion.Platform)
+            switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Unix:
                     startInfo.FileName = "mono";
@@ -126,22 +158,35 @@ namespace YamlDotNet.PerformanceTests.Runner
 
         private class TestResult
         {
-            public string Version { get; set; }
             public string Test { get; set; }
-            public double Duration { get; set; }
+            public string Version { get; set; }
+            public string Mean { get; set; }
+            public string Error { get; set; }
+            public string StdDev { get; set; }
+            public string Gen0 { get; set; }
+            public string Gen1 { get; set; }
+            public string Allocated { get; set; }
         }
 
         private static void ProcessTestResult(string data, List<TestResult> testResults)
         {
-            if (data != null)
+            if (data != null && data.StartsWith(" 'Serialize v"))
             {
-                var parts = data.Split('\t');
-                testResults.Add(new TestResult
+                var parts = data.Split('|');
+                var versionName = parts[0].Trim().Trim('\'').Split(' ');
+                var result = new TestResult
                 {
-                    Version = parts[0],
-                    Test = parts[1],
-                    Duration = double.Parse(parts[2]),
-                });
+                    Test = versionName[0],
+                    Version = versionName[1],
+                    Mean = parts.Length >= 1 ? parts[1].Trim() : string.Empty,
+                    Error = parts.Length >= 2 ? parts[2].Trim() : string.Empty,
+                    StdDev = parts.Length >= 3 ? parts[3].Trim() : string.Empty,
+                    Gen0 = parts.Length >= 4 ? parts[4].Trim() : string.Empty,
+                    Gen1 = parts.Length >= 5 ? parts[5].Trim() : string.Empty,
+                    Allocated = parts.Length >= 6 ? parts[6].Trim() : string.Empty,
+                };
+
+                testResults.Add(result);
             }
         }
     }
