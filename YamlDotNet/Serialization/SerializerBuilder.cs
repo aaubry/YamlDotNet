@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
     {
-        private Func<ITypeInspector, ITypeResolver, IEnumerable<IYamlTypeConverter>, IObjectGraphTraversalStrategy> objectGraphTraversalStrategyFactory;
+        private ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory;
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>();
             eventEmitterFactories.Add(typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings));
 
-            objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention ?? new NullNamingConvention());
+            objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention ?? new NullNamingConvention());
 
             WithTypeResolver(new DynamicTypeResolver());
         }
@@ -222,7 +222,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public SerializerBuilder EnsureRoundtrip()
         {
-            objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters) => new RoundtripObjectGraphTraversalStrategy(
+            objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) => new RoundtripObjectGraphTraversalStrategy(
                 typeConverters,
                 typeInspector,
                 typeResolver,
@@ -370,6 +370,18 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers an <see cref="ObjectGraphTraversalStrategyFactory"/> to be used by the serializer
+        /// while traversing the object graph.
+        /// </summary>
+        /// <param name="objectGraphTraversalStrategyFactory">A function that instantiates the traversal strategy.</param>
+        public SerializerBuilder WithObjectGraphTraversalStrategyFactory(ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory)
+        {
+            this.objectGraphTraversalStrategyFactory = objectGraphTraversalStrategyFactory;
+
+            return this;
+        }
+
+        /// <summary>
         /// Registers an additional <see cref="IObjectGraphVisitor{IEmitter}" /> to be used by the serializer
         /// while emitting an object graph.
         /// </summary>
@@ -472,7 +484,7 @@ namespace YamlDotNet.Serialization
         {
             var typeConverters = BuildTypeConverters();
             var typeInspector = BuildTypeInspector();
-            var traversalStrategy = objectGraphTraversalStrategyFactory(typeInspector, typeResolver, typeConverters);
+            var traversalStrategy = objectGraphTraversalStrategyFactory(typeInspector, typeResolver, typeConverters, maximumRecursion);
             var eventEmitter = eventEmitterFactories.BuildComponentChain(new WriterEventEmitter());
 
             return new ValueSerializer(
