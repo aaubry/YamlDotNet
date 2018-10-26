@@ -245,6 +245,17 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializeAndDesierializeClassWithNullableStruct()
+        {
+            var yaml = Serializer.Serialize(new ClassWithNullableStruct
+            {
+                Struct = new SimpleStruct { Value = 42 }
+            });
+
+            var i = Deserializer.Deserialize<ClassWithNullableStruct>(yaml);
+        }
+
+        [Fact]
         public void DeserializationFailsForUndefinedForwardReferences()
         {
             var text = Lines(

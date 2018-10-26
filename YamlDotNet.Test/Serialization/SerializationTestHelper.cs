@@ -530,4 +530,14 @@ namespace YamlDotNet.Test.Serialization
         [YamlIgnore]
         public string fourthTest { get; set; }
     }
+
+    public struct SimpleStruct
+    {
+        public int Value { get; set; }
+    }
+
+    public class ClassWithNullableStruct
+    {
+        public SimpleStruct? Struct { get; set; }
+    }
 }
