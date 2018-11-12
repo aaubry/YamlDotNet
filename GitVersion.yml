@@ -2,6 +2,8 @@ mode: ContinuousDelivery
 branches:
   master:
     tag: pre
-  releases?[/-]: {}
+  release:
+    regex: releases?[/-]
+    tag: ''
 ignore:
   sha: []
