@@ -65,7 +65,7 @@ Fixes:
 
 ## Version 5.0.0
 
-/!\ This release fixes a security issue. It is strongly recommended to upgrade,
+/!\ This release fixes a [security issue - CVE-2018-1000210](https://nvd.nist.gov/vuln/detail/CVE-2018-1000210). It is strongly recommended to upgrade,
 mainly if you are parsing documents from sources that you do not trust.
 
 **Many thanks to [Kurt Boberg](mailto:kurt.boberg@docusign.com), from the DocuSign Application Security Team, who identified this issue and provided feedback on mitigation strategies.**
