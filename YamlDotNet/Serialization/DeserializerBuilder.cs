@@ -283,7 +283,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public DeserializerBuilder WithTagMapping(string tag, Type type)
+        public override DeserializerBuilder WithTagMapping(string tag, Type type)
         {
             if (tag == null)
             {
