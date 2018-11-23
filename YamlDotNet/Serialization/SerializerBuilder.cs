@@ -79,7 +79,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Sets the maximum recursion that is allowed while traversing the object graph. The default value is 50.
-        /// <summary>
+        /// </summary>
         public SerializerBuilder WithMaximumRecursion(int maximumRecursion)
         {
             if (maximumRecursion <= 0)
@@ -177,7 +177,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public SerializerBuilder WithTagMapping(string tag, Type type)
+        public override SerializerBuilder WithTagMapping(string tag, Type type)
         {
             if (tag == null)
             {

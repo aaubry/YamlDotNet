@@ -87,6 +87,8 @@ namespace YamlDotNet.Serialization
             return Self;
         }
 
+        public abstract TBuilder WithTagMapping(string tag, Type type);
+
 #if !NET20
         /// <summary>
         /// Register an <see cref="Attribute"/> for for a given property.
