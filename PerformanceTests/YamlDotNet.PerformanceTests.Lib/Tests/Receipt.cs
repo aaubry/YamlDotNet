@@ -21,9 +21,9 @@
 
 using System;
 
-namespace YamlDotNet.PerformanceTests.Lib
+namespace YamlDotNet.PerformanceTests.Lib.Tests
 {
-    public class Receipt : ISerializationTest
+    public class Receipt
     {
         public object Graph {
             get {

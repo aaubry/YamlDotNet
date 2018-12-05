@@ -20,25 +20,15 @@
 //  SOFTWARE.
 
 using System;
-using YamlDotNet.PerformanceTests.Lib;
-using YamlDotNet.RepresentationModel.Serialization;
-using System.IO;
+using BenchmarkDotNet.Running;
 
 namespace YamlDotNet.PerformanceTests.v1_2_1
 {
-    public class Program : ISerializerAdapter
+    public class Program
     {
         public static void Main(string[] args)
         {
-            var runner = new PerformanceTestRunner();
-            runner.Run(new Program(), args);
-        }
-
-        private readonly Serializer _serializer = new Serializer();
-
-        public void Serialize (TextWriter writer, object graph)
-        {
-            _serializer.Serialize (writer, graph);
+            var summary = BenchmarkRunner.Run<ReceiptTest>();
         }
     }
 }
