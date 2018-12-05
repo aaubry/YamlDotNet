@@ -45,6 +45,15 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.3.0
+
+New features:
+* Add support for supplying custom IObjectGraphTraversalStrategy implementations.
+* Add abstract WithTagMapping() method to the base serializer / deserializer builder.
+
+Bug fixes:
+* Use BenchmarkDotNet and Compile YamlDotNet with Optimize option in Release-* configurations
+
 ## Version 5.2.1
 
 Bug fixes:
