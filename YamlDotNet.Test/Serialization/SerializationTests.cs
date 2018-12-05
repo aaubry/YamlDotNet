@@ -396,6 +396,17 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeField()
+        {
+            var text = @"theField: Howdy
+...";
+
+            var result = Deserializer.Deserialize<SimpleField>(UsingReaderFor(text));
+
+            result.theField.Should().Be("Howdy");
+        }
+
+        [Fact]
         public void RoundtripDerivedClassWithSerializeAs()
         {
             var obj = new InheritanceExample
