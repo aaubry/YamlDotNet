@@ -1625,6 +1625,26 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(3, result[5]);
         }
 
+        [Fact]
+        public void InfiniteRecursionIsDetected()
+        {
+            var sut = new SerializerBuilder()
+                .DisableAliases()
+                .Build();
+
+            var recursionRoot = new
+            {
+                Nested = new[]
+                {
+                    new Dictionary<string, object>()
+                }
+            };
+
+            recursionRoot.Nested[0].Add("loop", recursionRoot);
+
+            var exception = Assert.Throws<MaximumRecursionLevelReachedException>(() => sut.Serialize(recursionRoot));
+        }
+
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {

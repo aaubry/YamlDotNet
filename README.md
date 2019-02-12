@@ -45,6 +45,11 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.3.1
+
+New features:
+* Produce a detailed error message when too much recursion is detected during serialization.
+
 ## Version 5.3.0
 
 New features:
