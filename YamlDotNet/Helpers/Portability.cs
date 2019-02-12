@@ -193,6 +193,11 @@ namespace YamlDotNet
                 : type.GetRuntimeProperties().Where(instancePublic);
         }
 
+        public static IEnumerable<FieldInfo> GetPublicFields(this Type type)
+        {
+            return type.GetRuntimeFields().Where(f => !f.IsStatic && f.IsPublic);
+        }
+
         public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
         {
             return type.GetRuntimeMethods()
@@ -325,6 +330,11 @@ namespace YamlDotNet
                     .Concat(type.GetInterfaces())
                     .SelectMany(i => i.GetProperties(instancePublic))
                 : type.GetProperties(instancePublic);
+        }
+
+        public static IEnumerable<FieldInfo> GetPublicFields(this Type type)
+        {
+            return type.GetFields(BindingFlags.Instance | BindingFlags.Public);
         }
 
         public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)

@@ -31,5 +31,10 @@ namespace YamlDotNet.Test
                 .Replace("\r\n", "\n")
                 .Replace("\n", Environment.NewLine);
         }
+
+        public static string TrimNewLines(this string value)
+        {
+            return value.TrimEnd('\r', '\n');
+        }
     }
 }

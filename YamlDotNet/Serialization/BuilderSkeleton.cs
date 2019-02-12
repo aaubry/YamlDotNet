@@ -38,6 +38,7 @@ namespace YamlDotNet.Serialization
         internal readonly YamlAttributeOverrides overrides;
         internal readonly LazyComponentRegistrationList<Nothing, IYamlTypeConverter> typeConverterFactories;
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
+        private bool ignoreFields;
 
         internal BuilderSkeleton()
         {
@@ -54,9 +55,26 @@ namespace YamlDotNet.Serialization
 
         internal ITypeInspector BuildTypeInspector()
         {
-            return typeInspectorFactories.BuildComponentChain(
-                new ReadablePropertiesTypeInspector(typeResolver)
-            );
+            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver);
+            if (!ignoreFields)
+            {
+                innerInspector = new CompositeTypeInspector(
+                    new ReadableFieldsTypeInspector(typeResolver),
+                    innerInspector
+                );
+            }
+
+            return typeInspectorFactories.BuildComponentChain(innerInspector);
+        }
+
+        /// <summary>
+        /// Prevents serialization and deserialization of fields.
+        /// </summary>
+        /// <returns></returns>
+        public TBuilder IgnoreFields()
+        {
+            ignoreFields = true;
+            return Self;
         }
 
         /// <summary>

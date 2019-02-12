@@ -1645,6 +1645,50 @@ namespace YamlDotNet.Test.Serialization
             var exception = Assert.Throws<MaximumRecursionLevelReachedException>(() => sut.Serialize(recursionRoot));
         }
 
+        [Fact]
+        public void TuplesAreSerializable()
+        {
+            var sut = new SerializerBuilder()
+                .Build();
+
+            var yaml = sut.Serialize(new[]
+            {
+                Tuple.Create(1, "one"),
+                Tuple.Create(2, "two"),
+            });
+
+            var expected = Yaml.Text(@"
+                - Item1: 1
+                  Item2: one
+                - Item1: 2
+                  Item2: two
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void ValueTuplesAreSerializableWithoutMetadata()
+        {
+            var sut = new SerializerBuilder()
+                .Build();
+
+            var yaml = sut.Serialize(new[]
+            {
+                (num: 1, txt: "one"),
+                (num: 2, txt: "two"),
+            });
+
+            var expected = Yaml.Text(@"
+                - Item1: 1
+                  Item2: one
+                - Item1: 2
+                  Item2: two
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {

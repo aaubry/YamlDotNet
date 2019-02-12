@@ -78,6 +78,11 @@ namespace YamlDotNet.Test
 
         public static StringReader ReaderForText(string yamlText)
         {
+            return new StringReader(Text(yamlText));
+        }
+
+        public static string Text(string yamlText)
+        {
             var lines = yamlText
                 .Split('\n')
                 .Select(l => l.TrimEnd('\r', '\n'))
@@ -102,8 +107,7 @@ namespace YamlDotNet.Test
                     .ToList();
             }
 
-            var reader = new StringReader(string.Join("\n", lines.ToArray()));
-            return reader;
+            return string.Join("\n", lines.ToArray());
         }
     }
 }

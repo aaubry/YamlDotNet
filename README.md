@@ -45,6 +45,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 # Changelog
 
+## Version 5.4.0
+
+New features:
+* **Enable serialization of public fields.**  
+  YamlDotNet will now also serialize public fields. This feature is enabled by default,
+  but it can be disabled by calling `IgnoreFields()` no the `SerializerBuilder` or `DeserializerBuilder`.
+
 ## Version 5.3.1
 
 New features:
