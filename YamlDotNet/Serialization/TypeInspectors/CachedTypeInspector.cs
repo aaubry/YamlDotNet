@@ -18,10 +18,11 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
-
+#if !(NET20 || NET35)
+#define USE_CONCURRENT_DICTIONARY
+#endif
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace YamlDotNet.Serialization.TypeInspectors
 {
@@ -31,7 +32,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     public sealed class CachedTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
-        private readonly Dictionary<Type, List<IPropertyDescriptor>> cache = new Dictionary<Type, List<IPropertyDescriptor>>();
+        private readonly IDictionary<Type, List<IPropertyDescriptor>> cache;
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
@@ -39,18 +40,40 @@ namespace YamlDotNet.Serialization.TypeInspectors
             {
                 throw new ArgumentNullException("innerTypeDescriptor");
             }
-
+#if USE_CONCURRENT_DICTIONARY
+            cache = new System.Collections.Concurrent.ConcurrentDictionary<Type, List<IPropertyDescriptor>>();            
+#else
+            cache = new Dictionary<Type, List<IPropertyDescriptor>>();
+#endif
             this.innerTypeDescriptor = innerTypeDescriptor;
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
         {
             List<IPropertyDescriptor> list;
+#if USE_CONCURRENT_DICTIONARY
             if (!cache.TryGetValue(type, out list))
             {
                 list = new List<IPropertyDescriptor>(innerTypeDescriptor.GetProperties(type, container));
-                cache.Add(type, list);
+                cache[type] = list;
             }
+#else
+            if (!cache.TryGetValue(type, out list))
+            {
+                //if not able to get the properties, lock the type 
+                //this allows other threads to continue for already known types or new types
+                lock (type)
+                {
+                    //check again because, if there was a lock contention or if the 
+                    //non-concurrent dictionary was in the process of updating, it will already be done                    
+                    if (!cache.TryGetValue(type, out list))
+                    {
+                        list = new List<IPropertyDescriptor>(innerTypeDescriptor.GetProperties(type, container));
+                        cache[type] = list;
+                    }
+                }
+            }
+#endif
             return list;
         }
     }
