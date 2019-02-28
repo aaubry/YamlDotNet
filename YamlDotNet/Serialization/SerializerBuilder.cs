@@ -477,7 +477,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Creates a new <see cref="IValueDeserializer" /> that implements the current configuration.
-        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
         /// deserializer is to use the <see cref="Build" /> method.
         /// </summary>
         public IValueSerializer BuildValueSerializer()

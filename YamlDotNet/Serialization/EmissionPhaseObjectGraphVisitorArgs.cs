@@ -92,7 +92,7 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Gets the visitor of type <typeparamref name="T" /> that was used during the pre-processig phase.
+        /// Gets the visitor of type <typeparamref name="T" /> that was used during the pre-processing phase.
         /// </summary>
         /// <typeparam name="T">The type of the visitor.s</typeparam>
         /// <returns></returns>

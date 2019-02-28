@@ -85,13 +85,13 @@ namespace YamlDotNet.Core
         }
 
         /// <summary>
-        /// Gets the character at thhe specified offset.
+        /// Gets the character at the specified offset.
         /// </summary>
         public char Peek(int offset)
         {
             if (offset < 0 || offset >= buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset", "The offset must be betwwen zero and the capacity of the buffer.");
+                throw new ArgumentOutOfRangeException("offset", "The offset must be between zero and the capacity of the buffer.");
             }
 
             Cache(offset);

@@ -109,7 +109,7 @@ namespace YamlDotNet.Serialization
 
 #if !NET20
         /// <summary>
-        /// Register an <see cref="Attribute"/> for for a given property.
+        /// Register an <see cref="Attribute"/> for a given property.
         /// </summary>
         /// <typeparam name="TClass"></typeparam>
         /// <param name="propertyAccessor">An expression in the form: x => x.SomeProperty</param>
@@ -123,7 +123,7 @@ namespace YamlDotNet.Serialization
 #endif
 
         /// <summary>
-        /// Register an <see cref="Attribute"/> for for a given property.
+        /// Register an <see cref="Attribute"/> for a given property.
         /// </summary>
         public TBuilder WithAttributeOverride(Type type, string member, Attribute attribute)
         {

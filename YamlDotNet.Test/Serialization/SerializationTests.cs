@@ -788,7 +788,7 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        // Todo: this is actualy roundtrip
+        // Todo: this is actually roundtrip
         public void DeserializationOfDefaultsWorkInJson()
         {
             var writer = new StringWriter();
@@ -1135,15 +1135,15 @@ namespace YamlDotNet.Test.Serialization
 
             result["derived1"].Should()
                 .Contain("key", "D1", "key should be overriden by the actual mapping")
-                .And.Contain("level", "1", "level should should be inherited from the backreferenced mapping");
+                .And.Contain("level", "1", "level should be inherited from the backreferenced mapping");
 
             result["derived2"].Should()
                 .Contain("key", "D2", "key should be overriden by the actual mapping")
-                .And.Contain("level", "2", "level should should be inherited from the backreferenced mapping");
+                .And.Contain("level", "2", "level should be inherited from the backreferenced mapping");
 
             result["derived3"].Should()
                 .Contain("key", "D3", "key should be overriden by the actual mapping")
-                .And.Contain("level", "2", "level should should be inherited from the backreferenced mapping");
+                .And.Contain("level", "2", "level should be inherited from the backreferenced mapping");
         }
 
         [Fact]

@@ -24,7 +24,7 @@ using YamlDotNet.Core.Events;
 namespace YamlDotNet.Core
 {
     /// <summary>
-    /// Represents a YAML stream paser.
+    /// Represents a YAML stream parser.
     /// </summary>
     public interface IParser
     {

@@ -42,8 +42,8 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="Version"/> class.
         /// </summary>
-        /// <param name="major">The the major version number.</param>
-        /// <param name="minor">The the minor version number.</param>
+        /// <param name="major">The major version number.</param>
+        /// <param name="minor">The minor version number.</param>
         public Version(int major, int minor)
         {
             Major = major;

@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.Utilities
 {
     /// <summary>
     /// A generic container that is preserved during the entire deserialization process.
-    /// Any disposable object added to this collecion will be disposed when this object is disposed.
+    /// Any disposable object added to this collection will be disposed when this object is disposed.
     /// </summary>
     public sealed class SerializerState : IDisposable
     {

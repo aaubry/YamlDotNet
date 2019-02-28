@@ -65,7 +65,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Creates a new <see cref="Serializer" /> that uses the specified <see cref="IValueSerializer" />.
-        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
         /// deserializer is to use <see cref="SerializerBuilder" />.
         /// </summary>
         public static Serializer FromValueSerializer(IValueSerializer valueSerializer)

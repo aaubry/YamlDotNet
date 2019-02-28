@@ -34,7 +34,7 @@ namespace YamlDotNet.Core
         }
 
         /// <summary>
-        /// Gets the character at thhe specified offset.
+        /// Gets the character at the specified offset.
         /// </summary>
         char Peek(int offset);
 

@@ -69,7 +69,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Checks whether the current event is of the specified type.
         /// If the event is of the specified type, returns it and moves to the next event.
-        /// Otherwise retruns null.
+        /// Otherwise returns null.
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
         /// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
