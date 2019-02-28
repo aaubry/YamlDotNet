@@ -138,7 +138,7 @@ namespace YamlDotNet.Core
         {
             if (bestIndent < MinBestIndent || bestIndent > MaxBestIndent)
             {
-                throw new ArgumentOutOfRangeException("bestIndent", string.Format(CultureInfo.InvariantCulture,
+                throw new ArgumentOutOfRangeException(nameof(bestIndent), string.Format(CultureInfo.InvariantCulture,
                     "The bestIndent parameter must be between {0} and {1}.", MinBestIndent, MaxBestIndent));
             }
 
@@ -146,7 +146,7 @@ namespace YamlDotNet.Core
 
             if (bestWidth <= bestIndent * 2)
             {
-                throw new ArgumentOutOfRangeException("bestWidth", "The bestWidth parameter must be greater than bestIndent * 2.");
+                throw new ArgumentOutOfRangeException(nameof(bestWidth), "The bestWidth parameter must be greater than bestIndent * 2.");
             }
 
             this.bestWidth = bestWidth;
@@ -664,7 +664,7 @@ namespace YamlDotNet.Core
         {
             if (!(evt is StreamStart))
             {
-                throw new ArgumentException("Expected STREAM-START.", "evt");
+                throw new ArgumentException("Expected STREAM-START.", nameof(evt));
             }
 
             indent = -1;

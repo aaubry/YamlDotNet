@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
         {
             if (tagMappings == null)
             {
-                throw new ArgumentNullException("tagMappings");
+                throw new ArgumentNullException(nameof(tagMappings));
             }
 
             this.tagMappings = tagMappings;

@@ -20,7 +20,7 @@ namespace YamlDotNet.Helpers
             var property = TryGetMemberExpression<PropertyInfo>(propertyAccessor);
             if (property == null)
             {
-                throw new ArgumentException("Expected a lambda expression in the form: x => x.SomeProperty", "propertyAccessor");
+                throw new ArgumentException("Expected a lambda expression in the form: x => x.SomeProperty", nameof(propertyAccessor));
             }
 
             return property;

@@ -401,7 +401,7 @@ namespace YamlDotNet.RepresentationModel
         {
             if (mapping == null)
             {
-                throw new ArgumentNullException("mapping");
+                throw new ArgumentNullException(nameof(mapping));
             }
 
             var result = new YamlMappingNode();

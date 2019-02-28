@@ -57,35 +57,35 @@ namespace YamlDotNet.Serialization
         {
             if (innerVisitor == null)
             {
-                throw new ArgumentNullException("innerVisitor");
+                throw new ArgumentNullException(nameof(innerVisitor));
             }
 
             InnerVisitor = innerVisitor;
 
             if (eventEmitter == null)
             {
-                throw new ArgumentNullException("eventEmitter");
+                throw new ArgumentNullException(nameof(eventEmitter));
             }
 
             EventEmitter = eventEmitter;
 
             if (preProcessingPhaseVisitors == null)
             {
-                throw new ArgumentNullException("preProcessingPhaseVisitors");
+                throw new ArgumentNullException(nameof(preProcessingPhaseVisitors));
             }
 
             this.preProcessingPhaseVisitors = preProcessingPhaseVisitors;
 
             if (typeConverters == null)
             {
-                throw new ArgumentNullException("typeConverters");
+                throw new ArgumentNullException(nameof(typeConverters));
             }
 
             TypeConverters = typeConverters;
 
             if (nestedObjectSerializer == null)
             {
-                throw new ArgumentNullException("nestedObjectSerializer");
+                throw new ArgumentNullException(nameof(nestedObjectSerializer));
             }
 
             NestedObjectSerializer = nestedObjectSerializer;

@@ -81,7 +81,7 @@ Task("Set-Build-Version")
 
         System.IO.File.WriteAllText("YamlDotNet/Properties/AssemblyInfo.cs", assemblyInfo);
 
-        if(AppVeyor.IsRunningOnAppVeyor)
+        if (AppVeyor.IsRunningOnAppVeyor)
         {
             if (!string.IsNullOrEmpty(version.PreReleaseTag))
             {
@@ -289,7 +289,7 @@ void BuildSolution(string solutionPath, string configuration, Verbosity verbosit
     {
         if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
 
-        if(IsRunningOnUnix())
+        if (IsRunningOnUnix())
         {
             settings.ToolPath = "/usr/bin/msbuild";
         }

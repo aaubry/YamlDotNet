@@ -102,7 +102,7 @@ namespace YamlDotNet.RepresentationModel
                 return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
             }
 
-            throw new ArgumentException("The current event is of an unsupported type.", "events");
+            throw new ArgumentException("The current event is of an unsupported type.", nameof(parser));
         }
 
         /// <summary>

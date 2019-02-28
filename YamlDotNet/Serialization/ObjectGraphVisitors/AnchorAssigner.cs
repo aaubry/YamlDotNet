@@ -87,7 +87,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         private void VisitObject(IObjectDescriptor value)
         {
-            if(value.Value != null)
+            if (value.Value != null)
             {
                 assignments.Add(value.Value, new AnchorAssignment());
             }

@@ -37,14 +37,14 @@ namespace YamlDotNet.Serialization.ValueDeserializers
         {
             if (deserializers == null)
             {
-                throw new ArgumentNullException("deserializers");
+                throw new ArgumentNullException(nameof(deserializers));
             }
 
             this.deserializers = deserializers;
 
             if (typeResolvers == null)
             {
-                throw new ArgumentNullException("typeResolvers");
+                throw new ArgumentNullException(nameof(typeResolvers));
             }
             this.typeResolvers = typeResolvers;
         }

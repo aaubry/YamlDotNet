@@ -56,7 +56,7 @@ namespace YamlDotNet.Core
         /// <returns>Returns true if the current event is of type <typeparamref name="T"/>. Otherwise returns false.</returns>
         public static bool Accept<T>(this IParser parser) where T : ParsingEvent
         {
-            if(parser.Current == null)
+            if (parser.Current == null)
             {
                 if (!parser.MoveNext())
                 {

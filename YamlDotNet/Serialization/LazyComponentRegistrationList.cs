@@ -73,7 +73,7 @@ namespace YamlDotNet.Serialization
         {
             for (int i = 0; i < entries.Count; ++i)
             {
-                if(entries[i].ComponentType == componentType)
+                if (entries[i].ComponentType == componentType)
                 {
                     entries.RemoveAt(i);
                     return;

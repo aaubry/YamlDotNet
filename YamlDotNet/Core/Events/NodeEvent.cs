@@ -82,18 +82,18 @@ namespace YamlDotNet.Core.Events
             {
                 if (anchor.Length == 0)
                 {
-                    throw new ArgumentException("Anchor value must not be empty.", "anchor");
+                    throw new ArgumentException("Anchor value must not be empty.", nameof(anchor));
                 }
 
                 if (!anchorValidator.IsMatch(anchor))
                 {
-                    throw new ArgumentException("Anchor value must contain alphanumerical characters only.", "anchor");
+                    throw new ArgumentException("Anchor value must contain alphanumerical characters only.", nameof(anchor));
                 }
             }
 
             if (tag != null && tag.Length == 0)
             {
-                throw new ArgumentException("Tag value must not be empty.", "tag");
+                throw new ArgumentException("Tag value must not be empty.", nameof(tag));
             }
 
             this.anchor = anchor;
