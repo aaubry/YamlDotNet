@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization
         /// Initializes a new instance of <see cref="Deserializer" /> using the default configuration.
         /// </summary>
         /// <remarks>
-        /// To customize the bahavior of the deserializer, use <see cref="DeserializerBuilder" />.
+        /// To customize the behavior of the deserializer, use <see cref="DeserializerBuilder" />.
         /// </remarks>
         public Deserializer()
             : this(new DeserializerBuilder().BuildValueDeserializer())
@@ -64,7 +64,7 @@ namespace YamlDotNet.Serialization
         {
             if (valueDeserializer == null)
             {
-                throw new ArgumentNullException("valueDeserializer");
+                throw new ArgumentNullException(nameof(valueDeserializer));
             }
 
             this.valueDeserializer = valueDeserializer;
@@ -72,7 +72,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Creates a new <see cref="Deserializer" /> that uses the specified <see cref="IValueDeserializer" />.
-        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
         /// deserializer is to use <see cref="DeserializerBuilder" />.
         /// </summary>
         public static Deserializer FromValueDeserializer(IValueDeserializer valueDeserializer)
@@ -131,12 +131,12 @@ namespace YamlDotNet.Serialization
         {
             if (parser == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(parser));
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             var hasStreamStart = parser.Allow<StreamStart>() != null;

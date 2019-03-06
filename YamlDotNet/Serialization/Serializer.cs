@@ -57,7 +57,7 @@ namespace YamlDotNet.Serialization
         {
             if (valueSerializer == null)
             {
-                throw new ArgumentNullException("valueSerializer");
+                throw new ArgumentNullException(nameof(valueSerializer));
             }
 
             this.valueSerializer = valueSerializer;
@@ -65,7 +65,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Creates a new <see cref="Serializer" /> that uses the specified <see cref="IValueSerializer" />.
-        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
         /// deserializer is to use <see cref="SerializerBuilder" />.
         /// </summary>
         public static Serializer FromValueSerializer(IValueSerializer valueSerializer)
@@ -116,7 +116,7 @@ namespace YamlDotNet.Serialization
         {
             if (emitter == null)
             {
-                throw new ArgumentNullException("emitter");
+                throw new ArgumentNullException(nameof(emitter));
             }
 
             EmitDocument(emitter, graph, null);
@@ -132,12 +132,12 @@ namespace YamlDotNet.Serialization
         {
             if (emitter == null)
             {
-                throw new ArgumentNullException("emitter");
+                throw new ArgumentNullException(nameof(emitter));
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             EmitDocument(emitter, graph, type);

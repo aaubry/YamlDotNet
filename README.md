@@ -74,7 +74,7 @@ Bug fixes:
 ## Version 5.2.0
 
 Improvements:
-* Allow to specify the maximum recusion limit (fixes #352) with the [WithMaximumRecursion](https://github.com/aaubry/YamlDotNet/pull/353/files#diff-86074b6acff29ccad667aca741f62ac5R83) method.
+* Allow to specify the maximum recursion limit (fixes #352) with the [WithMaximumRecursion](https://github.com/aaubry/YamlDotNet/pull/353/files#diff-86074b6acff29ccad667aca741f62ac5R83) method.
 
 ## Version 5.1.0
 
@@ -91,8 +91,8 @@ mainly if you are parsing documents from sources that you do not trust.
 
 **Many thanks to [Kurt Boberg](mailto:kurt.boberg@docusign.com), from the DocuSign Application Security Team, who identified this issue and provided feedback on mitigation strategies.**
 
-* **Remove the legacy backwards-compatibe syntax that enabled to create
-  `Serializer` and `Deserializer` directly then changing their configutation.**  
+* **Remove the legacy backwards-compatible syntax that enabled to create
+  `Serializer` and `Deserializer` directly then changing their configuration.**  
   In most cases, the calls to the constructors should be replaced by
   instantiations of `SerializerBuilder` and `DeserializerBuilder`.
   These can be configured at will, then used to create instances of
@@ -161,7 +161,7 @@ Bug fixes:
 
 Bug fixes:
 
-* Actualy cache in CachedTypeInspector.
+* Actually cache in CachedTypeInspector.
 
 ## Version 4.2.1
 
@@ -202,8 +202,8 @@ Bug fixes:
   Use the `Without...` methods on `SerializerBuilder` and `DeserializerBuilder` for that.
 * New [`DateTimeConverter`](https://github.com/aaubry/YamlDotNet/pull/234)  
   * It accepts [`DateTimeKind.Utc`](https://msdn.microsoft.com/en-us/library/shx7s921(v=vs.110).aspx) and [Standard Date and Time Format Strings](https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx) of "G" as its default parameters, if they are omitted.
-  * For deserialisation, it accepts as many number of formats as we want. If a value doesn't match against provided formats, it will return [`FormatException`](https://msdn.microsoft.com/en-us/library/system.formatexception(v=vs.110).aspx). Please refer to my whole test cases.
-  * For serialisation, it only considers the first format in the format list.
+  * For deserialization, it accepts as many number of formats as we want. If a value doesn't match against provided formats, it will return [`FormatException`](https://msdn.microsoft.com/en-us/library/system.formatexception(v=vs.110).aspx). Please refer to my whole test cases.
+  * For serialization, it only considers the first format in the format list.
 * Improve the (de)serializer builders so that it is possible to [wrap existing component registrations](https://github.com/aaubry/YamlDotNet/commit/204ff4979dca7e2cfcbe86cd1387bf6b6f2398c3).
 * Added the `ApplyNamingConventions` property to `YamlMemberAttribute`.  
   When this property is true, naming conventions are not applied to the associated member. This solves [issue 228](https://github.com/aaubry/YamlDotNet/issues/228).
@@ -252,7 +252,7 @@ This a major release that introduces a few breaking changes.
   the composition of services performed by these two classes.
   This means that every aspect of the composition should be
   extensible / overridable. Things like injecting a custom TypeInspector
-  or replacing the the default ArrayNodeDeserializer with
+  or replacing the default ArrayNodeDeserializer with
   an alternative implementation become possible and easy.  
   In order to avoid breaking existing code,
   the constructors of Serializer and Deserializer have been kept

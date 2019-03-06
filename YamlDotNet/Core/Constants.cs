@@ -25,7 +25,7 @@ using YamlDotNet.Core.Tokens;
 namespace YamlDotNet.Core
 {
     /// <summary>
-    /// Defines constants thar relate to the YAML specification.
+    /// Defines constants that relate to the YAML specification.
     /// </summary>
     public static class Constants
     {

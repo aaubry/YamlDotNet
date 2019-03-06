@@ -740,7 +740,7 @@ namespace YamlDotNet.Core
                     break;
 
                 default:
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find uknown directive name.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find unknown directive name.");
             }
 
             // Eat the rest of the line including any comments.
@@ -982,7 +982,7 @@ namespace YamlDotNet.Core
 
             if (flowLevel == 0)
             {
-                // Check if we are allowed to start a new key (not nessesary simple).
+                // Check if we are allowed to start a new key (not necessary simple).
 
                 if (!simpleKeyAllowed)
                 {
@@ -1689,7 +1689,7 @@ namespace YamlDotNet.Core
                             {
                                 if (!analyzer.IsHex(k))
                                 {
-                                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, did not find expected hexdecimal number.");
+                                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, did not find expected hexadecimal number.");
                                 }
                                 character = ((character << 4) + analyzer.AsHex(k));
                             }

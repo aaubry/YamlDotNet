@@ -84,7 +84,7 @@ namespace YamlDotNet.Serialization
         {
             if (namingConvention == null)
             {
-                throw new ArgumentNullException("namingConvention");
+                throw new ArgumentNullException(nameof(namingConvention));
             }
 
             this.namingConvention = namingConvention;
@@ -98,7 +98,7 @@ namespace YamlDotNet.Serialization
         {
             if (typeResolver == null)
             {
-                throw new ArgumentNullException("typeResolver");
+                throw new ArgumentNullException(nameof(typeResolver));
             }
 
             this.typeResolver = typeResolver;
@@ -109,7 +109,7 @@ namespace YamlDotNet.Serialization
 
 #if !NET20
         /// <summary>
-        /// Register an <see cref="Attribute"/> for for a given property.
+        /// Register an <see cref="Attribute"/> for a given property.
         /// </summary>
         /// <typeparam name="TClass"></typeparam>
         /// <param name="propertyAccessor">An expression in the form: x => x.SomeProperty</param>
@@ -123,7 +123,7 @@ namespace YamlDotNet.Serialization
 #endif
 
         /// <summary>
-        /// Register an <see cref="Attribute"/> for for a given property.
+        /// Register an <see cref="Attribute"/> for a given property.
         /// </summary>
         public TBuilder WithAttributeOverride(Type type, string member, Attribute attribute)
         {
@@ -151,12 +151,12 @@ namespace YamlDotNet.Serialization
         {
             if (typeConverter == null)
             {
-                throw new ArgumentNullException("typeConverter");
+                throw new ArgumentNullException(nameof(typeConverter));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(typeConverterFactories.CreateRegistrationLocationSelector(typeConverter.GetType(), _ => typeConverter));
@@ -176,12 +176,12 @@ namespace YamlDotNet.Serialization
         {
             if (typeConverterFactory == null)
             {
-                throw new ArgumentNullException("typeConverterFactory");
+                throw new ArgumentNullException(nameof(typeConverterFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(typeConverterFactories.CreateTrackingRegistrationLocationSelector(typeof(TYamlTypeConverter), (wrapped, _) => typeConverterFactory(wrapped)));
@@ -204,7 +204,7 @@ namespace YamlDotNet.Serialization
         {
             if (converterType == null)
             {
-                throw new ArgumentNullException("converterType");
+                throw new ArgumentNullException(nameof(converterType));
             }
 
             typeConverterFactories.Remove(converterType);
@@ -234,12 +234,12 @@ namespace YamlDotNet.Serialization
         {
             if (typeInspectorFactory == null)
             {
-                throw new ArgumentNullException("typeInspectorFactory");
+                throw new ArgumentNullException(nameof(typeInspectorFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(typeInspectorFactories.CreateRegistrationLocationSelector(typeof(TTypeInspector), inner => typeInspectorFactory(inner)));
@@ -259,12 +259,12 @@ namespace YamlDotNet.Serialization
         {
             if (typeInspectorFactory == null)
             {
-                throw new ArgumentNullException("typeInspectorFactory");
+                throw new ArgumentNullException(nameof(typeInspectorFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(typeInspectorFactories.CreateTrackingRegistrationLocationSelector(typeof(TTypeInspector), (wrapped, inner) => typeInspectorFactory(wrapped, inner)));
@@ -287,7 +287,7 @@ namespace YamlDotNet.Serialization
         {
             if (inspectorType == null)
             {
-                throw new ArgumentNullException("inspectorType");
+                throw new ArgumentNullException(nameof(inspectorType));
             }
 
             typeInspectorFactories.Remove(inspectorType);

@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.EventEmitters
         {
             if (nextEmitter == null)
             {
-                throw new ArgumentNullException("nextEmitter");
+                throw new ArgumentNullException(nameof(nextEmitter));
             }
 
             this.nextEmitter = nextEmitter;

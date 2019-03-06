@@ -114,12 +114,12 @@ namespace YamlDotNet.Serialization
         {
             if (eventEmitterFactory == null)
             {
-                throw new ArgumentNullException("eventEmitterFactory");
+                throw new ArgumentNullException(nameof(eventEmitterFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner)));
@@ -139,12 +139,12 @@ namespace YamlDotNet.Serialization
         {
             if (eventEmitterFactory == null)
             {
-                throw new ArgumentNullException("eventEmitterFactory");
+                throw new ArgumentNullException(nameof(eventEmitterFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(eventEmitterFactories.CreateTrackingRegistrationLocationSelector(typeof(TEventEmitter), (wrapped, inner) => eventEmitterFactory(wrapped, inner)));
@@ -167,7 +167,7 @@ namespace YamlDotNet.Serialization
         {
             if (eventEmitterType == null)
             {
-                throw new ArgumentNullException("eventEmitterType");
+                throw new ArgumentNullException(nameof(eventEmitterType));
             }
 
             eventEmitterFactories.Remove(eventEmitterType);
@@ -181,18 +181,18 @@ namespace YamlDotNet.Serialization
         {
             if (tag == null)
             {
-                throw new ArgumentNullException("tag");
+                throw new ArgumentNullException(nameof(tag));
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             string alreadyRegisteredTag;
             if (tagMappings.TryGetValue(type, out alreadyRegisteredTag))
             {
-                throw new ArgumentException(string.Format("Type already has a registered tag '{0}' for type '{1}'", alreadyRegisteredTag, type.FullName), "type");
+                throw new ArgumentException(string.Format("Type already has a registered tag '{0}' for type '{1}'", alreadyRegisteredTag, type.FullName), nameof(type));
             }
 
             tagMappings.Add(type, tag);
@@ -206,7 +206,7 @@ namespace YamlDotNet.Serialization
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (!tagMappings.Remove(type))
@@ -303,12 +303,12 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitor == null)
             {
-                throw new ArgumentNullException("objectGraphVisitor");
+                throw new ArgumentNullException(nameof(objectGraphVisitor));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(preProcessingPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), _ => objectGraphVisitor));
@@ -334,12 +334,12 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitorFactory == null)
             {
-                throw new ArgumentNullException("objectGraphVisitorFactory");
+                throw new ArgumentNullException(nameof(objectGraphVisitorFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(preProcessingPhaseObjectGraphVisitorFactories.CreateTrackingRegistrationLocationSelector(typeof(TObjectGraphVisitor), (wrapped, _) => objectGraphVisitorFactory(wrapped)));
@@ -362,7 +362,7 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitorType == null)
             {
-                throw new ArgumentNullException("objectGraphVisitorType");
+                throw new ArgumentNullException(nameof(objectGraphVisitorType));
             }
 
             preProcessingPhaseObjectGraphVisitorFactories.Remove(objectGraphVisitorType);
@@ -406,12 +406,12 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitorFactory == null)
             {
-                throw new ArgumentNullException("objectGraphVisitorFactory");
+                throw new ArgumentNullException(nameof(objectGraphVisitorFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(emissionPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), args => objectGraphVisitorFactory(args)));
@@ -432,12 +432,12 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitorFactory == null)
             {
-                throw new ArgumentNullException("objectGraphVisitorFactory");
+                throw new ArgumentNullException(nameof(objectGraphVisitorFactory));
             }
 
             if (where == null)
             {
-                throw new ArgumentNullException("where");
+                throw new ArgumentNullException(nameof(where));
             }
 
             where(emissionPhaseObjectGraphVisitorFactories.CreateTrackingRegistrationLocationSelector(typeof(TObjectGraphVisitor), (wrapped, args) => objectGraphVisitorFactory(wrapped, args)));
@@ -460,7 +460,7 @@ namespace YamlDotNet.Serialization
         {
             if (objectGraphVisitorType == null)
             {
-                throw new ArgumentNullException("objectGraphVisitorType");
+                throw new ArgumentNullException(nameof(objectGraphVisitorType));
             }
 
             emissionPhaseObjectGraphVisitorFactories.Remove(objectGraphVisitorType);
@@ -477,7 +477,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Creates a new <see cref="IValueDeserializer" /> that implements the current configuration.
-        /// This method is available for advanced scenarios. The preferred way to customize the bahavior of the
+        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
         /// deserializer is to use the <see cref="Build" /> method.
         /// </summary>
         public IValueSerializer BuildValueSerializer()

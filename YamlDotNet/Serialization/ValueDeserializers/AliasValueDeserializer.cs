@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
         {
             if (innerDeserializer == null)
             {
-                throw new ArgumentNullException("innerDeserializer");
+                throw new ArgumentNullException(nameof(innerDeserializer));
             }
 
             this.innerDeserializer = innerDeserializer;

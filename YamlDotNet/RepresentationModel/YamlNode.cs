@@ -102,7 +102,7 @@ namespace YamlDotNet.RepresentationModel
                 return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
             }
 
-            throw new ArgumentException("The current event is of an unsupported type.", "events");
+            throw new ArgumentException("The current event is of an unsupported type.", nameof(parser));
         }
 
         /// <summary>
@@ -155,21 +155,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Gets a value indicating whether two objects are equal.
         /// </summary>
-        protected static bool SafeEquals(object first, object second)
-        {
-            if (first != null)
-            {
-                return first.Equals(second);
-            }
-            else if (second != null)
-            {
-                return second.Equals(first);
-            }
-            else
-            {
-                return true;
-            }
-        }
+        protected static bool SafeEquals(object first, object second) => object.Equals(first, second);
 
         /// <summary>
         /// Serves as a hash function for a particular type.

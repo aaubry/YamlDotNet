@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public ReadableFieldsTypeInspector(ITypeResolver typeResolver)
         {
-            this.typeResolver = typeResolver ?? throw new ArgumentNullException("typeResolver");
+            this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
