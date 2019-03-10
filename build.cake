@@ -1,7 +1,7 @@
-#tool "nuget:?package=xunit.runner.console"
-#tool "nuget:?package=Mono.TextTransform"
-#tool "nuget:?package=GitVersion.CommandLine"
-#tool "nuget:?package=Cake.Incubator"
+#tool "nuget:?package=xunit.runner.console&version=2.4.1"
+#tool "nuget:?package=Mono.TextTransform&version=1.0.0"
+#tool "nuget:?package=GitVersion.CommandLine&version=4.0.0"
+#tool "nuget:?package=Cake.Incubator&version=4.0.1"
 
 using System.Reflection;
 using System.Text.RegularExpressions;
