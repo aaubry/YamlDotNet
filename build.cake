@@ -1,11 +1,12 @@
 #tool "nuget:?package=xunit.runner.console&version=2.4.1"
 #tool "nuget:?package=Mono.TextTransform&version=1.0.0"
 #tool "nuget:?package=GitVersion.CommandLine&version=4.0.0"
-#tool "nuget:?package=Cake.Incubator&version=4.0.1"
+#addin "nuget:?package=Cake.Incubator&version=4.0.1"
 
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Cake.Incubator.LoggingExtensions;
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -62,6 +63,17 @@ Task("Restore-NuGet-Packages")
     .Does(() =>
     {
         NuGetRestore(solutionPath);
+    });
+
+Task("Show-Version")
+    .Does(() =>
+    {
+        var version = GitVersion(new GitVersionSettings
+        {
+            UpdateAssemblyInfo = false,
+        });
+
+        Information("Version:\n{0}", version.Dump());
     });
 
 Task("Set-Build-Version")

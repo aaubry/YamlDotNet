@@ -1,9 +1,1 @@
-mode: ContinuousDelivery
-branches:
-  master:
-    tag: pre
-  release:
-    regex: releases?[/-]
-    tag: ''
-ignore:
-  sha: []
+mode: Mainline
