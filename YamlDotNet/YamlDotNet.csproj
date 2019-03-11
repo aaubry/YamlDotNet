@@ -7,15 +7,16 @@
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
     <PackageLicenseUrl>https://github.com/aaubry/YamlDotNet/blob/master/LICENSE</PackageLicenseUrl>
     <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
-    <Configurations>Debug;Release-Signed;Release-Unsigned;Debug-AOT;</Configurations>
+    <Configurations>Debug;Release;Debug-AOT;</Configurations>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
     <DocumentationFile>bin\$(Configuration)\YamlDotNet.xml</DocumentationFile>
     <NoWarn>1591;1574</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release-Signed' Or '$(Configuration)' == 'Release-Unsigned' ">
-    <DefineConstants>$(DefineConstants);RELEASE;TRACE</DefineConstants>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
     <DebugSymbols>false</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
@@ -25,11 +26,6 @@
      <FrameworkPathOverride>$(SolutionDir)BuildUtils.UnityPrerequisites\Unity Subset v3.5</FrameworkPathOverride>
      <DefineConstants>$(DefineConstants);UNITY</DefineConstants>
    </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release-Signed' ">
-    <DefineConstants>$(DefineConstants);SIGNED</DefineConstants>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
 
   <!--
     Remove implicit framework references, to prevent warning of missing System.Drawing

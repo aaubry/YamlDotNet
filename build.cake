@@ -13,7 +13,7 @@ using Cake.Incubator.LoggingExtensions;
 //////////////////////////////////////////////////////////////////////
 
 var target = Argument("target", "Default");
-var configuration = Argument("configuration", "Release-Unsigned");
+var configuration = Argument("configuration", "Release");
 var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVerbosity", "Minimal"), ignoreCase: true);
 
 //////////////////////////////////////////////////////////////////////
@@ -24,8 +24,7 @@ var solutionPath = "./YamlDotNet.sln";
 
 var releaseConfigurations = new List<string>
 {
-    "Release-Unsigned",
-    "Release-Signed"
+    "Release"
 };
 
 if (!IsRunningOnWindows())
@@ -33,8 +32,6 @@ if (!IsRunningOnWindows())
     // AOT requires mono
     releaseConfigurations.Add("Debug-AOT");
 }
-
-var packageTypes = new[] { "Unsigned", "Signed" };
 
 var nugetVersion = "0.0.1";
 
@@ -144,12 +141,6 @@ Task("Test-Release-Configurations")
     {
         foreach(var releaseConfiguration in releaseConfigurations)
         {
-            if (releaseConfiguration.EndsWith("-Signed"))
-            {
-                Information("Skipping signed builds. Configuration: " + releaseConfiguration);
-                continue;
-            }
-
             if (releaseConfiguration.Equals("Debug-AOT"))
             {
                 RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.dll");
@@ -167,22 +158,19 @@ Task("Package")
     .IsDependentOn("Test-Release-Configurations")
     .Does(() =>
     {
-        foreach(var packageType in packageTypes)
+        // Replace directory separator char
+        var baseNuspecFile = "YamlDotNet/YamlDotNet.nuspec";
+        var nuspec = System.IO.File.ReadAllText(baseNuspecFile);
+
+        var finalNuspecFile = baseNuspecFile + ".tmp";
+        nuspec = nuspec.Replace('\\', System.IO.Path.DirectorySeparatorChar);
+        System.IO.File.WriteAllText(finalNuspecFile, nuspec);
+
+        NuGetPack(finalNuspecFile, new NuGetPackSettings
         {
-            // Replace directory separator char
-            var baseNuspecFile = "YamlDotNet/YamlDotNet." + packageType + ".nuspec";
-            var nuspec = System.IO.File.ReadAllText(baseNuspecFile);
-
-            var finalNuspecFile = baseNuspecFile + ".tmp";
-            nuspec = nuspec.Replace('\\', System.IO.Path.DirectorySeparatorChar);
-            System.IO.File.WriteAllText(finalNuspecFile, nuspec);
-
-            NuGetPack(finalNuspecFile, new NuGetPackSettings
-            {
-                Version = nugetVersion,
-                OutputDirectory = Directory("YamlDotNet/bin"),
-            });
-        }
+            Version = nugetVersion,
+            OutputDirectory = Directory("YamlDotNet/bin"),
+        });
     });
 
 Task("Document")

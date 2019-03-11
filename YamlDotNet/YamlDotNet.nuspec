@@ -14,16 +14,16 @@
         <tags>yaml parser development library serialization</tags>
     </metadata>
     <files>
-        <file src="bin\Release-Unsigned\net45\YamlDotNet.dll" target="lib\net45" />
-        <file src="bin\Release-Unsigned\net45\YamlDotNet.xml" target="lib\net45" />
+        <file src="bin\Release\net45\YamlDotNet.dll" target="lib\net45" />
+        <file src="bin\Release\net45\YamlDotNet.xml" target="lib\net45" />
 
-        <file src="bin\Release-Unsigned\net35\YamlDotNet.dll" target="lib\net35" />
-        <file src="bin\Release-Unsigned\net35\YamlDotNet.xml" target="lib\net35" />
+        <file src="bin\Release\net35\YamlDotNet.dll" target="lib\net35" />
+        <file src="bin\Release\net35\YamlDotNet.xml" target="lib\net35" />
 
-        <file src="bin\Release-Unsigned\net20\YamlDotNet.dll" target="lib\net20" />
-        <file src="bin\Release-Unsigned\net20\YamlDotNet.xml" target="lib\net20" />
+        <file src="bin\Release\net20\YamlDotNet.dll" target="lib\net20" />
+        <file src="bin\Release\net20\YamlDotNet.xml" target="lib\net20" />
 
-        <file src="bin\Release-Unsigned\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
-        <file src="bin\Release-Unsigned\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
+        <file src="bin\Release\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
+        <file src="bin\Release\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
     </files>
 </package>

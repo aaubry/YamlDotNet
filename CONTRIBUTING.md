@@ -65,8 +65,6 @@ The following table describes the most important build targets:
 Building for Unity requires installing
 [Visual Studio Tools for Unity](https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi).
 
-The Portable versions target [Profile259](http://embed.plnkr.co/03ck2dCtnJogBKHJ9EjY/preview). If you do not have that profile installed, a workaround is to [get the reference assemblies from here](https://ci.appveyor.com/api/buildjobs/hrqgt7tibmar826q/artifacts/Profile259.zip) and extract them to `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.5\Profile\Profile259`.
-
 ### Target platforms
 
 The project targets the following platforms:
@@ -83,13 +81,11 @@ In the csproj, the `TargetFrameworks` element also targets net40, but that is a 
 
 The following table describes the available build configurations:
 
-|         Configuration    |             Description                                                             |
-|--------------------------|-------------------------------------------------------------------------------------|
-| Debug                    | Default debug build.                                                                |
-| Release-Unsigned         | Release build, not signed.                                                          |
-| Release-Signed           | Release build, signed.                                                              |
-| Debug-AOT                | Builds the AOT tests project, that tests compatibility with mono's AOT compilation. |
-| Release-PerformanceTests | Builds the performance tests projects.                                              |
+| Configuration |             Description                                                             |
+|---------------|-------------------------------------------------------------------------------------|
+| Debug         | Default debug build.                                                                |
+| Release       | Release build.                                                                      |
+| Debug-AOT     | Builds the AOT tests project, that tests compatibility with mono's AOT compilation. |
 
 There are a few differences between the various target platforms,
 mainly in the reflection API. In order to adapt the code to each platform,
