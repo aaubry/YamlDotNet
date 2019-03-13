@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata minClientVersion="2.8">
+    <id>YamlDotNet</id>
+    <version>0.0.1</version>
+    <authors>Antoine Aubry</authors>
+    <description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
+    <summary>This package contains the YAML parser and serializer.</summary>
+    <language>en-US</language>
+    <licenseUrl>https://github.com/aaubry/YamlDotNet/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/aaubry/YamlDotNet/wiki</projectUrl>
+    <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
+    <repository type="git" url="https://github.com/aaubry/YamlDotNet.git" />
+    <tags>yaml parser development library serialization</tags>
+  </metadata>
+  <files>
+    <file src="bin\Release\net45\YamlDotNet.dll" target="lib\net45" />
+    <file src="bin\Release\net45\YamlDotNet.xml" target="lib\net45" />
+
+    <file src="bin\Release\net35\YamlDotNet.dll" target="lib\net35" />
+    <file src="bin\Release\net35\YamlDotNet.xml" target="lib\net35" />
+
+    <file src="bin\Release\net20\YamlDotNet.dll" target="lib\net20" />
+    <file src="bin\Release\net20\YamlDotNet.xml" target="lib\net20" />
+
+    <file src="bin\Release\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
+    <file src="bin\Release\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
+
+    <!-- Unity Subset v3.5 -->
+    <file src="bin\Release\net40\YamlDotNet.dll" target="lib\net35-client" />
+    <file src="bin\Release\net40\YamlDotNet.xml" target="lib\net35-client" />
+  </files>
+</package>

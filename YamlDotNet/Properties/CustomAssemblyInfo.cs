@@ -31,17 +31,10 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("The YamlDotNet library.")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("YamlDotNet")]
-[assembly: AssemblyCopyright("Copyright (c) Antoine Aubry and contributors 2008 - 2018")]
+[assembly: AssemblyCopyright("Copyright (c) Antoine Aubry and contributors 2008 - 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: CLSCompliant(true)]
-#if !SIGNED
-#if NETSTANDARD1_3 || !PORTABLE
-[assembly: InternalsVisibleTo("YamlDotNet.Test")]
-#else
-[assembly: InternalsVisibleTo("YamlDotNet.Test.Portable")]
-#endif
-#endif
-
+[assembly: InternalsVisibleTo("YamlDotNet.Test, PublicKey=002400000480000094000000060200000024000052534131000400000100010065e52a453dde5c5b4be5bbe2205755727fce80244b79b894faf8793d80f7db9a96d360b51c220782db32aacee4cb5b8a91bee33aeec700e1f21895c4baadef501eeeac609220d1651603b378173811ee5bb6a002df973d38821bd2fef820c00c174a69faec326a1983b570f07ec66147026b9c8753465de3a8d0c44b613b02af")]
 #endif

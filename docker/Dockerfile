@@ -32,5 +32,6 @@ RUN mono --aot=full /usr/lib/mono/gac/System.Configuration/4.0.0.0__b03f5f7f11d5
 RUN mono --aot=full /usr/lib/mono/gac/System.Security/4.0.0.0__b03f5f7f11d50a3a/System.Security.dll
 RUN mono --aot=full /usr/lib/mono/gac/System.Core/4.0.0.0__b77a5c561934e089/System.Core.dll
 RUN mono --aot=full /usr/lib/mono/gac/Mono.Posix/4.0.0.0__0738eb9f132ed756/Mono.Posix.dll
+RUN mono --aot=full /usr/lib/mono/gac/System.Numerics/4.0.0.0__b77a5c561934e089/System.Numerics.dll
 
 CMD [ "bash" ]
