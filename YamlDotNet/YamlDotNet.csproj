@@ -15,6 +15,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug-AOT' ">
+    <TargetFrameworks>net35</TargetFrameworks>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
     <DebugSymbols>false</DebugSymbols>

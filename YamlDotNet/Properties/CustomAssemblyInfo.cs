@@ -31,7 +31,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("The YamlDotNet library.")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("YamlDotNet")]
-[assembly: AssemblyCopyright("Copyright (c) Antoine Aubry and contributors 2008 - 2018")]
+[assembly: AssemblyCopyright("Copyright (c) Antoine Aubry and contributors 2008 - 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
