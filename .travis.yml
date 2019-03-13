@@ -12,7 +12,7 @@ install:
   - docker pull aaubry/yamldotnet
 
 script:
-  - docker run -u root -v `pwd`:/build -w /build -it aaubry/yamldotnet ./build.sh --target Test-Release-Configurations # --verbosity Diagnostic
+  - docker run -u root -v `pwd`:/build -w /build -it aaubry/yamldotnet ./build.sh --target Test-Release-Configurations --verbosity Diagnostic
 
 # mono:
 #   - latest
