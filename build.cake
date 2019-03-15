@@ -2,11 +2,16 @@
 #tool "nuget:?package=Mono.TextTransform&version=1.0.0"
 #tool "nuget:?package=GitVersion.CommandLine&version=4.0.0"
 #addin "nuget:?package=Cake.Incubator&version=4.0.1"
+#addin "nuget:?package=Cake.SemVer&version=3.0.0"
+#addin "nuget:?package=semver&version=2.0.4"
+#addin "nuget:?package=ConsoleMenuLib&version=3.2.1"
+#addin "nuget:?package=System.Interactive.Async&version=3.2.0"
 
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Cake.Incubator.LoggingExtensions;
+using ConsoleUi;
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -33,7 +38,7 @@ if (!IsRunningOnWindows())
     releaseConfigurations.Add("Debug-AOT");
 }
 
-var nugetVersion = "0.0.1";
+GitVersion version = null;
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
@@ -62,42 +67,37 @@ Task("Restore-NuGet-Packages")
         NuGetRestore(solutionPath);
     });
 
-Task("Show-Version")
+Task("Get-Version")
     .Does(() =>
     {
-        var version = GitVersion(new GitVersionSettings
+        version = GitVersion(new GitVersionSettings
         {
             UpdateAssemblyInfo = false,
         });
-
-        Information("Version:\n{0}", version.Dump());
-    });
-
-Task("Set-Build-Version")
-    .Does(() =>
-    {
-        var version = GitVersion(new GitVersionSettings
-        {
-            UpdateAssemblyInfo = false,
-        });
-        nugetVersion = version.NuGetVersion;
-
-        var assemblyInfo = TransformTextFile("YamlDotNet/Properties/AssemblyInfo.template")
-            .WithToken("assemblyVersion", $"{version.Major}.0.0.0")
-            .WithToken("assemblyFileVersion", $"{version.MajorMinorPatch}.0")
-            .WithToken("assemblyInformationalVersion", nugetVersion)
-            .ToString();
-
-        System.IO.File.WriteAllText("YamlDotNet/Properties/AssemblyInfo.cs", assemblyInfo);
 
         if (AppVeyor.IsRunningOnAppVeyor)
         {
             if (!string.IsNullOrEmpty(version.PreReleaseTag))
             {
-                nugetVersion = string.Format("{0}-{1}{2}", version.MajorMinorPatch, version.PreReleaseLabel, AppVeyor.Environment.Build.Version.Replace("0.0.", "").PadLeft(4, '0'));
+                version.NuGetVersion = string.Format("{0}-{1}{2}", version.MajorMinorPatch, version.PreReleaseLabel, AppVeyor.Environment.Build.Version.Replace("0.0.", "").PadLeft(4, '0'));
             }
-            AppVeyor.UpdateBuildVersion(nugetVersion);
+            AppVeyor.UpdateBuildVersion(version.NuGetVersion);
         }
+
+        Information("Building release:\n{0}", version.Dump());
+    });
+
+Task("Set-Build-Version")
+    .IsDependentOn("Get-Version")
+    .Does(() =>
+    {
+        var assemblyInfo = TransformTextFile("YamlDotNet/Properties/AssemblyInfo.template")
+            .WithToken("assemblyVersion", $"{version.Major}.0.0.0")
+            .WithToken("assemblyFileVersion", $"{version.MajorMinorPatch}.0")
+            .WithToken("assemblyInformationalVersion", version.NuGetVersion)
+            .ToString();
+
+        System.IO.File.WriteAllText("YamlDotNet/Properties/AssemblyInfo.cs", assemblyInfo);
     });
 
 Task("Build")
@@ -168,9 +168,130 @@ Task("Package")
 
         NuGetPack(finalNuspecFile, new NuGetPackSettings
         {
-            Version = nugetVersion,
+            Version = version.NuGetVersion,
             OutputDirectory = Directory("YamlDotNet/bin"),
         });
+    });
+
+Task("Release")
+    .IsDependentOn("Get-Version")
+    .WithCriteria(() => version.BranchName == "master", "Releases must be created from the master branch")
+    .Does(() =>
+    {
+        // Find previous release
+        var releases = RunProcess("git", "tag", "--list", "--merged", "master", "--format=\"%(refname:short)\"", "v*")
+            .Select(tag => new
+            {
+                Tag = tag,
+                Version = ParseSemVer(tag.TrimStart('v')),
+            })
+            .OrderByDescending(v => v.Version)
+            .ToList();
+
+        var previousVersion = releases.First();
+
+        Information("The previous release was {0}", previousVersion.Version);
+
+        var releaseNotesPath = Directory("releases").Path.CombineWithFilePath($"{version.NuGetVersion}.md").FullPath;
+        Action scaffoldReleaseNotes = () =>
+        {
+            // Get the git log to scaffold the release notes
+            string currentHash = null;
+            var commits = RunProcess("git", "rev-list", $"{previousVersion.Tag}..HEAD", "--first-parent", "--reverse", "--pretty=tformat:%B")
+                .Select(l =>
+                {
+                    var match = Regex.Match(l, "^commit (?<hash>[a-f0-9]+)$");
+                    if (match.Success)
+                    {
+                        currentHash = match.Groups["hash"].Value;
+                    }
+                    return new
+                    {
+                        message = l,
+                        commit = currentHash
+                    };
+                })
+                .GroupBy(l => l.commit, (k, list) => new
+                {
+                    commit = k,
+                    message = list
+                        .Skip(1)
+                        .Select(l => l.message.Trim())
+                        .Where(l => !string.IsNullOrEmpty(l))
+                        .ToList()
+                });
+            
+            var log = commits
+                .Select(c => c.message.Select((l, i) => $"{(i == 0 ? '-' : ' ')} {l}"))
+                .Select(c => string.Join("  \n", c));
+
+            var releaseNotes = $"# Release {version.NuGetVersion}\n\n{string.Join("\n\n", log)}";
+            System.IO.File.WriteAllText(releaseNotesPath, releaseNotes);
+        };
+
+        if (!FileExists(releaseNotesPath))
+        {
+            scaffoldReleaseNotes();
+        }
+
+        // Show release menu
+        Menu menu = null;
+
+        Action updateMenuDescription = () => menu.Description = System.IO.File.ReadAllText(releaseNotesPath);
+
+        menu = new Menu(
+            "Release",
+            new ActionMenuItem("Edit release notes", ctx =>
+            {
+                ctx.SuppressPause();
+                RunProcess(IsRunningOnWindows() ? "notepad" : "nano", releaseNotesPath);
+                updateMenuDescription();
+            }),
+            new ActionMenuItem("Scaffold release notes", async ctx =>
+            {
+                ctx.SuppressPause();
+                if (await ctx.UserInterface.Confirm(true, "This will erase the current draft. Are you sure ?"))
+                {
+                    scaffoldReleaseNotes();
+                    updateMenuDescription();
+                }
+            }),
+            new ActionMenuItem("Release", async ctx =>
+            {
+                ctx.SuppressPause();
+                if (await ctx.UserInterface.Confirm(true, "This will publish a new release. Are you sure ?"))
+                {
+                    menu.ShouldExit = true;
+
+                    var previousReleases = releases
+                        .Select(r => new
+                        {
+                            r.Version,
+                            Path = $"releases/{r.Version}.md"
+                        })
+                        .Where(r => FileExists(r.Path))
+                        .Select(r => $"- [{r.Version}]({r.Path})");
+
+                    var releaseNotesFile = string.Join("\n",
+                        "# Release notes",
+                        menu.Description.Replace("# Release", "## Release"),
+                        "# Previous releases",
+                        string.Join("\n", previousReleases)
+                    );
+
+                    System.IO.File.WriteAllText("RELEASE_NOTES.md", releaseNotesFile);
+
+                    RunProcess("git", "add", $"\"{releaseNotesPath}\"", "RELEASE_NOTES.md");
+                    RunProcess("git", "commit", "-m", $"\"Prepare release {version.NuGetVersion}\"");
+                    RunProcess("git", "tag", $"v{version.NuGetVersion}");
+
+                    ctx.UserInterface.Info($"Your release is ready. Remember to push it using the following commands:\n\n    git push && git push origin v{version.NuGetVersion}");
+                }
+            })
+        );
+        
+        updateMenuDescription();
+        new ConsoleUi.Console.ConsoleMenuRunner().Run(menu).Wait();
     });
 
 Task("Document")
@@ -297,23 +418,34 @@ void BuildSolution(string solutionPath, string configuration, Verbosity verbosit
         settings
             .SetVerbosity(verbosity)
             .SetConfiguration(configuration)
-            .WithProperty("Version", nugetVersion);
+            .WithProperty("Version", version.NuGetVersion);
     });
 }
 
-void RunProcess(string processName, params string[] arguments)
+IEnumerable<string> RunProcess(string processName, params string[] arguments)
 {
-    var exitCode = StartProcess(processName, new ProcessSettings().WithArguments(a =>
-    {
-        foreach (var argument in arguments)
+    var settings = new ProcessSettings()
+        .SetRedirectStandardOutput(true)
+        .WithArguments(a =>
         {
-            a.Append(argument);
-        }
-    }));
+            foreach (var argument in arguments)
+            {
+                a.Append(argument);
+            }
+        });
 
-    if (exitCode != 0)
+    using (var process = StartAndReturnProcess(processName, settings))
     {
-        throw new Exception(string.Format("{0} failed with exit code {1}", processName, exitCode));
+        var output = new List<string>(process.GetStandardOutput());
+        process.WaitForExit();
+
+        var exitCode = process.GetExitCode();
+        if (exitCode != 0)
+        {
+            throw new Exception(string.Format("{0} failed with exit code {1}", processName, exitCode));
+        }
+
+        return output;
     }
 }
 
