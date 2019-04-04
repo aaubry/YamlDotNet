@@ -216,7 +216,7 @@ Task("Release")
                     commit = k,
                     message = list
                         .Skip(1)
-                        .Select(l => l.message.Trim())
+                        .Select(l => Regex.Replace(l.message, @"\+semver:\s*\w+", "").Trim())
                         .Where(l => !string.IsNullOrEmpty(l))
                         .ToList()
                 });
