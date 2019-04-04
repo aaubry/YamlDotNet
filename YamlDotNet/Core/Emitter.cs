@@ -39,7 +39,6 @@ namespace YamlDotNet.Core
     {
         private const int MinBestIndent = 2;
         private const int MaxBestIndent = 9;
-        private const int MaxAliasLength = 128;
 
         private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
@@ -47,6 +46,7 @@ namespace YamlDotNet.Core
         private readonly TextWriter output;
         private readonly bool outputUsesUnicodeEncoding;
 
+        private readonly int maxSimpleKeyLength;
         private readonly bool isCanonical;
         private readonly int bestIndent;
         private readonly int bestWidth;
@@ -102,7 +102,7 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <param name="output">The <see cref="TextWriter"/> where the emitter will write.</param>
         public Emitter(TextWriter output)
-            : this(output, MinBestIndent)
+            : this(output, EmitterSettings.Default)
         {
         }
 
@@ -135,23 +135,16 @@ namespace YamlDotNet.Core
         /// <param name="bestWidth">The preferred text width.</param>
         /// <param name="isCanonical">If true, write the output in canonical form.</param>
         public Emitter(TextWriter output, int bestIndent, int bestWidth, bool isCanonical)
+            : this(output, new EmitterSettings(bestIndent, bestWidth, isCanonical, 1024))
         {
-            if (bestIndent < MinBestIndent || bestIndent > MaxBestIndent)
-            {
-                throw new ArgumentOutOfRangeException(nameof(bestIndent), string.Format(CultureInfo.InvariantCulture,
-                    "The bestIndent parameter must be between {0} and {1}.", MinBestIndent, MaxBestIndent));
-            }
+        }
 
-            this.bestIndent = bestIndent;
-
-            if (bestWidth <= bestIndent * 2)
-            {
-                throw new ArgumentOutOfRangeException(nameof(bestWidth), "The bestWidth parameter must be greater than bestIndent * 2.");
-            }
-
-            this.bestWidth = bestWidth;
-
-            this.isCanonical = isCanonical;
+        public Emitter(TextWriter output, EmitterSettings settings)
+        {
+            this.bestIndent = settings.BestIndent;
+            this.bestWidth = settings.BestWidth;
+            this.isCanonical = settings.IsCanonical;
+            this.maxSimpleKeyLength = settings.MaxSimpleKeyLength;
 
             this.output = output;
             this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
@@ -1743,7 +1736,7 @@ namespace YamlDotNet.Core
                     return false;
             }
 
-            return length <= MaxAliasLength;
+            return length <= maxSimpleKeyLength;
         }
 
         private int SafeStringLength(string value)
