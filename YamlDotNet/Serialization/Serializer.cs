@@ -20,23 +20,16 @@
 //  SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization.Converters;
-using YamlDotNet.Serialization.EventEmitters;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.ObjectGraphTraversalStrategies;
-using YamlDotNet.Serialization.ObjectGraphVisitors;
-using YamlDotNet.Serialization.TypeInspectors;
-using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
     public sealed class Serializer : ISerializer
     {
         private readonly IValueSerializer valueSerializer;
+        private readonly EmitterSettings emitterSettings;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Serializer" /> using the default configuration.
@@ -45,7 +38,7 @@ namespace YamlDotNet.Serialization
         /// To customize the behavior of the serializer, use <see cref="SerializerBuilder" />.
         /// </remarks>
         public Serializer()
-            : this(new SerializerBuilder().BuildValueSerializer())
+            : this(new SerializerBuilder().BuildValueSerializer(), EmitterSettings.Default)
         {
         }
 
@@ -53,14 +46,10 @@ namespace YamlDotNet.Serialization
         /// This constructor is private to discourage its use.
         /// To invoke it, call the <see cref="FromValueSerializer"/> method.
         /// </remarks>
-        private Serializer(IValueSerializer valueSerializer)
+        private Serializer(IValueSerializer valueSerializer, EmitterSettings emitterSettings)
         {
-            if (valueSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(valueSerializer));
-            }
-
-            this.valueSerializer = valueSerializer;
+            this.valueSerializer = valueSerializer ?? throw new ArgumentNullException(nameof(valueSerializer));
+            this.emitterSettings = emitterSettings ?? throw new ArgumentNullException(nameof(emitterSettings));
         }
 
         /// <summary>
@@ -68,9 +57,9 @@ namespace YamlDotNet.Serialization
         /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
         /// deserializer is to use <see cref="SerializerBuilder" />.
         /// </summary>
-        public static Serializer FromValueSerializer(IValueSerializer valueSerializer)
+        public static Serializer FromValueSerializer(IValueSerializer valueSerializer, EmitterSettings emitterSettings)
         {
-            return new Serializer(valueSerializer);
+            return new Serializer(valueSerializer, emitterSettings);
         }
 
         /// <summary>
@@ -80,7 +69,7 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         public void Serialize(TextWriter writer, object graph)
         {
-            Serialize(new Emitter(writer), graph);
+            Serialize(new Emitter(writer, emitterSettings), graph);
         }
 
         /// <summary>
@@ -104,7 +93,7 @@ namespace YamlDotNet.Serialization
         /// <param name="type">The static type of the object to serialize.</param>
         public void Serialize(TextWriter writer, object graph, Type type)
         {
-            Serialize(new Emitter(writer), graph, type);
+            Serialize(new Emitter(writer, emitterSettings), graph, type);
         }
 
         /// <summary>

@@ -46,6 +46,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
         private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
         private int maximumRecursion = 50;
+        private EmitterSettings emitterSettings = EmitterSettings.Default;
 
         public SerializerBuilder()
         {
@@ -263,6 +264,8 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public SerializerBuilder JsonCompatible()
         {
+            this.emitterSettings = this.emitterSettings.WithMaxSimpleKeyLength(int.MaxValue);
+
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
                 .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
@@ -472,7 +475,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public ISerializer Build()
         {
-            return Serializer.FromValueSerializer(BuildValueSerializer());
+            return Serializer.FromValueSerializer(BuildValueSerializer(), emitterSettings);
         }
 
         /// <summary>

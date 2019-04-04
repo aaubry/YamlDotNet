@@ -788,6 +788,20 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializationOfLongKeysWorksInJson()
+        {
+            var writer = new StringWriter();
+            var obj = new Dictionary<string, string>
+            {
+                { new string('x', 3000), "extremely long key" }
+            };
+
+            SerializerBuilder.EmitDefaults().JsonCompatible().Build().Serialize(writer, obj, typeof(Dictionary<string, string>));
+
+            writer.ToString().Should().NotContain("?");
+        }
+
+        [Fact]
         // Todo: this is actually roundtrip
         public void DeserializationOfDefaultsWorkInJson()
         {
