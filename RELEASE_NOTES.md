@@ -1,17 +1,12 @@
 # Release notes
-## Release 6.0.0
+## Release 6.1.1
 
-This release merges the YamlDotNet.Signed and YamlDotNet packages.
-This change has the following consequences:
-  
-  - The **assemblies in the YamlDotNet package will now have strong names**.  
-    This is a breaking change. If you depend on a library that depends on a
-    previous version of YamlDotNet, you will first need to update that library.
-    
-  - The **YamlDotNet.Signed package will cease to be published**.  
-    The code should be updated to depend on YamlDotNet.
+- Increase the max simple key length to 1024 and allow to configure it
+
+- Never emit key indicators in JSON
 
 # Previous releases
+- [6.0.0](releases/6.0.0.md)
 - [5.4.0](releases/5.4.0.md)
 - [5.3.1](releases/5.3.1.md)
 - [5.3.0](releases/5.3.0.md)
