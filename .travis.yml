@@ -9,8 +9,19 @@ git:
   depth: false
 
 install:
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-  - git checkout $BRANCH
+  # For pull requests, create a new branch (idempotently) to workaround
+  # GitVersion limitation, i.e., it does not work well with merge commits.
+  # We use GitVersion nuget package in Git-Version cake task, that fails
+  # with CI job requests triggered by PRs (GitHub server creates merge
+  # commits for PRs, and call CI endpoints with new commit ID).
+  # Perhaps this limitation will go away once the following PR is merged:
+  # https://github.com/GitTools/GitVersion/pull/1609
+  #
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+      git checkout $TRAVIS_BRANCH;
+    else
+      git checkout -b $TRAVIS_PULL_REQUEST_BRANCH > /dev/null;
+    fi
   - git reset $TRAVIS_COMMIT --hard
   - git status
   - docker pull aaubry/yamldotnet
