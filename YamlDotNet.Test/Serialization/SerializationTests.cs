@@ -815,6 +815,17 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializationOfEnumWorksInJson()
+        {
+            var enumOne = EnumExample.One;
+
+            var jsonSerializer = SerializerBuilder.EnsureRoundtrip().EmitDefaults().JsonCompatible().Build();
+            var jsonSerializedEnum = jsonSerializer.Serialize(enumOne);
+
+            jsonSerializedEnum.Should().Contain($"\"{enumOne}\"");
+        }
+
+        [Fact]
         public void SerializationOfOrderedProperties()
         {
             var obj = new OrderExample();

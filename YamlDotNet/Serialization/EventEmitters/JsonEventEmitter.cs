@@ -53,9 +53,21 @@ namespace YamlDotNet.Serialization.EventEmitters
                     eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
                     break;
 
+                case TypeCode.Int32:
+                    var valueIsEnum = eventInfo.Source.Value.GetType().IsEnum();
+                    if (valueIsEnum)
+                    {
+                        eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
+                        eventInfo.Style = ScalarStyle.DoubleQuoted;
+                    }
+                    else
+                    {
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
+                    }
+                    break;
+
                 case TypeCode.Byte:
                 case TypeCode.Int16:
-                case TypeCode.Int32:
                 case TypeCode.Int64:
                 case TypeCode.SByte:
                 case TypeCode.UInt16:
