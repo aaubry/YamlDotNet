@@ -142,7 +142,7 @@ namespace YamlDotNet.Test.Serialization
     }
 
     public enum SByteEnum : sbyte { Default, Sbyte }
-    public enum ByteEnum : uint { Default, Byte }
+    public enum ByteEnum : byte { Default, Byte }
     public enum Int16Enum : short { Default, Short }
     public enum UInt16Enum : ushort { Default, Ushort }
     public enum Int32Enum : int { Default, Int }
