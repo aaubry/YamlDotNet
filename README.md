@@ -5,7 +5,9 @@
 |[![Travis CI](https://travis-ci.org/aaubry/YamlDotNet.svg?branch=master)](https://travis-ci.org/aaubry/YamlDotNet/builds#)|[![Build status](https://ci.appveyor.com/api/projects/status/github/aaubry/yamldotnet?svg=true)](https://ci.appveyor.com/project/aaubry/yamldotnet/branch/master)|  [![NuGet](https://img.shields.io/nuget/v/YamlDotNet.svg)](https://www.nuget.org/packages/YamlDotNet/)
 
 
-YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.
+YamlDotNet is a YAML library for [netstandard and other .NET runtimes](#the-yamldotnet-library).
+
+YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.
 
 Currently, YamlDotNet supports [version 1.1 of the YAML specification](http://yaml.org/spec/1.1/).
 
@@ -15,7 +17,18 @@ YAML, which stands for "YAML Ain't Markup Language", is described as "a human fr
 
 ## The YamlDotNet library
 
-The library has now been successfully used in multiple projects and is considered fairly stable.
+The library has now been successfully used in multiple projects and is considered fairly stable. It is compatible with the following runtimes:
+
+* netstandard 1.3
+* .NET Framework 4.5
+* Unity Subset v3.5
+
+The following runtimes are also supported, with a few features missing:
+
+* .NET Framework 3.5
+* .NET Framework 2.0
+
+The library is compatible with mono's [Ahead-of-Time compilation](https://www.mono-project.com/docs/advanced/aot/) (AOT), and should work correctly on platforms that depend on it, such as Unity.
 
 ## More information
 
