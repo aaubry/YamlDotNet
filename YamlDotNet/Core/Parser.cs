@@ -318,7 +318,7 @@ namespace YamlDotNet.Core
                         throw new SemanticErrorException(currentVersion.Start, currentVersion.End, "Found duplicate %YAML directive.");
                     }
 
-                    if (currentVersion.Version.Major != Constants.MajorVersion || currentVersion.Version.Minor != Constants.MinorVersion)
+                    if (currentVersion.Version.Major != Constants.MajorVersion || currentVersion.Version.Minor > Constants.MinorVersion)
                     {
                         throw new SemanticErrorException(currentVersion.Start, currentVersion.End, "Found incompatible YAML document.");
                     }
@@ -472,7 +472,7 @@ namespace YamlDotNet.Core
                 }
                 else
                 {
-                    throw new SemanticErrorException(tag.Start, tag.End, "While parsing a node, find undefined tag handle.");
+                    throw new SemanticErrorException(tag.Start, tag.End, "While parsing a node, found undefined tag handle.");
                 }
             }
             if (string.IsNullOrEmpty(tagName))

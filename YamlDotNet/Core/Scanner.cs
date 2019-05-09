@@ -53,6 +53,7 @@ namespace YamlDotNet.Core
             { '"', '"' },
             { '\'', '\'' },
             { '\\', '\\' },
+            { '/', '/' },
             { 'N', '\x85' },
             { '_', '\xA0' },
             { 'L', '\x2028' },
@@ -485,7 +486,7 @@ namespace YamlDotNet.Core
             Skip();
             var end = cursor.Mark();
 
-            throw new SyntaxErrorException(start, end, "While scanning for the next token, find character that cannot start any token.");
+            throw new SyntaxErrorException(start, end, "While scanning for the next token, found character that cannot start any token.");
         }
 
         private bool CheckWhiteSpace()
@@ -740,7 +741,7 @@ namespace YamlDotNet.Core
                     break;
 
                 default:
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find unknown directive name.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, found unknown directive name.");
             }
 
             // Eat the rest of the line including any comments.
@@ -1351,7 +1352,7 @@ namespace YamlDotNet.Core
 
                     if (analyzer.Check('0'))
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an indentation indicator equal to 0.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, found an indentation indicator equal to 0.");
                     }
 
                     // Get the indentation level and eat the indicator.
@@ -1368,7 +1369,7 @@ namespace YamlDotNet.Core
             {
                 if (analyzer.Check('0'))
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find an indentation indicator equal to 0.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, found an indentation indicator equal to 0.");
                 }
 
                 increment = analyzer.AsDigit();
@@ -1526,7 +1527,7 @@ namespace YamlDotNet.Core
 
                 if ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsTab())
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, find a tab character where an indentation space is expected.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, found a tab character where an found space is expected.");
                 }
 
                 // Have we find a non-empty line?
@@ -1596,14 +1597,14 @@ namespace YamlDotNet.Core
 
                 if (IsDocumentIndicator())
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, find unexpected document indicator.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found unexpected document indicator.");
                 }
 
                 // Check for EOF.
 
                 if (analyzer.IsZero())
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, find unexpected end of stream.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found unexpected end of stream.");
                 }
 
                 // Consume non-blank characters.
@@ -1669,7 +1670,7 @@ namespace YamlDotNet.Core
                                 }
                                 else
                                 {
-                                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, find unknown escape character.");
+                                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, found unknown escape character.");
                                 }
                                 break;
                         }
@@ -1698,7 +1699,7 @@ namespace YamlDotNet.Core
 
                             if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
                             {
-                                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, find invalid Unicode character escape code.");
+                                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, found invalid Unicode character escape code.");
                             }
 
                             value.Append(char.ConvertFromUtf32(character));
@@ -1858,7 +1859,7 @@ namespace YamlDotNet.Core
 
                     if (flowLevel > 0 && analyzer.Check(':') && !analyzer.IsWhiteBreakOrZero(1))
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find unexpected ':'.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, found unexpected ':'.");
                     }
 
                     // Check for indicators that may end a plain scalar.
@@ -1929,7 +1930,7 @@ namespace YamlDotNet.Core
 
                         if (hasLeadingBlanks && cursor.LineOffset < currentIndent && analyzer.IsTab())
                         {
-                            throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, find a tab character that violate indentation.");
+                            throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, found a tab character that violate indentation.");
                         }
 
                         // Consume a space or a tab character.
@@ -2032,7 +2033,7 @@ namespace YamlDotNet.Core
 
             if (!analyzer.IsWhiteBreakOrZero())
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, find unexpected non-alphabetical character.");
+                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, found unexpected non-alphabetical character.");
             }
 
             return name.ToString();
@@ -2202,7 +2203,7 @@ namespace YamlDotNet.Core
 
                     if (width == 0)
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect leading UTF-8 octet.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, found an incorrect leading UTF-8 octet.");
                     }
 
                     charBytes = new byte[width];
@@ -2213,7 +2214,7 @@ namespace YamlDotNet.Core
 
                     if ((octet & 0xC0) != 0x80)
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect trailing UTF-8 octet.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, found an incorrect trailing UTF-8 octet.");
                     }
                 }
 
@@ -2231,7 +2232,7 @@ namespace YamlDotNet.Core
 
             if (result.Length == 0 || result.Length > 2)
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, find an incorrect UTF-8 sequence.");
+                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, found an incorrect UTF-8 sequence.");
             }
 
             return result;
@@ -2308,7 +2309,7 @@ namespace YamlDotNet.Core
 
                 if (++length > MaxVersionNumberLength)
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %YAML directive, find extremely long version number.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a %YAML directive, found extremely long version number.");
                 }
 
                 value = value * 10 + analyzer.AsDigit();
