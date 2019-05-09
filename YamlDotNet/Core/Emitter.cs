@@ -691,10 +691,11 @@ namespace YamlDotNet.Core
                 {
                     AnalyzeVersionDirective(documentStart.Version);
 
+                    var documentVersion = documentStart.Version.Version;
                     isImplicit = false;
                     WriteIndicator("%YAML", true, false, false);
                     WriteIndicator(string.Format(CultureInfo.InvariantCulture,
-                        "{0}.{1}", Constants.MajorVersion, Constants.MinorVersion),
+                        "{0}.{1}", documentVersion.Major, documentVersion.Minor),
                         true, false, false);
                     WriteIndent();
                 }
@@ -780,7 +781,7 @@ namespace YamlDotNet.Core
         // ReSharper disable UnusedParameter.Local
         private void AnalyzeVersionDirective(VersionDirective versionDirective)
         {
-            if (versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor != Constants.MinorVersion)
+            if (versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor > Constants.MinorVersion)
             {
                 throw new YamlException("Incompatible %YAML directive");
             }

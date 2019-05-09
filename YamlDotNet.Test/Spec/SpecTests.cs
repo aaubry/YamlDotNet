@@ -38,19 +38,19 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly string specFixtureDirectory = GetTestFixtureDirectory();
 
-        // Note: all of these (43) tests are failing the assertion on line 65
+        // Note: all of these (40) tests are failing the assertion on line 65
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "RTP8", "W5VH", "27NA", "UDM2",
+            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "RTP8", "W5VH", "UDM2", "M7A3",
             "8XYN", "4ABK", "KZN9", "Q5MG", "Y2GN", "2JQS", "S3PD", "R4YG", "9SA2", "UT92",
             "HWV9", "6ZKB", "9MMW", "6BCT", "W4TN", "S4JQ", "K3WX", "8MK2", "52DL", "2SXE",
-            "FP8R", "9DXL", "FRK4", "2LFX", "7Z25", "3UYS", "QT73", "A2M4", "6LVF", "DBG4",
-            "M7A3", "BEC7", "5MUD"
+            "FP8R", "9DXL", "FRK4", "2LFX", "7Z25", "QT73", "A2M4", "6LVF", "DBG4", "5MUD"
         };
 
         [Theory, MemberData(nameof(GetYamlSpecDataSuites))]
         public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error)
         {
+            var expectedResult = File.ReadAllText(expectedEventFile);
             using (var writer = new StringWriter())
             {
                 try
@@ -62,13 +62,13 @@ namespace YamlDotNet.Test.Spec
                 }
                 catch (Exception ex)
                 {
-                    Assert.True(error, "Unexpected spec failure. Writer: " + writer + ", Exception: " + ex);
+                    Assert.True(error, "Unexpected spec failure.\nExpected:\n" + expectedResult + "\nActual:\n[Writer Output]\n" + writer + "\n[Exception]\n" + ex);
                     return;
                 }
 
                 try
                 {
-                    Assert.Equal(File.ReadAllText(expectedEventFile), writer.ToString(), ignoreLineEndingDifferences: true);
+                    Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
                 }
                 catch (EqualException)
                 {

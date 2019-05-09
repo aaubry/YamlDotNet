@@ -19,7 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
 using YamlDotNet.Core.Tokens;
 
 namespace YamlDotNet.Core
@@ -36,7 +35,7 @@ namespace YamlDotNet.Core
         };
 
         public const int MajorVersion = 1;
-        public const int MinorVersion = 1;
+        public const int MinorVersion = 3;
 
         public const char HandleCharacter = '!';
         public const string DefaultHandle = "!";
