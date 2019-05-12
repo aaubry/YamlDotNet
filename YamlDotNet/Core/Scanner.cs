@@ -1153,14 +1153,38 @@ namespace YamlDotNet.Core
 
             Skip();
 
-            // Consume the value.
-
-            var value = new StringBuilder();
-            while (analyzer.IsAlphaNumericDashOrUnderscore())
+            bool isAliasKey = false;
+            if (isAlias)
             {
-                value.Append(ReadCurrentCharacter());
+                var key = simpleKeys.Peek();
+                isAliasKey = key.IsRequired && key.IsPossible;
             }
 
+            // Consume the value.
+            // YAML 1.2 - section 6.9.2."Node Anchors" specifies disallowed characters
+            // in the anchor name as follows:
+            //     '[', ']', '{', '}' and ','
+            // ref: https://yaml.org/spec/1.2/spec.html#id2785586
+
+            var value = new StringBuilder();
+            while (!analyzer.IsWhiteBreakOrZero())
+            {
+                // Anchor: read all allowed characters
+
+                // Alias: read all allowed characters except colon (':'); read colon when token is:
+                //    * not used in key OR
+                //    * used in key and colon is not last character
+
+                if (!analyzer.Check("[]{},") &&
+                    !(isAliasKey && analyzer.Check(':') && analyzer.IsWhiteBreakOrZero(1)))
+                {
+                    value.Append(ReadCurrentCharacter());
+                }
+                else
+                {
+                    break;
+                }
+            }
 
             // Check if length of the anchor is greater than 0 and it is followed by
             // a whitespace character or one of the indicators:
@@ -1170,7 +1194,7 @@ namespace YamlDotNet.Core
 
             if (value.Length == 0 || !(analyzer.IsWhiteBreakOrZero() || analyzer.Check("?:,]}%@`")))
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning an anchor or alias, did not find expected alphabetic or numeric character.");
+                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning an anchor or alias, found value containing disallowed: []{},");
             }
 
             // Create a token.
@@ -1834,6 +1858,8 @@ namespace YamlDotNet.Core
             var start = cursor.Mark();
             var end = start;
 
+            var key = simpleKeys.Peek();
+
             // Consume the content of the plain scalar.
 
             for (;;)
@@ -1852,12 +1878,14 @@ namespace YamlDotNet.Core
                     break;
                 }
 
+                var isAliasValue = analyzer.Check('*') && !(key.IsPossible && key.IsRequired);
+
                 // Consume non-blank characters.
                 while (!analyzer.IsWhiteBreakOrZero())
                 {
                     // Check for indicators that may end a plain scalar.
 
-                    if (analyzer.Check(':') && (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1)) || (flowLevel > 0 && analyzer.Check(",?[]{}")))
+                    if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1)) || (flowLevel > 0 && analyzer.Check(",?[]{}")))
                     {
                         break;
                     }

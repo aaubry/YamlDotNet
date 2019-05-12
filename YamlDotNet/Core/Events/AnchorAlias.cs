@@ -68,7 +68,7 @@ namespace YamlDotNet.Core.Events
 
             if (!NodeEvent.anchorValidator.IsMatch(value))
             {
-                throw new YamlException(start, end, "Anchor value must contain alphanumerical characters only.");
+                throw new YamlException(start, end, "Anchor value must not contain disallowed characters: []{},");
             }
 
             this.value = value;
