@@ -1,7 +1,7 @@
 FROM ubuntu:trusty
 
 RUN apt-get update
-RUN apt-get install -y apt-transport-https curl
+RUN apt-get install -y apt-transport-https curl git libgit2-0
 
 # Configure Mono 5.0 Beta 2 (5.0.0.94) (on Trusty) http://www.mono-project.com/download/beta/
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
@@ -19,9 +19,6 @@ RUN apt-get install -y mono-complete dotnet-dev-1.0.3
 WORKDIR /tmp/root
 COPY Dummy.csproj /tmp/root/Dummy.csproj
 RUN dotnet restore
-
-# Could be installed sooner, but I don't want to push a new 1GB image...
-RUN apt-get install -y git
 
 # Prepare for the AOT test
 RUN mono --aot=full /usr/lib/mono/4.5/mscorlib.dll

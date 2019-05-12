@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net4.6.1</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    
     <RootNamespace>YamlDotNet.PerformanceTests.v2_3_0</RootNamespace>
     <AssemblyName>YamlDotNet.PerformanceTests.v2.3.0</AssemblyName>
   </PropertyGroup>
+
+  <Import Project="../../build/common.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\YamlDotNet.PerformanceTests.Lib\YamlDotNet.PerformanceTests.Lib.csproj" />

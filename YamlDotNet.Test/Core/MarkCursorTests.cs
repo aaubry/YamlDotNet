@@ -25,7 +25,7 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Test.Core
 {
-    class MarkCursorTests
+    public class MarkCursorTests
     {
         [Fact]
         public void ShouldProvideAnOneIndexedMark()

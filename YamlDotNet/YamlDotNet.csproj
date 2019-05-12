@@ -15,6 +15,13 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  <Import Project="../build/common.props" />
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
+    <FrameworkPathOverride>$(MSBuildProjectDirectory)/../BuildUtils.UnityPrerequisites/Unity Subset v3.5</FrameworkPathOverride>
+    <DefineConstants>$(DefineConstants);UNITY</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug-AOT' ">
     <TargetFrameworks>net35</TargetFrameworks>
   </PropertyGroup>
@@ -25,11 +32,6 @@
     <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
   </PropertyGroup>
-
-   <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
-     <FrameworkPathOverride>$(SolutionDir)BuildUtils.UnityPrerequisites\Unity Subset v3.5</FrameworkPathOverride>
-     <DefineConstants>$(DefineConstants);UNITY</DefineConstants>
-   </PropertyGroup>
 
   <!--
     Remove implicit framework references, to prevent warning of missing System.Drawing

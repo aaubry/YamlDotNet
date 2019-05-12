@@ -44,6 +44,25 @@ GitVersion version = null;
 // TASKS
 //////////////////////////////////////////////////////////////////////
 
+Task("Fix-GitVersionOnLinux")
+    .Description("Workaround to use GitVersion on Linux (and Docker)")
+    .WithCriteria(IsRunningOnUnix())
+    .Does(() =>
+    {
+        var libGitFiles = GetFiles("/usr/lib/x86_64-linux-gnu/libgit2.so.*");
+        var libGitPath = libGitFiles.FirstOrDefault();
+
+        if (libGitPath != null)
+        {
+            Information("Found libgit at '{0}'", libGitPath);
+            XmlPoke("tools/GitVersion.CommandLine.4.0.0/tools/LibGit2Sharp.dll.config", "/configuration/dllmap[@os='linux']/@target", libGitPath.FullPath);
+        }
+        else
+        {
+            Warning("Could not find libgit in '/usr/lib/x86_64-linux-gnu/libgit2.so.*'");
+        }
+    });
+
 Task("Clean")
     .Does(() =>
     {
@@ -102,12 +121,14 @@ Task("Set-Build-Version")
 
 Task("Build")
     .IsDependentOn("Restore-NuGet-Packages")
+    .IsDependentOn("Get-Version")
     .Does(() =>
     {
         BuildSolution(solutionPath, configuration, buildVerbosity);
     });
 
 Task("Quick-Build")
+    .IsDependentOn("Get-Version")
     .Does(() =>
     {
         BuildSolution(solutionPath, configuration, buildVerbosity);
@@ -122,6 +143,7 @@ Task("Test")
 
 Task("Build-Release-Configurations")
     .IsDependentOn("Restore-NuGet-Packages")
+    .IsDependentOn("Get-Version")
     .IsDependentOn("Set-Build-Version")
     .Does(() =>
     {
@@ -143,9 +165,9 @@ Task("Test-Release-Configurations")
         {
             if (releaseConfiguration.Equals("Debug-AOT"))
             {
-                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.dll");
-                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
-                RunProcess("mono", "--full-aot", "YamlDotNet.AotTest/bin/Debug/YamlDotNet.AotTest.exe");
+                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/net45/YamlDotNet.dll");
+                RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/net45/YamlDotNet.AotTest.exe");
+                RunProcess("mono", "--full-aot", "YamlDotNet.AotTest/bin/Debug/net45/YamlDotNet.AotTest.exe");
             }
             else
             {
@@ -405,20 +427,20 @@ string UnIndent(string text)
 
 void BuildSolution(string solutionPath, string configuration, Verbosity verbosity)
 {
-    const string appVeyorLogger = @"""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll""";
-    MSBuild(solutionPath, settings =>
+    Information("version: {0}", version);
+    Information("version.NuGetVersion: {0}", version.NuGetVersion);
+    
+    DotNetCoreBuild(solutionPath, new DotNetCoreBuildSettings
     {
-        if (System.IO.File.Exists(appVeyorLogger)) settings.WithLogger(appVeyorLogger);
-
-        if (IsRunningOnUnix())
+        Verbosity = (DotNetCoreVerbosity)(int)verbosity,
+        Configuration = configuration,
+        MSBuildSettings = new DotNetCoreMSBuildSettings
         {
-            settings.ToolPath = "/usr/bin/msbuild";
+            Properties =
+            {
+                { "Version", new[] { version.NuGetVersion } }
+            }
         }
-
-        settings
-            .SetVerbosity(verbosity)
-            .SetConfiguration(configuration)
-            .WithProperty("Version", version.NuGetVersion);
     });
 }
 
