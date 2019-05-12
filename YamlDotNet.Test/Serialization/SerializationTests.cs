@@ -814,6 +814,27 @@ namespace YamlDotNet.Test.Serialization
             result.MyString.Should().BeNull();
         }
 
+        [Theory]
+        [InlineData(typeof(SByteEnum))]
+        [InlineData(typeof(ByteEnum))]
+        [InlineData(typeof(Int16Enum))]
+        [InlineData(typeof(UInt16Enum))]
+        [InlineData(typeof(Int32Enum))]
+        [InlineData(typeof(UInt32Enum))]
+        [InlineData(typeof(Int64Enum))]
+        [InlineData(typeof(UInt64Enum))]
+        public void DeserializationOfEnumWorksInJson(Type enumType)
+        {
+            var defaultEnumValue = 0;
+            var nonDefaultEnumValue = Enum.GetValues(enumType).GetValue(1);
+
+            var jsonSerializer = SerializerBuilder.EnsureRoundtrip().EmitDefaults().JsonCompatible().Build();
+            var jsonSerializedEnum = jsonSerializer.Serialize(nonDefaultEnumValue);
+
+            nonDefaultEnumValue.Should().NotBe(defaultEnumValue);
+            jsonSerializedEnum.Should().Contain($"\"{nonDefaultEnumValue}\"");
+        }
+
         [Fact]
         public void SerializationOfOrderedProperties()
         {
@@ -1715,7 +1736,7 @@ namespace YamlDotNet.Test.Serialization
             {
                 return destinationType == typeof(int);
             }
-            
+
             public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
             {
                 return ((DoublyConverted)value).Value.Length;
@@ -1725,7 +1746,7 @@ namespace YamlDotNet.Test.Serialization
             {
                 return sourceType == typeof(string);
             }
-            
+
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             {
                 return new DoublyConverted { Value = (string)value };

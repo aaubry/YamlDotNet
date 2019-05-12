@@ -61,6 +61,17 @@ namespace YamlDotNet.Serialization.EventEmitters
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
+                    var valueIsEnum = eventInfo.Source.Type.IsEnum();
+                    if (valueIsEnum)
+                    {
+                        eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
+                        eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        break;
+                    }
+
+                    eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
+                    break;
+
                 case TypeCode.Single:
                 case TypeCode.Double:
                 case TypeCode.Decimal:
