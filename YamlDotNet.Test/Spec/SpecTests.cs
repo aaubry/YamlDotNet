@@ -38,13 +38,13 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly string specFixtureDirectory = GetTestFixtureDirectory();
 
-        // Note: all of these (40) tests are failing the assertion on line 65
+        // Note: all of these (36) tests are failing the assertion on line 65
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "RTP8", "W5VH", "UDM2", "M7A3",
+            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "W5VH", "M7A3", "6LVF", "DBG4",
             "8XYN", "4ABK", "KZN9", "Q5MG", "Y2GN", "2JQS", "S3PD", "R4YG", "9SA2", "UT92",
-            "HWV9", "6ZKB", "9MMW", "6BCT", "W4TN", "S4JQ", "K3WX", "8MK2", "52DL", "2SXE",
-            "FP8R", "9DXL", "FRK4", "2LFX", "7Z25", "QT73", "A2M4", "6LVF", "DBG4", "5MUD"
+            "HWV9", "9MMW", "6BCT", "W4TN", "S4JQ", "K3WX", "8MK2", "52DL", "2SXE", "5MUD",
+            "FP8R", "FRK4", "2LFX", "7Z25", "QT73", "A2M4"
         };
 
         [Theory, MemberData(nameof(GetYamlSpecDataSuites))]
