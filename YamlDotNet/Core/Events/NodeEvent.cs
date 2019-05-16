@@ -29,7 +29,7 @@ namespace YamlDotNet.Core.Events
     /// </summary>
     public abstract class NodeEvent : ParsingEvent
     {
-        internal static readonly Regex anchorValidator = new Regex(@"^[0-9a-zA-Z_\-]+$", StandardRegexOptions.Compiled);
+        internal static readonly Regex anchorValidator = new Regex(@"^(?![\[\]\{\},]+).*$", StandardRegexOptions.Compiled);
 
         private readonly string anchor;
 
@@ -87,7 +87,7 @@ namespace YamlDotNet.Core.Events
 
                 if (!anchorValidator.IsMatch(anchor))
                 {
-                    throw new ArgumentException("Anchor value must contain alphanumerical characters only.", nameof(anchor));
+                    throw new ArgumentException("Anchor value must not contain disallowed characters: []{},", nameof(anchor));
                 }
             }
 

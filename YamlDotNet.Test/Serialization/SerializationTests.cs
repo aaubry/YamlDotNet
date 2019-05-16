@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1722,6 +1722,36 @@ namespace YamlDotNet.Test.Serialization
             ");
 
             Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void AnchorNameWithTrailingColonReferencedInKeyCanBeDeserialized()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
+                a: &::::scaryanchor:::: anchor "" value ""
+                *::::scaryanchor::::: 2
+                myvalue: *::::scaryanchor::::
+            "));
+
+            Assert.Equal(@"anchor "" value """, deserialized["a"]);
+            Assert.Equal("2", deserialized[@"anchor "" value """]);
+            Assert.Equal(@"anchor "" value """, deserialized["myvalue"]);
+        }
+
+        [Fact]
+        public void AnchorWithAllowedCharactersCanBeDeserialized()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
+                a: &@nchor<>""@-_123$>>>😁🎉🐻🍔end some value
+                myvalue: my *@nchor<>""@-_123$>>>😁🎉🐻🍔end test
+                interpolated value: *@nchor<>""@-_123$>>>😁🎉🐻🍔end
+            "));
+
+            Assert.Equal("some value", deserialized["a"]);
+            Assert.Equal(@"my *@nchor<>""@-_123$>>>😁🎉🐻🍔end test", deserialized["myvalue"]);
+            Assert.Equal("some value", deserialized["interpolated value"]);
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
