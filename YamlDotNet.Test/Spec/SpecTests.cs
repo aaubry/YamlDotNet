@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Xunit;
 using Xunit.Sdk;
@@ -38,13 +39,17 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly string specFixtureDirectory = GetTestFixtureDirectory();
 
-        // Note: all of these (32) tests are failing the assertion on line 65
+        // Note: all of these (29) tests are failing the assertion on line 65
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "M7A3", "6LVF", "DBG4", "7Z25",
-            "2LFX", "4ABK", "KZN9", "Q5MG", "2JQS", "S3PD", "R4YG", "9SA2", "UT92", "QT73",
-            "HWV9", "9MMW", "6BCT", "W4TN", "S4JQ", "K3WX", "8MK2", "52DL", "5MUD", "A2M4",
-            "FP8R", "FRK4"
+            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "M7A3", "6LVF", "DBG4", "A2M4",
+            "2LFX", "4ABK", "KZN9", "Q5MG", "2JQS", "S3PD", "R4YG", "9SA2", "UT92", "FP8R",
+            "FRK4", "9MMW", "6BCT", "W4TN", "S4JQ", "K3WX", "8MK2", "52DL", "5MUD"
+        };
+
+        private static readonly List<string> knownFalsePositives = new List<string>
+        {
+            "X4QW", "9C9N", "QB6E", "CVW2", "9JBA", "HRE5", "SU5Z", "QLJ7"
         };
 
         [Theory, MemberData(nameof(GetYamlSpecDataSuites))]
@@ -63,25 +68,25 @@ namespace YamlDotNet.Test.Spec
                 catch (Exception ex)
                 {
                     Assert.True(error, "Unexpected spec failure.\nExpected:\n" + expectedResult + "\nActual:\n[Writer Output]\n" + writer + "\n[Exception]\n" + ex);
+                    Debug.Assert(!(error && knownFalsePositives.Contains(name)), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
                     return;
                 }
 
                 try
                 {
                     Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
+                    Debug.Assert(!ignoredSuites.Contains(name), $"Spec test '{name}' passed but present in '{nameof(ignoredSuites)}' list. Consider removing it from the list.");
                 }
                 catch (EqualException)
                 {
-                    // there are seven spec tests failing, where YamlDotNet
-                    // is unexpectedly *not* erroring out during parsing.
+                    // In some cases, YamlDotNet is unexpectedly *not* erroring out during
+                    // the parsing.
                     //
-                    // TODO: remove this try-catch block once there is a
-                    //       decision on the following (update implementation
-                    //       or add these to ignoredSuites):
+                    // TODO: remove this try-catch block once there is a decision on the
+                    //       specs in 'knownFalsePositives' list (update implementation or
+                    //       add them to 'ignoredSuites' list)
                     //
-                    //       X4QW, 9C9N, QB6E, CVW2, 9JBA, HRE5, SU5Z
-                    //
-                    if (!error)
+                    if (!(error && knownFalsePositives.Contains(name)))
                     {
                         throw;
                     }
@@ -182,6 +187,7 @@ namespace YamlDotNet.Test.Spec
             foreach (var testPath in fixtures)
             {
                 var testName = Path.GetFileName(testPath);
+                // comment the following line to run spec tests (requires 'Rebuild')
                 if (ignoredSuites.Contains(testName)) continue;
 
                 var inputFile = Path.Combine(testPath, InputFilename);
