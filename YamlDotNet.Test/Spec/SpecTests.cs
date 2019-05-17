@@ -39,12 +39,11 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly string specFixtureDirectory = GetTestFixtureDirectory();
 
-        // Note: all of these (29) tests are failing the assertion on line 65
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "DK3J", "6M2F", "NJ66", "4MUZ", "NHX8", "WZ62", "M7A3", "6LVF", "DBG4", "A2M4",
-            "2LFX", "4ABK", "KZN9", "Q5MG", "2JQS", "S3PD", "R4YG", "9SA2", "UT92", "FP8R",
-            "FRK4", "9MMW", "6BCT", "W4TN", "S4JQ", "K3WX", "8MK2", "52DL", "5MUD"
+            "DK3J", "W4TN", "NJ66", "4MUZ", "NHX8", "WZ62", "M7A3", "6LVF", "S4JQ", "A2M4",
+            "2LFX", "K3WX", "8MK2", "Q5MG", "2JQS", "S3PD", "R4YG", "9SA2", "UT92", "FP8R",
+            "52DL", "5MUD", "6BCT"
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>

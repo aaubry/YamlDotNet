@@ -387,7 +387,8 @@ namespace YamlDotNet.Core
 
             // Is it the value indicator?
 
-            if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
+            if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)) &&
+                !(simpleKeyAllowed && flowLevel > 0))
             {
                 FetchValue();
                 return;
@@ -473,7 +474,8 @@ namespace YamlDotNet.Core
             bool isPlainScalar =
                 !isInvalidPlainScalarCharacter ||
                 (analyzer.Check('-') && !analyzer.IsWhite(1)) ||
-                (flowLevel == 0 && (analyzer.Check("?:")) && !analyzer.IsWhiteBreakOrZero(1));
+                (flowLevel == 0 && analyzer.Check("?:") && !analyzer.IsWhiteBreakOrZero(1)) ||
+                (simpleKeyAllowed && flowLevel > 0 && analyzer.Check("?:"));
 
             if (isPlainScalar)
             {
