@@ -245,9 +245,14 @@ namespace YamlDotNet.Core
                 }
             }
 
+            if (GetCurrentToken() is Scalar && state == ParserState.ImplicitDocumentStart)
+            {
+                isImplicit = true;
+            }
+
             // Parse an isImplicit document.
 
-            if (isImplicit && !(GetCurrentToken() is VersionDirective || GetCurrentToken() is TagDirective || GetCurrentToken() is DocumentStart || GetCurrentToken() is StreamEnd))
+            if (isImplicit && !(GetCurrentToken() is VersionDirective || GetCurrentToken() is TagDirective || GetCurrentToken() is DocumentStart || GetCurrentToken() is StreamEnd || GetCurrentToken() is DocumentEnd) || GetCurrentToken() is BlockMappingStart)
             {
                 var directives = new TagDirectiveCollection();
                 ProcessDirectives(directives);
@@ -261,7 +266,7 @@ namespace YamlDotNet.Core
 
             // Parse an explicit document.
 
-            else if (!(GetCurrentToken() is StreamEnd))
+            else if (!(GetCurrentToken() is StreamEnd || GetCurrentToken() is DocumentEnd))
             {
                 Mark start = GetCurrentToken().Start;
                 var directives = new TagDirectiveCollection();
@@ -286,6 +291,10 @@ namespace YamlDotNet.Core
 
             else
             {
+                if (GetCurrentToken() is DocumentEnd)
+                {
+                    Skip();
+                }
                 state = ParserState.StreamEnd;
 
                 ParsingEvent evt = new Events.StreamEnd(GetCurrentToken().Start, GetCurrentToken().End);
@@ -581,6 +590,10 @@ namespace YamlDotNet.Core
                 end = GetCurrentToken().End;
                 Skip();
                 isImplicit = false;
+            }
+            else if (!(currentToken is StreamEnd || currentToken is DocumentStart))
+            {
+                throw new SemanticErrorException(start, end, "Did not find expected <document end>.");
             }
 
             state = ParserState.DocumentStart;
