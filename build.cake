@@ -87,6 +87,7 @@ Task("Restore-NuGet-Packages")
     });
 
 Task("Get-Version")
+    .IsDependentOn("Fix-GitVersionOnLinux")
     .Does(() =>
     {
         version = GitVersion(new GitVersionSettings

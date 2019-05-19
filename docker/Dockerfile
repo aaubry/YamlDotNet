@@ -1,24 +1,21 @@
-FROM ubuntu:trusty
+FROM ubuntu:18.04
 
 RUN apt-get update
-RUN apt-get install -y apt-transport-https curl git libgit2-0
+RUN apt-get install -y gnupg ca-certificates apt-transport-https wget curl git libgit2-26
 
-# Configure Mono 5.0 Beta 2 (5.0.0.94) (on Trusty) http://www.mono-project.com/download/beta/
+# Configure Mono
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-RUN echo "deb http://download.mono-project.com/repo/ubuntu beta-trusty main" | tee /etc/apt/sources.list.d/mono-official-beta.list
+RUN echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | tee /etc/apt/sources.list.d/mono-official-stable.list
 
-# Configure dotnet-dev 1.0.3
-RUN sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
+# Configure dotnet
+RUN wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
 
 # Install mono and dotnet
 RUN apt-get update
-RUN apt-get install -y mono-complete dotnet-dev-1.0.3
+RUN apt-get install -y mono-complete dotnet-sdk-2.2
 
-# Warm-up package cache
-WORKDIR /tmp/root
-COPY Dummy.csproj /tmp/root/Dummy.csproj
-RUN dotnet restore
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 # Prepare for the AOT test
 RUN mono --aot=full /usr/lib/mono/4.5/mscorlib.dll
