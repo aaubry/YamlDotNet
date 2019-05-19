@@ -51,7 +51,7 @@ namespace YamlDotNet.Samples
                 This example shows how to validate the objects as they are deserialized.
             "
         )]
-        public static void Main()
+        public void Main()
         {
             // Then we wrap the existing ObjectNodeDeserializer
             // with our ValidatingNodeDeserializer:

@@ -26,6 +26,7 @@ using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Helpers;
 using System.Linq.Expressions;
+using HashCode = YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.Serialization
 {

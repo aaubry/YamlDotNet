@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net4.6.1</TargetFramework>
-    
+    <TargetFramework>net461</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-
     <RootNamespace>YamlDotNet.PerformanceTests.Lib</RootNamespace>
     <AssemblyName>YamlDotNet.PerformanceTests.Lib</AssemblyName>
   </PropertyGroup>
+
+  <Import Project="../../build/common.props" />
+
 </Project>

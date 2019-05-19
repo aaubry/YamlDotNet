@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-preview.1" />
+    <PackageReference Include="AAubry.NETFramework.ReferenceAssemblies.net35" Version="1.0.0-preview.1" />
+  </ItemGroup>
+</Project>

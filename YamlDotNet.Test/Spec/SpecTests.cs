@@ -67,7 +67,7 @@ namespace YamlDotNet.Test.Spec
                 }
                 catch (Exception ex)
                 {
-                    Assert.True(error, "Unexpected spec failure.\nExpected:\n" + expectedResult + "\nActual:\n[Writer Output]\n" + writer + "\n[Exception]\n" + ex);
+                    Assert.True(error, $"Unexpected spec failure ({name}).\n{description}\nExpected:\n{expectedResult}\nActual:\n[Writer Output]\n{writer}\n[Exception]\n{ex}");
                     Debug.Assert(!(error && knownFalsePositives.Contains(name)), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
                     return;
                 }
@@ -180,7 +180,7 @@ namespace YamlDotNet.Test.Spec
             }
         }
 
-        public static IEnumerable<object> GetYamlSpecDataSuites()
+        public static IEnumerable<object[]> GetYamlSpecDataSuites()
         {
             var fixtures = Directory.EnumerateDirectories(specFixtureDirectory, "*", SearchOption.TopDirectoryOnly);
 

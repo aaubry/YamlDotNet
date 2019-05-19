@@ -91,7 +91,7 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Theory]
-        [MemberData("DeserializeScalarBoolean_TestCases")]
+        [MemberData(nameof(DeserializeScalarBoolean_TestCases))]
         public void DeserializeScalarBoolean(string value, bool expected)
         {
             var result = Deserializer.Deserialize<bool>(UsingReaderFor(value));
@@ -1281,7 +1281,7 @@ namespace YamlDotNet.Test.Serialization
             writer.ToString().Should().Contain("new_key_here: new_value");
         }
 
-        [Theory, MemberData("SpecialFloats")]
+        [Theory, MemberData(nameof(SpecialFloats))]
         public void SpecialFloatsAreHandledCorrectly(FloatTestCase testCase)
         {
             var buffer = new StringWriter();
