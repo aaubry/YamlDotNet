@@ -1,46 +1,29 @@
 # Release notes
 ## Release 6.1.1
 
-- Remove semver tags from scaffolded release notes
+## New features
 
-- Merge pull request #395 from am11/feature/spec-suite-runner  
-  Add spec test executor for yaml-test-suite
+Tests from yaml-test-suite have been added to the project and an effort has been made to improve the conformance, thanks to [@am11](https://github.com/am11):
 
-- Update readme to clarify which runtimes are supported
+- [#395](https://github.com/aaubry/YamlDotNet/pull/395) Add spec test executor for yaml-test-suite
+- [#400](https://github.com/aaubry/YamlDotNet/pull/400) Improve YAML spec conformance by three tests
+- [#401](https://github.com/aaubry/YamlDotNet/pull/401) Allow scalar to have value without space (x:y)
+- [#403](https://github.com/aaubry/YamlDotNet/pull/403) Relax anchor names allowed characters set
+- [#404](https://github.com/aaubry/YamlDotNet/pull/404) Constrain DocumentEnd parsing to allowed tokens
+- [#406](https://github.com/aaubry/YamlDotNet/pull/406) Improve omitted keys handling
 
-- Merge pull request #400 from am11/conformance  
-  Improve YAML spec conformance by three tests
+### Other changes:
 
-- Merge pull request #401 from am11/conformance/scalars  
-  Allow scalar to have value without space (x:y)
+- Allow to save a `YamlStream` to an `IEmitter`
+- Some infrastructural changes have been made to ensure that the project would build on Linux without issues.
 
-- Merge pull request #396 from KapuKapu/bugfix/enums_should_serialize_to_json_string  
-  Fix missing string quotes around json serialized enums (#146)
+## Bug fixes
 
-- Merge pull request #403 from am11/conformance/anchors  
-  Relax anchor names allowed characters set
+- [#396](https://github.com/aaubry/YamlDotNet/pull/396) Fix missing string quotes around json serialized enums (fixes [#146](https://github.com/aaubry/YamlDotNet/issues/408))
+- Increase the max simple key length to 1024 and allow to configure it
+- Never emit key indicators in JSON
 
-- Ensure that the project builds on Linux
-
-- Update docker image for builds
-
-- Merge branch 'update-samples-project-format' of https://github.com/am11/YamlDotNet into am11-update-samples-project-format  
-  # Conflicts:  
-  #	YamlDotNet.Samples/YamlDotNet.Samples.csproj
-
-- Merge pull request #404 from am11/conformance/documentend  
-  Constrain DocumentEnd parsing to allowed tokens
-
-- Merge pull request #406 from am11/conformance/omitted-keys  
-  Improve omitted keys handling
-
-- Allow to save a YamlStream to an IEmitter
 # Previous releases
-- [6.1.1](releases/6.1.1.md)
-- [6.0.0](releases/6.0.0.md)
-- [5.4.0](releases/5.4.0.md)
-- [5.3.1](releases/5.3.1.md)
-- [5.3.0](releases/5.3.0.md)
 - [5.2.1](releases/5.2.1.md)
 - [5.2.0](releases/5.2.0.md)
 - [5.1.0](releases/5.1.0.md)
