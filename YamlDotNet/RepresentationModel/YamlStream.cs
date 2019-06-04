@@ -122,7 +122,16 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="assignAnchors">Indicates whether or not to assign node anchors.</param>
         public void Save(TextWriter output, bool assignAnchors)
         {
-            IEmitter emitter = new Emitter(output);
+            Save(new Emitter(output), assignAnchors);
+        }
+
+        /// <summary>
+        /// Saves the stream to the specified emitter.
+        /// </summary>
+        /// <param name="emitter">The emitter.</param>
+        /// <param name="assignAnchors">Indicates whether or not to assign node anchors.</param>
+        public void Save(IEmitter emitter, bool assignAnchors)
+        {
             emitter.Emit(new StreamStart());
 
             foreach (var document in documents)
