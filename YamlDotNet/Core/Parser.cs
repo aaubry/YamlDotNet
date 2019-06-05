@@ -937,6 +937,11 @@ namespace YamlDotNet.Core
                         return ProcessEmptyScalar(GetCurrentToken().Start);
                     }
                 }
+                else if (GetCurrentToken() is Scalar)
+                {
+                    states.Push(ParserState.FlowMappingValue);
+                    return ParseNode(false, false);
+                }
                 else if (!(GetCurrentToken() is FlowMappingEnd))
                 {
                     states.Push(ParserState.FlowMappingEmptyValue);
