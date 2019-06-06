@@ -1572,7 +1572,7 @@ namespace YamlDotNet.Core
 
             // Determine the indentation level if needed.
 
-            if (currentIndent == 0)
+            if (currentIndent == 0 && (cursor.LineOffset > 0 || indent > -1))
             {
                 currentIndent = Math.Max(maxIndent, Math.Max(indent + 1, 1));
             }
