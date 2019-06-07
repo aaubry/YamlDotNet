@@ -1887,7 +1887,7 @@ namespace YamlDotNet.Core
                 {
                     // Check for indicators that may end a plain scalar.
 
-                    if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1)) || (flowLevel > 0 && analyzer.Check(",?[]{}")))
+                    if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || (flowLevel > 0 && analyzer.Check(',', 1))) || (flowLevel > 0 && analyzer.Check(",?[]{}")))
                     {
                         break;
                     }
