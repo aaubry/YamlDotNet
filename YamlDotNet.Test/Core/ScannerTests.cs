@@ -375,45 +375,6 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
-#if !PORTABLE && !NETCOREAPP1_0
-        [Fact]
-        public void ScannerIsSerializable()
-        {
-            var sut = Yaml.ScannerForText(@"
-                - one
-                - two
-                - three
-            ");
-
-            AssertPartialSequenceOfTokensFrom(sut,
-                StreamStart,
-                BlockSequenceStart,
-                BlockEntry,
-                PlainScalar("one"),
-                BlockEntry,
-                PlainScalar("two"));
-
-            var buffer = new MemoryStream();
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(buffer, sut);
-
-            AssertSequenceOfTokensFrom(sut,
-                BlockEntry,
-                PlainScalar("three"),
-                BlockEnd,
-                StreamEnd);
-
-            buffer.Position = 0;
-            sut = (Scanner)formatter.Deserialize(buffer);
-
-            AssertSequenceOfTokensFrom(sut,
-                BlockEntry,
-                PlainScalar("three"),
-                BlockEnd,
-                StreamEnd);
-        }
-#endif
-
         [Fact]
         public void MarksOnDoubleQuotedScalarsAreCorrect()
         {
