@@ -895,7 +895,8 @@ namespace YamlDotNet.Core
 
         private void DecreaseFlowLevel()
         {
-            Debug.Assert(flowLevel > 0, "Could flowLevel be zero when this method is called?");
+            // flowLevel could be zero in case of malformed YAML.
+            // Since this is handled elsewhere, just ignore it.
             if (flowLevel > 0)
             {
                 --flowLevel;

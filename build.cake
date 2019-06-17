@@ -136,10 +136,10 @@ Task("Quick-Build")
     });
 
 Task("Test")
-    .IsDependentOn("Build")
+    // .IsDependentOn("Build")
     .Does(() =>
     {
-        RunUnitTests(configuration);
+        DotNetCoreTest();
     });
 
 Task("Build-Release-Configurations")
@@ -170,11 +170,8 @@ Task("Test-Release-Configurations")
                 RunProcess("mono", "--aot=full", "YamlDotNet.AotTest/bin/Debug/net45/YamlDotNet.AotTest.exe");
                 RunProcess("mono", "--full-aot", "YamlDotNet.AotTest/bin/Debug/net45/YamlDotNet.AotTest.exe");
             }
-            else
-            {
-                RunUnitTests(releaseConfiguration);
-            }
         }
+        DotNetCoreTest();
     });
 
 Task("Package")
@@ -469,42 +466,5 @@ IEnumerable<string> RunProcess(string processName, params string[] arguments)
         }
 
         return output;
-    }
-}
-
-void RunUnitTests(string configurationName)
-{
-    if (configurationName.Contains("DotNetStandard"))
-    {
-        // Execute .NETCoreApp tests using `dotnet test`.
-        var settings = new DotNetCoreTestSettings
-        {
-            Framework = "netcoreapp1.0",
-            Configuration = configurationName,
-            NoBuild = true
-        };
-
-        // if (AppVeyor.IsRunningOnAppVeyor)
-        // {
-        //     settings.ArgumentCustomization = args => args.Append("-appveyor");
-        // }
-
-        var path = MakeAbsolute(File("./YamlDotNet.Test/YamlDotNet.Test.csproj"));
-        DotNetCoreTest(path.FullPath, settings);
-    }
-    else
-    {
-        // Execute the full framework tests using xunit.console.runner.
-        // var settings = new XUnit2Settings
-        // {
-        //     Parallelism = ParallelismOption.All
-        // };
-
-        // if (AppVeyor.IsRunningOnAppVeyor)
-        // {
-        //     settings.ArgumentCustomization = args => args.Append("-appveyor");
-        // }
-
-        XUnit2("YamlDotNet.Test/bin/" + configurationName + "/net452/YamlDotNet.Test*.dll");
     }
 }
