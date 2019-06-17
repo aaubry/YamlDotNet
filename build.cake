@@ -99,7 +99,7 @@ Task("Get-Version")
         {
             if (!string.IsNullOrEmpty(version.PreReleaseTag))
             {
-                version.NuGetVersion = string.Format("{0}-{1}{2}", version.MajorMinorPatch, version.PreReleaseLabel, AppVeyor.Environment.Build.Version.Replace("0.0.", "").PadLeft(4, '0'));
+                version.NuGetVersion = string.Format("{0}-{1}{2}", version.MajorMinorPatch, string.IsNullOrEmpty(version.PreReleaseLabel) ? "pre" : version.PreReleaseLabel, AppVeyor.Environment.Build.Version.Replace("0.0.", "").PadLeft(4, '0'));
             }
             AppVeyor.UpdateBuildVersion(version.NuGetVersion);
         }
