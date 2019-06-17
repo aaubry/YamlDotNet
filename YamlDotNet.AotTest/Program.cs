@@ -76,7 +76,9 @@ namespace YamlDotNet.AotTest
                 var current = ex;
                 while (current != null)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     if (current is ExecutionEngineException)
+#pragma warning restore CS0618 // Type or member is obsolete
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("[failure]");
