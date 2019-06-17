@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="xunit.runner.json">
+    <None Update="xunit.runner.json" Condition="'$(OS)' == 'Unix'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
