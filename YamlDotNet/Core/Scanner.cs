@@ -2185,7 +2185,7 @@ namespace YamlDotNet.Core
 
             if (tag.Length == 0)
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, did not find expected tag URI.");
+                return string.Empty;
             }
 
             return tag.ToString();
