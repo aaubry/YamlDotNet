@@ -483,6 +483,12 @@ namespace YamlDotNet.Core
                 return;
             }
 
+            if (analyzer.IsWhiteBreakOrZero())
+            {
+                Skip();
+                return;
+            }
+
             // If we don't determine the token type so far, it is an error.
             var start = cursor.Mark();
             Skip();
@@ -1548,13 +1554,6 @@ namespace YamlDotNet.Core
                 if (cursor.LineOffset > maxIndent)
                 {
                     maxIndent = cursor.LineOffset;
-                }
-
-                // Check for a tab character messing the indentation.
-
-                if ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsTab())
-                {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, found a tab character where an found space is expected.");
                 }
 
                 // Have we find a non-empty line?

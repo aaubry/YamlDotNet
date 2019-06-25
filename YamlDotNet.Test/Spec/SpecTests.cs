@@ -41,8 +41,8 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "R4YG", "W4TN", "6BCT", "52DL", "NHX8", "WZ62", "M7A3", "6LVF", "S4JQ", "A2M4",
-            "2LFX", "S3PD", "8MK2", "Q5MG", "2JQS"
+            "2LFX", "W4TN", "S3PD", "52DL", "NHX8", "WZ62", "M7A3", "6LVF", "S4JQ", "8MK2",
+            "2JQS"
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
