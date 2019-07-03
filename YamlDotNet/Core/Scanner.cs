@@ -1696,7 +1696,7 @@ namespace YamlDotNet.Core
                                 }
                                 else
                                 {
-                                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, found unknown escape character.");
+                                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found unknown escape character.");
                                 }
                                 break;
                         }
@@ -1716,7 +1716,7 @@ namespace YamlDotNet.Core
                             {
                                 if (!analyzer.IsHex(k))
                                 {
-                                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, did not find expected hexadecimal number.");
+                                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, did not find expected hexadecimal number.");
                                 }
                                 character = ((character << 4) + analyzer.AsHex(k));
                             }
@@ -1725,7 +1725,7 @@ namespace YamlDotNet.Core
 
                             if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
                             {
-                                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a quoted scalar, found invalid Unicode character escape code.");
+                                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found invalid Unicode character escape code.");
                             }
 
                             value.Append(char.ConvertFromUtf32(character));
@@ -2185,7 +2185,7 @@ namespace YamlDotNet.Core
 
             if (tag.Length == 0)
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, did not find expected tag URI.");
+                return string.Empty;
             }
 
             return tag.ToString();
@@ -2208,7 +2208,7 @@ namespace YamlDotNet.Core
 
                 if (!(analyzer.Check('%') && analyzer.IsHex(1) && analyzer.IsHex(2)))
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, did not find URI escaped octet.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find URI escaped octet.");
                 }
 
                 // Get the octet.
@@ -2226,7 +2226,7 @@ namespace YamlDotNet.Core
 
                     if (width == 0)
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, found an incorrect leading UTF-8 octet.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, found an incorrect leading UTF-8 octet.");
                     }
 
                     charBytes = new byte[width];
@@ -2237,7 +2237,7 @@ namespace YamlDotNet.Core
 
                     if ((octet & 0xC0) != 0x80)
                     {
-                        throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, found an incorrect trailing UTF-8 octet.");
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, found an incorrect trailing UTF-8 octet.");
                     }
                 }
 
@@ -2255,7 +2255,7 @@ namespace YamlDotNet.Core
 
             if (result.Length == 0 || result.Length > 2)
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag, found an incorrect UTF-8 sequence.");
+                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, found an incorrect UTF-8 sequence.");
             }
 
             return result;
@@ -2303,7 +2303,7 @@ namespace YamlDotNet.Core
 
                 if (isDirective && (tagHandle.Length != 1 || tagHandle[0] != '!'))
                 {
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While parsing a tag directive, did not find expected '!'.");
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag directive, did not find expected '!'.");
                 }
             }
 
