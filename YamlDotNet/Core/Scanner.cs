@@ -1317,9 +1317,9 @@ namespace YamlDotNet.Core
 
             // Check the character which ends the tag.
 
-            if (!analyzer.IsWhiteBreakOrZero())
+            if (!analyzer.IsWhiteBreakOrZero() && !analyzer.Check(','))
             {
-                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find expected whitespace or line break.");
+                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a tag, did not find expected whitespace, comma or line break.");
             }
 
             // Create a token.
@@ -2162,7 +2162,8 @@ namespace YamlDotNet.Core
             //      '%'.
 
 
-            while (analyzer.IsAlphaNumericDashOrUnderscore() || analyzer.Check(";/?:@&=+$,.!~*'()[]%"))
+            while (analyzer.IsAlphaNumericDashOrUnderscore() || analyzer.Check(";/?:@&=+$.!~*'()[]%") ||
+                   (analyzer.Check(',') && !analyzer.IsBreak(1)))
             {
                 // Check if it is a URI-escape sequence.
 
