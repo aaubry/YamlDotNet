@@ -245,7 +245,7 @@ namespace YamlDotNet.Core
                 }
             }
 
-            if (GetCurrentToken() is Scalar && state == ParserState.ImplicitDocumentStart)
+            if (GetCurrentToken() is Scalar && (state == ParserState.ImplicitDocumentStart || state == ParserState.DocumentStart))
             {
                 isImplicit = true;
             }
