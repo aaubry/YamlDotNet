@@ -802,8 +802,22 @@ namespace YamlDotNet.Core
             Skip();
             Skip();
 
-            Token token = isStartToken ? (Token)new DocumentStart(start, cursor.Mark()) : new DocumentEnd(start, start);
-            tokens.Enqueue(token);
+            if (isStartToken)
+            {
+                tokens.Enqueue(new DocumentStart(start, cursor.Mark()));
+            }
+            else
+            {
+                while (!analyzer.EndOfInput && !analyzer.IsBreak() && !analyzer.Check('#'))
+                {
+                    if (!analyzer.IsWhite())
+                    {
+                        throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a document end, found invalid content after '...' marker.");
+                    }
+                    Skip();
+                }
+                tokens.Enqueue(new DocumentEnd(start, start));
+            }
         }
 
         /// <summary>
