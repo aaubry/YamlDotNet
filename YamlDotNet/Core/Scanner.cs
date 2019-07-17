@@ -749,7 +749,12 @@ namespace YamlDotNet.Core
                     break;
 
                 default:
-                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, found unknown directive name.");
+                    // warning: skipping reserved directive line
+                    while (!analyzer.Check('#') && !analyzer.IsBreak())
+                    {
+                        Skip();
+                    }
+                    return null;
             }
 
             // Eat the rest of the line including any comments.
