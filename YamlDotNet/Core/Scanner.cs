@@ -1069,9 +1069,13 @@ namespace YamlDotNet.Core
             {
                 // The ':' indicator follows a complex key.
 
+                // Simple keys after ':' are allowed in the block context.
+
+                var localSimpleKeyAllowed = flowLevel == 0;
+
                 // In the block context, extra checks are required.
 
-                if (flowLevel == 0)
+                if (localSimpleKeyAllowed)
                 {
                     // Check if we are allowed to start a complex value.
 
@@ -1084,11 +1088,22 @@ namespace YamlDotNet.Core
                     // Add the BLOCK-MAPPING-START token if needed.
 
                     RollIndent(cursor.LineOffset, -1, false, cursor.Mark());
+
+                    // Check if we are dealing with empty key.
+
+                    if (cursor.LineOffset == 0 && simpleKey.LineOffset == 0)
+                    {
+                        // Create the KEY token and insert it into the queue.
+
+                        tokens.Insert(tokens.Count, new Key(simpleKey.Mark, simpleKey.Mark));
+
+                        // A simple key cannot follow another simple key.
+
+                        localSimpleKeyAllowed = false;
+                    }
                 }
 
-                // Simple keys after ':' are allowed in the block context.
-
-                simpleKeyAllowed = flowLevel == 0;
+                simpleKeyAllowed = localSimpleKeyAllowed;
             }
 
             // Consume the token.
