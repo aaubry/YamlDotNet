@@ -75,6 +75,24 @@ namespace YamlDotNet.Core
         private bool tokenAvailable;
         private Token previous;
 
+        private bool IsDocumentStart() =>
+            !analyzer.EndOfInput &&
+            cursor.LineOffset == 0 &&
+            analyzer.Check('-', 0) &&
+            analyzer.Check('-', 1) &&
+            analyzer.Check('-', 2) &&
+            analyzer.IsWhiteBreakOrZero(3);
+
+        private bool IsDocumentEnd() =>
+            !analyzer.EndOfInput &&
+            cursor.LineOffset == 0 &&
+            analyzer.Check('.', 0) &&
+            analyzer.Check('.', 1) &&
+            analyzer.Check('.', 2) &&
+            analyzer.IsWhiteBreakOrZero(3);
+
+        private bool IsDocumentIndicator() => IsDocumentStart() || IsDocumentEnd();
+
         public bool SkipComments { get; private set; }
 
         /// <summary>
@@ -301,14 +319,7 @@ namespace YamlDotNet.Core
 
             // Is it the document start indicator?
 
-            bool isDocumentStart =
-                cursor.LineOffset == 0 &&
-                analyzer.Check('-', 0) &&
-                analyzer.Check('-', 1) &&
-                analyzer.Check('-', 2) &&
-                analyzer.IsWhiteBreakOrZero(3);
-
-            if (isDocumentStart)
+            if (IsDocumentStart())
             {
                 FetchDocumentIndicator(true);
                 return;
@@ -316,14 +327,7 @@ namespace YamlDotNet.Core
 
             // Is it the document end indicator?
 
-            bool isDocumentEnd =
-                cursor.LineOffset == 0 &&
-                analyzer.Check('.', 0) &&
-                analyzer.Check('.', 1) &&
-                analyzer.Check('.', 2) &&
-                analyzer.IsWhiteBreakOrZero(3);
-
-            if (isDocumentEnd)
+            if (IsDocumentEnd())
             {
                 FetchDocumentIndicator(false);
                 return;
@@ -502,21 +506,6 @@ namespace YamlDotNet.Core
             return analyzer.Check(' ') || ((flowLevel > 0 || !simpleKeyAllowed) && analyzer.Check('\t'));
         }
 
-        private bool IsDocumentIndicator()
-        {
-            if (cursor.LineOffset == 0 && analyzer.IsWhiteBreakOrZero(3))
-            {
-                bool isDocumentStart = analyzer.Check('-', 0) && analyzer.Check('-', 1) && analyzer.Check('-', 2);
-                bool isDocumentEnd = analyzer.Check('.', 0) && analyzer.Check('.', 1) && analyzer.Check('.', 2);
-
-                return isDocumentStart || isDocumentEnd;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         private void Skip()
         {
             cursor.Skip();
@@ -545,7 +534,7 @@ namespace YamlDotNet.Core
         {
             // Until the next token is not find.
 
-            for (;;)
+            while (true)
             {
 
                 // Eat whitespaces.
@@ -1489,11 +1478,9 @@ namespace YamlDotNet.Core
 
             // Scan the block scalar content.
 
-            while (cursor.LineOffset == currentIndent && !analyzer.IsZero())
+            while (cursor.LineOffset == currentIndent && !analyzer.IsZero() && !IsDocumentEnd())
             {
-
                 // We are at the beginning of a non-empty line.
-
 
                 // Is it a trailing whitespace?
 
@@ -1576,7 +1563,7 @@ namespace YamlDotNet.Core
 
             // Eat the indentation spaces and line breaks.
 
-            for (;;)
+            while (true)
             {
                 // Eat the indentation spaces.
 
@@ -1651,7 +1638,7 @@ namespace YamlDotNet.Core
             var whitespaces = new StringBuilder();
             var leadingBreak = new StringBuilder();
             var trailingBreaks = new StringBuilder();
-            for (;;)
+            while (true)
             {
                 // Check that there are no document indicators at the beginning of the line.
 
@@ -1898,7 +1885,7 @@ namespace YamlDotNet.Core
 
             // Consume the content of the plain scalar.
 
-            for (;;)
+            while (true)
             {
                 // Check for a document indicator.
 

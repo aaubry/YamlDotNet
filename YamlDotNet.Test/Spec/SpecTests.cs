@@ -41,7 +41,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "W4TN"
+            // no spec test is ignored as of https://github.com/yaml/yaml-test-suite/commit/053b73a9c12c0cd76da797fdc2ffbd4bb5264c12
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
