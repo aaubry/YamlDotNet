@@ -49,6 +49,12 @@ namespace YamlDotNet.Test.Spec
             "X4QW", "9C9N", "QB6E", "CVW2", "9JBA", "HRE5", "SU5Z", "QLJ7"
         };
 
+        private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
+        {
+            "2CMS", "3HFZ", "4EJS", "4H7K", "4JVG", "7MNF", "9CWY", "9KBC", "BS4K", "C2SP",
+            "CXX2", "EB22", "EW3V", "H7J7", "HU3P", "P2EQ", "RHX7", "T833", "W9L4", "ZCZ6"
+        };
+
         [Theory, MemberData(nameof(GetYamlSpecDataSuites))]
         public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error)
         {
@@ -65,7 +71,28 @@ namespace YamlDotNet.Test.Spec
                 catch (Exception ex)
                 {
                     Assert.True(error, $"Unexpected spec failure ({name}).\n{description}\nExpected:\n{expectedResult}\nActual:\n[Writer Output]\n{writer}\n[Exception]\n{ex}");
-                    Debug.Assert(!(error && knownFalsePositives.Contains(name)), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
+
+                    if (error)
+                    {
+                        Debug.Assert(!knownFalsePositives.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
+
+                        try
+                        {
+                            Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
+                            Debug.Assert(!knownParserDesyncInErrorCases.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownParserDesyncInErrorCases)}' list. Consider removing it from the list.");
+                        }
+                        catch (EqualException)
+                        {
+                            // In some error cases, YamlDotNet's parser output is in desync with what is expected by the spec.
+                            // Throw, if it is not a known case.
+
+                            if (!knownParserDesyncInErrorCases.Contains(name))
+                            {
+                                throw;
+                            }
+                        }
+                    }
+
                     return;
                 }
 
@@ -76,13 +103,9 @@ namespace YamlDotNet.Test.Spec
                 }
                 catch (EqualException)
                 {
-                    // In some cases, YamlDotNet is unexpectedly *not* erroring out during
-                    // the parsing.
-                    //
-                    // TODO: remove this try-catch block once there is a decision on the
-                    //       specs in 'knownFalsePositives' list (update implementation or
-                    //       add them to 'ignoredSuites' list)
-                    //
+                    // In some cases, YamlDotNet's parser/scanner is unexpectedly *not* erroring out.
+                    // Throw, if it is not a known case.
+
                     if (!(error && knownFalsePositives.Contains(name)))
                     {
                         throw;
