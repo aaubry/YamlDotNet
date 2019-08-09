@@ -699,8 +699,10 @@ namespace YamlDotNet.Core
             var token = ScanDirective();
 
             // Append the token to the queue.
-
-            tokens.Enqueue(token);
+            if (token != null)
+            {
+                tokens.Enqueue(token);
+            }
         }
 
         /// <summary>
