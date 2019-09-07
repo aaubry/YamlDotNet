@@ -78,8 +78,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object> nestedObjectDeserializer, IDictionary result)
         {
-            parser.Expect<MappingStart>();
-            while (!parser.Accept<MappingEnd>())
+            parser.Consume<MappingStart>();
+            while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var key = nestedObjectDeserializer(parser, tKey);
                 var keyPromise = key as IValuePromise;
@@ -140,7 +140,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                 }
             }
-            parser.Expect<MappingEnd>();
         }
     }
 }

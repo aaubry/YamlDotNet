@@ -139,12 +139,12 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var hasStreamStart = parser.Allow<StreamStart>() != null;
+            var hasStreamStart = parser.TryConsume<StreamStart>(out var _);
 
-            var hasDocumentStart = parser.Allow<DocumentStart>() != null;
+            var hasDocumentStart = parser.TryConsume<DocumentStart>(out var _);
 
             object result = null;
-            if (!parser.Accept<DocumentEnd>() && !parser.Accept<StreamEnd>())
+            if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
             {
                 using (var state = new SerializerState())
                 {
@@ -155,12 +155,12 @@ namespace YamlDotNet.Serialization
 
             if (hasDocumentStart)
             {
-                parser.Expect<DocumentEnd>();
+                parser.Consume<DocumentEnd>();
             }
 
             if (hasStreamStart)
             {
-                parser.Expect<StreamEnd>();
+                parser.Consume<StreamEnd>();
             }
 
             return result;

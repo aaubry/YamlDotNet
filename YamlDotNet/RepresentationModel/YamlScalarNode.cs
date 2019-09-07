@@ -58,7 +58,7 @@ namespace YamlDotNet.RepresentationModel
 
         private void Load(IParser parser, DocumentLoadingState state)
         {
-            var scalar = parser.Expect<Scalar>();
+            var scalar = parser.Consume<Scalar>();
             Load(scalar, state);
             Value = scalar.Value;
             Style = scalar.Style;

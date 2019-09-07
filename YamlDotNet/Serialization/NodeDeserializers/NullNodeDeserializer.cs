@@ -30,15 +30,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
             value = null;
-            var evt = parser.Peek<NodeEvent>();
-            var isNull = evt != null
-                && NodeIsNull(evt);
-
-            if (isNull)
+            if (parser.Accept<NodeEvent>(out var evt))
             {
-                parser.SkipThisAndNestedEvents();
+                if (NodeIsNull(evt))
+                {
+                    parser.SkipThisAndNestedEvents();
+                    return true;
+                }
             }
-            return isNull;
+
+            return false;
         }
 
         private bool NodeIsNull(NodeEvent nodeEvent)

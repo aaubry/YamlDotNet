@@ -68,12 +68,12 @@ namespace YamlDotNet.RepresentationModel
 
         private void Load(IParser parser, DocumentLoadingState state)
         {
-            var sequence = parser.Expect<SequenceStart>();
+            var sequence = parser.Consume<SequenceStart>();
             Load(sequence, state);
             Style = sequence.Style;
 
             bool hasUnresolvedAliases = false;
-            while (!parser.Accept<SequenceEnd>())
+            while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var child = ParseNode(parser, state);
                 children.Add(child);
@@ -84,8 +84,6 @@ namespace YamlDotNet.RepresentationModel
             {
                 state.AddNodeWithUnresolvedAliases(this);
             }
-
-            parser.Expect<SequenceEnd>();
         }
 
         /// <summary>

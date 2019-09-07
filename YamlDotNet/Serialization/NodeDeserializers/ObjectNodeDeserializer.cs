@@ -44,17 +44,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            var mapping = parser.Allow<MappingStart>();
-            if (mapping == null)
+            if (!parser.TryConsume<MappingStart>(out var mapping))
             {
                 value = null;
                 return false;
             }
 
             value = _objectFactory.Create(expectedType);
-            while (!parser.Accept<MappingEnd>())
+            while (!parser.TryConsume<MappingEnd>(out var _))
             {
-                var propertyName = parser.Expect<Scalar>();
+                var propertyName = parser.Consume<Scalar>();
                 var property = _typeDescriptor.GetProperty(expectedType, null, propertyName.Value, _ignoreUnmatched);
                 if (property == null)
                 {
@@ -80,7 +79,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
 
-            parser.Expect<MappingEnd>();
             return true;
         }
     }

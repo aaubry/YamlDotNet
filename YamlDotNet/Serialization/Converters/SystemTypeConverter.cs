@@ -19,8 +19,7 @@ namespace YamlDotNet.Serialization.Converters
 
         public object ReadYaml(IParser parser, Type type)
         {
-            var value = ((Scalar)parser.Current).Value;
-            parser.MoveNext();
+            var value = parser.Consume<Scalar>().Value;
             return Type.GetType(value, throwOnError: true);
         }
 

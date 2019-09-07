@@ -19,7 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.Globalization;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using YamlDotNet.Core.Events;
 
@@ -36,34 +37,11 @@ namespace YamlDotNet.Core
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
         /// <returns>Returns the current event.</returns>
         /// <exception cref="YamlException">If the current event is not of the specified type.</exception>
-        public static T Expect<T>(this IParser parser) where T : ParsingEvent
+        public static T Consume<T>(this IParser parser) where T : ParsingEvent
         {
-            var expectedEvent = parser.Allow<T>();
-            if (expectedEvent == null)
-            {
-                // TODO: Throw a better exception
-                var @event = parser.Current;
-                throw new YamlException(@event.Start, @event.End, string.Format(CultureInfo.InvariantCulture,
-                        "Expected '{0}', got '{1}' (at {2}).", typeof(T).Name, @event.GetType().Name, @event.Start));
-            }
-            return expectedEvent;
-        }
-
-        /// <summary>
-        /// Checks whether the current event is of the specified type.
-        /// </summary>
-        /// <typeparam name="T">Type of the event.</typeparam>
-        /// <returns>Returns true if the current event is of type <typeparamref name="T"/>. Otherwise returns false.</returns>
-        public static bool Accept<T>(this IParser parser) where T : ParsingEvent
-        {
-            if (parser.Current == null)
-            {
-                if (!parser.MoveNext())
-                {
-                    throw new EndOfStreamException();
-                }
-            }
-            return parser.Current is T;
+            var required = parser.Require<T>();
+            parser.MoveNext();
+            return required;
         }
 
         /// <summary>
@@ -72,30 +50,62 @@ namespace YamlDotNet.Core
         /// Otherwise returns null.
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
-        /// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
-        public static T Allow<T>(this IParser parser) where T : ParsingEvent
+        /// <returns>Returns true if the current event is of type T; otherwise returns null.</returns>
+        public static bool TryConsume<T>(this IParser parser, out T @event) where T : ParsingEvent
         {
-            if (!parser.Accept<T>())
+            if (parser.Accept(out @event))
             {
-                return null;
+                parser.MoveNext();
+                return true;
             }
-            var @event = (T)parser.Current;
-            parser.MoveNext();
-            return @event;
+            return false;
         }
 
         /// <summary>
-        /// Gets the next event without consuming it.
+        /// Enforces that the current event is of the specified type.
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
-        /// <returns>Returns the current event if it is of type T; otherwise returns null.</returns>
-        public static T Peek<T>(this IParser parser) where T : ParsingEvent
+        /// <returns>Returns the current event.</returns>
+        /// <exception cref="YamlException">If the current event is not of the specified type.</exception>
+        public static T Require<T>(this IParser parser) where T : ParsingEvent
         {
-            if (!parser.Accept<T>())
+            if (!parser.Accept<T>(out var required))
             {
-                return null;
+                var @event = parser.Current;
+                if (@event == null)
+                {
+                    throw new YamlException($"Expected '{typeof(T).Name}', got nothing.");
+                }
+                throw new YamlException(@event.Start, @event.End, $"Expected '{typeof(T).Name}', got '{@event.GetType().Name}' (at {@event.Start}).");
             }
-            return (T)parser.Current;
+            return required;
+        }
+
+        /// <summary>
+        /// Checks whether the current event is of the specified type.
+        /// </summary>
+        /// <typeparam name="T">Type of the event.</typeparam>
+        /// <returns>Returns true if the current event is of type <typeparamref name="T"/>. Otherwise returns false.</returns>
+        public static bool Accept<T>(this IParser parser, out T @event) where T : ParsingEvent
+        {
+            if (parser.Current == null)
+            {
+                if (!parser.MoveNext())
+                {
+                    throw new EndOfStreamException();
+                }
+            }
+
+            if (parser.Current is T evt)
+            {
+                @event = evt;
+                return true;
+            }
+            else
+            {
+                @event = default;
+                return false;
+            }
         }
 
         /// <summary>
@@ -106,10 +116,34 @@ namespace YamlDotNet.Core
             var depth = 0;
             do
             {
-                depth += parser.Peek<ParsingEvent>().NestingIncrease;
-                parser.MoveNext();
+                var next = parser.Consume<ParsingEvent>();
+                depth += next.NestingIncrease;
             }
             while (depth > 0);
+        }
+        
+        [Obsolete("Please use Consume<T>() instead")]
+        public static T Expect<T>(this IParser parser) where T : ParsingEvent
+        {
+            return parser.Consume<T>();
+        }
+
+        [Obsolete("Please use TryConsume<T>(out var evt) instead")]
+        public static T Allow<T>(this IParser parser) where T : ParsingEvent
+        {
+            return parser.TryConsume<T>(out var @event) ? @event : default;
+        }
+
+        [Obsolete("Please use Accept<T>(out var evt) instead")]
+        public static T Peek<T>(this IParser parser) where T : ParsingEvent
+        {
+            return parser.Accept<T>(out var @event) ? @event : default;
+        }
+
+        [Obsolete("Please use TryConsume<T>(out var evt) or Accept<T>(out var evt) instead")]
+        public static bool Accept<T>(this IParser parser) where T : ParsingEvent
+        {
+            return Accept<T>(parser, out var _);
         }
     }
 }

@@ -70,14 +70,11 @@ namespace YamlDotNet.Serialization.Converters
         /// <remarks>On deserializing, all formats in the list are used for conversion.</remarks>
         public object ReadYaml(IParser parser, Type type)
         {
-            var value = ((Scalar)parser.Current).Value;
+            var value = parser.Consume<Scalar>().Value;
             var style = this.kind == DateTimeKind.Local ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal;
 
             var dt = DateTime.ParseExact(value, this.formats, this.provider, style);
             dt = EnsureDateTimeKind(dt, this.kind);
-
-            parser.MoveNext();
-
             return dt;
         }
 

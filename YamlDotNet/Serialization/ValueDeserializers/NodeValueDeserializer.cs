@@ -51,8 +51,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         public object DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            var nodeEvent = parser.Peek<NodeEvent>();
-
+            parser.Accept<NodeEvent>(out var nodeEvent);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
             try

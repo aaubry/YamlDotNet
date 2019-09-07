@@ -78,8 +78,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
         {
-            parser.Expect<SequenceStart>();
-            while (!parser.Accept<SequenceEnd>())
+            parser.Consume<SequenceStart>();
+            while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var current = parser.Current;
 
@@ -103,7 +103,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     );
                 }
             }
-            parser.Expect<SequenceEnd>();
         }
     }
 }

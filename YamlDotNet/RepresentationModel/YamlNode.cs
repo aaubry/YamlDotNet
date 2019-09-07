@@ -81,24 +81,23 @@ namespace YamlDotNet.RepresentationModel
         /// <returns>Returns the node that has been parsed.</returns>
         static internal YamlNode ParseNode(IParser parser, DocumentLoadingState state)
         {
-            if (parser.Accept<Scalar>())
+            if (parser.Accept<Scalar>(out var _))
             {
                 return new YamlScalarNode(parser, state);
             }
 
-            if (parser.Accept<SequenceStart>())
+            if (parser.Accept<SequenceStart>(out var _))
             {
                 return new YamlSequenceNode(parser, state);
             }
 
-            if (parser.Accept<MappingStart>())
+            if (parser.Accept<MappingStart>(out var _))
             {
                 return new YamlMappingNode(parser, state);
             }
 
-            if (parser.Accept<AnchorAlias>())
+            if (parser.TryConsume<AnchorAlias>(out var alias))
             {
-                var alias = parser.Expect<AnchorAlias>();
                 return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
             }
 

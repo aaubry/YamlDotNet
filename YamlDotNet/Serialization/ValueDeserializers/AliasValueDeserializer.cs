@@ -109,8 +109,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
         public object DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
             object value;
-            var alias = parser.Allow<AnchorAlias>();
-            if (alias != null)
+            if (parser.TryConsume<AnchorAlias>(out var alias))
             {
                 var aliasState = state.Get<AliasState>();
                 ValuePromise valuePromise;
@@ -124,9 +123,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             }
 
             string anchor = null;
-
-            var nodeEvent = parser.Peek<NodeEvent>();
-            if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
+            if (parser.Accept<NodeEvent>(out var nodeEvent) && !string.IsNullOrEmpty(nodeEvent.Anchor))
             {
                 anchor = nodeEvent.Anchor;
             }

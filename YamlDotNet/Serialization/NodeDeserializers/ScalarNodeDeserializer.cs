@@ -36,8 +36,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            var scalar = parser.Allow<Scalar>();
-            if (scalar == null)
+            if (!parser.TryConsume<Scalar>(out var scalar))
             {
                 value = null;
                 return false;

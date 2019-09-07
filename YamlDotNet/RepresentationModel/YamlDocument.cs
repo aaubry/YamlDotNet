@@ -63,9 +63,9 @@ namespace YamlDotNet.RepresentationModel
         {
             var state = new DocumentLoadingState();
 
-            parser.Expect<DocumentStart>();
+            parser.Consume<DocumentStart>();
 
-            while (!parser.Accept<DocumentEnd>())
+            while (!parser.TryConsume<DocumentEnd>(out var _))
             {
                 Debug.Assert(RootNode == null);
                 RootNode = YamlNode.ParseNode(parser, state);
@@ -77,8 +77,6 @@ namespace YamlDotNet.RepresentationModel
             }
 
             state.ResolveAliases();
-
-            parser.Expect<DocumentEnd>();
         }
 
         /// <summary>

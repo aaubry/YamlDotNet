@@ -675,7 +675,7 @@ namespace YamlDotNet.Test.Serialization
                 "aaa: 222",
                 "..."));
 
-            reader.Expect<StreamStart>();
+            reader.Consume<StreamStart>();
             var one = Deserializer.Deserialize<Simple>(reader);
             var two = Deserializer.Deserialize<Simple>(reader);
 
@@ -695,12 +695,12 @@ namespace YamlDotNet.Test.Serialization
                 "aaa: 333",
                 "..."));
 
-            reader.Expect<StreamStart>();
+            reader.Consume<StreamStart>();
             var one = Deserializer.Deserialize<Simple>(reader);
             var two = Deserializer.Deserialize<Simple>(reader);
             var three = Deserializer.Deserialize<Simple>(reader);
 
-            reader.Accept<StreamEnd>().Should().BeTrue("reader should have reached StreamEnd");
+            reader.Accept<StreamEnd>(out var _).Should().BeTrue("reader should have reached StreamEnd");
             one.ShouldBeEquivalentTo(new { aaa = "111" });
             two.ShouldBeEquivalentTo(new { aaa = "222" });
             three.ShouldBeEquivalentTo(new { aaa = "333" });
@@ -1447,8 +1447,7 @@ namespace YamlDotNet.Test.Serialization
 
             public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
             {
-                var comment = parser.Allow<Comment>();
-                if (comment != null)
+                if (parser.TryConsume<Comment>(out var comment))
                 {
                     Comment = comment.Value;
                 }
@@ -1810,7 +1809,7 @@ namespace YamlDotNet.Test.Serialization
 
             public object ReadYaml(IParser parser, Type type)
             {
-                var scalar = parser.Expect<Scalar>();
+                var scalar = parser.Consume<Scalar>();
                 return new NonSerializable { Text = scalar.Value };
             }
 
