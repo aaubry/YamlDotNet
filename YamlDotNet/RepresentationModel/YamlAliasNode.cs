@@ -71,10 +71,11 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as YamlAliasNode;
-            return other != null && Equals(other) && SafeEquals(Anchor, other.Anchor);
+            return obj is YamlAliasNode other
+                && Equals(other)
+                && Equals(Anchor, other.Anchor);
         }
 
         /// <summary>

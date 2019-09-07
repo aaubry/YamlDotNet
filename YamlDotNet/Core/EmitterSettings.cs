@@ -35,7 +35,7 @@ namespace YamlDotNet.Core
 
         public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength)
         {
-            if(bestIndent < 2 || bestIndent > 9)
+            if (bestIndent < 2 || bestIndent > 9)
             {
                 throw new ArgumentOutOfRangeException(nameof(bestIndent), $"BestIndent must be between 2 and 9, inclusive");
             }

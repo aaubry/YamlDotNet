@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.
         /// </summary>
-        public Type SerializeAs { get; set; }
+        public Type? SerializeAs { get; set; }
 
         /// <summary>
         /// Specifies the order priority of this property.
@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
         /// </summary>
-        public string Alias { get; set; }
+        public string? Alias { get; set; }
 
         /// <summary>
         /// When false, naming conventions will not be applied to this member. Defaults to true.
@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization
         /// <param name="serializeAs">Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.</param>
         public YamlMemberAttribute(Type serializeAs) : this()
         {
-            SerializeAs = serializeAs;
+            SerializeAs = serializeAs ?? throw new ArgumentNullException(nameof(serializeAs));
         }
     }
 }

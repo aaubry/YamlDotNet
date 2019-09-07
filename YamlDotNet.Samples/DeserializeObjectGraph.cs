@@ -26,7 +26,7 @@ namespace YamlDotNet.Samples
             var input = new StringReader(Document);
 
             var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             var order = deserializer.Deserialize<Order>(input);

@@ -46,10 +46,10 @@ namespace YamlDotNet.Serialization
                 PropertyName = propertyName;
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
-                var other = (AttributeKey)obj;
-                return AttributeType.Equals(other.AttributeType)
+                return obj is AttributeKey other
+                    && AttributeType.Equals(other.AttributeType)
                     && PropertyName.Equals(other.PropertyName);
             }
 
@@ -70,10 +70,9 @@ namespace YamlDotNet.Serialization
                 Attribute = attribute;
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
-                var other = obj as AttributeMapping;
-                return other != null
+                return obj is AttributeMapping other
                     && RegisteredType.Equals(other.RegisteredType)
                     && Attribute.Equals(other.Attribute);
             }
@@ -90,7 +89,7 @@ namespace YamlDotNet.Serialization
             public int Matches(Type matchType)
             {
                 var currentPriority = 0;
-                var currentType = matchType;
+                Type? currentType = matchType;
                 while (currentType != null)
                 {
                     ++currentPriority;
@@ -112,13 +111,12 @@ namespace YamlDotNet.Serialization
 
         private readonly Dictionary<AttributeKey, List<AttributeMapping>> overrides = new Dictionary<AttributeKey, List<AttributeMapping>>();
 
-        public T GetAttribute<T>(Type type, string member) where T : Attribute
+        public T? GetAttribute<T>(Type type, string member) where T : Attribute
         {
-            List<AttributeMapping> mappings;
-            if (overrides.TryGetValue(new AttributeKey(typeof(T), member), out mappings))
+            if (overrides.TryGetValue(new AttributeKey(typeof(T), member), out var mappings))
             {
                 int bestMatchPriority = 0;
-                AttributeMapping bestMatch = null;
+                AttributeMapping? bestMatch = null;
 
                 foreach (var mapping in mappings)
                 {
@@ -132,11 +130,11 @@ namespace YamlDotNet.Serialization
 
                 if (bestMatchPriority > 0)
                 {
-                    return (T)bestMatch.Attribute;
+                    return (T)bestMatch!.Attribute;
                 }
             }
 
-            return null;
+            return default;
         }
 
         /// <summary>
@@ -149,16 +147,15 @@ namespace YamlDotNet.Serialization
         {
             var mapping = new AttributeMapping(type, attribute);
 
-            List<AttributeMapping> mappings;
             var attributeKey = new AttributeKey(attribute.GetType(), member);
-            if (!overrides.TryGetValue(attributeKey, out mappings))
+            if (!overrides.TryGetValue(attributeKey, out var mappings))
             {
                 mappings = new List<AttributeMapping>();
                 overrides.Add(attributeKey, mappings);
             }
             else if (mappings.Contains(mapping))
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Attribute ({2}) already set for Type {0}, Member {1}", type.FullName, member, attribute));
+                throw new InvalidOperationException($"Attribute ({attribute}) already set for Type {type.FullName}, Member {member}");
             }
 
             mappings.Add(mapping);

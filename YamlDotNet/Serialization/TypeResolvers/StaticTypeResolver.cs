@@ -28,7 +28,7 @@ namespace YamlDotNet.Serialization.TypeResolvers
     /// </summary>
     public sealed class StaticTypeResolver : ITypeResolver
     {
-        public Type Resolve(Type staticType, object actualValue)
+        public Type Resolve(Type staticType, object? actualValue)
         {
             return staticType;
         }

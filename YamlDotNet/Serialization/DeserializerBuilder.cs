@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
 using YamlDotNet.Serialization.ObjectFactories;
@@ -48,6 +49,7 @@ namespace YamlDotNet.Serialization
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
         /// </summary>
         public DeserializerBuilder()
+            : base(new StaticTypeResolver())
         {
             tagMappings = new Dictionary<string, Type>
             {
@@ -60,7 +62,7 @@ namespace YamlDotNet.Serialization
             };
 
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
-            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention != null ? new NamingConventionTypeInspector(inner, namingConvention) : inner);
+            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
             typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner));
@@ -87,8 +89,6 @@ namespace YamlDotNet.Serialization
                 { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
-
-            WithTypeResolver(new StaticTypeResolver());
         }
 
         protected override DeserializerBuilder Self { get { return this; } }
@@ -98,12 +98,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public DeserializerBuilder WithObjectFactory(IObjectFactory objectFactory)
         {
-            if (objectFactory == null)
-            {
-                throw new ArgumentNullException(nameof(objectFactory));
-            }
-
-            this.objectFactory = objectFactory;
+            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             return this;
         }
 
@@ -295,10 +290,9 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            Type alreadyRegisteredType;
-            if (tagMappings.TryGetValue(tag, out alreadyRegisteredType))
+            if (tagMappings.TryGetValue(tag, out var alreadyRegisteredType))
             {
-                throw new ArgumentException(string.Format("Type already has a registered type '{0}' for tag '{1}'", alreadyRegisteredType.FullName, tag), nameof(tag));
+                throw new ArgumentException($"Type already has a registered type '{alreadyRegisteredType.FullName}' for tag '{tag}'", nameof(tag));
             }
 
             tagMappings.Add(tag, type);
@@ -317,7 +311,7 @@ namespace YamlDotNet.Serialization
 
             if (!tagMappings.Remove(tag))
             {
-                throw new KeyNotFoundException(string.Format("Tag '{0}' is not registered", tag));
+                throw new KeyNotFoundException($"Tag '{tag}' is not registered");
             }
             return this;
         }

@@ -31,18 +31,12 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 
         public TagNodeTypeResolver(IDictionary<string, Type> tagMappings)
         {
-            if (tagMappings == null)
-            {
-                throw new ArgumentNullException(nameof(tagMappings));
-            }
-
-            this.tagMappings = tagMappings;
+            this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
         }
 
-        bool INodeTypeResolver.Resolve(NodeEvent nodeEvent, ref Type currentType)
+        bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
-            Type predefinedType;
-            if (!string.IsNullOrEmpty(nodeEvent.Tag) && tagMappings.TryGetValue(nodeEvent.Tag, out predefinedType))
+            if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Tag) && tagMappings.TryGetValue(nodeEvent.Tag, out var predefinedType))
             {
                 currentType = predefinedType;
                 return true;

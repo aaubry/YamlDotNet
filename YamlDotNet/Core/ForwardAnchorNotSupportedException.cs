@@ -28,15 +28,8 @@ namespace YamlDotNet.Core
     /// that has not yet been defined in a context that does not support forward references.
     /// </summary>
     [Serializable]
-    public class ForwardAnchorNotSupportedException : YamlException
+    public sealed class ForwardAnchorNotSupportedException : YamlException
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
-        /// </summary>
-        public ForwardAnchorNotSupportedException()
-        {
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
         /// </summary>

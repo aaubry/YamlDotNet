@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using YamlDotNet.Serialization.Converters;
+using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Serialization
@@ -33,22 +34,25 @@ namespace YamlDotNet.Serialization
     public abstract class BuilderSkeleton<TBuilder>
         where TBuilder : BuilderSkeleton<TBuilder>
     {
-        internal INamingConvention namingConvention;
+        internal INamingConvention namingConvention = NullNamingConvention.Instance;
         internal ITypeResolver typeResolver;
         internal readonly YamlAttributeOverrides overrides;
         internal readonly LazyComponentRegistrationList<Nothing, IYamlTypeConverter> typeConverterFactories;
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
         private bool ignoreFields;
 
-        internal BuilderSkeleton()
+        internal BuilderSkeleton(ITypeResolver typeResolver)
         {
             overrides = new YamlAttributeOverrides();
 
-            typeConverterFactories = new LazyComponentRegistrationList<Nothing, IYamlTypeConverter>();
-            typeConverterFactories.Add(typeof(GuidConverter), _ => new GuidConverter(false));
-            typeConverterFactories.Add(typeof(SystemTypeConverter), _ => new SystemTypeConverter());
+            typeConverterFactories = new LazyComponentRegistrationList<Nothing, IYamlTypeConverter>
+            {
+                { typeof(GuidConverter), _ => new GuidConverter(false) },
+                { typeof(SystemTypeConverter), _ => new SystemTypeConverter() }
+            };
 
             typeInspectorFactories = new LazyComponentRegistrationList<ITypeInspector, ITypeInspector>();
+            this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
         }
 
         protected abstract TBuilder Self { get; }
@@ -82,12 +86,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public TBuilder WithNamingConvention(INamingConvention namingConvention)
         {
-            if (namingConvention == null)
-            {
-                throw new ArgumentNullException(nameof(namingConvention));
-            }
-
-            this.namingConvention = namingConvention;
+            this.namingConvention = namingConvention ?? throw new ArgumentNullException(nameof(namingConvention));
             return Self;
         }
 
@@ -96,12 +95,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public TBuilder WithTypeResolver(ITypeResolver typeResolver)
         {
-            if (typeResolver == null)
-            {
-                throw new ArgumentNullException(nameof(typeResolver));
-            }
-
-            this.typeResolver = typeResolver;
+            this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
             return Self;
         }
 

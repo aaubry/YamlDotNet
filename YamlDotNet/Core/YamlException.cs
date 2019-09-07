@@ -32,26 +32,19 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Gets the position in the input stream where the event that originated the exception starts.
         /// </summary>
-        public Mark Start { get; private set; }
+        public Mark Start { get; }
 
         /// <summary>
         /// Gets the position in the input stream where the event that originated the exception ends.
         /// </summary>
-        public Mark End { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YamlException"/> class.
-        /// </summary>
-        public YamlException()
-        {
-        }
+        public Mark End { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
         /// <param name="message">The message.</param>
         public YamlException(string message)
-            : base(message)
+            : this(Mark.Empty, Mark.Empty, message)
         {
         }
 
@@ -66,8 +59,8 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        public YamlException(Mark start, Mark end, string message, Exception innerException)
-            : base(string.Format("({0}) - ({1}): {2}", start, end, message), innerException)
+        public YamlException(Mark start, Mark end, string message, Exception? innerException)
+            : base($"({start}) - ({end}): {message}", innerException)
         {
             Start = start;
             End = end;
@@ -79,7 +72,7 @@ namespace YamlDotNet.Core
         /// <param name="message">The message.</param>
         /// <param name="inner">The inner.</param>
         public YamlException(string message, Exception inner)
-            : base(message, inner)
+            : this(Mark.Empty, Mark.Empty, message, inner)
         {
         }
     }

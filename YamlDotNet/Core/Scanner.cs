@@ -73,7 +73,7 @@ namespace YamlDotNet.Core
         private int flowLevel;
         private int tokensParsed;
         private bool tokenAvailable;
-        private Token previous;
+        private Token? previous;
 
         private bool IsDocumentStart() =>
             !analyzer.EndOfInput &&
@@ -98,7 +98,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Gets the current token.
         /// </summary>
-        public Token Current { get; private set; }
+        public Token? Current { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Scanner"/> class.
@@ -267,7 +267,7 @@ namespace YamlDotNet.Core
                         throw new SyntaxErrorException(mark, mark, "While scanning a simple key, could not find expected ':'.");
                     }
 
-                    key.IsPossible = false;
+                    key.MarkAsImpossible();
                 }
             }
         }
@@ -714,7 +714,7 @@ namespace YamlDotNet.Core
         ///      %TAG    !yaml!  tag:yaml.org,2002:  \n
         ///      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         /// </summary>
-        private Token ScanDirective()
+        private Token? ScanDirective()
         {
             // Eat '%'.
 
@@ -1055,7 +1055,7 @@ namespace YamlDotNet.Core
 
                 // Remove the simple key.
 
-                simpleKey.IsPossible = false;
+                simpleKey.MarkAsImpossible();
 
                 // A simple key cannot follow another simple key.
 
@@ -1476,7 +1476,7 @@ namespace YamlDotNet.Core
 
             // Scan the leading line breaks and determine the indentation level if needed.
 
-            currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, start, ref end);
+            currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, ref end);
 
             // Scan the block scalar content.
 
@@ -1532,7 +1532,7 @@ namespace YamlDotNet.Core
 
                 // Eat the following indentation spaces and line breaks.
 
-                currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, start, ref end);
+                currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, ref end);
             }
 
             // Chomp the tail.
@@ -1557,7 +1557,7 @@ namespace YamlDotNet.Core
         /// indentation level if needed.
         /// </summary>
 
-        private int ScanBlockScalarBreaks(int currentIndent, StringBuilder breaks, Mark start, ref Mark end)
+        private int ScanBlockScalarBreaks(int currentIndent, StringBuilder breaks, ref Mark end)
         {
             int maxIndent = 0;
 
@@ -2045,7 +2045,7 @@ namespace YamlDotNet.Core
 
             // Remove the key from the stack.
 
-            key.IsPossible = false;
+            key.MarkAsImpossible();
         }
 
         /// <summary>
@@ -2168,7 +2168,7 @@ namespace YamlDotNet.Core
         /// Scan a tag.
         /// </summary>
 
-        private string ScanTagUri(string head, Mark start)
+        private string ScanTagUri(string? head, Mark start)
         {
             var tag = new StringBuilder();
             if (head != null && head.Length > 1)
@@ -2215,6 +2215,8 @@ namespace YamlDotNet.Core
             return tag.ToString();
         }
 
+        private static readonly byte[] EmptyBytes = new byte[0];
+
         /// <summary>
         /// Decode an URI-escape sequence corresponding to a single UTF-8 character.
         /// </summary>
@@ -2223,7 +2225,7 @@ namespace YamlDotNet.Core
         {
             // Decode the required number of characters.
 
-            byte[] charBytes = null;
+            byte[] charBytes = EmptyBytes;
             int nextInsertionIndex = 0;
             int width = 0;
             do
@@ -2402,7 +2404,7 @@ namespace YamlDotNet.Core
 
             if (simpleKeyAllowed)
             {
-                var key = new SimpleKey(true, isRequired, tokensParsed + tokens.Count, cursor);
+                var key = new SimpleKey(isRequired, tokensParsed + tokens.Count, cursor);
 
                 RemoveSimpleKey();
 

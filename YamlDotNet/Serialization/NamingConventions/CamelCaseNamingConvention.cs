@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NamingConventions
@@ -30,9 +31,16 @@ namespace YamlDotNet.Serialization.NamingConventions
     /// </summary>
     public sealed class CamelCaseNamingConvention : INamingConvention
     {
+        [Obsolete("Use the Instance static field instead of creating new instances")]
+        public CamelCaseNamingConvention() { }
+
         public string Apply(string value)
         {
             return value.ToCamelCase();
         }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        public static readonly INamingConvention Instance = new CamelCaseNamingConvention();
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

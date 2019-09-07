@@ -47,15 +47,13 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 return false;
             }
 
-            var convertible = value.Value as IYamlConvertible;
-            if (convertible != null)
+            if (value.Value is IYamlConvertible convertible)
             {
                 return false;
             }
 
 #pragma warning disable 0618 // IYamlSerializable is obsolete
-            var serializable = value.Value as IYamlSerializable;
-            if (serializable != null)
+            if (value.Value is IYamlSerializable serializable)
             {
                 return false;
             }

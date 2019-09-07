@@ -28,21 +28,16 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class LambdaObjectFactory : IObjectFactory
     {
-        private readonly Func<Type, object> _factory;
+        private readonly Func<Type, object> factory;
 
         public LambdaObjectFactory(Func<Type, object> factory)
         {
-            if (factory == null)
-            {
-                throw new ArgumentNullException(nameof(factory));
-            }
-
-            _factory = factory;
+            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
         public object Create(Type type)
         {
-            return _factory(type);
+            return factory(type);
         }
     }
 }

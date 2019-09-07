@@ -27,6 +27,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using System.Text;
 using YamlDotNet.Serialization;
+using static YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -140,7 +141,7 @@ namespace YamlDotNet.RepresentationModel
             {
                 if (children[i] is YamlAliasNode)
                 {
-                    children[i] = state.GetNode(children[i].Anchor, true, children[i].Start, children[i].End);
+                    children[i] = state.GetNode(children[i].Anchor!, children[i].Start, children[i].End);
                 }
             }
         }
@@ -172,17 +173,21 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             var other = obj as YamlSequenceNode;
-            if (other == null || !Equals(other) || children.Count != other.children.Count)
+            var areEqual = other != null
+                && Equals(Tag, other.Tag)
+                && children.Count == other.children.Count;
+
+            if (!areEqual)
             {
                 return false;
             }
 
             for (int i = 0; i < children.Count; ++i)
             {
-                if (!SafeEquals(children[i], other.children[i]))
+                if (!Equals(children[i], other!.children[i]))
                 {
                     return false;
                 }
@@ -199,12 +204,12 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         public override int GetHashCode()
         {
-            var hashCode = base.GetHashCode();
-
+            var hashCode = 0;
             foreach (var item in children)
             {
-                hashCode = CombineHashCodes(hashCode, GetHashCode(item));
+                hashCode = CombineHashCodes(hashCode, item);
             }
+            hashCode = CombineHashCodes(hashCode, Tag);
             return hashCode;
         }
 

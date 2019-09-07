@@ -67,9 +67,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <typeparam name="T">The type to which the value is to be converted.</typeparam>
         /// <param name="value">The value to convert.</param>
         /// <returns></returns>
-        public static T ChangeType<T>(object value)
+        public static T ChangeType<T>(object? value)
         {
-            return (T)ChangeType(value, typeof(T));
+            return (T)ChangeType(value, typeof(T))!; // This cast should always be valid
         }
 
         /// <summary>
@@ -79,9 +79,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="value">The value to convert.</param>
         /// <param name="provider">The provider.</param>
         /// <returns></returns>
-        public static T ChangeType<T>(object value, IFormatProvider provider)
+        public static T ChangeType<T>(object? value, IFormatProvider provider)
         {
-            return (T)ChangeType(value, typeof(T), provider);
+            return (T)ChangeType(value, typeof(T), provider)!; // This cast should always be valid
         }
 
         /// <summary>
@@ -91,9 +91,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="value">The value to convert.</param>
         /// <param name="culture">The culture.</param>
         /// <returns></returns>
-        public static T ChangeType<T>(object value, CultureInfo culture)
+        public static T ChangeType<T>(object? value, CultureInfo culture)
         {
-            return (T)ChangeType(value, typeof(T), culture);
+            return (T)ChangeType(value, typeof(T), culture)!; // This cast should always be valid
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="value">The value to convert.</param>
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <returns></returns>
-        public static object ChangeType(object value, Type destinationType)
+        public static object? ChangeType(object? value, Type destinationType)
         {
             return ChangeType(value, destinationType, CultureInfo.InvariantCulture);
         }
@@ -114,7 +114,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <param name="provider">The format provider.</param>
         /// <returns></returns>
-        public static object ChangeType(object value, Type destinationType, IFormatProvider provider)
+        public static object? ChangeType(object? value, Type destinationType, IFormatProvider provider)
         {
             return ChangeType(value, destinationType, new CultureInfoAdapter(CultureInfo.CurrentCulture, provider));
         }
@@ -126,7 +126,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <param name="culture">The culture.</param>
         /// <returns></returns>
-        public static object ChangeType(object value, Type destinationType, CultureInfo culture)
+        public static object? ChangeType(object? value, Type destinationType, CultureInfo culture)
         {
             // Handle null and DBNull
             if (value == null || value.IsDbNull())
@@ -157,8 +157,9 @@ namespace YamlDotNet.Serialization.Utilities
             // Enums also require special handling
             if (destinationType.IsEnum())
             {
-                var valueText = value as string;
-                return valueText != null ? Enum.Parse(destinationType, valueText, true) : value;
+                return value is string valueText
+                    ? Enum.Parse(destinationType, valueText, true)
+                    : value;
             }
 
             // Special case for booleans to support parsing "1" and "0". This is
@@ -166,10 +167,14 @@ namespace YamlDotNet.Serialization.Utilities
             if (destinationType == typeof(bool))
             {
                 if ("0".Equals(value))
+                {
                     return false;
+                }
 
                 if ("1".Equals(value))
+                {
                     return true;
+                }
             }
 
             // Try with the source type's converter
@@ -247,7 +252,7 @@ namespace YamlDotNet.Serialization.Utilities
             // Handle TimeSpan
             if (destinationType == typeof(TimeSpan))
             {
-                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture));
+                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture)!);
             }
 
             // Default to the Convert class

@@ -43,7 +43,7 @@ namespace YamlDotNet.AotTest
         {
             var output = new StringWriter();
             var serializer = new SerializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
             PerformTest(testName, () => serializer.Serialize(output, graph));
         }
@@ -52,7 +52,7 @@ namespace YamlDotNet.AotTest
         {
             var input = new StringReader(yaml);
             var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
             PerformTest(testName, () => deserializer.Deserialize<T>(input));
         }

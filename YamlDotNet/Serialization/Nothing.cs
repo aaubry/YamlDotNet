@@ -28,5 +28,7 @@ namespace YamlDotNet.Serialization
     public sealed class Nothing
     {
         private Nothing() { }
+
+        public static readonly Nothing Instance = new Nothing();
     }
 }

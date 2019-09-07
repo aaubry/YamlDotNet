@@ -62,12 +62,7 @@ namespace YamlDotNet.Serialization
         /// </remarks>
         private Deserializer(IValueDeserializer valueDeserializer)
         {
-            if (valueDeserializer == null)
-            {
-                throw new ArgumentNullException(nameof(valueDeserializer));
-            }
-
-            this.valueDeserializer = valueDeserializer;
+            this.valueDeserializer = valueDeserializer ?? throw new ArgumentNullException(nameof(valueDeserializer));
         }
 
         /// <summary>
@@ -84,21 +79,21 @@ namespace YamlDotNet.Serialization
         {
             using (var reader = new StringReader(input))
             {
-                return (T)Deserialize(reader, typeof(T));
+                return Deserialize<T>(reader);
             }
         }
 
         public T Deserialize<T>(TextReader input)
         {
-            return (T)Deserialize(input, typeof(T));
+            return Deserialize<T>(new Parser(input));
         }
 
-        public object Deserialize(TextReader input)
+        public object? Deserialize(TextReader input)
         {
             return Deserialize(input, typeof(object));
         }
 
-        public object Deserialize(string input, Type type)
+        public object? Deserialize(string input, Type type)
         {
             using (var reader = new StringReader(input))
             {
@@ -106,17 +101,17 @@ namespace YamlDotNet.Serialization
             }
         }
 
-        public object Deserialize(TextReader input, Type type)
+        public object? Deserialize(TextReader input, Type type)
         {
             return Deserialize(new Parser(input), type);
         }
 
         public T Deserialize<T>(IParser parser)
         {
-            return (T)Deserialize(parser, typeof(T));
+            return (T)Deserialize(parser, typeof(T))!; // We really want an exception if we are trying to deserialize null into a non-nullable type
         }
 
-        public object Deserialize(IParser parser)
+        public object? Deserialize(IParser parser)
         {
             return Deserialize(parser, typeof(object));
         }
@@ -127,7 +122,7 @@ namespace YamlDotNet.Serialization
         /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>
         /// <param name="type">The static type of the object to deserialize.</param>
         /// <returns>Returns the deserialized object.</returns>
-        public object Deserialize(IParser parser, Type type)
+        public object? Deserialize(IParser parser, Type type)
         {
             if (parser == null)
             {
@@ -143,7 +138,7 @@ namespace YamlDotNet.Serialization
 
             var hasDocumentStart = parser.TryConsume<DocumentStart>(out var _);
 
-            object result = null;
+            object? result = null;
             if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
             {
                 using (var state = new SerializerState())

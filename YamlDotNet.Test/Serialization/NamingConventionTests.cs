@@ -35,7 +35,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("thisIsATest", "ThisIsATest")]
         public void AppliesCamelCaseConvention(string expectedName, string input)
         {
-            ShouldApplyConventionGiven(input, expectedName, new CamelCaseNamingConvention());
+            ShouldApplyConventionGiven(input, expectedName, CamelCaseNamingConvention.Instance);
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("ThisIsATest", "thisIsATest")]
         public void AppliesPascalCaseConvention(string expectedName, string input)
         {
-            ShouldApplyConventionGiven(input, expectedName, new PascalCaseNamingConvention());
+            ShouldApplyConventionGiven(input, expectedName, PascalCaseNamingConvention.Instance);
         }
 
         [Theory]
@@ -54,7 +54,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("this-is-a-test", "this-is-a-test")]
         public void AppliesHyphenatedConvention(string expectedName, string input)
         {
-            ShouldApplyConventionGiven(input, expectedName, new HyphenatedNamingConvention());
+            ShouldApplyConventionGiven(input, expectedName, HyphenatedNamingConvention.Instance);
         }
 
         [Theory]
@@ -63,7 +63,7 @@ namespace YamlDotNet.Test.Serialization
         [InlineData("this_is_a_test", "this-is-a-test")]
         public void AppliesUnderscoredConvention(string expectedName, string input)
         {
-            ShouldApplyConventionGiven(input, expectedName, new UnderscoredNamingConvention());
+            ShouldApplyConventionGiven(input, expectedName, UnderscoredNamingConvention.Instance);
         }
 
         private void ShouldApplyConventionGiven(string input, string expectedName, INamingConvention convention)

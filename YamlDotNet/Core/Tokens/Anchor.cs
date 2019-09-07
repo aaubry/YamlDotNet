@@ -29,19 +29,11 @@ namespace YamlDotNet.Core.Tokens
     [Serializable]
     public class Anchor : Token
     {
-        private readonly string value;
-
         /// <summary>
         /// Gets the value.
         /// </summary>
         /// <value>The value.</value>
-        public string Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public string Value { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Anchor"/> class.
@@ -61,7 +53,7 @@ namespace YamlDotNet.Core.Tokens
         public Anchor(string value, Mark start, Mark end)
             : base(start, end)
         {
-            this.value = value;
+            this.Value = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

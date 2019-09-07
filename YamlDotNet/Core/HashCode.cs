@@ -38,5 +38,25 @@ namespace YamlDotNet.Core
         {
             return ((h1 << 5) + h1) ^ h2;
         }
+
+        public static int CombineHashCodes(int h1, object? o2)
+        {
+            return CombineHashCodes(h1, GetHashCode(o2));
+        }
+
+        public static int CombineHashCodes(object? first, params object?[] others)
+        {
+            var hashCode = GetHashCode(first);
+            foreach (var other in others)
+            {
+                hashCode = CombineHashCodes(hashCode, other);
+            }
+            return hashCode;
+        }
+
+        private static int GetHashCode(object? obj)
+        {
+            return obj != null ? obj.GetHashCode() : 0;
+        }
     }
 }

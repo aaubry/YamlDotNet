@@ -33,12 +33,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         public AliasValueDeserializer(IValueDeserializer innerDeserializer)
         {
-            if (innerDeserializer == null)
-            {
-                throw new ArgumentNullException(nameof(innerDeserializer));
-            }
-
-            this.innerDeserializer = innerDeserializer;
+            this.innerDeserializer = innerDeserializer ?? throw new ArgumentNullException(nameof(innerDeserializer));
         }
 
         private sealed class AliasState : Dictionary<string, ValuePromise>, IPostDeserializationCallback
@@ -49,10 +44,8 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 {
                     if (!promise.HasValue)
                     {
-                        throw new AnchorNotFoundException(promise.Alias.Start, promise.Alias.End, string.Format(
-                            "Anchor '{0}' not found",
-                            promise.Alias.Value
-                        ));
+                        var alias = promise.Alias!; // When the value is not known, the alias is always known
+                        throw new AnchorNotFoundException(alias.Start, alias.End, $"Anchor '{alias.Value}' not found");
                     }
                 }
             }
@@ -60,26 +53,26 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         private sealed class ValuePromise : IValuePromise
         {
-            public event Action<object> ValueAvailable;
+            public event Action<object?> ValueAvailable;
 
             public bool HasValue { get; private set; }
 
-            private object value;
+            private object? value;
 
-            public readonly AnchorAlias Alias;
+            public readonly AnchorAlias? Alias;
 
             public ValuePromise(AnchorAlias alias)
             {
                 this.Alias = alias;
             }
 
-            public ValuePromise(object value)
+            public ValuePromise(object? value)
             {
                 HasValue = true;
                 this.value = value;
             }
 
-            public object Value
+            public object? Value
             {
                 get
                 {
@@ -98,22 +91,18 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                     HasValue = true;
                     this.value = value;
 
-                    if (ValueAvailable != null)
-                    {
-                        ValueAvailable(value);
-                    }
+                    ValueAvailable?.Invoke(value);
                 }
             }
         }
 
-        public object DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            object value;
+            object? value;
             if (parser.TryConsume<AnchorAlias>(out var alias))
             {
                 var aliasState = state.Get<AliasState>();
-                ValuePromise valuePromise;
-                if (!aliasState.TryGetValue(alias.Value, out valuePromise))
+                if (!aliasState.TryGetValue(alias.Value, out var valuePromise))
                 {
                     valuePromise = new ValuePromise(alias);
                     aliasState.Add(alias.Value, valuePromise);
@@ -122,7 +111,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 return valuePromise.HasValue ? valuePromise.Value : valuePromise;
             }
 
-            string anchor = null;
+            string? anchor = null;
             if (parser.Accept<NodeEvent>(out var nodeEvent) && !string.IsNullOrEmpty(nodeEvent.Anchor))
             {
                 anchor = nodeEvent.Anchor;
@@ -134,8 +123,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             {
                 var aliasState = state.Get<AliasState>();
 
-                ValuePromise valuePromise;
-                if (!aliasState.TryGetValue(anchor, out valuePromise))
+                if (!aliasState.TryGetValue(anchor, out var valuePromise))
                 {
                     aliasState.Add(anchor, new ValuePromise(value));
                 }

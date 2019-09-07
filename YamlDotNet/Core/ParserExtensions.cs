@@ -51,9 +51,9 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <typeparam name="T">Type of the <see cref="ParsingEvent"/>.</typeparam>
         /// <returns>Returns true if the current event is of type T; otherwise returns null.</returns>
-        public static bool TryConsume<T>(this IParser parser, out T @event) where T : ParsingEvent
+        public static bool TryConsume<T>(this IParser parser, [MaybeNullWhen(false)] out T @event) where T : ParsingEvent
         {
-            if (parser.Accept(out @event))
+            if (parser.Accept(out @event!))
             {
                 parser.MoveNext();
                 return true;
@@ -86,7 +86,7 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <typeparam name="T">Type of the event.</typeparam>
         /// <returns>Returns true if the current event is of type <typeparamref name="T"/>. Otherwise returns false.</returns>
-        public static bool Accept<T>(this IParser parser, out T @event) where T : ParsingEvent
+        public static bool Accept<T>(this IParser parser, [MaybeNullWhen(false)] out T @event) where T : ParsingEvent
         {
             if (parser.Current == null)
             {
@@ -103,7 +103,7 @@ namespace YamlDotNet.Core
             }
             else
             {
-                @event = default;
+                @event = default!;
                 return false;
             }
         }
@@ -129,13 +129,13 @@ namespace YamlDotNet.Core
         }
 
         [Obsolete("Please use TryConsume<T>(out var evt) instead")]
-        public static T Allow<T>(this IParser parser) where T : ParsingEvent
+        public static T? Allow<T>(this IParser parser) where T : ParsingEvent
         {
             return parser.TryConsume<T>(out var @event) ? @event : default;
         }
 
         [Obsolete("Please use Accept<T>(out var evt) instead")]
-        public static T Peek<T>(this IParser parser) where T : ParsingEvent
+        public static T? Peek<T>(this IParser parser) where T : ParsingEvent
         {
             return parser.Accept<T>(out var @event) ? @event : default;
         }

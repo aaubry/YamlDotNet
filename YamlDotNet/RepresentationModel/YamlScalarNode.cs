@@ -26,6 +26,7 @@ using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using static YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -40,7 +41,7 @@ namespace YamlDotNet.RepresentationModel
         /// Gets or sets the value of the node.
         /// </summary>
         /// <value>The value.</value>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Gets or sets the style of the node.
@@ -75,7 +76,7 @@ namespace YamlDotNet.RepresentationModel
         /// Initializes a new instance of the <see cref="YamlScalarNode"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        public YamlScalarNode(string value)
+        public YamlScalarNode(string? value)
         {
             this.Value = value;
         }
@@ -96,7 +97,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new Scalar(Anchor, Tag, Value, Style, Tag == null, false));
+            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag == null, false));
         }
 
         /// <summary>
@@ -111,10 +112,11 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as YamlScalarNode;
-            return other != null && Equals(other) && SafeEquals(Value, other.Value);
+            return obj is YamlScalarNode other
+                && Equals(Tag, other.Tag)
+                && Equals(Value, other.Value);
         }
 
         /// <summary>
@@ -125,10 +127,7 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         public override int GetHashCode()
         {
-            return CombineHashCodes(
-                base.GetHashCode(),
-                GetHashCode(Value)
-            );
+            return CombineHashCodes(Tag, Value);
         }
 
         /// <summary>
@@ -136,7 +135,7 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator string(YamlScalarNode value)
+        public static explicit operator string?(YamlScalarNode value)
         {
             return value.Value;
         }
@@ -149,7 +148,7 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         internal override string ToString(RecursionLevel level)
         {
-            return Value;
+            return Value ?? string.Empty;
         }
 
         /// <summary>

@@ -23,6 +23,6 @@ namespace YamlDotNet.Serialization
 {
     public interface IAliasProvider
     {
-        string GetAlias(object target);
+        string? GetAlias(object target);
     }
 }

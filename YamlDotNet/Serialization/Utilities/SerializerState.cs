@@ -36,8 +36,7 @@ namespace YamlDotNet.Serialization.Utilities
         public T Get<T>()
             where T : class, new()
         {
-            object value;
-            if (!items.TryGetValue(typeof(T), out value))
+            if (!items.TryGetValue(typeof(T), out var value))
             {
                 value = new T();
                 items.Add(typeof(T), value);

@@ -48,9 +48,9 @@ namespace YamlDotNet.Serialization.Converters
             return new Guid(value);
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
-            var guid = (Guid)value;
+            var guid = (Guid)value!;
             emitter.Emit(new Scalar(null, null, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }

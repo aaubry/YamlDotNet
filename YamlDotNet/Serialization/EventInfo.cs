@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -26,22 +27,23 @@ namespace YamlDotNet.Serialization
 {
     public abstract class EventInfo
     {
-        public IObjectDescriptor Source { get; private set; }
+        public IObjectDescriptor Source { get; }
 
         protected EventInfo(IObjectDescriptor source)
         {
-            Source = source;
+            Source = source ?? throw new ArgumentNullException(nameof(source));
         }
     }
 
     public class AliasEventInfo : EventInfo
     {
-        public AliasEventInfo(IObjectDescriptor source)
+        public AliasEventInfo(IObjectDescriptor source, string alias)
             : base(source)
         {
+            Alias = alias ?? throw new ArgumentNullException(nameof(alias));
         }
 
-        public string Alias { get; set; }
+        public string Alias { get; }
     }
 
     public class ObjectEventInfo : EventInfo
@@ -51,8 +53,8 @@ namespace YamlDotNet.Serialization
         {
         }
 
-        public string Anchor { get; set; }
-        public string Tag { get; set; }
+        public string? Anchor { get; set; }
+        public string? Tag { get; set; }
     }
 
     public sealed class ScalarEventInfo : ObjectEventInfo
@@ -61,6 +63,7 @@ namespace YamlDotNet.Serialization
             : base(source)
         {
             Style = source.ScalarStyle;
+            RenderedValue = string.Empty;
         }
 
         public string RenderedValue { get; set; }

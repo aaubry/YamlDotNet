@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization.Utilities
 {
     internal static class ReflectionUtility
     {
-        public static Type GetImplementedGenericInterface(Type type, Type genericInterfaceType)
+        public static Type? GetImplementedGenericInterface(Type type, Type genericInterfaceType)
         {
             foreach (var interfacetype in GetImplementedInterfaces(type))
             {

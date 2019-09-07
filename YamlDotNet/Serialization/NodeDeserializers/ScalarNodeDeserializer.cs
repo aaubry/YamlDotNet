@@ -34,7 +34,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private const string BooleanTruePattern = "^(true|y|yes|on)$";
         private const string BooleanFalsePattern = "^(false|n|no|off)$";
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             if (!parser.TryConsume<Scalar>(out var scalar))
             {
@@ -132,7 +132,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var numberBuilder = new StringBuilder();
             int currentIndex = 0;
             bool isNegative = false;
-            int numberBase = 0;
+            int numberBase;
             ulong result = 0;
 
             if (value[0] == '-')

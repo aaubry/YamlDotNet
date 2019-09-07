@@ -31,32 +31,18 @@ namespace YamlDotNet.Core.Tokens
     [Serializable]
     public class TagDirective : Token
     {
-        private readonly string handle;
-        private readonly string prefix;
 
         /// <summary>
         /// Gets the handle.
         /// </summary>
         /// <value>The handle.</value>
-        public string Handle
-        {
-            get
-            {
-                return handle;
-            }
-        }
+        public string Handle { get; }
 
         /// <summary>
         /// Gets the prefix.
         /// </summary>
         /// <value>The prefix.</value>
-        public string Prefix
-        {
-            get
-            {
-                return prefix;
-            }
-        }
+        public string Prefix { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TagDirective"/> class.
@@ -68,7 +54,7 @@ namespace YamlDotNet.Core.Tokens
         {
         }
 
-        private static readonly Regex tagHandleValidator = new Regex(@"^!([0-9A-Za-z_\-]*!)?$", StandardRegexOptions.Compiled);
+        private static readonly Regex TagHandlePattern = new Regex(@"^!([0-9A-Za-z_\-]*!)?$", StandardRegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TagDirective"/> class.
@@ -85,19 +71,19 @@ namespace YamlDotNet.Core.Tokens
                 throw new ArgumentNullException(nameof(handle), "Tag handle must not be empty.");
             }
 
-            if (!tagHandleValidator.IsMatch(handle))
+            if (!TagHandlePattern.IsMatch(handle))
             {
                 throw new ArgumentException("Tag handle must start and end with '!' and contain alphanumerical characters only.", nameof(handle));
             }
 
-            this.handle = handle;
+            this.Handle = handle;
 
             if (string.IsNullOrEmpty(prefix))
             {
                 throw new ArgumentNullException(nameof(prefix), "Tag prefix must not be empty.");
             }
 
-            this.prefix = prefix;
+            this.Prefix = prefix;
         }
 
         /// <summary>
@@ -107,10 +93,11 @@ namespace YamlDotNet.Core.Tokens
         /// <returns>
         /// true if the specified System.Object is equal to the current System.Object; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as TagDirective;
-            return other != null && handle.Equals(other.handle) && prefix.Equals(other.prefix);
+            return obj is TagDirective other
+                && Handle.Equals(other.Handle)
+                && Prefix.Equals(other.Prefix);
         }
 
         /// <summary>
@@ -121,13 +108,13 @@ namespace YamlDotNet.Core.Tokens
         /// </returns>
         public override int GetHashCode()
         {
-            return handle.GetHashCode() ^ prefix.GetHashCode();
+            return Handle.GetHashCode() ^ Prefix.GetHashCode();
         }
 
         /// <summary/>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", handle, prefix);
+            return $"{Handle} => {Prefix}";
         }
     }
 }

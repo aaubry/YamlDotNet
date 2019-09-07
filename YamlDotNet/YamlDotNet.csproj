@@ -15,6 +15,9 @@
     <NoWarn>1591;1574</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+
     <NetStandard>false</NetStandard>
   </PropertyGroup>
 

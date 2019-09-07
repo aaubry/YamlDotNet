@@ -348,8 +348,10 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var input = new NameConvention { AliasTest = "Fourth" };
 
-            var attribute = new YamlMemberAttribute();
-            attribute.Alias = "fourthOverride";
+            var attribute = new YamlMemberAttribute
+            {
+                Alias = "fourthOverride"
+            };
 
             var serializer = new SerializerBuilder()
                 .WithAttributeOverride<NameConvention>(nc => nc.AliasTest, attribute)
@@ -1220,7 +1222,7 @@ namespace YamlDotNet.Test.Serialization
                 );
 
             DeserializerBuilder
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .IgnoreUnmatchedProperties();
 
             var actual = Deserializer.Deserialize<SimpleScratch>(UsingReaderFor(text));
@@ -1402,7 +1404,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void AttributeOverridesAndNamingConventionDoNotConflict()
         {
-            var namingConvention = new CamelCaseNamingConvention();
+            var namingConvention = CamelCaseNamingConvention.Instance;
 
             var yamlMember = new YamlMemberAttribute
             {
@@ -1578,7 +1580,7 @@ namespace YamlDotNet.Test.Serialization
         public void NamingConventionIsNotAppliedBySerializerWhenApplyNamingConventionsIsFalse()
         {
             var sut = new SerializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             var yaml = sut.Serialize(new NamingConventionDisabled { NoConvention = "value" });
@@ -1590,7 +1592,7 @@ namespace YamlDotNet.Test.Serialization
         public void NamingConventionIsNotAppliedByDeserializerWhenApplyNamingConventionsIsFalse()
         {
             var sut = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             var yaml = "NoConvention: value";

@@ -62,8 +62,9 @@ namespace YamlDotNet.Serialization
                     throw new InvalidOperationException("The parser has reached the end before deserialization completed.");
                 }
 
-                events.Add(parser.Current);
-                depth += parser.Current.NestingIncrease;
+                var current = parser.Current!;
+                events.Add(current);
+                depth += current.NestingIncrease;
             } while (depth > 0);
 
             Debug.Assert(depth == 0);

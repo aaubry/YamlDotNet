@@ -24,7 +24,7 @@ namespace YamlDotNet.Core.Events
     /// <summary>
     /// Represents a stream end event.
     /// </summary>
-    public class StreamEnd : ParsingEvent
+    public sealed class StreamEnd : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.

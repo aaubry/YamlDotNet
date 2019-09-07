@@ -24,11 +24,11 @@ using System;
 namespace YamlDotNet.Core
 {
     [Serializable]
-    public class Cursor
+    public sealed class Cursor
     {
-        public int Index { get; set; }
-        public int Line { get; set; }
-        public int LineOffset { get; set; }
+        public int Index { get; private set; }
+        public int Line { get; private set; }
+        public int LineOffset { get; private set; }
 
         public Cursor()
         {

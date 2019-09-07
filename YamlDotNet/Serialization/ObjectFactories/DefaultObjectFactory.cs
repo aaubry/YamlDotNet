@@ -41,8 +41,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
         {
             if (type.IsInterface())
             {
-                Type implementationType;
-                if (defaultInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out implementationType))
+                if (defaultInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
                 {
                     type = implementationType.MakeGenericType(type.GetGenericArguments());
                 }
@@ -50,11 +49,11 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
             try
             {
-                return Activator.CreateInstance(type);
+                return Activator.CreateInstance(type)!;
             }
             catch (Exception err)
             {
-                var message = string.Format("Failed to create an instance of type '{0}'.", type);
+                var message = $"Failed to create an instance of type '{type.FullName}'.";
                 throw new InvalidOperationException(message, err);
             }
         }
