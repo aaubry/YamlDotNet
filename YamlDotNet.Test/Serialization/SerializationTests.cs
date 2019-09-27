@@ -1327,16 +1327,16 @@ namespace YamlDotNet.Test.Serialization
                         new FloatTestCase("double.NaN", double.NaN, ".nan"),
                         new FloatTestCase("double.PositiveInfinity", double.PositiveInfinity, ".inf"),
                         new FloatTestCase("double.NegativeInfinity", double.NegativeInfinity, "-.inf"),
-                        new FloatTestCase("double.Epsilon", double.Epsilon, "4.9406564584124654E-324"),
-                        new FloatTestCase("double.MinValue", double.MinValue, "-1.7976931348623157E+308"),
-                        new FloatTestCase("double.MaxValue", double.MaxValue, "1.7976931348623157E+308"),
+                        new FloatTestCase("double.Epsilon", double.Epsilon, double.Epsilon.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G17", CultureInfo.InvariantCulture)),
 
                         new FloatTestCase("float.NaN", float.NaN, ".nan"),
                         new FloatTestCase("float.PositiveInfinity", float.PositiveInfinity, ".inf"),
                         new FloatTestCase("float.NegativeInfinity", float.NegativeInfinity, "-.inf"),
-                        new FloatTestCase("float.Epsilon", float.Epsilon, "1.40129846E-45"),
-                        new FloatTestCase("float.MinValue", float.MinValue, "-3.40282347E+38"),
-                        new FloatTestCase("float.MaxValue", float.MaxValue, "3.40282347E+38")
+                        new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.MinValue", float.MinValue, float.MinValue.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.MaxValue", float.MaxValue, float.MaxValue.ToString("G17", CultureInfo.InvariantCulture))
                     }
                     .Select(tc => new object[] { tc });
             }
