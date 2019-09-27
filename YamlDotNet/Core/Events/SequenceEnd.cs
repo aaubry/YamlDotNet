@@ -24,31 +24,19 @@ namespace YamlDotNet.Core.Events
     /// <summary>
     /// Represents a sequence end event.
     /// </summary>
-    public class SequenceEnd : ParsingEvent
+    public sealed class SequenceEnd : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.
         /// The value can be either -1, 0 or 1. For start events, it will be 1,
         /// for end events, it will be -1, and for the remaining events, it will be 0.
         /// </summary>
-        public override int NestingIncrease
-        {
-            get
-            {
-                return -1;
-            }
-        }
+        public override int NestingIncrease => -1;
 
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.
         /// </summary>
-        internal override EventType Type
-        {
-            get
-            {
-                return EventType.SequenceEnd;
-            }
-        }
+        internal override EventType Type => EventType.SequenceEnd;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SequenceEnd"/> class.

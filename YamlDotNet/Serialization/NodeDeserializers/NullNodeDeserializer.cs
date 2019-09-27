@@ -27,18 +27,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class NullNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             value = null;
-            var evt = parser.Peek<NodeEvent>();
-            var isNull = evt != null
-                && NodeIsNull(evt);
-
-            if (isNull)
+            if (parser.Accept<NodeEvent>(out var evt))
             {
-                parser.SkipThisAndNestedEvents();
+                if (NodeIsNull(evt))
+                {
+                    parser.SkipThisAndNestedEvents();
+                    return true;
+                }
             }
-            return isNull;
+
+            return false;
         }
 
         private bool NodeIsNull(NodeEvent nodeEvent)
@@ -50,12 +51,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return true;
             }
 
-            var scalar = nodeEvent as Scalar;
-            if (scalar == null || scalar.Style != Core.ScalarStyle.Plain)
-                return false;
+            if (nodeEvent is Scalar scalar && scalar.Style == Core.ScalarStyle.Plain)
+            {
+                var value = scalar.Value;
+                return value == "" || value == "~" || value == "null" || value == "Null" || value == "NULL";
+            }
 
-            var value = scalar.Value;
-            return value == "" || value == "~" || value == "null" || value == "Null" || value == "NULL";
+            return false;
         }
     }
 }

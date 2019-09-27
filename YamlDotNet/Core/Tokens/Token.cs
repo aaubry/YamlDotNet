@@ -29,31 +29,15 @@ namespace YamlDotNet.Core.Tokens
     [Serializable]
     public abstract class Token
     {
-        private readonly Mark start;
-
         /// <summary>
         /// Gets the start of the token in the input stream.
         /// </summary>
-        public Mark Start
-        {
-            get
-            {
-                return start;
-            }
-        }
-
-        private readonly Mark end;
+        public Mark Start { get; }
 
         /// <summary>
         /// Gets the end of the token in the input stream.
         /// </summary>
-        public Mark End
-        {
-            get
-            {
-                return end;
-            }
-        }
+        public Mark End { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Token"/> class.
@@ -62,8 +46,8 @@ namespace YamlDotNet.Core.Tokens
         /// <param name="end">The end position of the token.</param>
         protected Token(Mark start, Mark end)
         {
-            this.start = start;
-            this.end = end;
+            this.Start = start ?? throw new ArgumentNullException(nameof(start));
+            this.End = end ?? throw new ArgumentNullException(nameof(end));
         }
     }
 }

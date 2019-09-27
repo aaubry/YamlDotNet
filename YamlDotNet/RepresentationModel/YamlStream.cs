@@ -97,13 +97,12 @@ namespace YamlDotNet.RepresentationModel
         public void Load(IParser parser)
         {
             documents.Clear();
-            parser.Expect<StreamStart>();
-            while (!parser.Accept<StreamEnd>())
+            parser.Consume<StreamStart>();
+            while (!parser.TryConsume<StreamEnd>(out var _))
             {
                 var document = new YamlDocument(parser);
                 documents.Add(document);
             }
-            parser.Expect<StreamEnd>();
         }
 
         /// <summary>

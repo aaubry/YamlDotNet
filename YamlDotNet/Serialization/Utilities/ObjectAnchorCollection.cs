@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using YamlDotNet.Core;
 
@@ -50,7 +51,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="object">The object.</param>
         /// <param name="anchor">The anchor.</param>
         /// <returns></returns>
-        public bool TryGetAnchor(object @object, out string anchor)
+        public bool TryGetAnchor(object @object, [MaybeNullWhen(false)] out string? anchor)
         {
             return anchorsByObject.TryGetValue(@object, out anchor);
         }
@@ -63,13 +64,12 @@ namespace YamlDotNet.Serialization.Utilities
         {
             get
             {
-                object value;
-                if (objectsByAnchor.TryGetValue(anchor, out value))
+                if (objectsByAnchor.TryGetValue(anchor, out var value))
                 {
                     return value;
                 }
 
-                throw new AnchorNotFoundException(string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
+                throw new AnchorNotFoundException($"The anchor '{anchor}' does not exists");
             }
         }
     }

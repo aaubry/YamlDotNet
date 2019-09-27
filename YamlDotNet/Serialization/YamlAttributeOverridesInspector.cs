@@ -41,13 +41,16 @@ namespace YamlDotNet.Serialization
             this.overrides = overrides;
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            if (overrides == null)
-                return innerTypeDescriptor.GetProperties(type, container);
+            var properties = innerTypeDescriptor.GetProperties(type, container);
+            if (overrides != null)
+            {
+                properties = properties
+                    .Select(p => (IPropertyDescriptor)new OverridePropertyDescriptor(p, overrides, type));
+            }
 
-            return innerTypeDescriptor.GetProperties(type, container)
-                .Select(p => (IPropertyDescriptor)new OverridePropertyDescriptor(p, overrides, type));
+            return properties;
         }
 
         public sealed class OverridePropertyDescriptor : IPropertyDescriptor
@@ -69,7 +72,7 @@ namespace YamlDotNet.Serialization
 
             public Type Type { get { return baseDescriptor.Type; } }
 
-            public Type TypeOverride
+            public Type? TypeOverride
             {
                 get { return baseDescriptor.TypeOverride; }
                 set { baseDescriptor.TypeOverride = value; }
@@ -87,7 +90,7 @@ namespace YamlDotNet.Serialization
                 set { baseDescriptor.ScalarStyle = value; }
             }
 
-            public void Write(object target, object value)
+            public void Write(object target, object? value)
             {
                 baseDescriptor.Write(target, value);
             }

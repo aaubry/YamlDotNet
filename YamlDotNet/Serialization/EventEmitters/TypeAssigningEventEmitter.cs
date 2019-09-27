@@ -29,82 +29,88 @@ namespace YamlDotNet.Serialization.EventEmitters
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
-        private IDictionary<Type, string> tagMappings;
+        private readonly IDictionary<Type, string> tagMappings;
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, string> tagMappings)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
-            this.tagMappings = tagMappings;
+            this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
         {
             var suggestedStyle = ScalarStyle.Plain;
 
-            var typeCode = eventInfo.Source.Value != null
-                ? eventInfo.Source.Type.GetTypeCode()
-                : TypeCode.Empty;
-
-            switch (typeCode)
+            var value = eventInfo.Source.Value;
+            if (value == null)
             {
-                case TypeCode.Boolean:
-                    eventInfo.Tag = "tag:yaml.org,2002:bool";
-                    eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    eventInfo.Tag = "tag:yaml.org,2002:int";
-                    eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Single:
-                    eventInfo.Tag = "tag:yaml.org,2002:float";
-                    eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Double:
-                    eventInfo.Tag = "tag:yaml.org,2002:float";
-                    eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Decimal:
-                    eventInfo.Tag = "tag:yaml.org,2002:float";
-                    eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.String:
-                case TypeCode.Char:
-                    eventInfo.Tag = "tag:yaml.org,2002:str";
-                    eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
-                    suggestedStyle = ScalarStyle.Any;
-                    break;
-
-                case TypeCode.DateTime:
-                    eventInfo.Tag = "tag:yaml.org,2002:timestamp";
-                    eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Empty:
-                    eventInfo.Tag = "tag:yaml.org,2002:null";
-                    eventInfo.RenderedValue = "";
-                    break;
-
-                default:
-                    if (eventInfo.Source.Type == typeof(TimeSpan))
-                    {
-                        eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.Source.Value);
+                eventInfo.Tag = "tag:yaml.org,2002:null";
+                eventInfo.RenderedValue = "";
+            }
+            else
+            {
+                var typeCode = eventInfo.Source.Type.GetTypeCode();
+                switch (typeCode)
+                {
+                    case TypeCode.Boolean:
+                        eventInfo.Tag = "tag:yaml.org,2002:bool";
+                        eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
                         break;
-                    }
 
-                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.SByte:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                        eventInfo.Tag = "tag:yaml.org,2002:int";
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        break;
+
+                    case TypeCode.Single:
+                        eventInfo.Tag = "tag:yaml.org,2002:float";
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
+                        break;
+
+                    case TypeCode.Double:
+                        eventInfo.Tag = "tag:yaml.org,2002:float";
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
+                        break;
+
+                    case TypeCode.Decimal:
+                        eventInfo.Tag = "tag:yaml.org,2002:float";
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        break;
+
+                    case TypeCode.String:
+                    case TypeCode.Char:
+                        eventInfo.Tag = "tag:yaml.org,2002:str";
+                        eventInfo.RenderedValue = value.ToString()!;
+                        suggestedStyle = ScalarStyle.Any;
+                        break;
+
+                    case TypeCode.DateTime:
+                        eventInfo.Tag = "tag:yaml.org,2002:timestamp";
+                        eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
+                        break;
+
+                    case TypeCode.Empty:
+                        eventInfo.Tag = "tag:yaml.org,2002:null";
+                        eventInfo.RenderedValue = "";
+                        break;
+
+                    default:
+                        if (eventInfo.Source.Type == typeof(TimeSpan))
+                        {
+                            eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(value);
+                            break;
+                        }
+
+                        throw new NotSupportedException($"TypeCode.{typeCode} is not supported.");
+                }
             }
 
             eventInfo.IsPlainImplicit = true;
@@ -130,7 +136,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         private void AssignTypeIfNeeded(ObjectEventInfo eventInfo)
         {
-            if (tagMappings.TryGetValue(eventInfo.Source.Type, out string tag))
+            if (tagMappings.TryGetValue(eventInfo.Source.Type, out var tag))
             {
                 eventInfo.Tag = tag;
             }

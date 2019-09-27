@@ -44,7 +44,7 @@ namespace YamlDotNet.Serialization
 
         public static string FormatNumber(object number)
         {
-            return Convert.ToString(number, NumberFormat);
+            return Convert.ToString(number, NumberFormat)!;
         }
 
         public static string FormatNumber(double number)

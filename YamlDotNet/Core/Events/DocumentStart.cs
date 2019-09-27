@@ -27,60 +27,31 @@ namespace YamlDotNet.Core.Events
     /// <summary>
     /// Represents a document start event.
     /// </summary>
-    public class DocumentStart : ParsingEvent
+    public sealed class DocumentStart : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.
         /// The value can be either -1, 0 or 1. For start events, it will be 1,
         /// for end events, it will be -1, and for the remaining events, it will be 0.
         /// </summary>
-        public override int NestingIncrease
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public override int NestingIncrease => 1;
 
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.
         /// </summary>
-        internal override EventType Type
-        {
-            get
-            {
-                return EventType.DocumentStart;
-            }
-        }
-
-        private readonly TagDirectiveCollection tags;
-        private readonly VersionDirective version;
+        internal override EventType Type => EventType.DocumentStart;
 
         /// <summary>
         /// Gets the tags.
         /// </summary>
         /// <value>The tags.</value>
-        public TagDirectiveCollection Tags
-        {
-            get
-            {
-                return tags;
-            }
-        }
+        public TagDirectiveCollection? Tags { get; }
 
         /// <summary>
         /// Gets the version.
         /// </summary>
         /// <value>The version.</value>
-        public VersionDirective Version
-        {
-            get
-            {
-                return version;
-            }
-        }
-
-        private readonly bool isImplicit;
+        public VersionDirective? Version { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is implicit.
@@ -88,13 +59,7 @@ namespace YamlDotNet.Core.Events
         /// <value>
         ///     <c>true</c> if this instance is implicit; otherwise, <c>false</c>.
         /// </value>
-        public bool IsImplicit
-        {
-            get
-            {
-                return isImplicit;
-            }
-        }
+        public bool IsImplicit { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentStart"/> class.
@@ -104,12 +69,12 @@ namespace YamlDotNet.Core.Events
         /// <param name="isImplicit">Indicates whether the event is implicit.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit, Mark start, Mark end)
+        public DocumentStart(VersionDirective? version, TagDirectiveCollection? tags, bool isImplicit, Mark start, Mark end)
             : base(start, end)
         {
-            this.version = version;
-            this.tags = tags;
-            this.isImplicit = isImplicit;
+            this.Version = version;
+            this.Tags = tags;
+            this.IsImplicit = isImplicit;
         }
 
         /// <summary>
@@ -118,7 +83,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="version">The version.</param>
         /// <param name="tags">The tags.</param>
         /// <param name="isImplicit">Indicates whether the event is implicit.</param>
-        public DocumentStart(VersionDirective version, TagDirectiveCollection tags, bool isImplicit)
+        public DocumentStart(VersionDirective? version, TagDirectiveCollection? tags, bool isImplicit)
             : this(version, tags, isImplicit, Mark.Empty, Mark.Empty)
         {
         }
@@ -149,11 +114,7 @@ namespace YamlDotNet.Core.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "Document start [isImplicit = {0}]",
-                isImplicit
-            );
+            return $"Document start [isImplicit = {IsImplicit}]";
         }
 
         /// <summary>

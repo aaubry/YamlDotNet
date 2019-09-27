@@ -28,10 +28,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Gets a value indicating whether the end of the input reader has been reached.
         /// </summary>
-        bool EndOfInput
-        {
-            get;
-        }
+        bool EndOfInput { get; }
 
         /// <summary>
         /// Gets the character at the specified offset.

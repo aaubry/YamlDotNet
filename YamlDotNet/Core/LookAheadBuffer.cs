@@ -32,7 +32,7 @@ namespace YamlDotNet.Core
     /// This class implements a circular buffer with a fixed capacity.
     /// </remarks>
     [Serializable]
-    public class LookAheadBuffer : ILookAheadBuffer
+    public sealed class LookAheadBuffer : ILookAheadBuffer
     {
         private readonly TextReader input;
         private readonly char[] buffer;
@@ -47,29 +47,19 @@ namespace YamlDotNet.Core
         /// <param name="capacity">The capacity.</param>
         public LookAheadBuffer(TextReader input, int capacity)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
             if (capacity < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity), "The capacity must be positive.");
             }
 
-            this.input = input;
+            this.input = input ?? throw new ArgumentNullException(nameof(input));
             buffer = new char[capacity];
         }
 
         /// <summary>
         /// Gets a value indicating whether the end of the input reader has been reached.
         /// </summary>
-        public bool EndOfInput
-        {
-            get
-            {
-                return endOfInput && count == 0;
-            }
-        }
+        public bool EndOfInput => endOfInput && count == 0;
 
         /// <summary>
         /// Gets the index of the character for the specified offset.

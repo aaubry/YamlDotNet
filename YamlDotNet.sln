@@ -1,45 +1,54 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet", "YamlDotNet\YamlDotNet.csproj", "{ABFC2E37-119B-439D-82B6-49E9680EEA90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet", "YamlDotNet\YamlDotNet.csproj", "{ABFC2E37-119B-439D-82B6-49E9680EEA90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Samples", "YamlDotNet.Samples\YamlDotNet.Samples.csproj", "{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Test", "YamlDotNet.Test\YamlDotNet.Test.csproj", "{A9F67018-0240-4D16-A4EA-BCB780D0AF05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Test", "YamlDotNet.Test\YamlDotNet.Test.csproj", "{A9F67018-0240-4D16-A4EA-BCB780D0AF05}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests", "PerformanceTests", "{9A64B652-30A5-4632-AF4D-716EF29C5250}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.Lib", "PerformanceTests\YamlDotNet.PerformanceTests.Lib\YamlDotNet.PerformanceTests.Lib.csproj", "{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.Lib", "PerformanceTests\YamlDotNet.PerformanceTests.Lib\YamlDotNet.PerformanceTests.Lib.csproj", "{773B71D6-FEE5-4E4D-8717-5C5EF58D6F17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v1.2.1", "PerformanceTests\YamlDotNet.PerformanceTests.v1.2.1\YamlDotNet.PerformanceTests.v1.2.1.csproj", "{0FB497EA-A116-406A-AE8C-A24933D8CB21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.v1.2.1", "PerformanceTests\YamlDotNet.PerformanceTests.v1.2.1\YamlDotNet.PerformanceTests.v1.2.1.csproj", "{0FB497EA-A116-406A-AE8C-A24933D8CB21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.2.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.2.0\YamlDotNet.PerformanceTests.v2.2.0.csproj", "{C6E0B465-8422-4D6B-85CE-C59724A28E1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.v2.2.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.2.0\YamlDotNet.PerformanceTests.v2.2.0.csproj", "{C6E0B465-8422-4D6B-85CE-C59724A28E1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v2.3.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.3.0\YamlDotNet.PerformanceTests.v2.3.0.csproj", "{BE49A287-5F47-4E3B-90EB-97B51451934C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.v2.3.0", "PerformanceTests\YamlDotNet.PerformanceTests.v2.3.0\YamlDotNet.PerformanceTests.v2.3.0.csproj", "{BE49A287-5F47-4E3B-90EB-97B51451934C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v3.8.0", "PerformanceTests\YamlDotNet.PerformanceTests.v3.8.0\YamlDotNet.PerformanceTests.v3.8.0.csproj", "{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.v3.8.0", "PerformanceTests\YamlDotNet.PerformanceTests.v3.8.0\YamlDotNet.PerformanceTests.v3.8.0.csproj", "{CE856C44-2FE0-4AFA-99CE-F8A076F1BA11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v4.0.0", "PerformanceTests\YamlDotNet.PerformanceTests.v4.0.0\YamlDotNet.PerformanceTests.v4.0.0.csproj", "{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.v4.0.0", "PerformanceTests\YamlDotNet.PerformanceTests.v4.0.0\YamlDotNet.PerformanceTests.v4.0.0.csproj", "{747DD2E9-2A0A-4D5E-8D97-85AA9AC5A036}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.v5.2.1", "PerformanceTests\YamlDotNet.PerformanceTests.v5.2.1\YamlDotNet.PerformanceTests.v5.2.1.csproj", "{BDD556C6-A2A3-46C2-B70A-CA86C16BC060}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.v5.2.1", "PerformanceTests\YamlDotNet.PerformanceTests.v5.2.1\YamlDotNet.PerformanceTests.v5.2.1.csproj", "{BDD556C6-A2A3-46C2-B70A-CA86C16BC060}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.vlatest", "PerformanceTests\YamlDotNet.PerformanceTests.vlatest\YamlDotNet.PerformanceTests.vlatest.csproj", "{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.vlatest", "PerformanceTests\YamlDotNet.PerformanceTests.vlatest\YamlDotNet.PerformanceTests.vlatest.csproj", "{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.Runner", "PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj", "{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.Runner", "PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj", "{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.AotTest", "YamlDotNet.AotTest\YamlDotNet.AotTest.csproj", "{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.AotTest", "YamlDotNet.AotTest\YamlDotNet.AotTest.csproj", "{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB11D2D9-6E3D-45BF-8BCD-A04BCB1F8020}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.cake = build.cake
+		build\common.props = build\common.props
 		CONTRIBUTING.md = CONTRIBUTING.md
-		LICENSE.txt = LICENSE.txt
 		LICENSE-libyaml = LICENSE-libyaml
+		LICENSE.txt = LICENSE.txt
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{45384A6E-A0A1-48DF-8FCC-B04405198048}"
+	ProjectSection(SolutionItems) = preProject
+		docker\build.sh = docker\build.sh
+		docker\Dockerfile = docker\Dockerfile
+		docker\Dockerfile.local = docker\Dockerfile.local
+		docker\Dummy.csproj = docker\Dummy.csproj
 	EndProjectSection
 EndProject
 Global
@@ -51,8 +60,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Debug-AOT|Any CPU.ActiveCfg = Debug-AOT|Any CPU
-		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Debug-AOT|Any CPU.Build.0 = Debug-AOT|Any CPU
+		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Debug-AOT|Any CPU.Build.0 = Debug|Any CPU
 		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABFC2E37-119B-439D-82B6-49E9680EEA90}.Release|Any CPU.Build.0 = Release|Any CPU
 		{689D2A30-C52E-4CF8-8BA1-3178F4EB245A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -130,6 +139,7 @@ Global
 		{BDD556C6-A2A3-46C2-B70A-CA86C16BC060} = {9A64B652-30A5-4632-AF4D-716EF29C5250}
 		{91A1F4BC-65C0-42E6-B5FD-320A2D59AF71} = {9A64B652-30A5-4632-AF4D-716EF29C5250}
 		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9} = {9A64B652-30A5-4632-AF4D-716EF29C5250}
+		{45384A6E-A0A1-48DF-8FCC-B04405198048} = {EB11D2D9-6E3D-45BF-8BCD-A04BCB1F8020}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B388A06A-D288-4E48-B2A1-AE0E06E14EE4}

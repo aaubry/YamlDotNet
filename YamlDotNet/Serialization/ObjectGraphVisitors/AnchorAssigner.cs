@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     {
         private class AnchorAssignment
         {
-            public string Anchor;
+            public string? Anchor;
         }
 
         private readonly IDictionary<object, AnchorAssignment> assignments = new Dictionary<object, AnchorAssignment>();
@@ -42,8 +42,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         protected override bool Enter(IObjectDescriptor value)
         {
-            AnchorAssignment assignment;
-            if (value.Value != null && assignments.TryGetValue(value.Value, out assignment))
+            if (value.Value != null && assignments.TryGetValue(value.Value, out var assignment))
             {
                 if (assignment.Anchor == null)
                 {
@@ -93,10 +92,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             }
         }
 
-        string IAliasProvider.GetAlias(object target)
+        string? IAliasProvider.GetAlias(object target)
         {
-            AnchorAssignment assignment;
-            if (target != null && assignments.TryGetValue(target, out assignment))
+            if (target != null && assignments.TryGetValue(target, out var assignment))
             {
                 return assignment.Anchor;
             }

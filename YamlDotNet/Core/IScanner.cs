@@ -34,18 +34,12 @@ namespace YamlDotNet.Core
         /// Gets the current position inside the input stream.
         /// </summary>
         /// <value>The current position.</value>
-        Mark CurrentPosition
-        {
-            get;
-        }
+        Mark CurrentPosition { get; }
 
         /// <summary>
         /// Gets the current token.
         /// </summary>
-        Token Current
-        {
-            get;
-        }
+        Token? Current { get; }
 
         /// <summary>
         /// Moves to the next token and consumes the current token.

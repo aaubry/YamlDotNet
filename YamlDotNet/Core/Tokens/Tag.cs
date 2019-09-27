@@ -27,34 +27,19 @@ namespace YamlDotNet.Core.Tokens
     /// Represents a tag token.
     /// </summary>
     [Serializable]
-    public class Tag : Token
+    public sealed class Tag : Token
     {
-        private readonly string handle;
-        private readonly string suffix;
-
         /// <summary>
         /// Gets the handle.
         /// </summary>
         /// <value>The handle.</value>
-        public string Handle
-        {
-            get
-            {
-                return handle;
-            }
-        }
+        public string Handle { get; }
 
         /// <summary>
         /// Gets the suffix.
         /// </summary>
         /// <value>The suffix.</value>
-        public string Suffix
-        {
-            get
-            {
-                return suffix;
-            }
-        }
+        public string Suffix { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Tag"/> class.
@@ -76,8 +61,8 @@ namespace YamlDotNet.Core.Tokens
         public Tag(string handle, string suffix, Mark start, Mark end)
             : base(start, end)
         {
-            this.handle = handle;
-            this.suffix = suffix;
+            this.Handle = handle ?? throw new ArgumentNullException(nameof(handle));
+            this.Suffix = suffix ?? throw new ArgumentNullException(nameof(suffix));
         }
     }
 }

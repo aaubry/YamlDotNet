@@ -474,7 +474,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new TestObject() { DateTime = dt };
 
             var builder = new SerializerBuilder();
-            builder.WithNamingConvention(new CamelCaseNamingConvention());
+            builder.WithNamingConvention(CamelCaseNamingConvention.Instance);
             builder.WithTypeConverter(new DateTimeConverter());
 
             var serialiser = builder.Build();
@@ -507,7 +507,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new TestObject() { DateTime = dt };
 
             var builder = new SerializerBuilder();
-            builder.WithNamingConvention(new CamelCaseNamingConvention());
+            builder.WithNamingConvention(CamelCaseNamingConvention.Instance);
             builder.WithTypeConverter(new DateTimeConverter(provider: culture));
 
             var serialiser = builder.Build();
@@ -538,7 +538,7 @@ namespace YamlDotNet.Test.Serialization
             var obj = new TestObject() { DateTime = dt };
 
             var builder = new SerializerBuilder();
-            builder.WithNamingConvention(new CamelCaseNamingConvention());
+            builder.WithNamingConvention(CamelCaseNamingConvention.Instance);
             builder.WithTypeConverter(new DateTimeConverter(kind, formats: new [] {format, "G"}));
 
             var serialiser = builder.Build();

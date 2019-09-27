@@ -26,6 +26,6 @@ namespace YamlDotNet.Serialization
 {
     public interface IValueSerializer
     {
-        void SerializeValue(IEmitter emitter, object value, Type type);
+        void SerializeValue(IEmitter emitter, object? value, Type? type);
     }
 }

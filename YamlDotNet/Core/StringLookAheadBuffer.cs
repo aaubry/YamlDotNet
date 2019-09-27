@@ -24,7 +24,7 @@ using System;
 namespace YamlDotNet.Core
 {
     [Serializable]
-    internal class StringLookAheadBuffer : ILookAheadBuffer
+    internal sealed class StringLookAheadBuffer : ILookAheadBuffer
     {
         private readonly string value;
 
@@ -35,21 +35,9 @@ namespace YamlDotNet.Core
             this.value = value;
         }
 
-        public int Length
-        {
-            get
-            {
-                return value.Length;
-            }
-        }
+        public int Length => value.Length;
 
-        public bool EndOfInput
-        {
-            get
-            {
-                return IsOutside(Position);
-            }
-        }
+        public bool EndOfInput => IsOutside(Position);
 
         public char Peek(int offset)
         {

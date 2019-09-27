@@ -27,6 +27,7 @@ using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using static YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -66,12 +67,12 @@ namespace YamlDotNet.RepresentationModel
 
         private void Load(IParser parser, DocumentLoadingState state)
         {
-            var mapping = parser.Expect<MappingStart>();
+            var mapping = parser.Consume<MappingStart>();
             Load(mapping, state);
             Style = mapping.Style;
 
             bool hasUnresolvedAliases = false;
-            while (!parser.Accept<MappingEnd>())
+            while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var key = ParseNode(parser, state);
                 var value = ParseNode(parser, state);
@@ -92,8 +93,6 @@ namespace YamlDotNet.RepresentationModel
             {
                 state.AddNodeWithUnresolvedAliases(this);
             }
-
-            parser.Expect<MappingEnd>();
         }
 
         /// <summary>
@@ -198,8 +197,8 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state of the document.</param>
         internal override void ResolveAliases(DocumentLoadingState state)
         {
-            Dictionary<YamlNode, YamlNode> keysToUpdate = null;
-            Dictionary<YamlNode, YamlNode> valuesToUpdate = null;
+            Dictionary<YamlNode, YamlNode>? keysToUpdate = null;
+            Dictionary<YamlNode, YamlNode>? valuesToUpdate = null;
             foreach (var entry in children)
             {
                 if (entry.Key is YamlAliasNode)
@@ -208,7 +207,8 @@ namespace YamlDotNet.RepresentationModel
                     {
                         keysToUpdate = new Dictionary<YamlNode, YamlNode>();
                     }
-                    keysToUpdate.Add(entry.Key, state.GetNode(entry.Key.Anchor, true, entry.Key.Start, entry.Key.End));
+                    // TODO: The representation model should be redesigned, because here the anchor could be null but that would be invalid YAML
+                    keysToUpdate.Add(entry.Key, state.GetNode(entry.Key.Anchor!, entry.Key.Start, entry.Key.End));
                 }
                 if (entry.Value is YamlAliasNode)
                 {
@@ -216,7 +216,8 @@ namespace YamlDotNet.RepresentationModel
                     {
                         valuesToUpdate = new Dictionary<YamlNode, YamlNode>();
                     }
-                    valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor, true, entry.Value.Start, entry.Value.End));
+                    // TODO: The representation model should be redesigned, because here the anchor could be null but that would be invalid YAML
+                    valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor!, entry.Value.Start, entry.Value.End));
                 }
             }
             if (valuesToUpdate != null)
@@ -265,18 +266,21 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             var other = obj as YamlMappingNode;
-            if (other == null || !Equals(other) || children.Count != other.children.Count)
+            var areEqual = other != null
+                && Equals(Tag, other.Tag)
+                && children.Count == other.children.Count;
+
+            if (!areEqual)
             {
                 return false;
             }
 
             foreach (var entry in children)
             {
-                YamlNode otherNode;
-                if (!other.children.TryGetValue(entry.Key, out otherNode) || !SafeEquals(entry.Value, otherNode))
+                if (!other!.children.TryGetValue(entry.Key, out var otherNode) || !Equals(entry.Value, otherNode))
                 {
                     return false;
                 }
@@ -297,8 +301,8 @@ namespace YamlDotNet.RepresentationModel
 
             foreach (var entry in children)
             {
-                hashCode = CombineHashCodes(hashCode, GetHashCode(entry.Key));
-                hashCode = CombineHashCodes(hashCode, GetHashCode(entry.Value));
+                hashCode = CombineHashCodes(hashCode, entry.Key);
+                hashCode = CombineHashCodes(hashCode, entry.Value);
             }
             return hashCode;
         }
@@ -407,10 +411,15 @@ namespace YamlDotNet.RepresentationModel
             var result = new YamlMappingNode();
             foreach (var property in mapping.GetType().GetPublicProperties())
             {
-                if (property.CanRead && property.GetGetMethod().GetParameters().Length == 0)
+                // CanRead == true => GetGetMethod() != null
+                if (property.CanRead && property.GetGetMethod()!.GetParameters().Length == 0)
                 {
                     var value = property.GetValue(mapping, null);
-                    var valueNode = (value as YamlNode) ?? (Convert.ToString(value));
+                    if (!(value is YamlNode valueNode))
+                    {
+                        var valueAsString = Convert.ToString(value);
+                        valueNode = valueAsString ?? string.Empty;
+                    }
                     result.Add(property.Name, valueNode);
                 }
             }

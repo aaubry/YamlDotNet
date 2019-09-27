@@ -35,6 +35,6 @@ namespace YamlDotNet.Serialization
         /// true if <paramref name="currentType"/> has been resolved completely;
         /// false if the next type <see cref="INodeTypeResolver"/> should be invoked.
         /// </returns>
-        bool Resolve(NodeEvent nodeEvent, ref Type currentType);
+        bool Resolve(NodeEvent? nodeEvent, ref Type currentType);
     }
 }

@@ -35,18 +35,12 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
-            if (innerTypeDescriptor == null)
-            {
-                throw new ArgumentNullException(nameof(innerTypeDescriptor));
-            }
-
-            this.innerTypeDescriptor = innerTypeDescriptor;
+            this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            List<IPropertyDescriptor> list;
-            if (!cache.TryGetValue(type, out list))
+            if (!cache.TryGetValue(type, out var list))
             {
                 list = new List<IPropertyDescriptor>(innerTypeDescriptor.GetProperties(type, container));
                 cache.Add(type, list);

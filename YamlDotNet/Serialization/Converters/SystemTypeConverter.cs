@@ -19,15 +19,14 @@ namespace YamlDotNet.Serialization.Converters
 
         public object ReadYaml(IParser parser, Type type)
         {
-            var value = ((Scalar)parser.Current).Value;
-            parser.MoveNext();
-            return Type.GetType(value, throwOnError: true);
+            var value = parser.Consume<Scalar>().Value;
+            return Type.GetType(value, throwOnError: true)!; // Will throw instead of returning null
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
-            var systemType = (Type)value;
-            emitter.Emit(new Scalar(null, null, systemType.AssemblyQualifiedName, ScalarStyle.Any, true, false));
+            var systemType = (Type)value!;
+            emitter.Emit(new Scalar(null, null, systemType.AssemblyQualifiedName!, ScalarStyle.Any, true, false));
         }
     }
 }

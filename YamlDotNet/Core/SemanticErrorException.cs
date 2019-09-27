@@ -32,13 +32,6 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
         /// </summary>
-        public SemanticErrorException()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
-        /// </summary>
         /// <param name="message">The message.</param>
         public SemanticErrorException(string message)
             : base(message)

@@ -24,10 +24,10 @@ using System.Globalization;
 
 namespace YamlDotNet.Core.Events
 {
-    public class Comment : ParsingEvent
+    public sealed class Comment : ParsingEvent
     {
-        public string Value { get; private set; }
-        public bool IsInline { get; private set; }
+        public string Value { get; }
+        public bool IsInline { get; }
 
         public Comment(string value, bool isInline)
             : this(value, isInline, Mark.Empty, Mark.Empty)
@@ -41,10 +41,7 @@ namespace YamlDotNet.Core.Events
             IsInline = isInline;
         }
 
-        internal override EventType Type
-        {
-            get { return EventType.Comment; }
-        }
+        internal override EventType Type => EventType.Comment;
 
         public override void Accept(IParsingEventVisitor visitor)
         {
@@ -59,12 +56,7 @@ namespace YamlDotNet.Core.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "{0} Comment [{1}]",
-                IsInline ? "Inline" : "Block",
-                Value
-            );
+            return $"{(IsInline ? "Inline" : "Block")} Comment [{Value}]";
         }
     }
 }

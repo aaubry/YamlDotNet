@@ -28,7 +28,7 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Collection of <see cref="TagDirective"/>.
     /// </summary>
-    public class TagDirectiveCollection : KeyedCollection<string, TagDirective>
+    public sealed class TagDirectiveCollection : KeyedCollection<string, TagDirective>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TagDirectiveCollection"/> class.
@@ -50,10 +50,7 @@ namespace YamlDotNet.Core
         }
 
         /// <summary/>
-        protected override string GetKeyForItem(TagDirective item)
-        {
-            return item.Handle;
-        }
+        protected override string GetKeyForItem(TagDirective item) => item.Handle;
 
         /// <summary>
         /// Gets a value indicating whether the collection contains a directive with the same handle

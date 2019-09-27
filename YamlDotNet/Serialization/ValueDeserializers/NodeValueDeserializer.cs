@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -35,32 +34,20 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         public NodeValueDeserializer(IList<INodeDeserializer> deserializers, IList<INodeTypeResolver> typeResolvers)
         {
-            if (deserializers == null)
-            {
-                throw new ArgumentNullException(nameof(deserializers));
-            }
-
-            this.deserializers = deserializers;
-
-            if (typeResolvers == null)
-            {
-                throw new ArgumentNullException(nameof(typeResolvers));
-            }
-            this.typeResolvers = typeResolvers;
+            this.deserializers = deserializers ?? throw new ArgumentNullException(nameof(deserializers));
+            this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
         }
 
-        public object DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object? DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            var nodeEvent = parser.Peek<NodeEvent>();
-
+            parser.Accept<NodeEvent>(out var nodeEvent);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
             try
             {
                 foreach (var deserializer in deserializers)
                 {
-                    object value;
-                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out value))
+                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
                     {
                         return TypeConverter.ChangeType(value, expectedType);
                     }
@@ -72,20 +59,22 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             }
             catch (Exception ex)
             {
-                throw new YamlException(nodeEvent.Start, nodeEvent.End, "Exception during deserialization", ex);
+                throw new YamlException(
+                    nodeEvent?.Start ?? Mark.Empty,
+                    nodeEvent?.End ?? Mark.Empty,
+                    "Exception during deserialization",
+                    ex
+                );
             }
 
             throw new YamlException(
-                nodeEvent.Start,
-                nodeEvent.End,
-                string.Format(
-                    "No node deserializer was able to deserialize the node into type {0}",
-                    expectedType.AssemblyQualifiedName
-                )
+                nodeEvent?.Start ?? Mark.Empty,
+                nodeEvent?.End ?? Mark.Empty,
+                $"No node deserializer was able to deserialize the node into type {expectedType.AssemblyQualifiedName}"
             );
         }
 
-        private Type GetTypeFromEvent(NodeEvent nodeEvent, Type currentType)
+        private Type GetTypeFromEvent(NodeEvent? nodeEvent, Type currentType)
         {
             foreach (var typeResolver in typeResolvers)
             {

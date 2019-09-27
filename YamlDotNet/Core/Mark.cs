@@ -27,7 +27,7 @@ namespace YamlDotNet.Core
     /// Represents a location inside a file
     /// </summary>
     [Serializable]
-    public class Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
+    public sealed class Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
     {
         /// <summary>
         /// Gets a <see cref="Mark"/> with empty values.
@@ -37,17 +37,17 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Gets / sets the absolute offset in the file
         /// </summary>
-        public int Index { get; private set; }
+        public int Index { get; }
 
         /// <summary>
         /// Gets / sets the number of the line
         /// </summary>
-        public int Line { get; private set; }
+        public int Line { get; }
 
         /// <summary>
         /// Gets / sets the index of the column
         /// </summary>
-        public int Column { get; private set; }
+        public int Column { get; }
 
         public Mark()
         {
@@ -83,17 +83,17 @@ namespace YamlDotNet.Core
         /// </returns>
         public override string ToString()
         {
-            return string.Format("Line: {0}, Col: {1}, Idx: {2}", Line, Column, Index);
+            return $"Line: {Line}, Col: {Column}, Idx: {Index}";
         }
 
         /// <summary />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as Mark);
         }
 
         /// <summary />
-        public bool Equals(Mark other)
+        public bool Equals(Mark? other)
         {
             return other != null
                 && Index == other.Index
@@ -114,7 +114,7 @@ namespace YamlDotNet.Core
         }
 
         /// <summary />
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
             if (obj == null)
             {
@@ -124,7 +124,7 @@ namespace YamlDotNet.Core
         }
 
         /// <summary />
-        public int CompareTo(Mark other)
+        public int CompareTo(Mark? other)
         {
             if (other == null)
             {

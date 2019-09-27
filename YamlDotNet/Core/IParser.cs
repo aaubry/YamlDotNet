@@ -32,7 +32,7 @@ namespace YamlDotNet.Core
         /// Gets the current event. Returns null before the first call to <see cref="MoveNext" />,
         /// and also after <see cref="MoveNext" /> returns false.
         /// </summary>
-        ParsingEvent Current { get; }
+        ParsingEvent? Current { get; }
 
         /// <summary>
         /// Moves to the next event.

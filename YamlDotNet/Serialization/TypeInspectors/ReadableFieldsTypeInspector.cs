@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return type
                 .GetPublicFields()
@@ -60,12 +60,12 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public string Name { get { return fieldInfo.Name; } }
             public Type Type { get { return fieldInfo.FieldType; } }
-            public Type TypeOverride { get; set; }
+            public Type? TypeOverride { get; set; }
             public int Order { get; set; }
             public bool CanWrite { get { return !fieldInfo.IsInitOnly; } }
             public ScalarStyle ScalarStyle { get; set; }
 
-            public void Write(object target, object value)
+            public void Write(object target, object? value)
             {
                 fieldInfo.SetValue(target, value);
             }

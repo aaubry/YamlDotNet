@@ -132,7 +132,7 @@ namespace YamlDotNet.Serialization
             EmitDocument(emitter, graph, type);
         }
 
-        private void EmitDocument(IEmitter emitter, object graph, Type type)
+        private void EmitDocument(IEmitter emitter, object graph, Type? type)
         {
             emitter.Emit(new StreamStart());
             emitter.Emit(new DocumentStart());

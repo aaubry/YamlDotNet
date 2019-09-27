@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YamlDotNet.Serialization
 {
@@ -35,7 +36,7 @@ namespace YamlDotNet.Serialization
         /// <param name="type">The type whose properties are to be enumerated.</param>
         /// <param name="container">The actual object of type <paramref name="type"/> whose properties are to be enumerated. Can be null.</param>
         /// <returns></returns>
-        IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container);
+        IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container);
 
         /// <summary>
         /// Gets the property of the type with the specified name.
@@ -48,6 +49,6 @@ namespace YamlDotNet.Serialization
         /// found in <paramref name="type"/>
         /// </param>
         /// <returns></returns>
-        IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched);
+        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched);
     }
 }

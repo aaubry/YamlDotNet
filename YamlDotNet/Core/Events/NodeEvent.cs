@@ -29,35 +29,19 @@ namespace YamlDotNet.Core.Events
     /// </summary>
     public abstract class NodeEvent : ParsingEvent
     {
-        internal static readonly Regex anchorValidator = new Regex(@"^(?![\[\]\{\},]+).*$", StandardRegexOptions.Compiled);
-
-        private readonly string anchor;
+        internal static readonly Regex AnchorPattern = new Regex(@"^(?![\[\]\{\},]+).*$", StandardRegexOptions.Compiled);
 
         /// <summary>
         /// Gets the anchor.
         /// </summary>
         /// <value></value>
-        public string Anchor
-        {
-            get
-            {
-                return anchor;
-            }
-        }
-
-        private readonly string tag;
+        public string? Anchor { get; }
 
         /// <summary>
         /// Gets the tag.
         /// </summary>
         /// <value></value>
-        public string Tag
-        {
-            get
-            {
-                return tag;
-            }
-        }
+        public string? Tag { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is canonical.
@@ -75,7 +59,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        protected NodeEvent(string anchor, string tag, Mark start, Mark end)
+        protected NodeEvent(string? anchor, string? tag, Mark start, Mark end)
             : base(start, end)
         {
             if (anchor != null)
@@ -85,7 +69,7 @@ namespace YamlDotNet.Core.Events
                     throw new ArgumentException("Anchor value must not be empty.", nameof(anchor));
                 }
 
-                if (!anchorValidator.IsMatch(anchor))
+                if (!AnchorPattern.IsMatch(anchor))
                 {
                     throw new ArgumentException("Anchor value must not contain disallowed characters: []{},", nameof(anchor));
                 }
@@ -96,14 +80,14 @@ namespace YamlDotNet.Core.Events
                 throw new ArgumentException("Tag value must not be empty.", nameof(tag));
             }
 
-            this.anchor = anchor;
-            this.tag = tag;
+            this.Anchor = anchor;
+            this.Tag = tag;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeEvent"/> class.
         /// </summary>
-        protected NodeEvent(string anchor, string tag)
+        protected NodeEvent(string? anchor, string? tag)
             : this(anchor, tag, Mark.Empty, Mark.Empty)
         {
         }

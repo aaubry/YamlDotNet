@@ -44,7 +44,7 @@ namespace YamlDotNet
 #if NETSTANDARD1_3
     internal static class ReflectionExtensions
     {
-        public static Type BaseType(this Type type)
+        public static Type? BaseType(this Type type)
         {
             return type.GetTypeInfo().BaseType;
         }
@@ -177,7 +177,7 @@ namespace YamlDotNet
             return type.GetTypeInfo().GenericTypeArguments;
         }
 
-        public static PropertyInfo GetPublicProperty(this Type type, string name)
+        public static PropertyInfo? GetPublicProperty(this Type type, string name)
         {
             return type.GetRuntimeProperty(name);
         }
@@ -204,7 +204,7 @@ namespace YamlDotNet
                 .Where(m => m.IsPublic && m.IsStatic);
         }
 
-        public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
+        public static MethodInfo? GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
         {
             return type.GetRuntimeMethods()
                 .FirstOrDefault(m =>
@@ -219,7 +219,7 @@ namespace YamlDotNet
                 });
         }
 
-        public static MethodInfo GetPublicInstanceMethod(this Type type, string name)
+        public static MethodInfo? GetPublicInstanceMethod(this Type type, string name)
         {
             return type.GetRuntimeMethods()
                 .FirstOrDefault(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name));
@@ -253,24 +253,24 @@ namespace YamlDotNet
 
     internal sealed class CultureInfoAdapter : CultureInfo
     {
-        private readonly IFormatProvider _provider;
+        private readonly IFormatProvider provider;
 
         public CultureInfoAdapter(CultureInfo baseCulture, IFormatProvider provider)
             : base(baseCulture.Name)
         {
-            _provider = provider;
+            this.provider = provider;
         }
 
         public override object GetFormat(Type formatType)
         {
-            return _provider.GetFormat(formatType);
+            return provider.GetFormat(formatType);
         }
     }
 #else
 
     internal static class ReflectionExtensions
     {
-        public static Type BaseType(this Type type)
+        public static Type? BaseType(this Type type)
         {
             return type.BaseType;
         }
@@ -317,7 +317,7 @@ namespace YamlDotNet
             return Type.GetTypeCode(type);
         }
 
-        public static PropertyInfo GetPublicProperty(this Type type, string name)
+        public static PropertyInfo? GetPublicProperty(this Type type, string name)
         {
             return type.GetProperty(name);
         }
@@ -342,25 +342,30 @@ namespace YamlDotNet
             return type.GetMethods(BindingFlags.Static | BindingFlags.Public);
         }
 
-        public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
+        public static MethodInfo? GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
         {
             return type.GetMethod(name, BindingFlags.Public | BindingFlags.Static, null, parameterTypes, null);
         }
 
-        public static MethodInfo GetPublicInstanceMethod(this Type type, string name)
+        public static MethodInfo? GetPublicInstanceMethod(this Type type, string name)
         {
             return type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance);
         }
 
-        private static readonly FieldInfo remoteStackTraceField = typeof(Exception)
+        private static readonly FieldInfo? remoteStackTraceField = typeof(Exception)
                 .GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
 
         public static Exception Unwrap(this TargetInvocationException ex)
         {
             var result = ex.InnerException;
+            if (result == null)
+            {
+                return ex;
+            }
+
             if (remoteStackTraceField != null)
             {
-                remoteStackTraceField.SetValue(ex.InnerException, ex.InnerException.StackTrace + "\r\n");
+                remoteStackTraceField.SetValue(result, result.StackTrace + "\r\n");
             }
             return result;
         }
@@ -373,17 +378,17 @@ namespace YamlDotNet
 
     internal sealed class CultureInfoAdapter : CultureInfo
     {
-        private readonly IFormatProvider _provider;
+        private readonly IFormatProvider provider;
 
         public CultureInfoAdapter(CultureInfo baseCulture, IFormatProvider provider)
             : base(baseCulture.LCID)
         {
-            _provider = provider;
+            this.provider = provider;
         }
 
-        public override object GetFormat(Type formatType)
+        public override object? GetFormat(Type? formatType)
         {
-            return _provider.GetFormat(formatType);
+            return provider.GetFormat(formatType);
         }
     }
 
@@ -392,7 +397,7 @@ namespace YamlDotNet
 #if UNITY
     internal static class PropertyInfoExtensions
     {
-        public static object ReadValue(this PropertyInfo property, object target)
+        public static object? ReadValue(this PropertyInfo property, object target)
         {
             return property.GetGetMethod().Invoke(target, null);
         }
@@ -400,7 +405,7 @@ namespace YamlDotNet
 #else
     internal static class PropertyInfoExtensions
     {
-        public static object ReadValue(this PropertyInfo property, object target)
+        public static object? ReadValue(this PropertyInfo property, object target)
         {
             return property.GetValue(target, null);
         }
@@ -513,7 +518,7 @@ namespace System.Linq
             {
                 return item;
             }
-            return default(T);
+            return default!;
         }
 
         public static T SingleOrDefault<T>(this IEnumerable<T> sequence)
@@ -522,7 +527,7 @@ namespace System.Linq
             {
                 if (!enumerator.MoveNext())
                 {
-                    return default(T);
+                    return default!;
                 }
                 var result = enumerator.Current;
                 if (enumerator.MoveNext())
@@ -640,7 +645,7 @@ namespace System.Linq
         {
             foreach (var item in sequence)
             {
-                if (item.Equals(value))
+                if (Equals(item, value))
                 {
                     return true;
                 }
@@ -681,7 +686,7 @@ namespace System.Collections.Generic
 {
     internal class HashSet<T> : IEnumerable<T>
     {
-        private readonly Dictionary<T, object> items = new Dictionary<T, object>();
+        private readonly Dictionary<T, object?> items = new Dictionary<T, object?>();
 
         public bool Add(T value)
         {
@@ -729,12 +734,29 @@ namespace System.Runtime.Versioning
     internal sealed class TargetFrameworkAttribute : Attribute
     {
         public string FrameworkName { get; set; }
-        public string FrameworkDisplayName { get; set; }
+        public string? FrameworkDisplayName { get; set; }
 
         public TargetFrameworkAttribute(string frameworkName)
         {
             FrameworkName = frameworkName;
         }
+    }
+}
+#endif
+
+#if !(NETCOREAPP3_0 || NETSTANDARD2_1)
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class NotNullWhenAttribute : Attribute
+    {
+        public NotNullWhenAttribute(bool returnValue) { }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class MaybeNullWhenAttribute : Attribute
+    {
+        public MaybeNullWhenAttribute(bool returnValue) { }
     }
 }
 #endif

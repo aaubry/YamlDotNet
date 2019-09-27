@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization
 
         public Type Type { get { return baseDescriptor.Type; } }
 
-        public Type TypeOverride
+        public Type? TypeOverride
         {
             get { return baseDescriptor.TypeOverride; }
             set { baseDescriptor.TypeOverride = value; }
@@ -57,7 +57,7 @@ namespace YamlDotNet.Serialization
             get { return baseDescriptor.CanWrite; }
         }
 
-        public void Write(object target, object value)
+        public void Write(object target, object? value)
         {
             baseDescriptor.Write(target, value);
         }

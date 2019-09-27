@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// A reference to the object.
         /// </summary>
-        object Value { get; }
+        object? Value { get; }
 
         /// <summary>
         /// The type that should be used when to interpret the <see cref="Value" />.
@@ -48,5 +48,20 @@ namespace YamlDotNet.Serialization
         /// The style to be used for scalars.
         /// </summary>
         ScalarStyle ScalarStyle { get; }
+    }
+
+    public static class ObjectDescriptorExtensions
+    {
+        /// <summary>
+        /// Returns the Value property of the <paramref name="objectDescriptor"/> if it is not null.
+        /// This is useful in all places that the value must not be null.
+        /// </summary>
+        /// <param name="objectDescriptor">An object descriptor.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the Value is null</exception>
+        /// <returns></returns>
+        public static object NonNullValue(this IObjectDescriptor objectDescriptor)
+        {
+            return objectDescriptor.Value ?? throw new InvalidOperationException($"Attempted to use a IObjectDescriptor of type '{objectDescriptor.Type.FullName}' whose Value is null at a point whete it is invalid to do so. This may indicate a bug in YamlDotNet.");
+        }
     }
 }

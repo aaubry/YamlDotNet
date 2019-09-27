@@ -28,6 +28,6 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public interface ITypeResolver
     {
-        Type Resolve(Type staticType, object actualValue);
+        Type Resolve(Type staticType, object? actualValue);
     }
 }

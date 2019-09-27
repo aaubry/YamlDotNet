@@ -20,9 +20,6 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -31,31 +28,30 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ObjectNodeDeserializer : INodeDeserializer
     {
-        private readonly IObjectFactory _objectFactory;
-        private readonly ITypeInspector _typeDescriptor;
-        private readonly bool _ignoreUnmatched;
+        private readonly IObjectFactory objectFactory;
+        private readonly ITypeInspector typeDescriptor;
+        private readonly bool ignoreUnmatched;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched)
         {
-            _objectFactory = objectFactory;
-            _typeDescriptor = typeDescriptor;
-            _ignoreUnmatched = ignoreUnmatched;
+            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
+            this.ignoreUnmatched = ignoreUnmatched;
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            var mapping = parser.Allow<MappingStart>();
-            if (mapping == null)
+            if (!parser.TryConsume<MappingStart>(out var mapping))
             {
                 value = null;
                 return false;
             }
 
-            value = _objectFactory.Create(expectedType);
-            while (!parser.Accept<MappingEnd>())
+            value = objectFactory.Create(expectedType);
+            while (!parser.TryConsume<MappingEnd>(out var _))
             {
-                var propertyName = parser.Expect<Scalar>();
-                var property = _typeDescriptor.GetProperty(expectedType, null, propertyName.Value, _ignoreUnmatched);
+                var propertyName = parser.Consume<Scalar>();
+                var property = typeDescriptor.GetProperty(expectedType, null, propertyName.Value, ignoreUnmatched);
                 if (property == null)
                 {
                     parser.SkipThisAndNestedEvents();
@@ -63,13 +59,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
 
                 var propertyValue = nestedObjectDeserializer(parser, property.Type);
-                var propertyValuePromise = propertyValue as IValuePromise;
-                if (propertyValuePromise == null)
-                {
-                    var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
-                    property.Write(value, convertedValue);
-                }
-                else
+                if (propertyValue is IValuePromise propertyValuePromise)
                 {
                     var valueRef = value;
                     propertyValuePromise.ValueAvailable += v =>
@@ -78,9 +68,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         property.Write(valueRef, convertedValue);
                     };
                 }
+                else
+                {
+                    var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
+                    property.Write(value, convertedValue);
+                }
             }
 
-            parser.Expect<MappingEnd>();
             return true;
         }
     }

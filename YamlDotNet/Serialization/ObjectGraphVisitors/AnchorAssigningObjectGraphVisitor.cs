@@ -40,29 +40,38 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         public override bool Enter(IObjectDescriptor value, IEmitter context)
         {
-            var alias = aliasProvider.GetAlias(value.Value);
-            if (alias != null && !emittedAliases.Add(alias))
+            if (value.Value != null)
             {
-                eventEmitter.Emit(new AliasEventInfo(value) { Alias = alias }, context);
-                return false;
+                var alias = aliasProvider.GetAlias(value.Value);
+                if (alias != null && !emittedAliases.Add(alias))
+                {
+                    eventEmitter.Emit(new AliasEventInfo(value, alias), context);
+                    return false;
+                }
             }
-
             return base.Enter(value, context);
         }
 
         public override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context)
         {
-            eventEmitter.Emit(new MappingStartEventInfo(mapping) { Anchor = aliasProvider.GetAlias(mapping.Value) }, context);
+            var anchor = aliasProvider.GetAlias(mapping.NonNullValue());
+            eventEmitter.Emit(new MappingStartEventInfo(mapping) { Anchor = anchor }, context);
         }
 
         public override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType, IEmitter context)
         {
-            eventEmitter.Emit(new SequenceStartEventInfo(sequence) { Anchor = aliasProvider.GetAlias(sequence.Value) }, context);
+            var anchor = aliasProvider.GetAlias(sequence.NonNullValue());
+            eventEmitter.Emit(new SequenceStartEventInfo(sequence) { Anchor = anchor }, context);
         }
 
         public override void VisitScalar(IObjectDescriptor scalar, IEmitter context)
         {
-            eventEmitter.Emit(new ScalarEventInfo(scalar) { Anchor = aliasProvider.GetAlias(scalar.Value) }, context);
+            var scalarInfo = new ScalarEventInfo(scalar);
+            if (scalar.Value != null)
+            {
+                scalarInfo.Anchor = aliasProvider.GetAlias(scalar.Value);
+            }
+            eventEmitter.Emit(scalarInfo, context);
         }
     }
 }

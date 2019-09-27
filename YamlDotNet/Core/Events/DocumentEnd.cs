@@ -26,33 +26,19 @@ namespace YamlDotNet.Core.Events
     /// <summary>
     /// Represents a document end event.
     /// </summary>
-    public class DocumentEnd : ParsingEvent
+    public sealed class DocumentEnd : ParsingEvent
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.
         /// The value can be either -1, 0 or 1. For start events, it will be 1,
         /// for end events, it will be -1, and for the remaining events, it will be 0.
         /// </summary>
-        public override int NestingIncrease
-        {
-            get
-            {
-                return -1;
-            }
-        }
+        public override int NestingIncrease => -1;
 
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.
         /// </summary>
-        internal override EventType Type
-        {
-            get
-            {
-                return EventType.DocumentEnd;
-            }
-        }
-
-        private readonly bool isImplicit;
+        internal override EventType Type => EventType.DocumentEnd;
 
         /// <summary>
         /// Gets a value indicating whether this instance is implicit.
@@ -60,13 +46,7 @@ namespace YamlDotNet.Core.Events
         /// <value>
         ///     <c>true</c> if this instance is implicit; otherwise, <c>false</c>.
         /// </value>
-        public bool IsImplicit
-        {
-            get
-            {
-                return isImplicit;
-            }
-        }
+        public bool IsImplicit { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentEnd"/> class.
@@ -77,7 +57,7 @@ namespace YamlDotNet.Core.Events
         public DocumentEnd(bool isImplicit, Mark start, Mark end)
             : base(start, end)
         {
-            this.isImplicit = isImplicit;
+            this.IsImplicit = isImplicit;
         }
 
         /// <summary>
@@ -97,11 +77,7 @@ namespace YamlDotNet.Core.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "Document end [isImplicit = {0}]",
-                isImplicit
-            );
+            return $"Document end [isImplicit = {IsImplicit}]";
         }
 
         /// <summary>

@@ -44,14 +44,13 @@ namespace YamlDotNet.Serialization.Converters
 
         public object ReadYaml(IParser parser, Type type)
         {
-            var value = ((Scalar)parser.Current).Value;
-            parser.MoveNext();
+            var value = parser.Consume<Scalar>().Value;
             return new Guid(value);
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
-            var guid = (Guid)value;
+            var guid = (Guid)value!;
             emitter.Emit(new Scalar(null, null, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }

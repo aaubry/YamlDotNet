@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization
             this.innerTypeDescriptor = innerTypeDescriptor;
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return innerTypeDescriptor.GetProperties(type, container)
                 .Where(p => p.GetCustomAttribute<YamlIgnoreAttribute>() == null)

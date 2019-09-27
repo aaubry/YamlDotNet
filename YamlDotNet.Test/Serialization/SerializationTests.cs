@@ -348,8 +348,10 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var input = new NameConvention { AliasTest = "Fourth" };
 
-            var attribute = new YamlMemberAttribute();
-            attribute.Alias = "fourthOverride";
+            var attribute = new YamlMemberAttribute
+            {
+                Alias = "fourthOverride"
+            };
 
             var serializer = new SerializerBuilder()
                 .WithAttributeOverride<NameConvention>(nc => nc.AliasTest, attribute)
@@ -675,7 +677,7 @@ namespace YamlDotNet.Test.Serialization
                 "aaa: 222",
                 "..."));
 
-            reader.Expect<StreamStart>();
+            reader.Consume<StreamStart>();
             var one = Deserializer.Deserialize<Simple>(reader);
             var two = Deserializer.Deserialize<Simple>(reader);
 
@@ -695,12 +697,12 @@ namespace YamlDotNet.Test.Serialization
                 "aaa: 333",
                 "..."));
 
-            reader.Expect<StreamStart>();
+            reader.Consume<StreamStart>();
             var one = Deserializer.Deserialize<Simple>(reader);
             var two = Deserializer.Deserialize<Simple>(reader);
             var three = Deserializer.Deserialize<Simple>(reader);
 
-            reader.Accept<StreamEnd>().Should().BeTrue("reader should have reached StreamEnd");
+            reader.Accept<StreamEnd>(out var _).Should().BeTrue("reader should have reached StreamEnd");
             one.ShouldBeEquivalentTo(new { aaa = "111" });
             two.ShouldBeEquivalentTo(new { aaa = "222" });
             three.ShouldBeEquivalentTo(new { aaa = "333" });
@@ -1220,7 +1222,7 @@ namespace YamlDotNet.Test.Serialization
                 );
 
             DeserializerBuilder
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .IgnoreUnmatchedProperties();
 
             var actual = Deserializer.Deserialize<SimpleScratch>(UsingReaderFor(text));
@@ -1325,16 +1327,16 @@ namespace YamlDotNet.Test.Serialization
                         new FloatTestCase("double.NaN", double.NaN, ".nan"),
                         new FloatTestCase("double.PositiveInfinity", double.PositiveInfinity, ".inf"),
                         new FloatTestCase("double.NegativeInfinity", double.NegativeInfinity, "-.inf"),
-                        new FloatTestCase("double.Epsilon", double.Epsilon, "4.9406564584124654E-324"),
-                        new FloatTestCase("double.MinValue", double.MinValue, "-1.7976931348623157E+308"),
-                        new FloatTestCase("double.MaxValue", double.MaxValue, "1.7976931348623157E+308"),
+                        new FloatTestCase("double.Epsilon", double.Epsilon, double.Epsilon.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G17", CultureInfo.InvariantCulture)),
 
                         new FloatTestCase("float.NaN", float.NaN, ".nan"),
                         new FloatTestCase("float.PositiveInfinity", float.PositiveInfinity, ".inf"),
                         new FloatTestCase("float.NegativeInfinity", float.NegativeInfinity, "-.inf"),
-                        new FloatTestCase("float.Epsilon", float.Epsilon, "1.40129846E-45"),
-                        new FloatTestCase("float.MinValue", float.MinValue, "-3.40282347E+38"),
-                        new FloatTestCase("float.MaxValue", float.MaxValue, "3.40282347E+38")
+                        new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.MinValue", float.MinValue, float.MinValue.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.MaxValue", float.MaxValue, float.MaxValue.ToString("G17", CultureInfo.InvariantCulture))
                     }
                     .Select(tc => new object[] { tc });
             }
@@ -1402,7 +1404,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void AttributeOverridesAndNamingConventionDoNotConflict()
         {
-            var namingConvention = new CamelCaseNamingConvention();
+            var namingConvention = CamelCaseNamingConvention.Instance;
 
             var yamlMember = new YamlMemberAttribute
             {
@@ -1447,8 +1449,7 @@ namespace YamlDotNet.Test.Serialization
 
             public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
             {
-                var comment = parser.Allow<Comment>();
-                if (comment != null)
+                if (parser.TryConsume<Comment>(out var comment))
                 {
                     Comment = comment.Value;
                 }
@@ -1579,7 +1580,7 @@ namespace YamlDotNet.Test.Serialization
         public void NamingConventionIsNotAppliedBySerializerWhenApplyNamingConventionsIsFalse()
         {
             var sut = new SerializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             var yaml = sut.Serialize(new NamingConventionDisabled { NoConvention = "value" });
@@ -1591,7 +1592,7 @@ namespace YamlDotNet.Test.Serialization
         public void NamingConventionIsNotAppliedByDeserializerWhenApplyNamingConventionsIsFalse()
         {
             var sut = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             var yaml = "NoConvention: value";
@@ -1810,7 +1811,7 @@ namespace YamlDotNet.Test.Serialization
 
             public object ReadYaml(IParser parser, Type type)
             {
-                var scalar = parser.Expect<Scalar>();
+                var scalar = parser.Consume<Scalar>();
                 return new NonSerializable { Text = scalar.Value };
             }
 

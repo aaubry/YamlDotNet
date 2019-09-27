@@ -28,7 +28,7 @@ namespace YamlDotNet.Core.Tokens
     /// Represents a flow sequence end token.
     /// </summary>
     [Serializable]
-    public class FlowSequenceEnd : Token
+    public sealed class FlowSequenceEnd : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FlowSequenceEnd"/> class.
