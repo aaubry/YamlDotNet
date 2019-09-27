@@ -32,6 +32,7 @@ using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
+
     /// <summary>
     /// Creates and configures instances of <see cref="Serializer" />.
     /// This class is used to customize the behavior of <see cref="Serializer" />. Use the relevant methods
@@ -47,6 +48,7 @@ namespace YamlDotNet.Serialization
         private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
+        private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -72,8 +74,8 @@ namespace YamlDotNet.Serialization
                     args => new AnchorAssigningObjectGraphVisitor(args.InnerVisitor, args.EventEmitter, args.GetPreProcessingPhaseObjectGraphVisitor<AnchorAssigner>())
                 },
                 {
-                    typeof(DefaultExclusiveObjectGraphVisitor),
-                    args => new DefaultExclusiveObjectGraphVisitor(args.InnerVisitor)
+                    typeof(DefaultValuesObjectGraphVisitor),
+                    args => new DefaultValuesObjectGraphVisitor(defaultValuesHandlingConfiguration, args.InnerVisitor)
                 }
             };
 
@@ -262,9 +264,20 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Forces every value to be serialized, even if it is the default value for that type.
         /// </summary>
-        public SerializerBuilder EmitDefaults()
+        [Obsolete("The default behavior is now to always emit default values, thefore calling this method has no effect. This behavior is now controlled by ConfigureDefaultValuesHandling.", error: true)]
+        public SerializerBuilder EmitDefaults() => ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve);
+
+        /// <summary>
+        /// Configures how properties with default and null values should be handled. The default value is DefaultValuesHandling.Preserve
+        /// </summary>
+        /// <remarks>
+        /// If more control is needed, create a class that extends from ChainedObjectGraphVisitor and override its EnterMapping methods.
+        /// Then register it as follows: 
+        /// WithEmissionPhaseObjectGraphVisitor(args => new MyDefaultHandlingStrategy(args.InnerVisitor));
+        /// </remarks>
+        public SerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)
         {
-            emissionPhaseObjectGraphVisitorFactories.Remove(typeof(DefaultExclusiveObjectGraphVisitor));
+            this.defaultValuesHandlingConfiguration = configuration;
             return this;
         }
 

@@ -197,7 +197,9 @@ namespace YamlDotNet.Test.Serialization
         public void SerializeCustomTags()
         {
             var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
-            SerializerBuilder.WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
+            SerializerBuilder
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+                .WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
 
             var point = new Point(10, 20);
             var result = Serializer.Serialize(point);
@@ -266,7 +268,6 @@ namespace YamlDotNet.Test.Serialization
                 new SerializerBuilder()
                     .WithTagMapping("!Example", typeof(Example))
                     .EnsureRoundtrip()
-                    .EmitDefaults()
                     .Build(),
                 new DeserializerBuilder()
                     .WithTagMapping("!Example", typeof(Example))
@@ -286,7 +287,6 @@ namespace YamlDotNet.Test.Serialization
                 new SerializerBuilder()
                     .WithTagMapping("!Example", typeof(Example))
                     .EnsureRoundtrip()
-                    .EmitDefaults()
                     .Build(),
                 new DeserializerBuilder()
                     .WithTagMapping("!Example", typeof(Example))
@@ -331,6 +331,9 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var input = new NameConvention { AliasTest = "Fourth" };
 
+            SerializerBuilder
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults);
+
             Serializer.Serialize(writer, input, input.GetType());
             var text = writer.ToString();
 
@@ -354,6 +357,7 @@ namespace YamlDotNet.Test.Serialization
             };
 
             var serializer = new SerializerBuilder()
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
                 .WithAttributeOverride<NameConvention>(nc => nc.AliasTest, attribute)
                 .Build();
 
@@ -738,7 +742,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new[] { "foo", null, "bar" };
 
-            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj);
+            SerializerBuilder.Build().Serialize(writer, obj);
             var serialized = writer.ToString();
 
             Regex.Matches(serialized, "-").Count.Should().Be(3, "there should have been 3 elements");
@@ -750,7 +754,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
 
-            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj, typeof(Example));
+            SerializerBuilder.Build().Serialize(writer, obj, typeof(Example));
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -762,7 +766,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new { MyString = (string)null };
 
-            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj, obj.GetType());
+            SerializerBuilder.Build().Serialize(writer, obj, obj.GetType());
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -772,6 +776,9 @@ namespace YamlDotNet.Test.Serialization
         {
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
+
+            SerializerBuilder
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults);
 
             Serializer.Serialize(writer, obj, typeof(Example));
 
@@ -784,7 +791,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
 
-            SerializerBuilder.EmitDefaults().JsonCompatible().Build().Serialize(writer, obj, typeof(Example));
+            SerializerBuilder.JsonCompatible().Build().Serialize(writer, obj, typeof(Example));
 
             writer.ToString().Should().Contain("MyString");
         }
@@ -798,7 +805,7 @@ namespace YamlDotNet.Test.Serialization
                 { new string('x', 3000), "extremely long key" }
             };
 
-            SerializerBuilder.EmitDefaults().JsonCompatible().Build().Serialize(writer, obj, typeof(Dictionary<string, string>));
+            SerializerBuilder.JsonCompatible().Build().Serialize(writer, obj, typeof(Dictionary<string, string>));
 
             writer.ToString().Should().NotContain("?");
         }
@@ -810,7 +817,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new Example { MyString = null };
 
-            SerializerBuilder.EnsureRoundtrip().EmitDefaults().JsonCompatible().Build().Serialize(writer, obj, typeof(Example));
+            SerializerBuilder.EnsureRoundtrip().JsonCompatible().Build().Serialize(writer, obj, typeof(Example));
             var result = Deserializer.Deserialize<Example>(UsingReaderFor(writer));
 
             result.MyString.Should().BeNull();
@@ -830,7 +837,7 @@ namespace YamlDotNet.Test.Serialization
             var defaultEnumValue = 0;
             var nonDefaultEnumValue = Enum.GetValues(enumType).GetValue(1);
 
-            var jsonSerializer = SerializerBuilder.EnsureRoundtrip().EmitDefaults().JsonCompatible().Build();
+            var jsonSerializer = SerializerBuilder.EnsureRoundtrip().JsonCompatible().Build();
             var jsonSerializedEnum = jsonSerializer.Serialize(nonDefaultEnumValue);
 
             nonDefaultEnumValue.Should().NotBe(defaultEnumValue);
@@ -954,6 +961,9 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new DefaultsExample { Value = DefaultsExample.DefaultValue };
 
+            SerializerBuilder
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults);
+
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
 
@@ -966,7 +976,7 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
             var obj = new DefaultsExample { Value = DefaultsExample.DefaultValue };
 
-            SerializerBuilder.EmitDefaults().Build().Serialize(writer, obj);
+            SerializerBuilder.Build().Serialize(writer, obj);
             var serialized = writer.ToString();
 
             serialized.Should().Contain("Value");
@@ -1384,7 +1394,6 @@ namespace YamlDotNet.Test.Serialization
         {
             var sut = new SerializerBuilder()
                 .JsonCompatible()
-                .EmitDefaults()
                 .Build();
 
             var yamlAsJson = new StringWriter();

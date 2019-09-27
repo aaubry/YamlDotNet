@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Provides special Yaml serialization instructions.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public sealed class YamlMemberAttribute : Attribute
     {
         /// <summary>
@@ -54,6 +54,11 @@ namespace YamlDotNet.Serialization
         /// Specifies the scalar style of the property when serialized. This will only affect the serialization of scalar properties.
         /// </summary>
         public ScalarStyle ScalarStyle { get; set; }
+
+        /// <summary>
+        /// Overrides how null and default values should be handled for this property.
+        /// </summary>
+        public DefaultValuesHandling? DefaultValuesHandling { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
