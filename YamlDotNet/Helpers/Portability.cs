@@ -744,7 +744,7 @@ namespace System.Runtime.Versioning
 }
 #endif
 
-#if !NETCOREAPP3_0
+#if !(NETCOREAPP3_0 || NETSTANDARD2_1)
 namespace System.Diagnostics.CodeAnalysis
 {
     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]

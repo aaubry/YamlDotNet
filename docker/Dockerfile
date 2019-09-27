@@ -12,8 +12,9 @@ RUN wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsof
 RUN dpkg -i packages-microsoft-prod.deb
 
 # Install mono and dotnet
+ARG NETSDK=3.0
 RUN apt-get update
-RUN apt-get install -y mono-complete dotnet-sdk-2.2
+RUN apt-get install -y mono-complete dotnet-sdk-${NETSDK}
 
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 

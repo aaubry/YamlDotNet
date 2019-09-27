@@ -53,7 +53,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         private sealed class ValuePromise : IValuePromise
         {
-            public event Action<object?> ValueAvailable;
+            public event Action<object?>? ValueAvailable;
 
             public bool HasValue { get; private set; }
 

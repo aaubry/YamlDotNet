@@ -21,6 +21,11 @@
     <NetStandard>false</NetStandard>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0'">
+    <!-- Since the BCL is not yet annotated in other platforms, disable the nullable warnings when compiling for those -->
+    <NoWarn>1591;1574;8600;8602;8604</NoWarn>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netcoreapp3.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
