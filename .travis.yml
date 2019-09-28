@@ -19,11 +19,10 @@ install:
   #
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       git checkout $TRAVIS_BRANCH;
+      git reset $TRAVIS_COMMIT --hard;
     else
       git checkout -b $TRAVIS_PULL_REQUEST_BRANCH > /dev/null;
     fi
-  - git reset $TRAVIS_COMMIT --hard
-  - git status
   - docker pull aaubry/yamldotnet
 
 script:
