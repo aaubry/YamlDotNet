@@ -57,13 +57,11 @@ namespace YamlDotNet.Core
         private int flowLevel;
         private bool isMappingContext;
         private bool isSimpleKeyContext;
-        private bool isRootContext;
 
         private int column;
         private bool isWhitespace;
         private bool isIndentation;
 
-        private bool isOpenEnded;
         private bool isDocumentEndWritten;
 
         private readonly AnchorData anchorData = new AnchorData();
@@ -741,12 +739,6 @@ namespace YamlDotNet.Core
 
             else if (evt is StreamEnd)
             {
-                if (isOpenEnded)
-                {
-                    WriteIndicator("...", true, false, false);
-                    WriteIndent();
-                }
-
                 state = EmitterState.StreamEnd;
             }
             else
@@ -811,7 +803,6 @@ namespace YamlDotNet.Core
         /// </summary>
         private void EmitNode(ParsingEvent evt, bool isRoot, bool isMapping, bool isSimpleKey)
         {
-            isRootContext = isRoot;
             isMappingContext = isMapping;
             isSimpleKeyContext = isSimpleKey;
 
@@ -1004,11 +995,6 @@ namespace YamlDotNet.Core
 
             isWhitespace = false;
             isIndentation = false;
-
-            if (isRootContext)
-            {
-                isOpenEnded = true;
-            }
         }
 
         private void WriteSingleQuotedScalar(string value, bool allowBreaks)
@@ -1764,8 +1750,6 @@ namespace YamlDotNet.Core
                 WriteIndicator(indentHint, false, false, false);
             }
 
-            isOpenEnded = false;
-
             string? chompHint = null;
             if (value.Length == 0 || !analyzer.IsBreak(value.Length - 1))
             {
@@ -1774,7 +1758,6 @@ namespace YamlDotNet.Core
             else if (value.Length >= 2 && analyzer.IsBreak(value.Length - 2))
             {
                 chompHint = "+";
-                isOpenEnded = true;
             }
 
             if (chompHint != null)
@@ -1794,7 +1777,6 @@ namespace YamlDotNet.Core
 
             isWhitespace = whitespace;
             isIndentation &= indentation;
-            isOpenEnded = false;
         }
 
         private void WriteIndent()
