@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace YamlDotNet.Serialization.ObjectFactories
@@ -29,7 +30,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class DefaultObjectFactory : IObjectFactory
     {
-        private static readonly Dictionary<Type, Type> defaultInterfaceImplementations = new Dictionary<Type, Type>
+        private static readonly Dictionary<Type, Type> defaultGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
             { typeof(IEnumerable<>), typeof(List<>) },
             { typeof(ICollection<>), typeof(List<>) },
@@ -37,13 +38,31 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(IDictionary<,>), typeof(Dictionary<,>) }
         };
 
+        private static readonly Dictionary<Type, Type> defaultNonGenericInterfaceImplementations = new Dictionary<Type, Type>
+        {
+            { typeof(IEnumerable), typeof(List<object>) },
+            { typeof(ICollection), typeof(List<object>) },
+            { typeof(IList), typeof(List<object>) },
+            { typeof(IDictionary), typeof(Dictionary<object, object>) }
+        };
+
         public object Create(Type type)
         {
             if (type.IsInterface())
             {
-                if (defaultInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
+                if (type.IsGenericType())
                 {
-                    type = implementationType.MakeGenericType(type.GetGenericArguments());
+                    if (defaultGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
+                    {
+                        type = implementationType.MakeGenericType(type.GetGenericArguments());
+                    }
+                }
+                else
+                {
+                    if (defaultNonGenericInterfaceImplementations.TryGetValue(type, out var implementationType))
+                    {
+                        type = implementationType;
+                    }
                 }
             }
 
