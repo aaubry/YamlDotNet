@@ -201,9 +201,11 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Converts a <see cref="YamlScalarNode" /> to a string by returning its value.
         /// </summary>
-        public static explicit operator string?(YamlNode scalar)
+        public static explicit operator string?(YamlNode node)
         {
-            return ((YamlScalarNode)scalar).Value;
+            return node is YamlScalarNode scalar
+                ? scalar.Value
+                : throw new ArgumentException($"Attempted to convert a '{node.NodeType}' to string. This conversion is valid only for Scalars.");
         }
 
         /// <summary>
@@ -213,7 +215,9 @@ namespace YamlDotNet.RepresentationModel
         {
             get
             {
-                return ((YamlSequenceNode)this).Children[index];
+                return this is YamlSequenceNode sequence
+                    ? sequence.Children[index]
+                    : throw new ArgumentException($"Accessed '{NodeType}' with an invalid index: {index}. Only Sequences can be indexed by number.");
             }
         }
 
@@ -224,7 +228,9 @@ namespace YamlDotNet.RepresentationModel
         {
             get
             {
-                return ((YamlMappingNode)this).Children[key];
+                return this is YamlMappingNode mapping
+                    ? mapping.Children[key]
+                    : throw new ArgumentException($"Accessed '{NodeType}' with an invalid index: {key}. Only Mappings can be indexed by key.");
             }
         }
     }
