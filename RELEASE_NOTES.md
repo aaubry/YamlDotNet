@@ -1,54 +1,30 @@
 # Release notes
-## Release 7.0.0
+## Release 8.0.0
 
-Added support for **nullable references** and **netstandard 2.1**.
+## New features and improvements
 
-Enabling nullable references exposed many potential bugs where the code assumed
-that a reference would not be null, but where it was possible for it to be null.
-In most cases this did not cause an error because of the way the code was being used.
+- Change the default value handling behavior. Fixes #427  
+  This is a **breaking change** to the default behaviour of the serializer, which will now **always emit null and default values**.  
+  It is possible to configure this behaviour by using the `ConfigureDefaultValuesHandling` method on `SerializerBuilder`.
 
-Because fixing these problems required some breaking changes, a few improvements were made to the code base to take advantage of modern C# constructs.
+  [More details are available in the documentation.](https://github.com/aaubry/YamlDotNet/wiki/Serialization.Serializer#configuredefaultvalueshandlingdefaultvalueshandling)
 
-Overall, the following **breaking changes** were made:
+- Add default implementations for the following non-generic collections to `DefaultObjectFactory`:  
+  - IEnumerable  
+  - ICollection  
+  - IList  
+  - IDictionary
 
-- **Removed the default constructor from most exceptions**, because that would cause some uninitialized properties.
+- Remove obsolete and unused `SerializationOptions` enum. Fixes #438
+- Throw descriptive exceptions when using the "linq" methods of `YamlNode`. Relates to #437
 
-- Made the **`ParsingEvent` concretizations sealed**. There is no point in inheriting from these because the library assumes that they form a closed set.
+## Bug fixes
 
-- **Made many classes sealed**, since they are not intended to be extended.
-
-- **`YamlDocument` now throws an exception** if is has no root node after loading. This should only happen when loading from an `IParser` that returns invalid data or is in an invalid state.
-
-The following APIs were made **obsolete** (but still work as before):
-
-- Refactored the **extension methods to `IParser`** to have better names with a more sensible semantic. The previous extension methods, `Expect<T>`, `Allow<T>`, `Peek<T>` and `Accept<T>` are still available but have been deprecated. The new extension methods are:
-
-    - `T Consume<T>() where T : ParsingEvent`  
-    Ensures that the current event is of the specified type, returns it and moves to the next event. Throws an exception if the next event is not of the expected type.
-
-    - `bool TryConsume<T>(out T @event) where T : ParsingEvent`  
-    If the event is of the specified type, returns it and moves to the next event, otherwise returns null.
-
-    - `T Require<T>() where T : ParsingEvent`  
-    Enforces that the current event is of the specified type.
-
-    - `bool Accept<T>(out T @event) where T : ParsingEvent`  
-    Checks whether the current event is of the specified type.
-
-- Made the **constructor of all naming conventions obsolete**. Instead each has a static property named `Instance`. There was no point in creating multiple instances of those classes.  
-  Instead of: 
-  ```c#
-  new SerializerBuilder()
-      .WithNamingConvention(new CamelCaseNamingConvention());
-  ```
-  Use:
-  ```c#
-  new SerializerBuilder()
-      .WithNamingConvention(CamelCaseNamingConvention.Instance);
-  ```
-
+- Never emit document end indicator on stream end. Fixes #436
+- Fix exception when deserializing an interface. Fixes #439  
 
 # Previous releases
+- [7.0.0](releases/7.0.0.md)
 - [6.1.2](releases/6.1.2.md)
 - [6.1.1](releases/6.1.1.md)
 - [6.0.0](releases/6.0.0.md)
