@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -20,18 +20,19 @@
 //  SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-
-    public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
+    public sealed class DefaultValuesObjectGraphVisitor : ChainedObjectGraphVisitor
     {
-        public DefaultExclusiveObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
+        private readonly DefaultValuesHandling handling;
+
+        public DefaultValuesObjectGraphVisitor(DefaultValuesHandling handling, IObjectGraphVisitor<IEmitter> nextVisitor)
             : base(nextVisitor)
         {
+            this.handling = handling;
         }
 
         private static object? GetDefault(Type type)
@@ -39,21 +40,28 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             return type.IsValueType() ? Activator.CreateInstance(type) : null;
         }
 
-        public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
-        {
-            return !Equals(value.Value, GetDefault(value.Type))
-                   && base.EnterMapping(key, value, context);
-        }
-
         public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
-            var defaultValue = defaultValueAttribute != null
-                ? defaultValueAttribute.Value
-                : GetDefault(key.Type);
+            var configuration = key.GetCustomAttribute<YamlMemberAttribute>()?.DefaultValuesHandling ?? this.handling;
+            switch (configuration)
+            {
+                case DefaultValuesHandling.OmitNull:
+                    if (value.Value is null)
+                    {
+                        return false;
+                    }
+                    break;
 
-            return !Equals(value.Value, defaultValue)
-                   && base.EnterMapping(key, value, context);
+                case DefaultValuesHandling.OmitDefaults:
+                    var defaultValue = key.GetCustomAttribute<DefaultValueAttribute>()?.Value ?? GetDefault(key.Type);
+                    if (Equals(value.Value, defaultValue))
+                    {
+                        return false;
+                    }
+                    break;
+            }
+
+            return base.EnterMapping(key, value, context);
         }
     }
 }
