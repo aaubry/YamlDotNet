@@ -19,29 +19,15 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using BenchmarkDotNet.Running;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace YamlDotNet.PerformanceTests.v8_0_0
 {
-    /// <summary>
-    /// Wraps another <see cref="ITypeInspector"/> and applies caching.
-    /// </summary>
-    public sealed class CachedTypeInspector : TypeInspectorSkeleton
+    public class Program
     {
-        private readonly ITypeInspector innerTypeDescriptor;
-        private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
-
-        public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
+        public static void Main(string[] args)
         {
-            this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
-        }
-
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
-        {
-            return cache.GetOrAdd(type, t => innerTypeDescriptor.GetProperties(t, container).ToList());
+            var summary = BenchmarkRunner.Run<ReceiptTest>(new AllowNonOptimized());
         }
     }
 }

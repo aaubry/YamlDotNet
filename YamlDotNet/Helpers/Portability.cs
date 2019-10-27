@@ -760,3 +760,28 @@ namespace System.Diagnostics.CodeAnalysis
     }
 }
 #endif
+
+namespace System.Collections.Concurrent
+{
+    #if NET20 || NET35 || UNITY
+    internal sealed class ConcurrentDictionary<TKey, TValue>
+    {
+        private readonly Dictionary<TKey, TValue> entries = new Dictionary<TKey, TValue>();
+
+        public delegate TValue ValueFactory(TKey key);
+
+        public TValue GetOrAdd(TKey key, ValueFactory valueFactory)
+        {
+            lock (entries)
+            {
+                if (!entries.TryGetValue(key, out var value))
+                {
+                    value = valueFactory(key);
+                    entries.Add(key, value);
+                }
+                return value;
+            }
+        }
+    }
+    #endif
+}

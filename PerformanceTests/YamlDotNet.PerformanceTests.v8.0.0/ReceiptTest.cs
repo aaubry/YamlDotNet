@@ -19,29 +19,28 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using BenchmarkDotNet.Attributes;
+using YamlDotNet.PerformanceTests.Lib.Tests;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
-namespace YamlDotNet.Serialization.TypeInspectors
+namespace YamlDotNet.PerformanceTests.v8_0_0
 {
-    /// <summary>
-    /// Wraps another <see cref="ITypeInspector"/> and applies caching.
-    /// </summary>
-    public sealed class CachedTypeInspector : TypeInspectorSkeleton
+    [MemoryDiagnoser]
+    public class ReceiptTest
     {
-        private readonly ITypeInspector innerTypeDescriptor;
-        private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
+        private readonly Receipt _receipt = new Receipt();
+        private readonly StringWriter _buffer = new StringWriter();
 
-        public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
-        {
-            this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
-        }
+        private readonly ISerializer _serializer = new SerializerBuilder()
+            .WithNamingConvention(new CamelCaseNamingConvention())
+            .Build();
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
+        [Benchmark(Description = "Serialize v8.0.0")]
+        public void Serialize()
         {
-            return cache.GetOrAdd(type, t => innerTypeDescriptor.GetProperties(t, container).ToList());
+            _serializer.Serialize(_buffer, _receipt.Graph);
         }
     }
 }
