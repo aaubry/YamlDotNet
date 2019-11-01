@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Dynamic;
 using Xunit;
 using YamlDotNet.Serialization;
 
@@ -126,6 +127,95 @@ namespace YamlDotNet.Test.Serialization
             // Assert
             Assert.Contains(nameof(Model.ANullString) + ':', yaml);
             Assert.DoesNotContain(nameof(Model.ANullInteger) + ':', yaml);
+        }
+
+        [Fact]
+        public void All_default_values_and_nulls_from_dynamic_are_emitted_when_no_configuration_is_performed()
+        {
+            // Arrange
+            var sut = new SerializerBuilder()
+                .Build();
+
+            dynamic model = new ExpandoObject();
+            model.ANullString = default(string);
+            model.AZeroInteger = 0;
+            model.ANonZeroInteger = 0;
+            model.ANullInteger = default(int?);
+            model.ANullableZeroInteger = (int?)0;
+            model.ANullableNonZeroInteger = (int?)1;
+
+            // Act
+            var yaml = sut.Serialize(model);
+
+            // Assert
+            Assert.Contains(nameof(Model.ANullString) + ':', yaml);
+
+            Assert.Contains(nameof(Model.AZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonZeroInteger) + ':', yaml);
+
+            Assert.Contains(nameof(Model.ANullInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableNonZeroInteger) + ':', yaml);
+        }
+
+        [Fact]
+        public void Only_null_values_from_dynamic_are_omitted_when_DefaultValuesHandling_is_OmitNull()
+        {
+            // Arrange
+            var sut = new SerializerBuilder()
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .Build();
+
+            dynamic model = new ExpandoObject();
+            model.ANullString = default(string);
+            model.AZeroInteger = 0;
+            model.ANonZeroInteger = 0;
+            model.ANullInteger = default(int?);
+            model.ANullableZeroInteger = (int?)0;
+            model.ANullableNonZeroInteger = (int?)1;
+
+            // Act
+            var yaml = sut.Serialize(model);
+
+            // Assert
+            Assert.DoesNotContain(nameof(Model.ANullString) + ':', yaml);
+
+            Assert.Contains(nameof(Model.AZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonZeroInteger) + ':', yaml);
+
+            Assert.DoesNotContain(nameof(Model.ANullInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableNonZeroInteger) + ':', yaml);
+        }
+
+        [Fact]
+        public void All_default_values_from_dynamic_are_omitted_when_DefaultValuesHandling_is_OmitAll()
+        {
+            // Arrange
+            var sut = new SerializerBuilder()
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+                .Build();
+
+            dynamic model = new ExpandoObject();
+            model.ANullString = default(string);
+            model.AZeroInteger = 0;
+            model.ANonZeroInteger = 0;
+            model.ANullInteger = default(int?);
+            model.ANullableZeroInteger = (int?)0;
+            model.ANullableNonZeroInteger = (int?)1;
+
+            // Act
+            var yaml = sut.Serialize(model);
+
+            // Assert
+            Assert.DoesNotContain(nameof(Model.ANullString) + ':', yaml);
+
+            Assert.DoesNotContain(nameof(Model.AZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonZeroInteger) + ':', yaml);
+
+            Assert.DoesNotContain(nameof(Model.ANullInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableNonZeroInteger) + ':', yaml);
         }
     }
 }
