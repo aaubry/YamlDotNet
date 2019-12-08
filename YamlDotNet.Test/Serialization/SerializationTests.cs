@@ -1273,6 +1273,32 @@ namespace YamlDotNet.Test.Serialization
             writer.ToString().Should().Contain("xxx: new_value");
         }
 
+
+        [Fact]
+        public async System.Threading.Tasks.Task SerializeDynamicPropertyAndApplyNamingConventionAsync()
+        {
+            dynamic obj = new ExpandoObject();
+            obj.property_one = new ExpandoObject();
+            ((IDictionary<string, object>)obj.property_one).Add("new_key_here", "new_value");
+
+            var mockNamingConvention = A.Fake<INamingConvention>();
+            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(mockNamingConvention)
+                .Build();
+
+            var writer = new StringWriter();
+#if NETSTandard && !NETSTANDARD1_3
+            await serializer.SerializeAsync(writer, obj);
+#else
+            serializer.Serialize(writer, obj);
+#endif
+
+            writer.ToString().Should().Contain("xxx: new_value");
+        }
+
+
         [Fact]
         public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
         {

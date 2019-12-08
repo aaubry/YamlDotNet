@@ -566,6 +566,31 @@ namespace YamlDotNet.Serialization
 
                 traversalStrategy.Traverse(graph, emittingVisitor, emitter);
             }
+
+#if NETSTandard && !NETSTANDARD1_3
+            public async System.Threading.Tasks.Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
+            {
+                var actualType = type ?? (value != null ? value.GetType() : typeof(object));
+                var staticType = type ?? typeof(object);
+
+                var graph = new ObjectDescriptor(value, actualType, staticType);
+
+                var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
+                foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
+                {
+                    traversalStrategy.Traverse(graph, visitor, null);
+                }
+
+                void nestedObjectSerializer(object? v, Type? t) => SerializeValueAsync(emitter, v, t);
+
+                var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChainAsync(
+                    new EmittingObjectGraphVisitor(eventEmitter),
+                    inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, nestedObjectSerializer)
+                );
+
+                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+            }
+#endif
         }
     }
 }

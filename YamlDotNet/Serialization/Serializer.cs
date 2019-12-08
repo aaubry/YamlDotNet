@@ -21,6 +21,9 @@
 
 using System;
 using System.IO;
+#if NETSTandard && !NETSTANDARD1_3
+using System.Threading.Tasks;
+#endif
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -72,6 +75,18 @@ namespace YamlDotNet.Serialization
             Serialize(new Emitter(writer, emitterSettings), graph);
         }
 
+#if NETSTandard && !NETSTANDARD1_3
+        /// <summary>
+        /// Serializes the specified object with async.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        public async Task SerializeAsync(TextWriter writer, object graph)
+        {
+            await SerializeAsync(new Emitter(writer, emitterSettings), graph);
+        }
+#endif
+
         /// <summary>
         /// Serializes the specified object into a string.
         /// </summary>
@@ -85,6 +100,21 @@ namespace YamlDotNet.Serialization
             }
         }
 
+#if NETSTandard && !NETSTANDARD1_3
+        /// <summary>
+        /// Serializes the specified object into a string with async.
+        /// </summary>
+        /// <param name="graph">The object to serialize.</param>
+        public async Task<string> SerializeAsync(object graph)
+        {
+            using (var buffer = new StringWriter())
+            {
+                await SerializeAsync(buffer, graph);
+                return buffer.ToString();
+            }
+        }
+#endif
+
         /// <summary>
         /// Serializes the specified object.
         /// </summary>
@@ -95,6 +125,19 @@ namespace YamlDotNet.Serialization
         {
             Serialize(new Emitter(writer, emitterSettings), graph, type);
         }
+
+#if NETSTandard && !NETSTANDARD1_3
+        /// <summary>
+        /// Serializes the specified object with async.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param>
+        public async Task SerializeAsync(TextWriter writer, object graph, Type type)
+        {
+            await SerializeAsync(new Emitter(writer, emitterSettings), graph, type);
+        }
+#endif
 
         /// <summary>
         /// Serializes the specified object.
@@ -110,6 +153,23 @@ namespace YamlDotNet.Serialization
 
             EmitDocument(emitter, graph, null);
         }
+
+#if NETSTandard && !NETSTANDARD1_3
+        /// <summary>
+        /// Serializes the specified object wiyth async.
+        /// </summary>
+        /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        public async Task SerializeAsync(IEmitter emitter, object graph)
+        {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException(nameof(emitter));
+            }
+
+            await EmitDocumentAsync(emitter, graph, null);
+        }
+#endif
 
         /// <summary>
         /// Serializes the specified object.
@@ -132,6 +192,29 @@ namespace YamlDotNet.Serialization
             EmitDocument(emitter, graph, type);
         }
 
+#if NETSTandard && !NETSTANDARD1_3
+        /// <summary>
+        /// Serializes the specified object with async.
+        /// </summary>
+        /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param>
+        public async Task SerializeAsync(IEmitter emitter, object graph, Type type)
+        {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException(nameof(emitter));
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            await EmitDocumentAsync(emitter, graph, type);
+        }
+#endif
+
         private void EmitDocument(IEmitter emitter, object graph, Type? type)
         {
             emitter.Emit(new StreamStart());
@@ -142,5 +225,19 @@ namespace YamlDotNet.Serialization
             emitter.Emit(new DocumentEnd(true));
             emitter.Emit(new StreamEnd());
         }
+
+#if NETSTandard && !NETSTANDARD1_3
+        private async Task EmitDocumentAsync(IEmitter emitter, object graph, Type? type)
+        {
+            emitter.Emit(new StreamStart());
+            emitter.Emit(new DocumentStart());
+
+            await valueSerializer.SerializeValueAsync(emitter, graph, type);
+
+            emitter.Emit(new DocumentEnd(true));
+            emitter.Emit(new StreamEnd());
+        }
+#endif
+
     }
 }

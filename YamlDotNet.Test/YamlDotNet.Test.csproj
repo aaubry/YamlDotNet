@@ -39,4 +39,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!--Add Async for projects that are not netstandard 2.0 or higher (due to System.Linq.Async dependency)-->
+  <ItemGroup Condition="'$(NetStandard)' == 'true' And '$(TargetFramework)' != 'netstandard1.3'">
+    <Reference Include="System.Threading.Tasks" />
+    <PackageReference Include="System.Linq.Async">
+      <Version>4.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
 </Project>
