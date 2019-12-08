@@ -28,7 +28,7 @@ namespace YamlDotNet.Serialization
     {
         void SerializeValue(IEmitter emitter, object? value, Type? type);
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         System.Threading.Tasks.Task SerializeValueAsync(IEmitter emitter, object? value, Type? type);
 #endif
     }

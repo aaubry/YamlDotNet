@@ -567,7 +567,7 @@ namespace YamlDotNet.Serialization
                 traversalStrategy.Traverse(graph, emittingVisitor, emitter);
             }
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
             public async System.Threading.Tasks.Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
             {
                 var actualType = type ?? (value != null ? value.GetType() : typeof(object));

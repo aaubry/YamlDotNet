@@ -1289,7 +1289,7 @@ namespace YamlDotNet.Test.Serialization
                 .Build();
 
             var writer = new StringWriter();
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
             await serializer.SerializeAsync(writer, obj);
 #else
             serializer.Serialize(writer, obj);

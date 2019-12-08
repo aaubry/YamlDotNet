@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
 using System.Linq.Async;
 #endif
 
@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization
             return outerComponent;
         }
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         public static TComponent BuildComponentChainAsync<TComponent>(this LazyComponentRegistrationList<TComponent, TComponent> registrations, TComponent innerComponent)
         {
             var outerComponent = registrations.InReverseOrder.AggregateAsync(
@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization
             return outerComponent;
         }
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         public static TComponent BuildComponentChain<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TComponent innerComponent, Func<TComponent, TArgument> argumentBuilder)
         {
             var outerComponent = registrations.InReverseOrder.AggregateAsync(
@@ -81,7 +81,7 @@ namespace YamlDotNet.Serialization
                 .ToList();
         }
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         public static List<TComponent> BuildComponentListAsync<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
         {
             return registrations
@@ -97,7 +97,7 @@ namespace YamlDotNet.Serialization
                 .ToList();
         }
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         public static List<TComponent> BuildComponentListAsync<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TArgument argument)
         {
             return registrations

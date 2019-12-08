@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
 using System.Threading.Tasks;
 #endif
 using YamlDotNet.Core;
@@ -16,7 +16,7 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         void Serialize(TextWriter writer, object graph);
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         /// <summary>
         /// Serializes the specified object.
         /// </summary>
@@ -31,7 +31,7 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         string Serialize(object graph);
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         /// <summary>
         /// Serializes the specified object into a string.
         /// </summary>
@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization
         /// <param name="type">The static type of the object to serialize.</param>
         void Serialize(TextWriter writer, object graph, Type type);
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         /// <summary>
         /// Serializes the specified object.
         /// </summary>
@@ -64,7 +64,7 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         void Serialize(IEmitter emitter, object graph);
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         /// <summary>
         /// Serializes the specified object.
         /// </summary>
@@ -81,7 +81,7 @@ namespace YamlDotNet.Serialization
         /// <param name="type">The static type of the object to serialize.</param>
         void Serialize(IEmitter emitter, object graph, Type type);
 
-#if NETSTandard && !NETSTANDARD1_3
+#if NETSTANDARD && !NETSTANDARD1_3
         /// <summary>
         /// Serializes the specified object.
         /// </summary>
