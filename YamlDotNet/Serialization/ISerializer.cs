@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization
         /// Serializes the specified object into a string.
         /// </summary>
         /// <param name="graph">The object to serialize.</param>
-        Task SerializeAsync(object graph);
+        Task<string> SerializeAsync(object graph);
 #endif
 
         /// <summary>

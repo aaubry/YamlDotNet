@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 #if NETSTANDARD && !NETSTANDARD1_3
-using System.Linq.Async;
+using System.Threading.Tasks;
 #endif
 
 namespace YamlDotNet.Serialization
@@ -40,18 +40,6 @@ namespace YamlDotNet.Serialization
             return outerComponent;
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
-        public static TComponent BuildComponentChainAsync<TComponent>(this LazyComponentRegistrationList<TComponent, TComponent> registrations, TComponent innerComponent)
-        {
-            var outerComponent = registrations.InReverseOrder.AggregateAsync(
-                innerComponent,
-                (inner, factory) => factory(inner)
-            );
-
-            return outerComponent;
-        }
-#endif
-
         public static TComponent BuildComponentChain<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TComponent innerComponent, Func<TComponent, TArgument> argumentBuilder)
         {
             var outerComponent = registrations.InReverseOrder.Aggregate(
@@ -62,18 +50,6 @@ namespace YamlDotNet.Serialization
             return outerComponent;
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
-        public static TComponent BuildComponentChain<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TComponent innerComponent, Func<TComponent, TArgument> argumentBuilder)
-        {
-            var outerComponent = registrations.InReverseOrder.AggregateAsync(
-                innerComponent,
-                (inner, factory) => factory(argumentBuilder(inner))
-            );
-
-            return outerComponent;
-        }
-#endif
-
         public static List<TComponent> BuildComponentList<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
         {
             return registrations
@@ -82,11 +58,11 @@ namespace YamlDotNet.Serialization
         }
 
 #if NETSTANDARD && !NETSTANDARD1_3
-        public static List<TComponent> BuildComponentListAsync<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
+        public static async Task<List<TComponent>> BuildComponentListAsync<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
         {
-            return registrations
-                .SelectAsync(factory => factory(Nothing.Instance))
-                .ToList();
+            return await Task.FromResult(registrations
+                .Select(factory => factory(Nothing.Instance))
+                .ToList());
         }
 #endif
 
@@ -98,11 +74,11 @@ namespace YamlDotNet.Serialization
         }
 
 #if NETSTANDARD && !NETSTANDARD1_3
-        public static List<TComponent> BuildComponentListAsync<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TArgument argument)
+        public static async Task<List<TComponent>> BuildComponentListAsync<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TArgument argument)
         {
-            return registrations
-                .SelectAsync(factory => factory(argument))
-                .ToList();
+            return await Task.FromResult(registrations
+                .Select(factory => factory(argument))
+                .ToList());
         }
 #endif
     }

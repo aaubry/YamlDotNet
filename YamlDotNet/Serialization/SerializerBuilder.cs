@@ -21,6 +21,9 @@
 
 using System;
 using System.Collections.Generic;
+#if NETSTANDARD && !NETSTANDARD1_3
+using System.Threading.Tasks;
+#endif
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.EventEmitters;
@@ -568,22 +571,22 @@ namespace YamlDotNet.Serialization
             }
 
 #if NETSTANDARD && !NETSTANDARD1_3
-            public async System.Threading.Tasks.Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
+            public async Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
             {
                 var actualType = type ?? (value != null ? value.GetType() : typeof(object));
                 var staticType = type ?? typeof(object);
 
                 var graph = new ObjectDescriptor(value, actualType, staticType);
 
-                var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
+                var preProcessingPhaseObjectGraphVisitors = await preProcessingPhaseObjectGraphVisitorFactories.BuildComponentListAsync(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
                 {
                     traversalStrategy.Traverse(graph, visitor, null);
                 }
 
-                void nestedObjectSerializer(object? v, Type? t) => SerializeValueAsync(emitter, v, t);
+                void nestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
 
-                var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChainAsync(
+                var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
                     new EmittingObjectGraphVisitor(eventEmitter),
                     inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, nestedObjectSerializer)
                 );
