@@ -21,7 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
 using System.Threading.Tasks;
 #endif
 using YamlDotNet.Core;
@@ -570,7 +570,7 @@ namespace YamlDotNet.Serialization
                 traversalStrategy.Traverse(graph, emittingVisitor, emitter);
             }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
             public async Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
             {
                 var actualType = type ?? (value != null ? value.GetType() : typeof(object));

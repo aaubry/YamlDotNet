@@ -1289,7 +1289,7 @@ namespace YamlDotNet.Test.Serialization
                 .Build();
 
             var writer = new StringWriter();
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
             await serializer.SerializeAsync(writer, obj);
 #else
             serializer.Serialize(writer, obj);
@@ -1567,7 +1567,7 @@ namespace YamlDotNet.Test.Serialization
                 .WithTypeConverter(new MethodInfoConverter())
                 .Build();
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
            string yaml = await serializer.SerializeAsync(ex);
 #else
             string yaml = serializer.Serialize(ex);

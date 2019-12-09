@@ -97,8 +97,8 @@
     </PackageReference>
   </ItemGroup>
 
-  <!--Add Async for projects that are not netstandard 2.0 or higher (due to System.Linq.Async dependency)-->
-  <ItemGroup Condition="'$(NetStandard)' == 'true' And '$(TargetFramework)' != 'netstandard1.3'">
+  <!--Add Async for projects that are netstandard, dotnetcore, or dotnet framework 4.5+-->
+  <ItemGroup Condition="'$(NetStandard)' == 'true' Or '$(TargetFramework)' == 'net45'">
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
 

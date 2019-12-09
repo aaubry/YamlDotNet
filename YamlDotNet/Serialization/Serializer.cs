@@ -21,7 +21,7 @@
 
 using System;
 using System.IO;
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
 using System.Threading.Tasks;
 #endif
 using YamlDotNet.Core;
@@ -75,7 +75,7 @@ namespace YamlDotNet.Serialization
             Serialize(new Emitter(writer, emitterSettings), graph);
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         /// <summary>
         /// Serializes the specified object with async.
         /// </summary>
@@ -100,7 +100,7 @@ namespace YamlDotNet.Serialization
             }
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         /// <summary>
         /// Serializes the specified object into a string with async.
         /// </summary>
@@ -126,7 +126,7 @@ namespace YamlDotNet.Serialization
             Serialize(new Emitter(writer, emitterSettings), graph, type);
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         /// <summary>
         /// Serializes the specified object with async.
         /// </summary>
@@ -154,7 +154,7 @@ namespace YamlDotNet.Serialization
             EmitDocument(emitter, graph, null);
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         /// <summary>
         /// Serializes the specified object wiyth async.
         /// </summary>
@@ -192,7 +192,7 @@ namespace YamlDotNet.Serialization
             EmitDocument(emitter, graph, type);
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         /// <summary>
         /// Serializes the specified object with async.
         /// </summary>
@@ -226,7 +226,7 @@ namespace YamlDotNet.Serialization
             emitter.Emit(new StreamEnd());
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         private async Task EmitDocumentAsync(IEmitter emitter, object graph, Type? type)
         {
             emitter.Emit(new StreamStart());

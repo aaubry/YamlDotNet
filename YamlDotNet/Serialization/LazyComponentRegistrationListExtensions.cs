@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
 using System.Threading.Tasks;
 #endif
 
@@ -57,7 +57,7 @@ namespace YamlDotNet.Serialization
                 .ToList();
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         public static async Task<List<TComponent>> BuildComponentListAsync<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
         {
             return await Task.FromResult(registrations
@@ -73,7 +73,7 @@ namespace YamlDotNet.Serialization
                 .ToList();
         }
 
-#if NETSTANDARD && !NETSTANDARD1_3
+#if NETSTANDARD || NET45
         public static async Task<List<TComponent>> BuildComponentListAsync<TArgument, TComponent>(this LazyComponentRegistrationList<TArgument, TComponent> registrations, TArgument argument)
         {
             return await Task.FromResult(registrations
