@@ -45,7 +45,7 @@ namespace YamlDotNet.Test.Serialization
 {
     public class SerializationTests : SerializationTestHelper
     {
-        #region Test Cases
+#region Test Cases
 
         private static readonly string[] TrueStrings = { "true", "y", "yes", "on" };
         private static readonly string[] FalseStrings = { "false", "n", "no", "off" };
@@ -68,7 +68,7 @@ namespace YamlDotNet.Test.Serialization
             }
         }
 
-        #endregion
+#endregion
 
         [Fact]
         public void DeserializeEmptyDocument()
@@ -1112,7 +1112,7 @@ namespace YamlDotNet.Test.Serialization
                   - &BIG { r: 10 }
                   - &SMALL { r: 1 }
                 
-                # All the following maps are equal:
+# All the following maps are equal:
                 results:
                   - # Explicit keys
                     x: 1
@@ -1130,12 +1130,12 @@ namespace YamlDotNet.Test.Serialization
                     label: center/big
                   
                   - # Override
-                    #<< : [ *BIG, *LEFT, *SMALL ]    # This does not work because, in the current implementation,
-                                                     # later keys override former keys. This could be fixed, but that
-                                                     # is not trivial because the deserializer allows aliases to refer to
-                                                     # an anchor that is defined later in the document, and the way it is
-                                                     # implemented, the value is assigned later when the anchored value is
-                                                     # deserialized.
+#<< : [ *BIG, *LEFT, *SMALL ]    # This does not work because, in the current implementation,
+# later keys override former keys. This could be fixed, but that
+# is not trivial because the deserializer allows aliases to refer to
+# an anchor that is defined later in the document, and the way it is
+# implemented, the value is assigned later when the anchored value is
+# deserialized.
                     << : [ *SMALL, *LEFT, *BIG ]
                     x: 1
                     label: center/big
@@ -1556,6 +1556,22 @@ namespace YamlDotNet.Test.Serialization
                 .WithTypeConverter(new MethodInfoConverter())
                 .Build();
             string yaml = serializer.Serialize(ex);
+            Assert.Contains("GetExceptionWithStackTrace", yaml);
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task SerializeExceptionWithStackTraceAsync()
+        {
+            var ex = GetExceptionWithStackTrace();
+            var serializer = new SerializerBuilder()
+                .WithTypeConverter(new MethodInfoConverter())
+                .Build();
+
+#if NETSTANDARD && !NETSTANDARD1_3
+           string yaml = await serializer.SerializeAsync(ex);
+#else
+            string yaml = serializer.Serialize(ex);
+#endif
             Assert.Contains("GetExceptionWithStackTrace", yaml);
         }
 
