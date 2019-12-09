@@ -1276,7 +1276,9 @@ namespace YamlDotNet.Test.Serialization
 
         [Trait("Category","Async")]
         [Fact]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async System.Threading.Tasks.Task SerializeDynamicPropertyAndApplyNamingConventionAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             dynamic obj = new ExpandoObject();
             obj.property_one = new ExpandoObject();
@@ -1563,7 +1565,9 @@ namespace YamlDotNet.Test.Serialization
 
         [Trait("Category","Async")]
         [Fact]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async System.Threading.Tasks.Task SerializeExceptionWithStackTraceAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var ex = GetExceptionWithStackTrace();
             var serializer = new SerializerBuilder()
