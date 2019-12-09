@@ -1253,6 +1253,7 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(3, exception.Start.Column);
         }
 
+        [Trait("Category","Async")]
         [Fact]
         public void SerializeDynamicPropertyAndApplyNamingConvention()
         {
@@ -1273,7 +1274,7 @@ namespace YamlDotNet.Test.Serialization
             writer.ToString().Should().Contain("xxx: new_value");
         }
 
-
+        [Trait("Category","Async")]
         [Fact]
         public async System.Threading.Tasks.Task SerializeDynamicPropertyAndApplyNamingConventionAsync()
         {
@@ -1548,6 +1549,7 @@ namespace YamlDotNet.Test.Serialization
             Assert.NotNull(deserialized);
         }
 
+        [Trait("Category","Async")]
         [Fact]
         public void SerializeExceptionWithStackTrace()
         {
@@ -1559,6 +1561,7 @@ namespace YamlDotNet.Test.Serialization
             Assert.Contains("GetExceptionWithStackTrace", yaml);
         }
 
+        [Trait("Category","Async")]
         [Fact]
         public async System.Threading.Tasks.Task SerializeExceptionWithStackTraceAsync()
         {

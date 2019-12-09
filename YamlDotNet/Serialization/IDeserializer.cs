@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+#if NETSTANDARD || NET45
+using System.Threading.Tasks;
+#endif
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization

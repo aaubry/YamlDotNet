@@ -22,6 +22,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NETSTANDARD || NET45
+using System.Threading.Tasks;
+#endif
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Converters;
@@ -83,15 +86,40 @@ namespace YamlDotNet.Serialization
             }
         }
 
+//#if NETSTANDARD || NET45
+//        public async Task<T> DeserializeAsync<T>(string input)
+//        {
+//            using (var reader = new StringReader(input))
+//            {
+//                return await DeserializeAsync<T>(reader);
+//            }
+//        }
+//#endif
+
         public T Deserialize<T>(TextReader input)
         {
             return Deserialize<T>(new Parser(input));
         }
 
+//#if NETSTANDARD || NET45
+//        public  async Task<T> DeserializeAsync<T>(TextReader input)
+//        {
+//            return await DeserializeAsync<T>(new Parser(input));
+//        }
+//#endif
+
         public object? Deserialize(TextReader input)
         {
             return Deserialize(input, typeof(object));
         }
+
+#if NETSTANDARD || NET45
+        public  async Task<object?> DeserializeAsync(TextReader input)
+        {
+            return await DeserializeAsync(input, typeof(object));
+        }
+#endif
+
 
         public object? Deserialize(string input, Type type)
         {
@@ -101,20 +129,51 @@ namespace YamlDotNet.Serialization
             }
         }
 
+#if NETSTANDARD || NET45
+        public  async Task<object?> DeserializeAsync(string input, Type type)
+        {
+            using (var reader = new StringReader(input))
+            {
+                return await DeserializeAsync(reader, type);
+            }
+        }
+#endif
+
         public object? Deserialize(TextReader input, Type type)
         {
             return Deserialize(new Parser(input), type);
         }
+
+#if NETSTANDARD || NET45
+        public  async Task<object?> DeserializeAsync(TextReader input, Type type)
+        {
+            return await DeserializeAsync(new Parser(input), type);
+        }
+#endif
 
         public T Deserialize<T>(IParser parser)
         {
             return (T)Deserialize(parser, typeof(T))!; // We really want an exception if we are trying to deserialize null into a non-nullable type
         }
 
+//#if NETSTANDARD || NET45
+//        public async Task<T> DeserializeAsync<T>(IParser parser)
+//        {
+//            return await (T)DeserializeAsync(parser, typeof(T))!; // We really want an exception if we are trying to deserialize null into a non-nullable type
+//        }
+//#endif
+
         public object? Deserialize(IParser parser)
         {
             return Deserialize(parser, typeof(object));
         }
+
+#if NETSTANDARD || NET45
+        public async Task<object?> DeserializeAsync(IParser parser)
+        {
+            return await DeserializeAsync(parser, typeof(object));
+        }
+#endif
 
         /// <summary>
         /// Deserializes an object of the specified type.
@@ -160,5 +219,52 @@ namespace YamlDotNet.Serialization
 
             return result;
         }
+
+#if NETSTANDARD || NET45
+        /// <summary>
+        /// Deserializes an object of the specified type.
+        /// </summary>
+        /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>
+        /// <param name="type">The static type of the object to deserialize.</param>
+        /// <returns>Returns the deserialized object.</returns>
+        public async Task<object?> DeserializeAsync(IParser parser, Type type)
+        {
+            if (parser == null)
+            {
+                throw new ArgumentNullException(nameof(parser));
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            var hasStreamStart = parser.TryConsume<StreamStart>(out var _);
+
+            var hasDocumentStart = parser.TryConsume<DocumentStart>(out var _);
+
+            object? result = null;
+            if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
+            {
+                using (var state = new SerializerState())
+                {
+                    result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
+                    state.OnDeserialization();
+                }
+            }
+
+            if (hasDocumentStart)
+            {
+                parser.Consume<DocumentEnd>();
+            }
+
+            if (hasStreamStart)
+            {
+                parser.Consume<StreamEnd>();
+            }
+
+            return result;
+        }
+#endif
     }
 }
