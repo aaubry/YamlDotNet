@@ -45,7 +45,7 @@ namespace YamlDotNet.Test.Serialization
 {
     public class SerializationTests : SerializationTestHelper
     {
-#region Test Cases
+        #region Test Cases
 
         private static readonly string[] TrueStrings = { "true", "y", "yes", "on" };
         private static readonly string[] FalseStrings = { "false", "n", "no", "off" };
@@ -68,7 +68,7 @@ namespace YamlDotNet.Test.Serialization
             }
         }
 
-#endregion
+        #endregion
 
         [Fact]
         public void DeserializeEmptyDocument()
@@ -165,6 +165,7 @@ namespace YamlDotNet.Test.Serialization
             result.Should().Be(flags);
         }
 
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializeCircularReference()
         {
@@ -176,6 +177,27 @@ namespace YamlDotNet.Test.Serialization
             };
 
             Action action = () => SerializerBuilder.EnsureRoundtrip().Build().Serialize(new StringWriter(), obj, typeof(CircularReference));
+
+            action.ShouldNotThrow();
+        }
+
+        //Note: async here is a slight performance degrade - 7-8ms, up from 1ms
+        [Trait("Category", "Async")]
+        [Fact]
+        public void SerializeCircularReferenceAsync()
+        {
+            var obj = new CircularReference();
+            obj.Child1 = new CircularReference
+            {
+                Child1 = obj,
+                Child2 = obj
+            };
+
+#if NETSTANDARD || NET45
+            Action action = () => await SerializerBuilder.EnsureRoundtrip().Build().SerializeAsync(new StringWriter(), obj, typeof(CircularReference));
+#else
+            Action action = () => SerializerBuilder.EnsureRoundtrip().Build().Serialize(new StringWriter(), obj, typeof(CircularReference));
+#endif
 
             action.ShouldNotThrow();
         }
@@ -193,6 +215,7 @@ namespace YamlDotNet.Test.Serialization
                 .ShouldBeEquivalentTo(new { X = 10, Y = 20 }, o => o.ExcludingMissingMembers());
         }
 
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializeCustomTags()
         {
@@ -203,6 +226,25 @@ namespace YamlDotNet.Test.Serialization
 
             var point = new Point(10, 20);
             var result = Serializer.Serialize(point);
+
+            result.Should().Be(expectedResult);
+        }
+
+        [Trait("Category", "Async")]
+        [Fact]
+        public void SerializeCustomTagsAsync()
+        {
+            var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
+            SerializerBuilder
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+                .WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
+
+            var point = new Point(10, 20);
+#if NETSTANDARD || NET45
+            var result = await Serializer.SerializeAsync(point);
+#else
+            var result = Serializer.Serialize(point);
+#endif
 
             result.Should().Be(expectedResult);
         }
@@ -712,6 +754,7 @@ namespace YamlDotNet.Test.Serialization
             three.ShouldBeEquivalentTo(new { aaa = "333" });
         }
 
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializeGuid()
         {
@@ -720,6 +763,24 @@ namespace YamlDotNet.Test.Serialization
             var writer = new StringWriter();
 
             Serializer.Serialize(writer, guid);
+            var serialized = writer.ToString();
+            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: " + serialized);
+        }
+
+        //Note: async here is basically equivalent to the sync version, both taking ~1ms
+        [Trait("Category", "Async")]
+        [Fact]
+        public void SerializeGuidAsync()
+        {
+            var guid = new Guid("{9462790D-5C44-4689-8542-5E2DD38EBD98}");
+
+            var writer = new StringWriter();
+
+#if NETSTANDARD || NET45
+           await  Serializer.Serialize(writer, guid);
+#else
+            Serializer.Serialize(writer, guid);
+#endif
             var serialized = writer.ToString();
             Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: " + serialized);
         }
@@ -994,6 +1055,7 @@ namespace YamlDotNet.Test.Serialization
             serialized.Should().Contain("Value");
         }
 
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializingAGenericDictionaryShouldNotThrowTargetException()
         {
@@ -1002,6 +1064,23 @@ namespace YamlDotNet.Test.Serialization
             };
 
             Action action = () => Serializer.Serialize(new StringWriter(), obj);
+
+            action.ShouldNotThrow<TargetException>();
+        }
+
+        [Trait("Category", "Async")]
+        [Fact]
+        public void SerializingAGenericDictionaryShouldNotThrowTargetExceptionAsync()
+        {
+            var obj = new CustomGenericDictionary {
+                { "hello", "world" }
+            };
+
+#if NETSTANDARD || NET45
+            Action action = () => await Serializer.SerializeAsync(new StringWriter(), obj);
+#else
+            Action action = () => Serializer.Serialize(new StringWriter(), obj);
+#endif
 
             action.ShouldNotThrow<TargetException>();
         }
@@ -1253,7 +1332,7 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(3, exception.Start.Column);
         }
 
-        [Trait("Category","Async")]
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializeDynamicPropertyAndApplyNamingConvention()
         {
@@ -1274,7 +1353,7 @@ namespace YamlDotNet.Test.Serialization
             writer.ToString().Should().Contain("xxx: new_value");
         }
 
-        [Trait("Category","Async")]
+        [Trait("Category", "Async")]
         [Fact]
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async System.Threading.Tasks.Task SerializeDynamicPropertyAndApplyNamingConventionAsync()
@@ -1302,6 +1381,7 @@ namespace YamlDotNet.Test.Serialization
         }
 
 
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
         {
@@ -1318,6 +1398,32 @@ namespace YamlDotNet.Test.Serialization
 
             var writer = new StringWriter();
             serializer.Serialize(writer, obj);
+
+            writer.ToString().Should().Contain("new_key_here: new_value");
+        }
+
+        //Note: async here is a massive performance degrade - 200-700ms, up from 1ms
+        [Trait("Category", "Async")]
+        [Fact]
+        public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConventionAsync()
+        {
+            var obj = new Dictionary<string, object>();
+            obj["property_one"] = new GenericTestDictionary<string, object>();
+            ((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
+
+            var mockNamingConvention = A.Fake<INamingConvention>();
+            A.CallTo(() => mockNamingConvention.Apply(A<string>.Ignored)).Returns("xxx");
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(mockNamingConvention)
+                .Build();
+
+            var writer = new StringWriter();
+#if NETSTANDARD || NET45
+            await serializer.SerializeAsync(writer, obj);
+#else
+            serializer.Serialize(writer, obj);
+#endif
 
             writer.ToString().Should().Contain("new_key_here: new_value");
         }
@@ -1551,7 +1657,7 @@ namespace YamlDotNet.Test.Serialization
             Assert.NotNull(deserialized);
         }
 
-        [Trait("Category","Async")]
+        [Trait("Category", "Async")]
         [Fact]
         public void SerializeExceptionWithStackTrace()
         {
@@ -1563,7 +1669,7 @@ namespace YamlDotNet.Test.Serialization
             Assert.Contains("GetExceptionWithStackTrace", yaml);
         }
 
-        [Trait("Category","Async")]
+        [Trait("Category", "Async")]
         [Fact]
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async System.Threading.Tasks.Task SerializeExceptionWithStackTraceAsync()
