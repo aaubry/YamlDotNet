@@ -83,27 +83,10 @@ namespace YamlDotNet.Serialization
             }
         }
 
-//#if NETSTANDARD || NET45
-//        public async Task<T> DeserializeAsync<T>(string input)
-//        {
-//            using (var reader = new StringReader(input))
-//            {
-//                return await DeserializeAsync<T>(reader);
-//            }
-//        }
-//#endif
-
         public T Deserialize<T>(TextReader input)
         {
             return Deserialize<T>(new Parser(input));
         }
-
-//#if NETSTANDARD || NET45
-//        public  async Task<T> DeserializeAsync<T>(TextReader input)
-//        {
-//            return await DeserializeAsync<T>(new Parser(input));
-//        }
-//#endif
 
         public object? Deserialize(TextReader input)
         {

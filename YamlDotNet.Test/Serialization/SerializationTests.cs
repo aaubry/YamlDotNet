@@ -184,7 +184,9 @@ namespace YamlDotNet.Test.Serialization
         //Note: async here is a slight performance degrade - 7-8ms, up from 1ms
         [Trait("Category", "Async")]
         [Fact]
-        public void SerializeCircularReferenceAsync()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async System.Threading.Tasks.Task SerializeCircularReferenceAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var obj = new CircularReference();
             obj.Child1 = new CircularReference
@@ -232,7 +234,9 @@ namespace YamlDotNet.Test.Serialization
 
         [Trait("Category", "Async")]
         [Fact]
-        public void SerializeCustomTagsAsync()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async System.Threading.Tasks.Task SerializeCustomTagsAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
             SerializerBuilder
@@ -770,7 +774,9 @@ namespace YamlDotNet.Test.Serialization
         //Note: async here is basically equivalent to the sync version, both taking ~1ms
         [Trait("Category", "Async")]
         [Fact]
-        public void SerializeGuidAsync()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async System.Threading.Tasks.Task SerializeGuidAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var guid = new Guid("{9462790D-5C44-4689-8542-5E2DD38EBD98}");
 
@@ -1070,7 +1076,9 @@ namespace YamlDotNet.Test.Serialization
 
         [Trait("Category", "Async")]
         [Fact]
-        public void SerializingAGenericDictionaryShouldNotThrowTargetExceptionAsync()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async System.Threading.Tasks.Task SerializingAGenericDictionaryShouldNotThrowTargetExceptionAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var obj = new CustomGenericDictionary {
                 { "hello", "world" }
@@ -1405,7 +1413,9 @@ namespace YamlDotNet.Test.Serialization
         //Note: async here is a massive performance degrade - 200-700ms, up from 1ms
         [Trait("Category", "Async")]
         [Fact]
-        public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConventionAsync()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async System.Threading.Tasks.Task SerializeGenericDictionaryPropertyAndDoNotApplyNamingConventionAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var obj = new Dictionary<string, object>();
             obj["property_one"] = new GenericTestDictionary<string, object>();
