@@ -29,7 +29,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netcoreapp3.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <PackageReference Include="System.ComponentModel.TypeConverter">
       <Version>4.3.0</Version>
