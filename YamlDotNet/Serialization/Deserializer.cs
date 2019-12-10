@@ -160,6 +160,5 @@ namespace YamlDotNet.Serialization
 
             return result;
         }
-
     }
 }
