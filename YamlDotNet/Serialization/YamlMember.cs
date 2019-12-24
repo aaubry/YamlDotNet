@@ -21,6 +21,7 @@
 
 using System;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization
 {
@@ -56,6 +57,16 @@ namespace YamlDotNet.Serialization
         public ScalarStyle ScalarStyle { get; set; }
 
         /// <summary>
+        /// Specifies the sequence style of the property when serialied. This will only affect the serialization of sequence properties.
+        /// </summary>
+        public SequenceStyle SequenceStyle { get; set; }
+
+        /// <summary>
+        /// Specifies the mapping style of the property when serialied. This will only affect the serialization of object properties.
+        /// </summary>
+        public MappingStyle MappingStyle { get; set; }
+
+        /// <summary>
         /// Overrides how null and default values should be handled for this property.
         /// </summary>
         public DefaultValuesHandling? DefaultValuesHandling { get; set; }
@@ -66,6 +77,8 @@ namespace YamlDotNet.Serialization
         public YamlMemberAttribute()
         {
             ScalarStyle = ScalarStyle.Any;
+            SequenceStyle = SequenceStyle.Any;
+            MappingStyle = MappingStyle.Any;
             ApplyNamingConventions = true;
         }
 

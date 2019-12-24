@@ -21,6 +21,7 @@
 
 using System;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization
 {
@@ -32,6 +33,8 @@ namespace YamlDotNet.Serialization
         Type? TypeOverride { get; set; }
         int Order { get; set; }
         ScalarStyle ScalarStyle { get; set; }
+        SequenceStyle SequenceStyle { get; set; }
+        MappingStyle MappingStyle { get; set; }
 
         T GetCustomAttribute<T>() where T : Attribute;
 

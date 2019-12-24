@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Serialization
@@ -88,6 +89,18 @@ namespace YamlDotNet.Serialization
             {
                 get { return baseDescriptor.ScalarStyle; }
                 set { baseDescriptor.ScalarStyle = value; }
+            }
+
+            public SequenceStyle SequenceStyle
+            {
+                get { return baseDescriptor.SequenceStyle; }
+                set { baseDescriptor.SequenceStyle = value; }
+            }
+
+            public MappingStyle MappingStyle
+            {
+                get { return baseDescriptor.MappingStyle; }
+                set { baseDescriptor.MappingStyle = value; }
             }
 
             public void Write(object target, object? value)

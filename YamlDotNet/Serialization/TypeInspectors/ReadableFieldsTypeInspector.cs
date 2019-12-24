@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization.TypeInspectors
 {
@@ -56,6 +57,8 @@ namespace YamlDotNet.Serialization.TypeInspectors
                 this.fieldInfo = fieldInfo;
                 this.typeResolver = typeResolver;
                 ScalarStyle = ScalarStyle.Any;
+                SequenceStyle = SequenceStyle.Any;
+                MappingStyle = MappingStyle.Any;
             }
 
             public string Name { get { return fieldInfo.Name; } }
@@ -64,6 +67,8 @@ namespace YamlDotNet.Serialization.TypeInspectors
             public int Order { get; set; }
             public bool CanWrite { get { return !fieldInfo.IsInitOnly; } }
             public ScalarStyle ScalarStyle { get; set; }
+            public SequenceStyle SequenceStyle { get; set; }
+            public MappingStyle MappingStyle { get; set; }
 
             public void Write(object target, object? value)
             {
@@ -80,7 +85,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             {
                 var propertyValue = fieldInfo.GetValue(target);
                 var actualType = TypeOverride ?? typeResolver.Resolve(Type, propertyValue);
-                return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
+                return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle, SequenceStyle, MappingStyle);
             }
         }
     }

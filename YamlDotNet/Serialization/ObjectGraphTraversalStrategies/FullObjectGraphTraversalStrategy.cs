@@ -152,7 +152,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                         {
                             // This is a nullable type, recursively handle it with its underlying type.
                             // Note that if it contains null, the condition above already took care of it
-                            Traverse("Value", new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, context, path);
+                            Traverse("Value", new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle, value.SequenceStyle, value.MappingStyle), visitor, context, path);
                         }
                         else
                         {
@@ -180,7 +180,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             {
                 var genericArguments = genericDictionaryType.GetGenericArguments();
                 var adaptedDictionary = Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(genericArguments), value.Value)!;
-                TraverseDictionary(new ObjectDescriptor(adaptedDictionary, value.Type, value.StaticType, value.ScalarStyle), visitor, genericArguments[0], genericArguments[1], context, path);
+                TraverseDictionary(new ObjectDescriptor(adaptedDictionary, value.Type, value.StaticType, value.ScalarStyle, value.SequenceStyle, value.MappingStyle), visitor, genericArguments[0], genericArguments[1], context, path);
                 return;
             }
 

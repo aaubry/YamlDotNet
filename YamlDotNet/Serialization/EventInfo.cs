@@ -77,6 +77,7 @@ namespace YamlDotNet.Serialization
         public MappingStartEventInfo(IObjectDescriptor source)
             : base(source)
         {
+            Style = source.MappingStyle;
         }
 
         public bool IsImplicit { get; set; }
@@ -96,6 +97,7 @@ namespace YamlDotNet.Serialization
         public SequenceStartEventInfo(IObjectDescriptor source)
             : base(source)
         {
+            Style = source.SequenceStyle;
         }
 
         public bool IsImplicit { get; set; }
