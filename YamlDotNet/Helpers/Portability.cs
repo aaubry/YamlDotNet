@@ -244,7 +244,7 @@ namespace YamlDotNet
         {
             return ex.InnerException;
         }
-        
+
         public static bool IsInstanceOf(this Type type, object o)
         {
             return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type);
@@ -740,23 +740,6 @@ namespace System.Runtime.Versioning
         {
             FrameworkName = frameworkName;
         }
-    }
-}
-#endif
-
-#if !(NETCOREAPP3_0 || NETSTANDARD2_1)
-namespace System.Diagnostics.CodeAnalysis
-{
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-    public sealed class NotNullWhenAttribute : Attribute
-    {
-        public NotNullWhenAttribute(bool returnValue) { }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-    public sealed class MaybeNullWhenAttribute : Attribute
-    {
-        public MaybeNullWhenAttribute(bool returnValue) { }
     }
 }
 #endif
