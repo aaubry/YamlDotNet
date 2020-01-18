@@ -1,29 +1,20 @@
 # Release notes
-## Release 8.0.0
+
+# Release 8.1.0
 
 ## New features and improvements
 
-- Change the default value handling behavior. Fixes #427  
-  This is a **breaking change** to the default behaviour of the serializer, which will now **always emit null and default values**.  
-  It is possible to configure this behaviour by using the `ConfigureDefaultValuesHandling` method on `SerializerBuilder`.
+- Made CachedTypeInspector thread safe #386  
+  Previously, using an instance of `Serializer` or `Deserializer` was not thread-safe,
+  although the intention was for them to be thread safe. The only mutable state is
+  inside CachedTypeInspector and was not properly protected against concurrent mutation.
 
-  [More details are available in the documentation.](https://github.com/aaubry/YamlDotNet/wiki/Serialization.Serializer#configuredefaultvalueshandlingdefaultvalueshandling)
+## Other fixes
 
-- Add default implementations for the following non-generic collections to `DefaultObjectFactory`:  
-  - IEnumerable  
-  - ICollection  
-  - IList  
-  - IDictionary
-
-- Remove obsolete and unused `SerializationOptions` enum. Fixes #438
-- Throw descriptive exceptions when using the "linq" methods of `YamlNode`. Relates to #437
-
-## Bug fixes
-
-- Never emit document end indicator on stream end. Fixes #436
-- Fix exception when deserializing an interface. Fixes #439  
+- Fix type conflicts when targeting frameworks without nullability attributes #460
 
 # Previous releases
+- [8.0.0](releases/8.0.0.md)
 - [7.0.0](releases/7.0.0.md)
 - [6.1.2](releases/6.1.2.md)
 - [6.1.1](releases/6.1.1.md)
