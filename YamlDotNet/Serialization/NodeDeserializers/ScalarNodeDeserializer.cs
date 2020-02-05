@@ -149,40 +149,32 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             if (value[currentIndex] == '0')
             {
                 // Could be binary, octal, hex, decimal (0)
+                
+                // Check the next character
+                currentIndex++;
 
-                // If there are no characters remaining, it's a decimal zero
-                if (currentIndex == value.Length - 1)
+                if (value[currentIndex] == 'b')
                 {
-                    numberBase = 10;
-                    result = 0;
+                    // Binary
+                    numberBase = 2;
+
+                    currentIndex++;
+                }
+
+                else if (value[currentIndex] == 'x')
+                {
+                    // Hex
+                    numberBase = 16;
+
+                    currentIndex++;
                 }
 
                 else
                 {
-                    // Check the next character
-                    currentIndex++;
-
-                    if (value[currentIndex] == 'b')
-                    {
-                        // Binary
-                        numberBase = 2;
-
-                        currentIndex++;
-                    }
-
-                    else if (value[currentIndex] == 'x')
-                    {
-                        // Hex
-                        numberBase = 16;
-
-                        currentIndex++;
-                    }
-
-                    else
-                    {
-                        // Octal
-                        numberBase = 8;
-                    }
+                    // The custom to indicate octal integers starting with a '0' only, has been
+                    // proven confusing in many language and was dropped from the YAML specification
+                    // https://stackoverflow.com/a/33099062/899077
+                    numberBase = 10;
                 }
 
                 // Copy remaining digits to the number buffer (skip underscores)
@@ -196,22 +188,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
 
                 // Parse the magnitude of the number
-                switch (numberBase)
-                {
-                    case 2:
-                    case 8:
-                        // TODO: how to incorporate the numberFormat?
-                        result = Convert.ToUInt64(numberBuilder.ToString(), numberBase);
-                        break;
-
-                    case 16:
-                        result = ulong.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
-                        break;
-
-                    case 10:
-                        // Result is already zero
-                        break;
-                }
+                result = Convert.ToUInt64(numberBuilder.ToString(), numberBase);
             }
 
             else
