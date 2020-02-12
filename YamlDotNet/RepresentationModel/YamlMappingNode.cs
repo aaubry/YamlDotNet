@@ -27,6 +27,7 @@ using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Helpers;
 using static YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.RepresentationModel
@@ -37,7 +38,7 @@ namespace YamlDotNet.RepresentationModel
     [Serializable]
     public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly IDictionary<YamlNode, YamlNode> children = new Dictionary<YamlNode, YamlNode>();
+        private readonly IDictionary<YamlNode, YamlNode> children = new OrderedYamlDictionary();
 
         /// <summary>
         /// Gets the children of the current node.
