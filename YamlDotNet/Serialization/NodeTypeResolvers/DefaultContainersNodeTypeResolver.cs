@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
     public sealed class DefaultContainersNodeTypeResolver : INodeTypeResolver
     {
-        bool INodeTypeResolver.Resolve(NodeEvent nodeEvent, ref Type currentType)
+        bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
             if (currentType == typeof(object))
             {

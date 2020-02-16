@@ -43,63 +43,68 @@ namespace YamlDotNet.Serialization.EventEmitters
             eventInfo.IsPlainImplicit = true;
             eventInfo.Style = ScalarStyle.Plain;
 
-            var typeCode = eventInfo.Source.Value != null
-                ? eventInfo.Source.Type.GetTypeCode()
-                : TypeCode.Empty;
-
-            switch (typeCode)
+            var value = eventInfo.Source.Value;
+            if (value == null)
             {
-                case TypeCode.Boolean:
-                    eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
-                    break;
+                eventInfo.RenderedValue = "null";
+            }
+            else
+            {
+                var typeCode = eventInfo.Source.Type.GetTypeCode();
+                switch (typeCode)
+                {
+                    case TypeCode.Boolean:
+                        eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
+                        break;
 
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    var valueIsEnum = eventInfo.Source.Type.IsEnum();
-                    if (valueIsEnum)
-                    {
-                        eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.SByte:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                        var valueIsEnum = eventInfo.Source.Type.IsEnum();
+                        if (valueIsEnum)
+                        {
+                            eventInfo.RenderedValue = value.ToString()!;
+                            eventInfo.Style = ScalarStyle.DoubleQuoted;
+                            break;
+                        }
+
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        break;
+
+                    case TypeCode.Single:
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        break;
+
+                    case TypeCode.String:
+                    case TypeCode.Char:
+                        eventInfo.RenderedValue = value.ToString()!;
                         eventInfo.Style = ScalarStyle.DoubleQuoted;
                         break;
-                    }
 
-                    eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Single:
-                case TypeCode.Double:
-                case TypeCode.Decimal:
-                    eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.String:
-                case TypeCode.Char:
-                    eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
-                    eventInfo.Style = ScalarStyle.DoubleQuoted;
-                    break;
-
-                case TypeCode.DateTime:
-                    eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.Source.Value);
-                    break;
-
-                case TypeCode.Empty:
-                    eventInfo.RenderedValue = "null";
-                    break;
-
-                default:
-                    if (eventInfo.Source.Type == typeof(TimeSpan))
-                    {
-                        eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.Source.Value);
+                    case TypeCode.DateTime:
+                        eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
                         break;
-                    }
 
-                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+                    case TypeCode.Empty:
+                        eventInfo.RenderedValue = "null";
+                        break;
+
+                    default:
+                        if (eventInfo.Source.Type == typeof(TimeSpan))
+                        {
+                            eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(value);
+                            break;
+                        }
+
+                        throw new NotSupportedException($"TypeCode.{typeCode} is not supported.");
+                }
             }
 
             base.Emit(eventInfo, emitter);

@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             this.typeInspectors = typeInspectors?.ToList() ?? throw new ArgumentNullException(nameof(typeInspectors));
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return typeInspectors
                 .SelectMany(i => i.GetProperties(type, container));

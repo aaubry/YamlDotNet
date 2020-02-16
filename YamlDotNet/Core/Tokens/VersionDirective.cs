@@ -27,21 +27,13 @@ namespace YamlDotNet.Core.Tokens
     /// Represents a version directive token.
     /// </summary>
     [Serializable]
-    public class VersionDirective : Token
+    public sealed class VersionDirective : Token
     {
-        private readonly Version version;
-
         /// <summary>
         /// Gets the version.
         /// </summary>
         /// <value>The version.</value>
-        public Version Version
-        {
-            get
-            {
-                return version;
-            }
-        }
+        public Version Version { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VersionDirective"/> class.
@@ -61,7 +53,7 @@ namespace YamlDotNet.Core.Tokens
         public VersionDirective(Version version, Mark start, Mark end)
             : base(start, end)
         {
-            this.version = version;
+            this.Version = version;
         }
 
         /// <summary>
@@ -71,10 +63,10 @@ namespace YamlDotNet.Core.Tokens
         /// <returns>
         /// true if the specified System.Object is equal to the current System.Object; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as VersionDirective;
-            return other != null && version.Equals(other.version);
+            return obj is VersionDirective other
+                && Version.Equals(other.Version);
         }
 
         /// <summary>
@@ -85,7 +77,7 @@ namespace YamlDotNet.Core.Tokens
         /// </returns>
         public override int GetHashCode()
         {
-            return version.GetHashCode();
+            return Version.GetHashCode();
         }
     }
 }

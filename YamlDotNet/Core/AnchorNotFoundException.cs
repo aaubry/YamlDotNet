@@ -32,13 +32,6 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
         /// </summary>
-        public AnchorNotFoundException()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
-        /// </summary>
         /// <param name="message">The message.</param>
         public AnchorNotFoundException(string message)
             : base(message)

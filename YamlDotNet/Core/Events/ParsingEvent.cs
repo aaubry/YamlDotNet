@@ -31,44 +31,22 @@ namespace YamlDotNet.Core.Events
         /// The value can be either -1, 0 or 1. For start events, it will be 1,
         /// for end events, it will be -1, and for the remaining events, it will be 0.
         /// </summary>
-        public virtual int NestingIncrease
-        {
-            get { return 0; }
-        }
+        public virtual int NestingIncrease => 0;
 
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.
         /// </summary>
-        internal abstract EventType Type
-        {
-            get;
-        }
-
-        private readonly Mark start;
+        internal abstract EventType Type { get; }
 
         /// <summary>
         /// Gets the position in the input stream where the event starts.
         /// </summary>
-        public Mark Start
-        {
-            get
-            {
-                return start;
-            }
-        }
-
-        private readonly Mark end;
+        public Mark Start { get; }
 
         /// <summary>
         /// Gets the position in the input stream where the event ends.
         /// </summary>
-        public Mark End
-        {
-            get
-            {
-                return end;
-            }
-        }
+        public Mark End { get; }
 
         /// <summary>
         /// Accepts the specified visitor.
@@ -83,8 +61,8 @@ namespace YamlDotNet.Core.Events
         /// <param name="end">The end position of the event.</param>
         internal ParsingEvent(Mark start, Mark end)
         {
-            this.start = start;
-            this.end = end;
+            this.Start = start ?? throw new System.ArgumentNullException(nameof(start));
+            this.End = end ?? throw new System.ArgumentNullException(nameof(end));
         }
     }
 }

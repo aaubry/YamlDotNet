@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using YamlDotNet.Core;
 
@@ -63,21 +64,43 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="start">The start position.</param>
         /// <param name="end">The end position.</param>
         /// <returns></returns>
-        public YamlNode GetNode(string anchor, bool throwException, Mark start, Mark end)
+        [Obsolete("Please use GetNode(string, Mark, Mark) when throwException = true or TryGetNode(string, Node) when throwException = false")]
+        public YamlNode? GetNode(string anchor, bool throwException, Mark start, Mark end)
         {
-            YamlNode target;
-            if (anchors.TryGetValue(anchor, out target))
+            return throwException
+                ? GetNode(anchor, start, end)
+                : TryGetNode(anchor, out var node) ? node : null;
+        }
+
+        /// <summary>
+        /// Gets the node with the specified anchor.
+        /// </summary>
+        /// <param name="anchor">The anchor.</param>
+        /// <param name="start">The start position.</param>
+        /// <param name="end">The end position.</param>
+        /// <returns></returns>
+        /// <exception cref="AnchorNotFoundException">if there is no node with that anchor.</exception>
+        public YamlNode GetNode(string anchor, Mark start, Mark end)
+        {
+            if (anchors.TryGetValue(anchor, out var target))
             {
                 return target;
             }
-            else if (throwException)
-            {
-                throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
-            }
             else
             {
-                return null;
+                throw new AnchorNotFoundException(start, end, $"The anchor '{anchor}' does not exists");
             }
+        }
+
+        /// <summary>
+        /// Gets the node with the specified anchor.
+        /// </summary>
+        /// <param name="anchor">The anchor.</param>
+        /// <param name="node">The node that was retrieved.</param>
+        /// <returns>true if the anchor was found; otherwise false.</returns>
+        public bool TryGetNode(string anchor, [NotNullWhen(true)] out YamlNode? node)
+        {
+            return anchors.TryGetValue(anchor, out node);
         }
 
         /// <summary>

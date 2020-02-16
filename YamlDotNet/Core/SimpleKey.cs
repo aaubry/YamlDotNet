@@ -24,28 +24,33 @@ using System;
 namespace YamlDotNet.Core
 {
     [Serializable]
-    internal class SimpleKey
+    internal sealed class SimpleKey
     {
         private readonly Cursor cursor;
 
-        public bool IsPossible { get; set; }
+        public bool IsPossible { get; private set; }
 
-        public bool IsRequired { get; private set; }
-        public int TokenNumber { get; private set; }
-        public int Index { get { return cursor.Index; } }
-        public int Line { get { return cursor.Line; } }
-        public int LineOffset { get { return cursor.LineOffset; } }
+        public void MarkAsImpossible()
+        {
+            IsPossible = false;
+        }
 
-        public Mark Mark { get { return cursor.Mark(); } }
+        public bool IsRequired { get; }
+        public int TokenNumber { get; }
+        public int Index => cursor.Index;
+        public int Line => cursor.Line;
+        public int LineOffset => cursor.LineOffset;
+
+        public Mark Mark => cursor.Mark();
 
         public SimpleKey()
         {
             cursor = new Cursor();
         }
 
-        public SimpleKey(bool isPossible, bool isRequired, int tokenNumber, Cursor cursor)
+        public SimpleKey(bool isRequired, int tokenNumber, Cursor cursor)
         {
-            IsPossible = isPossible;
+            IsPossible = true;
             IsRequired = isRequired;
             TokenNumber = tokenNumber;
             this.cursor = new Cursor(cursor);

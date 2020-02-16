@@ -37,9 +37,6 @@ namespace YamlDotNet.Core
     /// </summary>
     public class Emitter : IEmitter
     {
-        private const int MinBestIndent = 2;
-        private const int MaxBestIndent = 9;
-
         private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
@@ -60,13 +57,11 @@ namespace YamlDotNet.Core
         private int flowLevel;
         private bool isMappingContext;
         private bool isSimpleKeyContext;
-        private bool isRootContext;
 
         private int column;
         private bool isWhitespace;
         private bool isIndentation;
 
-        private bool isOpenEnded;
         private bool isDocumentEndWritten;
 
         private readonly AnchorData anchorData = new AnchorData();
@@ -75,19 +70,19 @@ namespace YamlDotNet.Core
 
         private class AnchorData
         {
-            public string anchor;
+            public string? anchor;
             public bool isAlias;
         }
 
         private class TagData
         {
-            public string handle;
-            public string suffix;
+            public string? handle;
+            public string? suffix;
         }
 
         private class ScalarData
         {
-            public string value;
+            public string value = string.Empty;
             public bool isMultiline;
             public bool isFlowPlainAllowed;
             public bool isBlockPlainAllowed;
@@ -246,18 +241,15 @@ namespace YamlDotNet.Core
             tagData.handle = null;
             tagData.suffix = null;
 
-            var alias = evt as AnchorAlias;
-            if (alias != null)
+            if (evt is AnchorAlias alias)
             {
                 AnalyzeAnchor(alias.Value, true);
                 return;
             }
 
-            var nodeEvent = evt as NodeEvent;
-            if (nodeEvent != null)
+            if (evt is NodeEvent nodeEvent)
             {
-                var scalar = evt as Scalar;
-                if (scalar != null)
+                if (evt is Scalar scalar)
                 {
                     AnalyzeScalar(scalar);
                 }
@@ -271,7 +263,7 @@ namespace YamlDotNet.Core
             }
         }
 
-        private void AnalyzeAnchor(string anchor, bool isAlias)
+        private void AnalyzeAnchor(string? anchor, bool isAlias)
         {
             anchorData.anchor = anchor;
             anchorData.isAlias = isAlias;
@@ -547,8 +539,7 @@ namespace YamlDotNet.Core
 
         private void StateMachine(ParsingEvent evt)
         {
-            var comment = evt as Comment;
-            if (comment != null)
+            if (evt is Comment comment)
             {
                 EmitComment(comment);
                 return;
@@ -673,10 +664,11 @@ namespace YamlDotNet.Core
         /// </summary>
         private void EmitDocumentStart(ParsingEvent evt, bool isFirst)
         {
-            var documentStart = evt as DocumentStart;
-            if (documentStart != null)
+            if (evt is DocumentStart documentStart)
             {
-                var isImplicit = documentStart.IsImplicit && isFirst && !isCanonical;
+                var isImplicit = documentStart.IsImplicit
+                    && isFirst
+                    && !isCanonical;
 
                 var documentTagDirectives = NonDefaultTagsAmong(documentStart.Tags);
 
@@ -747,12 +739,6 @@ namespace YamlDotNet.Core
 
             else if (evt is StreamEnd)
             {
-                if (isOpenEnded)
-                {
-                    WriteIndicator("...", true, false, false);
-                    WriteIndent();
-                }
-
                 state = EmitterState.StreamEnd;
             }
             else
@@ -761,11 +747,13 @@ namespace YamlDotNet.Core
             }
         }
 
-        private TagDirectiveCollection NonDefaultTagsAmong(IEnumerable<TagDirective> tagCollection)
+        private TagDirectiveCollection NonDefaultTagsAmong(IEnumerable<TagDirective>? tagCollection)
         {
             var directives = new TagDirectiveCollection();
             if (tagCollection == null)
+            {
                 return directives;
+            }
 
             foreach (var tagDirective in tagCollection)
             {
@@ -778,7 +766,6 @@ namespace YamlDotNet.Core
             return directives;
         }
 
-        // ReSharper disable UnusedParameter.Local
         private void AnalyzeVersionDirective(VersionDirective versionDirective)
         {
             if (versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor > Constants.MinorVersion)
@@ -786,7 +773,6 @@ namespace YamlDotNet.Core
                 throw new YamlException("Incompatible %YAML directive");
             }
         }
-        // ReSharper restore UnusedParameter.Local
 
         private static void AppendTagDirectiveTo(TagDirective value, bool allowDuplicates, TagDirectiveCollection tagDirectives)
         {
@@ -817,7 +803,6 @@ namespace YamlDotNet.Core
         /// </summary>
         private void EmitNode(ParsingEvent evt, bool isRoot, bool isMapping, bool isSimpleKey)
         {
-            isRootContext = isRoot;
             isMappingContext = isMapping;
             isSimpleKeyContext = isSimpleKey;
 
@@ -840,7 +825,7 @@ namespace YamlDotNet.Core
                     break;
 
                 default:
-                    throw new YamlException(string.Format("Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {0}", evt.Type));
+                    throw new YamlException($"Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {evt.Type}");
             }
         }
 
@@ -973,7 +958,6 @@ namespace YamlDotNet.Core
             for (var index = 0; index < value.Length; ++index)
             {
                 var character = value[index];
-                char breakCharacter;
                 if (IsSpace(character))
                 {
                     if (allowBreaks && !previousSpace && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ')
@@ -986,7 +970,7 @@ namespace YamlDotNet.Core
                     }
                     previousSpace = true;
                 }
-                else if (IsBreak(character, out breakCharacter))
+                else if (IsBreak(character, out var breakCharacter))
                 {
                     if (!previousBreak && character == '\n')
                     {
@@ -1011,11 +995,6 @@ namespace YamlDotNet.Core
 
             isWhitespace = false;
             isIndentation = false;
-
-            if (isRootContext)
-            {
-                isOpenEnded = true;
-            }
         }
 
         private void WriteSingleQuotedScalar(string value, bool allowBreaks)
@@ -1028,8 +1007,6 @@ namespace YamlDotNet.Core
             for (var index = 0; index < value.Length; ++index)
             {
                 var character = value[index];
-                char breakCharacter;
-
                 if (character == ' ')
                 {
                     if (allowBreaks && !previousSpace && column > bestWidth && index != 0 && index + 1 < value.Length &&
@@ -1043,7 +1020,7 @@ namespace YamlDotNet.Core
                     }
                     previousSpace = true;
                 }
-                else if (IsBreak(character, out breakCharacter))
+                else if (IsBreak(character, out var breakCharacter))
                 {
                     if (!previousBreak && character == '\n')
                     {
@@ -1084,9 +1061,7 @@ namespace YamlDotNet.Core
             for (var index = 0; index < value.Length; ++index)
             {
                 var character = value[index];
-
-                char breakCharacter;
-                if (!IsPrintable(character) || IsBreak(character, out breakCharacter) || character == '"' || character == '\\')
+                if (!IsPrintable(character) || IsBreak(character, out _) || character == '"' || character == '\\')
                 {
                     Write('\\');
 
@@ -1229,8 +1204,7 @@ namespace YamlDotNet.Core
                     continue;
                 }
 
-                char breakCharacter;
-                if (IsBreak(character, out breakCharacter))
+                if (IsBreak(character, out char breakCharacter))
                 {
                     WriteBreak(breakCharacter);
                     isIndentation = true;
@@ -1264,17 +1238,16 @@ namespace YamlDotNet.Core
             for (var i = 0; i < value.Length; ++i)
             {
                 var character = value[i];
-                char breakCharacter, ignoredBreak;
-                if (IsBreak(character, out breakCharacter))
+                if (IsBreak(character, out var breakCharacter))
                 {
                     if (!previousBreak && !leadingSpaces && character == '\n')
                     {
                         var k = 0;
-                        while (i + k < value.Length && IsBreak(value[i + k], out ignoredBreak))
+                        while (i + k < value.Length && IsBreak(value[i + k], out _))
                         {
                             ++k;
                         }
-                        if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k], out ignoredBreak)))
+                        if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k], out _)))
                         {
                             WriteBreak();
                         }
@@ -1350,7 +1323,7 @@ namespace YamlDotNet.Core
 
         private static bool IsHighSurrogate(char c)
         {
-           return 0xD800 <= c && c <= 0xDBFF;
+            return 0xD800 <= c && c <= 0xDBFF;
         }
 
         private static bool IsLowSurrogate(char c)
@@ -1427,7 +1400,7 @@ namespace YamlDotNet.Core
             else
             {
                 WriteIndicator("!<", true, false, false);
-                WriteTagContent(tagData.suffix, false);
+                WriteTagContent(tagData.suffix!, false);
                 WriteIndicator(">", false, false, false);
             }
         }
@@ -1437,8 +1410,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private void EmitDocumentEnd(ParsingEvent evt)
         {
-            var documentEnd = evt as DocumentEnd;
-            if (documentEnd != null)
+            if (evt is DocumentEnd documentEnd)
             {
                 WriteIndent();
                 if (!documentEnd.IsImplicit)
@@ -1669,8 +1641,7 @@ namespace YamlDotNet.Core
                 index++;
                 if (index == 2)
                 {
-                    var scalar = parsingEvent as Scalar;
-                    if (scalar != null)
+                    if (parsingEvent is Scalar scalar)
                     {
                         return string.IsNullOrEmpty(scalar.Value);
                     }
@@ -1740,35 +1711,31 @@ namespace YamlDotNet.Core
             return length <= maxSimpleKeyLength;
         }
 
-        private int SafeStringLength(string value)
+        private int SafeStringLength(string? value)
         {
             return value == null ? 0 : value.Length;
         }
 
-        private bool CheckEmptySequence()
+        private bool CheckEmptySequence() => CheckEmptyStructure<SequenceStart, SequenceEnd>();
+        private bool CheckEmptyMapping() => CheckEmptyStructure<MappingStart, MappingEnd>();
+
+        private bool CheckEmptyStructure<TStart, TEnd>()
+            where TStart : NodeEvent
+            where TEnd : ParsingEvent
         {
             if (events.Count < 2)
             {
                 return false;
             }
 
-            // Todo: must be something better than this FakeList
-            var eventList = new FakeList<ParsingEvent>(events);
-            return eventList[0] is SequenceStart && eventList[1] is SequenceEnd;
-        }
-
-        private bool CheckEmptyMapping()
-        {
-            if (events.Count < 2)
+            using (var enumerator = events.GetEnumerator())
             {
-                return false;
+                return enumerator.MoveNext()
+                    && enumerator.Current is TStart
+                    && enumerator.MoveNext()
+                    && enumerator.Current is TEnd;
             }
-
-            // Todo: must be something better than this FakeList
-            var eventList = new FakeList<ParsingEvent>(events);
-            return eventList[0] is MappingStart && eventList[1] is MappingEnd;
         }
-
         #endregion
 
         #region Write Methods
@@ -1779,13 +1746,11 @@ namespace YamlDotNet.Core
 
             if (analyzer.IsSpace() || analyzer.IsBreak())
             {
-                var indentHint = string.Format(CultureInfo.InvariantCulture, "{0}", bestIndent);
+                var indentHint = bestIndent.ToString(CultureInfo.InvariantCulture);
                 WriteIndicator(indentHint, false, false, false);
             }
 
-            isOpenEnded = false;
-
-            string chompHint = null;
+            string? chompHint = null;
             if (value.Length == 0 || !analyzer.IsBreak(value.Length - 1))
             {
                 chompHint = "-";
@@ -1793,7 +1758,6 @@ namespace YamlDotNet.Core
             else if (value.Length >= 2 && analyzer.IsBreak(value.Length - 2))
             {
                 chompHint = "+";
-                isOpenEnded = true;
             }
 
             if (chompHint != null)
@@ -1813,14 +1777,17 @@ namespace YamlDotNet.Core
 
             isWhitespace = whitespace;
             isIndentation &= indentation;
-            isOpenEnded = false;
         }
 
         private void WriteIndent()
         {
             var currentIndent = Math.Max(indent, 0);
 
-            if (!isIndentation || column > currentIndent || (column == currentIndent && !isWhitespace))
+            var isBreakRequired = !isIndentation
+                || column > currentIndent
+                || (column == currentIndent && !isWhitespace);
+
+            if (isBreakRequired)
             {
                 WriteBreak();
             }

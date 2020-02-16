@@ -32,66 +32,61 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// </summary>
     public sealed class ReadablePropertiesTypeInspector : TypeInspectorSkeleton
     {
-        private readonly ITypeResolver _typeResolver;
+        private readonly ITypeResolver typeResolver;
 
         public ReadablePropertiesTypeInspector(ITypeResolver typeResolver)
         {
-            if (typeResolver == null)
-            {
-                throw new ArgumentNullException(nameof(typeResolver));
-            }
-
-            _typeResolver = typeResolver;
+            this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
         }
 
         private static bool IsValidProperty(PropertyInfo property)
         {
             return property.CanRead
-                && property.GetGetMethod().GetParameters().Length == 0;
+                && property.GetGetMethod()!.GetParameters().Length == 0;
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return type
                 .GetPublicProperties()
                 .Where(IsValidProperty)
-                .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, _typeResolver));
+                .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, typeResolver));
         }
 
         private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
         {
-            private readonly PropertyInfo _propertyInfo;
-            private readonly ITypeResolver _typeResolver;
+            private readonly PropertyInfo propertyInfo;
+            private readonly ITypeResolver typeResolver;
 
             public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, ITypeResolver typeResolver)
             {
-                _propertyInfo = propertyInfo;
-                _typeResolver = typeResolver;
+                this.propertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
+                this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
                 ScalarStyle = ScalarStyle.Any;
             }
 
-            public string Name { get { return _propertyInfo.Name; } }
-            public Type Type { get { return _propertyInfo.PropertyType; } }
-            public Type TypeOverride { get; set; }
+            public string Name => propertyInfo.Name;
+            public Type Type => propertyInfo.PropertyType;
+            public Type? TypeOverride { get; set; }
             public int Order { get; set; }
-            public bool CanWrite { get { return _propertyInfo.CanWrite; } }
+            public bool CanWrite => propertyInfo.CanWrite;
             public ScalarStyle ScalarStyle { get; set; }
 
-            public void Write(object target, object value)
+            public void Write(object target, object? value)
             {
-                _propertyInfo.SetValue(target, value, null);
+                propertyInfo.SetValue(target, value, null);
             }
 
             public T GetCustomAttribute<T>() where T : Attribute
             {
-                var attributes = _propertyInfo.GetCustomAttributes(typeof(T), true);
+                var attributes = propertyInfo.GetCustomAttributes(typeof(T), true);
                 return (T)attributes.FirstOrDefault();
             }
 
             public IObjectDescriptor Read(object target)
             {
-                var propertyValue = _propertyInfo.ReadValue(target);
-                var actualType = TypeOverride ?? _typeResolver.Resolve(Type, propertyValue);
+                var propertyValue = propertyInfo.ReadValue(target);
+                var actualType = TypeOverride ?? typeResolver.Resolve(Type, propertyValue);
                 return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
             }
         }

@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             if (!expectedType.IsArray)
             {
@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            var itemType = expectedType.GetElementType();
+            var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
             var items = new ArrayList();
             CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
@@ -49,66 +49,42 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         private sealed class ArrayList : IList
         {
-            private object[] data;
-            private int count;
+            private object?[] data;
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Initialized inside Clear()
             public ArrayList()
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
             {
                 Clear();
             }
 
-            public int Add(object value)
+            public int Add(object? value)
             {
-                if (count == data.Length)
+                if (Count == data.Length)
                 {
                     Array.Resize(ref data, data.Length * 2);
                 }
-                data[count] = value;
-                return count++;
+                data[Count] = value;
+                return Count++;
             }
 
             public void Clear()
             {
                 data = new object[10];
-                count = 0;
+                Count = 0;
             }
 
-            public bool Contains(object value)
-            {
-                throw new NotSupportedException();
-            }
+            bool IList.Contains(object? value) => throw new NotSupportedException();
+             int IList.IndexOf(object? value) => throw new NotSupportedException();
+            void IList.Insert(int index, object? value) => throw new NotSupportedException();
+            void IList.Remove(object? value) => throw new NotSupportedException();
+            void IList.RemoveAt(int index) => throw new NotSupportedException();
 
-            public int IndexOf(object value)
-            {
-                throw new NotSupportedException();
-            }
+            public bool IsFixedSize => false;
 
-            public void Insert(int index, object value)
-            {
-                throw new NotSupportedException();
-            }
+            public bool IsReadOnly => false;
 
-            public bool IsFixedSize
-            {
-                get { return false; }
-            }
-
-            public bool IsReadOnly
-            {
-                get { return false; }
-            }
-
-            public void Remove(object value)
-            {
-                throw new NotSupportedException();
-            }
-
-            public void RemoveAt(int index)
-            {
-                throw new NotSupportedException();
-            }
-
-            public object this[int index]
+            public object? this[int index]
             {
                 get
                 {
@@ -122,27 +98,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             public void CopyTo(Array array, int index)
             {
-                Array.Copy(data, 0, array, index, count);
+                Array.Copy(data, 0, array, index, Count);
             }
 
-            public int Count
-            {
-                get { return count; }
-            }
+            public int Count { get; private set; }
 
-            public bool IsSynchronized
-            {
-                get { return false; }
-            }
-
-            public object SyncRoot
-            {
-                get { return data; }
-            }
+            public bool IsSynchronized => false;
+            public object SyncRoot => data;
 
             public IEnumerator GetEnumerator()
             {
-                for (int i = 0; i < count; ++i)
+                for (int i = 0; i < Count; ++i)
                 {
                     yield return data[i];
                 }

@@ -26,31 +26,17 @@ namespace YamlDotNet.Core.Events
     /// <summary>
     /// Represents an alias event.
     /// </summary>
-    public class AnchorAlias : ParsingEvent
+    public sealed class AnchorAlias : ParsingEvent
     {
         /// <summary>
         /// Gets the event type, which allows for simpler type comparisons.
         /// </summary>
-        internal override EventType Type
-        {
-            get
-            {
-                return EventType.Alias;
-            }
-        }
-
-        private readonly string value;
+        internal override EventType Type => EventType.Alias;
 
         /// <summary>
         /// Gets the value of the alias.
         /// </summary>
-        public string Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public string Value { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorAlias"/> class.
@@ -66,12 +52,12 @@ namespace YamlDotNet.Core.Events
                 throw new YamlException(start, end, "Anchor value must not be empty.");
             }
 
-            if (!NodeEvent.anchorValidator.IsMatch(value))
+            if (!NodeEvent.AnchorPattern.IsMatch(value))
             {
                 throw new YamlException(start, end, "Anchor value must not contain disallowed characters: []{},");
             }
 
-            this.value = value;
+            this.Value = value;
         }
 
         /// <summary>
@@ -91,7 +77,7 @@ namespace YamlDotNet.Core.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", value);
+            return $"Alias [value = {Value}]";
         }
 
         /// <summary>

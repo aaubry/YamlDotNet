@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,27 +32,16 @@ namespace YamlDotNet.Serialization.TypeInspectors
     public sealed class CachedTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
-        private readonly Dictionary<Type, List<IPropertyDescriptor>> cache = new Dictionary<Type, List<IPropertyDescriptor>>();
+        private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
-            if (innerTypeDescriptor == null)
-            {
-                throw new ArgumentNullException(nameof(innerTypeDescriptor));
-            }
-
-            this.innerTypeDescriptor = innerTypeDescriptor;
+            this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            List<IPropertyDescriptor> list;
-            if (!cache.TryGetValue(type, out list))
-            {
-                list = new List<IPropertyDescriptor>(innerTypeDescriptor.GetProperties(type, container));
-                cache.Add(type, list);
-            }
-            return list;
+            return cache.GetOrAdd(type, t => innerTypeDescriptor.GetProperties(t, container).ToList());
         }
     }
 }

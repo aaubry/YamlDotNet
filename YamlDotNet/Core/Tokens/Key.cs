@@ -28,7 +28,7 @@ namespace YamlDotNet.Core.Tokens
     /// Represents a key token.
     /// </summary>
     [Serializable]
-    public class Key : Token
+    public sealed class Key : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Key"/> class.

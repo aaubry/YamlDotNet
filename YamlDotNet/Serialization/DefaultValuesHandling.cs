@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,51 +19,26 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Serialization
 {
     /// <summary>
-    /// Options that control the serialization process.
+    /// Specifies the strategy to handle default and null values during serialization of properties.
     /// </summary>
-    [Flags]
-    public enum SerializationOptions
+    public enum DefaultValuesHandling
     {
         /// <summary>
-        /// Serializes using the default options
+        /// Specifies that all properties are to be emitted regardless of their value. This is the default behavior.
         /// </summary>
-        None = 0,
+        Preserve,
 
         /// <summary>
-        /// Ensures that it will be possible to deserialize the serialized objects.
+        /// Specifies that properties that contain null references or a null Nullable&lt;T&gt; are to be omitted. 
         /// </summary>
-        Roundtrip = 1,
+        OmitNull,
 
         /// <summary>
-        /// If this flag is specified, if the same object appears more than once in the
-        /// serialization graph, it will be serialized each time instead of just once.
+        /// Specifies that properties that that contain their default value, either default(T) or the value specified in DefaultValueAttribute are to be omitted. 
         /// </summary>
-        /// <remarks>
-        /// If the serialization graph contains circular references and this flag is set,
-        /// a StackOverflowException will be thrown.
-        /// If this flag is not set, there is a performance penalty because the entire
-        /// object graph must be walked twice.
-        /// </remarks>
-        DisableAliases = 2,
-
-        /// <summary>
-        /// Forces every value to be serialized, even if it is the default value for that type.
-        /// </summary>
-        EmitDefaults = 4,
-
-        /// <summary>
-        /// Ensures that the result of the serialization is valid JSON.
-        /// </summary>
-        JsonCompatible = 8,
-
-        /// <summary>
-        /// Use the static type of values instead of their actual type.
-        /// </summary>
-        DefaultToStaticType = 16,
+        OmitDefaults,
     }
 }

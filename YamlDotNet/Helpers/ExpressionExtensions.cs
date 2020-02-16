@@ -26,7 +26,7 @@ namespace YamlDotNet.Helpers
             return property;
         }
 
-        private static TMemberInfo TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
+        private static TMemberInfo? TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
             where TMemberInfo : MemberInfo
         {
             if (lambdaExpression.Parameters.Count != 1)
@@ -36,8 +36,7 @@ namespace YamlDotNet.Helpers
 
             var body = lambdaExpression.Body;
 
-            var castExpression = body as UnaryExpression;
-            if (castExpression != null)
+            if (body is UnaryExpression castExpression)
             {
                 if (castExpression.NodeType != ExpressionType.Convert)
                 {
@@ -47,18 +46,16 @@ namespace YamlDotNet.Helpers
                 body = castExpression.Operand;
             }
 
-            var memberExpression = body as MemberExpression;
-            if (memberExpression == null)
+            if (body is MemberExpression memberExpression)
             {
-                return null;
-            }
+                if (memberExpression.Expression != lambdaExpression.Parameters[0])
+                {
+                    return null;
+                }
 
-            if (memberExpression.Expression != lambdaExpression.Parameters[0])
-            {
-                return null;
+                return memberExpression.Member as TMemberInfo;
             }
-
-            return memberExpression.Member as TMemberInfo;
+            return null;
         }
     }
 }

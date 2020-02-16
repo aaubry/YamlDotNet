@@ -20,6 +20,8 @@ using ConsoleUi;
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
 var buildVerbosity = (Verbosity)Enum.Parse(typeof(Verbosity), Argument("buildVerbosity", "Minimal"), ignoreCase: true);
+var nobuild = Argument("nobuild", false);
+var unclean = Argument("unclean", false) || nobuild;
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -64,6 +66,7 @@ Task("Fix-GitVersionOnLinux")
     });
 
 Task("Clean")
+    .WithCriteria(!unclean)
     .Does(() =>
     {
         CleanDirectories(new[]
@@ -80,6 +83,7 @@ Task("Clean")
     });
 
 Task("Restore-NuGet-Packages")
+    .WithCriteria(!nobuild)
     .IsDependentOn("Clean")
     .Does(() =>
     {
@@ -108,6 +112,7 @@ Task("Get-Version")
     });
 
 Task("Set-Build-Version")
+    .WithCriteria(!nobuild)
     .IsDependentOn("Get-Version")
     .Does(() =>
     {
@@ -121,6 +126,7 @@ Task("Set-Build-Version")
     });
 
 Task("Build")
+    .WithCriteria(!nobuild)
     .IsDependentOn("Restore-NuGet-Packages")
     .IsDependentOn("Get-Version")
     .Does(() =>
@@ -128,18 +134,31 @@ Task("Build")
         BuildSolution(solutionPath, configuration, buildVerbosity);
     });
 
-Task("Quick-Build")
-    .IsDependentOn("Get-Version")
-    .Does(() =>
-    {
-        BuildSolution(solutionPath, configuration, buildVerbosity);
-    });
-
 Task("Test")
-    // .IsDependentOn("Build")
+    .IsDependentOn("Build")
     .Does(() =>
     {
         DotNetCoreTest();
+    });
+
+Task("PerformanceTest")
+    .WithCriteria(configuration == "Release")
+    .IsDependentOn("Build")
+    .Does(() =>
+    {
+        var settings = new ProcessSettings()
+            .UseWorkingDirectory("./PerformanceTests/YamlDotNet.PerformanceTests.Runner/bin/Release/net461");
+
+        var runnerExeName = "YamlDotNet.PerformanceTests.Runner.exe";
+        if (IsRunningOnUnix())
+        {
+            settings = settings.WithArguments(args => args.Append(runnerExeName));
+            StartProcess("mono", settings);
+        }
+        else
+        {
+            StartProcess(runnerExeName, settings);
+        }
     });
 
 Task("Build-Release-Configurations")

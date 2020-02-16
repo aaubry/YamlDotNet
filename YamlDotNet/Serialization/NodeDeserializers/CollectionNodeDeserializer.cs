@@ -31,16 +31,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class CollectionNodeDeserializer : INodeDeserializer
     {
-        private readonly IObjectFactory _objectFactory;
+        private readonly IObjectFactory objectFactory;
 
         public CollectionNodeDeserializer(IObjectFactory objectFactory)
         {
-            _objectFactory = objectFactory;
+            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            IList list;
+            IList? list;
             bool canUpdate = true;
             Type itemType;
             var genericCollectionType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
@@ -49,20 +49,21 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 var genericArguments = genericCollectionType.GetGenericArguments();
                 itemType = genericArguments[0];
 
-                value = _objectFactory.Create(expectedType);
+                value = objectFactory.Create(expectedType);
                 list = value as IList;
                 if (list == null)
                 {
+                    // Uncommon case where a type implements IList<T> but not IList
                     var genericListType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IList<>));
                     canUpdate = genericListType != null;
-                    list = new GenericCollectionToNonGenericAdapter(value, genericCollectionType, genericListType);
+                    list = (IList?)Activator.CreateInstance(typeof(GenericCollectionToNonGenericAdapter<>).MakeGenericType(itemType), value);
                 }
             }
             else if (typeof(IList).IsAssignableFrom(expectedType))
             {
                 itemType = typeof(object);
 
-                value = _objectFactory.Create(expectedType);
+                value = objectFactory.Create(expectedType);
                 list = (IList)value;
             }
             else
@@ -71,39 +72,40 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list, canUpdate);
+            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate)
         {
-            parser.Expect<SequenceStart>();
-            while (!parser.Accept<SequenceEnd>())
+            parser.Consume<SequenceStart>();
+            while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var current = parser.Current;
 
                 var value = nestedObjectDeserializer(parser, tItem);
-                var promise = value as IValuePromise;
-                if (promise == null)
+                if (value is IValuePromise promise)
                 {
-                    result.Add(TypeConverter.ChangeType(value, tItem));
-                }
-                else if (canUpdate)
-                {
-                    var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
-                    promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
+                    if (canUpdate)
+                    {
+                        var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
+                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
+                    }
+                    else
+                    {
+                        throw new ForwardAnchorNotSupportedException(
+                            current?.Start ?? Mark.Empty,
+                            current?.End ?? Mark.Empty,
+                            "Forward alias references are not allowed because this type does not implement IList<>"
+                        );
+                    }
                 }
                 else
                 {
-                    throw new ForwardAnchorNotSupportedException(
-                        current.Start,
-                        current.End,
-                        "Forward alias references are not allowed because this type does not implement IList<>"
-                    );
+                    result.Add(TypeConverter.ChangeType(value, tItem));
                 }
             }
-            parser.Expect<SequenceEnd>();
         }
     }
 }

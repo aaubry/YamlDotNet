@@ -30,16 +30,16 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// </summary>
     public sealed class ReadableAndWritablePropertiesTypeInspector : TypeInspectorSkeleton
     {
-        private readonly ITypeInspector _innerTypeDescriptor;
+        private readonly ITypeInspector innerTypeDescriptor;
 
         public ReadableAndWritablePropertiesTypeInspector(ITypeInspector innerTypeDescriptor)
         {
-            _innerTypeDescriptor = innerTypeDescriptor;
+            this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
         }
 
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
+        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            return _innerTypeDescriptor.GetProperties(type, container)
+            return innerTypeDescriptor.GetProperties(type, container)
                 .Where(p => p.CanWrite);
         }
     }

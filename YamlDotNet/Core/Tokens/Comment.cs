@@ -27,17 +27,17 @@ namespace YamlDotNet.Core.Tokens
     /// Represents a comment
     /// </summary>
     [Serializable]
-    public class Comment : Token
+    public sealed class Comment : Token
     {
         /// <summary>
         /// Gets the value of the comment
         /// </summary>
-        public string Value { get; private set; }
+        public string Value { get; }
 
         /// <summary>
         /// Gets a value indicating whether the comment appears other tokens on that line.
         /// </summary>
-        public bool IsInline { get; private set; }
+        public bool IsInline { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Comment"/> class.
@@ -53,8 +53,8 @@ namespace YamlDotNet.Core.Tokens
         public Comment(string value, bool isInline, Mark start, Mark end)
             : base(start, end)
         {
+            Value = value ?? throw new ArgumentNullException(nameof(value));
             IsInline = isInline;
-            Value = value;
         }
     }
 }

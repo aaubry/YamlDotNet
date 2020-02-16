@@ -26,6 +26,7 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
+
     public sealed class DefaultExclusiveObjectGraphVisitor : ChainedObjectGraphVisitor
     {
         public DefaultExclusiveObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
@@ -33,16 +34,14 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
         {
         }
 
-        private static object GetDefault(Type type)
+        private static object? GetDefault(Type type)
         {
             return type.IsValueType() ? Activator.CreateInstance(type) : null;
         }
 
-        private static readonly IEqualityComparer<object> _objectComparer = EqualityComparer<object>.Default;
-
         public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            return !_objectComparer.Equals(value, GetDefault(value.Type))
+            return !Equals(value.Value, GetDefault(value.Type))
                    && base.EnterMapping(key, value, context);
         }
 
@@ -53,7 +52,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 ? defaultValueAttribute.Value
                 : GetDefault(key.Type);
 
-            return !_objectComparer.Equals(value.Value, defaultValue)
+            return !Equals(value.Value, defaultValue)
                    && base.EnterMapping(key, value, context);
         }
     }

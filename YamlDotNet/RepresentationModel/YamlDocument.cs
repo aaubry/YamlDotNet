@@ -59,26 +59,32 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlDocument"/> class.
         /// </summary>
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. There is a guard that throws an exception if this happens.
         internal YamlDocument(IParser parser)
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             var state = new DocumentLoadingState();
 
-            parser.Expect<DocumentStart>();
+            parser.Consume<DocumentStart>();
 
-            while (!parser.Accept<DocumentEnd>())
+            while (!parser.TryConsume<DocumentEnd>(out var _))
             {
                 Debug.Assert(RootNode == null);
                 RootNode = YamlNode.ParseNode(parser, state);
 
                 if (RootNode is YamlAliasNode)
                 {
-                    throw new YamlException();
+                    throw new YamlException("A document cannot contain only an alias");
                 }
             }
 
             state.ResolveAliases();
 
-            parser.Expect<DocumentEnd>();
+            if (RootNode == null)
+            {
+                // This should not happen unless the parser has a bug
+                throw new ArgumentException("Atempted to parse an empty document");
+            }
         }
 
         /// <summary>
@@ -130,8 +136,7 @@ namespace YamlDotNet.RepresentationModel
             /// </summary>
             private bool VisitNodeAndFindDuplicates(YamlNode node)
             {
-                bool isDuplicate;
-                if (visitedNodes.TryGetValue(node, out isDuplicate))
+                if (visitedNodes.TryGetValue(node, out bool isDuplicate))
                 {
                     if (!isDuplicate)
                     {

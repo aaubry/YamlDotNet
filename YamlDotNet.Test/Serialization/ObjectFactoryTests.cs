@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System.Collections;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Serialization.ObjectFactories;
@@ -48,6 +49,14 @@ namespace YamlDotNet.Test.Serialization
             var result = Deserializer.Deserialize(UsingReaderFor(text));
 
             result.Should().BeOfType<EmptyDerived>();
+        }
+
+        [Fact]
+        public void DefaultObjectFactorySupportsNonGenericInterfaces()
+        {
+            var sut = new DefaultObjectFactory();
+            var result = sut.Create(typeof(IList));
+            Assert.IsAssignableFrom<IList>(result);
         }
     }
 }

@@ -27,17 +27,17 @@ namespace YamlDotNet.Core
     /// Specifies the version of the YAML language.
     /// </summary>
     [Serializable]
-    public class Version
+    public sealed class Version
     {
         /// <summary>
         /// Gets the major version number.
         /// </summary>
-        public int Major { get; private set; }
+        public int Major { get; }
 
         /// <summary>
         /// Gets the minor version number.
         /// </summary>
-        public int Minor { get; private set; }
+        public int Minor { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Version"/> class.
@@ -46,8 +46,13 @@ namespace YamlDotNet.Core
         /// <param name="minor">The minor version number.</param>
         public Version(int major, int minor)
         {
-            Major = major;
-            Minor = minor;
+            Major = major >= 0
+                ? major
+                : throw new ArgumentOutOfRangeException(nameof(major), $"{major} should be >= 0");
+
+            Minor = minor >= 0
+                ? minor
+                : throw new ArgumentOutOfRangeException(nameof(minor), $"{minor} should be >= 0");
         }
 
         /// <summary>
@@ -57,10 +62,11 @@ namespace YamlDotNet.Core
         /// <returns>
         /// true if the specified System.Object is equal to the current System.Object; otherwise, false.
         /// </returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var that = obj as Version;
-            return that != null && Major == that.Major && Minor == that.Minor;
+            return obj is Version other
+                && Major == other.Major
+                && Minor == other.Minor;
         }
 
         /// <summary>
@@ -71,7 +77,7 @@ namespace YamlDotNet.Core
         /// </returns>
         public override int GetHashCode()
         {
-            return Major.GetHashCode() ^ Minor.GetHashCode();
+            return HashCode.CombineHashCodes(Major.GetHashCode(), Minor.GetHashCode());
         }
     }
 }

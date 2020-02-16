@@ -27,13 +27,13 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Provides special Yaml serialization instructions.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public sealed class YamlMemberAttribute : Attribute
     {
         /// <summary>
         /// Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.
         /// </summary>
-        public Type SerializeAs { get; set; }
+        public Type? SerializeAs { get; set; }
 
         /// <summary>
         /// Specifies the order priority of this property.
@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Instructs the <see cref="Deserializer"/> to use a different field name for serialization.
         /// </summary>
-        public string Alias { get; set; }
+        public string? Alias { get; set; }
 
         /// <summary>
         /// When false, naming conventions will not be applied to this member. Defaults to true.
@@ -54,6 +54,11 @@ namespace YamlDotNet.Serialization
         /// Specifies the scalar style of the property when serialized. This will only affect the serialization of scalar properties.
         /// </summary>
         public ScalarStyle ScalarStyle { get; set; }
+
+        /// <summary>
+        /// Overrides how null and default values should be handled for this property.
+        /// </summary>
+        public DefaultValuesHandling? DefaultValuesHandling { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
@@ -70,7 +75,7 @@ namespace YamlDotNet.Serialization
         /// <param name="serializeAs">Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.</param>
         public YamlMemberAttribute(Type serializeAs) : this()
         {
-            SerializeAs = serializeAs;
+            SerializeAs = serializeAs ?? throw new ArgumentNullException(nameof(serializeAs));
         }
     }
 }

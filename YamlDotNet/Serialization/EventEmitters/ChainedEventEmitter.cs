@@ -34,12 +34,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         protected ChainedEventEmitter(IEventEmitter nextEmitter)
         {
-            if (nextEmitter == null)
-            {
-                throw new ArgumentNullException(nameof(nextEmitter));
-            }
-
-            this.nextEmitter = nextEmitter;
+            this.nextEmitter = nextEmitter ?? throw new ArgumentNullException(nameof(nextEmitter));
         }
 
         public virtual void Emit(AliasEventInfo eventInfo, IEmitter emitter)

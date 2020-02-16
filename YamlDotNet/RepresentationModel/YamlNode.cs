@@ -40,23 +40,23 @@ namespace YamlDotNet.RepresentationModel
         /// Gets or sets the anchor of the node.
         /// </summary>
         /// <value>The anchor.</value>
-        public string Anchor { get; set; }
+        public string? Anchor { get; set; }
 
         /// <summary>
         /// Gets or sets the tag of the node.
         /// </summary>
         /// <value>The tag.</value>
-        public string Tag { get; set; }
+        public string? Tag { get; set; }
 
         /// <summary>
         /// Gets the position in the input stream where the event that originated the node starts.
         /// </summary>
-        public Mark Start { get; private set; }
+        public Mark Start { get; private set; } = Mark.Empty;
 
         /// <summary>
         /// Gets the position in the input stream where the event that originated the node ends.
         /// </summary>
-        public Mark End { get; private set; }
+        public Mark End { get; private set; } = Mark.Empty;
 
         /// <summary>
         /// Loads the specified event.
@@ -81,25 +81,24 @@ namespace YamlDotNet.RepresentationModel
         /// <returns>Returns the node that has been parsed.</returns>
         static internal YamlNode ParseNode(IParser parser, DocumentLoadingState state)
         {
-            if (parser.Accept<Scalar>())
+            if (parser.Accept<Scalar>(out var _))
             {
                 return new YamlScalarNode(parser, state);
             }
 
-            if (parser.Accept<SequenceStart>())
+            if (parser.Accept<SequenceStart>(out var _))
             {
                 return new YamlSequenceNode(parser, state);
             }
 
-            if (parser.Accept<MappingStart>())
+            if (parser.Accept<MappingStart>(out var _))
             {
                 return new YamlMappingNode(parser, state);
             }
 
-            if (parser.Accept<AnchorAlias>())
+            if (parser.TryConsume<AnchorAlias>(out var alias))
             {
-                var alias = parser.Expect<AnchorAlias>();
-                return state.GetNode(alias.Value, false, alias.Start, alias.End) ?? new YamlAliasNode(alias.Value);
+                return state.TryGetNode(alias.Value, out var node) ? node : new YamlAliasNode(alias.Value);
             }
 
             throw new ArgumentException("The current event is of an unsupported type.", nameof(parser));
@@ -142,48 +141,6 @@ namespace YamlDotNet.RepresentationModel
         /// A <see cref="IYamlVisitor"/>.
         /// </param>
         public abstract void Accept(IYamlVisitor visitor);
-
-        /// <summary>
-        /// Provides a basic implementation of Object.Equals 
-        /// </summary>
-        protected bool Equals(YamlNode other)
-        {
-            // Do not use the anchor in the equality comparison because that would prevent anchored nodes from being found in dictionaries.
-            return SafeEquals(Tag, other.Tag);
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether two objects are equal.
-        /// </summary>
-        protected static bool SafeEquals(object first, object second) => object.Equals(first, second);
-
-        /// <summary>
-        /// Serves as a hash function for a particular type.
-        /// </summary>
-        /// <returns>
-        /// A hash code for the current <see cref="T:System.Object"/>.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            // Do not use the anchor in the hash code because that would prevent anchored nodes from being found in dictionaries.
-            return GetHashCode(Tag);
-        }
-
-        /// <summary>
-        /// Gets the hash code of the specified object, or zero if the object is null. 
-        /// </summary>
-        protected static int GetHashCode(object value)
-        {
-            return value == null ? 0 : value.GetHashCode();
-        }
-
-        /// <summary>
-        /// Combines two hash codes into one. 
-        /// </summary>
-        protected static int CombineHashCodes(int h1, int h2)
-        {
-            return unchecked(((h1 << 5) + h1) ^ h2);
-        }
 
         public override string ToString()
         {
@@ -244,9 +201,11 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Converts a <see cref="YamlScalarNode" /> to a string by returning its value.
         /// </summary>
-        public static explicit operator string(YamlNode scalar)
+        public static explicit operator string?(YamlNode node)
         {
-            return ((YamlScalarNode)scalar).Value;
+            return node is YamlScalarNode scalar
+                ? scalar.Value
+                : throw new ArgumentException($"Attempted to convert a '{node.NodeType}' to string. This conversion is valid only for Scalars.");
         }
 
         /// <summary>
@@ -256,7 +215,9 @@ namespace YamlDotNet.RepresentationModel
         {
             get
             {
-                return ((YamlSequenceNode)this).Children[index];
+                return this is YamlSequenceNode sequence
+                    ? sequence.Children[index]
+                    : throw new ArgumentException($"Accessed '{NodeType}' with an invalid index: {index}. Only Sequences can be indexed by number.");
             }
         }
 
@@ -267,7 +228,9 @@ namespace YamlDotNet.RepresentationModel
         {
             get
             {
-                return ((YamlMappingNode)this).Children[key];
+                return this is YamlMappingNode mapping
+                    ? mapping.Children[key]
+                    : throw new ArgumentException($"Accessed '{NodeType}' with an invalid index: {key}. Only Mappings can be indexed by key.");
             }
         }
     }

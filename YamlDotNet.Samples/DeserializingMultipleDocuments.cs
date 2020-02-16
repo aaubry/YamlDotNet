@@ -30,9 +30,9 @@ namespace YamlDotNet.Samples
             var parser = new Parser(input);
 
             // Consume the stream start event "manually"
-            parser.Expect<StreamStart>();
+            parser.Consume<StreamStart>();
 
-            while (parser.Accept<DocumentStart>())
+            while (parser.Accept<DocumentStart>(out var _))
             {
                 // Deserialize the document
                 var doc = deserializer.Deserialize<List<string>>(parser);

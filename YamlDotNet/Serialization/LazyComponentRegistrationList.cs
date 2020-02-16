@@ -80,7 +80,7 @@ namespace YamlDotNet.Serialization
                 }
             }
 
-            throw new KeyNotFoundException(string.Format("A component registration of type '{0}' was not found.", componentType.FullName));
+            throw new KeyNotFoundException($"A component registration of type '{componentType.FullName}' was not found.");
         }
 
         public int Count {  get { return entries.Count; } }
@@ -144,7 +144,7 @@ namespace YamlDotNet.Serialization
         {
             if (IndexOfRegistration(componentType) != -1)
             {
-                throw new InvalidOperationException(string.Format("A component of type '{0}' has already been registered.", componentType.FullName));
+                throw new InvalidOperationException($"A component of type '{componentType.FullName}' has already been registered.");
             }
         }
 
@@ -153,7 +153,7 @@ namespace YamlDotNet.Serialization
             var registrationIndex = IndexOfRegistration(typeof(TRegistrationType));
             if (registrationIndex == -1)
             {
-                throw new InvalidOperationException(string.Format("A component of type '{0}' has not been registered.", typeof(TRegistrationType).FullName));
+                throw new InvalidOperationException($"A component of type '{typeof(TRegistrationType).FullName}' has not been registered.");
             }
             return registrationIndex;
         }

@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class EnumerableNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             Type itemsType;
             if (expectedType == typeof(IEnumerable))

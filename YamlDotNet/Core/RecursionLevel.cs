@@ -28,10 +28,10 @@ namespace YamlDotNet.Core
     /// and throws <see cref="MaximumRecursionLevelReachedException"/>
     /// whenever <see cref="Maximum"/> is reached.
     /// </summary>
-    internal class RecursionLevel
+    internal sealed class RecursionLevel
     {
         private int current;
-        public int Maximum { get; private set; }
+        public int Maximum { get; }
 
         public RecursionLevel(int maximum)
         {
@@ -47,7 +47,7 @@ namespace YamlDotNet.Core
         {
             if (!TryIncrement())
             {
-                throw new MaximumRecursionLevelReachedException();
+                throw new MaximumRecursionLevelReachedException("Maximum level of recursion reached");
             }
         }
 

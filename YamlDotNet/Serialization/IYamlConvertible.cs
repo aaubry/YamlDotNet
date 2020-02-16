@@ -53,7 +53,7 @@ namespace YamlDotNet.Serialization
     /// </summary>
     /// <param name="type">The type that the deserializer should read.</param>
     /// <returns>Returns the object that was deserialized.</returns>
-    public delegate object ObjectDeserializer(Type type);
+    public delegate object? ObjectDeserializer(Type type);
 
     /// <summary>
     /// Represents a function that is used to serialize an object of the given type.
@@ -63,5 +63,5 @@ namespace YamlDotNet.Serialization
     /// The type that should be considered when emitting the object.
     /// If null, the actual type of the <paramref name="value" /> is used.
     /// </param>
-    public delegate void ObjectSerializer(object value, Type type = null);
+    public delegate void ObjectSerializer(object? value, Type? type = null);
 }

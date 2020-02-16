@@ -6,7 +6,7 @@ branches:
     - /^(?!master).+$/
     - /^master.+$/
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 test: off
 
@@ -20,8 +20,11 @@ build_script:
   - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic -buildVerbosity=Verbose
 
 artifacts:
+  - path: YamlDotNet\bin\Release\netstandard2.1
+    name: Release-NetStandard-2.1
+
   - path: YamlDotNet\bin\Release\netstandard1.3
-    name: Release-NetStandard
+    name: Release-NetStandard-1.3
 
   - path: YamlDotNet\bin\Release\net45
     name: Release-Net45

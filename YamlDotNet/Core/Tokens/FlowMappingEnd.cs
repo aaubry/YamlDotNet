@@ -28,7 +28,7 @@ namespace YamlDotNet.Core.Tokens
     /// Represents a flow mapping end token.
     /// </summary>
     [Serializable]
-    public class FlowMappingEnd : Token
+    public sealed class FlowMappingEnd : Token
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FlowMappingEnd"/> class.

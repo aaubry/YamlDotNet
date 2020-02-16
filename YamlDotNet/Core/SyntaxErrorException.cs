@@ -27,15 +27,8 @@ namespace YamlDotNet.Core
     /// Exception that is thrown when a syntax error is detected on a YAML stream.
     /// </summary>
     [Serializable]
-    public class SyntaxErrorException : YamlException
+    public sealed class SyntaxErrorException : YamlException
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SyntaxErrorException"/> class.
-        /// </summary>
-        public SyntaxErrorException()
-        {
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SyntaxErrorException"/> class.
         /// </summary>
