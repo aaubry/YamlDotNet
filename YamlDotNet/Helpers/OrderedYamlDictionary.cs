@@ -10,100 +10,58 @@ using YamlDotNet.RepresentationModel;
 namespace YamlDotNet.Helpers
 {
     [Serializable]
-    public class OrderedYamlDictionary : OrderedDictionary, IDictionary<YamlNode, YamlNode>
+    public class OrderedYamlDictionary : IDictionary<YamlNode, YamlNode>
     {
-        public YamlNode this[YamlNode key]
-        {
-            get => base[key] as YamlNode;
-            set => base[key] = value;
-        }
+        private readonly OrderedDictionary dic = new OrderedDictionary();
 
-        ICollection<YamlNode> IDictionary<YamlNode, YamlNode>.Keys => throw new NotImplementedException();
-
-        ICollection<YamlNode> IDictionary<YamlNode, YamlNode>.Values => throw new NotImplementedException();
-
-        public void Add(YamlNode key, YamlNode value)
-        {
-            base.Add(key, value);
-        }
+        public YamlNode this[YamlNode key] { get { return (YamlNode)dic[key]; } set { dic[key] = value; } }
 
         public void Add(KeyValuePair<YamlNode, YamlNode> item)
         {
-            base.Add(item.Key,item.Value);
+            dic.Add(item.Key, item.Value);
+        }
+        public void Add(YamlNode key, YamlNode value)
+        {
+            dic.Add(key, value);
         }
 
-        public bool Contains(KeyValuePair<YamlNode, YamlNode> item)
+        public void Clear() { dic.Clear(); }
+
+
+        public void CopyTo(KeyValuePair<YamlNode, YamlNode>[] array, int arrayIndex) { }
+
+
+        public int Count { get { return dic.Count; } }
+        public bool IsReadOnly { get { return false; } }
+
+        public bool Contains(YamlNode key) { return dic.Contains(key); }
+        public bool ContainsKey(YamlNode key) { return dic.Contains(key); }
+
+        public bool Remove(YamlNode key) { dic.Remove(key); return true; }
+
+        public bool TryGetValue(YamlNode key, out YamlNode value) { value = default(YamlNode); return false; }
+
+        bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Contains(KeyValuePair<YamlNode, YamlNode> item)
         {
-            return base.Contains(item.Key) && base[item.Key] == item.Value;
+            throw new NotImplementedException();
         }
+        bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Remove(KeyValuePair<YamlNode, YamlNode> item) { return false; }
 
-        public bool ContainsKey(YamlNode key)
+        public IEnumerator<KeyValuePair<YamlNode, YamlNode>> GetEnumerator()
         {
-            return base.Contains(key);
-        }
-
-        public void CopyTo(KeyValuePair<YamlNode, YamlNode>[] array, int arrayIndex)
-        {
-            base.CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(YamlNode key)
-        {
-            if (base.Contains(key))
-            {
-                base.Remove(key);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-        }
-
-        public bool Remove(KeyValuePair<YamlNode, YamlNode> item)
-        {
-            if (base.Contains(item.Key))
-            {
-                base.Remove(item.Key);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool TryGetValue(YamlNode key, [MaybeNullWhen(false)] out YamlNode value)
-        {
-
-            if (base.Contains(key))
-            {
-                value = (YamlNode)base[key];
-                return true;
-            }
-            else
-            {
-                value = null;
-                return false;
-            }
-        }
-
-        IEnumerator<KeyValuePair<YamlNode, YamlNode>> IEnumerable<KeyValuePair<YamlNode, YamlNode>>.GetEnumerator()
-        {
-            foreach(DictionaryEntry entry in this)
-            {
+            foreach (DictionaryEntry entry in dic)
                 yield return new KeyValuePair<YamlNode, YamlNode>((YamlNode)entry.Key, (YamlNode)entry.Value);
-            }
         }
 
-        protected OrderedYamlDictionary(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-
+            return GetEnumerator();
         }
 
-        public OrderedYamlDictionary() : base()
-        {
-        }
+        private static readonly YamlNode[] keys = new YamlNode[0];
+        private static readonly YamlNode[] values = new YamlNode[0];
+
+        ICollection<YamlNode> IDictionary<YamlNode,YamlNode>.Keys { get { return keys; } }
+        ICollection<YamlNode> IDictionary<YamlNode, YamlNode>.Values { get { return values; } }
     }
 }

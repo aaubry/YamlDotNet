@@ -19,6 +19,8 @@
     <Nullable>enable</Nullable>
 
     <NetStandard>false</NetStandard>
+
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0'">
