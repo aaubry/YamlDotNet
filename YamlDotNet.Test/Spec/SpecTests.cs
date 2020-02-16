@@ -46,13 +46,12 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> knownFalsePositives = new List<string>
         {
-            "X4QW", "9C9N", "QB6E", "CVW2", "9JBA", "HRE5", "SU5Z", "QLJ7"
+            // no false-positives known as of https://github.com/yaml/yaml-test-suite/commit/bf64436490f3f70a883f19c7cd06057190d9caac
         };
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
         {
-            "2CMS", "3HFZ", "4EJS", "4H7K", "4JVG", "7MNF", "9CWY", "9KBC", "BS4K", "C2SP",
-            "CXX2", "EB22", "EW3V", "H7J7", "HU3P", "P2EQ", "RHX7", "T833", "W9L4", "ZCZ6"
+            "4H7K", "4JVG", "BS4K", "C2SP", "EB22", "H7J7"
         };
 
         [Theory, MemberData(nameof(GetYamlSpecDataSuites))]
