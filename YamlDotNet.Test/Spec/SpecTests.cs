@@ -46,6 +46,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> knownFalsePositives = new List<string>
         {
+            // no false-positives known as of https://github.com/yaml/yaml-test-suite/commit/bf64436490f3f70a883f19c7cd06057190d9caac
         };
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
