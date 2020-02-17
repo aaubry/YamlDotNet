@@ -227,6 +227,12 @@ namespace YamlDotNet.Core
         /// </summary>
         private ParsingEvent ParseDocumentStart(bool isImplicit)
         {
+            if (currentToken is VersionDirective)
+            {
+                // EB22
+                throw new SyntaxErrorException("While parsing a document start node, could not find document end marker before version directive.");
+            }
+
             // Parse extra document end indicators.
 
             var current = GetCurrentToken();
@@ -241,7 +247,7 @@ namespace YamlDotNet.Core
 
             if (current == null)
             {
-                throw new SyntaxErrorException("Reached the end of the stream while parsing a document start");
+                throw new SyntaxErrorException("Reached the end of the stream while parsing a document start.");
             }
 
             if (current is Scalar && (state == ParserState.ImplicitDocumentStart || state == ParserState.DocumentStart))
@@ -496,6 +502,10 @@ namespace YamlDotNet.Core
 
                     Skip();
                 }
+                else if (current is Anchor secondAnchor)
+                {
+                    throw new SemanticErrorException(secondAnchor.Start, secondAnchor.End, "While parsing a node, found more than one anchor.");
+                }
                 else if (current is AnchorAlias anchorAlias)
                 {
                     throw new SemanticErrorException(anchorAlias.Start, anchorAlias.End, "While parsing a node, did not find expected token.");
@@ -635,7 +645,7 @@ namespace YamlDotNet.Core
                 Skip();
                 isImplicit = false;
             }
-            else if (!(currentToken is StreamEnd || currentToken is DocumentStart))
+            else if (!(currentToken is StreamEnd || currentToken is DocumentStart || currentToken is FlowSequenceEnd || currentToken is VersionDirective))
             {
                 throw new SemanticErrorException(start, end, "Did not find expected <document end>.");
             }
