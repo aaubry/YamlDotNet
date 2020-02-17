@@ -67,6 +67,7 @@ namespace YamlDotNet.Core
         private readonly Cursor cursor;
         private bool streamStartProduced;
         private bool streamEndProduced;
+        private int flowSequenceStartLine;
         private int indent = -1;
         private bool simpleKeyAllowed;
         private int flowLevel;
@@ -739,7 +740,7 @@ namespace YamlDotNet.Core
             switch (name)
             {
                 case "YAML":
-                    if (previous is StreamStart || previous is DocumentEnd)
+                    if (previous is DocumentStart || previous is StreamStart || previous is DocumentEnd)
                     {
                         directive = ScanVersionDirectiveValue(start);
                     }
@@ -865,6 +866,7 @@ namespace YamlDotNet.Core
             if (isSequenceToken)
             {
                 token = new FlowSequenceStart(start, start);
+                flowSequenceStartLine = token.Start.Line;
             }
             else
             {
@@ -918,6 +920,11 @@ namespace YamlDotNet.Core
                 if (analyzer.Check('#'))
                 {
                     errorToken = new Error("While scanning a flow sequence end, found invalid comment after ']'.", start, start);
+                }
+
+                if (previous is StreamStart && flowSequenceStartLine != start.Line)
+                {
+                    tokens.Enqueue(new Error("While scanning a flow sequence end, found mapping key spanning across multiple lines.", start, start));
                 }
 
                 token = new FlowSequenceEnd(start, start);
