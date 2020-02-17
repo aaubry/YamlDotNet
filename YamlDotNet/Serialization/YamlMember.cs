@@ -55,10 +55,18 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public ScalarStyle ScalarStyle { get; set; }
 
+        private DefaultValuesHandling? defaultValuesHandling;
+
         /// <summary>
         /// Overrides how null and default values should be handled for this property.
         /// </summary>
-        public DefaultValuesHandling? DefaultValuesHandling { get; set; }
+        public DefaultValuesHandling DefaultValuesHandling
+        {
+            get => defaultValuesHandling.GetValueOrDefault();
+            set => defaultValuesHandling = value;
+        }
+
+        public bool IsDefaultValuesHandlingSpecified => defaultValuesHandling.HasValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.

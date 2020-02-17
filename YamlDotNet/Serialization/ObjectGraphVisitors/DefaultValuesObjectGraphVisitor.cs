@@ -42,7 +42,13 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            var configuration = key.GetCustomAttribute<YamlMemberAttribute>()?.DefaultValuesHandling ?? this.handling;
+            var configuration = this.handling;
+            var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
+            if (yamlMember != null && yamlMember.IsDefaultValuesHandlingSpecified)
+            {
+                configuration = yamlMember.DefaultValuesHandling;
+            }
+
             switch (configuration)
             {
                 case DefaultValuesHandling.OmitNull:
