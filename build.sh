@@ -46,6 +46,13 @@ for i in "$@"; do
     shift
 done
 
+# Make sure there is no 9A19103F-16F7-4668-BE54-9A1E7A4F7556 GUID in SLN file
+# see https://github.com/dotnet/project-system/issues/1821 bug report.
+if grep -q "9A19103F-16F7-4668-BE54-9A1E7A4F7552" $SCRIPT_DIR/YamlDotNet.sln > /dev/null 2>&1; then
+  echo "Replace 9A19103F-16F7-4668-BE54-9A1E7A4F7552 with FAE04EC0-301F-11D3-BF4B-00C04F79EFBC in YamlDotNet.sln"
+  exit 1
+fi
+
 # Make sure the tools folder exist.
 if [ ! -d "$TOOLS_DIR" ]; then
   mkdir "$TOOLS_DIR"
