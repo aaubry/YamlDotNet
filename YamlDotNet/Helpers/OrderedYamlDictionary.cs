@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using System.Text;
 using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Helpers
@@ -14,43 +12,111 @@ namespace YamlDotNet.Helpers
     {
         private readonly OrderedDictionary dic = new OrderedDictionary();
 
-        public YamlNode this[YamlNode key] { get { return (YamlNode)dic[key]; } set { dic[key] = value; } }
+        public YamlNode this[YamlNode key]
+        {
+            get
+            {
+                return (YamlNode)dic[key];
+            }
+            set
+            {
+                dic[key] = value;
+            }
+        }
 
         public void Add(KeyValuePair<YamlNode, YamlNode> item)
         {
             dic.Add(item.Key, item.Value);
         }
+
         public void Add(YamlNode key, YamlNode value)
         {
             dic.Add(key, value);
         }
 
-        public void Clear() { dic.Clear(); }
+        public void Clear()
+        {
+            dic.Clear();
+        }
 
 
-        public void CopyTo(KeyValuePair<YamlNode, YamlNode>[] array, int arrayIndex) { }
+        public void CopyTo(KeyValuePair<YamlNode, YamlNode>[] array, int arrayIndex)
+        {
+            int modifier = 0;
+            foreach(DictionaryEntry obj in dic)
+            {
+                array.SetValue(new DictionaryEntry(obj.Key, obj.Value), arrayIndex + modifier);
+                modifier++;
+            }
+
+        }
 
 
-        public int Count { get { return dic.Count; } }
-        public bool IsReadOnly { get { return false; } }
+        public int Count
+        {
+            get
+            {
+                return dic.Count;
+            }
+        }
 
-        public bool Contains(YamlNode key) { return dic.Contains(key); }
-        public bool ContainsKey(YamlNode key) { return dic.Contains(key); }
+        public bool IsReadOnly
+        {
+            get
+            {
+                return false;
+            }
+        }
 
-        public bool Remove(YamlNode key) { dic.Remove(key); return true; }
+        public bool Contains(YamlNode key)
+        {
+            return dic.Contains(key);
+        }
 
-        public bool TryGetValue(YamlNode key, out YamlNode value) { value = default(YamlNode); return false; }
+        public bool ContainsKey(YamlNode key)
+        {
+            return dic.Contains(key);
+        }
+
+        public bool Remove(YamlNode key)
+        {
+            dic.Remove(key);
+            return true;
+        }
+
+        public bool TryGetValue(YamlNode key, out YamlNode value)
+        {
+            if(dic.Contains(key))
+            {
+                value = dic[key] as YamlNode;
+                return true;
+            }
+            value = default(YamlNode);
+            return false;
+        }
 
         bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Contains(KeyValuePair<YamlNode, YamlNode> item)
         {
-            throw new NotImplementedException();
+            return dic.Contains(item);
         }
-        bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Remove(KeyValuePair<YamlNode, YamlNode> item) { return false; }
+
+        bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Remove(KeyValuePair<YamlNode, YamlNode> item)
+        {
+            if (dic.Contains(item.Key))
+            {
+                dic.Remove(item.Key);
+                return true;
+            }
+            return false;
+
+        }
 
         public IEnumerator<KeyValuePair<YamlNode, YamlNode>> GetEnumerator()
         {
             foreach (DictionaryEntry entry in dic)
+            {
                 yield return new KeyValuePair<YamlNode, YamlNode>((YamlNode)entry.Key, (YamlNode)entry.Value);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -58,10 +124,43 @@ namespace YamlDotNet.Helpers
             return GetEnumerator();
         }
 
-        private static readonly YamlNode[] keys = new YamlNode[0];
-        private static readonly YamlNode[] values = new YamlNode[0];
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            dic.GetObjectData(info, context);
+        }
 
-        ICollection<YamlNode> IDictionary<YamlNode,YamlNode>.Keys { get { return keys; } }
-        ICollection<YamlNode> IDictionary<YamlNode, YamlNode>.Values { get { return values; } }
+        ICollection<YamlNode> IDictionary<YamlNode,YamlNode>.Keys
+        {
+            get
+            {
+                List<YamlNode> keys = new List<YamlNode>();
+                foreach(object obj in dic.Keys)
+                {
+                    keys.Add(obj as YamlNode);
+                }
+                return keys;
+            }
+        }
+
+        ICollection<YamlNode> IDictionary<YamlNode, YamlNode>.Values
+        {
+            get
+            {
+                List<YamlNode> values = new List<YamlNode>();
+                foreach (Object obj in dic.Values)
+                {
+                    values.Add(obj as YamlNode);
+                }
+                return values;
+            }
+        }
+
+
+        public OrderedYamlDictionary()
+        {
+
+        }
+
+
     }
 }
