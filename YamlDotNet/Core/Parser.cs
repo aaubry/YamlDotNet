@@ -41,6 +41,7 @@ namespace YamlDotNet.Core
 
         private readonly IScanner scanner;
         private Token? currentToken;
+        private VersionDirective? version;
 
         private Token? GetCurrentToken()
         {
@@ -226,6 +227,12 @@ namespace YamlDotNet.Core
         /// </summary>
         private ParsingEvent ParseDocumentStart(bool isImplicit)
         {
+            if (currentToken is VersionDirective)
+            {
+                // EB22
+                throw new SyntaxErrorException("While parsing a document start node, could not find document end marker before version directive.");
+            }
+
             // Parse extra document end indicators.
 
             var current = GetCurrentToken();
@@ -240,7 +247,7 @@ namespace YamlDotNet.Core
 
             if (current == null)
             {
-                throw new SyntaxErrorException("Reached the end of the stream while parsing a document start");
+                throw new SyntaxErrorException("Reached the end of the stream while parsing a document start.");
             }
 
             if (current is Scalar && (state == ParserState.ImplicitDocumentStart || state == ParserState.DocumentStart))
@@ -313,8 +320,8 @@ namespace YamlDotNet.Core
         /// </summary>
         private VersionDirective? ProcessDirectives(TagDirectiveCollection tags)
         {
-            VersionDirective? version = null;
             bool hasOwnDirectives = false;
+            VersionDirective? localVersion = null;
 
             while (true)
             {
@@ -330,7 +337,7 @@ namespace YamlDotNet.Core
                         throw new SemanticErrorException(currentVersion.Start, currentVersion.End, "Found incompatible YAML document.");
                     }
 
-                    version = currentVersion;
+                    localVersion = version = currentVersion;
                     hasOwnDirectives = true;
                 }
                 else if (GetCurrentToken() is TagDirective tag)
@@ -341,6 +348,18 @@ namespace YamlDotNet.Core
                     }
                     tags.Add(tag);
                     hasOwnDirectives = true;
+                }
+
+                // Starting from v1.2, it is not permitted to use tag shorthands for multiple documents in a stream.
+                else if (GetCurrentToken() is DocumentStart && (version == null || (version.Version.Major == 1 && version.Version.Minor > 1)))
+                {
+                    if (GetCurrentToken() is DocumentStart && (version == null))
+                    {
+                        version = new VersionDirective(new Version(1, 2));
+                    }
+
+                    hasOwnDirectives = true;
+                    break;
                 }
                 else
                 {
@@ -359,7 +378,7 @@ namespace YamlDotNet.Core
 
             AddTagDirectives(tagDirectives, tags);
 
-            return version;
+            return localVersion;
         }
 
         private static void AddTagDirectives(TagDirectiveCollection directives, IEnumerable<TagDirective> source)
@@ -435,6 +454,11 @@ namespace YamlDotNet.Core
         /// </summary>
         private ParsingEvent ParseNode(bool isBlock, bool isIndentlessSequence)
         {
+            if (GetCurrentToken() is Error errorToken)
+            {
+                throw new SemanticErrorException(errorToken.Start, errorToken.End, errorToken.Value);
+            }
+
             var current = GetCurrentToken() ?? throw new SemanticErrorException("Reached the end of the stream while parsing a node");
             if (current is AnchorAlias alias)
             {
@@ -478,9 +502,18 @@ namespace YamlDotNet.Core
 
                     Skip();
                 }
+                else if (current is Anchor secondAnchor)
+                {
+                    throw new SemanticErrorException(secondAnchor.Start, secondAnchor.End, "While parsing a node, found more than one anchor.");
+                }
                 else if (current is AnchorAlias anchorAlias)
                 {
                     throw new SemanticErrorException(anchorAlias.Start, anchorAlias.End, "While parsing a node, did not find expected token.");
+                }
+                else if (current is Error)
+                {
+                    errorToken = (current as Error)!;
+                    throw new SemanticErrorException(errorToken.Start, errorToken.End, errorToken.Value);
                 }
                 else
                 {
@@ -522,7 +555,35 @@ namespace YamlDotNet.Core
 
                     state = states.Pop();
                     Skip();
-                    return new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End);
+
+                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End);
+
+                    // Read next token to ensure the error case spec test 'CXX2':
+                    // "Mapping with anchor on document start line".
+
+                    if (anchorName != null && scanner.MoveNextWithoutConsuming())
+                    {
+                        currentToken = scanner.Current;
+                        if (currentToken is Error)
+                        {
+                            errorToken = (currentToken as Error)!;
+                            throw new SemanticErrorException(errorToken.Start, errorToken.End, errorToken.Value);
+                        }
+                    }
+
+                    // Read next token to ensure the error case spec test 'T833':
+                    // "Flow mapping missing a separating comma".
+
+                    if (state == ParserState.FlowMappingKey && scanner.MoveNextWithoutConsuming())
+                    {
+                        currentToken = scanner.Current;
+                        if (currentToken != null && !(currentToken is FlowEntry) && !(currentToken is FlowMappingEnd))
+                        {
+                            throw new SemanticErrorException(currentToken.Start, currentToken.End, "While parsing a flow mapping, did not find expected ',' or '}'.");
+                        }
+                    }
+
+                    return evt;
                 }
 
                 if (current is FlowSequenceStart flowSequenceStart)
@@ -584,11 +645,15 @@ namespace YamlDotNet.Core
                 Skip();
                 isImplicit = false;
             }
-            else if (!(currentToken is StreamEnd || currentToken is DocumentStart))
+            else if (!(currentToken is StreamEnd || currentToken is DocumentStart || currentToken is FlowSequenceEnd || currentToken is VersionDirective))
             {
                 throw new SemanticErrorException(start, end, "Did not find expected <document end>.");
             }
 
+            if (version != null && version.Version.Major == 1 && version.Version.Minor > 1)
+            {
+                version = null;
+            }
             state = ParserState.DocumentStart;
             return new Events.DocumentEnd(isImplicit, start, end);
         }
@@ -725,6 +790,11 @@ namespace YamlDotNet.Core
                 ParsingEvent evt = new Events.MappingEnd(blockEnd.Start, blockEnd.End);
                 Skip();
                 return evt;
+            }
+
+            else if (GetCurrentToken() is Error error)
+            {
+                throw new SyntaxErrorException(error.Start, error.End, error.Value);
             }
 
             else
