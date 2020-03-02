@@ -21,7 +21,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Helpers
@@ -29,13 +28,15 @@ namespace YamlDotNet.Helpers
     [Serializable]
     public class OrderedYamlDictionary : IDictionary<YamlNode, YamlNode>
     {
-        private readonly OrderedDictionary dic = new OrderedDictionary();
+        private readonly Dictionary<YamlNode,YamlNode> dic = new Dictionary<YamlNode, YamlNode>();
+
+        private readonly List<KeyValuePair<YamlNode, YamlNode>> valuePairs = new List<KeyValuePair<YamlNode, YamlNode>>();
 
         public YamlNode this[YamlNode key]
         {
             get
             {
-                return (YamlNode)dic[key];
+                return dic[key];
             }
             set
             {
@@ -46,24 +47,28 @@ namespace YamlDotNet.Helpers
         public void Add(KeyValuePair<YamlNode, YamlNode> item)
         {
             dic.Add(item.Key, item.Value);
+            valuePairs.Add(item);
         }
 
         public void Add(YamlNode key, YamlNode value)
         {
             dic.Add(key, value);
+            valuePairs.Add(new KeyValuePair<YamlNode, YamlNode>(key,value));
         }
 
         public void Clear()
         {
             dic.Clear();
+            valuePairs.Clear();
         }
 
 
         public void CopyTo(KeyValuePair<YamlNode, YamlNode>[] array, int arrayIndex)
         {
             int modifier = 0;
-            foreach(DictionaryEntry obj in dic)
+            foreach(KeyValuePair<YamlNode,YamlNode> obj in dic)
             {
+                valuePairs[arrayIndex + modifier] = obj;
                 array.SetValue(new DictionaryEntry(obj.Key, obj.Value), arrayIndex + modifier);
                 modifier++;
             }
@@ -89,25 +94,26 @@ namespace YamlDotNet.Helpers
 
         public bool Contains(YamlNode key)
         {
-            return dic.Contains(key);
+            return dic.ContainsKey(key);
         }
 
         public bool ContainsKey(YamlNode key)
         {
-            return dic.Contains(key);
+            return dic.ContainsKey(key);
         }
 
         public bool Remove(YamlNode key)
         {
             dic.Remove(key);
+            valuePairs.RemoveAll(item => item.Key.Equals(key));
             return true;
         }
 
         public bool TryGetValue(YamlNode key, out YamlNode value)
         {
-            if(dic.Contains(key))
+            if(dic.ContainsKey(key))
             {
-                value = dic[key] as YamlNode;
+                value = dic[key];
                 return true;
             }
             value = default(YamlNode);
@@ -116,12 +122,12 @@ namespace YamlDotNet.Helpers
 
         bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Contains(KeyValuePair<YamlNode, YamlNode> item)
         {
-            return dic.Contains(item);
+            return dic.ContainsKey(item.Key) && dic.ContainsValue(item.Value);
         }
 
         bool ICollection<KeyValuePair<YamlNode, YamlNode>>.Remove(KeyValuePair<YamlNode, YamlNode> item)
         {
-            if (dic.Contains(item.Key))
+            if (dic.ContainsKey(item.Key))
             {
                 dic.Remove(item.Key);
                 return true;
@@ -132,15 +138,17 @@ namespace YamlDotNet.Helpers
 
         public IEnumerator<KeyValuePair<YamlNode, YamlNode>> GetEnumerator()
         {
-            foreach (DictionaryEntry entry in dic)
+            return valuePairs.GetEnumerator();
+            /*foreach (KeyValuePair<YamlNode,YamlNode> entry in dic)
             {
                 yield return new KeyValuePair<YamlNode, YamlNode>((YamlNode)entry.Key, (YamlNode)entry.Value);
             }
+            */
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return valuePairs.GetEnumerator();
         }
 
         ICollection<YamlNode> IDictionary<YamlNode,YamlNode>.Keys
@@ -148,9 +156,9 @@ namespace YamlDotNet.Helpers
             get
             {
                 List<YamlNode> keys = new List<YamlNode>();
-                foreach(object obj in dic.Keys)
+                foreach(YamlNode obj in dic.Keys)
                 {
-                    keys.Add(obj as YamlNode);
+                    keys.Add(obj);
                 }
                 return keys;
             }
@@ -161,9 +169,9 @@ namespace YamlDotNet.Helpers
             get
             {
                 List<YamlNode> values = new List<YamlNode>();
-                foreach (Object obj in dic.Values)
+                foreach (YamlNode obj in dic.Values)
                 {
-                    values.Add(obj as YamlNode);
+                    values.Add(obj);
                 }
                 return values;
             }
