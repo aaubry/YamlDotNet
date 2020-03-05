@@ -130,6 +130,7 @@ namespace YamlDotNet.Helpers
             if (dic.ContainsKey(item.Key))
             {
                 dic.Remove(item.Key);
+                valuePairs.Remove(item);
                 return true;
             }
             return false;
@@ -138,12 +139,11 @@ namespace YamlDotNet.Helpers
 
         public IEnumerator<KeyValuePair<YamlNode, YamlNode>> GetEnumerator()
         {
-            return valuePairs.GetEnumerator();
-            /*foreach (KeyValuePair<YamlNode,YamlNode> entry in dic)
+            foreach (KeyValuePair<YamlNode,YamlNode> entry in dic)
             {
-                yield return new KeyValuePair<YamlNode, YamlNode>((YamlNode)entry.Key, (YamlNode)entry.Value);
+                yield return new KeyValuePair<YamlNode, YamlNode>(entry.Key, entry.Value);
             }
-            */
+
         }
 
         IEnumerator IEnumerable.GetEnumerator()
