@@ -51,7 +51,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
         {
-            "BS4K", "H7J7"
+            "5LLU" // remove 5LLU once https://github.com/yaml/yaml-test-suite/pull/61 is released
         };
 
         [Theory, MemberData(nameof(GetYamlSpecDataSuites))]

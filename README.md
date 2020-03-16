@@ -9,7 +9,13 @@ YamlDotNet is a YAML library for [netstandard and other .NET runtimes](#the-yaml
 
 YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.
 
-Currently, YamlDotNet supports [version 1.1 of the YAML specification](http://yaml.org/spec/1.1/).
+YamlDotNet's conformance with YAML specifications:
+
+|            YAML Spec                | YDN Parser | YDN Emitter |
+|:-----------------------------------:|:----------:|:-----------:|
+|  [v1.1](http://yaml.org/spec/1.1/)  |     ✓      |      ✓      |
+|  [v1.2](http://yaml.org/spec/1.2/)  |     ✓      |             |
+
 
 ## What is YAML?
 
