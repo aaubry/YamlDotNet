@@ -67,6 +67,7 @@ namespace YamlDotNet.Core
         private readonly Cursor cursor;
         private bool streamStartProduced;
         private bool streamEndProduced;
+        private bool plainScalarFollowedByComment;
         private int flowSequenceStartLine;
         private int indent = -1;
         private bool simpleKeyAllowed;
@@ -486,6 +487,15 @@ namespace YamlDotNet.Core
                 {
                     throw new SyntaxErrorException("While scanning a document start, found mapping key starting after '---' indicator.");
                 }
+
+                if (plainScalarFollowedByComment)
+                {
+                    var startMark = cursor.Mark();
+                    tokens.Enqueue(new Error("While scanning plain scalar, found a comment between adjacent scalars.", startMark, startMark));
+                }
+
+                plainScalarFollowedByComment = false;
+
                 FetchPlainScalar();
                 return;
             }
@@ -1685,7 +1695,13 @@ namespace YamlDotNet.Core
             if (isLiteral && indentOfFirstLine > 1 && currentIndent < indentOfFirstLine - 1)
             {
                 // W9L4
-                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scaler, found extra spaces in fist line.");
+                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found extra spaces in first line.");
+            }
+
+            if (!isLiteral && maxIndent > cursor.LineOffset)
+            {
+                // S98Z
+                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found more spaces in lines above first content line.");
             }
 
             // Determine the indentation level if needed.
@@ -2020,6 +2036,10 @@ namespace YamlDotNet.Core
 
                 if (analyzer.Check('#'))
                 {
+                    if (indent < 0 && flowLevel == 0)
+                    {
+                        plainScalarFollowedByComment = true;
+                    }
                     break;
                 }
 
