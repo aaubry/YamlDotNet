@@ -23,7 +23,6 @@ using System;
 
 namespace YamlDotNet.Core
 {
-    [Serializable]
     internal sealed class SimpleKey
     {
         private readonly Cursor cursor;

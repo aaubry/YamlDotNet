@@ -26,7 +26,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents an alias token.
     /// </summary>
-    [Serializable]
     public sealed class AnchorAlias : Token
     {
         /// <summary>

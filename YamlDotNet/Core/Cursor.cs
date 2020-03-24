@@ -23,7 +23,6 @@ using System;
 
 namespace YamlDotNet.Core
 {
-    [Serializable]
     public sealed class Cursor
     {
         public int Index { get; private set; }

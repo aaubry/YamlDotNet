@@ -27,7 +27,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a scalar token.
     /// </summary>
-    [Serializable]
     public sealed class Scalar : Token
     {
         /// <summary>

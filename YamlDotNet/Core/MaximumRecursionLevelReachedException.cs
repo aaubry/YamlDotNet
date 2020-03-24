@@ -26,7 +26,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Exception that is thrown when an infinite recursion is detected.
     /// </summary>
-    [Serializable]
     public sealed class MaximumRecursionLevelReachedException : YamlException
     {
         /// <summary>

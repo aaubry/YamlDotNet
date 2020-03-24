@@ -26,7 +26,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a value token.
     /// </summary>
-    [Serializable]
     public sealed class Value : Token
     {
         /// <summary>

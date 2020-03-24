@@ -28,7 +28,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a tag directive token.
     /// </summary>
-    [Serializable]
     public class TagDirective : Token
     {
 

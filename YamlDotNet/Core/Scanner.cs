@@ -31,7 +31,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Converts a sequence of characters into a sequence of YAML tokens.
     /// </summary>
-    [Serializable]
     public class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;

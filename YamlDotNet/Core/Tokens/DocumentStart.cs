@@ -27,7 +27,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a document start token.
     /// </summary>
-    [Serializable]
     public sealed class DocumentStart : Token
     {
         /// <summary>

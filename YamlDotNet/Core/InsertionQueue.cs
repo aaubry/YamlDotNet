@@ -30,7 +30,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Generic queue on which items may be inserted
     /// </summary>
-    [Serializable]
     public sealed class InsertionQueue<T> : IEnumerable<T>
     {
         private const int DefaultInitialCapacity = 1 << 7; // Must be a power of 2

@@ -26,7 +26,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// The exception that is thrown when an alias references an anchor that does not exist.
     /// </summary>
-    [Serializable]
     public class AnchorNotFoundException : YamlException
     {
         /// <summary>

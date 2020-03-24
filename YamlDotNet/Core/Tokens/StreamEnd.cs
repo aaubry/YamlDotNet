@@ -27,7 +27,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a stream end event.
     /// </summary>
-    [Serializable]
     public sealed class StreamEnd : Token
     {
         /// <summary>

@@ -26,7 +26,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Represents a location inside a file
     /// </summary>
-    [Serializable]
     public sealed class Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
     {
         /// <summary>

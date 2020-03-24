@@ -27,7 +27,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a flow entry event.
     /// </summary>
-    [Serializable]
     public sealed class FlowEntry : Token
     {
         /// <summary>

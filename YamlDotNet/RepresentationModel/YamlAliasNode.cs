@@ -28,7 +28,6 @@ namespace YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents an alias node in the YAML document.
     /// </summary>
-    [Serializable]
     internal class YamlAliasNode : YamlNode
     {
         /// <summary>
