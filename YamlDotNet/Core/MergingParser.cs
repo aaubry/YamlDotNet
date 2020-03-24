@@ -136,7 +136,7 @@ namespace YamlDotNet.Core
             return true;
         }
 
-        private IEnumerable<ParsingEvent> GetMappingEvents(string anchor)
+        private IEnumerable<ParsingEvent> GetMappingEvents(AnchorName anchor)
         {
             var cloner = new ParsingEventCloner();
             var nesting = 0;
@@ -151,13 +151,13 @@ namespace YamlDotNet.Core
         {
             private readonly LinkedList<ParsingEvent> events;
             private readonly HashSet<LinkedListNode<ParsingEvent>> deleted;
-            private readonly Dictionary<string, LinkedListNode<ParsingEvent>> references;
+            private readonly Dictionary<AnchorName, LinkedListNode<ParsingEvent>> references;
 
             public ParsingEventCollection()
             {
                 events = new LinkedList<ParsingEvent>();
                 deleted = new HashSet<LinkedListNode<ParsingEvent>>();
-                references = new Dictionary<string, LinkedListNode<ParsingEvent>>();
+                references = new Dictionary<AnchorName, LinkedListNode<ParsingEvent>>();
             }
 
             public void AddAfter(LinkedListNode<ParsingEvent> node, IEnumerable<ParsingEvent> items)
@@ -187,7 +187,7 @@ namespace YamlDotNet.Core
                 }
             }
 
-            public IEnumerable<LinkedListNode<ParsingEvent>> FromAnchor(string anchor)
+            public IEnumerable<LinkedListNode<ParsingEvent>> FromAnchor(AnchorName anchor)
             {
                 var node = references[anchor].Next;
                 var iterator = GetEnumerator(node);
@@ -214,7 +214,7 @@ namespace YamlDotNet.Core
                 if (item is MappingStart mappingStart)
                 {
                     var anchor = mappingStart.Anchor;
-                    if (!string.IsNullOrEmpty(anchor))
+                    if (!anchor.IsEmpty)
                     {
                         references[anchor] = node;
                     }
@@ -264,12 +264,12 @@ namespace YamlDotNet.Core
 
             void IParsingEventVisitor.Visit(Scalar e)
             {
-                clonedEvent = new Scalar(null, e.Tag, e.Value, e.Style, e.IsPlainImplicit, e.IsQuotedImplicit, e.Start, e.End);
+                clonedEvent = new Scalar(AnchorName.Empty, e.Tag, e.Value, e.Style, e.IsPlainImplicit, e.IsQuotedImplicit, e.Start, e.End);
             }
 
             void IParsingEventVisitor.Visit(SequenceStart e)
             {
-                clonedEvent = new SequenceStart(null, e.Tag, e.IsImplicit, e.Style, e.Start, e.End);
+                clonedEvent = new SequenceStart(AnchorName.Empty, e.Tag, e.IsImplicit, e.Style, e.Start, e.End);
             }
 
             void IParsingEventVisitor.Visit(SequenceEnd e)
@@ -279,7 +279,7 @@ namespace YamlDotNet.Core
 
             void IParsingEventVisitor.Visit(MappingStart e)
             {
-                clonedEvent = new MappingStart(null, e.Tag, e.IsImplicit, e.Style, e.Start, e.End);
+                clonedEvent = new MappingStart(AnchorName.Empty, e.Tag, e.IsImplicit, e.Style, e.Start, e.End);
             }
 
             void IParsingEventVisitor.Visit(MappingEnd e)

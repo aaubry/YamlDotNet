@@ -31,13 +31,13 @@ namespace YamlDotNet.Core.Tokens
         /// <summary>
         /// Gets the value of the alias.
         /// </summary>
-        public string Value { get; }
+        public AnchorName Value { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorAlias"/> class.
         /// </summary>
         /// <param name="value">The value of the anchor.</param>
-        public AnchorAlias(string value)
+        public AnchorAlias(AnchorName value)
             : this(value, Mark.Empty, Mark.Empty)
         {
         }
@@ -48,10 +48,14 @@ namespace YamlDotNet.Core.Tokens
         /// <param name="value">The value of the anchor.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public AnchorAlias(string value, Mark start, Mark end)
+        public AnchorAlias(AnchorName value, Mark start, Mark end)
             : base(start, end)
         {
-            this.Value = value ?? throw new ArgumentNullException(nameof(value));
+            if (value.IsEmpty)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            this.Value = value;
         }
     }
 }

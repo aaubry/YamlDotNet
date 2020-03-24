@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
@@ -29,7 +30,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     {
         private class AnchorAssignment
         {
-            public string? Anchor;
+            public AnchorName Anchor;
         }
 
         private readonly IDictionary<object, AnchorAssignment> assignments = new Dictionary<object, AnchorAssignment>();
@@ -44,9 +45,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
         {
             if (value.Value != null && assignments.TryGetValue(value.Value, out var assignment))
             {
-                if (assignment.Anchor == null)
+                if (assignment.Anchor.IsEmpty)
                 {
-                    assignment.Anchor = "o" + nextId.ToString(CultureInfo.InvariantCulture);
+                    assignment.Anchor = new AnchorName("o" + nextId.ToString(CultureInfo.InvariantCulture));
                     ++nextId;
                 }
                 return false;
@@ -92,13 +93,13 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             }
         }
 
-        string? IAliasProvider.GetAlias(object target)
+        AnchorName IAliasProvider.GetAlias(object target)
         {
             if (target != null && assignments.TryGetValue(target, out var assignment))
             {
                 return assignment.Anchor;
             }
-            return null;
+            return AnchorName.Empty;
         }
     }
 }

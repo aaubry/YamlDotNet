@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.RepresentationModel
@@ -32,7 +31,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     internal class DocumentLoadingState
     {
-        private readonly IDictionary<string, YamlNode> anchors = new Dictionary<string, YamlNode>();
+        private readonly IDictionary<AnchorName, YamlNode> anchors = new Dictionary<AnchorName, YamlNode>();
         private readonly IList<YamlNode> nodesWithUnresolvedAliases = new List<YamlNode>();
 
         /// <summary>
@@ -41,7 +40,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="node">The node.</param>
         public void AddAnchor(YamlNode node)
         {
-            if (node.Anchor == null)
+            if (node.Anchor.IsEmpty)
             {
                 throw new ArgumentException("The specified node does not have an anchor");
             }
@@ -60,27 +59,11 @@ namespace YamlDotNet.RepresentationModel
         /// Gets the node with the specified anchor.
         /// </summary>
         /// <param name="anchor">The anchor.</param>
-        /// <param name="throwException">if set to <c>true</c>, the method should throw an exception if there is no node with that anchor.</param>
-        /// <param name="start">The start position.</param>
-        /// <param name="end">The end position.</param>
-        /// <returns></returns>
-        [Obsolete("Please use GetNode(string, Mark, Mark) when throwException = true or TryGetNode(string, Node) when throwException = false")]
-        public YamlNode? GetNode(string anchor, bool throwException, Mark start, Mark end)
-        {
-            return throwException
-                ? GetNode(anchor, start, end)
-                : TryGetNode(anchor, out var node) ? node : null;
-        }
-
-        /// <summary>
-        /// Gets the node with the specified anchor.
-        /// </summary>
-        /// <param name="anchor">The anchor.</param>
         /// <param name="start">The start position.</param>
         /// <param name="end">The end position.</param>
         /// <returns></returns>
         /// <exception cref="AnchorNotFoundException">if there is no node with that anchor.</exception>
-        public YamlNode GetNode(string anchor, Mark start, Mark end)
+        public YamlNode GetNode(AnchorName anchor, Mark start, Mark end)
         {
             if (anchors.TryGetValue(anchor, out var target))
             {
@@ -98,7 +81,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="anchor">The anchor.</param>
         /// <param name="node">The node that was retrieved.</param>
         /// <returns>true if the anchor was found; otherwise false.</returns>
-        public bool TryGetNode(string anchor, [NotNullWhen(true)] out YamlNode? node)
+        public bool TryGetNode(AnchorName anchor, [NotNullWhen(true)] out YamlNode? node)
         {
             return anchors.TryGetValue(anchor, out node);
         }

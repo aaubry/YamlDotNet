@@ -72,7 +72,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="isQuotedImplicit">.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public Scalar(string? anchor, string? tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
+        public Scalar(AnchorName anchor, string? tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
             this.Value = value;
@@ -90,7 +90,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="style">The style.</param>
         /// <param name="isPlainImplicit">.</param>
         /// <param name="isQuotedImplicit">.</param>
-        public Scalar(string? anchor, string? tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit)
+        public Scalar(AnchorName anchor, string? tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit)
             : this(anchor, tag, value, style, isPlainImplicit, isQuotedImplicit, Mark.Empty, Mark.Empty)
         {
         }
@@ -100,7 +100,7 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="value">The value.</param>
         public Scalar(string value)
-            : this(null, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, null, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
         {
         }
 
@@ -110,14 +110,14 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="value">The value.</param>
         public Scalar(string tag, string value)
-            : this(null, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Scalar"/> class.
         /// </summary>
-        public Scalar(string? anchor, string? tag, string value)
+        public Scalar(AnchorName anchor, string? tag, string value)
             : this(anchor, tag, value, ScalarStyle.Any, true, true, Mark.Empty, Mark.Empty)
         {
         }

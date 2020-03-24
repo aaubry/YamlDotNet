@@ -72,7 +72,7 @@ namespace YamlDotNet.Core
 
         private class AnchorData
         {
-            public string? anchor;
+            public AnchorName anchor;
             public bool isAlias;
         }
 
@@ -241,7 +241,7 @@ namespace YamlDotNet.Core
 
         private void AnalyzeEvent(ParsingEvent evt)
         {
-            anchorData.anchor = null;
+            anchorData.anchor = AnchorName.Empty;
             tagData.handle = null;
             tagData.suffix = null;
 
@@ -267,7 +267,7 @@ namespace YamlDotNet.Core
             }
         }
 
-        private void AnalyzeAnchor(string? anchor, bool isAlias)
+        private void AnalyzeAnchor(AnchorName anchor, bool isAlias)
         {
             anchorData.anchor = anchor;
             anchorData.isAlias = isAlias;
@@ -1391,7 +1391,7 @@ namespace YamlDotNet.Core
 
         private void ProcessAnchor()
         {
-            if (anchorData.anchor != null && !skipAnchorName)
+            if (!anchorData.anchor.IsEmpty && !skipAnchorName)
             {
                 WriteIndicator(anchorData.isAlias ? "*" : "&", true, false, false);
                 WriteAnchor(anchorData.anchor);
@@ -1682,7 +1682,7 @@ namespace YamlDotNet.Core
             switch (events.Peek().Type)
             {
                 case EventType.Alias:
-                    length = SafeStringLength(anchorData.anchor);
+                    length = AnchorNameLength(anchorData.anchor);
                     break;
 
                 case EventType.Scalar:
@@ -1692,7 +1692,7 @@ namespace YamlDotNet.Core
                     }
 
                     length =
-                        SafeStringLength(anchorData.anchor) +
+                        AnchorNameLength(anchorData.anchor) +
                             SafeStringLength(tagData.handle) +
                             SafeStringLength(tagData.suffix) +
                             SafeStringLength(scalarData.value);
@@ -1704,7 +1704,7 @@ namespace YamlDotNet.Core
                         return false;
                     }
                     length =
-                        SafeStringLength(anchorData.anchor) +
+                        AnchorNameLength(anchorData.anchor) +
                             SafeStringLength(tagData.handle) +
                             SafeStringLength(tagData.suffix);
                     break;
@@ -1715,7 +1715,7 @@ namespace YamlDotNet.Core
                         return false;
                     }
                     length =
-                        SafeStringLength(anchorData.anchor) +
+                        AnchorNameLength(anchorData.anchor) +
                             SafeStringLength(tagData.handle) +
                             SafeStringLength(tagData.suffix);
                     break;
@@ -1725,6 +1725,11 @@ namespace YamlDotNet.Core
             }
 
             return length <= maxSimpleKeyLength;
+        }
+
+        private int AnchorNameLength(AnchorName value)
+        {
+            return value.IsEmpty ? 0 : value.Value.Length;
         }
 
         private int SafeStringLength(string? value)
@@ -1817,9 +1822,9 @@ namespace YamlDotNet.Core
             isIndentation = true;
         }
 
-        private void WriteAnchor(string value)
+        private void WriteAnchor(AnchorName value)
         {
-            Write(value);
+            Write(value.Value);
 
             isWhitespace = false;
             isIndentation = false;

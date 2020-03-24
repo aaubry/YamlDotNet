@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             this.innerDeserializer = innerDeserializer ?? throw new ArgumentNullException(nameof(innerDeserializer));
         }
 
-        private sealed class AliasState : Dictionary<string, ValuePromise>, IPostDeserializationCallback
+        private sealed class AliasState : Dictionary<AnchorName, ValuePromise>, IPostDeserializationCallback
         {
             public void OnDeserialization()
             {
@@ -110,15 +110,15 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 return valuePromise.HasValue ? valuePromise.Value : valuePromise;
             }
 
-            string? anchor = null;
-            if (parser.Accept<NodeEvent>(out var nodeEvent) && !string.IsNullOrEmpty(nodeEvent.Anchor))
+            var anchor = AnchorName.Empty;
+            if (parser.Accept<NodeEvent>(out var nodeEvent) && !nodeEvent.Anchor.IsEmpty)
             {
                 anchor = nodeEvent.Anchor;
             }
 
             value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
 
-            if (anchor != null)
+            if (!anchor.IsEmpty)
             {
                 var aliasState = state.Get<AliasState>();
 

@@ -20,7 +20,6 @@
 //  SOFTWARE.
 
 using System;
-using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core.Events
 {
@@ -29,13 +28,11 @@ namespace YamlDotNet.Core.Events
     /// </summary>
     public abstract class NodeEvent : ParsingEvent
     {
-        internal static readonly Regex AnchorPattern = new Regex(@"^(?![\[\]\{\},]+).*$", StandardRegexOptions.Compiled);
-
         /// <summary>
         /// Gets the anchor.
         /// </summary>
         /// <value></value>
-        public string? Anchor { get; }
+        public AnchorName Anchor { get; }
 
         /// <summary>
         /// Gets the tag.
@@ -59,22 +56,9 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        protected NodeEvent(string? anchor, string? tag, Mark start, Mark end)
+        protected NodeEvent(AnchorName anchor, string? tag, Mark start, Mark end)
             : base(start, end)
         {
-            if (anchor != null)
-            {
-                if (anchor.Length == 0)
-                {
-                    throw new ArgumentException("Anchor value must not be empty.", nameof(anchor));
-                }
-
-                if (!AnchorPattern.IsMatch(anchor))
-                {
-                    throw new ArgumentException("Anchor value must not contain disallowed characters: []{},", nameof(anchor));
-                }
-            }
-
             if (tag != null && tag.Length == 0)
             {
                 throw new ArgumentException("Tag value must not be empty.", nameof(tag));
@@ -87,7 +71,7 @@ namespace YamlDotNet.Core.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeEvent"/> class.
         /// </summary>
-        protected NodeEvent(string? anchor, string? tag)
+        protected NodeEvent(AnchorName anchor, string? tag)
             : this(anchor, tag, Mark.Empty, Mark.Empty)
         {
         }

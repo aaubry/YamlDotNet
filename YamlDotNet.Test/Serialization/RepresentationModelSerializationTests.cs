@@ -100,7 +100,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var bytes = (byte[])value;
             emitter.Emit(new YamlDotNet.Core.Events.Scalar(
-                null,
+                AnchorName.Empty,
                 "tag:yaml.org,2002:binary",
                 Convert.ToBase64String(bytes),
                 ScalarStyle.Plain,

@@ -143,12 +143,12 @@ namespace YamlDotNet.Test.Core
 
         protected static Anchor Anchor(string anchor)
         {
-            return new Anchor(anchor);
+            return new Anchor(new AnchorName(anchor));
         }
 
         protected static AnchorAlias AnchorAlias(string alias)
         {
-            return new AnchorAlias(alias);
+            return new AnchorAlias(new AnchorName(alias));
         }
 
         protected static Comment StandaloneComment(string text)

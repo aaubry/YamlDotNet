@@ -34,7 +34,7 @@ namespace YamlDotNet.RepresentationModel
         /// Initializes a new instance of the <see cref="YamlAliasNode"/> class.
         /// </summary>
         /// <param name="anchor">The anchor.</param>
-        internal YamlAliasNode(string anchor)
+        internal YamlAliasNode(AnchorName anchor)
         {
             Anchor = anchor;
         }

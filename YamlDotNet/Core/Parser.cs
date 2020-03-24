@@ -421,7 +421,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private static ParsingEvent ProcessEmptyScalar(Mark position)
         {
-            return new Events.Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
+            return new Events.Scalar(AnchorName.Empty, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
         }
 
         /// <summary>
@@ -470,7 +470,7 @@ namespace YamlDotNet.Core
 
             var start = current.Start;
 
-            string? anchorName = null;
+            var anchorName = AnchorName.Empty;
             string? tagName = null;
             Anchor? lastAnchor = null;
             Tag? lastTag = null;
@@ -478,10 +478,10 @@ namespace YamlDotNet.Core
             // The anchor and the tag can be in any order. This loop repeats at most twice.
             while (true)
             {
-                if (anchorName == null && current is Anchor anchor)
+                if (anchorName.IsEmpty && current is Anchor anchor)
                 {
                     lastAnchor = anchor;
-                    anchorName = string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value;
+                    anchorName = anchor.Value;
                     Skip();
                 }
                 else if (tagName == null && current is Tag tag)
@@ -516,7 +516,7 @@ namespace YamlDotNet.Core
                 }
                 else if (current is Error error)
                 {
-                    if (lastTag != null && lastAnchor != null && !string.IsNullOrEmpty(anchorName))
+                    if (lastTag != null && lastAnchor != null && !anchorName.IsEmpty)
                     {
                         return new Events.Scalar(anchorName, default, string.Empty, default, false, false, lastAnchor.Start, lastAnchor.End);
                     }
@@ -568,7 +568,7 @@ namespace YamlDotNet.Core
                     // Read next token to ensure the error case spec test 'CXX2':
                     // "Mapping with anchor on document start line".
 
-                    if (anchorName != null && scanner.MoveNextWithoutConsuming())
+                    if (!anchorName.IsEmpty && scanner.MoveNextWithoutConsuming())
                     {
                         currentToken = scanner.Current;
                         if (currentToken is Error)
@@ -620,7 +620,7 @@ namespace YamlDotNet.Core
                     }
                 }
 
-                if (anchorName != null || tagName != null)
+                if (!anchorName.IsEmpty || tagName != null)
                 {
                     state = states.Pop();
                     return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, isImplicit, false, start, current.End);
@@ -896,7 +896,7 @@ namespace YamlDotNet.Core
                 if (current is Key)
                 {
                     state = ParserState.FlowSequenceEntryMappingKey;
-                    evt = new Events.MappingStart(null, null, true, MappingStyle.Flow);
+                    evt = new Events.MappingStart(AnchorName.Empty, null, true, MappingStyle.Flow);
                     Skip();
                     return evt;
                 }

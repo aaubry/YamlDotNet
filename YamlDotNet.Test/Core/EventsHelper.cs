@@ -144,7 +144,7 @@ namespace YamlDotNet.Test.Core
 
         protected AnchorAlias AnchorAlias(string alias)
         {
-            return new AnchorAlias(alias);
+            return new AnchorAlias(new AnchorName(alias));
         }
 
         protected Comment StandaloneComment(string value)
@@ -202,7 +202,7 @@ namespace YamlDotNet.Test.Core
 
             public static implicit operator Scalar(ScalarBuilder builder)
             {
-                return new Scalar(null,
+                return new Scalar(AnchorName.Empty,
                     builder.tag,
                     builder.text,
                     builder.style,
@@ -216,7 +216,7 @@ namespace YamlDotNet.Test.Core
             private const bool DefaultImplicit = true;
 
             private readonly SequenceStyle style;
-            private string anchor;
+            private AnchorName anchor;
             private bool @implicit;
 
             public SequenceStartBuilder(SequenceStyle style)
@@ -227,7 +227,7 @@ namespace YamlDotNet.Test.Core
 
             public SequenceStartBuilder A(string anchor)
             {
-                this.anchor = anchor;
+                this.anchor = new AnchorName(anchor);
                 return this;
             }
 
@@ -277,7 +277,7 @@ namespace YamlDotNet.Test.Core
 
             public static implicit operator MappingStart(MappingStartBuilder builder)
             {
-                return new MappingStart(null, builder.tag, builder.@implicit, builder.style);
+                return new MappingStart(AnchorName.Empty, builder.tag, builder.@implicit, builder.style);
             }
         }
 

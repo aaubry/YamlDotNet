@@ -1286,14 +1286,14 @@ namespace YamlDotNet.Core
             }
 
             // Create a token.
-
+            var name = new AnchorName(value.ToString());
             if (isAlias)
             {
-                return new AnchorAlias(value.ToString(), start, cursor.Mark());
+                return new AnchorAlias(name, start, cursor.Mark());
             }
             else
             {
-                return previousAnchor = new Anchor(value.ToString(), start, cursor.Mark());
+                return previousAnchor = new Anchor(name, start, cursor.Mark());
             }
         }
 
