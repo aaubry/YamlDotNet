@@ -66,6 +66,17 @@ namespace YamlDotNet.Test.Serialization
             ShouldApplyConventionGiven(input, expectedName, UnderscoredNamingConvention.Instance);
         }
 
+        [Theory]
+        [InlineData("test", "test")]
+        [InlineData("thisisatest", "thisIsATest")]
+        [InlineData("thisisatest", "this-is-a-test")]
+        [InlineData("thisisatest", "this_is_a_test")]
+        [InlineData("thisisatest", "ThisIsATest")]
+        public void AppliesLowerCaseConvention(string expectedName, string input)
+        {
+            ShouldApplyConventionGiven(input, expectedName, LowerCaseNamingConvention.Instance);
+        }
+
         private void ShouldApplyConventionGiven(string input, string expectedName, INamingConvention convention)
         {
             convention.Apply(input).Should().Be(expectedName);
