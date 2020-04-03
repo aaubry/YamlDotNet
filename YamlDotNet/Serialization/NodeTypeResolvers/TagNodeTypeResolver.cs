@@ -46,12 +46,12 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
             }
 
             //Null and bool are handled special (can be ignored here)
-            AddRegExp("[-+]?[0-9]+", "int");
-            AddRegExp("0o[0-7]+", "int");
-            AddRegExp("0x[0-9a-fA-F]+", "int");
-            AddRegExp(@"[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?", "float");
-            AddRegExp(@"[-+]?(\.inf|\.Inf|\.INF)", "float");
-            AddRegExp(@"[-+]?(\.nan|\.NaN|\.NAN)", "float");
+            AddRegExp("^[-+]?[0-9]+$", "int");
+            AddRegExp("^0o[0-7]+$", "int");
+            AddRegExp("^0x[0-9a-fA-F]+$", "int");
+            AddRegExp(@"^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$", "float");
+            AddRegExp(@"^[-+]?(\.inf|\.Inf|\.INF)$", "float");
+            AddRegExp(@"^[-+]?(\.nan|\.NaN|\.NAN)$", "float");
         }
 
         private bool ResolveImplicitTag(NodeEvent nodeEvent, ref string tag)
