@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 
         static TagNodeTypeResolver()
         {
-            //seee 10.3.2 Tag Resolution (https://yaml.org/spec/1.2/spec.html#id2804356)
+            //see 10.3.2 Tag Resolution (https://yaml.org/spec/1.2/spec.html#id2804356)
             void AddRegExp(string pattern, string tag, string tagPrefix = "tag:yaml.org,2002:")
             {
                 ImplicitRegEx.Add((new Regex(pattern, RegexOptions.Compiled), $"{tagPrefix}{tag}"));
