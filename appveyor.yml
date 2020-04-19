@@ -1,11 +1,5 @@
 version: 0.0.{build}
 
-branches:
-  only:
-    # Releases must be built from a release tag
-    - /^(?!master).+$/
-    - /^master.+$/
-
 image: Visual Studio 2019
 
 test: off
