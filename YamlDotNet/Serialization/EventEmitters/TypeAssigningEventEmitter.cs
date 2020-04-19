@@ -21,17 +21,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using YamlDotNet.Core;
+using YamlDotNet.Serialization.Schemas;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
-        private readonly IDictionary<Type, string> tagMappings;
+        private readonly IDictionary<Type, TagName> tagMappings;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, string> tagMappings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             var value = eventInfo.Source.Value;
             if (value == null)
             {
-                eventInfo.Tag = "tag:yaml.org,2002:null";
+                eventInfo.Tag = JsonSchema.Tags.Null;
                 eventInfo.RenderedValue = "";
             }
             else
@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        eventInfo.Tag = "tag:yaml.org,2002:bool";
+                        eventInfo.Tag = JsonSchema.Tags.Bool;
                         eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
                         break;
 
@@ -66,39 +66,39 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        eventInfo.Tag = "tag:yaml.org,2002:int";
+                        eventInfo.Tag = JsonSchema.Tags.Int;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Single:
-                        eventInfo.Tag = "tag:yaml.org,2002:float";
+                        eventInfo.Tag = JsonSchema.Tags.Float;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
                         break;
 
                     case TypeCode.Double:
-                        eventInfo.Tag = "tag:yaml.org,2002:float";
+                        eventInfo.Tag = JsonSchema.Tags.Float;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
                         break;
 
                     case TypeCode.Decimal:
-                        eventInfo.Tag = "tag:yaml.org,2002:float";
+                        eventInfo.Tag = JsonSchema.Tags.Float;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
                     case TypeCode.Char:
-                        eventInfo.Tag = "tag:yaml.org,2002:str";
+                        eventInfo.Tag = FailsafeSchema.Tags.Str;
                         eventInfo.RenderedValue = value.ToString()!;
                         suggestedStyle = ScalarStyle.Any;
                         break;
 
                     case TypeCode.DateTime:
-                        eventInfo.Tag = "tag:yaml.org,2002:timestamp";
+                        eventInfo.Tag = DefaultSchema.Tags.Timestamp;
                         eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
-                        eventInfo.Tag = "tag:yaml.org,2002:null";
+                        eventInfo.Tag = JsonSchema.Tags.Null;
                         eventInfo.RenderedValue = "";
                         break;
 

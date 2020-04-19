@@ -96,7 +96,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag == null, false));
+            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag.IsEmpty, false));
         }
 
         /// <summary>

@@ -118,10 +118,11 @@ namespace YamlDotNet.RepresentationModel
                 textWriter.Write(" &");
                 textWriter.Write(nodeEvent.Anchor);
             }
-            if (!string.IsNullOrEmpty(nodeEvent.Tag))
+
+            if (!nodeEvent.Tag.IsEmpty)
             {
                 textWriter.Write(" <");
-                textWriter.Write(nodeEvent.Tag);
+                textWriter.Write(nodeEvent.Tag.Value);
                 textWriter.Write(">");
             }
         }

@@ -59,7 +59,7 @@ namespace YamlDotNet.Serialization
         }
 
         public AnchorName Anchor { get; set; }
-        public string? Tag { get; set; }
+        public TagName Tag { get; set; }
     }
 
     public sealed class ScalarEventInfo : ObjectEventInfo

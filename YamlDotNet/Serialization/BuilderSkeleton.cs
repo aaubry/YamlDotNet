@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.TypeInspectors;
@@ -109,7 +110,7 @@ namespace YamlDotNet.Serialization
             return Self;
         }
 
-        public abstract TBuilder WithTagMapping(string tag, Type type);
+        public abstract TBuilder WithTagMapping(TagName tag, Type type);
 
 #if !NET20
         /// <summary>

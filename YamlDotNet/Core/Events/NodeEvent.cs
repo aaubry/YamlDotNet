@@ -38,7 +38,7 @@ namespace YamlDotNet.Core.Events
         /// Gets the tag.
         /// </summary>
         /// <value></value>
-        public string? Tag { get; }
+        public TagName Tag { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is canonical.
@@ -56,14 +56,9 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        protected NodeEvent(AnchorName anchor, string? tag, Mark start, Mark end)
+        protected NodeEvent(AnchorName anchor, TagName tag, Mark start, Mark end)
             : base(start, end)
         {
-            if (tag != null && tag.Length == 0)
-            {
-                throw new ArgumentException("Tag value must not be empty.", nameof(tag));
-            }
-
             this.Anchor = anchor;
             this.Tag = tag;
         }
@@ -71,7 +66,7 @@ namespace YamlDotNet.Core.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeEvent"/> class.
         /// </summary>
-        protected NodeEvent(AnchorName anchor, string? tag)
+        protected NodeEvent(AnchorName anchor, TagName tag)
             : this(anchor, tag, Mark.Empty, Mark.Empty)
         {
         }

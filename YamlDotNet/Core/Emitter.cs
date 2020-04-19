@@ -260,7 +260,7 @@ namespace YamlDotNet.Core
 
                 AnalyzeAnchor(nodeEvent.Anchor, false);
 
-                if (!string.IsNullOrEmpty(nodeEvent.Tag) && (isCanonical || nodeEvent.IsCanonical))
+                if (!nodeEvent.Tag.IsEmpty && (isCanonical || nodeEvent.IsCanonical))
                 {
                     AnalyzeTag(nodeEvent.Tag);
                 }
@@ -539,15 +539,15 @@ namespace YamlDotNet.Core
                    encoding is UTF7Encoding;
         }
 
-        private void AnalyzeTag(string tag)
+        private void AnalyzeTag(TagName tag)
         {
-            tagData.handle = tag;
+            tagData.handle = tag.Value;
             foreach (var tagDirective in tagDirectives)
             {
-                if (tag.StartsWith(tagDirective.Prefix, StringComparison.Ordinal))
+                if (tag.Value.StartsWith(tagDirective.Prefix, StringComparison.Ordinal))
                 {
                     tagData.handle = tagDirective.Handle;
-                    tagData.suffix = tag.Substring(tagDirective.Prefix.Length);
+                    tagData.suffix = tag.Value.Substring(tagDirective.Prefix.Length);
                     break;
                 }
             }

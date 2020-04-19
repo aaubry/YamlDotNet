@@ -45,7 +45,7 @@ namespace YamlDotNet.RepresentationModel
         /// Gets or sets the tag of the node.
         /// </summary>
         /// <value>The tag.</value>
-        public string? Tag { get; set; }
+        public TagName Tag { get; set; }
 
         /// <summary>
         /// Gets the position in the input stream where the event that originated the node starts.

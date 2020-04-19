@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
-        private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
+        private readonly IDictionary<Type, TagName> tagMappings = new Dictionary<Type, TagName>();
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
@@ -189,11 +189,11 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public override SerializerBuilder WithTagMapping(string tag, Type type)
+        public override SerializerBuilder WithTagMapping(TagName tag, Type type)
         {
-            if (tag == null)
+            if (tag.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(tag));
+                throw new ArgumentException("Non-specific tags cannot be maped");
             }
 
             if (type == null)

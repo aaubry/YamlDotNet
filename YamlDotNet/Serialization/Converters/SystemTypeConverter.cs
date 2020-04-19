@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization.Converters
         public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
             var systemType = (Type)value!;
-            emitter.Emit(new Scalar(AnchorName.Empty, null, systemType.AssemblyQualifiedName!, ScalarStyle.Any, true, false));
+            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, systemType.AssemblyQualifiedName!, ScalarStyle.Any, true, false));
         }
     }
 }

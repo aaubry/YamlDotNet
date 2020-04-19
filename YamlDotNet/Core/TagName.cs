@@ -20,40 +20,45 @@
 //  SOFTWARE.
 
 using System;
-using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core
 {
-    public struct AnchorName : IEquatable<AnchorName>
+    public struct TagName : IEquatable<TagName>
     {
-        public static readonly AnchorName Empty = default;
-
-        // https://yaml.org/spec/1.2/spec.html#id2785586
-        private static readonly Regex AnchorPattern = new Regex(@"^[^\[\]\{\},]+$", StandardRegexOptions.Compiled);
+        public static readonly TagName Empty = default;
 
         private readonly string? value;
 
-        public string Value => value ?? throw new InvalidOperationException("Cannot read the Value of an empty anchor");
+        public string Value => value ?? throw new InvalidOperationException("Cannot read the Value of a non-specific tag");
 
         public bool IsEmpty => value is null;
+        public bool IsNonSpecific => !IsEmpty && (value == "!" || value == "?");
 
-        public AnchorName(string value)
+        public bool IsLocal => !IsEmpty && Value[0] == '!';
+        public bool IsGlobal => !IsEmpty && !IsLocal;
+
+        public TagName(string value)
         {
             this.value = value ?? throw new ArgumentNullException(nameof(value));
 
-            if (!AnchorPattern.IsMatch(value))
+            if (value.Length == 0)
             {
-                throw new ArgumentException($"Anchor cannot be empty or contain disallowed characters: []{{}},\nThe value was '{value}'.", nameof(value));
+                throw new ArgumentException("Tag value must not be empty.", nameof(value));
+            }
+
+            if (IsGlobal && !Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute))
+            {
+                throw new ArgumentException("Global tags must be valid URIs.", nameof(value));
             }
         }
 
-        public override string ToString() => value ?? "[empty]";
+        public override string ToString() => value ?? "?";
 
-        public bool Equals(AnchorName other) => Equals(value, other.value);
+        public bool Equals(TagName other) => Equals(value, other.value);
 
         public override bool Equals(object? obj)
         {
-            return obj is AnchorName other && Equals(other);
+            return obj is TagName other && Equals(other);
         }
 
         public override int GetHashCode()
@@ -61,16 +66,26 @@ namespace YamlDotNet.Core
             return value?.GetHashCode() ?? 0;
         }
 
-        public static bool operator ==(AnchorName left, AnchorName right)
+        public static bool operator ==(TagName left, TagName right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(AnchorName left, AnchorName right)
+        public static bool operator !=(TagName left, TagName right)
         {
             return !(left == right);
         }
 
-        public static implicit operator AnchorName(string value) => value == null ? Empty : new AnchorName(value);
+        public static bool operator ==(TagName left, string right)
+        {
+            return Equals(left.value, right);
+        }
+
+        public static bool operator !=(TagName left, string right)
+        {
+            return !(left == right);
+        }
+
+        public static implicit operator TagName(string value) => value == null ? Empty : new TagName(value);
     }
 }

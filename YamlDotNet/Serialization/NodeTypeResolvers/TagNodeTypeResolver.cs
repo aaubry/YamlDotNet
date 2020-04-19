@@ -21,22 +21,23 @@
 
 using System;
 using System.Collections.Generic;
+using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
     public sealed class TagNodeTypeResolver : INodeTypeResolver
     {
-        private readonly IDictionary<string, Type> tagMappings;
+        private readonly IDictionary<TagName, Type> tagMappings;
 
-        public TagNodeTypeResolver(IDictionary<string, Type> tagMappings)
+        public TagNodeTypeResolver(IDictionary<TagName, Type> tagMappings)
         {
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
         }
 
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
-            if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Tag) && tagMappings.TryGetValue(nodeEvent.Tag, out var predefinedType))
+            if (nodeEvent != null && !nodeEvent.Tag.IsEmpty && tagMappings.TryGetValue(nodeEvent.Tag, out var predefinedType))
             {
                 currentType = predefinedType;
                 return true;

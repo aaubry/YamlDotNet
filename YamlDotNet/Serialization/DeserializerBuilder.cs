@@ -21,10 +21,12 @@
 
 using System;
 using System.Collections.Generic;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
 using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Serialization.Schemas;
 using YamlDotNet.Serialization.TypeInspectors;
 using YamlDotNet.Serialization.TypeResolvers;
 using YamlDotNet.Serialization.ValueDeserializers;
@@ -42,7 +44,7 @@ namespace YamlDotNet.Serialization
         private IObjectFactory objectFactory = new DefaultObjectFactory();
         private readonly LazyComponentRegistrationList<Nothing, INodeDeserializer> nodeDeserializerFactories;
         private readonly LazyComponentRegistrationList<Nothing, INodeTypeResolver> nodeTypeResolverFactories;
-        private readonly Dictionary<string, Type> tagMappings;
+        private readonly Dictionary<TagName, Type> tagMappings;
         private bool ignoreUnmatched;
 
         /// <summary>
@@ -51,14 +53,14 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder()
             : base(new StaticTypeResolver())
         {
-            tagMappings = new Dictionary<string, Type>
+            tagMappings = new Dictionary<TagName, Type>
             {
-                { "tag:yaml.org,2002:map", typeof(Dictionary<object, object>) },
-                { "tag:yaml.org,2002:bool", typeof(bool) },
-                { "tag:yaml.org,2002:float", typeof(double) },
-                { "tag:yaml.org,2002:int", typeof(int) },
-                { "tag:yaml.org,2002:str", typeof(string) },
-                { "tag:yaml.org,2002:timestamp", typeof(DateTime) }
+                { FailsafeSchema.Tags.Map, typeof(Dictionary<object, object>) },
+                { FailsafeSchema.Tags.Str, typeof(string) },
+                { JsonSchema.Tags.Bool, typeof(bool) },
+                { JsonSchema.Tags.Float, typeof(double) },
+                { JsonSchema.Tags.Int, typeof(int) },
+                { DefaultSchema.Tags.Timestamp, typeof(DateTime) }
             };
 
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
@@ -278,11 +280,11 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public override DeserializerBuilder WithTagMapping(string tag, Type type)
+        public override DeserializerBuilder WithTagMapping(TagName tag, Type type)
         {
-            if (tag == null)
+            if (tag.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(tag));
+                throw new ArgumentException("Non-specific tags cannot be maped");
             }
 
             if (type == null)
@@ -302,11 +304,11 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing tag mapping.
         /// </summary>
-        public DeserializerBuilder WithoutTagMapping(string tag)
+        public DeserializerBuilder WithoutTagMapping(TagName tag)
         {
-            if (tag == null)
+            if (tag.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(tag));
+                throw new ArgumentException("Non-specific tags cannot be maped");
             }
 
             if (!tagMappings.Remove(tag))
