@@ -79,8 +79,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public T GetCustomAttribute<T>() where T : Attribute
             {
-                // Don't use IMemberInfo.GetCustomAttributes, it ignores the inherit parameter
-                var attributes = Attribute.GetCustomAttributes(propertyInfo, typeof(T));
+                var attributes = propertyInfo.GetAllCustomAttributes<T>();
                 return (T)attributes.FirstOrDefault();
             }
 

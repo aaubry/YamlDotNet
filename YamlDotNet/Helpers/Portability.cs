@@ -249,6 +249,25 @@ namespace YamlDotNet
         {
             return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type);
         }
+
+        public static Attribute[] GetAllCustomAttributes<TAttribute>(this PropertyInfo member)
+        {
+            // IMemberInfo.GetCustomAttributes ignores it's "inherit" parameter for properties,
+            // and the suggested replacement (Attribute.GetCustomAttributes) is not available
+            // on netstandard1.3
+            var result = new List<Attribute>();
+            var type = member.DeclaringType;
+
+            while (type != null)
+            {
+                type.GetPublicProperty(member.Name);
+                result.AddRange(member.GetCustomAttributes(typeof(TAttribute)));
+
+                type = type.BaseType();
+            }
+
+            return result.ToArray();
+        }
     }
 
     internal sealed class CultureInfoAdapter : CultureInfo
@@ -373,6 +392,12 @@ namespace YamlDotNet
         public static bool IsInstanceOf(this Type type, object o)
         {
             return type.IsInstanceOfType(o);
+        }
+
+        public static Attribute[] GetAllCustomAttributes<TAttribute>(this PropertyInfo property)
+        {
+            // Don't use IMemberInfo.GetCustomAttributes, it ignores the inherit parameter
+            return Attribute.GetCustomAttributes(property, typeof(TAttribute));
         }
     }
 
