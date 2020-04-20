@@ -57,6 +57,15 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         public Mark End { get; private set; } = Mark.Empty;
 
+        protected YamlNode() : this(TagName.NonSpecific)
+        {
+        }
+        
+        protected YamlNode(TagName tag)
+        {
+            this.Tag = tag;
+        }
+
         /// <summary>
         /// Loads the specified event.
         /// </summary>

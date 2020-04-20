@@ -96,7 +96,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag.IsEmpty, false));
+            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style));
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace YamlDotNet.RepresentationModel
         public override bool Equals(object? obj)
         {
             return obj is YamlScalarNode other
-                && Equals(Tag, other.Tag)
+                && ((Tag.IsNonSpecific && other.Tag.IsNonSpecific) || Equals(Tag, other.Tag))
                 && Equals(Value, other.Value);
         }
 
@@ -126,7 +126,7 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         public override int GetHashCode()
         {
-            return CombineHashCodes(Tag, Value);
+            return CombineHashCodes(Tag.IsNonSpecific ? 0 : Tag.GetHashCode(), Value);
         }
 
         /// <summary>

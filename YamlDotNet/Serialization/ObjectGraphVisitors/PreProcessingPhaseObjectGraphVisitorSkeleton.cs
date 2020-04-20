@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     {
         protected readonly IEnumerable<IYamlTypeConverter> typeConverters;
 
-        public PreProcessingPhaseObjectGraphVisitorSkeleton(IEnumerable<IYamlTypeConverter> typeConverters)
+        protected PreProcessingPhaseObjectGraphVisitorSkeleton(IEnumerable<IYamlTypeConverter> typeConverters)
         {
             this.typeConverters = typeConverters != null
                 ? typeConverters.ToList()

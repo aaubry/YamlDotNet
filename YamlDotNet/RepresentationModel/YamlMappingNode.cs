@@ -36,19 +36,11 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly IOrderedDictionary<YamlNode, YamlNode> children = new OrderedDictionary<YamlNode, YamlNode>();
-
         /// <summary>
         /// Gets the children of the current node.
         /// </summary>
         /// <value>The children.</value>
-        public IOrderedDictionary<YamlNode, YamlNode> Children
-        {
-            get
-            {
-                return children;
-            }
-        }
+        public IOrderedDictionary<YamlNode, YamlNode> Children { get; } = new OrderedDictionary<YamlNode, YamlNode>();
 
         /// <summary>
         /// Gets or sets the style of the node.
@@ -78,7 +70,7 @@ namespace YamlDotNet.RepresentationModel
 
                 try
                 {
-                    children.Add(key, value);
+                    Children.Add(key, value);
                 }
                 catch (ArgumentException err)
                 {
@@ -116,7 +108,7 @@ namespace YamlDotNet.RepresentationModel
         {
             foreach (var child in children)
             {
-                this.children.Add(child);
+                this.Children.Add(child);
             }
         }
 
@@ -157,7 +149,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="value">The value node.</param>
         public void Add(YamlNode key, YamlNode value)
         {
-            children.Add(key, value);
+            Children.Add(key, value);
         }
 
         /// <summary>
@@ -167,7 +159,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="value">The value node.</param>
         public void Add(string key, YamlNode value)
         {
-            children.Add(new YamlScalarNode(key), value);
+            Children.Add(new YamlScalarNode(key), value);
         }
 
         /// <summary>
@@ -177,7 +169,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="value">The value node.</param>
         public void Add(YamlNode key, string value)
         {
-            children.Add(key, new YamlScalarNode(value));
+            Children.Add(key, new YamlScalarNode(value));
         }
 
         /// <summary>
@@ -187,7 +179,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="value">The value node.</param>
         public void Add(string key, string value)
         {
-            children.Add(new YamlScalarNode(key), new YamlScalarNode(value));
+            Children.Add(new YamlScalarNode(key), new YamlScalarNode(value));
         }
 
         /// <summary>
@@ -198,7 +190,7 @@ namespace YamlDotNet.RepresentationModel
         {
             Dictionary<YamlNode, YamlNode>? keysToUpdate = null;
             Dictionary<YamlNode, YamlNode>? valuesToUpdate = null;
-            foreach (var entry in children)
+            foreach (var entry in Children)
             {
                 if (entry.Key is YamlAliasNode)
                 {
@@ -223,16 +215,16 @@ namespace YamlDotNet.RepresentationModel
             {
                 foreach (var entry in valuesToUpdate)
                 {
-                    children[entry.Key] = entry.Value;
+                    Children[entry.Key] = entry.Value;
                 }
             }
             if (keysToUpdate != null)
             {
                 foreach (var entry in keysToUpdate)
                 {
-                    YamlNode value = children[entry.Key];
-                    children.Remove(entry.Key);
-                    children.Add(entry.Value, value);
+                    YamlNode value = Children[entry.Key];
+                    Children.Remove(entry.Key);
+                    Children.Add(entry.Value, value);
                 }
             }
         }
@@ -244,8 +236,8 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new MappingStart(Anchor, Tag, true, Style));
-            foreach (var entry in children)
+            emitter.Emit(new MappingStart(Anchor, Tag, Style));
+            foreach (var entry in Children)
             {
                 entry.Key.Save(emitter, state);
                 entry.Value.Save(emitter, state);
@@ -270,16 +262,16 @@ namespace YamlDotNet.RepresentationModel
             var other = obj as YamlMappingNode;
             var areEqual = other != null
                 && Equals(Tag, other.Tag)
-                && children.Count == other.children.Count;
+                && Children.Count == other.Children.Count;
 
             if (!areEqual)
             {
                 return false;
             }
 
-            foreach (var entry in children)
+            foreach (var entry in Children)
             {
-                if (!other!.children.TryGetValue(entry.Key, out var otherNode) || !Equals(entry.Value, otherNode))
+                if (!other!.Children.TryGetValue(entry.Key, out var otherNode) || !Equals(entry.Value, otherNode))
                 {
                     return false;
                 }
@@ -298,7 +290,7 @@ namespace YamlDotNet.RepresentationModel
         {
             var hashCode = base.GetHashCode();
 
-            foreach (var entry in children)
+            foreach (var entry in Children)
             {
                 hashCode = CombineHashCodes(hashCode, entry.Key);
                 hashCode = CombineHashCodes(hashCode, entry.Value);
@@ -315,7 +307,7 @@ namespace YamlDotNet.RepresentationModel
         {
             level.Increment();
             yield return this;
-            foreach (var child in children)
+            foreach (var child in Children)
             {
                 foreach (var node in child.Key.SafeAllNodes(level))
                 {
@@ -352,7 +344,7 @@ namespace YamlDotNet.RepresentationModel
 
             var text = new StringBuilder("{ ");
 
-            foreach (var child in children)
+            foreach (var child in Children)
             {
                 if (text.Length > 2)
                 {
@@ -373,7 +365,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary />
         public IEnumerator<KeyValuePair<YamlNode, YamlNode>> GetEnumerator()
         {
-            return children.GetEnumerator();
+            return Children.GetEnumerator();
         }
 
         #endregion

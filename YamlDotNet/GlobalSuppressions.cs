@@ -4,3 +4,4 @@
 // a specific target and scoped to a namespace, type, member, etc.
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0056:Use index operator", Justification = "Not available on older platforms", Scope = "member", Target = "~M:YamlDotNet.Core.Scanner.ScanTag~YamlDotNet.Core.Tokens.Token")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "We don't agree with this guideline", Scope = "type")]

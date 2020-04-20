@@ -37,19 +37,11 @@ namespace YamlDotNet.RepresentationModel
     [DebuggerDisplay("Count = {children.Count}")]
     public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible
     {
-        private readonly IList<YamlNode> children = new List<YamlNode>();
-
         /// <summary>
         /// Gets the collection of child nodes.
         /// </summary>
         /// <value>The children.</value>
-        public IList<YamlNode> Children
-        {
-            get
-            {
-                return children;
-            }
-        }
+        public IList<YamlNode> Children { get; } = new List<YamlNode>();
 
         /// <summary>
         /// Gets or sets the style of the node.
@@ -76,7 +68,7 @@ namespace YamlDotNet.RepresentationModel
             while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var child = ParseNode(parser, state);
-                children.Add(child);
+                Children.Add(child);
                 hasUnresolvedAliases |= child is YamlAliasNode;
             }
 
@@ -108,7 +100,7 @@ namespace YamlDotNet.RepresentationModel
         {
             foreach (var child in children)
             {
-                this.children.Add(child);
+                this.Children.Add(child);
             }
         }
 
@@ -118,7 +110,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="child">The child.</param>
         public void Add(YamlNode child)
         {
-            children.Add(child);
+            Children.Add(child);
         }
 
         /// <summary>
@@ -127,7 +119,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="child">The child.</param>
         public void Add(string child)
         {
-            children.Add(new YamlScalarNode(child));
+            Children.Add(new YamlScalarNode(child));
         }
 
         /// <summary>
@@ -136,11 +128,11 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state of the document.</param>
         internal override void ResolveAliases(DocumentLoadingState state)
         {
-            for (int i = 0; i < children.Count; ++i)
+            for (int i = 0; i < Children.Count; ++i)
             {
-                if (children[i] is YamlAliasNode)
+                if (Children[i] is YamlAliasNode)
                 {
-                    children[i] = state.GetNode(children[i].Anchor!, children[i].Start, children[i].End);
+                    Children[i] = state.GetNode(Children[i].Anchor!, Children[i].Start, Children[i].End);
                 }
             }
         }
@@ -152,8 +144,8 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new SequenceStart(Anchor, Tag, Tag.IsEmpty, Style));
-            foreach (var node in children)
+            emitter.Emit(new SequenceStart(Anchor, Tag, Style));
+            foreach (var node in Children)
             {
                 node.Save(emitter, state);
             }
@@ -177,16 +169,16 @@ namespace YamlDotNet.RepresentationModel
             var other = obj as YamlSequenceNode;
             var areEqual = other != null
                 && Equals(Tag, other.Tag)
-                && children.Count == other.children.Count;
+                && Children.Count == other.Children.Count;
 
             if (!areEqual)
             {
                 return false;
             }
 
-            for (int i = 0; i < children.Count; ++i)
+            for (int i = 0; i < Children.Count; ++i)
             {
-                if (!Equals(children[i], other!.children[i]))
+                if (!Equals(Children[i], other!.Children[i]))
                 {
                     return false;
                 }
@@ -204,7 +196,7 @@ namespace YamlDotNet.RepresentationModel
         public override int GetHashCode()
         {
             var hashCode = 0;
-            foreach (var item in children)
+            foreach (var item in Children)
             {
                 hashCode = CombineHashCodes(hashCode, item);
             }
@@ -221,7 +213,7 @@ namespace YamlDotNet.RepresentationModel
         {
             level.Increment();
             yield return this;
-            foreach (var child in children)
+            foreach (var child in Children)
             {
                 foreach (var node in child.SafeAllNodes(level))
                 {
@@ -254,7 +246,7 @@ namespace YamlDotNet.RepresentationModel
 
             var text = new StringBuilder("[ ");
 
-            foreach (var child in children)
+            foreach (var child in Children)
             {
                 if (text.Length > 2)
                 {

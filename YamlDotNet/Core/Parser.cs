@@ -33,7 +33,7 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Parses YAML streams.
     /// </summary>
-    public class Parser : IParser
+    public sealed class Parser : IParser
     {
         private readonly Stack<ParserState> states = new Stack<ParserState>();
         private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
@@ -421,7 +421,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private static ParsingEvent ProcessEmptyScalar(Mark position)
         {
-            return new Events.Scalar(AnchorName.Empty, TagName.Empty, string.Empty, ScalarStyle.Plain, true, false, position, position);
+            return new Events.Scalar(AnchorName.Empty, TagName.Empty, string.Empty, ScalarStyle.Plain, position, position);
         }
 
         /// <summary>
@@ -514,7 +514,7 @@ namespace YamlDotNet.Core
                 {
                     if (lastTag != null && lastAnchor != null && !anchorName.IsEmpty)
                     {
-                        return new Events.Scalar(anchorName, default, string.Empty, default, false, false, lastAnchor.Start, lastAnchor.End);
+                        return new Events.Scalar(anchorName, TagName.Empty, string.Empty, default, lastAnchor.Start, lastAnchor.End);
                     }
                     throw new SemanticErrorException(error.Start, error.End, error.Value);
                 }
@@ -526,8 +526,6 @@ namespace YamlDotNet.Core
                 current = GetCurrentToken() ?? throw new SemanticErrorException("Reached the end of the stream while parsing a node");
             }
 
-            var isImplicit = tagName.IsEmpty;
-
             if (isIndentlessSequence && GetCurrentToken() is BlockEntry)
             {
                 state = ParserState.IndentlessSequenceEntry;
@@ -535,7 +533,6 @@ namespace YamlDotNet.Core
                 return new Events.SequenceStart(
                     anchorName,
                     tagName,
-                    isImplicit,
                     SequenceStyle.Block,
                     start,
                     current.End
@@ -545,21 +542,10 @@ namespace YamlDotNet.Core
             {
                 if (current is Scalar scalar)
                 {
-                    var isPlainImplicit = false;
-                    var isQuotedImplicit = false;
-                    if ((scalar.Style == ScalarStyle.Plain && tagName.IsEmpty) || tagName.IsNonSpecific)
-                    {
-                        isPlainImplicit = true;
-                    }
-                    else if (tagName.IsEmpty)
-                    {
-                        isQuotedImplicit = true;
-                    }
-
                     state = states.Pop();
                     Skip();
 
-                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End);
+                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, start, scalar.End);
 
                     // Read next token to ensure the error case spec test 'CXX2':
                     // "Mapping with anchor on document start line".
@@ -592,13 +578,13 @@ namespace YamlDotNet.Core
                 if (current is FlowSequenceStart flowSequenceStart)
                 {
                     state = ParserState.FlowSequenceFirstEntry;
-                    return new Events.SequenceStart(anchorName, tagName, isImplicit, SequenceStyle.Flow, start, flowSequenceStart.End);
+                    return new Events.SequenceStart(anchorName, tagName, SequenceStyle.Flow, start, flowSequenceStart.End);
                 }
 
                 if (current is FlowMappingStart flowMappingStart)
                 {
                     state = ParserState.FlowMappingFirstKey;
-                    return new Events.MappingStart(anchorName, tagName, isImplicit, MappingStyle.Flow, start, flowMappingStart.End);
+                    return new Events.MappingStart(anchorName, tagName, MappingStyle.Flow, start, flowMappingStart.End);
                 }
 
                 if (isBlock)
@@ -606,20 +592,20 @@ namespace YamlDotNet.Core
                     if (current is BlockSequenceStart blockSequenceStart)
                     {
                         state = ParserState.BlockSequenceFirstEntry;
-                        return new Events.SequenceStart(anchorName, tagName, isImplicit, SequenceStyle.Block, start, blockSequenceStart.End);
+                        return new Events.SequenceStart(anchorName, tagName, SequenceStyle.Block, start, blockSequenceStart.End);
                     }
 
                     if (current is BlockMappingStart blockMappingStart)
                     {
                         state = ParserState.BlockMappingFirstKey;
-                        return new Events.MappingStart(anchorName, tagName, isImplicit, MappingStyle.Block, start, blockMappingStart.End);
+                        return new Events.MappingStart(anchorName, tagName, MappingStyle.Block, start, blockMappingStart.End);
                     }
                 }
 
                 if (!anchorName.IsEmpty || !tagName.IsEmpty)
                 {
                     state = states.Pop();
-                    return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, isImplicit, false, start, current.End);
+                    return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, start, current.End);
                 }
 
                 throw new SemanticErrorException(current.Start, current.End, "While parsing a node, did not find expected node content.");
@@ -892,7 +878,7 @@ namespace YamlDotNet.Core
                 if (current is Key)
                 {
                     state = ParserState.FlowSequenceEntryMappingKey;
-                    evt = new Events.MappingStart(AnchorName.Empty, TagName.Empty, true, MappingStyle.Flow);
+                    evt = new Events.MappingStart(AnchorName.Empty, TagName.Empty, MappingStyle.Flow);
                     Skip();
                     return evt;
                 }

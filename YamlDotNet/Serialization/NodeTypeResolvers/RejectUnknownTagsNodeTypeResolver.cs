@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
     {
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
-            if (nodeEvent != null && !nodeEvent.Tag.IsEmpty)
+            if (nodeEvent != null && !nodeEvent.Tag.IsNonSpecific)
             {
                 throw new YamlException(nodeEvent.Start, nodeEvent.End, $"Encountered an unresolved tag '{nodeEvent.Tag}'");
             }

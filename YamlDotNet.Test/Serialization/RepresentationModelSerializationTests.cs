@@ -70,7 +70,8 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(expectedKeysAndValues.Length / 2, node.Children.Count);
             for (int i = 0; i < expectedKeysAndValues.Length; i += 2)
             {
-                Assert.Equal(expectedKeysAndValues[i + 1], ((YamlScalarNode)node.Children[expectedKeysAndValues[i]]).Value);
+                YamlNode key = expectedKeysAndValues[i];
+                Assert.Equal(expectedKeysAndValues[i + 1], ((YamlScalarNode)node.Children[key]).Value);
             }
 
             var serializer = new SerializerBuilder()
@@ -103,10 +104,7 @@ namespace YamlDotNet.Test.Serialization
                 AnchorName.Empty,
                 "tag:yaml.org,2002:binary",
                 Convert.ToBase64String(bytes),
-                ScalarStyle.Plain,
-                false,
-                false
-            ));
+                ScalarStyle.Plain));
         }
     }
 }

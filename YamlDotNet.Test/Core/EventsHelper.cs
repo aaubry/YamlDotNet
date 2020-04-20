@@ -205,24 +205,18 @@ namespace YamlDotNet.Test.Core
                 return new Scalar(AnchorName.Empty,
                     builder.tag,
                     builder.text,
-                    builder.style,
-                    builder.plainImplicit,
-                    builder.quotedImplicit);
+                    builder.style);
             }
         }
 
         protected class SequenceStartBuilder
         {
-            private const bool DefaultImplicit = true;
-
             private readonly SequenceStyle style;
             private AnchorName anchor;
-            private bool @implicit;
 
             public SequenceStartBuilder(SequenceStyle style)
             {
                 this.style = style;
-                @implicit = DefaultImplicit;
             }
 
             public SequenceStartBuilder A(string anchor)
@@ -231,33 +225,20 @@ namespace YamlDotNet.Test.Core
                 return this;
             }
 
-            public SequenceStartBuilder Explicit
-            {
-                get
-                {
-                    @implicit = false;
-                    return this;
-                }
-            }
-
             public static implicit operator SequenceStart(SequenceStartBuilder builder)
             {
-                return new SequenceStart(builder.anchor, null, builder.@implicit, builder.style);
+                return new SequenceStart(builder.anchor, null, builder.style);
             }
         }
 
         protected class MappingStartBuilder
         {
-            private const bool DefaultImplicit = true;
-
             private readonly MappingStyle style;
             private string tag;
-            private bool @implicit;
 
             public MappingStartBuilder(MappingStyle style)
             {
                 this.style = style;
-                @implicit = DefaultImplicit;
             }
 
             public MappingStartBuilder T(string tag)
@@ -266,18 +247,9 @@ namespace YamlDotNet.Test.Core
                 return this;
             }
 
-            public MappingStartBuilder Explicit
-            {
-                get
-                {
-                    @implicit = false;
-                    return this;
-                }
-            }
-
             public static implicit operator MappingStart(MappingStartBuilder builder)
             {
-                return new MappingStart(AnchorName.Empty, builder.tag, builder.@implicit, builder.style);
+                return new MappingStart(AnchorName.Empty, builder.tag, builder.style);
             }
         }
 
@@ -328,7 +300,7 @@ namespace YamlDotNet.Test.Core
                 }
                 else
                 {
-                    value.Should().Be(expectedValue, "Compared property {0} in parse event {1}", property.Name, eventNumber);
+                    value.Should().Be(expectedValue, "Compared property {0}.{1} in parse event {2}", property.DeclaringType.Name, property.Name, eventNumber);
                 }
             }
         }

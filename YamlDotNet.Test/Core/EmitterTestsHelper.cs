@@ -95,7 +95,7 @@ namespace YamlDotNet.Test.Core
 
         protected IEnumerable<ParsingEvent> SequenceWith(params ParsingEvent[] events)
         {
-            return Wrap(events, BlockSequenceStart.Explicit, SequenceEnd);
+            return Wrap(events, BlockSequenceStart, SequenceEnd);
         }
 
         protected IEnumerable<ParsingEvent> MappingWith(params ParsingEvent[] events)

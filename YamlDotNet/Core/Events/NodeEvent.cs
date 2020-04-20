@@ -44,10 +44,7 @@ namespace YamlDotNet.Core.Events
         /// Gets a value indicating whether this instance is canonical.
         /// </summary>
         /// <value></value>
-        public abstract bool IsCanonical
-        {
-            get;
-        }
+        public abstract bool IsCanonical { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeEvent"/> class.

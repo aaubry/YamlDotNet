@@ -41,18 +41,10 @@ namespace YamlDotNet.Core.Events
         internal override EventType Type => EventType.SequenceStart;
 
         /// <summary>
-        /// Gets a value indicating whether this instance is implicit.
-        /// </summary>
-        /// <value>
-        ///     <c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsImplicit { get; }
-
-        /// <summary>
         /// Gets a value indicating whether this instance is canonical.
         /// </summary>
         /// <value></value>
-        public override bool IsCanonical => !IsImplicit;
+        public override bool IsCanonical => !Tag.IsImplicit;
 
         /// <summary>
         /// Gets the style.
@@ -65,22 +57,21 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="anchor">The anchor.</param>
         /// <param name="tag">The tag.</param>
-        /// <param name="isImplicit">if set to <c>true</c> [is implicit].</param>
         /// <param name="style">The style.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public SequenceStart(AnchorName anchor, TagName tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
+        /// 
+        public SequenceStart(AnchorName anchor, TagName tag, SequenceStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
-            this.IsImplicit = isImplicit;
             this.Style = style;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SequenceStart"/> class.
         /// </summary>
-        public SequenceStart(AnchorName anchor, TagName tag, bool isImplicit, SequenceStyle style)
-            : this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
+        public SequenceStart(AnchorName anchor, TagName tag, SequenceStyle style)
+            : this(anchor, tag, style, Mark.Empty, Mark.Empty)
         {
         }
 
@@ -92,7 +83,7 @@ namespace YamlDotNet.Core.Events
         /// </returns>
         public override string ToString()
         {
-            return $"Sequence start [anchor = {Anchor}, tag = {Tag}, isImplicit = {IsImplicit}, style = {Style}]";
+            return $"Sequence start [anchor = {Anchor}, tag = {Tag}, style = {Style}]";
         }
 
         /// <summary>

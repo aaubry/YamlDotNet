@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             var value = eventInfo.Source.Value;
             if (value == null)
             {
-                eventInfo.Tag = JsonSchema.Tags.Null;
+                eventInfo.Tag = JsonSchema.Tags.Null.Implicit();
                 eventInfo.RenderedValue = "";
             }
             else
@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        eventInfo.Tag = JsonSchema.Tags.Bool;
+                        eventInfo.Tag = JsonSchema.Tags.Bool.Implicit();
                         eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
                         break;
 
@@ -66,39 +66,39 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        eventInfo.Tag = JsonSchema.Tags.Int;
+                        eventInfo.Tag = JsonSchema.Tags.Int.Implicit();
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Single:
-                        eventInfo.Tag = JsonSchema.Tags.Float;
+                        eventInfo.Tag = JsonSchema.Tags.Float.Implicit();
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
                         break;
 
                     case TypeCode.Double:
-                        eventInfo.Tag = JsonSchema.Tags.Float;
+                        eventInfo.Tag = JsonSchema.Tags.Float.Implicit();
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
                         break;
 
                     case TypeCode.Decimal:
-                        eventInfo.Tag = JsonSchema.Tags.Float;
+                        eventInfo.Tag = JsonSchema.Tags.Float.Implicit();
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
                     case TypeCode.Char:
-                        eventInfo.Tag = FailsafeSchema.Tags.Str;
+                        eventInfo.Tag = FailsafeSchema.Tags.Str.Implicit();
                         eventInfo.RenderedValue = value.ToString()!;
                         suggestedStyle = ScalarStyle.Any;
                         break;
 
                     case TypeCode.DateTime:
-                        eventInfo.Tag = DefaultSchema.Tags.Timestamp;
+                        eventInfo.Tag = DefaultSchema.Tags.Timestamp.Implicit();
                         eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
-                        eventInfo.Tag = JsonSchema.Tags.Null;
+                        eventInfo.Tag = JsonSchema.Tags.Null.Implicit();
                         eventInfo.RenderedValue = "";
                         break;
 
@@ -113,7 +113,6 @@ namespace YamlDotNet.Serialization.EventEmitters
                 }
             }
 
-            eventInfo.IsPlainImplicit = true;
             if (eventInfo.Style == ScalarStyle.Any)
             {
                 eventInfo.Style = suggestedStyle;

@@ -260,7 +260,7 @@ namespace YamlDotNet.Core
 
                 AnalyzeAnchor(nodeEvent.Anchor, false);
 
-                if (!nodeEvent.Tag.IsEmpty && (isCanonical || nodeEvent.IsCanonical))
+                if (!nodeEvent.Tag.IsImplicit && (isCanonical || nodeEvent.IsCanonical))
                 {
                     AnalyzeTag(nodeEvent.Tag);
                 }
@@ -876,7 +876,7 @@ namespace YamlDotNet.Core
             var style = scalar.Style;
             var noTag = tagData.handle == null && tagData.suffix == null;
 
-            if (noTag && !scalar.IsPlainImplicit && !scalar.IsQuotedImplicit)
+            if (noTag && !scalar.Tag.IsImplicit)
             {
                 throw new YamlException("Neither tag nor isImplicit flags are specified.");
             }
@@ -906,7 +906,7 @@ namespace YamlDotNet.Core
                 {
                     style = ScalarStyle.SingleQuoted;
                 }
-                if (noTag && !scalar.IsPlainImplicit)
+                if (noTag && !scalar.Tag.IsImplicit)
                 {
                     style = ScalarStyle.SingleQuoted;
                 }

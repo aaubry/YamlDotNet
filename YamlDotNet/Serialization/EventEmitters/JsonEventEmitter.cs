@@ -39,7 +39,6 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
         {
-            eventInfo.IsPlainImplicit = true;
             eventInfo.Style = ScalarStyle.Plain;
 
             var value = eventInfo.Source.Value;

@@ -19,8 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.Globalization;
-
 namespace YamlDotNet.Core.Events
 {
     /// <summary>
@@ -41,18 +39,10 @@ namespace YamlDotNet.Core.Events
         internal override EventType Type => EventType.MappingStart;
 
         /// <summary>
-        /// Gets a value indicating whether this instance is implicit.
-        /// </summary>
-        /// <value>
-        ///     <c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsImplicit { get; }
-
-        /// <summary>
         /// Gets a value indicating whether this instance is canonical.
         /// </summary>
         /// <value></value>
-        public override bool IsCanonical => !IsImplicit;
+        public override bool IsCanonical => !Tag.IsImplicit;
 
         /// <summary>
         /// Gets the style of the mapping.
@@ -64,14 +54,13 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="anchor">The anchor.</param>
         /// <param name="tag">The tag.</param>
-        /// <param name="isImplicit">Indicates whether the event is implicit.</param>
         /// <param name="style">The style of the mapping.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public MappingStart(AnchorName anchor, TagName tag, bool isImplicit, MappingStyle style, Mark start, Mark end)
+        /// 
+        public MappingStart(AnchorName anchor, TagName tag, MappingStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
-            this.IsImplicit = isImplicit;
             this.Style = style;
         }
 
@@ -80,10 +69,10 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="anchor">The anchor.</param>
         /// <param name="tag">The tag.</param>
-        /// <param name="isImplicit">Indicates whether the event is implicit.</param>
         /// <param name="style">The style of the mapping.</param>
-        public MappingStart(AnchorName anchor, TagName tag, bool isImplicit, MappingStyle style)
-            : this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
+        /// 
+        public MappingStart(AnchorName anchor, TagName tag, MappingStyle style)
+            : this(anchor, tag, style, Mark.Empty, Mark.Empty)
         {
         }
 
@@ -91,7 +80,7 @@ namespace YamlDotNet.Core.Events
         /// Initializes a new instance of the <see cref="MappingStart"/> class.
         /// </summary>
         public MappingStart()
-            : this(AnchorName.Empty, TagName.Empty, true, MappingStyle.Any, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, TagName.Empty, MappingStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
 
@@ -103,7 +92,7 @@ namespace YamlDotNet.Core.Events
         /// </returns>
         public override string ToString()
         {
-            return $"Mapping start [anchor = {Anchor}, tag = {Tag}, isImplicit = {IsImplicit}, style = {Style}]";
+            return $"Mapping start [anchor = {Anchor}, tag = {Tag}, style = {Style}]";
         }
 
         /// <summary>

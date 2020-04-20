@@ -26,35 +26,71 @@ namespace YamlDotNet.Core
     public struct TagName : IEquatable<TagName>
     {
         public static readonly TagName Empty = default;
+        public static readonly TagName NonSpecific = new TagName("!");
+
+        private const string emptyTag = "?";
 
         private readonly string? value;
 
-        public string Value => value ?? throw new InvalidOperationException("Cannot read the Value of a non-specific tag");
+        public string Value => value ?? emptyTag;
 
+        /// <summary>
+        /// Indicates whether this tag was explicitly specified, or if it was assigned automatically
+        /// </summary>
+        public bool IsExplicit { get; }
+
+        public bool IsImplicit => !IsExplicit;
         public bool IsEmpty => value is null;
-        public bool IsNonSpecific => !IsEmpty && (value == "!" || value == "?");
+        public bool IsNonSpecific => IsEmpty || Equals(NonSpecific);
 
-        public bool IsLocal => !IsEmpty && Value[0] == '!';
+        public bool IsLocal => !(value is null) && value.Length > 1 && value[0] == '!';
         public bool IsGlobal => !IsEmpty && !IsLocal;
 
-        public TagName(string value)
+        private TagName(string value, bool isExplicit)
         {
             this.value = value ?? throw new ArgumentNullException(nameof(value));
 
             if (value.Length == 0)
             {
-                throw new ArgumentException("Tag value must not be empty.", nameof(value));
+                throw new ArgumentException("Tag value must not be empty", nameof(value));
             }
 
+            if (isExplicit && value.Equals(emptyTag))
+            {
+                throw new ArgumentException($"Invalid explicit tag '{emptyTag}'", nameof(value));
+            }
+
+            this.IsExplicit = isExplicit;
+        }
+
+        public TagName(string value)
+            : this(value, isExplicit: true)
+        {
             if (IsGlobal && !Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute))
             {
-                throw new ArgumentException("Global tags must be valid URIs.", nameof(value));
+                throw new ArgumentException("Global tags must be valid URIs", nameof(value));
             }
         }
 
-        public override string ToString() => value ?? "?";
+        // TODO: Evaluate if this makes any sense.
+        // We need this to keep changing the code, but we'll see is it necessary.
+        public TagName Implicit()
+        {
+            if (IsImplicit)
+            {
+                throw new InvalidOperationException("This tag is already implicit");
+            }
+            return new TagName(value!, isExplicit: false);
+        }
 
-        public bool Equals(TagName other) => Equals(value, other.value);
+        public override string ToString() => $"{Value}{(IsImplicit ? " (implicit)" : "")}";
+
+        public bool Equals(TagName other)
+        {
+            // The 'IsImplicit' property is not compared because that's not relevant
+            // for tag equivalence.
+            return Equals(value, other.value);
+        }
 
         public override bool Equals(object? obj)
         {
