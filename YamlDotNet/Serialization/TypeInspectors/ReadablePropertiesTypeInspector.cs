@@ -79,7 +79,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public T GetCustomAttribute<T>() where T : Attribute
             {
-                var attributes = propertyInfo.GetCustomAttributes(typeof(T), true);
+                var attributes = propertyInfo.GetAllCustomAttributes<T>();
                 return (T)attributes.FirstOrDefault();
             }
 

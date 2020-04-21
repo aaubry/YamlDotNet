@@ -871,6 +871,19 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializationRespectsYamlIgnoreAttributeOfDerivedClasses()
+        {
+
+            var writer = new StringWriter();
+            var obj = new IgnoreExampleDerived();
+
+            Serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+
+            serialized.Should().NotContain("IgnoreMe");
+        }
+
+        [Fact]
         public void SerializationRespectsYamlIgnoreOverride()
         {
 

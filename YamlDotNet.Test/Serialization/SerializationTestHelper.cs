@@ -413,6 +413,25 @@ namespace YamlDotNet.Test.Serialization
         }
     }
 
+    public class IgnoreExampleBase
+    {
+        [YamlIgnore]
+        public virtual String IgnoreMe
+        {
+            get { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
+            set { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
+        }
+    }
+
+    public class IgnoreExampleDerived : IgnoreExampleBase
+    {
+        public override String IgnoreMe
+        {
+            get { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
+            set { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
+        }
+    }
+
     public class ScalarStyleExample
     {
         public ScalarStyleExample()
