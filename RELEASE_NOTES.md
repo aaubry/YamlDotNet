@@ -1,19 +1,20 @@
 # Release notes
+## Release 8.1.1
 
-# Release 8.1.0
+## Bug fixes
 
-## New features and improvements
+- Improve compliance with the official YAML test suite: #467, #469 and #475.
 
-- Made CachedTypeInspector thread safe #386  
-  Previously, using an instance of `Serializer` or `Deserializer` was not thread-safe,
-  although the intention was for them to be thread safe. The only mutable state is
-  inside CachedTypeInspector and was not properly protected against concurrent mutation.
+- Make YamlMemberAttribute.DefaultValuesHandling actually usable. Fixes #466.
 
-## Other fixes
+- Actually inherit YamlIgnore attributes: #481.
 
-- Fix type conflicts when targeting frameworks without nullability attributes #460
+## New features
+
+- Add LowerCaseNamingConvention: #477.
 
 # Previous releases
+- [8.1.0](releases/8.1.0.md)
 - [8.0.0](releases/8.0.0.md)
 - [7.0.0](releases/7.0.0.md)
 - [6.1.2](releases/6.1.2.md)
