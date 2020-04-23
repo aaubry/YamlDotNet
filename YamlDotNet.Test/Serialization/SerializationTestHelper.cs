@@ -539,4 +539,32 @@ namespace YamlDotNet.Test.Serialization
         [YamlIgnore]
         public string fourthTest { get; set; }
     }
+
+    public class NonPublicPropertiesExample
+    {
+        public string Public { get; set; } = "public";
+
+        internal string Internal { get; set; } = "internal";
+
+        protected string Protected { get; set; } = "protected";
+
+        private string Private { get; set; } = "private";
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Public},{Internal},{Protected},{Private}";
+    }
+
+    public class NonPublicFieldsExample
+    {
+        public string Public = "public";
+
+        internal string Internal = "internal";
+
+        protected string Protected = "protected";
+
+        private string Private = "private";
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Public},{Internal},{Protected},{Private}";
+    }
 }

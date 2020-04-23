@@ -40,6 +40,7 @@ namespace YamlDotNet.Serialization
         internal readonly LazyComponentRegistrationList<Nothing, IYamlTypeConverter> typeConverterFactories;
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
         private bool ignoreFields;
+        private bool includeNonPublicProperties = false;
 
         internal BuilderSkeleton(ITypeResolver typeResolver)
         {
@@ -59,7 +60,7 @@ namespace YamlDotNet.Serialization
 
         internal ITypeInspector BuildTypeInspector()
         {
-            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver);
+            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
             if (!ignoreFields)
             {
                 innerInspector = new CompositeTypeInspector(
@@ -78,6 +79,15 @@ namespace YamlDotNet.Serialization
         public TBuilder IgnoreFields()
         {
             ignoreFields = true;
+            return Self;
+        }
+
+        /// <summary>
+        /// Allows serialization and deserialization of non-public properties.
+        /// </summary>
+        public TBuilder IncludeNonPublicProperties()
+        {
+            includeNonPublicProperties = true;
             return Self;
         }
 

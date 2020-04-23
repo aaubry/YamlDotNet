@@ -412,7 +412,7 @@ namespace YamlDotNet.RepresentationModel
             foreach (var property in mapping.GetType().GetPublicProperties())
             {
                 // CanRead == true => GetGetMethod() != null
-                if (property.CanRead && property.GetGetMethod()!.GetParameters().Length == 0)
+                if (property.CanRead && property.GetGetMethod(false)!.GetParameters().Length == 0)
                 {
                     var value = property.GetValue(mapping, null);
                     if (!(value is YamlNode valueNode))
