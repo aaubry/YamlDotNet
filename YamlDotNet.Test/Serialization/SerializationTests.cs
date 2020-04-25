@@ -40,6 +40,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
 using YamlDotNet.Serialization.TypeInspectors;
+using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -414,6 +415,7 @@ namespace YamlDotNet.Test.Serialization
                 obj,
                 new SerializerBuilder()
                     .WithTagMapping("!InheritanceExample", typeof(InheritanceExample))
+                    .WithTypeResolver(new StaticTypeResolver())
                     .EnsureRoundtrip()
                     .Build(),
                 new DeserializerBuilder()
@@ -1762,6 +1764,44 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal("some value", deserialized["a"]);
             Assert.Equal(@"my *@nchor<>""@-_123$>>>😁🎉🐻🍔end test", deserialized["myvalue"]);
             Assert.Equal("some value", deserialized["interpolated value"]);
+        }
+
+        [Fact]
+        public void DeserializeMutableTypeWithImmutableInterface()
+        {
+            var sut = new DeserializerBuilder()
+                      .WithObjectFactory(
+                                         t => t == typeof(IImmutableExample)
+                                                  ? new ImmutableInterfaceExample()
+                                                  : new DefaultObjectFactory().Create(t))
+                      .WithTypeResolver(new DynamicTypeResolver())
+                      .Build();
+            var deserialized = sut.Deserialize<IImmutableExample>(Yaml.Text(@"
+                FirstTest: first
+                SecondTest: second
+            "));
+
+            Assert.IsType<ImmutableInterfaceExample>(deserialized);
+            Assert.Equal("first", deserialized.FirstTest);
+            Assert.Equal("second", deserialized.SecondTest);
+        }
+
+        [Fact]
+        public void DeserializeDerivedTypeWithObjectFactory()
+        {
+            var sut = new DeserializerBuilder()
+                      .WithObjectFactory(t => t == typeof(Base) ? new Derived() : new DefaultObjectFactory().Create(t))
+                      .WithTypeResolver(new DynamicTypeResolver())
+                      .Build();
+
+            var deserialized = sut.Deserialize<Base>(Yaml.Text(@"
+                BaseProperty: base
+                DerivedProperty: derived
+            "));
+
+            Assert.IsType<Derived>(deserialized);
+            Assert.Equal("base", deserialized.BaseProperty);
+            Assert.Equal("derived", ((Derived)deserialized).DerivedProperty);
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]

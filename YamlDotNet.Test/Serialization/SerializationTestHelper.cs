@@ -539,4 +539,16 @@ namespace YamlDotNet.Test.Serialization
         [YamlIgnore]
         public string fourthTest { get; set; }
     }
+
+    public interface IImmutableExample
+    {
+        string FirstTest { get; }
+        string SecondTest { get; }
+    }
+
+    public class ImmutableInterfaceExample : IImmutableExample
+    {
+        public string FirstTest { get; set; }
+        public string SecondTest { get; set; }
+    }
 }

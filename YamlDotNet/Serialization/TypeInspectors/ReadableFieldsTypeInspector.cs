@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            return type
+            return typeResolver.Resolve(type, container)
                 .GetPublicFields()
                 .Select(p => (IPropertyDescriptor)new ReflectionFieldDescriptor(p, typeResolver));
         }
