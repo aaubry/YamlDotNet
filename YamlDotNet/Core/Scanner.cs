@@ -483,11 +483,6 @@ namespace YamlDotNet.Core
 
             if (isPlainScalar)
             {
-                if (simpleKeyAllowed && previous is DocumentStart documentStart && documentStart.Start.Line == cursor.Line)
-                {
-                    throw new SyntaxErrorException("While scanning a document start, found mapping key starting after '---' indicator.");
-                }
-
                 if (plainScalarFollowedByComment)
                 {
                     var startMark = cursor.Mark();
@@ -2048,11 +2043,6 @@ namespace YamlDotNet.Core
                 // Consume non-blank characters.
                 while (!analyzer.IsWhiteBreakOrZero())
                 {
-                    if (onDocumentStartLine && analyzer.Check(':'))
-                    {
-                        throw new SyntaxErrorException(start, start, "While scanning a document start, found mapping key starting after '---' indicator.");
-                    }
-
                     // Check for indicators that may end a plain scalar.
 
                     if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || (flowLevel > 0 && analyzer.Check(',', 1))) || (flowLevel > 0 && analyzer.Check(",?[]{}")))

@@ -13,8 +13,8 @@ YamlDotNet's conformance with YAML specifications:
 
 |            YAML Spec                | YDN Parser | YDN Emitter |
 |:-----------------------------------:|:----------:|:-----------:|
-|  [v1.1](http://yaml.org/spec/1.1/)  |     ✓      |      ✓      |
-|  [v1.2](http://yaml.org/spec/1.2/)  |     ✓      |             |
+|  [v1.1](https://yaml.org/spec/1.1/)  |     ✓      |      ✓      |
+|  [v1.2](https://yaml.org/spec/1.2/spec.html)  |     ✓      |             |
 
 
 ## What is YAML?

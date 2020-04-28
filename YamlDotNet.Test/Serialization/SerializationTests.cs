@@ -1266,6 +1266,33 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(3, exception.Start.Column);
         }
 
+        [Theory]
+        [InlineData("blah")]
+        [InlineData("hello=world")]
+        [InlineData("+190:20:30")]
+        [InlineData("x:y")]
+        public void ValueAllowedAfterDocumentStartToken(string text)
+        {
+            var value = Lines("--- " + text);
+
+            var sut = new Deserializer();
+            var actual = sut.Deserialize<string>(UsingReaderFor(value));
+
+            Assert.Equal(text, actual);
+        }
+
+        [Fact]
+        public void MappingDisallowedAfterDocumentStartToken()
+        {
+            var value = Lines("--- x: y");
+
+            var sut = new Deserializer();
+            var exception = Assert.Throws<SemanticErrorException>(() => sut.Deserialize<string>(UsingReaderFor(value)));
+
+            Assert.Equal(1, exception.Start.Line);
+            Assert.Equal(6, exception.Start.Column);
+        }
+
         [Fact]
         public void SerializeDynamicPropertyAndApplyNamingConvention()
         {
