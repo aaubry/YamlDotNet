@@ -25,10 +25,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// An empty type for cases where a type needs to be provided but won't be used.
     /// </summary>
-    public sealed class Nothing
+    public struct Nothing
     {
-        private Nothing() { }
-
-        public static readonly Nothing Instance = new Nothing();
     }
 }

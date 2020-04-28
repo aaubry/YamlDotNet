@@ -572,7 +572,7 @@ namespace YamlDotNet.Serialization
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
                 {
-                    traversalStrategy.Traverse(graph, visitor, null!);
+                    traversalStrategy.Traverse(graph, visitor, default);
                 }
 
                 void nestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
