@@ -5,3 +5,7 @@
 	path = YamlDotNet.Test/yaml-test-suite
 	url = https://github.com/yaml/yaml-test-suite
 	branch = data-2020-02-11
+[submodule "yaml-test-schema"]
+	path = YamlDotNet.Test/yaml-test-schema
+	url = https://github.com/perlpunk/yaml-test-schema.git
+	branch = master

@@ -43,9 +43,9 @@ namespace YamlDotNet.Core.Events
 
         internal override EventType Type => EventType.Comment;
 
-        public override void Accept(IParsingEventVisitor visitor)
+        public override T Accept<T>(IParsingEventVisitor<T> visitor)
         {
-            visitor.Visit(this);
+            return visitor.Visit(this);
         }
 
         /// <summary>

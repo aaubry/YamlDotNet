@@ -22,11 +22,11 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Schemas;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
 using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.Schemas;
 using YamlDotNet.Serialization.TypeInspectors;
 using YamlDotNet.Serialization.TypeResolvers;
 using YamlDotNet.Serialization.ValueDeserializers;
@@ -55,12 +55,12 @@ namespace YamlDotNet.Serialization
         {
             tagMappings = new Dictionary<TagName, Type>
             {
-                { FailsafeSchema.Tags.Map, typeof(Dictionary<object, object>) },
-                { FailsafeSchema.Tags.Str, typeof(string) },
-                { JsonSchema.Tags.Bool, typeof(bool) },
-                { JsonSchema.Tags.Float, typeof(double) },
-                { JsonSchema.Tags.Int, typeof(int) },
-                { DefaultSchema.Tags.Timestamp, typeof(DateTime) }
+                { YamlTagRepository.Mapping, typeof(Dictionary<object, object>) },
+                { YamlTagRepository.String, typeof(string) },
+                { YamlTagRepository.Boolean, typeof(bool) },
+                { YamlTagRepository.FloatingPoint, typeof(double) },
+                { YamlTagRepository.Integer, typeof(int) },
+                { YamlTagRepository.Timestamp, typeof(DateTime) }
             };
 
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));

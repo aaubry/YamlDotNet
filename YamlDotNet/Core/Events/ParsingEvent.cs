@@ -19,6 +19,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
+
 namespace YamlDotNet.Core.Events
 {
     /// <summary>
@@ -49,20 +51,106 @@ namespace YamlDotNet.Core.Events
         public Mark End { get; }
 
         /// <summary>
-        /// Accepts the specified visitor.
-        /// </summary>
-        /// <param name="visitor">Visitor to accept, may not be null</param>
-        public abstract void Accept(IParsingEventVisitor visitor);
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ParsingEvent"/> class.
         /// </summary>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
         internal ParsingEvent(Mark start, Mark end)
         {
-            this.Start = start ?? throw new System.ArgumentNullException(nameof(start));
-            this.End = end ?? throw new System.ArgumentNullException(nameof(end));
+            this.Start = start ?? throw new ArgumentNullException(nameof(start));
+            this.End = end ?? throw new ArgumentNullException(nameof(end));
+        }
+
+        /// <summary>
+        /// Accepts the specified visitor.
+        /// </summary>
+        /// <param name="visitor">Visitor to accept, may not be null</param>
+        /// <returns>Returns the value produced by the <paramref name="visitor"/>.</returns>
+        public abstract T Accept<T>(IParsingEventVisitor<T> visitor);
+
+        /// <summary>
+        /// Accepts the specified visitor.
+        /// </summary>
+        /// <param name="visitor">Visitor to accept, may not be null</param>
+        public void Accept(IParsingEventVisitor visitor)
+        {
+            Accept(new VoidVisitorAdapter(visitor));
+        }
+
+        private sealed class VoidVisitorAdapter : IParsingEventVisitor<object?>
+        {
+            private readonly IParsingEventVisitor visitor;
+
+            public VoidVisitorAdapter(IParsingEventVisitor visitor)
+            {
+                this.visitor = visitor ?? throw new ArgumentNullException(nameof(visitor));
+            }
+
+            public object? Visit(AnchorAlias e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(StreamStart e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(StreamEnd e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(DocumentStart e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(DocumentEnd e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(Scalar e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(SequenceStart e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(SequenceEnd e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(MappingStart e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(MappingEnd e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
+
+            public object? Visit(Comment e)
+            {
+                this.visitor.Visit(e);
+                return null;
+            }
         }
     }
 }

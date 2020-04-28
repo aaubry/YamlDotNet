@@ -71,9 +71,9 @@ namespace YamlDotNet.Core.Events
         /// Invokes run-time type specific Visit() method of the specified visitor.
         /// </summary>
         /// <param name="visitor">visitor, may not be null.</param>
-        public override void Accept(IParsingEventVisitor visitor)
+        public override T Accept<T>(IParsingEventVisitor<T> visitor)
         {
-            visitor.Visit(this);
+            return visitor.Visit(this);
         }
     }
 }
