@@ -51,7 +51,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
-                var property = typeDescriptor.GetProperty(expectedType, null, propertyName.Value, ignoreUnmatched);
+                var property = typeDescriptor.GetProperty(expectedType, value, propertyName.Value, ignoreUnmatched);
                 if (property == null)
                 {
                     parser.SkipThisAndNestedEvents();
