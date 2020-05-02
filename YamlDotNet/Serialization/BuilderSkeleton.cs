@@ -120,7 +120,7 @@ namespace YamlDotNet.Serialization
         /// <param name="propertyAccessor">An expression in the form: x => x.SomeProperty</param>
         /// <param name="attribute">The attribute to register.</param>
         /// <returns></returns>
-        public TBuilder WithAttributeOverride<TClass>(Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
+        public TBuilder WithAttributeOverride<TClass>(Expression<Func<TClass, object?>> propertyAccessor, Attribute attribute)
         {
             overrides.Add(propertyAccessor, attribute);
             return Self;

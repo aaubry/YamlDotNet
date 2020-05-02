@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -215,8 +216,8 @@ namespace YamlDotNet.Test.Core
             {
                 parser.Consume<MappingStart>();
 
-                NodeEvent expected = null;
-                NodeEvent actual = null;
+                NodeEvent? expected = null;
+                NodeEvent? actual = null;
                 for (int i = 0; i < 2; i++)
                 {
                     var key = parser.Consume<Scalar>();
@@ -243,13 +244,13 @@ namespace YamlDotNet.Test.Core
                 output.WriteLine("actual: {0}\nexpected: {1}\n\n", actual, expected);
 
                 // Since we can't specify the '?' tag, we'll use '!?' and translate here
-                var expectedTag = expected.Tag;
+                var expectedTag = expected.Tag.Name;
                 if (expectedTag.Value == "!?")
                 {
                     expectedTag = TagName.Empty;
                 }
 
-                Assert.Equal(expectedTag, actual.Tag);
+                Assert.Equal(expectedTag, actual.Tag.Name);
 
                 parser.Consume<MappingEnd>();
             }
@@ -278,27 +279,36 @@ namespace YamlDotNet.Test.Core
             throw new InvalidOperationException(
                 string.Format(
                     "Invalid node type {0} at {1}",
-                    parsingEvent.GetType().Name,
-                    parsingEvent.Start
+                    parsingEvent!.GetType().Name,
+                    parsingEvent!.Start
                 )
             );
         }
 
         private sealed class NullSchema : ISchema
         {
-            public TagName ResolveNonSpecificTag(Scalar node, IEnumerable<NodeEvent> path)
+            public bool ResolveNonSpecificTag(Scalar node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
             {
-                return node.Tag;
+                resolvedTag = null;
+                return false;
             }
 
-            public TagName ResolveNonSpecificTag(MappingStart node, IEnumerable<NodeEvent> path)
+            public bool ResolveNonSpecificTag(MappingStart node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
             {
-                return node.Tag;
+                resolvedTag = null;
+                return false;
             }
 
-            public TagName ResolveNonSpecificTag(SequenceStart node, IEnumerable<NodeEvent> path)
+            public bool ResolveNonSpecificTag(SequenceStart node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
             {
-                return node.Tag;
+                resolvedTag = null;
+                return false;
+            }
+
+            public bool ResolveSpecificTag(TagName tag, [NotNullWhen(true)] out ITag? resolvedTag)
+            {
+                resolvedTag = null;
+                return false;
             }
         }
     }

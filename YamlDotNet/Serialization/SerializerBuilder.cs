@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
-        private readonly IDictionary<Type, TagName> tagMappings = new Dictionary<Type, TagName>();
+        private readonly IDictionary<Type, ITag> tagMappings = new Dictionary<Type, ITag>();
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
@@ -206,7 +206,7 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentException($"Type already has a registered tag '{alreadyRegisteredTag}' for type '{type.FullName}'", nameof(type));
             }
 
-            tagMappings.Add(type, tag);
+            tagMappings.Add(type, new SimpleTag(tag));
             return this;
         }
 

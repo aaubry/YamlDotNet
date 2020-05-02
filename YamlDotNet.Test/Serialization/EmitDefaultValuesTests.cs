@@ -8,10 +8,10 @@ namespace YamlDotNet.Test.Serialization
     {
         private class Model
         {
-            public string ANullString => null;
+            public string? ANullString => null;
             [DefaultValue("hello")] public string ADefaultString => "hello";
             [DefaultValue("hello")] public string ANonDefaultString => "world";
-            [DefaultValue("hello")] public string ANonDefaultNullString => null;
+            [DefaultValue("hello")] public string? ANonDefaultNullString => null;
 
             public int AZeroInteger => 0;
             public int ANonZeroInteger => 1;

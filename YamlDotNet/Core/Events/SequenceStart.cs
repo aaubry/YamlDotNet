@@ -39,12 +39,6 @@ namespace YamlDotNet.Core.Events
         internal override EventType Type => EventType.SequenceStart;
 
         /// <summary>
-        /// Gets a value indicating whether this instance is canonical.
-        /// </summary>
-        /// <value></value>
-        public override bool IsCanonical => !Tag.IsImplicit;
-
-        /// <summary>
         /// Gets the style.
         /// </summary>
         /// <value>The style.</value>
@@ -59,7 +53,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
         /// 
-        public SequenceStart(AnchorName anchor, TagName tag, SequenceStyle style, Mark start, Mark end)
+        public SequenceStart(AnchorName anchor, ITag tag, SequenceStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
             this.Style = style;
@@ -68,8 +62,16 @@ namespace YamlDotNet.Core.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="SequenceStart"/> class.
         /// </summary>
-        public SequenceStart(AnchorName anchor, TagName tag, SequenceStyle style)
+        public SequenceStart(AnchorName anchor, ITag tag, SequenceStyle style)
             : this(anchor, tag, style, Mark.Empty, Mark.Empty)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SequenceStart"/> class.
+        /// </summary>
+        public SequenceStart()
+            : this(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, SequenceStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
 

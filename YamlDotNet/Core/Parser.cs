@@ -421,7 +421,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private static ParsingEvent ProcessEmptyScalar(Mark position)
         {
-            return new Events.Scalar(AnchorName.Empty, TagName.Empty, string.Empty, ScalarStyle.Plain, position, position);
+            return new Events.Scalar(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, string.Empty, ScalarStyle.Plain, position, position);
         }
 
         /// <summary>
@@ -471,7 +471,7 @@ namespace YamlDotNet.Core
             var start = current.Start;
 
             var anchorName = AnchorName.Empty;
-            var tagName = TagName.Empty;
+            ITag tag = SimpleTag.NonSpecificOtherNodes;
             Anchor? lastAnchor = null;
             Tag? lastTag = null;
 
@@ -484,20 +484,20 @@ namespace YamlDotNet.Core
                     anchorName = anchor.Value;
                     Skip();
                 }
-                else if (tagName.IsEmpty && current is Tag tag)
+                else if (tag.Name.IsEmpty && current is Tag tagToken)
                 {
-                    lastTag = tag;
-                    if (string.IsNullOrEmpty(tag.Handle))
+                    lastTag = tagToken;
+                    if (string.IsNullOrEmpty(tagToken.Handle))
                     {
-                        tagName = new TagName(tag.Suffix);
+                        tag = new SimpleTag(new TagName(tagToken.Suffix));
                     }
-                    else if (tagDirectives.Contains(tag.Handle))
+                    else if (tagDirectives.Contains(tagToken.Handle))
                     {
-                        tagName = new TagName(string.Concat(tagDirectives[tag.Handle].Prefix, tag.Suffix));
+                        tag = new SimpleTag(new TagName(string.Concat(tagDirectives[tagToken.Handle].Prefix, tagToken.Suffix)));
                     }
                     else
                     {
-                        throw new SemanticErrorException(tag.Start, tag.End, "While parsing a node, found undefined tag handle.");
+                        throw new SemanticErrorException(tagToken.Start, tagToken.End, "While parsing a node, found undefined tag handle.");
                     }
 
                     Skip();
@@ -514,7 +514,7 @@ namespace YamlDotNet.Core
                 {
                     if (lastTag != null && lastAnchor != null && !anchorName.IsEmpty)
                     {
-                        return new Events.Scalar(anchorName, TagName.Empty, string.Empty, default, lastAnchor.Start, lastAnchor.End);
+                        return new Events.Scalar(anchorName, SimpleTag.NonSpecificOtherNodes, string.Empty, ScalarStyle.Plain, lastAnchor.Start, lastAnchor.End);
                     }
                     throw new SemanticErrorException(error.Start, error.End, error.Value);
                 }
@@ -532,7 +532,7 @@ namespace YamlDotNet.Core
 
                 return new Events.SequenceStart(
                     anchorName,
-                    tagName,
+                    tag,
                     SequenceStyle.Block,
                     start,
                     current.End
@@ -545,7 +545,12 @@ namespace YamlDotNet.Core
                     state = states.Pop();
                     Skip();
 
-                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, start, scalar.End);
+                    if (tag.Name.IsEmpty && scalar.Style != ScalarStyle.Plain)
+                    {
+                        tag = SimpleTag.NonSpecificNonPlainScalar;
+                    }
+
+                    ParsingEvent evt = new Events.Scalar(anchorName, tag, scalar.Value, scalar.Style, start, scalar.End);
 
                     // Read next token to ensure the error case spec test 'CXX2':
                     // "Mapping with anchor on document start line".
@@ -578,13 +583,13 @@ namespace YamlDotNet.Core
                 if (current is FlowSequenceStart flowSequenceStart)
                 {
                     state = ParserState.FlowSequenceFirstEntry;
-                    return new Events.SequenceStart(anchorName, tagName, SequenceStyle.Flow, start, flowSequenceStart.End);
+                    return new Events.SequenceStart(anchorName, tag, SequenceStyle.Flow, start, flowSequenceStart.End);
                 }
 
                 if (current is FlowMappingStart flowMappingStart)
                 {
                     state = ParserState.FlowMappingFirstKey;
-                    return new Events.MappingStart(anchorName, tagName, MappingStyle.Flow, start, flowMappingStart.End);
+                    return new Events.MappingStart(anchorName, tag, MappingStyle.Flow, start, flowMappingStart.End);
                 }
 
                 if (isBlock)
@@ -592,20 +597,20 @@ namespace YamlDotNet.Core
                     if (current is BlockSequenceStart blockSequenceStart)
                     {
                         state = ParserState.BlockSequenceFirstEntry;
-                        return new Events.SequenceStart(anchorName, tagName, SequenceStyle.Block, start, blockSequenceStart.End);
+                        return new Events.SequenceStart(anchorName, tag, SequenceStyle.Block, start, blockSequenceStart.End);
                     }
 
                     if (current is BlockMappingStart blockMappingStart)
                     {
                         state = ParserState.BlockMappingFirstKey;
-                        return new Events.MappingStart(anchorName, tagName, MappingStyle.Block, start, blockMappingStart.End);
+                        return new Events.MappingStart(anchorName, tag, MappingStyle.Block, start, blockMappingStart.End);
                     }
                 }
 
-                if (!anchorName.IsEmpty || !tagName.IsEmpty)
+                if (!anchorName.IsEmpty || !tag.Name.IsEmpty)
                 {
                     state = states.Pop();
-                    return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, start, current.End);
+                    return new Events.Scalar(anchorName, tag, string.Empty, ScalarStyle.Plain, start, current.End);
                 }
 
                 throw new SemanticErrorException(current.Start, current.End, "While parsing a node, did not find expected node content.");
@@ -825,7 +830,7 @@ namespace YamlDotNet.Core
                 }
             }
 
-            else if(current is Error error)
+            else if (current is Error error)
             {
                 throw new SemanticErrorException(error.Start, error.End, error.Value);
             }
@@ -878,7 +883,7 @@ namespace YamlDotNet.Core
                 if (current is Key)
                 {
                     state = ParserState.FlowSequenceEntryMappingKey;
-                    evt = new Events.MappingStart(AnchorName.Empty, TagName.Empty, MappingStyle.Flow);
+                    evt = new Events.MappingStart(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, MappingStyle.Flow);
                     Skip();
                     return evt;
                 }

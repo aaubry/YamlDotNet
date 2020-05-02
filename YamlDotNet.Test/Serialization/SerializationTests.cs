@@ -437,7 +437,7 @@ Value: foo");
             {
                 if (t == typeof(InterfaceExample)) { return new InterfaceExample(); }
                 else if (t == typeof(IDerived)) { return new Derived(); }
-                return null;
+                return null!;
             }));
 
             var obj = new InterfaceExample
@@ -704,7 +704,7 @@ Value: foo");
         public void SerializationIncludesKeyFromAnonymousTypeWhenEmittingDefaults()
         {
             var writer = new StringWriter();
-            var obj = new { MyString = (string)null };
+            var obj = new { MyString = (string?)null };
 
             SerializerBuilder.Build().Serialize(writer, obj, obj.GetType());
 
@@ -794,7 +794,7 @@ y:
         public void DeserializationOfEnumWorksInJson(Type enumType)
         {
             var defaultEnumValue = 0;
-            var nonDefaultEnumValue = Enum.GetValues(enumType).GetValue(1);
+            var nonDefaultEnumValue = Enum.GetValues(enumType).GetValue(1)!;
 
             var jsonSerializer = SerializerBuilder.EnsureRoundtrip().JsonCompatible().Build();
             var jsonSerializedEnum = jsonSerializer.Serialize(nonDefaultEnumValue);
@@ -1451,9 +1451,10 @@ y:
         }
 
         public class CommentWrapper<T> : IYamlConvertible
+            where T : class
         {
-            public string Comment { get; set; }
-            public T Value { get; set; }
+            public string? Comment { get; set; }
+            public T? Value { get; set; }
 
             public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
             {
@@ -1462,14 +1463,14 @@ y:
                     Comment = comment.Value;
                 }
 
-                Value = (T)nestedObjectDeserializer(typeof(T));
+                Value = (T?)nestedObjectDeserializer(typeof(T));
             }
 
             public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
             {
                 if (!string.IsNullOrEmpty(Comment))
                 {
-                    emitter.Emit(new Comment(Comment, false));
+                    emitter.Emit(new Comment(Comment!, false));
                 }
 
                 nestedObjectSerializer(Value, typeof(T));
@@ -1504,10 +1505,10 @@ y:
 
         public class AnchorsOverwritingTestCase
         {
-            public List<string> a { get; set; }
-            public List<string> b { get; set; }
-            public List<string> c { get; set; }
-            public List<string> d { get; set; }
+            public List<string>? a { get; set; }
+            public List<string>? b { get; set; }
+            public List<string>? c { get; set; }
+            public List<string>? d { get; set; }
         }
 
         [Fact]
@@ -1576,10 +1577,10 @@ c:  *anchor1");
                 throw new NotImplementedException();
             }
 
-            public void WriteYaml(IEmitter emitter, object value, Type type)
+            public void WriteYaml(IEmitter emitter, object? value, Type type)
             {
-                var method = (MethodInfo)value;
-                emitter.Emit(new Scalar(string.Format("{0}.{1}", method.DeclaringType.FullName, method.Name)));
+                var method = (MethodInfo)value!;
+                emitter.Emit(new Scalar(string.Format("{0}.{1}", method.DeclaringType!.FullName, method.Name)));
             }
         }
 
@@ -1613,7 +1614,7 @@ c:  *anchor1");
 
             var result = deserializer.Deserialize<NonSerializableContainer>(yaml);
 
-            Assert.Equal("hello", result.Value.Text);
+            Assert.Equal("hello", result.Value!.Text);
         }
 
         [Fact]
@@ -1659,7 +1660,7 @@ c:  *anchor1");
             var sut = new DeserializerBuilder()
                 .Build();
 
-            var type = sut.Deserialize<Type>(typeof(string).AssemblyQualifiedName);
+            var type = sut.Deserialize<Type>(typeof(string).AssemblyQualifiedName!);
 
             Assert.Equal(typeof(string), type);
         }
@@ -1971,7 +1972,7 @@ c: *anchor1");
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {
-            public string Value { get; set; }
+            public string? Value { get; set; }
         }
 
         public class DoublyConvertedTypeConverter : TypeConverter
@@ -1983,7 +1984,7 @@ c: *anchor1");
 
             public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
             {
-                return ((DoublyConverted)value).Value.Length;
+                return ((DoublyConverted)value).Value!.Length;
             }
 
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -2000,19 +2001,19 @@ c: *anchor1");
         public class NamingConventionDisabled
         {
             [YamlMember(ApplyNamingConventions = false)]
-            public string NoConvention { get; set; }
+            public string? NoConvention { get; set; }
         }
 
         public class NonSerializableContainer
         {
-            public NonSerializable Value { get; set; }
+            public NonSerializable? Value { get; set; }
         }
 
         public class NonSerializable
         {
             public string WillThrow { get { throw new Exception(); } }
 
-            public string Text { get; set; }
+            public string? Text { get; set; }
         }
 
         public class NonSerializableTypeConverter : IYamlTypeConverter
@@ -2028,9 +2029,9 @@ c: *anchor1");
                 return new NonSerializable { Text = scalar.Value };
             }
 
-            public void WriteYaml(IEmitter emitter, object value, Type type)
+            public void WriteYaml(IEmitter emitter, object? value, Type type)
             {
-                emitter.Emit(new Scalar(((NonSerializable)value).Text));
+                emitter.Emit(new Scalar(((NonSerializable)value!).Text!));
             }
         }
     }

@@ -39,12 +39,6 @@ namespace YamlDotNet.Core.Events
         internal override EventType Type => EventType.MappingStart;
 
         /// <summary>
-        /// Gets a value indicating whether this instance is canonical.
-        /// </summary>
-        /// <value></value>
-        public override bool IsCanonical => !Tag.IsImplicit;
-
-        /// <summary>
         /// Gets the style of the mapping.
         /// </summary>
         public MappingStyle Style { get; }
@@ -58,7 +52,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
         /// 
-        public MappingStart(AnchorName anchor, TagName tag, MappingStyle style, Mark start, Mark end)
+        public MappingStart(AnchorName anchor, ITag tag, MappingStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
             this.Style = style;
@@ -71,7 +65,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="style">The style of the mapping.</param>
         /// 
-        public MappingStart(AnchorName anchor, TagName tag, MappingStyle style)
+        public MappingStart(AnchorName anchor, ITag tag, MappingStyle style)
             : this(anchor, tag, style, Mark.Empty, Mark.Empty)
         {
         }
@@ -80,7 +74,7 @@ namespace YamlDotNet.Core.Events
         /// Initializes a new instance of the <see cref="MappingStart"/> class.
         /// </summary>
         public MappingStart()
-            : this(AnchorName.Empty, TagName.Empty, MappingStyle.Any, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, MappingStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
 

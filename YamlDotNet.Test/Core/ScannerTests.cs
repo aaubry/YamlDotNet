@@ -384,12 +384,13 @@ namespace YamlDotNet.Test.Core
                 ""x""
             ");
 
-            Scalar scalar = null;
+            Scalar? scalar = null;
             while (scanner.MoveNext() && scalar == null)
             {
                 scalar = scanner.Current as Scalar;
             }
-            Assert.Equal(4, scalar.End.Column);
+            Assert.NotNull(scalar);
+            Assert.Equal(4, scalar!.End.Column);
         }
 
         [Fact]
@@ -423,7 +424,7 @@ namespace YamlDotNet.Test.Core
             foreach (var expected in tokens)
             {
                 scanner.MoveNext().Should().BeTrue("Missing token number {0}", tokenNumber);
-                AssertToken(expected, scanner.Current, tokenNumber);
+                AssertToken(expected, scanner.Current!, tokenNumber);
                 tokenNumber++;
             }
         }

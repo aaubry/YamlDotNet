@@ -73,7 +73,7 @@ namespace YamlDotNet.Test.Core
         {
             while (parser.MoveNext())
             {
-                yield return parser.Current;
+                yield return parser.Current!;
             }
         }
 
@@ -201,7 +201,7 @@ namespace YamlDotNet.Test.Core
         [Fact]
         public void FoldedStyleIsSelectedWhenNewLinesAreFoundInLiteral()
         {
-            var events = SequenceWith(Scalar("hello\nworld").ImplicitPlain);
+            var events = SequenceWith(Scalar("hello\nworld"));
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -213,7 +213,7 @@ namespace YamlDotNet.Test.Core
         [Trait("motive", "pr #540")]
         public void AllowBlockStyleInMultilineScalarsWithTrailingSpaces()
         {
-            var events = SequenceWith(Scalar("hello  \nworld").ImplicitPlain);
+            var events = SequenceWith(PlainScalar("hello  \nworld"));
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -258,7 +258,7 @@ namespace YamlDotNet.Test.Core
         {
             var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
             var events = MappingWith(
-                Scalar("Payload").ImplicitPlain,
+                Scalar("Payload"),
                 FoldedScalar(input));
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
@@ -278,9 +278,9 @@ namespace YamlDotNet.Test.Core
             var events = SequenceWith(
                 StandaloneComment("Top comment"),
                 StandaloneComment("Second line"),
-                Scalar("first").ImplicitPlain,
+                Scalar("first"),
                 InlineComment("The first value"),
-                Scalar("second").ImplicitPlain,
+                Scalar("second"),
                 InlineComment("The second value"),
                 StandaloneComment("Bottom comment")
             );
@@ -302,7 +302,7 @@ namespace YamlDotNet.Test.Core
             var events = new ParsingEvent[]
             {
                 StandaloneComment("Top comment"),
-                Scalar("first").ImplicitPlain,
+                Scalar("first"),
             };
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
@@ -350,7 +350,7 @@ namespace YamlDotNet.Test.Core
         public void EmptyStringsAreQuoted()
         {
             var events = SequenceWith(
-                Scalar(string.Empty).ImplicitPlain
+                Scalar(string.Empty)
             );
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));

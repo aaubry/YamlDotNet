@@ -5,37 +5,37 @@
     /// </summary>
     public sealed class JsonSchema : RegexBasedSchema
     {
-        private JsonSchema(TagName fallbackTag) : base(BuildMappingTable(), fallbackTag) { }
+        private JsonSchema(ITag fallbackTag) : base(BuildMappingTable(), fallbackTag) { }
 
         /// <summary>
         /// A version of the <see cref="JsonSchema"/> that conforms strictly to the specification
         /// by not resolving any unrecognized scalars.
         /// </summary>
-        public static readonly JsonSchema Strict = new JsonSchema(TagName.Empty);
+        public static readonly JsonSchema Strict = new JsonSchema(SimpleTag.NonSpecificOtherNodes);
 
         /// <summary>
         /// A version of the <see cref="JsonSchema"/> that treats unrecognized scalars as strings.
         /// </summary>
-        public static readonly JsonSchema Lenient = new JsonSchema(YamlTagRepository.String);
+        public static readonly JsonSchema Lenient = new JsonSchema(FailsafeSchema.String);
 
         private static RegexTagMappingTable BuildMappingTable() => new RegexTagMappingTable
         {
-            {
-                "^null$",
-                YamlTagRepository.Null
-            },
-            {
-                "^(true|false)$",
-                YamlTagRepository.Boolean
-            },
-            {
-                "^-?(0|[1-9][0-9]*)$",
-                YamlTagRepository.Integer
-            },
-            {
-                @"^-?(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?$",
-                YamlTagRepository.FloatingPoint
-            }
+            //{
+            //    "^null$",
+            //    YamlTagRepository.Null
+            //},
+            //{
+            //    "^(true|false)$",
+            //    YamlTagRepository.Boolean.Yaml12
+            //},
+            //{
+            //    "^-?(0|[1-9][0-9]*)$",
+            //    YamlTagRepository.Integer
+            //},
+            //{
+            //    @"^-?(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?$",
+            //    YamlTagRepository.FloatingPoint
+            //}
         };
     }
 }

@@ -57,7 +57,7 @@ namespace YamlDotNet.Test.Core
             return DocumentStart(isImplicit, null, DefaultTags);
         }
 
-        protected DocumentStart DocumentStart(bool isImplicit, VersionDirective version, params TagDirective[] tags)
+        protected DocumentStart DocumentStart(bool isImplicit, VersionDirective? version, params TagDirective[] tags)
         {
             return new DocumentStart(version, new TagDirectiveCollection(tags), isImplicit);
         }
@@ -161,43 +161,19 @@ namespace YamlDotNet.Test.Core
         {
             private readonly string text;
             private readonly ScalarStyle style;
-            private string tag;
-            private bool plainImplicit;
-            private bool quotedImplicit;
+            private ITag tag;
 
             public ScalarBuilder(string text, ScalarStyle style)
             {
                 this.text = text;
                 this.style = style;
-                plainImplicit = style == ScalarStyle.Plain;
-                quotedImplicit = style != ScalarStyle.Plain &&
-                                 style != ScalarStyle.Any;
+                this.tag = style != ScalarStyle.Plain ? SimpleTag.NonSpecificNonPlainScalar : SimpleTag.NonSpecificOtherNodes;
             }
 
             public ScalarBuilder T(string tag)
             {
-                this.tag = tag;
-                plainImplicit = false;
-                quotedImplicit = false;
+                this.tag = new SimpleTag(tag);
                 return this;
-            }
-
-            public ScalarBuilder ImplicitPlain
-            {
-                get
-                {
-                    plainImplicit = true;
-                    return this;
-                }
-            }
-
-            public ScalarBuilder ImplicitQuoted
-            {
-                get
-                {
-                    quotedImplicit = true;
-                    return this;
-                }
             }
 
             public static implicit operator Scalar(ScalarBuilder builder)
@@ -227,14 +203,14 @@ namespace YamlDotNet.Test.Core
 
             public static implicit operator SequenceStart(SequenceStartBuilder builder)
             {
-                return new SequenceStart(builder.anchor, null, builder.style);
+                return new SequenceStart(builder.anchor, SimpleTag.NonSpecificOtherNodes, builder.style);
             }
         }
 
         protected class MappingStartBuilder
         {
             private readonly MappingStyle style;
-            private string tag;
+            private ITag tag = SimpleTag.NonSpecificOtherNodes;
 
             public MappingStartBuilder(MappingStyle style)
             {
@@ -243,7 +219,7 @@ namespace YamlDotNet.Test.Core
 
             public MappingStartBuilder T(string tag)
             {
-                this.tag = tag;
+                this.tag = new SimpleTag(tag);
                 return this;
             }
 
@@ -259,7 +235,7 @@ namespace YamlDotNet.Test.Core
             foreach (var expected in events)
             {
                 parser.MoveNext().Should().BeTrue("Missing parse event number {0}", eventNumber);
-                AssertEvent(expected, parser.Current, eventNumber);
+                AssertEvent(expected, parser.Current!, eventNumber);
                 eventNumber++;
             }
             parser.MoveNext().Should().BeFalse("Found extra parse events");
@@ -276,7 +252,7 @@ namespace YamlDotNet.Test.Core
                     continue;
                 }
 
-                var value = property.GetValue(actual, null);
+                var value = property.GetValue(actual, null)!;
                 var expectedValue = property.GetValue(expected, null);
                 if (expectedValue is IEnumerable && !(expectedValue is string))
                 {
@@ -300,7 +276,7 @@ namespace YamlDotNet.Test.Core
                 }
                 else
                 {
-                    value.Should().Be(expectedValue, "Compared property {0}.{1} in parse event {2}", property.DeclaringType.Name, property.Name, eventNumber);
+                    value.Should().Be(expectedValue, "Compared property {0}.{1} in parse event {2}", property.DeclaringType!.Name, property.Name, eventNumber);
                 }
             }
         }

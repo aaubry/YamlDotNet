@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Schemas;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 
@@ -91,18 +92,18 @@ namespace YamlDotNet.Test.Serialization
 
         public object ReadYaml(IParser parser, Type type)
         {
-            var scalar = (YamlDotNet.Core.Events.Scalar)parser.Current;
+            var scalar = (YamlDotNet.Core.Events.Scalar)parser.Current!;
             var bytes = Convert.FromBase64String(scalar.Value);
             parser.MoveNext();
             return bytes;
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
-            var bytes = (byte[])value;
+            var bytes = (byte[])value!;
             emitter.Emit(new YamlDotNet.Core.Events.Scalar(
                 AnchorName.Empty,
-                "tag:yaml.org,2002:binary",
+                new SimpleTag(YamlTagRepository.Binary),
                 Convert.ToBase64String(bytes),
                 ScalarStyle.Plain));
         }

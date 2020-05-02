@@ -165,7 +165,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Adds a Member Attribute Override
         /// </summary>
-        public void Add<TClass>(Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
+        public void Add<TClass>(Expression<Func<TClass, object?>> propertyAccessor, Attribute attribute)
         {
             var property = propertyAccessor.AsProperty();
             Add(typeof(TClass), property.Name, attribute);

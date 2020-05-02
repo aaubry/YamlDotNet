@@ -29,9 +29,9 @@ namespace YamlDotNet.Serialization.EventEmitters
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
-        private readonly IDictionary<Type, TagName> tagMappings;
+        private readonly IDictionary<Type, ITag> tagMappings;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, ITag> tagMappings)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             var value = eventInfo.Source.Value;
             if (value == null)
             {
-                eventInfo.Tag = YamlTagRepository.Null.Implicit();
+                eventInfo.Tag = new SimpleTag(YamlTagRepository.Null);
                 eventInfo.RenderedValue = "";
             }
             else
@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        eventInfo.Tag = YamlTagRepository.Boolean.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Boolean);
                         eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
                         break;
 
@@ -66,39 +66,39 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        eventInfo.Tag = YamlTagRepository.Integer.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Integer);
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Single:
-                        eventInfo.Tag = YamlTagRepository.FloatingPoint.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.FloatingPoint);
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
                         break;
 
                     case TypeCode.Double:
-                        eventInfo.Tag = YamlTagRepository.FloatingPoint.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.FloatingPoint);
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
                         break;
 
                     case TypeCode.Decimal:
-                        eventInfo.Tag = YamlTagRepository.FloatingPoint.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.FloatingPoint);
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
                     case TypeCode.Char:
-                        eventInfo.Tag = YamlTagRepository.String.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.String);
                         eventInfo.RenderedValue = value.ToString()!;
                         suggestedStyle = ScalarStyle.Any;
                         break;
 
                     case TypeCode.DateTime:
-                        eventInfo.Tag = YamlTagRepository.Timestamp.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Timestamp);
                         eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
-                        eventInfo.Tag = YamlTagRepository.Null.Implicit();
+                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Null);
                         eventInfo.RenderedValue = "";
                         break;
 

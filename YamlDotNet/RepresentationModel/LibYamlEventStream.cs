@@ -119,12 +119,13 @@ namespace YamlDotNet.RepresentationModel
                 textWriter.Write(nodeEvent.Anchor);
             }
 
-            if (!nodeEvent.Tag.IsEmpty)
-            {
-                textWriter.Write(" <");
-                textWriter.Write(nodeEvent.Tag.Value);
-                textWriter.Write(">");
-            }
+            // TODO:
+            //if (!nodeEvent.Tag.IsEmpty)
+            //{
+            //    textWriter.Write(" <");
+            //    textWriter.Write(nodeEvent.Tag.Value);
+            //    textWriter.Write(">");
+            //}
         }
     }
 }

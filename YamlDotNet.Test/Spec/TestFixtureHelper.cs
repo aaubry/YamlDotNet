@@ -29,7 +29,7 @@ namespace YamlDotNet.Test.Spec
         public static string GetTestFixtureDirectory(string environmentVariableName, string directoryName)
         {
             // check if environment variable 'environmentVariableName' is set
-            string fixturesPath = Environment.GetEnvironmentVariable(environmentVariableName);
+            var fixturesPath = Environment.GetEnvironmentVariable(environmentVariableName);
 
             if (!string.IsNullOrEmpty(fixturesPath))
             {

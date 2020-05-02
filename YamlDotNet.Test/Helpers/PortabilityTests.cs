@@ -33,9 +33,9 @@ namespace YamlDotNet.Test.Helpers
             var expected = DateTimeOffset.UtcNow;
 
             var type = typeof(DateTimeOffset);
-            var method = type.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider));
+            var method = type.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider))!;
 
-            var actual = (DateTimeOffset)method.Invoke(null, new object[] { expected.ToString("o"), CultureInfo.InvariantCulture });
+            var actual = (DateTimeOffset)method.Invoke(null, new object[] { expected.ToString("o"), CultureInfo.InvariantCulture })!;
 
             Assert.Equal(expected, actual);
         }

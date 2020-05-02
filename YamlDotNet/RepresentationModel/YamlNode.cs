@@ -45,7 +45,7 @@ namespace YamlDotNet.RepresentationModel
         /// Gets or sets the tag of the node.
         /// </summary>
         /// <value>The tag.</value>
-        public TagName Tag { get; set; }
+        public ITag Tag { get; set; }
 
         /// <summary>
         /// Gets the position in the input stream where the event that originated the node starts.
@@ -57,11 +57,11 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         public Mark End { get; private set; } = Mark.Empty;
 
-        protected YamlNode() : this(TagName.NonSpecific)
+        protected YamlNode() : this(SimpleTag.NonSpecificOtherNodes)
         {
         }
         
-        protected YamlNode(TagName tag)
+        protected YamlNode(ITag tag)
         {
             this.Tag = tag;
         }

@@ -34,19 +34,13 @@ namespace YamlDotNet.Core
 
         public string Value => value ?? emptyTag;
 
-        /// <summary>
-        /// Indicates whether this tag was explicitly specified, or if it was assigned automatically
-        /// </summary>
-        public bool IsExplicit { get; }
-
-        public bool IsImplicit => !IsExplicit;
         public bool IsEmpty => value is null;
         public bool IsNonSpecific => IsEmpty || Equals(NonSpecific);
 
         public bool IsLocal => !(value is null) && value.Length > 1 && value[0] == '!';
         public bool IsGlobal => !IsEmpty && !IsLocal;
 
-        private TagName(string value, bool isExplicit)
+        public TagName(string value)
         {
             this.value = value ?? throw new ArgumentNullException(nameof(value));
 
@@ -55,35 +49,13 @@ namespace YamlDotNet.Core
                 throw new ArgumentException("Tag value must not be empty", nameof(value));
             }
 
-            if (isExplicit && value.Equals(emptyTag))
-            {
-                throw new ArgumentException($"Invalid explicit tag '{emptyTag}'", nameof(value));
-            }
-
-            this.IsExplicit = isExplicit;
-        }
-
-        public TagName(string value)
-            : this(value, isExplicit: true)
-        {
             if (IsGlobal && !Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute))
             {
                 throw new ArgumentException("Global tags must be valid URIs", nameof(value));
             }
         }
 
-        // TODO: Evaluate if this makes any sense.
-        // We need this to keep changing the code, but we'll see is it necessary.
-        public TagName Implicit()
-        {
-            if (IsImplicit)
-            {
-                throw new InvalidOperationException("This tag is already implicit");
-            }
-            return new TagName(value!, isExplicit: false);
-        }
-
-        public override string ToString() => $"{Value}{(IsImplicit ? " (implicit)" : "")}";
+        public override string ToString() => Value;
 
         public bool Equals(TagName other)
         {

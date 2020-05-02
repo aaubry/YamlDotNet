@@ -44,22 +44,6 @@ namespace YamlDotNet.Core.Events
         public ScalarStyle Style { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the tag is optional for the plain style.
-        /// </summary>
-        public bool IsPlainImplicit { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the tag is optional for any non-plain style.
-        /// </summary>
-        public bool IsQuotedImplicit { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance is canonical.
-        /// </summary>
-        /// <value></value>
-        public override bool IsCanonical => !Tag.IsImplicit;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Scalar"/> class.
         /// </summary>
         /// <param name="anchor">The anchor.</param>
@@ -68,18 +52,11 @@ namespace YamlDotNet.Core.Events
         /// <param name="style">The style.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public Scalar(AnchorName anchor, TagName tag, string value, ScalarStyle style, Mark start, Mark end)
-            : base(anchor, CoalesceNonSpecificTagName(tag, style), start, end)
+        public Scalar(AnchorName anchor, ITag tag, string value, ScalarStyle style, Mark start, Mark end)
+            : base(anchor, tag, start, end)
         {
             this.Value = value;
             this.Style = style;
-        }
-
-        private static TagName CoalesceNonSpecificTagName(TagName tag, ScalarStyle style)
-        {
-            return tag.IsEmpty && style != ScalarStyle.Plain
-                ? TagName.NonSpecific.Implicit()
-                : tag;
         }
 
         /// <summary>
@@ -89,7 +66,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="value">The value.</param>
         /// <param name="style">The style.</param>
-        public Scalar(AnchorName anchor, TagName tag, string value, ScalarStyle style)
+        public Scalar(AnchorName anchor, ITag tag, string value, ScalarStyle style)
             : this(anchor, tag, value, style, Mark.Empty, Mark.Empty)
         {
         }
@@ -99,7 +76,7 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="value">The value.</param>
         public Scalar(string value)
-            : this(AnchorName.Empty, TagName.Empty, value, ScalarStyle.Any, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, value, ScalarStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
 
@@ -108,7 +85,7 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="tag">The tag.</param>
         /// <param name="value">The value.</param>
-        public Scalar(TagName tag, string value)
+        public Scalar(ITag tag, string value)
             : this(AnchorName.Empty, tag, value, ScalarStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
@@ -116,7 +93,7 @@ namespace YamlDotNet.Core.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="Scalar"/> class.
         /// </summary>
-        public Scalar(AnchorName anchor, TagName tag, string value)
+        public Scalar(AnchorName anchor, ITag tag, string value)
             : this(anchor, tag, value, ScalarStyle.Any, Mark.Empty, Mark.Empty)
         {
         }

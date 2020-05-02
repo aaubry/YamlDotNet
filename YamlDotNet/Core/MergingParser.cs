@@ -144,7 +144,7 @@ namespace YamlDotNet.Core
             return events.FromAnchor(anchor)
                 .Select(e => e.Value)
                 .TakeWhile(e => (nesting += e.NestingIncrease) >= 0)
-                .Select(e => cloner.Clone(e));
+                .Select(e => e.Accept(cloner));
         }
 
         private sealed class ParsingEventCollection : IEnumerable<LinkedListNode<ParsingEvent>>
@@ -222,72 +222,59 @@ namespace YamlDotNet.Core
             }
         }
 
-        private sealed class ParsingEventCloner : IParsingEventVisitor
+        private sealed class ParsingEventCloner : IParsingEventVisitor<ParsingEvent>
         {
-            private ParsingEvent? clonedEvent;
-
-            public ParsingEvent Clone(ParsingEvent e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(AnchorAlias e)
             {
-                e.Accept(this);
-                if (clonedEvent == null)
-                {
-                    throw new InvalidOperationException($"Could not clone event of type '{e.Type}'");
-                }
-
-                return clonedEvent;
+                return new AnchorAlias(e.Value, e.Start, e.End);
             }
 
-            void IParsingEventVisitor.Visit(AnchorAlias e)
-            {
-                clonedEvent = new AnchorAlias(e.Value, e.Start, e.End);
-            }
-
-            void IParsingEventVisitor.Visit(StreamStart e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(StreamStart e)
             {
                 throw new NotSupportedException();
             }
 
-            void IParsingEventVisitor.Visit(StreamEnd e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(StreamEnd e)
             {
                 throw new NotSupportedException();
             }
 
-            void IParsingEventVisitor.Visit(DocumentStart e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(DocumentStart e)
             {
                 throw new NotSupportedException();
             }
 
-            void IParsingEventVisitor.Visit(DocumentEnd e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(DocumentEnd e)
             {
                 throw new NotSupportedException();
             }
 
-            void IParsingEventVisitor.Visit(Scalar e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(Scalar e)
             {
-                clonedEvent = new Scalar(AnchorName.Empty, e.Tag, e.Value, e.Style, e.Start, e.End);
+                return new Scalar(AnchorName.Empty, e.Tag, e.Value, e.Style, e.Start, e.End);
             }
 
-            void IParsingEventVisitor.Visit(SequenceStart e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(SequenceStart e)
             {
-                clonedEvent = new SequenceStart(AnchorName.Empty, e.Tag, e.Style, e.Start, e.End);
+                return new SequenceStart(AnchorName.Empty, e.Tag, e.Style, e.Start, e.End);
             }
 
-            void IParsingEventVisitor.Visit(SequenceEnd e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(SequenceEnd e)
             {
-                clonedEvent = new SequenceEnd(e.Start, e.End);
+                return new SequenceEnd(e.Start, e.End);
             }
 
-            void IParsingEventVisitor.Visit(MappingStart e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(MappingStart e)
             {
-                clonedEvent = new MappingStart(AnchorName.Empty, e.Tag, e.Style, e.Start, e.End);
+                return new MappingStart(AnchorName.Empty, e.Tag, e.Style, e.Start, e.End);
             }
 
-            void IParsingEventVisitor.Visit(MappingEnd e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(MappingEnd e)
             {
-                clonedEvent = new MappingEnd(e.Start, e.End);
+                return new MappingEnd(e.Start, e.End);
             }
 
-            void IParsingEventVisitor.Visit(Comment e)
+            ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(Comment e)
             {
                 throw new NotSupportedException();
             }

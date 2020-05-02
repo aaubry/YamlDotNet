@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core.Schemas
@@ -8,9 +9,9 @@ namespace YamlDotNet.Core.Schemas
     /// </summary>
     public sealed class FailsafeSchema : ISchema
     {
-        private readonly TagName fallbackTag;
+        private readonly ITag fallbackTag;
 
-        private FailsafeSchema(TagName fallbackTag)
+        private FailsafeSchema(ITag fallbackTag)
         {
             this.fallbackTag = fallbackTag;
         }
@@ -19,26 +20,75 @@ namespace YamlDotNet.Core.Schemas
         /// A version of the <see cref="FailsafeSchema"/> that conforms strictly to the specification
         /// by not resolving any unrecognized scalars.
         /// </summary>
-        public static readonly FailsafeSchema Strict = new FailsafeSchema(TagName.Empty);
+        public static readonly FailsafeSchema Strict = new FailsafeSchema(new SimpleTag(TagName.Empty));
 
         /// <summary>
         /// A version of the <see cref="FailsafeSchema"/> that treats unrecognized scalars as strings.
         /// </summary>
-        public static readonly FailsafeSchema Lenient = new FailsafeSchema(YamlTagRepository.String);
+        public static readonly FailsafeSchema Lenient = new FailsafeSchema(String);
 
-        public TagName ResolveNonSpecificTag(Scalar node, IEnumerable<NodeEvent> path)
+        public static readonly ITag String = new SimpleTag(YamlTagRepository.String, s => s.Value);
+        public static readonly ITag Mapping = new SimpleTag(YamlTagRepository.Mapping);
+        public static readonly ITag Sequence = new SimpleTag(YamlTagRepository.Sequence);
+
+        public bool ResolveNonSpecificTag(Scalar node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
         {
-            return node.Tag.IsEmpty ? fallbackTag : YamlTagRepository.String;
+            if (node.Tag.Name.IsEmpty)
+            {
+                resolvedTag = fallbackTag;
+                return !fallbackTag.Name.IsEmpty;
+            }
+
+            resolvedTag = String;
+            return true;
         }
 
-        public TagName ResolveNonSpecificTag(MappingStart node, IEnumerable<NodeEvent> path)
+        public bool ResolveNonSpecificTag(MappingStart node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
         {
-            return node.Tag.IsEmpty ? node.Tag : YamlTagRepository.Mapping;
+            if (node.Tag.Name.IsEmpty)
+            {
+                resolvedTag = fallbackTag;
+                return !fallbackTag.Name.IsEmpty;
+            }
+
+            resolvedTag = Mapping;
+            return true;
         }
 
-        public TagName ResolveNonSpecificTag(SequenceStart node, IEnumerable<NodeEvent> path)
+        public bool ResolveNonSpecificTag(SequenceStart node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
         {
-            return node.Tag.IsEmpty ? node.Tag : YamlTagRepository.Sequence;
+            if (node.Tag.Name.IsEmpty)
+            {
+                resolvedTag = fallbackTag;
+                return !fallbackTag.Name.IsEmpty;
+            }
+
+            resolvedTag = Sequence;
+            return true;
+        }
+
+        public bool ResolveSpecificTag(TagName tag, [NotNullWhen(true)] out ITag? resolvedTag)
+        {
+            if (tag.Equals(String.Name))
+            {
+                resolvedTag = String;
+                return true;
+            }
+            else if (tag.Equals(Sequence.Name))
+            {
+                resolvedTag = Sequence;
+                return true;
+            }
+            else if (tag.Equals(Mapping.Name))
+            {
+                resolvedTag = Mapping;
+                return true;
+            }
+            else
+            {
+                resolvedTag = null;
+                return false;
+            }
         }
     }
 }

@@ -35,8 +35,8 @@ namespace YamlDotNet.Test.Serialization
 {
     public class SerializationTestHelper
     {
-        private SerializerBuilder serializerBuilder;
-        private DeserializerBuilder deserializerBuilder;
+        private SerializerBuilder serializerBuilder = new SerializerBuilder();
+        private DeserializerBuilder deserializerBuilder = new DeserializerBuilder();
 
         protected T DoRoundtripFromObjectTo<T>(object obj)
         {
@@ -107,7 +107,7 @@ namespace YamlDotNet.Test.Serialization
 
         protected TextReader UsingReaderFor(TextWriter buffer)
         {
-            return UsingReaderFor(buffer.ToString());
+            return UsingReaderFor(buffer.ToString()!);
         }
 
         protected TextReader UsingReaderFor(string text)
@@ -152,23 +152,23 @@ namespace YamlDotNet.Test.Serialization
 
     public class CircularReference
     {
-        public CircularReference Child1 { get; set; }
-        public CircularReference Child2 { get; set; }
+        public CircularReference? Child1 { get; set; }
+        public CircularReference? Child2 { get; set; }
     }
 
     [TypeConverter(typeof(ConvertibleConverter))]
     public class Convertible : IConvertible
     {
-        public string Left { get; set; }
-        public string Right { get; set; }
+        public string? Left { get; set; }
+        public string? Right { get; set; }
 
-        public object ToType(Type conversionType, IFormatProvider provider)
+        public object ToType(Type conversionType, IFormatProvider? provider)
         {
             conversionType.Should().Be<string>();
             return ToString(provider);
         }
 
-        public string ToString(IFormatProvider provider)
+        public string ToString(IFormatProvider? provider)
         {
             provider.Should().Be(CultureInfo.InvariantCulture);
             return string.Format(provider, "[{0}, {1}]", Left, Right);
@@ -181,72 +181,72 @@ namespace YamlDotNet.Test.Serialization
             throw new NotSupportedException();
         }
 
-        public bool ToBoolean(IFormatProvider provider)
+        public bool ToBoolean(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public byte ToByte(IFormatProvider provider)
+        public byte ToByte(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public char ToChar(IFormatProvider provider)
+        public char ToChar(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public DateTime ToDateTime(IFormatProvider provider)
+        public DateTime ToDateTime(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public decimal ToDecimal(IFormatProvider provider)
+        public decimal ToDecimal(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public double ToDouble(IFormatProvider provider)
+        public double ToDouble(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public short ToInt16(IFormatProvider provider)
+        public short ToInt16(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public int ToInt32(IFormatProvider provider)
+        public int ToInt32(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public long ToInt64(IFormatProvider provider)
+        public long ToInt64(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public sbyte ToSByte(IFormatProvider provider)
+        public sbyte ToSByte(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public float ToSingle(IFormatProvider provider)
+        public float ToSingle(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public ushort ToUInt16(IFormatProvider provider)
+        public ushort ToUInt16(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public uint ToUInt32(IFormatProvider provider)
+        public uint ToUInt32(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
 
-        public ulong ToUInt64(IFormatProvider provider)
+        public ulong ToUInt64(IFormatProvider? provider)
         {
             throw new NotSupportedException();
         }
@@ -270,7 +270,7 @@ namespace YamlDotNet.Test.Serialization
         {
             if (!(value is string))
                 throw new InvalidOperationException();
-            var parts = (value as string).Split(' ');
+            var parts = ((string)value).Split(' ');
             return new Convertible
             {
                 Left = parts[0],
@@ -298,49 +298,49 @@ namespace YamlDotNet.Test.Serialization
 
         public object ReadYaml(IParser parser, Type type)
         {
-            var value = ((Scalar)parser.Current).Value;
+            var value = ((Scalar)parser.Current!).Value;
             parser.MoveNext();
             return new MissingDefaultCtor(value);
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
-            emitter.Emit(new Scalar(((MissingDefaultCtor)value).Value));
+            emitter.Emit(new Scalar(((MissingDefaultCtor)value!).Value));
         }
     }
 
     public class InheritanceExample
     {
-        public object SomeScalar { get; set; }
-        public Base RegularBase { get; set; }
+        public object? SomeScalar { get; set; }
+        public Base? RegularBase { get; set; }
 
         [YamlMember(serializeAs: typeof(Base))]
-        public Base BaseWithSerializeAs { get; set; }
+        public Base? BaseWithSerializeAs { get; set; }
     }
 
     public class InterfaceExample
     {
-        public IDerived Derived { get; set; }
+        public IDerived? Derived { get; set; }
     }
 
     public interface IBase
     {
-        string BaseProperty { get; set; }
+        string? BaseProperty { get; set; }
     }
 
     public interface IDerived : IBase
     {
-        string DerivedProperty { get; set; }
+        string? DerivedProperty { get; set; }
     }
 
     public class Base : IBase
     {
-        public string BaseProperty { get; set; }
+        public string? BaseProperty { get; set; }
     }
 
     public class Derived : Base, IDerived
     {
-        public string DerivedProperty { get; set; }
+        public string? DerivedProperty { get; set; }
     }
 
     public class EmptyBase
@@ -353,23 +353,23 @@ namespace YamlDotNet.Test.Serialization
 
     public class Simple
     {
-        public string aaa { get; set; }
+        public string? aaa { get; set; }
     }
 
     public class SimpleScratch
     {
-        public string Scratch { get; set; }
+        public string? Scratch { get; set; }
         public bool DeleteScratch { get; set; }
-        public IEnumerable<string> MappedScratch { get; set; }
+        public IEnumerable<string>? MappedScratch { get; set; }
     }
 
     public class Example
     {
         public bool MyFlag { get; set; }
-        public string Nothing { get; set; }
+        public string? Nothing { get; set; }
         public int MyInt { get; set; }
         public double MyDouble { get; set; }
-        public string MyString { get; set; }
+        public string? MyString { get; set; }
         public DateTime MyDate { get; set; }
         public TimeSpan MyTimeSpan { get; set; }
         public Point MyPoint { get; set; }
@@ -453,7 +453,7 @@ namespace YamlDotNet.Test.Serialization
         public const string DefaultValue = "myDefault";
 
         [DefaultValue(DefaultValue)]
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 
     public class CustomGenericDictionary : IDictionary<string, string>
@@ -548,15 +548,15 @@ namespace YamlDotNet.Test.Serialization
 
     public class NameConvention
     {
-        public string FirstTest { get; set; }
-        public string SecondTest { get; set; }
-        public string ThirdTest { get; set; }
+        public string? FirstTest { get; set; }
+        public string? SecondTest { get; set; }
+        public string? ThirdTest { get; set; }
 
         [YamlMember(Alias = "fourthTest")]
-        public string AliasTest { get; set; }
+        public string? AliasTest { get; set; }
 
         [YamlIgnore]
-        public string fourthTest { get; set; }
+        public string? fourthTest { get; set; }
     }
 
     public class NonPublicPropertiesExample

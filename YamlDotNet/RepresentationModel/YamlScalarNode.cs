@@ -114,7 +114,7 @@ namespace YamlDotNet.RepresentationModel
         public override bool Equals(object? obj)
         {
             return obj is YamlScalarNode other
-                && ((Tag.IsNonSpecific && other.Tag.IsNonSpecific) || Equals(Tag, other.Tag))
+                && ((Tag.Name.IsNonSpecific && other.Tag.Name.IsNonSpecific) || Equals(Tag, other.Tag))
                 && Equals(Value, other.Value);
         }
 
@@ -126,7 +126,7 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         public override int GetHashCode()
         {
-            return CombineHashCodes(Tag.IsNonSpecific ? 0 : Tag.GetHashCode(), Value);
+            return CombineHashCodes(Tag.Name.IsNonSpecific ? 0 : Tag.GetHashCode(), Value);
         }
 
         /// <summary>

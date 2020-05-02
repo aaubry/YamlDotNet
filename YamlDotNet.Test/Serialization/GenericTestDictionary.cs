@@ -27,7 +27,7 @@ namespace YamlDotNet.Test.Serialization
     /// <summary>
     /// Test Dictionary that implements <see cref="IDictionary{TKey, TValue}" />, but not <see cref="IDictionary"/>.
     /// </summary>
-    public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    public class GenericTestDictionary<TKey, TValue> : IDictionary<TKey, TValue> where TKey : notnull
     {
         private readonly Dictionary<TKey, TValue> dictionary;
 

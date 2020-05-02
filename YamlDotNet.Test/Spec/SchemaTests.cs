@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -95,7 +96,7 @@ namespace YamlDotNet.Test.Spec
             { "yaml11", Yaml11Schema.Instance },
         };
 
-        private static readonly Dictionary<string, object> Functions = new Dictionary<string, object>
+        private static readonly Dictionary<string, object?> Functions = new Dictionary<string, object?>
         {
             { "true()", true },
             { "false()", false },
@@ -129,24 +130,11 @@ namespace YamlDotNet.Test.Spec
             ConformsWithYamlSpec(inputYaml, schemaId, type, loadedValueText, dumpedYaml, sourceLineNumber);
         }
 
-        private void ConformsWithYamlSpec(string inputYaml, string schemaId, string type, string loadedValueText, string dumpedYaml, int sourceLineNumber)
+        private void ConformsWithYamlSpec(string inputYaml, string schemaId, string type, string expectedLoadedValueText, string dumpedYaml, int sourceLineNumber)
         {
             if (!SchemasById.TryGetValue(schemaId, out var schema))
             {
                 throw new KeyNotFoundException($"Schema '{schemaId}' not found");
-            }
-
-            object loadedValue;
-            if (loadedValueText.EndsWith("()"))
-            {
-                if (!Functions.TryGetValue(loadedValueText, out loadedValue))
-                {
-                    throw new KeyNotFoundException($"Function '{loadedValueText}' not found");
-                }
-            }
-            else
-            {
-                loadedValue = loadedValueText;
             }
 
 
@@ -158,14 +146,39 @@ namespace YamlDotNet.Test.Spec
 
             var actual = parser.Consume<Scalar>();
 
-            var expectedTag = YamlTagRepository.Prefix + type switch {
+            var expectedTag = YamlTagRepository.Prefix + type switch
+            {
                 "inf" => "float",
                 "nan" => "float",
                 _ => type
             };
-            Assert.Equal(expectedTag, actual.Tag.Value);
+            Assert.Equal(expectedTag, actual.Tag.Name.Value);
 
-            // TODO
+
+            object? expectedLoadedValue;
+            if (expectedLoadedValueText.EndsWith("()"))
+            {
+                if (!Functions.TryGetValue(expectedLoadedValueText, out expectedLoadedValue))
+                {
+                    throw new KeyNotFoundException($"Function '{expectedLoadedValueText}' not found");
+                }
+            }
+            else if (actual.Tag.Name == YamlTagRepository.Integer)
+            {
+                expectedLoadedValue = long.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
+            }
+            else if (actual.Tag.Name == YamlTagRepository.FloatingPoint)
+            {
+                expectedLoadedValue = double.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                expectedLoadedValue = expectedLoadedValueText;
+            }
+            var scalarParser = actual.Tag.ScalarParser!;
+            Assert.NotNull(scalarParser);
+            var actualLoadedValue = scalarParser(actual);
+            Assert.Equal(expectedLoadedValue, actualLoadedValue);
         }
     }
 }

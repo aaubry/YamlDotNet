@@ -64,26 +64,26 @@ namespace YamlDotNet.Core
 
             ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(Scalar scalar)
             {
-                if (scalar.Tag.IsNonSpecific)
+                var wasResolved = scalar.Tag.Name.IsNonSpecific
+                    ? schema.ResolveNonSpecificTag(scalar, currentPath, out var resolvedTag)
+                    : schema.ResolveSpecificTag(scalar.Tag.Name, out resolvedTag);
+
+                if (wasResolved)
                 {
-                    var resolvedTag = schema.ResolveNonSpecificTag(scalar, currentPath);
-                    if (!resolvedTag.Equals(scalar.Tag))
-                    {
-                        scalar = new Scalar(scalar.Anchor, resolvedTag, scalar.Value, scalar.Style, scalar.Start, scalar.End);
-                    }
+                    scalar = new Scalar(scalar.Anchor, resolvedTag!, scalar.Value, scalar.Style, scalar.Start, scalar.End);
                 }
                 return scalar;
             }
 
             ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(SequenceStart sequenceStart)
             {
-                if (sequenceStart.Tag.IsNonSpecific)
+                var wasResolved = sequenceStart.Tag.Name.IsNonSpecific
+                    ? schema.ResolveNonSpecificTag(sequenceStart, currentPath, out var resolvedTag)
+                    : schema.ResolveSpecificTag(sequenceStart.Tag.Name, out resolvedTag);
+
+                if (wasResolved)
                 {
-                    var resolvedTag = schema.ResolveNonSpecificTag(sequenceStart, currentPath);
-                    if (!resolvedTag.Equals(sequenceStart.Tag))
-                    {
-                        sequenceStart = new SequenceStart(sequenceStart.Anchor, resolvedTag, sequenceStart.Style, sequenceStart.Start, sequenceStart.End);
-                    }
+                    sequenceStart = new SequenceStart(sequenceStart.Anchor, resolvedTag!, sequenceStart.Style, sequenceStart.Start, sequenceStart.End);
                 }
                 PushPathSegment(sequenceStart);
                 return sequenceStart;
@@ -91,13 +91,13 @@ namespace YamlDotNet.Core
 
             ParsingEvent IParsingEventVisitor<ParsingEvent>.Visit(MappingStart mappingStart)
             {
-                if (mappingStart.Tag.IsNonSpecific)
+                var wasResolved = mappingStart.Tag.Name.IsNonSpecific
+                    ? schema.ResolveNonSpecificTag(mappingStart, currentPath, out var resolvedTag)
+                    : schema.ResolveSpecificTag(mappingStart.Tag.Name, out resolvedTag);
+
+                if (wasResolved)
                 {
-                    var resolvedTag = schema.ResolveNonSpecificTag(mappingStart, currentPath);
-                    if (!resolvedTag.Equals(mappingStart.Tag))
-                    {
-                        mappingStart = new MappingStart(mappingStart.Anchor, resolvedTag, mappingStart.Style, mappingStart.Start, mappingStart.End);
-                    }
+                    mappingStart = new MappingStart(mappingStart.Anchor, resolvedTag!, mappingStart.Style, mappingStart.Start, mappingStart.End);
                 }
                 PushPathSegment(mappingStart);
                 return mappingStart;
