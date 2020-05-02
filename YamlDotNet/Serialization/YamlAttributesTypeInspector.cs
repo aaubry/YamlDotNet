@@ -55,6 +55,8 @@ namespace YamlDotNet.Serialization
 
                         descriptor.Order = member.Order;
                         descriptor.ScalarStyle = member.ScalarStyle;
+                        descriptor.SequenceStyle = member.SequenceStyle;
+                        descriptor.MappingStyle = member.MappingStyle;
 
                         if (member.Alias != null)
                         {

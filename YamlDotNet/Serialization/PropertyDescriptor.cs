@@ -21,6 +21,7 @@
 
 using System;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization
 {
@@ -50,6 +51,18 @@ namespace YamlDotNet.Serialization
         {
             get { return baseDescriptor.ScalarStyle; }
             set { baseDescriptor.ScalarStyle = value; }
+        }
+
+        public SequenceStyle SequenceStyle
+        {
+            get { return baseDescriptor.SequenceStyle; }
+            set { baseDescriptor.SequenceStyle = value; }
+        }
+
+        public MappingStyle MappingStyle
+        {
+            get { return baseDescriptor.MappingStyle; }
+            set { baseDescriptor.MappingStyle = value; }
         }
 
         public bool CanWrite

@@ -21,6 +21,7 @@
 
 using System;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization
 {
@@ -30,19 +31,23 @@ namespace YamlDotNet.Serialization
         public Type Type { get; private set; }
         public Type StaticType { get; private set; }
         public ScalarStyle ScalarStyle { get; private set; }
+        public SequenceStyle SequenceStyle { get; private set; }
+        public MappingStyle MappingStyle { get; private set; }
 
         public ObjectDescriptor(object? value, Type type, Type staticType)
-            : this(value, type, staticType, ScalarStyle.Any)
+            : this(value, type, staticType, ScalarStyle.Any, SequenceStyle.Any, MappingStyle.Any)
         {
         }
 
-        public ObjectDescriptor(object? value, Type type, Type staticType, ScalarStyle scalarStyle)
+        public ObjectDescriptor(object? value, Type type, Type staticType, ScalarStyle scalarStyle, SequenceStyle sequenceStyle, MappingStyle mappingStyle)
         {
             Value = value;
             Type = type ?? throw new ArgumentNullException(nameof(type));
             StaticType = staticType ?? throw new ArgumentNullException(nameof(staticType));
 
             ScalarStyle = scalarStyle;
+            SequenceStyle = sequenceStyle;
+            MappingStyle = mappingStyle;
         }
     }
 }

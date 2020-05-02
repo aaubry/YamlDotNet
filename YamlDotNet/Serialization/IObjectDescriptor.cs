@@ -21,6 +21,7 @@
 
 using System;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization
 {
@@ -48,6 +49,13 @@ namespace YamlDotNet.Serialization
         /// The style to be used for scalars.
         /// </summary>
         ScalarStyle ScalarStyle { get; }
+
+        /// <summary>
+        /// The style to be used for sequences.
+        /// </summary>
+        SequenceStyle SequenceStyle { get; }
+
+        MappingStyle MappingStyle { get; }
     }
 
     public static class ObjectDescriptorExtensions
