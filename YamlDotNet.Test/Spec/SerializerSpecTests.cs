@@ -54,7 +54,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> knownFalsePositives = new List<string>
         {
-            // no false-positives known as of https://github.com/yaml/yaml-test-suite/commit/61cf64dbc2bf93d49b24ba6f62b327941b5076ab
+            // no false-positives known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
         private readonly IDeserializer deserializer = new DeserializerBuilder().Build();

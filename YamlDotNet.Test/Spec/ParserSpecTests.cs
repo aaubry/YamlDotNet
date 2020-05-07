@@ -39,12 +39,12 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            // no spec test is ignored as of https://github.com/yaml/yaml-test-suite/commit/053b73a9c12c0cd76da797fdc2ffbd4bb5264c12
+            // no spec test is ignored as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
         {
-            // no false-positives known as of https://github.com/yaml/yaml-test-suite/commit/bf64436490f3f70a883f19c7cd06057190d9caac
+            // no false-positives known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
