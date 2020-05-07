@@ -154,6 +154,9 @@ namespace YamlDotNet.Test.Spec
             };
             Assert.Equal(expectedTag, actual.Tag.Name.Value);
 
+            var scalarParser = actual.Tag.ScalarParser!;
+            Assert.NotNull(scalarParser);
+            var actualLoadedValue = scalarParser(actual);
 
             object? expectedLoadedValue;
             if (expectedLoadedValueText.EndsWith("()"))
@@ -165,7 +168,14 @@ namespace YamlDotNet.Test.Spec
             }
             else if (actual.Tag.Name == YamlTagRepository.Integer)
             {
-                expectedLoadedValue = long.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
+                if (actualLoadedValue is long)
+                {
+                    expectedLoadedValue = long.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    expectedLoadedValue = ulong.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
+                }
             }
             else if (actual.Tag.Name == YamlTagRepository.FloatingPoint)
             {
@@ -175,9 +185,7 @@ namespace YamlDotNet.Test.Spec
             {
                 expectedLoadedValue = expectedLoadedValueText;
             }
-            var scalarParser = actual.Tag.ScalarParser!;
-            Assert.NotNull(scalarParser);
-            var actualLoadedValue = scalarParser(actual);
+
             Assert.Equal(expectedLoadedValue, actualLoadedValue);
         }
     }

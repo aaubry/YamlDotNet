@@ -162,6 +162,25 @@ namespace YamlDotNet.Helpers
             return parsed;
         }
 
+        // Assumes that value has the form: ^0o[0-7]+$
+        public static ulong ParseBase8Unsigned(string value)
+        {
+            ulong parsed = 0;
+            try
+            {
+                for (var idx = 2; idx < value.Length; ++idx)
+                {
+                    parsed = checked((parsed * 8UL) + (ulong)(value[idx] & 0b111));
+                }
+            }
+            catch (OverflowException)
+            {
+                throw new OverflowException("Value was too large for an integer.");
+            }
+
+            return parsed;
+        }
+
         // Assumes that value has the form: ^[-+]?(0|[1-9][0-9_]*)$
         public static long ParseBase10(string value)
         {
@@ -282,8 +301,36 @@ namespace YamlDotNet.Helpers
             return parsed;
         }
 
-        // Assumes that value has the form: ^[-+]?[1-9][0-9_]*(:[0-5]?[0-9])+$
+        // Assumes that value has the form: ^0x[0-9a-fA-F]+$
+        public static ulong ParseBase16Unsigned(string value)
+        {
+            ulong parsed = 0;
+            try
+            {
+                for (var idx = 2; idx < value.Length; ++idx)
+                {
+                    var chr = value[idx];
+                    if (chr != '_')
+                    {
+                        parsed = checked((parsed * 16UL) + (ulong)(chr & 0x0f));
+                        if (chr > '9')
+                        {
+                            parsed = checked(parsed + 9UL);
+                        }
+                    }
+                }
+            }
+            catch (OverflowException)
+            {
+                throw new OverflowException("Value was too large for an integer.");
+            }
+
+            return parsed;
+        }
+
         public static long ParseBase60(string value) => ParseBase60(value, value.Length, out _);
+
+        // Assumes that value has the form: ^[-+]?[1-9][0-9_]*(:[0-5]?[0-9])+$
         public static long ParseBase60(string value, int length, out bool isPositive)
         {
             int idx;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using YamlDotNet.Core.Events;
 
@@ -13,8 +14,12 @@ namespace YamlDotNet.Core.Schemas
 
         private FailsafeSchema(ITag fallbackTag)
         {
-            this.fallbackTag = fallbackTag;
+            this.fallbackTag = fallbackTag ?? throw new ArgumentNullException(nameof(fallbackTag));
         }
+
+        public static readonly ITag String = new SimpleTag(YamlTagRepository.String, s => s.Value);
+        public static readonly ITag Mapping = new SimpleTag(YamlTagRepository.Mapping);
+        public static readonly ITag Sequence = new SimpleTag(YamlTagRepository.Sequence);
 
         /// <summary>
         /// A version of the <see cref="FailsafeSchema"/> that conforms strictly to the specification
@@ -26,10 +31,6 @@ namespace YamlDotNet.Core.Schemas
         /// A version of the <see cref="FailsafeSchema"/> that treats unrecognized scalars as strings.
         /// </summary>
         public static readonly FailsafeSchema Lenient = new FailsafeSchema(String);
-
-        public static readonly ITag String = new SimpleTag(YamlTagRepository.String, s => s.Value);
-        public static readonly ITag Mapping = new SimpleTag(YamlTagRepository.Mapping);
-        public static readonly ITag Sequence = new SimpleTag(YamlTagRepository.Sequence);
 
         public bool ResolveNonSpecificTag(Scalar node, IEnumerable<NodeEvent> path, [NotNullWhen(true)] out ITag? resolvedTag)
         {

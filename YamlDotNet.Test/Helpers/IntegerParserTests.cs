@@ -107,6 +107,24 @@ namespace YamlDotNet.Test.Helpers
         }
 
         [Theory]
+        [InlineData("0o644", 420UL)]
+        [InlineData("0o0", 0UL)]
+        [InlineData("0o436573262730015027653", 5165465146154561451UL)]
+        [InlineData("0o1777777777777777777777", ulong.MaxValue)]
+        public void ParseBase8Unsigned_is_correct(string value, ulong expected)
+        {
+            var actual = IntegerParser.ParseBase8Unsigned(value);
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("0o2000000000000000000000")]
+        public void ParseBase8Unsigned_detects_overflow(string value)
+        {
+            Assert.Throws<OverflowException>(() => IntegerParser.ParseBase8Unsigned(value));
+        }
+
+        [Theory]
         [InlineData("-123", -123L)]
         [InlineData("123", 123L)]
         [InlineData("+123", 123L)]
@@ -152,6 +170,24 @@ namespace YamlDotNet.Test.Helpers
         public void ParseBase16_detects_overflow(string value)
         {
             Assert.Throws<OverflowException>(() => IntegerParser.ParseBase16(value));
+        }
+
+        [Theory]
+        [InlineData("0xf4C", 3916UL)]
+        [InlineData("0x0", 0UL)]
+        [InlineData("0x47AF6B2EC0342FAB", 5165465146154561451UL)]
+        [InlineData("0xFFFFFFFFFFFFFFFF", ulong.MaxValue)]
+        public void ParseBase16Unsigned_is_correct(string value, ulong expected)
+        {
+            var actual = IntegerParser.ParseBase16Unsigned(value);
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("0x10000000000000000")]
+        public void ParseBase16Unsigned_detects_overflow(string value)
+        {
+            Assert.Throws<OverflowException>(() => IntegerParser.ParseBase16Unsigned(value));
         }
 
         [Theory]
