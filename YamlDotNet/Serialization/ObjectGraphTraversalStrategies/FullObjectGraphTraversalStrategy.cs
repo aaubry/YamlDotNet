@@ -22,8 +22,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Helpers;
@@ -198,17 +196,15 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             visitor.VisitMappingStart(dictionary, keyType, valueType, context);
 
             var isDynamic = dictionary.Type.FullName!.Equals("System.Dynamic.ExpandoObject");
-#pragma warning disable CS8605 // Unboxing a possibly null value. Iterating IDictionary should not return nulls.
-            foreach (DictionaryEntry entry in (IDictionary)dictionary.NonNullValue())
-#pragma warning restore CS8605 // Unboxing a possibly null value.
+            foreach (DictionaryEntry? entry in (IDictionary)dictionary.NonNullValue())
             {
-                var keyValue = isDynamic ? namingConvention.Apply(entry.Key.ToString()!) : entry.Key;
+                var entryValue = entry!.Value;
+                var keyValue = isDynamic ? namingConvention.Apply(entryValue.Key.ToString()!) : entryValue.Key;
                 var key = GetObjectDescriptor(keyValue, keyType);
-                var value = GetObjectDescriptor(entry.Value, valueType);
+                var value = GetObjectDescriptor(entryValue.Value, valueType);
 
                 if (visitor.EnterMapping(key, value, context))
                 {
-                    var keyAsString = TypeConverter.ChangeType<string>(key);
                     Traverse(keyValue, key, visitor, context, path);
                     Traverse(keyValue, value, visitor, context, path);
                 }
