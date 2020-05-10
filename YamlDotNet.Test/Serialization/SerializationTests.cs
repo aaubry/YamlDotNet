@@ -234,19 +234,6 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        public void DeserializationOfObjectsHandlesForwardReferences()
-        {
-            var text = Lines(
-                "Nothing: *forward",
-                "MyString: &forward ForwardReference");
-
-            var result = Deserializer.Deserialize<Example>(UsingReaderFor(text));
-
-            result.ShouldBeEquivalentTo(
-                new { Nothing = "ForwardReference", MyString = "ForwardReference" }, o => o.ExcludingMissingMembers());
-        }
-
-        [Fact]
         public void DeserializationFailsForUndefinedForwardReferences()
         {
             var text = Lines(
@@ -512,30 +499,6 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        public void DeserializationOfGenericListsHandlesForwardReferences()
-        {
-            var text = Lines(
-                "- *forward",
-                "- &forward ForwardReference");
-
-            var result = Deserializer.Deserialize<string[]>(UsingReaderFor(text));
-
-            result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
-        }
-
-        [Fact]
-        public void DeserializationOfNonGenericListsHandlesForwardReferences()
-        {
-            var text = Lines(
-                "- *forward",
-                "- &forward ForwardReference");
-
-            var result = Deserializer.Deserialize<ArrayList>(UsingReaderFor(text));
-
-            result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
-        }
-
-        [Fact]
         public void RoundtripList()
         {
             var obj = new List<int> { 2, 4, 6 };
@@ -610,47 +573,6 @@ namespace YamlDotNet.Test.Serialization
             var result = DoRoundtripFromObjectTo<Dictionary<string, string>>(obj);
 
             result.Should().Equal(obj);
-        }
-
-        [Fact]
-        public void DeserializationOfGenericDictionariesHandlesForwardReferences()
-        {
-            var text = Lines(
-                "key1: *forward",
-                "*forwardKey: ForwardKeyValue",
-                "*forward: *forward",
-                "key2: &forward ForwardReference",
-                "key3: &forwardKey key4");
-
-            var result = Deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(text));
-
-            result.Should().Equal(new Dictionary<string, string> {
-                { "ForwardReference", "ForwardReference" },
-                { "key1", "ForwardReference" },
-                { "key2", "ForwardReference" },
-                { "key4", "ForwardKeyValue" },
-                { "key3", "key4" }
-            });
-        }
-
-        [Fact]
-        public void DeserializationOfNonGenericDictionariesHandlesForwardReferences()
-        {
-            var text = Lines(
-                "key1: *forward",
-                "*forwardKey: ForwardKeyValue",
-                "*forward: *forward",
-                "key2: &forward ForwardReference",
-                "key3: &forwardKey key4");
-
-            var result = Deserializer.Deserialize<Hashtable>(UsingReaderFor(text));
-
-            result.Should().BeEquivalentTo(
-                Entry("ForwardReference", "ForwardReference"),
-                Entry("key1", "ForwardReference"),
-                Entry("key2", "ForwardReference"),
-                Entry("key4", "ForwardKeyValue"),
-                Entry("key3", "key4"));
         }
 
         [Fact]
@@ -1562,6 +1484,38 @@ namespace YamlDotNet.Test.Serialization
             Assert.NotNull(deserialized);
         }
 
+        private sealed class AnchorPrecedence
+        {
+            internal sealed class AnchorPrecedenceNested
+            {
+                public string b1 { get; set; }
+                public Dictionary<string, string> b2 { get; set; }
+            }
+
+            public string a { get; set; }
+            public AnchorPrecedenceNested b { get; set; }
+            public string c { get; set; }
+        }
+
+        [Fact]
+        public void DeserializationWithDuplicateAnchorsSucceeds()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<AnchorPrecedence>(@"
+a: &anchor1 test0
+b:
+  b1: &anchor1 test1
+  b2:
+    b21:  &anchor1 test2
+c:  *anchor1");
+
+            Assert.Equal("test0", deserialized.a);
+            Assert.Equal("test1", deserialized.b.b1);
+            Assert.Contains("b21", deserialized.b.b2.Keys);
+            Assert.Equal("test2", deserialized.b.b2["b21"]);
+            Assert.Equal("test2", deserialized.c);
+        }
+
         [Fact]
         public void SerializeExceptionWithStackTrace()
         {
@@ -1787,6 +1741,18 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal(@"anchor "" value """, deserialized["a"]);
             Assert.Equal("2", deserialized[@"anchor "" value """]);
             Assert.Equal(@"anchor "" value """, deserialized["myvalue"]);
+        }
+
+        [Fact]
+        public void AliasBeforeAnchorCannotBeDeserialized()
+        {
+            var sut = new Deserializer();
+            Action action = () => sut.Deserialize<GenericTestDictionary<string, string>>(@"
+a: *anchor1
+b: &anchor1 test0
+c: *anchor1");
+
+            action.ShouldThrow<AnchorNotFoundException>();
         }
 
         [Fact]
