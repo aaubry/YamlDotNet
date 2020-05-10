@@ -27,19 +27,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -808,6 +806,25 @@ namespace YamlDotNet.Test.Serialization
             SerializerBuilder.JsonCompatible().Build().Serialize(writer, obj, typeof(Dictionary<string, string>));
 
             writer.ToString().Should().NotContain("?");
+        }
+
+        [Fact]
+        public void SerializationOfAnchorWorksInJson()
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yamlObject = deserializer.Deserialize(Yaml.ReaderForText(@"
+x: &anchor1
+  z:
+    v: 1
+y:
+  k: *anchor1"));
+
+            var serializer = new SerializerBuilder()
+                .JsonCompatible()
+                .Build();
+
+            serializer.Serialize(yamlObject).Trim().Should()
+                .BeEquivalentTo(@"{""x"": {""z"": {""v"": ""1""}}, ""y"": {""k"": {""z"": {""v"": ""1""}}}}");
         }
 
         [Fact]

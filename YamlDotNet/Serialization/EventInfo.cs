@@ -44,6 +44,7 @@ namespace YamlDotNet.Serialization
         }
 
         public string Alias { get; }
+        public bool NeedsExpansion { get; set; }
     }
 
     public class ObjectEventInfo : EventInfo

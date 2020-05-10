@@ -20,7 +20,6 @@
 //  SOFTWARE.
 
 using System;
-using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -35,7 +34,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
         {
-            throw new NotSupportedException("Aliases are not supported in JSON");
+            eventInfo.NeedsExpansion = true;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
