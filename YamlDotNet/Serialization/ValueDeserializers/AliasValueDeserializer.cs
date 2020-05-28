@@ -104,8 +104,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 var aliasState = state.Get<AliasState>();
                 if (!aliasState.TryGetValue(alias.Value, out var valuePromise))
                 {
-                    valuePromise = new ValuePromise(alias);
-                    aliasState.Add(alias.Value, valuePromise);
+                    throw new AnchorNotFoundException(alias.Start, alias.End, $"Alias ${alias.Value} cannot precede anchor declaration");
                 }
 
                 return valuePromise.HasValue ? valuePromise.Value : valuePromise;
