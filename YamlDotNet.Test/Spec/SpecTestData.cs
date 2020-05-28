@@ -30,6 +30,7 @@ namespace YamlDotNet.Test.Spec
     {
         private const string DescriptionFilename = "===";
         private const string InputFilename = "in.yaml";
+        private const string OutputFilename = "out.yaml";
         private const string ExpectedEventFilename = "test.event";
         private const string ErrorFilename = "error";
 
@@ -56,12 +57,15 @@ namespace YamlDotNet.Test.Spec
                 var hasErrorFile = File.Exists(Path.Combine(testPath, ErrorFilename));
                 var expectedEventFile = Path.Combine(testPath, ExpectedEventFilename);
 
+                var outputFile = Path.Combine(testPath, OutputFilename);
+                if (!File.Exists(outputFile)) outputFile = inputFile;
+
                 yield return new object[]
                 {
                     testName,
                     File.ReadAllText(descriptionFile).TrimEnd(),
                     inputFile,
-                    expectedEventFile,
+                    (this is SerializerSpecTests.SerializerSpecTestsData) ? outputFile : expectedEventFile,
                     hasErrorFile
                 };
             }
