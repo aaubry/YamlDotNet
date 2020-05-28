@@ -45,6 +45,7 @@ namespace YamlDotNet.Core
 
         private readonly int maxSimpleKeyLength;
         private readonly bool isCanonical;
+        private readonly bool skipAnchorName;
         private readonly int bestIndent;
         private readonly int bestWidth;
         private EmitterState state;
@@ -140,6 +141,7 @@ namespace YamlDotNet.Core
             this.bestWidth = settings.BestWidth;
             this.isCanonical = settings.IsCanonical;
             this.maxSimpleKeyLength = settings.MaxSimpleKeyLength;
+            this.skipAnchorName = settings.SkipAnchorName;
 
             this.output = output;
             this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
@@ -1375,7 +1377,7 @@ namespace YamlDotNet.Core
 
         private void ProcessAnchor()
         {
-            if (anchorData.anchor != null)
+            if (anchorData.anchor != null && !skipAnchorName)
             {
                 WriteIndicator(anchorData.isAlias ? "*" : "&", true, false, false);
                 WriteAnchor(anchorData.anchor);
