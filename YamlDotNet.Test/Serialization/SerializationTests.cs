@@ -194,6 +194,18 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeWithGapsBetweenKeys()
+        {
+            var yamlReader = new StringReader(@"Text: >
+  Some Text.
+  
+Value: foo");
+            var result = Deserializer.Deserialize(yamlReader);
+
+            result.Should().NotBeNull();
+        }
+
+        [Fact]
         public void SerializeCustomTags()
         {
             var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();

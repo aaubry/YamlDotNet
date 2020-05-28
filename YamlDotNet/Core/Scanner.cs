@@ -1693,7 +1693,7 @@ namespace YamlDotNet.Core
                 throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found extra spaces in first line.");
             }
 
-            if (!isLiteral && maxIndent > cursor.LineOffset)
+            if (!isLiteral && maxIndent > cursor.LineOffset && indentOfFirstLine > -1)
             {
                 // S98Z
                 throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found more spaces in lines above first content line.");
