@@ -1,19 +1,13 @@
 # Release notes
-## Release 8.1.1
+## Release 8.1.2
 
 ## Bug fixes
 
-- Improve compliance with the official YAML test suite: #467, #469 and #475.
-
-- Make YamlMemberAttribute.DefaultValuesHandling actually usable. Fixes #466.
-
-- Actually inherit YamlIgnore attributes: #481.
-
-## New features
-
-- Add LowerCaseNamingConvention: #477.
+- Merge #483 - Allow values after DocumentStart token
+- Merge #497 - Fix indentation check for first content line - fixes #492
 
 # Previous releases
+- [8.1.1](releases/8.1.1.md)
 - [8.1.0](releases/8.1.0.md)
 - [8.0.0](releases/8.0.0.md)
 - [7.0.0](releases/7.0.0.md)
