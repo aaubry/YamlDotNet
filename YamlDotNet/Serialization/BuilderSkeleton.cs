@@ -271,7 +271,7 @@ namespace YamlDotNet.Serialization
         public TBuilder WithoutTypeInspector<TTypeInspector>()
             where TTypeInspector : ITypeInspector
         {
-            return WithoutTypeInspector(typeof(ITypeInspector));
+            return WithoutTypeInspector(typeof(TTypeInspector));
         }
 
         /// <summary>
