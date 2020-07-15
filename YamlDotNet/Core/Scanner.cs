@@ -1662,7 +1662,7 @@ namespace YamlDotNet.Core
                     {
                         int localIndent = cursor.LineOffset;
                         int i = 0;
-                        for (; !analyzer.IsBreak(i) && analyzer.IsSpace(i); ++i, ++localIndent) ;
+                        for (; !analyzer.IsBreak(i) && analyzer.IsSpace(i) && i < MaxBufferLength - 1; ++i, ++localIndent) ;
                         if (analyzer.IsBreak(i) && localIndent > cursor.LineOffset)
                         {
                             isFirstLine = false;

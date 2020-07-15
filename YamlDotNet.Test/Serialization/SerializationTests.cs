@@ -1799,6 +1799,20 @@ c: *anchor1");
             Assert.Equal("some value", deserialized["interpolated value"]);
         }
 
+        [Fact]
+        public void HeavilyIndentedLiteral()
+        {
+            var stream = Yaml.StreamFrom("heavily-indented-literal.yaml");
+
+            var result = Deserializer.Deserialize(stream);
+
+            result
+                .Should().BeOfType<Dictionary<object, object>>().And
+                .Subject.As<Dictionary<object, object>>()
+                .Should().HaveCount(1).And
+                .Contain("Literal", "        <hr>");
+        }
+
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {
