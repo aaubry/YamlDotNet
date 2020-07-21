@@ -497,7 +497,7 @@ namespace YamlDotNet.Core
 
             if (simpleKeyAllowed && indent >= cursor.LineOffset && analyzer.IsTab())
             {
-                throw new SyntaxErrorException("While scanning a mapping, found invalid tab as indendation.");
+                throw new SyntaxErrorException("While scanning a mapping, found invalid tab as indentation.");
             }
 
             if (analyzer.IsWhiteBreakOrZero())
