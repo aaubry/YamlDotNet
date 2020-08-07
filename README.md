@@ -37,6 +37,39 @@ The following runtimes are also supported, with a few features missing:
 
 The library is compatible with mono's [Ahead-of-Time compilation](https://www.mono-project.com/docs/advanced/aot/) (AOT), and should work correctly on platforms that depend on it, such as Unity.
 
+## Quick start
+
+Here are some quick samples to get you started.
+
+### Serialisation to a string
+
+```c#
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+...
+
+string yaml = string.Empty;
+var deserializer = new DeserializerBuilder()
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .Build();
+
+var order = deserializer.Deserialize<Order>(yaml);
+```
+
+### Deserialization from a string
+
+
+```c#
+using YamlDotNet.RepresentationModel;
+...
+
+var objectToSerialize;
+...
+var serializer = new SerializerBuilder().Build();
+//yaml contains a string containing your YAML
+var yaml = serializer.Serialize(receipt);
+```
+
 ## More information
 
 More information can be found in the [project's wiki](https://github.com/aaubry/YamlDotNet/wiki).
