@@ -154,6 +154,13 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeQuotedStringNullAsString()
+        {
+            var result = Deserializer.Deserialize<string>(UsingReaderFor("'null'"));
+            result.Should().Be("null");
+        }
+
+        [Fact]
         public void RoundtripEnums()
         {
             var flags = EnumExample.One | EnumExample.Two;
