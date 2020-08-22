@@ -39,36 +39,87 @@ The library is compatible with mono's [Ahead-of-Time compilation](https://www.mo
 
 ## Quick start
 
-Here are some quick samples to get you started.
+Here are some quick samples to get you started which can be viewed in [this fiddle](https://dotnetfiddle.net/CQ7ZKi).
 
-### Serialisation to a string
+### Serialization to a string
 
 ```c#
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 ...
 
-string yaml;
-//
-var deserializer = new DeserializerBuilder()
+ var person = new Person
+{
+    Name = "Abe Lincoln",
+    Age = 25,
+    HeightInInches = 6f + 4f / 12f,
+    Addresses = new Dictionary<string, Address>{
+        { "home", new  Address() {
+                Street = "2720  Sundown Lane",
+                City = "Kentucketsville",
+                State = "Calousiyorkida",
+                Zip = "99978",
+            }},
+        { "work", new  Address() {
+                Street = "1600 Pennsylvania Avenue NW",
+                City = "Washington",
+                State = "District of Columbia",
+                Zip = "20500",
+            }},
+    }
+};
+
+var serializer = new SerializerBuilder()
     .WithNamingConvention(CamelCaseNamingConvention.Instance)
     .Build();
-
-var order = deserializer.Deserialize<Order>(yaml);
+var yaml = serializer.Serialize(person);
+System.Console.WriteLine(yaml);
+// Output: 
+// name: Abe Lincoln
+// age: 25
+// heightInInches: 6.3333334922790527
+// addresses:
+//   home:
+//     street: 2720  Sundown Lane
+//     city: Kentucketsville
+//     state: Calousiyorkida
+//     zip: 99978
+//   work:
+//     street: 1600 Pennsylvania Avenue NW
+//     city: Washington
+//     state: District of Columbia
+//     zip: 20500
 ```
 
 ### Deserialization from a string
 
-
 ```c#
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 ...
 
-var objectToSerialize;
-...
-var serializer = new SerializerBuilder().Build();
-//yaml contains a string containing your YAML
-var yaml = serializer.Serialize(receipt);
+var yml = @"
+name: George Washington
+age: 89
+height_in_inches: 5.75
+addresses:
+  home:
+    street: 400 Mockingbird Lane
+    city: Louaryland
+    state: Hawidaho
+    zip: 99970
+";
+
+var deserializer = new DeserializerBuilder()
+    .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml 
+    .Build();
+
+//yml contains a string containing your YAML
+var p = deserializer.Deserialize<Person>(yml);
+var h = p.Addresses["home"];
+System.Console.WriteLine($"{p.Name} is {p.Age} years old and lives at {h.Street} in {h.City}, {h.State}.");
+// Output:
+// George Washington is 89 years old and lives at 400 Mockingbird Lane in Louaryland, Hawidaho.
 ```
 
 ## More information
