@@ -41,7 +41,7 @@ The library is compatible with mono's [Ahead-of-Time compilation](https://www.mo
 
 Here are some quick samples to get you started.
 
-### Serialisation to a string
+### Deserialization from a string
 
 ```c#
 using YamlDotNet.Serialization;
@@ -57,8 +57,7 @@ var deserializer = new DeserializerBuilder()
 var order = deserializer.Deserialize<Order>(yaml);
 ```
 
-### Deserialization from a string
-
+### Serialisation to a string
 
 ```c#
 using YamlDotNet.RepresentationModel;
