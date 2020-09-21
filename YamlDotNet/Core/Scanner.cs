@@ -109,7 +109,7 @@ namespace YamlDotNet.Core
         /// <param name="skipComments">Indicates whether comments should be ignored</param>
         public Scanner(TextReader input, bool skipComments = true)
         {
-            analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
+            analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, 1024));
             cursor = new Cursor();
             SkipComments = skipComments;
         }
