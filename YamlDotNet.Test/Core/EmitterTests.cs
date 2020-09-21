@@ -346,6 +346,39 @@ namespace YamlDotNet.Test.Core
         }
 
         [Theory]
+        [InlineData("NULL")]
+        [InlineData("Null")]
+        [InlineData("null")]
+        [InlineData("~")]
+        [InlineData("true")]
+        [InlineData("false")]
+        [InlineData("True")]
+        [InlineData("False")]
+        [InlineData("TRUE")]
+        [InlineData("FALSE")]
+        [InlineData("0o77")]
+        [InlineData("0x7A")]
+        [InlineData("+1e10")]
+        [InlineData("1E10")]
+        [InlineData("+.inf")]
+        [InlineData("-.inf")]
+        [InlineData(".inf")]
+        [InlineData(".nan")]
+        [InlineData(".NaN")]
+        [InlineData(".NAN")]
+        [Trait("motive", "issue #387")]
+        public void StringsThatMatchKeywordsAreQuoted(string input)
+        {
+            var events = SequenceWith(
+                Scalar(input).ImplicitPlain
+            );
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+            yaml.Should()
+                .Contain(string.Format("- '{0}'", input));
+        }
+
+        [Theory]
         [InlineData("b-carriage-return,b-line-feed\r\nlll", "b-carriage-return,b-line-feed\nlll")]
         [InlineData("b-carriage-return\rlll", "b-carriage-return\nlll")]
         [InlineData("b-line-feed\nlll", "b-line-feed\nlll")]

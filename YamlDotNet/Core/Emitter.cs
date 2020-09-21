@@ -297,6 +297,21 @@ namespace YamlDotNet.Core
                 return;
             }
 
+            if (scalar.Tag == "tag:yaml.org,2002:str" || scalar.Tag == null)
+            {
+                // make sure anything that is listed in 10.3.2 of the YAML spec: https://yaml.org/spec/1.2/spec.html
+                //   and is coming from a string value doesn't get inadvertently converted into a non-string output.
+                if (scalar.Style == ScalarStyle.Any && IsSpecialStringValue(scalar.Value))
+                {
+                    scalarData.isMultiline = false;
+                    scalarData.isFlowPlainAllowed = false;
+                    scalarData.isBlockPlainAllowed = false;
+                    scalarData.isSingleQuotedAllowed = true;
+                    scalarData.isBlockAllowed = false;
+                    return;
+                }
+            }
+
             var flowIndicators = false;
             var blockIndicators = false;
             if (value.StartsWith("---", StringComparison.Ordinal) || value.StartsWith("...", StringComparison.Ordinal))
@@ -493,6 +508,26 @@ namespace YamlDotNet.Core
             }
 
             scalarData.hasSingleQuotes = singleQuotes;
+        }
+
+        // based on 10.3.2 at https://yaml.org/spec/1.2/spec.html
+        // NOTE: this may need to be expanded to handle other "special" values like 'yes', and 'no', etc.
+        private static string IsSpecialStringValue_Regex =
+            @"^("
+                 + @"null|Null|NULL|\~"
+                 + @"|true|True|TRUE|false|False|FALSE"
+                 + @"|[-+]?[0-9]+|0o[0-7]+"
+                 + @"|0x[0-9a-fA-F]+"
+                 + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?"
+                 + @"|[-+]?(\.inf|\.Inf|\.INF)"
+                 + @"|\.nan|\.NaN|\.NAN"
+            + @")$";
+
+        private bool IsSpecialStringValue(string value)
+        {
+            return Regex.IsMatch(
+                value,
+                IsSpecialStringValue_Regex);
         }
 
         private bool ValueIsRepresentableInOutputEncoding(string value)
