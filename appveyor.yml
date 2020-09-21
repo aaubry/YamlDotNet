@@ -34,14 +34,10 @@ artifacts:
 
   - path: YamlDotNet\bin\*.nupkg
 
-for:
-  - branches:
-      only:
-        - master
-    skip_non_tags: true
-
-    deploy:
-      - provider: NuGet
-        api_key:
-          secure: ojJHQQHSQs/rgIRopbuHUQcjWpVgwaXhjYpW2kdkjS6NZta2A3Zzaz9k2yf+XooV
-        artifact: /.*\.nupkg/
+deploy:
+  - provider: NuGet
+    on:
+      APPVEYOR_REPO_TAG: true
+    api_key:
+      secure: ojJHQQHSQs/rgIRopbuHUQcjWpVgwaXhjYpW2kdkjS6NZta2A3Zzaz9k2yf+XooV
+    artifact: /.*\.nupkg/
