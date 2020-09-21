@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,24 +19,24 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
+using System;
 
-// Information about this assembly is defined by the following attributes.
-// Change them to the values specific to your project.
-[assembly: AssemblyTitle ("YamlDotNet.PerformanceTests.v4.0.0")]
-[assembly: AssemblyDescription ("")]
-[assembly: AssemblyConfiguration ("")]
-[assembly: AssemblyCompany ("")]
-[assembly: AssemblyProduct ("")]
-[assembly: AssemblyCopyright ("aaubry")]
-[assembly: AssemblyTrademark ("")]
-[assembly: AssemblyCulture ("")]
-// The assembly version has the format "{Major}.{Minor}.{Build}.{Revision}".
-// The form "{Major}.{Minor}.*" will automatically update the build and revision,
-// and "{Major}.{Minor}.{Build}.*" will update just the revision.
-[assembly: AssemblyVersion ("1.0.0")]
-// The following attributes are used to specify the signing key for the assembly,
-// if desired. See the Mono documentation for more information about signing.
-//[assembly: AssemblyDelaySign(false)]
-//[assembly: AssemblyKeyFile("")]
+namespace YamlDotNet.PerformanceTests
+{
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
+    public class BuildPropertiesAttribute : Attribute
+    {
+        public BuildPropertiesAttribute(string testVersion, string baseIntermediateOutputPath, string msbuildProjectExtensionsPath, string targetFramework)
+        {
+            TestVersion = testVersion;
+            BaseIntermediateOutputPath = baseIntermediateOutputPath;
+            MSBuildProjectExtensionsPath = msbuildProjectExtensionsPath;
+            TargetFramework = targetFramework;
+        }
+
+        public string TestVersion { get; }
+        public string BaseIntermediateOutputPath { get; }
+        public string MSBuildProjectExtensionsPath { get; }
+        public string TargetFramework { get; }
+    }
+}

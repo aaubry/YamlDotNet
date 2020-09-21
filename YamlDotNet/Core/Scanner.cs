@@ -35,7 +35,6 @@ namespace YamlDotNet.Core
     public class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;
-        private const int MaxBufferLength = 8;
 
         private static readonly IDictionary<char, char> simpleEscapeCodes = new SortedDictionary<char, char>
         {
