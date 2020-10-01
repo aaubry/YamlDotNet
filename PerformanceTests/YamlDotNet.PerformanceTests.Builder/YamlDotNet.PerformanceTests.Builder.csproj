@@ -1,0 +1,22 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+  <PropertyGroup>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <ProjectGuid>{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}</ProjectGuid>
+    <Configurations>Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <Import Project="versions.props" />
+  <ItemGroup>
+    <None Include="versions.props" />
+  </ItemGroup>
+  <Target Name="Build" Outputs="%(TestVersions.Identity)">
+    <Message Importance="high" Text="BUILDING %(TestVersions.Identity)" />
+    <MSBuild Projects="..\YamlDotNet.PerformanceTests\YamlDotNet.PerformanceTests.csproj" Targets="Restore;Build" BuildInParallel="$(BuildInParallel)" Properties="Configuration=Release;TestVersion=%(TestVersions.Identity);BaseIntermediateOutputPath=obj\%(TestVersions.Identity)\;MSBuildProjectExtensionsPath=obj\%(TestVersions.Identity)\" />
+    <Message Importance="high" Text="&#xA;" />
+  </Target>
+  <Target Name="Clean">
+    <RemoveDir Directories="..\YamlDotNet.PerformanceTests\obj\%(TestVersions.Identity)" />
+  </Target>
+</Project>

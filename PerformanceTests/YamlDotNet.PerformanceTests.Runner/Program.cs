@@ -20,50 +20,62 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Extensions;
-using BenchmarkDotNet.Running;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.PerformanceTests.Runner
 {
     class MainClass
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             var currentDir = Directory.GetCurrentDirectory();
-            
+
             var baseDir = currentDir;
             for (var i = 0; i < 4; ++i)
             {
                 baseDir = Path.GetDirectoryName(baseDir);
             }
 
-            var baseDirLength = currentDir.IndexOf($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}");
+            var testsBaseDir = Path.Combine(baseDir, "YamlDotNet.PerformanceTests", "bin");
 
-            var configuration = currentDir.Substring(baseDirLength, currentDir.Length - baseDirLength).Trim(Path.DirectorySeparatorChar);
+            var testPrograms = Directory.GetDirectories(testsBaseDir)
+                .SelectMany(d => Directory.GetDirectories(d))
+                .SelectMany(d => new[] { Path.Combine(d, "YamlDotNet.PerformanceTests.exe"), Path.Combine(d, "YamlDotNet.PerformanceTests.dll") })
+                .Where(f => File.Exists(f))
+                .GroupBy(f => Path.GetDirectoryName(f), (_, f) => f.OrderBy(fn => Path.GetExtension(fn)).First()) // Favor .dll over .exe
+                //.Where(d => d.Contains("5.2.0")).Take(1)
+                .Select(f => new
+                {
+                    Path = f,
+                    Framework = Path.GetFileName(Path.GetDirectoryName(f)),
+                    Version = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(f))),
+                })
+                .OrderBy(p => p.Version == "latest" ? new Version(999, 999, 999) : Version.Parse(p.Version)).ThenBy(p => p.Framework)
+                .ToList();
 
-            Console.WriteLine($"Configuration: {configuration}\n");
-
-            var testPrograms = Directory.GetDirectories(baseDir)
-                .Select(d => Path.Combine(d, configuration))
-                .Where(d => d != currentDir)
-                .Where(Directory.Exists)
-                .SelectMany(d => Directory.GetFiles(d, "*.exe"))
-                .Where(f => Regex.IsMatch(f, @"YamlDotNet.PerformanceTests.(vlatest|v\d+\.\d+\.\d+)\.exe$"));
-
-            var testResults = new List<TestResult>();
+            Console.Error.WriteLine($"Base dir: {testsBaseDir}");
+            Console.Error.WriteLine("Discovered the following tests:");
             foreach (var testProgram in testPrograms)
             {
-                Console.Error.WriteLine("Running {0}", Path.GetFileName(testProgram));
-
-                RunTest(testProgram, testResults);
+                Console.Error.WriteLine($"  - version {testProgram.Version,-7} {testProgram.Framework,-13}  .{testProgram.Path.Substring(testsBaseDir.Length)}");
             }
+
+            var testResults = new List<TestResult>();
+
+            for (int i = 0; i < testPrograms.Count; i++)
+            {
+                var testProgram = testPrograms[i];
+
+                Console.Title = $"Running tests for YamlDotNet {testProgram.Version} for {testProgram.Framework} ({i + 1} of {testPrograms.Count})";
+
+                RunTest(testProgram.Path, testProgram.Version, testProgram.Framework, testResults);
+            }
+
+            Console.Title = "Performance test results for YamlDotNet";
 
             PrintResult(testResults);
         }
@@ -84,7 +96,7 @@ namespace YamlDotNet.PerformanceTests.Runner
                 var resultsFromTest = testResults.Where(r => r.Test == test).OrderBy(p => p.Version).ToList();
 
                 var initialColumnWidth = resultsFromTest.Max(r => r.Version.Length);
-                var tableWith = initialColumnWidth + (columnWidth + 2) * metricsCount + metricsCount + 4;
+                var tableWith = initialColumnWidth + 16 + (columnWidth + 2) * metricsCount + metricsCount + 4;
                 Console.WriteLine();
 
                 PrintLine(tableWith);
@@ -94,26 +106,52 @@ namespace YamlDotNet.PerformanceTests.Runner
                 PrintLine(tableWith);
 
                 Console.Write($"| {string.Empty.PadLeft(initialColumnWidth)} |");
-                Console.Write($" {nameof(TestResult.Mean).PadLeft(columnWidth)} |");
-                Console.Write($" {nameof(TestResult.Error).PadLeft(columnWidth)} |");
-                Console.Write($" {nameof(TestResult.StdDev).PadLeft(columnWidth)} |");
-                Console.Write($" {nameof(TestResult.Gen0).PadLeft(columnWidth)} |");
-                Console.Write($" {nameof(TestResult.Gen1).PadLeft(columnWidth)} |");
-                Console.Write($" {nameof(TestResult.Allocated).PadLeft(columnWidth)} |");
+                Console.Write($" {nameof(TestResult.Version),-13} |");
+                Console.Write($" {nameof(TestResult.Mean),columnWidth} |");
+                Console.Write($" {nameof(TestResult.Error),columnWidth} |");
+                Console.Write($" {nameof(TestResult.StdDev),columnWidth} |");
+                Console.Write($" {nameof(TestResult.Gen0),columnWidth} |");
+                Console.Write($" {nameof(TestResult.Gen1),columnWidth} |");
+                Console.Write($" {nameof(TestResult.Allocated),columnWidth} |");
 
                 Console.WriteLine();
 
                 PrintLine(tableWith);
 
+                static string FormatTime(double time)
+                {
+                    if (double.IsNaN(time))
+                    {
+                        return "N/A";
+                    }
+
+                    var units = new[] { "ns", "us", "ms", "s" };
+                    var currentUnit = units[0];
+                    foreach (var unit in units)
+                    {
+                        currentUnit = unit;
+
+                        if (time < 1000.0)
+                        {
+                            break;
+                        }
+
+                        time /= 1000.0;
+                    }
+
+                    return $"{time:G5} {currentUnit}";
+                }
+
                 foreach (var result in resultsFromTest)
                 {
                     Console.Write($"| {result.Version.PadRight(initialColumnWidth)} |");
-                    Console.Write($" {result.Mean?.PadLeft(columnWidth)} |");
-                    Console.Write($" {result.Error?.PadLeft(columnWidth)} |");
-                    Console.Write($" {result.StdDev?.PadLeft(columnWidth)} |");
-                    Console.Write($" {result.Gen0?.PadLeft(columnWidth)} |");
-                    Console.Write($" {result.Gen1?.PadLeft(columnWidth)} |");
-                    Console.Write($" {result.Allocated?.PadLeft(columnWidth)} |");
+                    Console.Write($" {result.Framework,-13} |");
+                    Console.Write($" {FormatTime(result.Mean),columnWidth} |");
+                    Console.Write($" {FormatTime(result.Error),columnWidth} |");
+                    Console.Write($" {FormatTime(result.StdDev),columnWidth} |");
+                    Console.Write($" {result.Gen0,columnWidth} |");
+                    Console.Write($" {result.Gen1,columnWidth} |");
+                    Console.Write($" {result.Allocated,columnWidth} |");
 
                     Console.WriteLine();
                 }
@@ -129,65 +167,127 @@ namespace YamlDotNet.PerformanceTests.Runner
             Console.WriteLine(new String('-', tableWith));
         }
 
-        private static void RunTest(string testProgram, List<TestResult> testResults)
+        private static void RunTest(string testProgram, string version, string framework, List<TestResult> testResults)
         {
             var startInfo = new ProcessStartInfo
             {
                 UseShellExecute = false,
-                RedirectStandardOutput = true,
             };
 
-            switch (Environment.OSVersion.Platform)
+            switch (Path.GetExtension(testProgram))
             {
-                case PlatformID.Unix:
+                case ".dll":
+                    startInfo.FileName = "dotnet";
+                    startInfo.Arguments = testProgram;
+                    break;
+
+                case ".exe" when Environment.OSVersion.Platform == PlatformID.Unix:
                     startInfo.FileName = "mono";
                     startInfo.Arguments = testProgram;
                     break;
 
-                default:
+                case ".exe":
                     startInfo.FileName = testProgram;
                     break;
+
+                default:
+                    throw new NotSupportedException();
+            }
+
+            var reportPath = Path.Combine("BenchmarkDotNet.Artifacts", "results", "YamlDotNet.PerformanceTests.ReceiptTest-report-brief.json");
+            if (File.Exists(reportPath))
+            {
+                File.Delete(reportPath);
             }
 
             var testProcess = Process.Start(startInfo);
-            testProcess.OutputDataReceived += (s, e) => ProcessTestResult(e.Data, testResults);
-            testProcess.BeginOutputReadLine();
-
             testProcess.WaitForExit();
+
+            if (File.Exists(reportPath))
+            {
+                using var reportFile = File.OpenText(reportPath);
+                var report = JsonParser.Deserialize<BriefReport>(reportFile);
+
+                foreach (var benchmark in report.Benchmarks)
+                {
+                    testResults.Add(new TestResult
+                    {
+                        Test = $"{benchmark.Type}.{benchmark.Method}",
+                        Version = version,
+                        Framework = framework,
+                        Mean = benchmark.Statistics?.Mean ?? double.NaN,
+                        Error = benchmark.Statistics?.StandardError ?? double.NaN,
+                        StdDev = benchmark.Statistics?.StandardDeviation ?? double.NaN,
+                        Gen0 = benchmark.Memory?.Gen0Collections ?? -1,
+                        Gen1 = benchmark.Memory?.Gen1Collections ?? -1,
+                        Allocated = benchmark.Memory?.BytesAllocatedPerOperation ?? -1,
+                    });
+                }
+            }
+            else
+            {
+                testResults.Add(new TestResult
+                {
+                    Test = "INVALID",
+                    Version = version,
+                    Framework = framework,
+                    Mean = double.NaN,
+                    Error = double.NaN,
+                    StdDev = double.NaN,
+                    Gen0 = -1,
+                    Gen1 = -1,
+                    Allocated = -1,
+                });
+            }
+        }
+
+        private static readonly IDeserializer JsonParser = new DeserializerBuilder()
+            .IgnoreUnmatchedProperties()
+            .Build();
+
+        private class BriefReport
+        {
+            public List<Benchmark> Benchmarks { get; set; }
+        }
+
+        private class Benchmark
+        {
+            public string Type { get; set; }
+            public string Method { get; set; }
+
+            public Statistics Statistics { get; set; }
+            public Memory Memory { get; set; }
+        }
+
+        private class Statistics
+        {
+            public int N { get; set; }
+            public double Median { get; set; }
+            public double Mean { get; set; }
+            public double StandardError { get; set; }
+            public double StandardDeviation { get; set; }
+        }
+
+        private class Memory
+        {
+            public int Gen0Collections { get; set; }
+            public int Gen1Collections { get; set; }
+            public int Gen2Collections { get; set; }
+            public int TotalOperations { get; set; }
+            public int BytesAllocatedPerOperation { get; set; }
         }
 
         private class TestResult
         {
             public string Test { get; set; }
             public string Version { get; set; }
-            public string Mean { get; set; }
-            public string Error { get; set; }
-            public string StdDev { get; set; }
-            public string Gen0 { get; set; }
-            public string Gen1 { get; set; }
-            public string Allocated { get; set; }
-        }
-
-        private static void ProcessTestResult(string data, List<TestResult> testResults)
-        {
-            if (data != null && data.StartsWith(" 'Serialize v"))
-            {
-                var parts = data.Split('|');
-                var versionName = parts[0].Trim().Trim('\'').Split(' ');
-                var result = new TestResult
-                {
-                    Test = versionName[0],
-                    Version = versionName[1],
-                    Mean = parts.Length >= 1 ? parts[1].Trim() : string.Empty,
-                    Error = parts.Length >= 2 ? parts[2].Trim() : string.Empty,
-                    StdDev = parts.Length >= 3 ? parts[3].Trim() : string.Empty,
-                    Gen0 = parts.Length >= 4 ? parts[4].Trim() : string.Empty,
-                    Gen1 = parts.Length >= 5 ? parts[5].Trim() : string.Empty,
-                    Allocated = parts.Length >= 6 ? parts[6].Trim() : string.Empty,
-                };
-
-                testResults.Add(result);
-            }
+            public string Framework { get; internal set; }
+            public double Mean { get; set; }
+            public double Error { get; set; }
+            public double StdDev { get; set; }
+            public int Gen0 { get; set; }
+            public int Gen1 { get; set; }
+            public int Allocated { get; set; }
         }
     }
 }

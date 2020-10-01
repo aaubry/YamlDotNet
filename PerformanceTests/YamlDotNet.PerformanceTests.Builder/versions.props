@@ -1,0 +1,12 @@
+<Project>
+	<ItemGroup>
+		<!-- After changing this file, you need to tell Visual Studio to reload the project! -->
+
+		<TestVersions Include="3.8.0" />
+		<TestVersions Include="4.0.0" />
+		<TestVersions Include="5.3.0" />
+		<TestVersions Include="8.0.0" />
+		<TestVersions Include="8.1.2" />
+		<TestVersions Include="latest" />
+	</ItemGroup>
+</Project>
