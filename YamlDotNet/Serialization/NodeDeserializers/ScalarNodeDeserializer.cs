@@ -48,7 +48,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
             else
             {
-                var typeCode = expectedType.GetTypeCode();
+                var underlyingType = Nullable.GetUnderlyingType(expectedType);
+                var typeCode = underlyingType != null ? underlyingType.GetTypeCode() : expectedType.GetTypeCode();
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
