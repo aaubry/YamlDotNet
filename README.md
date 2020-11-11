@@ -67,7 +67,7 @@ var objectToSerialize;
 ...
 var serializer = new SerializerBuilder().Build();
 //yaml contains a string containing your YAML
-var yaml = serializer.Serialize(receipt);
+var yaml = serializer.Serialize(objectToSerialize);
 ```
 
 ## More information
