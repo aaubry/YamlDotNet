@@ -1,12 +1,23 @@
 # Release notes
-## Release 8.1.2
+## Release 9.1.0
 
-## Bug fixes
+## Improvements
 
-- Merge #483 - Allow values after DocumentStart token
-- Merge #497 - Fix indentation check for first content line - fixes #492
+- Small performance improvements. Addresses [#519]
+- [#490] Add anchor/alias support in JsonEventEmitter
+- [#540] Allow block style in multiline scalars with trailing spaces
+- [#482] Add support for private properties in the serializer.
+
+## Bugfixes
+
+- Fix KeyNotFoundException in WithoutTypeInspector<TTypeInspector> (fixes [#507])
+- [#539] Fix deserialization for Nullable types.
+- [#491] Disallow usage of alias before anchor declaration
+- [#542] **Fix the order of YamlMappingNode items**  
+  YamlMappingNode will now return the items in the order they appear inside the document.
 
 # Previous releases
+- [8.1.2](releases/8.1.2.md)
 - [8.1.1](releases/8.1.1.md)
 - [8.1.0](releases/8.1.0.md)
 - [8.0.0](releases/8.0.0.md)
