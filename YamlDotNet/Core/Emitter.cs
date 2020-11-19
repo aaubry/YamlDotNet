@@ -319,11 +319,13 @@ namespace YamlDotNet.Core
             var spaceBreak = false;
             var previousSpace = false;
             var previousBreak = false;
+            var lineOfSpaces = false;
 
             var lineBreaks = false;
 
             var specialCharacters = !ValueIsRepresentableInOutputEncoding(value);
             var singleQuotes = false;
+            var linesOfSpaces = false;
 
             var isFirst = true;
             while (!buffer.EndOfInput)
@@ -403,6 +405,7 @@ namespace YamlDotNet.Core
                     if (previousBreak)
                     {
                         breakSpace = true;
+                        lineOfSpaces = true;
                     }
 
                     previousSpace = true;
@@ -425,6 +428,11 @@ namespace YamlDotNet.Core
                         spaceBreak = true;
                     }
 
+                    if (lineOfSpaces)
+                    {
+                        linesOfSpaces = true;
+                    }
+
                     previousSpace = false;
                     previousBreak = true;
                 }
@@ -432,6 +440,7 @@ namespace YamlDotNet.Core
                 {
                     previousSpace = false;
                     previousBreak = false;
+                    lineOfSpaces = false;
                 }
 
                 preceededByWhitespace = buffer.IsWhiteBreakOrZero();
@@ -472,6 +481,9 @@ namespace YamlDotNet.Core
                 scalarData.isFlowPlainAllowed = false;
                 scalarData.isBlockPlainAllowed = false;
                 scalarData.isSingleQuotedAllowed = false;
+            }
+            if (linesOfSpaces)
+            {
                 scalarData.isBlockAllowed = false;
             }
 
