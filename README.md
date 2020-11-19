@@ -91,7 +91,7 @@ System.Console.WriteLine(yaml);
 //     zip: 20500
 ```
 
-### Deserialization from a string
+### Serialisation to a string
 
 ```c#
 using YamlDotNet.Serialization;

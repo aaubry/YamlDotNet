@@ -208,6 +208,19 @@ namespace YamlDotNet.Test.Core
             yaml.Should().Contain(">");
         }
 
+
+        [Fact]
+        [Trait("motive", "pr #540")]
+        public void AllowBlockStyleInMultilineScalarsWithTrailingSpaces()
+        {
+            var events = SequenceWith(Scalar("hello  \nworld").ImplicitPlain);
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+
+            yaml.Should().Contain("\n");
+        }
+
+
         [Fact]
         public void FoldedStyleDoesNotGenerateExtraLineBreaks()
         {

@@ -35,7 +35,6 @@ namespace YamlDotNet.Core
     public class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;
-        private const int MaxBufferLength = 8;
 
         private static readonly IDictionary<char, char> simpleEscapeCodes = new SortedDictionary<char, char>
         {
@@ -109,7 +108,7 @@ namespace YamlDotNet.Core
         /// <param name="skipComments">Indicates whether comments should be ignored</param>
         public Scanner(TextReader input, bool skipComments = true)
         {
-            analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
+            analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, 1024));
             cursor = new Cursor();
             SkipComments = skipComments;
         }

@@ -138,6 +138,14 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeNullableScalarOctalNumber()
+        {
+            var result = Deserializer.Deserialize<int?>(UsingReaderFor("+071_352"));
+
+            result.Should().Be(29418);
+        }
+
+        [Fact]
         public void DeserializeScalarHexNumber()
         {
             var result = Deserializer.Deserialize<int>(UsingReaderFor("-0x_0F_B9"));
