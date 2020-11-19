@@ -182,15 +182,22 @@ namespace YamlDotNet
             return type.GetRuntimeProperty(name);
         }
 
+        public static IEnumerable<PropertyInfo> GetProperties(this Type type, bool includeNonPublic)
+        {
+            var instancePublic
+                = new Func<PropertyInfo, bool>(
+                                               p => !p.GetMethod.IsStatic
+                                                    && (p.GetMethod.IsPublic || includeNonPublic));
+            return type.IsInterface()
+                       ? (new Type[] { type })
+                         .Concat(type.GetInterfaces())
+                         .SelectMany(i => i.GetRuntimeProperties().Where(instancePublic))
+                       : type.GetRuntimeProperties().Where(instancePublic);
+        }
+
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
-            var instancePublic = new Func<PropertyInfo, bool>(
-                p => !p.GetMethod.IsStatic && p.GetMethod.IsPublic);
-            return type.IsInterface()
-                ? (new Type[] { type })
-                    .Concat(type.GetInterfaces())
-                    .SelectMany(i => i.GetRuntimeProperties().Where(instancePublic))
-                : type.GetRuntimeProperties().Where(instancePublic);
+            return GetProperties(type, false);
         }
 
         public static IEnumerable<FieldInfo> GetPublicFields(this Type type)
@@ -225,7 +232,7 @@ namespace YamlDotNet
                 .FirstOrDefault(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name));
         }
 
-        public static MethodInfo GetGetMethod(this PropertyInfo property)
+        public static MethodInfo GetGetMethod(this PropertyInfo property, bool _)
         {
             return property.GetMethod;
         }
@@ -343,12 +350,23 @@ namespace YamlDotNet
 
         public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
         {
-            var instancePublic = BindingFlags.Instance | BindingFlags.Public;
+            return GetProperties(type, false);
+        }
+
+        public static IEnumerable<PropertyInfo> GetProperties(this Type type, bool includeNonPublic)
+        {
+            var bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+
+            if (includeNonPublic)
+            {
+                bindingFlags |= BindingFlags.NonPublic;
+            }
+
             return type.IsInterface
                 ? (new Type[] { type })
                     .Concat(type.GetInterfaces())
-                    .SelectMany(i => i.GetProperties(instancePublic))
-                : type.GetProperties(instancePublic);
+                    .SelectMany(i => i.GetProperties(bindingFlags))
+                : type.GetProperties(bindingFlags);
         }
 
         public static IEnumerable<FieldInfo> GetPublicFields(this Type type)

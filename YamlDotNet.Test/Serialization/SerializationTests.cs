@@ -1807,6 +1807,80 @@ c: *anchor1");
             Assert.Equal("some value", deserialized["interpolated value"]);
         }
 
+        [Fact]
+        public void SerializationNonPublicPropertiesAreIgnored()
+        {
+            var sut = new SerializerBuilder().Build();
+            var yaml = sut.Serialize(new NonPublicPropertiesExample());
+            Assert.Equal("Public: public", yaml.TrimNewLines());
+        }
+
+        [Fact]
+        public void SerializationNonPublicPropertiesAreIncluded()
+        {
+            var sut = new SerializerBuilder().IncludeNonPublicProperties().Build();
+            var yaml = sut.Serialize(new NonPublicPropertiesExample());
+
+            var expected = Yaml.Text(@"
+                Public: public
+                Internal: internal
+                Protected: protected
+                Private: private
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void DeserializationNonPublicPropertiesAreIgnored()
+        {
+            var sut = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
+            var deserialized = sut.Deserialize<NonPublicPropertiesExample>(Yaml.ReaderForText(@"
+                Public: public2
+                Internal: internal2
+                Protected: protected2
+                Private: private2
+            "));
+
+            Assert.Equal("public2,internal,protected,private", deserialized.ToString());
+        }
+
+                [Fact]
+        public void DeserializationNonPublicPropertiesAreIncluded()
+        {
+            var sut = new DeserializerBuilder().IncludeNonPublicProperties().Build();
+            var deserialized = sut.Deserialize<NonPublicPropertiesExample>(Yaml.ReaderForText(@"
+                Public: public2
+                Internal: internal2
+                Protected: protected2
+                Private: private2
+            "));
+
+            Assert.Equal("public2,internal2,protected2,private2", deserialized.ToString());
+        }
+
+        [Fact]
+        public void SerializationNonPublicFieldsAreIgnored()
+        {
+            var sut = new SerializerBuilder().Build();
+            var yaml = sut.Serialize(new NonPublicFieldsExample());
+            Assert.Equal("Public: public", yaml.TrimNewLines());
+        }
+
+        [Fact]
+        public void DeserializationNonPublicFieldsAreIgnored()
+        {
+            var sut = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
+            var deserialized = sut.Deserialize<NonPublicFieldsExample>(Yaml.ReaderForText(@"
+                Public: public2
+                Internal: internal2
+                Protected: protected2
+                Private: private2
+            "));
+
+            Assert.Equal("public2,internal,protected,private", deserialized.ToString());
+        }
+
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {
