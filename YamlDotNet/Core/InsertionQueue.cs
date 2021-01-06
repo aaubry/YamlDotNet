@@ -20,6 +20,8 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using YamlDotNet.Helpers;
 
@@ -29,7 +31,7 @@ namespace YamlDotNet.Core
     /// Generic queue on which items may be inserted
     /// </summary>
     [Serializable]
-    public sealed class InsertionQueue<T>
+    public sealed class InsertionQueue<T> : IEnumerable<T>
     {
         private const int DefaultInitialCapacity = 1 << 7; // Must be a power of 2
 
@@ -62,6 +64,7 @@ namespace YamlDotNet.Core
         /// Gets the number of items that are contained by the queue.
         /// </summary>
         public int Count => count;
+        public int Capacity => items.Length;
 
         /// <summary>
         /// Enqueues the specified item.
@@ -132,14 +135,14 @@ namespace YamlDotNet.Core
 
                 var newItems = new T[capacity * 2];
 
-                var beginCount = readPtr;
+                var beginCount = readPtr + 1;
                 if (beginCount > 0)
                 {
-                    Array.Copy(items, 0, newItems, 0, readPtr);
+                    Array.Copy(items, 0, newItems, 0, beginCount);
                 }
 
                 writePtr += capacity;
-                var endCount = capacity - readPtr - 1;
+                var endCount = capacity - beginCount;
                 if (endCount > 0)
                 {
                     Array.Copy(items, readPtr + 1, newItems, writePtr + 1, endCount);
@@ -198,5 +201,17 @@ namespace YamlDotNet.Core
                 --writePtr;
             }
         }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            var ptr = readPtr;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return items[ptr];
+                ptr = (ptr - 1) & mask;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

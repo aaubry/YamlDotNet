@@ -158,6 +158,36 @@ namespace YamlDotNet.Test.Core
             Assert.Equal(expected, actual);
         }
 
+        [Theory]
+        [InlineData(0, 4)]
+        [InlineData(1, 4)]
+        [InlineData(2, 4)]
+        [InlineData(3, 4)]
+        public void Resize_is_is_correct(int offsetBeforeResize, int initialCapacity)
+        {
+            var sut = new InsertionQueue<int>(initialCapacity);
+
+            for (int i = 0; i < offsetBeforeResize; ++i)
+            {
+                sut.Enqueue(-1);
+                sut.Dequeue();
+            }
+
+            for (int i = 0; i < initialCapacity; ++i)
+            {
+                sut.Enqueue(i + 1);
+            }
+
+            // Sanity checks
+            Assert.Equal(initialCapacity, sut.Capacity);
+            Assert.Equal(Enumerable.Range(1, initialCapacity), sut);
+
+            sut.Enqueue(initialCapacity + 1);
+
+            Assert.Equal(initialCapacity * 2, sut.Capacity);
+            Assert.Equal(Enumerable.Range(1, initialCapacity + 1), sut);
+        }
+
         private void PrintChars(params (int idx, char chr)[] characters)
         {
             var text = new char[characters.Max(c => c.idx) + 1];
