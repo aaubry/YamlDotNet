@@ -1,22 +1,12 @@
 # Release notes
-## Release 9.1.0
+## Release 9.1.1
 
-## Improvements
+- Fix off by one error when resizing InsertionQueue
 
-- Small performance improvements. Addresses [#519]
-- [#490] Add anchor/alias support in JsonEventEmitter
-- [#540] Allow block style in multiline scalars with trailing spaces
-- [#482] Add support for private properties in the serializer.
-
-## Bugfixes
-
-- Fix KeyNotFoundException in WithoutTypeInspector<TTypeInspector> (fixes [#507])
-- [#539] Fix deserialization for Nullable types.
-- [#491] Disallow usage of alias before anchor declaration
-- [#542] **Fix the order of YamlMappingNode items**  
-  YamlMappingNode will now return the items in the order they appear inside the document.
+This fixes a critical bug that was causing failures while parsing Yaml documents. If you are using release 9.1.0, please use this version instead.
 
 # Previous releases
+- [9.1.0](releases/9.1.0.md)
 - [8.1.2](releases/8.1.2.md)
 - [8.1.1](releases/8.1.1.md)
 - [8.1.0](releases/8.1.0.md)
