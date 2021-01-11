@@ -165,7 +165,7 @@ namespace YamlDotNet.Test.Core
         [InlineData(1, 4)]
         [InlineData(2, 4)]
         [InlineData(3, 4)]
-        public void Resize_is_is_correct(int offsetBeforeResize, int initialCapacity)
+        public void Resize_is_is_correct_when_enqueuing(int offsetBeforeResize, int initialCapacity)
         {
             var sut = new InsertionQueue<int>(initialCapacity);
 
@@ -188,6 +188,60 @@ namespace YamlDotNet.Test.Core
 
             Assert.Equal(initialCapacity * 2, sut.Capacity);
             Assert.Equal(Enumerable.Range(1, initialCapacity + 1), sut);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 4)]
+        [InlineData(0, 1, 4)]
+        [InlineData(0, 2, 4)]
+        [InlineData(0, 3, 4)]
+        [InlineData(0, 4, 4)]
+        [InlineData(1, 0, 4)]
+        [InlineData(1, 1, 4)]
+        [InlineData(1, 2, 4)]
+        [InlineData(1, 3, 4)]
+        [InlineData(1, 4, 4)]
+        [InlineData(2, 0, 4)]
+        [InlineData(2, 1, 4)]
+        [InlineData(2, 2, 4)]
+        [InlineData(2, 3, 4)]
+        [InlineData(2, 4, 4)]
+        [InlineData(3, 0, 4)]
+        [InlineData(3, 1, 4)]
+        [InlineData(3, 2, 4)]
+        [InlineData(3, 3, 4)]
+        [InlineData(3, 4, 4)]
+        public void Resize_is_is_correct_when_inserting(int offsetBeforeResize, int insertionIndex, int initialCapacity)
+        {
+            var sut = new InsertionQueue<int>(initialCapacity);
+
+            for (int i = 0; i < offsetBeforeResize; ++i)
+            {
+                sut.Enqueue(-1);
+                sut.Dequeue();
+            }
+
+            for (int i = 0; i < initialCapacity; ++i)
+            {
+                sut.Enqueue(i + 1);
+            }
+
+            // Sanity checks
+            Assert.Equal(initialCapacity, sut.Capacity);
+            Assert.Equal(Enumerable.Range(1, initialCapacity), sut);
+
+            sut.Insert(insertionIndex, initialCapacity + 1);
+
+            Assert.Equal(initialCapacity * 2, sut.Capacity);
+
+            var expectedSequence =
+                Enumerable.Range(1, insertionIndex)
+                .Concat(new[] { initialCapacity + 1 })
+                .Concat(Enumerable.Range(insertionIndex + 1, initialCapacity - insertionIndex));
+
+            Assert.Equal(expectedSequence, sut);
+
+            sut.Enqueue(-1);
         }
 
         private void PrintChars(params (int idx, char chr)[] characters)
