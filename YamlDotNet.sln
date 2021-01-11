@@ -9,13 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Samples", "YamlD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Test", "YamlDotNet.Test\YamlDotNet.Test.csproj", "{A9F67018-0240-4D16-A4EA-BCB780D0AF05}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests", "PerformanceTests", "{9A64B652-30A5-4632-AF4D-716EF29C5250}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests.Runner", "PerformanceTests\YamlDotNet.PerformanceTests.Runner\YamlDotNet.PerformanceTests.Runner.csproj", "{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3} = {2C86D85C-A483-4F17-8897-2B53DC1DBFA3}
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.AotTest", "YamlDotNet.AotTest\YamlDotNet.AotTest.csproj", "{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB11D2D9-6E3D-45BF-8BCD-A04BCB1F8020}"
@@ -41,13 +34,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{45384A
 		docker\Dummy.csproj = docker\Dummy.csproj
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.PerformanceTests.Builder", "PerformanceTests\YamlDotNet.PerformanceTests.Builder\YamlDotNet.PerformanceTests.Builder.csproj", "{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{ABFC2E37-119B-439D-82B6-49E9680EEA90} = {ABFC2E37-119B-439D-82B6-49E9680EEA90}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.PerformanceTests", "PerformanceTests\YamlDotNet.PerformanceTests\YamlDotNet.PerformanceTests.csproj", "{A173861D-BE16-418F-9CCA-22554E208801}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,37 +57,18 @@ Global
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Debug-AOT|Any CPU.Build.0 = Debug|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}.Debug-AOT|Any CPU.Build.0 = Debug|Any CPU
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A173861D-BE16-418F-9CCA-22554E208801}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A173861D-BE16-418F-9CCA-22554E208801}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A173861D-BE16-418F-9CCA-22554E208801}.Debug-AOT|Any CPU.ActiveCfg = Debug|Any CPU
-		{A173861D-BE16-418F-9CCA-22554E208801}.Debug-AOT|Any CPU.Build.0 = Debug|Any CPU
-		{A173861D-BE16-418F-9CCA-22554E208801}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A173861D-BE16-418F-9CCA-22554E208801}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A5C7D77C-0F08-4647-8376-3719BD6DEBD9} = {9A64B652-30A5-4632-AF4D-716EF29C5250}
 		{45384A6E-A0A1-48DF-8FCC-B04405198048} = {EB11D2D9-6E3D-45BF-8BCD-A04BCB1F8020}
-		{2C86D85C-A483-4F17-8897-2B53DC1DBFA3} = {9A64B652-30A5-4632-AF4D-716EF29C5250}
-		{A173861D-BE16-418F-9CCA-22554E208801} = {9A64B652-30A5-4632-AF4D-716EF29C5250}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B388A06A-D288-4E48-B2A1-AE0E06E14EE4}

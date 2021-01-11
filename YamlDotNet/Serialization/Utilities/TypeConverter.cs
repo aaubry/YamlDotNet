@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <typeparam name="TConvertible">The type to which the converter should be associated.</typeparam>
         /// <typeparam name="TConverter">The type of the converter.</typeparam>
 #endif
-#if !(NETCOREAPP3_0 || NETSTANDARD2_1 || NETSTANDARD1_3 || UNITY)
+#if !(NETCOREAPP3_1 || NETSTANDARD2_1 || NETSTANDARD1_3 || UNITY)
         [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
 #endif
 #if !(NETSTANDARD1_3 || UNITY)

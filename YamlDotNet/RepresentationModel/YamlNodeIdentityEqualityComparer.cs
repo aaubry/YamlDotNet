@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -31,7 +32,7 @@ namespace YamlDotNet.RepresentationModel
         #region IEqualityComparer<YamlNode> Members
 
         /// <summary />
-        public bool Equals(YamlNode x, YamlNode y)
+        public bool Equals([AllowNull] YamlNode x, [AllowNull] YamlNode y)
         {
             return ReferenceEquals(x, y);
         }
