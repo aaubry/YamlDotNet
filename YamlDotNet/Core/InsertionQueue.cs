@@ -198,7 +198,7 @@ namespace YamlDotNet.Core
                 copyIndex = writePtr + 1;
                 copyOffset = -1;
                 copyLength = moveLeftCost;
-                --writePtr;
+                writePtr = (writePtr - 1) & mask;
             }
         }
 
