@@ -52,6 +52,8 @@ namespace YamlDotNet.Test.Core
         [InlineData("43210---", 2, "432X10--")]
         [InlineData("210---43", 2, "2X10--43")]
         [InlineData("10---432", 2, "10--432X")]
+
+        [InlineData("-43210--", 4, "4X3210--")]
         public void CalculateInsertionParameters_is_correct(string initialState, int index, string expectedFinalState)
         {
             static (int capacity, int readPtr, int writePtr, int insertPtr, List<(char chr, int idx)> elements) ParseState(string state)
