@@ -8,7 +8,7 @@
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
     <PackageLicenseFile>../LICENSE.txt</PackageLicenseFile>
     <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
-    <Configurations>Debug;Release;Debug-AOT;</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <DocumentationFile>bin\$(Configuration)\YamlDotNet.xml</DocumentationFile>
@@ -63,10 +63,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
     <FrameworkPathOverride>$(MSBuildProjectDirectory)/../BuildUtils.UnityPrerequisites/Unity Subset v3.5</FrameworkPathOverride>
     <DefineConstants>$(DefineConstants);UNITY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug-AOT' ">
-    <TargetFrameworks>net35</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
