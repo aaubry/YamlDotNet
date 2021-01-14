@@ -41,7 +41,7 @@ The library is compatible with mono's [Ahead-of-Time compilation](https://www.mo
 
 Here are some quick samples to get you started which can be viewed in [this fiddle](https://dotnetfiddle.net/CQ7ZKi).
 
-### Serialization to a string
+### Serialization from an object to a string
 
 ```c#
 using YamlDotNet.Serialization;
@@ -91,7 +91,7 @@ System.Console.WriteLine(yaml);
 //     zip: 20500
 ```
 
-### Serialisation to a string
+### Deserialization from a string to an object
 
 ```c#
 using YamlDotNet.Serialization;
