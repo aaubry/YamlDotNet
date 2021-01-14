@@ -1,11 +1,15 @@
 # Release notes
-## Release 9.1.1
 
-- Fix off by one error when resizing InsertionQueue
+## Release 9.1.2
 
-This fixes a critical bug that was causing failures while parsing Yaml documents. If you are using release 9.1.0, please use this version instead.
+- Fix writePtr decrementation in InsertionQueue [#558]
+
+This fixes another critical bug that was causing failures while parsing Yaml documents. If you are using release 9.1.1, please use this version instead.
+
 
 # Previous releases
+
+- [9.1.1](releases/9.1.1.md)
 - [9.1.0](releases/9.1.0.md)
 - [8.1.2](releases/8.1.2.md)
 - [8.1.1](releases/8.1.1.md)
