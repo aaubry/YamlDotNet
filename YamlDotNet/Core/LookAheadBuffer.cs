@@ -125,10 +125,25 @@ namespace YamlDotNet.Core
 
         private void FillBuffer()
         {
-            var readCount = input.Read(buffer, writeOffset, blockSize);
-            writeOffset = blockSize - writeOffset;
-            endOfInput = readCount < blockSize;
-            count += readCount;
+            var remainingSize = blockSize;
+            do
+            {
+                var readCount = input.Read(buffer, writeOffset, remainingSize);
+                if (readCount == 0)
+                {
+                    endOfInput = true;
+                    break;
+                }
+
+                remainingSize -= readCount;
+                writeOffset += readCount;
+                count += readCount;
+            } while (remainingSize > 0);
+
+            if (writeOffset == buffer.Length)
+            {
+                writeOffset = 0;
+            }
         }
 
         /// <summary>
