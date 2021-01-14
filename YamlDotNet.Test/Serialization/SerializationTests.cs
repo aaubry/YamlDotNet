@@ -81,7 +81,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalar()
         {
-            var stream = Yaml.StreamFrom("02-scalar-in-imp-doc.yaml");
+            var stream = Yaml.ReaderFrom("02-scalar-in-imp-doc.yaml");
 
             var result = Deserializer.Deserialize(stream);
 
@@ -189,7 +189,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeCustomTags()
         {
-            var stream = Yaml.StreamFrom("tags.yaml");
+            var stream = Yaml.ReaderFrom("tags.yaml");
 
             DeserializerBuilder.WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
             var result = Deserializer.Deserialize(stream);
@@ -214,7 +214,7 @@ Value: foo");
         [Fact]
         public void SerializeCustomTags()
         {
-            var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
+            var expectedResult = Yaml.ReaderFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
             SerializerBuilder
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
                 .WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
@@ -228,7 +228,7 @@ Value: foo");
         [Fact]
         public void DeserializeExplicitType()
         {
-            var text = Yaml.StreamFrom("explicit-type.template").TemplatedOn<Simple>();
+            var text = Yaml.ReaderFrom("explicit-type.template").TemplatedOn<Simple>();
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!Simple", typeof(Simple))
@@ -241,7 +241,7 @@ Value: foo");
         [Fact]
         public void DeserializeConvertible()
         {
-            var text = Yaml.StreamFrom("convertible.template").TemplatedOn<Convertible>();
+            var text = Yaml.ReaderFrom("convertible.template").TemplatedOn<Convertible>();
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!Convertible", typeof(Convertible))
@@ -454,7 +454,7 @@ Value: foo");
         [Fact]
         public void DeserializeGuid()
         {
-            var stream = Yaml.StreamFrom("guid.yaml");
+            var stream = Yaml.ReaderFrom("guid.yaml");
             var result = Deserializer.Deserialize<Guid>(stream);
 
             result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
@@ -463,7 +463,7 @@ Value: foo");
         [Fact]
         public void DeserializationOfOrderedProperties()
         {
-            var stream = Yaml.StreamFrom("ordered-properties.yaml");
+            var stream = Yaml.ReaderFrom("ordered-properties.yaml");
 
             var orderExample = Deserializer.Deserialize<OrderExample>(stream);
 
@@ -484,7 +484,7 @@ Value: foo");
         [Fact]
         public void DeserializeArray()
         {
-            var stream = Yaml.StreamFrom("list.yaml");
+            var stream = Yaml.ReaderFrom("list.yaml");
 
             var result = Deserializer.Deserialize<String[]>(stream);
 
@@ -494,7 +494,7 @@ Value: foo");
         [Fact]
         public void DeserializeList()
         {
-            var stream = Yaml.StreamFrom("list.yaml");
+            var stream = Yaml.ReaderFrom("list.yaml");
 
             var result = Deserializer.Deserialize(stream);
 
@@ -505,7 +505,7 @@ Value: foo");
         [Fact]
         public void DeserializeExplicitList()
         {
-            var stream = Yaml.StreamFrom("list-explicit.yaml");
+            var stream = Yaml.ReaderFrom("list-explicit.yaml");
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!List", typeof(List<int>))
@@ -551,7 +551,7 @@ Value: foo");
         [Fact]
         public void DeserializeDictionary()
         {
-            var stream = Yaml.StreamFrom("dictionary.yaml");
+            var stream = Yaml.ReaderFrom("dictionary.yaml");
 
             var result = Deserializer.Deserialize(stream);
 
@@ -565,7 +565,7 @@ Value: foo");
         [Fact]
         public void DeserializeExplicitDictionary()
         {
-            var stream = Yaml.StreamFrom("dictionary-explicit.yaml");
+            var stream = Yaml.ReaderFrom("dictionary-explicit.yaml");
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!Dictionary", typeof(Dictionary<string, int>))
@@ -596,7 +596,7 @@ Value: foo");
         [Fact]
         public void DeserializeListOfDictionaries()
         {
-            var stream = Yaml.StreamFrom("list-of-dictionaries.yaml");
+            var stream = Yaml.ReaderFrom("list-of-dictionaries.yaml");
 
             var result = Deserializer.Deserialize<List<Dictionary<string, string>>>(stream);
 
@@ -1036,7 +1036,7 @@ y:
         [Fact]
         public void BackreferencesAreMergedWithMappings()
         {
-            var stream = Yaml.StreamFrom("backreference.yaml");
+            var stream = Yaml.ReaderFrom("backreference.yaml");
 
             var parser = new MergingParser(new Parser(stream));
             var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);

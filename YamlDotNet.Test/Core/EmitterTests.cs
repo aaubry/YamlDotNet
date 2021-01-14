@@ -51,7 +51,7 @@ namespace YamlDotNet.Test.Core
         [InlineData("14-mapping-wo-indent.yaml")]
         public void CompareOriginalAndEmittedText(string filename)
         {
-            var stream = Yaml.StreamFrom(filename);
+            var stream = Yaml.ReaderFrom(filename);
 
             var originalEvents = ParsingEventsOf(stream.ReadToEnd());
             var emittedText = EmittedTextFrom(originalEvents);
