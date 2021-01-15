@@ -22,6 +22,19 @@ namespace build
             var versionJson = Read("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
             WriteVerbose(versionJson);
 
+            if (options.Verbose)
+            {
+                // Remove extra output from versionJson
+                var lines = versionJson
+                    .Split('\n')
+                    .Select(l => l.TrimEnd('\r'))
+                    .SkipWhile(l => !l.StartsWith('{'))
+                    .TakeWhile(l => !l.StartsWith('}'))
+                    .Append("}");
+
+                versionJson = string.Join('\n', lines);
+            }
+
             var jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -109,7 +122,7 @@ namespace build
             return new NuGetPackage(packagePath);
         }
 
-        public static void Publish(Options options, NuGetPackage package)
+        public static void Publish(Options options, GitVersion version, NuGetPackage package)
         {
             var apiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
             if (string.IsNullOrEmpty(apiKey))
@@ -131,6 +144,12 @@ namespace build
             {
                 Console.WriteLine($"nuget push {package.Path} -ApiKey *** -Source https://api.nuget.org/v3/index.json");
                 Run("nuget", $"push {package.Path} -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
+
+                if (version.IsPreRelease)
+                {
+                    Console.WriteLine($"nuget delete YamlDotNet {version.NuGetVersion} -ApiKey *** -Source https://api.nuget.org/v3/index.json");
+                    Run("nuget", $"delete YamlDotNet {version.NuGetVersion} -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
+                }
             }
         }
 
@@ -196,7 +215,7 @@ namespace build
             }
             WriteVerbose(releaseNotes);
 
-            return new ScaffoldedRelease(releaseNotes, reviewed);
+            return new ScaffoldedRelease(releaseNotes, releaseNotesPath, reviewed);
         }
 
         public static PreviousReleases DiscoverPreviousReleases()
@@ -252,6 +271,7 @@ namespace build
             File.WriteAllText(releaseNotesPath, releaseNotesFile);
 
             Run("git", $"add \"{releaseNotesPath}\"");
+            Run("git", $"add \"{scaffoldedRelease.ReleaseNotesPath}\"");
             Run("git", $"commit -m \"Prepare release {version.NuGetVersion}\"");
             Run("git", $"tag v{version.NuGetVersion}");
 
@@ -377,13 +397,14 @@ namespace build
         public int Minor { get; set; }
         public int Patch { get; set; }
         public string? PreReleaseLabel { get; set; }
+        public string? CommitsSinceVersionSourcePadded { get; set; }
 
         public string NuGetVersion
         {
             get
             {
                 return IsPreRelease
-                    ? $"{MajorMinorPatch}-{PreReleaseLabel}"
+                    ? $"{MajorMinorPatch}-{PreReleaseLabel}-{CommitsSinceVersionSourcePadded}"
                     : MajorMinorPatch;
             }
         }
@@ -411,13 +432,15 @@ namespace build
 
     public class ScaffoldedRelease
     {
-        public ScaffoldedRelease(string releaseNotes, bool reviewed)
+        public ScaffoldedRelease(string releaseNotes, string releaseNotesPath, bool reviewed)
         {
             ReleaseNotes = releaseNotes;
+            ReleaseNotesPath = releaseNotesPath;
             Reviewed = reviewed;
         }
 
         public string ReleaseNotes { get; set; }
+        public string ReleaseNotesPath { get; set; }
         public bool Reviewed { get; }
     }
 
