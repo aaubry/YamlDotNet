@@ -1,13 +1,13 @@
 # Release notes
 
-## Release 9.1.3
+## Release 9.1.4
 
-- Fix an error when a stream returns less than the requested amount of bytes  
-  Fixes #560
+- Fix LookAheadBuffer trying to read from the stream after reaching its end
 
 
 # Previous releases
 
+- [9.1.3](releases/9.1.3.md)
 - [9.1.2](releases/9.1.2.md)
 - [9.1.1](releases/9.1.1.md)
 - [9.1.0](releases/9.1.0.md)
