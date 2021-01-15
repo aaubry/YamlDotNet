@@ -123,18 +123,19 @@ namespace build
                 switch (options.Host)
                 {
                     case Host.Appveyor:
-                        
+
                         // Default CI targets for AppVeyor
+                        var isBuildingMaster = Environment.GetEnvironmentVariable("APPVEYOR_REPO_BRANCH")?.Equals("master", StringComparison.Ordinal) ?? true;
                         var isBuildingRelease = Environment.GetEnvironmentVariable("APPVEYOR_REPO_TAG")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
-                        if (isBuildingRelease)
+                        if (isBuildingRelease || !isBuildingMaster)
                         {
-                            WriteInformation("Release build detected");
+                            WriteInformation("Publishable build detected");
                             targets.Add(nameof(BuildDefinition.SetBuildVersion));
                             targets.Add(nameof(BuildDefinition.Publish));
                         }
                         else
                         {
-                            WriteInformation("Non-release build detected");
+                            WriteInformation("Non-publishable build detected");
                             targets.Add(nameof(BuildDefinition.SetBuildVersion));
                             targets.Add(nameof(BuildDefinition.Pack));
                         }
