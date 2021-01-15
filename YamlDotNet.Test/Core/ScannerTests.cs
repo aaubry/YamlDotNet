@@ -26,6 +26,7 @@ using YamlDotNet.Core.Tokens;
 using System.IO;
 using System.Reflection;
 using System;
+using System.Linq;
 
 #if !PORTABLE && !NETCOREAPP1_0
 using System.Runtime.Serialization.Formatters.Binary;
@@ -407,6 +408,14 @@ namespace YamlDotNet.Test.Core
             scanner.MoveNext();
         }
 
+        [Fact]
+        public void Issue_553_562()
+        {
+            var yaml = "MainItem4:\n" + string.Join("\n", Enumerable.Range(1, 100).Select(e => $"- {{item: {{foo1: {e}, foo2: 'bar{e}' }}}}"));
+
+            var scanner = new Scanner(new StringReader(yaml));
+            while (scanner.MoveNext()) ;
+        }
 
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {

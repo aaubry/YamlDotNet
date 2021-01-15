@@ -20,6 +20,7 @@
 //  SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using YamlDotNet.Helpers;
 
@@ -125,6 +126,11 @@ namespace YamlDotNet.Core
 
         private void FillBuffer()
         {
+            if (endOfInput)
+            {
+                return;
+            }
+
             var remainingSize = blockSize;
             do
             {
@@ -132,7 +138,7 @@ namespace YamlDotNet.Core
                 if (readCount == 0)
                 {
                     endOfInput = true;
-                    break;
+                    return;
                 }
 
                 remainingSize -= readCount;
@@ -144,6 +150,8 @@ namespace YamlDotNet.Core
             {
                 writeOffset = 0;
             }
+
+            Debug.Assert(writeOffset == 0 || writeOffset == blockSize);
         }
 
         /// <summary>
