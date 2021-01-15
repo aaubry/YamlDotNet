@@ -89,7 +89,8 @@ namespace YamlDotNet.Core
                 bestIndent,
                 BestWidth,
                 IsCanonical,
-                MaxSimpleKeyLength
+                MaxSimpleKeyLength,
+                SkipAnchorName
             );
         }
 
@@ -99,7 +100,8 @@ namespace YamlDotNet.Core
                 BestIndent,
                 bestWidth,
                 IsCanonical,
-                MaxSimpleKeyLength
+                MaxSimpleKeyLength,
+                SkipAnchorName
             );
         }
 
@@ -109,7 +111,8 @@ namespace YamlDotNet.Core
                 BestIndent,
                 BestWidth,
                 IsCanonical,
-                maxSimpleKeyLength
+                maxSimpleKeyLength,
+                SkipAnchorName
             );
         }
 
@@ -119,14 +122,20 @@ namespace YamlDotNet.Core
                 BestIndent,
                 BestWidth,
                 true,
-                MaxSimpleKeyLength
+                MaxSimpleKeyLength,
+                SkipAnchorName
             );
         }
 
         public EmitterSettings WithoutAnchorName()
         {
-            SkipAnchorName = true;
-            return this;
+            return new EmitterSettings(
+                BestIndent,
+                BestWidth,
+                IsCanonical,
+                MaxSimpleKeyLength,
+                true
+            );
         }
     }
 }
