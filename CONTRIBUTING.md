@@ -14,8 +14,8 @@ All contributions should be submitted as pull requests.
 1. Please create **one pull request for each feature**. This results in smaller pull requests that are easier to review and validate.
 
 1. **Avoid reformatting existing code** unless you are making other changes to it.
-  * Cleaning-up of `using`s is acceptable, if you made other changes to that file.
-  * If you believe that some code is badly formatted and needs fixing, isolate that change in a separate pull request.
+   * Cleaning-up of `using`s is acceptable, if you made other changes to that file.
+   * If you believe that some code is badly formatted and needs fixing, isolate that change in a separate pull request.
 
 1. Always add one or more **unit tests** that prove that the feature / fix you are submitting is working correctly.
 
