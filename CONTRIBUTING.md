@@ -32,38 +32,57 @@ The PerformanceTests folder contains various projects that contain performance t
 
 ## Building / multiplatform
 
-The project uses a [cake](http://cakebuild.net/) script to specify the build recipe.
-If you are on Windows, use the `build.ps1` script to build the project:
+This repository uses submodules. **Before building, make sure that you update them** using the following command:
 ```
-.\build.ps1 -Target Package
-```
-You should see an [output similar to this](https://ci.appveyor.com/project/aaubry/yamldotnet/build/4.2.1#L15).
-
-If you are on Linux, use `build.sh`:
-```
-.\build.sh --target Package
-```
-Alternatively, if you want to avoid installing the build tools, there is another script that uses a docker container to build. Just replace `build.sh` by `docker-build.sh`:
-```
-.\docker-build.sh --target Package
+git submodule update --init
 ```
 
-### Build targets
-
-The following table describes the most important build targets:
-
-|           Target             |                   Description                      |                          Example                            |
-|------------------------------|----------------------------------------------------|-------------------------------------------------------------|
-| Clean                        | Deletes the build output.                          | `.\build.ps1 -Target Clean`                                 |
-| Build                        | Builds a single configuration.                     | `.\build.ps1 -Target Build -Configuration Release-Unsigned` |
-| Test                         | Runs unit tests on a single configuration.         | `.\build.ps1 -Target Test -Configuration Release-Unsigned`  |
-| Build-Release-Configurations | Builds all the release configurations.             | `.\build.ps1 -Target Build-Release-Configurations`          |
-| Test-Release-Configurations  | Runs unit tests on all the release configurations. | `.\build.ps1 -Target Test-Release-Configurations`           |
-| Package                      | Build the NuGet package.                           | `.\build.ps1 -Target Package`                               |
-| Document                     | Generates the samples documentation.               | `.\build.ps1 -Target Document`                              |
+In order to build locally, you need at least to install the [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download). Alternatively, you may install [Visual Studio 2019 Community](https://visualstudio.microsoft.com/vs/), which will install it for you and allow you to edit the code as well.
 
 Building for Unity requires installing
 [Visual Studio Tools for Unity](https://visualstudiogallery.msdn.microsoft.com/20b80b8c-659b-45ef-96c1-437828fe7cf2/file/92287/8/Visual%20Studio%202013%20Tools%20for%20Unity.msi).
+
+**TODO**: Other .NET SDKs are probably needed. Check the correct set of requirements and update this page.
+
+This project is compatible with the standard `dotnet` tool, so building the project is as simple as running the following command:
+```
+dotnet build
+```
+
+You can also run the unit tests in a similar fashion:
+```
+dotnet test
+```
+
+### Build tool
+
+There is a program inside `/tools/build` that orchestrates other automation tasks. This tool can be executed by calling `build.cmd <target>`, where `<target>` is one of the following:
+
+#### `Pack`
+
+Builds the project and produces a NuGet package.
+
+#### `Publish`
+
+Builds the project and publishes a NuGet package to nuget.org. In order to do so, an environment variable named `NUGET_API_KEY` must be set.
+
+#### `Release`
+
+If there are no release notes for the current version, generates those release notes from the git log and exits.  
+Otherwise, creates a release from the current commit by performing the following:
+1. Update the `RELEASE_NOTES.md` file.
+2. Commit the `RELEASE_NOTES.md` and the release notes for the current version.
+3. Tags the commit with the current version.
+
+Once this is done, the tag must be pushed manually to the repository.
+
+#### `Document`
+
+Generates the samples documentation.
+
+### Continuous integration
+
+Every commit and pull request is built on [AppVeyor](https://ci.appveyor.com/project/aaubry/yamldotnet). The build definition is kept intentionally simple. All the logic is delegated to the build tool. This makes it easy to use a different CI provider, or even to run the builds manually.
 
 ### Target platforms
 
@@ -83,14 +102,6 @@ In the csproj, the `TargetFrameworks` element also targets the following platfor
 
 ### Build configurations
 
-The following table describes the available build configurations:
-
-| Configuration |             Description                                                             |
-|---------------|-------------------------------------------------------------------------------------|
-| Debug         | Default debug build.                                                                |
-| Release       | Release build.                                                                      |
-| Debug-AOT     | Builds the AOT tests project, that tests compatibility with mono's AOT compilation. |
-
 There are a few differences between the various target platforms,
 mainly in the reflection API. In order to adapt the code to each platform,
 `#if ... #endif` sections are used. When possible, such sections should be placed
@@ -100,15 +111,15 @@ on the build variables.
 
 ## AOT compatibility
 
-Some platforms - such as IOS - forbid dynamic code generation. This prevents Just-in-Time compilation (JIT) from being used. In those cases, one can use Mono's Ahead-of-Time compilation (AOT). This results on a precompiled assembly that does not rely on JIT. There are [some limitations](http://www.mono-project.com/docs/advanced/aot/#limitation-generic-interface-instantiation) however, most of them related to usage of generics.
+Some platforms - such as IOS - forbid dynamic code generation. This prevents Just-in-Time compilation (JIT) from being used. In those cases, one can use Mono's Ahead-of-Time compilation (AOT). This results on a precompiled assembly that does not rely on JIT. There are [some limitations](http://www.mono-project.com/docs/advanced/aot/#limitation-generic-interface-instantiation) however, most of them are related to usage of generics.
 
-In order to ensure that YamlDotNet is compatible with AOT compilation, an automatic test has been created that runs on every commit on [Travis CI](https://travis-ci.org/aaubry/YamlDotNet). That test exercises the serializer and deserializer to help identify AOT-related problems.
+In order to ensure that YamlDotNet is compatible with AOT compilation, an automatic test has been created that runs on every commit. That test exercises the serializer and deserializer to help identify AOT-related problems.
 
 ## Coding style
 
-Attempt to follow the [SOLID](https://en.wikipedia.org/wiki/SOLID_%28object-oriented_design%29) principles. In particular, try to give each type a single responsibility, and favor composition to combine features.
+Attempt to follow the [SOLID](https://en.wikipedia.org/wiki/SOLID_%28object-oriented_design%29) principles. In particular, try to give each type a single responsibility, and favour composition to combine features.
 
-As long as you keep the code readable, I don't care too much about any specific coding convention. There are only a few rules that should be honored:
+As long as you keep the code readable, I don't care too much about any specific coding convention. There are only a few rules that should be honoured:
 
 * Use **4 spaces** to indent.
 * Each class / interface / struct / delegate **goes to its own file**.
