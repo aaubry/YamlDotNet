@@ -147,8 +147,8 @@ namespace build
 
                 if (version.IsPreRelease)
                 {
-                    Console.WriteLine($"nuget delete YamlDotNet {version.NuGetVersion} --non-interactive -ApiKey *** -Source https://api.nuget.org/v3/index.json");
-                    Run("nuget", $"delete YamlDotNet {version.NuGetVersion} --non-interactive -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
+                    Console.WriteLine($"nuget delete YamlDotNet {version.NuGetVersion} -NonInteractive -ApiKey *** -Source https://api.nuget.org/v3/index.json");
+                    Run("nuget", $"delete YamlDotNet {version.NuGetVersion} -NonInteractive -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
                 }
             }
         }
