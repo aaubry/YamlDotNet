@@ -26,7 +26,7 @@ using YamlDotNet.RepresentationModel;
 namespace YamlDotNet.Helpers
 {
     [Serializable]
-    public class OrderedYamlDictionary : IDictionary<YamlNode, YamlNode>
+    internal class OrderedYamlDictionary : IDictionary<YamlNode, YamlNode>
     {
         private readonly Dictionary<YamlNode,YamlNode> dic = new Dictionary<YamlNode, YamlNode>();
 
