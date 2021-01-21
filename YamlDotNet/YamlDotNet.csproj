@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0;netstandard2.1;netstandard1.3;net20;net35;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;netstandard1.3;net20;net35;net40;net45</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
     <PackageLicenseFile>../LICENSE.txt</PackageLicenseFile>
     <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
-    <Configurations>Debug;Release;Debug-AOT;</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <DocumentationFile>bin\$(Configuration)\YamlDotNet.xml</DocumentationFile>
@@ -23,12 +23,12 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp3.1'">
     <!-- Since the BCL is not yet annotated in other platforms, disable the nullable warnings when compiling for those -->
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netcoreapp3.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netcoreapp3.1'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
@@ -54,7 +54,7 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <PackageReference Include="System.ComponentModel.TypeConverter">
       <Version>4.3.0</Version>
     </PackageReference>
@@ -65,10 +65,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
     <FrameworkPathOverride>$(MSBuildProjectDirectory)/../BuildUtils.UnityPrerequisites/Unity Subset v3.5</FrameworkPathOverride>
     <DefineConstants>$(DefineConstants);UNITY</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug-AOT' ">
-    <TargetFrameworks>net35</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

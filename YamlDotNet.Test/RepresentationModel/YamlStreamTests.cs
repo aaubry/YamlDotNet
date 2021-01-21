@@ -37,7 +37,7 @@ namespace YamlDotNet.Test.RepresentationModel
         public void LoadSimpleDocument()
         {
             var stream = new YamlStream();
-            stream.Load(Yaml.StreamFrom("02-scalar-in-imp-doc.yaml"));
+            stream.Load(Yaml.ReaderFrom("02-scalar-in-imp-doc.yaml"));
 
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
@@ -71,7 +71,7 @@ namespace YamlDotNet.Test.RepresentationModel
         public void BackwardAliasReferenceWorks()
         {
             var stream = new YamlStream();
-            stream.Load(Yaml.StreamFrom("backwards-alias.yaml"));
+            stream.Load(Yaml.ReaderFrom("backwards-alias.yaml"));
 
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
@@ -89,7 +89,7 @@ namespace YamlDotNet.Test.RepresentationModel
         public void ForwardAliasReferenceWorks()
         {
             var stream = new YamlStream();
-            stream.Load(Yaml.StreamFrom("forward-alias.yaml"));
+            stream.Load(Yaml.ReaderFrom("forward-alias.yaml"));
 
             Assert.Equal(1, stream.Documents.Count);
             Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
@@ -215,13 +215,13 @@ namespace YamlDotNet.Test.RepresentationModel
         public void AllAliasesMustBeResolved()
         {
             var original = new YamlStream();
-            Assert.Throws<AnchorNotFoundException>(() => original.Load(Yaml.StreamFrom("invalid-reference.yaml")));
+            Assert.Throws<AnchorNotFoundException>(() => original.Load(Yaml.ReaderFrom("invalid-reference.yaml")));
         }
 
         private void RoundtripTest(string yamlFileName)
         {
             var original = new YamlStream();
-            original.Load(Yaml.StreamFrom(yamlFileName));
+            original.Load(Yaml.ReaderFrom(yamlFileName));
 
             var buffer = new StringBuilder();
             original.Save(new StringWriter(buffer));

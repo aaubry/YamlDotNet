@@ -286,7 +286,9 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public SerializerBuilder JsonCompatible()
         {
-            this.emitterSettings = this.emitterSettings.WithMaxSimpleKeyLength(int.MaxValue);
+            this.emitterSettings = this.emitterSettings
+                                       .WithMaxSimpleKeyLength(int.MaxValue)
+                                       .WithoutAnchorName();
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
@@ -554,7 +556,7 @@ namespace YamlDotNet.Serialization
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
                 {
-                    traversalStrategy.Traverse(graph, visitor, null);
+                    traversalStrategy.Traverse(graph, visitor, null!);
                 }
 
                 void nestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);

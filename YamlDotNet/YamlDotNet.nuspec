@@ -1,38 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
-  <metadata minClientVersion="2.8">
-    <id>YamlDotNet</id>
-    <version>0.0.1</version>
-    <authors>Antoine Aubry</authors>
-    <description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
-    <summary>This package contains the YAML parser and serializer.</summary>
-    <language>en-US</language>
-    <license type="file">LICENSE.txt</license>
-    <projectUrl>https://github.com/aaubry/YamlDotNet/wiki</projectUrl>
-    <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
-    <repository type="git" url="https://github.com/aaubry/YamlDotNet.git" />
-    <tags>yaml parser development library serialization</tags>
-  </metadata>
-  <files>
-    <file src="bin\Release\net45\YamlDotNet.dll" target="lib\net45" />
-    <file src="bin\Release\net45\YamlDotNet.xml" target="lib\net45" />
+    <metadata minClientVersion="2.8">
+        <id>YamlDotNet</id>
+        <version>0.0.1</version>
+        <authors>Antoine Aubry</authors>
+        <description>A .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument.</description>
+        <summary>This package contains the YAML parser and serializer.</summary>
+        <language>en-US</language>
+        <license type="file">LICENSE.txt</license>
+        <projectUrl>https://github.com/aaubry/YamlDotNet/wiki</projectUrl>
+        <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
+        <icon>images/yamldotnet.png</icon>
+        <repository type="git" url="https://github.com/aaubry/YamlDotNet.git" />
+        <tags>yaml parser development library serialization</tags>
+        <dependencies>
+            <group targetFramework=".NETFramework4.5" />
+            <group targetFramework=".NETFramework3.5" />
+            <group targetFramework=".NETFramework2.0" />
+            <group targetFramework=".NETStandard2.1" />
+            <group targetFramework=".NETStandard1.3" />
+            <group targetFramework=".NETFramework3.5-Client" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin/Release/net45/YamlDotNet.dll" target="lib/net45" />
+        <file src="bin/Release/net45/YamlDotNet.xml" target="lib/net45" />
 
-    <file src="bin\Release\net35\YamlDotNet.dll" target="lib\net35" />
-    <file src="bin\Release\net35\YamlDotNet.xml" target="lib\net35" />
+        <file src="bin/Release/net35/YamlDotNet.dll" target="lib/net35" />
+        <file src="bin/Release/net35/YamlDotNet.xml" target="lib/net35" />
 
-    <file src="bin\Release\net20\YamlDotNet.dll" target="lib\net20" />
-    <file src="bin\Release\net20\YamlDotNet.xml" target="lib\net20" />
+        <file src="bin/Release/net20/YamlDotNet.dll" target="lib/net20" />
+        <file src="bin/Release/net20/YamlDotNet.xml" target="lib/net20" />
 
-    <file src="bin\Release\netstandard1.3\YamlDotNet.dll" target="lib\netstandard1.3" />
-    <file src="bin\Release\netstandard1.3\YamlDotNet.xml" target="lib\netstandard1.3" />
+        <file src="bin/Release/netstandard1.3/YamlDotNet.dll" target="lib/netstandard1.3" />
+        <file src="bin/Release/netstandard1.3/YamlDotNet.xml" target="lib/netstandard1.3" />
 
-    <file src="bin\Release\netstandard2.1\YamlDotNet.dll" target="lib\netstandard2.1" />
-    <file src="bin\Release\netstandard2.1\YamlDotNet.xml" target="lib\netstandard2.1" />
+        <file src="bin/Release/netstandard2.1/YamlDotNet.dll" target="lib/netstandard2.1" />
+        <file src="bin/Release/netstandard2.1/YamlDotNet.xml" target="lib/netstandard2.1" />
 
-    <!-- Unity Subset v3.5 -->
-    <file src="bin\Release\net40\YamlDotNet.dll" target="lib\net35-client" />
-    <file src="bin\Release\net40\YamlDotNet.xml" target="lib\net35-client" />
+        <!-- Unity Subset v3.5 -->
+        <file src="bin/Release/net40/YamlDotNet.dll" target="lib/net35-client" />
+        <file src="bin/Release/net40/YamlDotNet.xml" target="lib/net35-client" />
 
-    <file src="..\LICENSE.txt" target="" />
-  </files>
+        <file src="../LICENSE.txt" target="" />
+        <file src="../yamldotnet.png" target="images/" />
+    </files>
 </package>

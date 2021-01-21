@@ -1,19 +1,19 @@
 # Release notes
 
-# Release 8.1.0
+## Release 9.1.4
 
-## New features and improvements
+- Fix LookAheadBuffer trying to read from the stream after reaching its end
 
-- Made CachedTypeInspector thread safe #386  
-  Previously, using an instance of `Serializer` or `Deserializer` was not thread-safe,
-  although the intention was for them to be thread safe. The only mutable state is
-  inside CachedTypeInspector and was not properly protected against concurrent mutation.
-
-## Other fixes
-
-- Fix type conflicts when targeting frameworks without nullability attributes #460
 
 # Previous releases
+
+- [9.1.3](releases/9.1.3.md)
+- [9.1.2](releases/9.1.2.md)
+- [9.1.1](releases/9.1.1.md)
+- [9.1.0](releases/9.1.0.md)
+- [8.1.2](releases/8.1.2.md)
+- [8.1.1](releases/8.1.1.md)
+- [8.1.0](releases/8.1.0.md)
 - [8.0.0](releases/8.0.0.md)
 - [7.0.0](releases/7.0.0.md)
 - [6.1.2](releases/6.1.2.md)

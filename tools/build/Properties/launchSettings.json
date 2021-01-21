@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "build": {
+      "commandName": "Project",
+      "commandLineArgs": "Document",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

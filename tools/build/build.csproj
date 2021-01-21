@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <Platforms>AnyCPU</Platforms>
+        <Nullable>Enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Bullseye" Version="3.6.0" />
+        <PackageReference Include="SimpleExec" Version="6.4.0" />
+    </ItemGroup>
+
+</Project>

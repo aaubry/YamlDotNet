@@ -45,6 +45,7 @@ namespace YamlDotNet.Core
 
         private readonly int maxSimpleKeyLength;
         private readonly bool isCanonical;
+        private readonly bool skipAnchorName;
         private readonly int bestIndent;
         private readonly int bestWidth;
         private EmitterState state;
@@ -140,6 +141,7 @@ namespace YamlDotNet.Core
             this.bestWidth = settings.BestWidth;
             this.isCanonical = settings.IsCanonical;
             this.maxSimpleKeyLength = settings.MaxSimpleKeyLength;
+            this.skipAnchorName = settings.SkipAnchorName;
 
             this.output = output;
             this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
@@ -317,11 +319,13 @@ namespace YamlDotNet.Core
             var spaceBreak = false;
             var previousSpace = false;
             var previousBreak = false;
+            var lineOfSpaces = false;
 
             var lineBreaks = false;
 
             var specialCharacters = !ValueIsRepresentableInOutputEncoding(value);
             var singleQuotes = false;
+            var linesOfSpaces = false;
 
             var isFirst = true;
             while (!buffer.EndOfInput)
@@ -401,6 +405,7 @@ namespace YamlDotNet.Core
                     if (previousBreak)
                     {
                         breakSpace = true;
+                        lineOfSpaces = true;
                     }
 
                     previousSpace = true;
@@ -423,6 +428,11 @@ namespace YamlDotNet.Core
                         spaceBreak = true;
                     }
 
+                    if (lineOfSpaces)
+                    {
+                        linesOfSpaces = true;
+                    }
+
                     previousSpace = false;
                     previousBreak = true;
                 }
@@ -430,6 +440,7 @@ namespace YamlDotNet.Core
                 {
                     previousSpace = false;
                     previousBreak = false;
+                    lineOfSpaces = false;
                 }
 
                 preceededByWhitespace = buffer.IsWhiteBreakOrZero();
@@ -470,6 +481,9 @@ namespace YamlDotNet.Core
                 scalarData.isFlowPlainAllowed = false;
                 scalarData.isBlockPlainAllowed = false;
                 scalarData.isSingleQuotedAllowed = false;
+            }
+            if (linesOfSpaces)
+            {
                 scalarData.isBlockAllowed = false;
             }
 
@@ -1375,7 +1389,7 @@ namespace YamlDotNet.Core
 
         private void ProcessAnchor()
         {
-            if (anchorData.anchor != null)
+            if (anchorData.anchor != null && !skipAnchorName)
             {
                 WriteIndicator(anchorData.isAlias ? "*" : "&", true, false, false);
                 WriteAnchor(anchorData.anchor);

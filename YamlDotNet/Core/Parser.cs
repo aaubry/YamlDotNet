@@ -472,17 +472,21 @@ namespace YamlDotNet.Core
 
             string? anchorName = null;
             string? tagName = null;
+            Anchor? lastAnchor = null;
+            Tag? lastTag = null;
 
             // The anchor and the tag can be in any order. This loop repeats at most twice.
             while (true)
             {
                 if (anchorName == null && current is Anchor anchor)
                 {
+                    lastAnchor = anchor;
                     anchorName = string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value;
                     Skip();
                 }
                 else if (tagName == null && current is Tag tag)
                 {
+                    lastTag = tag;
                     if (string.IsNullOrEmpty(tag.Handle))
                     {
                         tagName = tag.Suffix;
@@ -510,10 +514,13 @@ namespace YamlDotNet.Core
                 {
                     throw new SemanticErrorException(anchorAlias.Start, anchorAlias.End, "While parsing a node, did not find expected token.");
                 }
-                else if (current is Error)
+                else if (current is Error error)
                 {
-                    errorToken = (current as Error)!;
-                    throw new SemanticErrorException(errorToken.Start, errorToken.End, errorToken.Value);
+                    if (lastTag != null && lastAnchor != null && !string.IsNullOrEmpty(anchorName))
+                    {
+                        return new Events.Scalar(anchorName, default, string.Empty, default, false, false, lastAnchor.Start, lastAnchor.End);
+                    }
+                    throw new SemanticErrorException(error.Start, error.End, error.Value);
                 }
                 else
                 {
@@ -645,7 +652,8 @@ namespace YamlDotNet.Core
                 Skip();
                 isImplicit = false;
             }
-            else if (!(currentToken is StreamEnd || currentToken is DocumentStart || currentToken is FlowSequenceEnd || currentToken is VersionDirective))
+            else if (!(currentToken is StreamEnd || currentToken is DocumentStart || currentToken is FlowSequenceEnd || currentToken is VersionDirective ||
+                (Current is Events.Scalar && currentToken is Error)))
             {
                 throw new SemanticErrorException(start, end, "Did not find expected <document end>.");
             }
@@ -833,6 +841,11 @@ namespace YamlDotNet.Core
                     state = ParserState.BlockMappingKey;
                     return ProcessEmptyScalar(mark);
                 }
+            }
+
+            else if(current is Error error)
+            {
+                throw new SemanticErrorException(error.Start, error.End, error.Value);
             }
 
             else

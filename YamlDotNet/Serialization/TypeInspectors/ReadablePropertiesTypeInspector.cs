@@ -33,22 +33,29 @@ namespace YamlDotNet.Serialization.TypeInspectors
     public sealed class ReadablePropertiesTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeResolver typeResolver;
+        private readonly bool includeNonPublicProperties;
 
         public ReadablePropertiesTypeInspector(ITypeResolver typeResolver)
+            :this(typeResolver, false)
+        {
+        }
+
+        public ReadablePropertiesTypeInspector(ITypeResolver typeResolver, bool includeNonPublicProperties)
         {
             this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
+            this.includeNonPublicProperties = includeNonPublicProperties;
         }
 
         private static bool IsValidProperty(PropertyInfo property)
         {
             return property.CanRead
-                && property.GetGetMethod()!.GetParameters().Length == 0;
+                && property.GetGetMethod(true)!.GetParameters().Length == 0;
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return type
-                .GetPublicProperties()
+                .GetProperties(includeNonPublicProperties)
                 .Where(IsValidProperty)
                 .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, typeResolver));
         }
@@ -79,7 +86,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public T GetCustomAttribute<T>() where T : Attribute
             {
-                var attributes = propertyInfo.GetCustomAttributes(typeof(T), true);
+                var attributes = propertyInfo.GetAllCustomAttributes<T>();
                 return (T)attributes.FirstOrDefault();
             }
 

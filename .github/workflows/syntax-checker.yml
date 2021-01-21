@@ -1,0 +1,14 @@
+name: Check Yaml Syntax
+
+on:
+  issues:
+    types: [ opened, edited ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check syntax on YAML code blocks
+        uses: docker://aaubry/yamldotnet-syntax-checker:latest
+        with:
+          args: -repository ${{ github.repository }} -issueNumber ${{ github.event.issue.number }} -apiToken ${{ secrets.BOT_TOKEN }}

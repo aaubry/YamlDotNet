@@ -25,6 +25,8 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
 using System.IO;
 using System.Reflection;
+using System;
+using System.Linq;
 
 #if !PORTABLE && !NETCOREAPP1_0
 using System.Runtime.Serialization.Formatters.Binary;
@@ -390,6 +392,30 @@ namespace YamlDotNet.Test.Core
             Assert.Equal(4, scalar.End.Column);
         }
 
+        [Fact]
+        public void Slow_stream_is_parsed_correctly()
+        {
+            var buffer = new MemoryStream();
+            Yaml.StreamFrom("04-scalars-in-multi-docs.yaml").CopyTo(buffer);
+
+            var slowStream = new SlowStream(buffer.ToArray());
+
+            var scanner = new Scanner(new StreamReader(slowStream));
+
+            scanner.MoveNext();
+            
+            // Should not fail
+            scanner.MoveNext();
+        }
+
+        [Fact]
+        public void Issue_553_562()
+        {
+            var yaml = "MainItem4:\n" + string.Join("\n", Enumerable.Range(1, 100).Select(e => $"- {{item: {{foo1: {e}, foo2: 'bar{e}' }}}}"));
+
+            var scanner = new Scanner(new StringReader(yaml));
+            while (scanner.MoveNext()) ;
+        }
 
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
@@ -421,6 +447,66 @@ namespace YamlDotNet.Test.Core
                     var expectedValue = property.GetValue(expected, null);
                     value.Should().Be(expectedValue, "Comparing property {0} in token {1}", property.Name, tokenNumber);
                 }
+            }
+        }
+
+        /// <summary>
+        /// A stream that reads one byte at the time.
+        /// </summary>
+        public class SlowStream : Stream
+        {
+            private readonly byte[] data;
+            private int position;
+
+            public SlowStream(byte[] data)
+            {
+                this.data = data;
+            }
+
+            public override bool CanRead => true;
+
+            public override bool CanSeek => false;
+
+            public override bool CanWrite => false;
+
+            public override long Length => data.Length;
+
+            public override long Position
+            {
+                get => position;
+                set => throw new NotSupportedException();
+            }
+
+            public override void Flush()
+            {
+                throw new NotSupportedException();
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                if (count == 0 || position == data.Length)
+                {
+                    return 0;
+                }
+
+                buffer[offset] = data[position];
+                ++position;
+                return 1;
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                throw new NotSupportedException();
             }
         }
     }

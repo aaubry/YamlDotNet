@@ -59,7 +59,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlDocument"/> class.
         /// </summary>
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. There is a guard that throws an exception if this happens.
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. There is a guard that throws an exception if this happens (upstream bug: https://github.com/dotnet/roslyn/issues/44046).
         internal YamlDocument(IParser parser)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {

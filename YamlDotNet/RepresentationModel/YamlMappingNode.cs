@@ -22,10 +22,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Helpers;
 using static YamlDotNet.Core.HashCode;
@@ -38,13 +38,13 @@ namespace YamlDotNet.RepresentationModel
     [Serializable]
     public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly IDictionary<YamlNode, YamlNode> children = new OrderedYamlDictionary();
+        private readonly IOrderedDictionary<YamlNode, YamlNode> children = new OrderedDictionary<YamlNode, YamlNode>();
 
         /// <summary>
         /// Gets the children of the current node.
         /// </summary>
         /// <value>The children.</value>
-        public IDictionary<YamlNode, YamlNode> Children
+        public IOrderedDictionary<YamlNode, YamlNode> Children
         {
             get
             {
@@ -413,7 +413,7 @@ namespace YamlDotNet.RepresentationModel
             foreach (var property in mapping.GetType().GetPublicProperties())
             {
                 // CanRead == true => GetGetMethod() != null
-                if (property.CanRead && property.GetGetMethod()!.GetParameters().Length == 0)
+                if (property.CanRead && property.GetGetMethod(false)!.GetParameters().Length == 0)
                 {
                     var value = property.GetValue(mapping, null);
                     if (!(value is YamlNode valueNode))

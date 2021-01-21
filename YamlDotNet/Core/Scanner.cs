@@ -35,7 +35,6 @@ namespace YamlDotNet.Core
     public class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;
-        private const int MaxBufferLength = 8;
 
         private static readonly IDictionary<char, char> simpleEscapeCodes = new SortedDictionary<char, char>
         {
@@ -67,6 +66,7 @@ namespace YamlDotNet.Core
         private readonly Cursor cursor;
         private bool streamStartProduced;
         private bool streamEndProduced;
+        private bool plainScalarFollowedByComment;
         private int flowSequenceStartLine;
         private int indent = -1;
         private bool simpleKeyAllowed;
@@ -108,7 +108,7 @@ namespace YamlDotNet.Core
         /// <param name="skipComments">Indicates whether comments should be ignored</param>
         public Scanner(TextReader input, bool skipComments = true)
         {
-            analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, MaxBufferLength));
+            analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, 1024));
             cursor = new Cursor();
             SkipComments = skipComments;
         }
@@ -482,17 +482,21 @@ namespace YamlDotNet.Core
 
             if (isPlainScalar)
             {
-                if (simpleKeyAllowed && previous is DocumentStart documentStart && documentStart.Start.Line == cursor.Line)
+                if (plainScalarFollowedByComment)
                 {
-                    throw new SyntaxErrorException("While scanning a document start, found mapping key starting after '---' indicator.");
+                    var startMark = cursor.Mark();
+                    tokens.Enqueue(new Error("While scanning plain scalar, found a comment between adjacent scalars.", startMark, startMark));
                 }
+
+                plainScalarFollowedByComment = false;
+
                 FetchPlainScalar();
                 return;
             }
 
             if (simpleKeyAllowed && indent >= cursor.LineOffset && analyzer.IsTab())
             {
-                throw new SyntaxErrorException("While scanning a mapping, found invalid tab as indendation.");
+                throw new SyntaxErrorException("While scanning a mapping, found invalid tab as indentation.");
             }
 
             if (analyzer.IsWhiteBreakOrZero())
@@ -1685,7 +1689,13 @@ namespace YamlDotNet.Core
             if (isLiteral && indentOfFirstLine > 1 && currentIndent < indentOfFirstLine - 1)
             {
                 // W9L4
-                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scaler, found extra spaces in fist line.");
+                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found extra spaces in first line.");
+            }
+
+            if (!isLiteral && maxIndent > cursor.LineOffset && indentOfFirstLine > -1)
+            {
+                // S98Z
+                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found more spaces in lines above first content line.");
             }
 
             // Determine the indentation level if needed.
@@ -2020,6 +2030,10 @@ namespace YamlDotNet.Core
 
                 if (analyzer.Check('#'))
                 {
+                    if (indent < 0 && flowLevel == 0)
+                    {
+                        plainScalarFollowedByComment = true;
+                    }
                     break;
                 }
 
@@ -2028,11 +2042,6 @@ namespace YamlDotNet.Core
                 // Consume non-blank characters.
                 while (!analyzer.IsWhiteBreakOrZero())
                 {
-                    if (onDocumentStartLine && analyzer.Check(':'))
-                    {
-                        throw new SyntaxErrorException(start, start, "While scanning a document start, found mapping key starting after '---' indicator.");
-                    }
-
                     // Check for indicators that may end a plain scalar.
 
                     if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || (flowLevel > 0 && analyzer.Check(',', 1))) || (flowLevel > 0 && analyzer.Check(",?[]{}")))

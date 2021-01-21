@@ -20,7 +20,10 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {
@@ -28,22 +31,40 @@ namespace YamlDotNet.Core
     /// Generic queue on which items may be inserted
     /// </summary>
     [Serializable]
-    public sealed class InsertionQueue<T>
+    public sealed class InsertionQueue<T> : IEnumerable<T>
     {
-        // TODO: Use a more efficient data structure
+        private const int DefaultInitialCapacity = 1 << 7; // Must be a power of 2
 
-        private readonly IList<T> items = new List<T>();
+        // Circular buffer
+        private T[] items;
+        private int readPtr;
+        private int writePtr;
+        private int mask;
+        private int count = 0;
+
+        public InsertionQueue(int initialCapacity = DefaultInitialCapacity)
+        {
+            if (initialCapacity <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(initialCapacity), "The initial capacity must be a positive number.");
+            }
+
+            if (!initialCapacity.IsPowerOfTwo())
+            {
+                throw new ArgumentException("The initial capacity must be a power of 2.", nameof(initialCapacity));
+            }
+
+            items = new T[initialCapacity];
+            readPtr = initialCapacity / 2;
+            writePtr = initialCapacity / 2;
+            mask = initialCapacity - 1;
+        }
 
         /// <summary>
         /// Gets the number of items that are contained by the queue.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return items.Count;
-            }
-        }
+        public int Count => count;
+        public int Capacity => items.Length;
 
         /// <summary>
         /// Enqueues the specified item.
@@ -51,7 +72,11 @@ namespace YamlDotNet.Core
         /// <param name="item">The item to be enqueued.</param>
         public void Enqueue(T item)
         {
-            items.Add(item);
+            ResizeIfNeeded();
+
+            items[writePtr] = item;
+            writePtr = (writePtr - 1) & mask;
+            ++count;
         }
 
         /// <summary>
@@ -60,13 +85,14 @@ namespace YamlDotNet.Core
         /// <returns>Returns the item that been dequeued.</returns>
         public T Dequeue()
         {
-            if (Count == 0)
+            if (count == 0)
             {
                 throw new InvalidOperationException("The queue is empty");
             }
 
-            T item = items[0];
-            items.RemoveAt(0);
+            var item = items[readPtr];
+            readPtr = (readPtr - 1) & mask;
+            --count;
             return item;
         }
 
@@ -77,7 +103,115 @@ namespace YamlDotNet.Core
         /// <param name="item">The item to be inserted.</param>
         public void Insert(int index, T item)
         {
-            items.Insert(index, item);
+            if (index > count)
+            {
+                throw new InvalidOperationException("Cannot insert outside of the bounds of the queue");
+            }
+
+            ResizeIfNeeded();
+
+            CalculateInsertionParameters(
+                mask, count, index,
+                ref readPtr, ref writePtr,
+                out var insertPtr,
+                out var copyIndex, out var copyOffset, out var copyLength
+            );
+
+            if (copyLength != 0)
+            {
+                Array.Copy(items, copyIndex, items, copyIndex + copyOffset, copyLength);
+            }
+
+            items[insertPtr] = item;
+            ++count;
         }
+
+        private void ResizeIfNeeded()
+        {
+            var capacity = items.Length;
+            if (count == capacity)
+            {
+                Debug.Assert(readPtr == writePtr);
+
+                var newItems = new T[capacity * 2];
+
+                var beginCount = readPtr + 1;
+                if (beginCount > 0)
+                {
+                    Array.Copy(items, 0, newItems, 0, beginCount);
+                }
+
+                writePtr += capacity;
+                var endCount = capacity - beginCount;
+                if (endCount > 0)
+                {
+                    Array.Copy(items, readPtr + 1, newItems, writePtr + 1, endCount);
+                }
+
+                items = newItems;
+                mask = mask * 2 + 1;
+            }
+        }
+
+        internal static void CalculateInsertionParameters(int mask, int count, int index, ref int readPtr, ref int writePtr, out int insertPtr, out int copyIndex, out int copyOffset, out int copyLength)
+        {
+            var indexOfLastElement = (readPtr + 1) & mask;
+            if (index == 0)
+            {
+                insertPtr = readPtr = indexOfLastElement;
+
+                // No copy is needed
+                copyIndex = 0;
+                copyOffset = 0;
+                copyLength = 0;
+                return;
+            }
+
+            insertPtr = (readPtr - index) & mask;
+            if (index == count)
+            {
+                writePtr = (writePtr - 1) & mask;
+
+                // No copy is needed
+                copyIndex = 0;
+                copyOffset = 0;
+                copyLength = 0;
+                return;
+            }
+
+            var canMoveRight = indexOfLastElement >= insertPtr;
+            var moveRightCost = canMoveRight ? readPtr - insertPtr : int.MaxValue;
+
+            var canMoveLeft = writePtr <= insertPtr;
+            var moveLeftCost = canMoveLeft ? insertPtr - writePtr : int.MaxValue;
+
+            if (moveRightCost <= moveLeftCost)
+            {
+                ++insertPtr;
+                ++readPtr;
+                copyIndex = insertPtr;
+                copyOffset = 1;
+                copyLength = moveRightCost;
+            }
+            else
+            {
+                copyIndex = writePtr + 1;
+                copyOffset = -1;
+                copyLength = moveLeftCost;
+                writePtr = (writePtr - 1) & mask;
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            var ptr = readPtr;
+            for (int i = 0; i < Count; i++)
+            {
+                yield return items[ptr];
+                ptr = (ptr - 1) & mask;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -45,8 +45,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 var alias = aliasProvider.GetAlias(value.Value);
                 if (alias != null && !emittedAliases.Add(alias))
                 {
-                    eventEmitter.Emit(new AliasEventInfo(value, alias), context);
-                    return false;
+                    var aliasEventInfo = new AliasEventInfo(value, alias);
+                    eventEmitter.Emit(aliasEventInfo, context);
+                    return aliasEventInfo.NeedsExpansion;
                 }
             }
             return base.Enter(value, context);

@@ -51,7 +51,7 @@ namespace YamlDotNet.Test.Core
         [InlineData("14-mapping-wo-indent.yaml")]
         public void CompareOriginalAndEmittedText(string filename)
         {
-            var stream = Yaml.StreamFrom(filename);
+            var stream = Yaml.ReaderFrom(filename);
 
             var originalEvents = ParsingEventsOf(stream.ReadToEnd());
             var emittedText = EmittedTextFrom(originalEvents);
@@ -208,6 +208,19 @@ namespace YamlDotNet.Test.Core
             yaml.Should().Contain(">");
         }
 
+
+        [Fact]
+        [Trait("motive", "pr #540")]
+        public void AllowBlockStyleInMultilineScalarsWithTrailingSpaces()
+        {
+            var events = SequenceWith(Scalar("hello  \nworld").ImplicitPlain);
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+
+            yaml.Should().Contain("\n");
+        }
+
+
         [Fact]
         public void FoldedStyleDoesNotGenerateExtraLineBreaks()
         {
@@ -311,7 +324,7 @@ namespace YamlDotNet.Test.Core
                 )
             );
             var buffer = new MemoryStream();
-#if (NETCOREAPP2_1 || NETCOREAPP3_0)
+#if (NETCOREAPP2_1 || NETCOREAPP3_1)
             // Code pages such as Cyrillic are not recognized by default in
             // .NET Core.  We need to register this provider.
             // https://msdn.microsoft.com/en-us/library/mt643899(v=vs.110).aspx#Remarks

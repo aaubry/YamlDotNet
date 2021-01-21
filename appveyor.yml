@@ -1,23 +1,19 @@
 version: 0.0.{build}
 
-branches:
-  only:
-    # Releases must be built from a release tag
-    - /^(?!master).+$/
-    - /^master.+$/
-
 image: Visual Studio 2019
 
 test: off
 
-build:
-  publish_nuget: true
+environment:
+  NUGET_API_KEY:
+    secure: ojJHQQHSQs/rgIRopbuHUQcjWpVgwaXhjYpW2kdkjS6NZta2A3Zzaz9k2yf+XooV
 
 install:
   - cmd: git submodule update --init
+  - cmd: dotnet tool install --global GitVersion.Tool
 
 build_script:
-  - ps: .\build.ps1 -Target Package # -Verbosity Diagnostic -buildVerbosity=Verbose
+  - cmd: .\build.cmd --appveyor
 
 artifacts:
   - path: YamlDotNet\bin\Release\netstandard2.1
@@ -39,15 +35,3 @@ artifacts:
     name: Release-UnitySubset-v35
 
   - path: YamlDotNet\bin\*.nupkg
-
-for:
-  - branches:
-      only:
-        - master
-    skip_non_tags: true
-
-    deploy:
-      - provider: NuGet
-        api_key:
-          secure: GMc0xUTASI8qTPK1/eN/GFs6PBhPFBin1TT1hE5N8NlkU7VSBx3z4zQinSv/ICmx
-        artifact: /.*\.nupkg/

@@ -27,19 +27,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -83,7 +81,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalar()
         {
-            var stream = Yaml.StreamFrom("02-scalar-in-imp-doc.yaml");
+            var stream = Yaml.ReaderFrom("02-scalar-in-imp-doc.yaml");
 
             var result = Deserializer.Deserialize(stream);
 
@@ -140,6 +138,14 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeNullableScalarOctalNumber()
+        {
+            var result = Deserializer.Deserialize<int?>(UsingReaderFor("+071_352"));
+
+            result.Should().Be(29418);
+        }
+
+        [Fact]
         public void DeserializeScalarHexNumber()
         {
             var result = Deserializer.Deserialize<int>(UsingReaderFor("-0x_0F_B9"));
@@ -183,7 +189,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeCustomTags()
         {
-            var stream = Yaml.StreamFrom("tags.yaml");
+            var stream = Yaml.ReaderFrom("tags.yaml");
 
             DeserializerBuilder.WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
             var result = Deserializer.Deserialize(stream);
@@ -194,9 +200,21 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeWithGapsBetweenKeys()
+        {
+            var yamlReader = new StringReader(@"Text: >
+  Some Text.
+  
+Value: foo");
+            var result = Deserializer.Deserialize(yamlReader);
+
+            result.Should().NotBeNull();
+        }
+
+        [Fact]
         public void SerializeCustomTags()
         {
-            var expectedResult = Yaml.StreamFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
+            var expectedResult = Yaml.ReaderFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
             SerializerBuilder
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
                 .WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
@@ -210,7 +228,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeExplicitType()
         {
-            var text = Yaml.StreamFrom("explicit-type.template").TemplatedOn<Simple>();
+            var text = Yaml.ReaderFrom("explicit-type.template").TemplatedOn<Simple>();
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!Simple", typeof(Simple))
@@ -223,7 +241,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeConvertible()
         {
-            var text = Yaml.StreamFrom("convertible.template").TemplatedOn<Convertible>();
+            var text = Yaml.ReaderFrom("convertible.template").TemplatedOn<Convertible>();
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!Convertible", typeof(Convertible))
@@ -231,19 +249,6 @@ namespace YamlDotNet.Test.Serialization
                 .Deserialize<Simple>(UsingReaderFor(text));
 
             result.aaa.Should().Be("[hello, world]");
-        }
-
-        [Fact]
-        public void DeserializationOfObjectsHandlesForwardReferences()
-        {
-            var text = Lines(
-                "Nothing: *forward",
-                "MyString: &forward ForwardReference");
-
-            var result = Deserializer.Deserialize<Example>(UsingReaderFor(text));
-
-            result.ShouldBeEquivalentTo(
-                new { Nothing = "ForwardReference", MyString = "ForwardReference" }, o => o.ExcludingMissingMembers());
         }
 
         [Fact]
@@ -449,7 +454,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeGuid()
         {
-            var stream = Yaml.StreamFrom("guid.yaml");
+            var stream = Yaml.ReaderFrom("guid.yaml");
             var result = Deserializer.Deserialize<Guid>(stream);
 
             result.Should().Be(new Guid("9462790d5c44468985425e2dd38ebd98"));
@@ -458,7 +463,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializationOfOrderedProperties()
         {
-            var stream = Yaml.StreamFrom("ordered-properties.yaml");
+            var stream = Yaml.ReaderFrom("ordered-properties.yaml");
 
             var orderExample = Deserializer.Deserialize<OrderExample>(stream);
 
@@ -479,7 +484,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeArray()
         {
-            var stream = Yaml.StreamFrom("list.yaml");
+            var stream = Yaml.ReaderFrom("list.yaml");
 
             var result = Deserializer.Deserialize<String[]>(stream);
 
@@ -489,7 +494,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeList()
         {
-            var stream = Yaml.StreamFrom("list.yaml");
+            var stream = Yaml.ReaderFrom("list.yaml");
 
             var result = Deserializer.Deserialize(stream);
 
@@ -500,7 +505,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeExplicitList()
         {
-            var stream = Yaml.StreamFrom("list-explicit.yaml");
+            var stream = Yaml.ReaderFrom("list-explicit.yaml");
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!List", typeof(List<int>))
@@ -509,30 +514,6 @@ namespace YamlDotNet.Test.Serialization
 
             result.Should().BeAssignableTo<IList<int>>().And
                 .Subject.As<IList<int>>().Should().Equal(3, 4, 5);
-        }
-
-        [Fact]
-        public void DeserializationOfGenericListsHandlesForwardReferences()
-        {
-            var text = Lines(
-                "- *forward",
-                "- &forward ForwardReference");
-
-            var result = Deserializer.Deserialize<string[]>(UsingReaderFor(text));
-
-            result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
-        }
-
-        [Fact]
-        public void DeserializationOfNonGenericListsHandlesForwardReferences()
-        {
-            var text = Lines(
-                "- *forward",
-                "- &forward ForwardReference");
-
-            var result = Deserializer.Deserialize<ArrayList>(UsingReaderFor(text));
-
-            result.Should().Equal(new[] { "ForwardReference", "ForwardReference" });
         }
 
         [Fact]
@@ -570,7 +551,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeDictionary()
         {
-            var stream = Yaml.StreamFrom("dictionary.yaml");
+            var stream = Yaml.ReaderFrom("dictionary.yaml");
 
             var result = Deserializer.Deserialize(stream);
 
@@ -584,7 +565,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeExplicitDictionary()
         {
-            var stream = Yaml.StreamFrom("dictionary-explicit.yaml");
+            var stream = Yaml.ReaderFrom("dictionary-explicit.yaml");
 
             var result = new DeserializerBuilder()
                 .WithTagMapping("!Dictionary", typeof(Dictionary<string, int>))
@@ -613,50 +594,9 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
-        public void DeserializationOfGenericDictionariesHandlesForwardReferences()
-        {
-            var text = Lines(
-                "key1: *forward",
-                "*forwardKey: ForwardKeyValue",
-                "*forward: *forward",
-                "key2: &forward ForwardReference",
-                "key3: &forwardKey key4");
-
-            var result = Deserializer.Deserialize<Dictionary<string, string>>(UsingReaderFor(text));
-
-            result.Should().Equal(new Dictionary<string, string> {
-                { "ForwardReference", "ForwardReference" },
-                { "key1", "ForwardReference" },
-                { "key2", "ForwardReference" },
-                { "key4", "ForwardKeyValue" },
-                { "key3", "key4" }
-            });
-        }
-
-        [Fact]
-        public void DeserializationOfNonGenericDictionariesHandlesForwardReferences()
-        {
-            var text = Lines(
-                "key1: *forward",
-                "*forwardKey: ForwardKeyValue",
-                "*forward: *forward",
-                "key2: &forward ForwardReference",
-                "key3: &forwardKey key4");
-
-            var result = Deserializer.Deserialize<Hashtable>(UsingReaderFor(text));
-
-            result.Should().BeEquivalentTo(
-                Entry("ForwardReference", "ForwardReference"),
-                Entry("key1", "ForwardReference"),
-                Entry("key2", "ForwardReference"),
-                Entry("key4", "ForwardKeyValue"),
-                Entry("key3", "key4"));
-        }
-
-        [Fact]
         public void DeserializeListOfDictionaries()
         {
-            var stream = Yaml.StreamFrom("list-of-dictionaries.yaml");
+            var stream = Yaml.ReaderFrom("list-of-dictionaries.yaml");
 
             var result = Deserializer.Deserialize<List<Dictionary<string, string>>>(stream);
 
@@ -811,6 +751,25 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializationOfAnchorWorksInJson()
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yamlObject = deserializer.Deserialize(Yaml.ReaderForText(@"
+x: &anchor1
+  z:
+    v: 1
+y:
+  k: *anchor1"));
+
+            var serializer = new SerializerBuilder()
+                .JsonCompatible()
+                .Build();
+
+            serializer.Serialize(yamlObject).Trim().Should()
+                .BeEquivalentTo(@"{""x"": {""z"": {""v"": ""1""}}, ""y"": {""k"": {""z"": {""v"": ""1""}}}}");
+        }
+
+        [Fact]
         // Todo: this is actually roundtrip
         public void DeserializationOfDefaultsWorkInJson()
         {
@@ -863,6 +822,19 @@ namespace YamlDotNet.Test.Serialization
 
             var writer = new StringWriter();
             var obj = new IgnoreExample();
+
+            Serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+
+            serialized.Should().NotContain("IgnoreMe");
+        }
+
+        [Fact]
+        public void SerializationRespectsYamlIgnoreAttributeOfDerivedClasses()
+        {
+
+            var writer = new StringWriter();
+            var obj = new IgnoreExampleDerived();
 
             Serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
@@ -1064,7 +1036,7 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void BackreferencesAreMergedWithMappings()
         {
-            var stream = Yaml.StreamFrom("backreference.yaml");
+            var stream = Yaml.ReaderFrom("backreference.yaml");
 
             var parser = new MergingParser(new Parser(stream));
             var result = Deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
@@ -1251,6 +1223,33 @@ namespace YamlDotNet.Test.Serialization
 
             Assert.Equal(2, exception.Start.Line);
             Assert.Equal(3, exception.Start.Column);
+        }
+
+        [Theory]
+        [InlineData("blah")]
+        [InlineData("hello=world")]
+        [InlineData("+190:20:30")]
+        [InlineData("x:y")]
+        public void ValueAllowedAfterDocumentStartToken(string text)
+        {
+            var value = Lines("--- " + text);
+
+            var sut = new Deserializer();
+            var actual = sut.Deserialize<string>(UsingReaderFor(value));
+
+            Assert.Equal(text, actual);
+        }
+
+        [Fact]
+        public void MappingDisallowedAfterDocumentStartToken()
+        {
+            var value = Lines("--- x: y");
+
+            var sut = new Deserializer();
+            var exception = Assert.Throws<SemanticErrorException>(() => sut.Deserialize<string>(UsingReaderFor(value)));
+
+            Assert.Equal(1, exception.Start.Line);
+            Assert.Equal(6, exception.Start.Column);
         }
 
         [Fact]
@@ -1522,6 +1521,38 @@ namespace YamlDotNet.Test.Serialization
             Assert.NotNull(deserialized);
         }
 
+        private sealed class AnchorPrecedence
+        {
+            internal sealed class AnchorPrecedenceNested
+            {
+                public string b1 { get; set; }
+                public Dictionary<string, string> b2 { get; set; }
+            }
+
+            public string a { get; set; }
+            public AnchorPrecedenceNested b { get; set; }
+            public string c { get; set; }
+        }
+
+        [Fact]
+        public void DeserializationWithDuplicateAnchorsSucceeds()
+        {
+            var sut = new Deserializer();
+            var deserialized = sut.Deserialize<AnchorPrecedence>(@"
+a: &anchor1 test0
+b:
+  b1: &anchor1 test1
+  b2:
+    b21:  &anchor1 test2
+c:  *anchor1");
+
+            Assert.Equal("test0", deserialized.a);
+            Assert.Equal("test1", deserialized.b.b1);
+            Assert.Contains("b21", deserialized.b.b2.Keys);
+            Assert.Equal("test2", deserialized.b.b2["b21"]);
+            Assert.Equal("test2", deserialized.c);
+        }
+
         [Fact]
         public void SerializeExceptionWithStackTrace()
         {
@@ -1750,6 +1781,18 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void AliasBeforeAnchorCannotBeDeserialized()
+        {
+            var sut = new Deserializer();
+            Action action = () => sut.Deserialize<GenericTestDictionary<string, string>>(@"
+a: *anchor1
+b: &anchor1 test0
+c: *anchor1");
+
+            action.ShouldThrow<AnchorNotFoundException>();
+        }
+
+        [Fact]
         public void AnchorWithAllowedCharactersCanBeDeserialized()
         {
             var sut = new Deserializer();
@@ -1762,6 +1805,80 @@ namespace YamlDotNet.Test.Serialization
             Assert.Equal("some value", deserialized["a"]);
             Assert.Equal(@"my *@nchor<>""@-_123$>>>😁🎉🐻🍔end test", deserialized["myvalue"]);
             Assert.Equal("some value", deserialized["interpolated value"]);
+        }
+
+        [Fact]
+        public void SerializationNonPublicPropertiesAreIgnored()
+        {
+            var sut = new SerializerBuilder().Build();
+            var yaml = sut.Serialize(new NonPublicPropertiesExample());
+            Assert.Equal("Public: public", yaml.TrimNewLines());
+        }
+
+        [Fact]
+        public void SerializationNonPublicPropertiesAreIncluded()
+        {
+            var sut = new SerializerBuilder().IncludeNonPublicProperties().Build();
+            var yaml = sut.Serialize(new NonPublicPropertiesExample());
+
+            var expected = Yaml.Text(@"
+                Public: public
+                Internal: internal
+                Protected: protected
+                Private: private
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void DeserializationNonPublicPropertiesAreIgnored()
+        {
+            var sut = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
+            var deserialized = sut.Deserialize<NonPublicPropertiesExample>(Yaml.ReaderForText(@"
+                Public: public2
+                Internal: internal2
+                Protected: protected2
+                Private: private2
+            "));
+
+            Assert.Equal("public2,internal,protected,private", deserialized.ToString());
+        }
+
+                [Fact]
+        public void DeserializationNonPublicPropertiesAreIncluded()
+        {
+            var sut = new DeserializerBuilder().IncludeNonPublicProperties().Build();
+            var deserialized = sut.Deserialize<NonPublicPropertiesExample>(Yaml.ReaderForText(@"
+                Public: public2
+                Internal: internal2
+                Protected: protected2
+                Private: private2
+            "));
+
+            Assert.Equal("public2,internal2,protected2,private2", deserialized.ToString());
+        }
+
+        [Fact]
+        public void SerializationNonPublicFieldsAreIgnored()
+        {
+            var sut = new SerializerBuilder().Build();
+            var yaml = sut.Serialize(new NonPublicFieldsExample());
+            Assert.Equal("Public: public", yaml.TrimNewLines());
+        }
+
+        [Fact]
+        public void DeserializationNonPublicFieldsAreIgnored()
+        {
+            var sut = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
+            var deserialized = sut.Deserialize<NonPublicFieldsExample>(Yaml.ReaderForText(@"
+                Public: public2
+                Internal: internal2
+                Protected: protected2
+                Private: private2
+            "));
+
+            Assert.Equal("public2,internal,protected,private", deserialized.ToString());
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]

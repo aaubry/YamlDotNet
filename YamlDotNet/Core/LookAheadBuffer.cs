@@ -20,7 +20,9 @@
 //  SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {
@@ -36,7 +38,10 @@ namespace YamlDotNet.Core
     {
         private readonly TextReader input;
         private readonly char[] buffer;
+        private readonly int blockSize;
+        private readonly int mask;
         private int firstIndex;
+        private int writeOffset;
         private int count;
         private bool endOfInput;
 
@@ -52,8 +57,18 @@ namespace YamlDotNet.Core
                 throw new ArgumentOutOfRangeException(nameof(capacity), "The capacity must be positive.");
             }
 
+            if (!capacity.IsPowerOfTwo())
+            {
+                throw new ArgumentException("The capacity must be a power of 2.", nameof(capacity));
+            }
+
             this.input = input ?? throw new ArgumentNullException(nameof(input));
-            buffer = new char[capacity];
+
+            blockSize = capacity;
+
+            // Allocate twice the required capacity to ensure that 
+            buffer = new char[capacity * 2];
+            mask = capacity * 2 - 1;
         }
 
         /// <summary>
@@ -66,12 +81,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private int GetIndexForOffset(int offset)
         {
-            int index = firstIndex + offset;
-            if (index >= buffer.Length)
-            {
-                index -= buffer.Length;
-            }
-            return index;
+            return (firstIndex + offset) & mask;
         }
 
         /// <summary>
@@ -79,16 +89,20 @@ namespace YamlDotNet.Core
         /// </summary>
         public char Peek(int offset)
         {
-            if (offset < 0 || offset >= buffer.Length)
+#if DEBUG
+            if (offset < 0 || offset >= blockSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset), "The offset must be between zero and the capacity of the buffer.");
             }
-
-            Cache(offset);
+#endif
+            if (offset >= count)
+            {
+                FillBuffer();
+            }
 
             if (offset < count)
             {
-                return buffer[GetIndexForOffset(offset)];
+                return buffer[(firstIndex + offset) & mask];
             }
             else
             {
@@ -104,21 +118,40 @@ namespace YamlDotNet.Core
         /// </param>
         public void Cache(int length)
         {
-            while (length >= count)
+            if (length >= count)
             {
-                var nextChar = input.Read();
-                if (nextChar >= 0)
-                {
-                    var lastIndex = GetIndexForOffset(count);
-                    buffer[lastIndex] = (char)nextChar;
-                    ++count;
-                }
-                else
+                FillBuffer();
+            }
+        }
+
+        private void FillBuffer()
+        {
+            if (endOfInput)
+            {
+                return;
+            }
+
+            var remainingSize = blockSize;
+            do
+            {
+                var readCount = input.Read(buffer, writeOffset, remainingSize);
+                if (readCount == 0)
                 {
                     endOfInput = true;
                     return;
                 }
+
+                remainingSize -= readCount;
+                writeOffset += readCount;
+                count += readCount;
+            } while (remainingSize > 0);
+
+            if (writeOffset == buffer.Length)
+            {
+                writeOffset = 0;
             }
+
+            Debug.Assert(writeOffset == 0 || writeOffset == blockSize);
         }
 
         /// <summary>
@@ -127,7 +160,7 @@ namespace YamlDotNet.Core
         /// </summary>
         public void Skip(int length)
         {
-            if (length < 1 || length > count)
+            if (length < 1 || length > blockSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(length), "The length must be between 1 and the number of characters in the buffer. Use the Peek() and / or Cache() methods to fill the buffer.");
             }

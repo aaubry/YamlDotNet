@@ -30,13 +30,18 @@ namespace YamlDotNet.Test
 {
     public static class Yaml
     {
-        public static TextReader StreamFrom(string name)
+        public static TextReader ReaderFrom(string name)
+        {
+            return new StreamReader(StreamFrom(name));
+        }
+
+        public static Stream StreamFrom(string name)
         {
             var fromType = typeof(Yaml);
             var assembly = fromType.GetTypeInfo().Assembly;
             var stream = assembly.GetManifestResourceStream(name) ??
                          assembly.GetManifestResourceStream(fromType.Namespace + ".files." + name);
-            return new StreamReader(stream);
+            return stream;
         }
 
         public static string TemplatedOn<T>(this TextReader reader)
@@ -58,7 +63,7 @@ namespace YamlDotNet.Test
 
         public static IParser ParserForResource(string name)
         {
-            return new Parser(Yaml.StreamFrom(name));
+            return new Parser(Yaml.ReaderFrom(name));
         }
 
         public static IParser ParserForText(string yamlText)
@@ -68,7 +73,7 @@ namespace YamlDotNet.Test
 
         public static Scanner ScannerForResource(string name)
         {
-            return new Scanner(Yaml.StreamFrom(name));
+            return new Scanner(Yaml.ReaderFrom(name));
         }
 
         public static Scanner ScannerForText(string yamlText)

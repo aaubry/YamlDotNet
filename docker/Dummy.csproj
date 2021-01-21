@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net35;netstandard1.3</TargetFrameworks>
-  </PropertyGroup>
-
-</Project>

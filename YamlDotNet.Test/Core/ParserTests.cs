@@ -19,7 +19,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System.IO;
 using Xunit;
 using YamlDotNet.Core;
 
@@ -427,7 +426,7 @@ namespace YamlDotNet.Test.Core
                 DocumentEnd(Implicit),
                 StreamEnd);
         }
-        
+
         [Fact]
         public void VerifyCommentTypeAfterScalarBlock()
         {
