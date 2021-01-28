@@ -22,10 +22,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Xunit.Abstractions;
+using YamlDotNet.Samples.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Samples.Helpers;
-using Xunit.Abstractions;
 
 namespace YamlDotNet.Samples
 {

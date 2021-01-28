@@ -22,9 +22,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Text;
 using YamlDotNet.Serialization;
 using static YamlDotNet.Core.HashCode;
 
@@ -72,7 +72,7 @@ namespace YamlDotNet.RepresentationModel
             Load(sequence, state);
             Style = sequence.Style;
 
-            bool hasUnresolvedAliases = false;
+            var hasUnresolvedAliases = false;
             while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var child = ParseNode(parser, state);
@@ -136,7 +136,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state of the document.</param>
         internal override void ResolveAliases(DocumentLoadingState state)
         {
-            for (int i = 0; i < children.Count; ++i)
+            for (var i = 0; i < children.Count; ++i)
             {
                 if (children[i] is YamlAliasNode)
                 {
@@ -184,7 +184,7 @@ namespace YamlDotNet.RepresentationModel
                 return false;
             }
 
-            for (int i = 0; i < children.Count; ++i)
+            for (var i = 0; i < children.Count; ++i)
             {
                 if (!Equals(children[i], other!.children[i]))
                 {
@@ -240,10 +240,10 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// Returns a <see cref="string"/> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
+        /// A <see cref="string"/> that represents this instance.
         /// </returns>
         internal override string ToString(RecursionLevel level)
         {

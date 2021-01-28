@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization
         {
             events.Clear();
 
-            int depth = 0;
+            var depth = 0;
             do
             {
                 if (!parser.MoveNext())

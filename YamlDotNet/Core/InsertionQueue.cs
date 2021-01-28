@@ -205,7 +205,7 @@ namespace YamlDotNet.Core
         public IEnumerator<T> GetEnumerator()
         {
             var ptr = readPtr;
-            for (int i = 0; i < Count; i++)
+            for (var i = 0; i < Count; i++)
             {
                 yield return items[ptr];
                 ptr = (ptr - 1) & mask;

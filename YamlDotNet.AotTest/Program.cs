@@ -30,10 +30,10 @@ namespace YamlDotNet.AotTest
 {
     class Program
     {
-        static int Main(string[] args)
+        static int Main()
         {
             Console.WriteLine();
-            Console.WriteLine("---------------------------------------------------------------------------------"); 
+            Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine();
 
             Console.ForegroundColor = ConsoleColor.White;
@@ -47,18 +47,18 @@ namespace YamlDotNet.AotTest
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" {0} test succeeded, {1} tests failed", succeededTestCount, failedTestCount);
+            Console.WriteLine(" {0} test succeeded, {1} tests failed", SucceededTestCount, FailedTestCount);
 
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine();
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine();
 
-            return failedTestCount;
+            return FailedTestCount;
         }
 
-        private static int succeededTestCount;
-        private static int failedTestCount;
+        private static int SucceededTestCount;
+        private static int FailedTestCount;
 
         private static void TrySerialize<T>(string testName, T graph)
         {
@@ -90,7 +90,7 @@ namespace YamlDotNet.AotTest
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("[success]");
                 Console.ForegroundColor = ConsoleColor.Gray;
-                ++succeededTestCount;
+                ++SucceededTestCount;
             }
             catch (Exception ex)
             {
@@ -107,7 +107,7 @@ namespace YamlDotNet.AotTest
                         Console.Write(" ");
                         Console.WriteLine(current.Message);
                         Console.ForegroundColor = ConsoleColor.Gray;
-                        ++failedTestCount;
+                        ++FailedTestCount;
                         return;
                     }
 
@@ -119,6 +119,7 @@ namespace YamlDotNet.AotTest
         }
     }
 
+#pragma warning disable IDE1006 // Naming Styles
     public class MyDictionary
     {
         public Dictionary<string, int> myDictionary { get; set; }
@@ -133,4 +134,5 @@ namespace YamlDotNet.AotTest
     {
         public int[] myArray { get; set; }
     }
+#pragma warning restore IDE1006 // Naming Styles
 }

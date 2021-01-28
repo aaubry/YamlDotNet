@@ -24,4 +24,6 @@
 // Project-level suppressions either have no target or are given 
 // a specific target and scoped to a namespace, type, member, etc.
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Language Usage Opportunities", "RECS0014:If all fields, properties and methods members are static, the class can be made static.", Justification = "<Pending>", Scope = "type", Target = "~T:YamlDotNet.Test.Core.TokenHelper")]
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Many test classes use non-compliant properties to test specific cases.", Scope = "namespaceanddescendants", Target = "~N:YamlDotNet.Test")]

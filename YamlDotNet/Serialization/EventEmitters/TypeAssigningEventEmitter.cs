@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.EventEmitters
@@ -143,11 +142,11 @@ namespace YamlDotNet.Serialization.EventEmitters
             else if (requireTagWhenStaticAndActualTypesAreDifferent && eventInfo.Source.Value != null && eventInfo.Source.Type != eventInfo.Source.StaticType)
             {
                 throw new YamlException(
-                    $"Cannot serialize type '{eventInfo.Source.Type.FullName}' where a '{eventInfo.Source.StaticType.FullName}' was expected " +
-                    $"because no tag mapping has been registered for '{eventInfo.Source.Type.FullName}', " + 
-                    $"which means that it won't be possible to deserialize the document.\n" +
-                    $"Register a tag mapping using the SerializerBuilder.WithTagMapping method.\n\n" +
-                    $"E.g: builder.WithTagMapping(\"!{eventInfo.Source.Type.Name}\", typeof({eventInfo.Source.Type.FullName}));"
+                    $"Cannot serialize type '{eventInfo.Source.Type.FullName}' where a '{eventInfo.Source.StaticType.FullName}' was expected "
+                    + $"because no tag mapping has been registered for '{eventInfo.Source.Type.FullName}', "
+                    + $"which means that it won't be possible to deserialize the document.\n"
+                    + $"Register a tag mapping using the SerializerBuilder.WithTagMapping method.\n\n"
+                    + $"E.g: builder.WithTagMapping(\"!{eventInfo.Source.Type.Name}\", typeof({eventInfo.Source.Type.FullName}));"
                 );
             }
         }

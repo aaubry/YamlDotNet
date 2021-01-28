@@ -54,11 +54,17 @@ namespace YamlDotNet.RepresentationModel
                         break;
                     case DocumentEnd documentEnd:
                         textWriter.Write("-DOC");
-                        if (!documentEnd.IsImplicit) textWriter.Write(" ...");
+                        if (!documentEnd.IsImplicit)
+                        {
+                            textWriter.Write(" ...");
+                        }
                         break;
                     case DocumentStart documentStart:
                         textWriter.Write("+DOC");
-                        if (!documentStart.IsImplicit) textWriter.Write(" ---");
+                        if (!documentStart.IsImplicit)
+                        {
+                            textWriter.Write(" ---");
+                        }
                         break;
                     case MappingEnd _:
                         textWriter.Write("-MAP");
@@ -80,7 +86,7 @@ namespace YamlDotNet.RepresentationModel
                             default: textWriter.Write(" :"); break;
                         }
 
-                        foreach (char character in scalar.Value)
+                        foreach (var character in scalar.Value)
                         {
                             switch (character)
                             {

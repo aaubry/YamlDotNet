@@ -59,9 +59,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlDocument"/> class.
         /// </summary>
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. There is a guard that throws an exception if this happens (upstream bug: https://github.com/dotnet/roslyn/issues/44046).
         internal YamlDocument(IParser parser)
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
         {
             var state = new DocumentLoadingState();
 
@@ -136,7 +134,7 @@ namespace YamlDotNet.RepresentationModel
             /// </summary>
             private bool VisitNodeAndFindDuplicates(YamlNode node)
             {
-                if (visitedNodes.TryGetValue(node, out bool isDuplicate))
+                if (visitedNodes.TryGetValue(node, out var isDuplicate))
                 {
                     if (!isDuplicate)
                     {
@@ -159,13 +157,17 @@ namespace YamlDotNet.RepresentationModel
             public override void Visit(YamlMappingNode mapping)
             {
                 if (!VisitNodeAndFindDuplicates(mapping))
+                {
                     base.Visit(mapping);
+                }
             }
 
             public override void Visit(YamlSequenceNode sequence)
             {
                 if (!VisitNodeAndFindDuplicates(sequence))
+                {
                     base.Visit(sequence);
+                }
             }
         }
 

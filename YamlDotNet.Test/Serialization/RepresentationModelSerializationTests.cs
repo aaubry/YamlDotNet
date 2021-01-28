@@ -21,9 +21,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
@@ -65,7 +62,7 @@ namespace YamlDotNet.Test.Serialization
 
             Assert.NotNull(node);
             Assert.Equal(expectedValues.Length, node.Children.Count);
-            for (int i = 0; i < expectedValues.Length; i++)
+            for (var i = 0; i < expectedValues.Length; i++)
             {
                 Assert.Equal(expectedValues[i], ((YamlScalarNode)node.Children[i]).Value);
             }
@@ -88,7 +85,7 @@ namespace YamlDotNet.Test.Serialization
 
             Assert.NotNull(node);
             Assert.Equal(expectedKeysAndValues.Length / 2, node.Children.Count);
-            for (int i = 0; i < expectedKeysAndValues.Length; i += 2)
+            for (var i = 0; i < expectedKeysAndValues.Length; i += 2)
             {
                 Assert.Equal(expectedKeysAndValues[i + 1], ((YamlScalarNode)node.Children[expectedKeysAndValues[i]]).Value);
             }

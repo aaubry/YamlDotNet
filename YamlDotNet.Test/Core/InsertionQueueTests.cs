@@ -169,13 +169,13 @@ namespace YamlDotNet.Test.Core
         {
             var sut = new InsertionQueue<int>(initialCapacity);
 
-            for (int i = 0; i < offsetBeforeResize; ++i)
+            for (var i = 0; i < offsetBeforeResize; ++i)
             {
                 sut.Enqueue(-1);
                 sut.Dequeue();
             }
 
-            for (int i = 0; i < initialCapacity; ++i)
+            for (var i = 0; i < initialCapacity; ++i)
             {
                 sut.Enqueue(i + 1);
             }
@@ -215,13 +215,13 @@ namespace YamlDotNet.Test.Core
         {
             var sut = new InsertionQueue<int>(initialCapacity);
 
-            for (int i = 0; i < offsetBeforeResize; ++i)
+            for (var i = 0; i < offsetBeforeResize; ++i)
             {
                 sut.Enqueue(-1);
                 sut.Dequeue();
             }
 
-            for (int i = 0; i < initialCapacity; ++i)
+            for (var i = 0; i < initialCapacity; ++i)
             {
                 sut.Enqueue(i + 1);
             }
@@ -247,7 +247,7 @@ namespace YamlDotNet.Test.Core
         private void PrintChars(params (int idx, char chr)[] characters)
         {
             var text = new char[characters.Max(c => c.idx) + 1];
-            for (int i = 0; i < text.Length; ++i)
+            for (var i = 0; i < text.Length; ++i)
             {
                 text[i] = ' ';
             }

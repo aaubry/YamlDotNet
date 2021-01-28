@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             IList? list;
-            bool canUpdate = true;
+            var canUpdate = true;
             Type itemType;
             var genericCollectionType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
             if (genericCollectionType != null)

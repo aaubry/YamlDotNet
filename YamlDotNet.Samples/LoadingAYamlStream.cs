@@ -20,9 +20,9 @@
 // SOFTWARE.
 
 using System.IO;
+using Xunit.Abstractions;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Samples.Helpers;
-using Xunit.Abstractions;
 
 namespace YamlDotNet.Samples
 {

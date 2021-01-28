@@ -121,7 +121,7 @@ namespace YamlDotNet.Core
             }
             while (depth > 0);
         }
-        
+
         [Obsolete("Please use Consume<T>() instead")]
         public static T Expect<T>(this IParser parser) where T : ParsingEvent
         {

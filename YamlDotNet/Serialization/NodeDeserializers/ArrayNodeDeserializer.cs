@@ -75,7 +75,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
 
             bool IList.Contains(object? value) => throw new NotSupportedException();
-             int IList.IndexOf(object? value) => throw new NotSupportedException();
+            int IList.IndexOf(object? value) => throw new NotSupportedException();
             void IList.Insert(int index, object? value) => throw new NotSupportedException();
             void IList.Remove(object? value) => throw new NotSupportedException();
             void IList.RemoveAt(int index) => throw new NotSupportedException();
@@ -108,7 +108,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             public IEnumerator GetEnumerator()
             {
-                for (int i = 0; i < Count; ++i)
+                for (var i = 0; i < Count; ++i)
                 {
                     yield return data[i];
                 }

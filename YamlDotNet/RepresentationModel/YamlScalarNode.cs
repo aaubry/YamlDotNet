@@ -130,7 +130,7 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="YamlDotNet.RepresentationModel.YamlScalarNode"/> to <see cref="System.String"/>.
+        /// Performs an explicit conversion from <see cref="YamlScalarNode"/> to <see cref="string"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -140,10 +140,10 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// Returns a <see cref="string"/> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
+        /// A <see cref="string"/> that represents this instance.
         /// </returns>
         internal override string ToString(RecursionLevel level)
         {

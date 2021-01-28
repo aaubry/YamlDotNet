@@ -20,7 +20,6 @@
 // SOFTWARE.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization

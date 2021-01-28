@@ -37,7 +37,7 @@ namespace YamlDotNet.Core
     /// </summary>
     public class Emitter : IEmitter
     {
-        private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
+        private static readonly Regex UriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
         private readonly TextWriter output;
@@ -71,26 +71,26 @@ namespace YamlDotNet.Core
 
         private class AnchorData
         {
-            public string? anchor;
-            public bool isAlias;
+            public string? Anchor;
+            public bool IsAlias;
         }
 
         private class TagData
         {
-            public string? handle;
-            public string? suffix;
+            public string? Handle;
+            public string? Suffix;
         }
 
         private class ScalarData
         {
-            public string value = string.Empty;
-            public bool isMultiline;
-            public bool isFlowPlainAllowed;
-            public bool isBlockPlainAllowed;
-            public bool isSingleQuotedAllowed;
-            public bool isBlockAllowed;
-            public bool hasSingleQuotes;
-            public ScalarStyle style;
+            public string Value = string.Empty;
+            public bool IsMultiline;
+            public bool IsFlowPlainAllowed;
+            public bool IsBlockPlainAllowed;
+            public bool IsSingleQuotedAllowed;
+            public bool IsBlockAllowed;
+            public bool HasSingleQuotes;
+            public ScalarStyle Style;
         }
 
         /// <summary>
@@ -239,9 +239,9 @@ namespace YamlDotNet.Core
 
         private void AnalyzeEvent(ParsingEvent evt)
         {
-            anchorData.anchor = null;
-            tagData.handle = null;
-            tagData.suffix = null;
+            anchorData.Anchor = null;
+            tagData.Handle = null;
+            tagData.Suffix = null;
 
             if (evt is AnchorAlias alias)
             {
@@ -267,32 +267,32 @@ namespace YamlDotNet.Core
 
         private void AnalyzeAnchor(string? anchor, bool isAlias)
         {
-            anchorData.anchor = anchor;
-            anchorData.isAlias = isAlias;
+            anchorData.Anchor = anchor;
+            anchorData.IsAlias = isAlias;
         }
 
         private void AnalyzeScalar(Scalar scalar)
         {
             var value = scalar.Value;
-            scalarData.value = value;
+            scalarData.Value = value;
 
             if (value.Length == 0)
             {
                 if (scalar.Tag == "tag:yaml.org,2002:null")
                 {
-                    scalarData.isMultiline = false;
-                    scalarData.isFlowPlainAllowed = false;
-                    scalarData.isBlockPlainAllowed = true;
-                    scalarData.isSingleQuotedAllowed = false;
-                    scalarData.isBlockAllowed = false;
+                    scalarData.IsMultiline = false;
+                    scalarData.IsFlowPlainAllowed = false;
+                    scalarData.IsBlockPlainAllowed = true;
+                    scalarData.IsSingleQuotedAllowed = false;
+                    scalarData.IsBlockAllowed = false;
                 }
                 else
                 {
-                    scalarData.isMultiline = false;
-                    scalarData.isFlowPlainAllowed = false;
-                    scalarData.isBlockPlainAllowed = false;
-                    scalarData.isSingleQuotedAllowed = true;
-                    scalarData.isBlockAllowed = false;
+                    scalarData.IsMultiline = false;
+                    scalarData.IsFlowPlainAllowed = false;
+                    scalarData.IsBlockPlainAllowed = false;
+                    scalarData.IsSingleQuotedAllowed = true;
+                    scalarData.IsBlockAllowed = false;
                 }
                 return;
             }
@@ -453,58 +453,58 @@ namespace YamlDotNet.Core
                 isFirst = false;
             }
 
-            scalarData.isFlowPlainAllowed = true;
-            scalarData.isBlockPlainAllowed = true;
-            scalarData.isSingleQuotedAllowed = true;
-            scalarData.isBlockAllowed = true;
+            scalarData.IsFlowPlainAllowed = true;
+            scalarData.IsBlockPlainAllowed = true;
+            scalarData.IsSingleQuotedAllowed = true;
+            scalarData.IsBlockAllowed = true;
 
             if (leadingSpace || leadingBreak || trailingSpace || trailingBreak || leadingQuote)
             {
-                scalarData.isFlowPlainAllowed = false;
-                scalarData.isBlockPlainAllowed = false;
+                scalarData.IsFlowPlainAllowed = false;
+                scalarData.IsBlockPlainAllowed = false;
             }
 
             if (trailingSpace)
             {
-                scalarData.isBlockAllowed = false;
+                scalarData.IsBlockAllowed = false;
             }
 
             if (breakSpace)
             {
-                scalarData.isFlowPlainAllowed = false;
-                scalarData.isBlockPlainAllowed = false;
-                scalarData.isSingleQuotedAllowed = false;
+                scalarData.IsFlowPlainAllowed = false;
+                scalarData.IsBlockPlainAllowed = false;
+                scalarData.IsSingleQuotedAllowed = false;
             }
 
             if (spaceBreak || specialCharacters)
             {
-                scalarData.isFlowPlainAllowed = false;
-                scalarData.isBlockPlainAllowed = false;
-                scalarData.isSingleQuotedAllowed = false;
+                scalarData.IsFlowPlainAllowed = false;
+                scalarData.IsBlockPlainAllowed = false;
+                scalarData.IsSingleQuotedAllowed = false;
             }
             if (linesOfSpaces)
             {
-                scalarData.isBlockAllowed = false;
+                scalarData.IsBlockAllowed = false;
             }
 
-            scalarData.isMultiline = lineBreaks;
+            scalarData.IsMultiline = lineBreaks;
             if (lineBreaks)
             {
-                scalarData.isFlowPlainAllowed = false;
-                scalarData.isBlockPlainAllowed = false;
+                scalarData.IsFlowPlainAllowed = false;
+                scalarData.IsBlockPlainAllowed = false;
             }
 
             if (flowIndicators)
             {
-                scalarData.isFlowPlainAllowed = false;
+                scalarData.IsFlowPlainAllowed = false;
             }
 
             if (blockIndicators)
             {
-                scalarData.isBlockPlainAllowed = false;
+                scalarData.IsBlockPlainAllowed = false;
             }
 
-            scalarData.hasSingleQuotes = singleQuotes;
+            scalarData.HasSingleQuotes = singleQuotes;
         }
 
         private bool ValueIsRepresentableInOutputEncoding(string value)
@@ -539,13 +539,13 @@ namespace YamlDotNet.Core
 
         private void AnalyzeTag(string tag)
         {
-            tagData.handle = tag;
+            tagData.Handle = tag;
             foreach (var tagDirective in tagDirectives)
             {
                 if (tag.StartsWith(tagDirective.Prefix, StringComparison.Ordinal))
                 {
-                    tagData.handle = tagDirective.Handle;
-                    tagData.suffix = tag.Substring(tagDirective.Prefix.Length);
+                    tagData.Handle = tagDirective.Handle;
+                    tagData.Suffix = tag.Substring(tagDirective.Prefix.Length);
                     break;
                 }
             }
@@ -809,13 +809,13 @@ namespace YamlDotNet.Core
         private void EmitDocumentContent(ParsingEvent evt)
         {
             states.Push(EmitterState.DocumentEnd);
-            EmitNode(evt, true, false, false);
+            EmitNode(evt, false, false);
         }
 
         /// <summary>
         /// Expect a node.
         /// </summary>
-        private void EmitNode(ParsingEvent evt, bool isRoot, bool isMapping, bool isSimpleKey)
+        private void EmitNode(ParsingEvent evt, bool isMapping, bool isSimpleKey)
         {
             isMappingContext = isMapping;
             isSimpleKeyContext = isSimpleKey;
@@ -872,7 +872,7 @@ namespace YamlDotNet.Core
             var scalar = (Scalar)evt;
 
             var style = scalar.Style;
-            var noTag = tagData.handle == null && tagData.suffix == null;
+            var noTag = tagData.Handle == null && tagData.Suffix == null;
 
             if (noTag && !scalar.IsPlainImplicit && !scalar.IsQuotedImplicit)
             {
@@ -881,7 +881,7 @@ namespace YamlDotNet.Core
 
             if (style == ScalarStyle.Any)
             {
-                style = scalarData.isMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
+                style = scalarData.IsMultiline ? ScalarStyle.Folded : ScalarStyle.Plain;
             }
 
             if (isCanonical)
@@ -889,18 +889,18 @@ namespace YamlDotNet.Core
                 style = ScalarStyle.DoubleQuoted;
             }
 
-            if (isSimpleKeyContext && scalarData.isMultiline)
+            if (isSimpleKeyContext && scalarData.IsMultiline)
             {
                 style = ScalarStyle.DoubleQuoted;
             }
 
             if (style == ScalarStyle.Plain)
             {
-                if ((flowLevel != 0 && !scalarData.isFlowPlainAllowed) || (flowLevel == 0 && !scalarData.isBlockPlainAllowed))
+                if ((flowLevel != 0 && !scalarData.IsFlowPlainAllowed) || (flowLevel == 0 && !scalarData.IsBlockPlainAllowed))
                 {
-                    style = (scalarData.isSingleQuotedAllowed && !scalarData.hasSingleQuotes) ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted;
+                    style = (scalarData.IsSingleQuotedAllowed && !scalarData.HasSingleQuotes) ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted;
                 }
-                if (string.IsNullOrEmpty(scalarData.value) && (flowLevel != 0 || isSimpleKeyContext))
+                if (string.IsNullOrEmpty(scalarData.Value) && (flowLevel != 0 || isSimpleKeyContext))
                 {
                     style = ScalarStyle.SingleQuoted;
                 }
@@ -912,7 +912,7 @@ namespace YamlDotNet.Core
 
             if (style == ScalarStyle.SingleQuoted)
             {
-                if (!scalarData.isSingleQuotedAllowed)
+                if (!scalarData.IsSingleQuotedAllowed)
                 {
                     style = ScalarStyle.DoubleQuoted;
                 }
@@ -920,37 +920,37 @@ namespace YamlDotNet.Core
 
             if (style == ScalarStyle.Literal || style == ScalarStyle.Folded)
             {
-                if (!scalarData.isBlockAllowed || flowLevel != 0 || isSimpleKeyContext)
+                if (!scalarData.IsBlockAllowed || flowLevel != 0 || isSimpleKeyContext)
                 {
                     style = ScalarStyle.DoubleQuoted;
                 }
             }
 
-            scalarData.style = style;
+            scalarData.Style = style;
         }
 
         private void ProcessScalar()
         {
-            switch (scalarData.style)
+            switch (scalarData.Style)
             {
                 case ScalarStyle.Plain:
-                    WritePlainScalar(scalarData.value, !isSimpleKeyContext);
+                    WritePlainScalar(scalarData.Value, !isSimpleKeyContext);
                     break;
 
                 case ScalarStyle.SingleQuoted:
-                    WriteSingleQuotedScalar(scalarData.value, !isSimpleKeyContext);
+                    WriteSingleQuotedScalar(scalarData.Value, !isSimpleKeyContext);
                     break;
 
                 case ScalarStyle.DoubleQuoted:
-                    WriteDoubleQuotedScalar(scalarData.value, !isSimpleKeyContext);
+                    WriteDoubleQuotedScalar(scalarData.Value, !isSimpleKeyContext);
                     break;
 
                 case ScalarStyle.Literal:
-                    WriteLiteralScalar(scalarData.value);
+                    WriteLiteralScalar(scalarData.Value);
                     break;
 
                 case ScalarStyle.Folded:
-                    WriteFoldedScalar(scalarData.value);
+                    WriteFoldedScalar(scalarData.Value);
                     break;
 
                 default:
@@ -1210,7 +1210,7 @@ namespace YamlDotNet.Core
             isIndentation = true;
             isWhitespace = true;
 
-            for (int i = 0; i < value.Length; ++i)
+            for (var i = 0; i < value.Length; ++i)
             {
                 var character = value[i];
                 if (character == '\r' && (i + 1) < value.Length && value[i + 1] == '\n')
@@ -1218,7 +1218,7 @@ namespace YamlDotNet.Core
                     continue;
                 }
 
-                if (IsBreak(character, out char breakCharacter))
+                if (IsBreak(character, out var breakCharacter))
                 {
                     WriteBreak(breakCharacter);
                     isIndentation = true;
@@ -1389,32 +1389,32 @@ namespace YamlDotNet.Core
 
         private void ProcessAnchor()
         {
-            if (anchorData.anchor != null && !skipAnchorName)
+            if (anchorData.Anchor != null && !skipAnchorName)
             {
-                WriteIndicator(anchorData.isAlias ? "*" : "&", true, false, false);
-                WriteAnchor(anchorData.anchor);
+                WriteIndicator(anchorData.IsAlias ? "*" : "&", true, false, false);
+                WriteAnchor(anchorData.Anchor);
             }
         }
 
         private void ProcessTag()
         {
-            if (tagData.handle == null && tagData.suffix == null)
+            if (tagData.Handle == null && tagData.Suffix == null)
             {
                 return;
             }
 
-            if (tagData.handle != null)
+            if (tagData.Handle != null)
             {
-                WriteTagHandle(tagData.handle);
-                if (tagData.suffix != null)
+                WriteTagHandle(tagData.Handle);
+                if (tagData.Suffix != null)
                 {
-                    WriteTagContent(tagData.suffix, false);
+                    WriteTagContent(tagData.Suffix, false);
                 }
             }
             else
             {
                 WriteIndicator("!<", true, false, false);
-                WriteTagContent(tagData.suffix!, false);
+                WriteTagContent(tagData.Suffix!, false);
                 WriteIndicator(">", false, false, false);
             }
         }
@@ -1482,7 +1482,7 @@ namespace YamlDotNet.Core
 
             states.Push(EmitterState.FlowSequenceItem);
 
-            EmitNode(evt, false, false, false);
+            EmitNode(evt, false, false);
         }
 
         /// <summary>
@@ -1523,13 +1523,13 @@ namespace YamlDotNet.Core
             if (!isCanonical && CheckSimpleKey())
             {
                 states.Push(EmitterState.FlowMappingSimpleValue);
-                EmitNode(evt, false, true, true);
+                EmitNode(evt, true, true);
             }
             else
             {
                 WriteIndicator("?", true, false, false);
                 states.Push(EmitterState.FlowMappingValue);
-                EmitNode(evt, false, true, false);
+                EmitNode(evt, true, false);
             }
         }
 
@@ -1551,7 +1551,7 @@ namespace YamlDotNet.Core
                 WriteIndicator(":", true, false, false);
             }
             states.Push(EmitterState.FlowMappingKey);
-            EmitNode(evt, false, true, false);
+            EmitNode(evt, true, false);
         }
 
         /// <summary>
@@ -1575,7 +1575,7 @@ namespace YamlDotNet.Core
             WriteIndicator("-", true, false, true);
             states.Push(EmitterState.BlockSequenceItem);
 
-            EmitNode(evt, false, false, false);
+            EmitNode(evt, false, false);
         }
 
         /// <summary>
@@ -1600,13 +1600,13 @@ namespace YamlDotNet.Core
             if (CheckSimpleKey())
             {
                 states.Push(EmitterState.BlockMappingSimpleValue);
-                EmitNode(evt, false, true, true);
+                EmitNode(evt, true, true);
             }
             else
             {
                 WriteIndicator("?", true, false, true);
                 states.Push(EmitterState.BlockMappingValue);
-                EmitNode(evt, false, true, false);
+                EmitNode(evt, true, false);
             }
         }
 
@@ -1625,7 +1625,7 @@ namespace YamlDotNet.Core
                 WriteIndicator(":", true, false, true);
             }
             states.Push(EmitterState.BlockMappingKey);
-            EmitNode(evt, false, true, false);
+            EmitNode(evt, true, false);
         }
 
         private void IncreaseIndent(bool isFlow, bool isIndentless)
@@ -1680,20 +1680,20 @@ namespace YamlDotNet.Core
             switch (events.Peek().Type)
             {
                 case EventType.Alias:
-                    length = SafeStringLength(anchorData.anchor);
+                    length = SafeStringLength(anchorData.Anchor);
                     break;
 
                 case EventType.Scalar:
-                    if (scalarData.isMultiline)
+                    if (scalarData.IsMultiline)
                     {
                         return false;
                     }
 
                     length =
-                        SafeStringLength(anchorData.anchor) +
-                            SafeStringLength(tagData.handle) +
-                            SafeStringLength(tagData.suffix) +
-                            SafeStringLength(scalarData.value);
+                        SafeStringLength(anchorData.Anchor) +
+                            SafeStringLength(tagData.Handle) +
+                            SafeStringLength(tagData.Suffix) +
+                            SafeStringLength(scalarData.Value);
                     break;
 
                 case EventType.SequenceStart:
@@ -1702,9 +1702,9 @@ namespace YamlDotNet.Core
                         return false;
                     }
                     length =
-                        SafeStringLength(anchorData.anchor) +
-                            SafeStringLength(tagData.handle) +
-                            SafeStringLength(tagData.suffix);
+                        SafeStringLength(anchorData.Anchor) +
+                            SafeStringLength(tagData.Handle) +
+                            SafeStringLength(tagData.Suffix);
                     break;
 
                 case EventType.MappingStart:
@@ -1713,9 +1713,9 @@ namespace YamlDotNet.Core
                         return false;
                     }
                     length =
-                        SafeStringLength(anchorData.anchor) +
-                            SafeStringLength(tagData.handle) +
-                            SafeStringLength(tagData.suffix);
+                        SafeStringLength(anchorData.Anchor) +
+                            SafeStringLength(tagData.Handle) +
+                            SafeStringLength(tagData.Suffix);
                     break;
 
                 default:
@@ -1742,13 +1742,11 @@ namespace YamlDotNet.Core
                 return false;
             }
 
-            using (var enumerator = events.GetEnumerator())
-            {
-                return enumerator.MoveNext()
-                    && enumerator.Current is TStart
-                    && enumerator.MoveNext()
-                    && enumerator.Current is TEnd;
-            }
+            using var enumerator = events.GetEnumerator();
+            return enumerator.MoveNext()
+                && enumerator.Current is TStart
+                && enumerator.MoveNext()
+                && enumerator.Current is TEnd;
         }
         #endregion
 
@@ -1851,7 +1849,7 @@ namespace YamlDotNet.Core
 
         private string UrlEncode(string text)
         {
-            return uriReplacer.Replace(text, delegate (Match match)
+            return UriReplacer.Replace(text, delegate (Match match)
             {
                 var buffer = new StringBuilder();
                 foreach (var toEncode in Encoding.UTF8.GetBytes(match.Value))

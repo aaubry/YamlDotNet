@@ -64,42 +64,38 @@ namespace YamlDotNet.Test.Spec
         public void ConformsWithYamlSpec(string name, string description, string inputFile, string outputFile, bool error)
         {
             var expectedResult = File.ReadAllText(outputFile);
-            using (var writer = new StringWriter())
+            using var writer = new StringWriter();
+            try
             {
-                try
-                {
-                    using (var reader = File.OpenText(inputFile))
-                    {
-                        var subject = deserializer.Deserialize(reader);
-                        serializer.Serialize(writer, subject);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Assert.True(error, $"Unexpected spec failure ({name}).\n{description}\nExpected:\n{expectedResult}\nActual:\n[Writer Output]\n{writer}\n[Exception]\n{ex}");
+                using var reader = File.OpenText(inputFile);
+                var subject = deserializer.Deserialize(reader);
+                serializer.Serialize(writer, subject);
+            }
+            catch (Exception ex)
+            {
+                Assert.True(error, $"Unexpected spec failure ({name}).\n{description}\nExpected:\n{expectedResult}\nActual:\n[Writer Output]\n{writer}\n[Exception]\n{ex}");
 
-                    if (error)
-                    {
-                        Debug.Assert(!knownFalsePositives.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
-                    }
-
-                    return;
+                if (error)
+                {
+                    Debug.Assert(!knownFalsePositives.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
                 }
 
-                try
-                {
-                    Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
-                    Debug.Assert(!ignoredSuites.Contains(name), $"Spec test '{name}' passed but present in '{nameof(ignoredSuites)}' list. Consider removing it from the list.");
-                }
-                catch (EqualException)
-                {
-                    // In some cases, YamlDotNet's parser/scanner is unexpectedly *not* erroring out.
-                    // Throw, if it is not a known case.
+                return;
+            }
 
-                    if (!(error && knownFalsePositives.Contains(name)))
-                    {
-                        throw;
-                    }
+            try
+            {
+                Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
+                Debug.Assert(!ignoredSuites.Contains(name), $"Spec test '{name}' passed but present in '{nameof(ignoredSuites)}' list. Consider removing it from the list.");
+            }
+            catch (EqualException)
+            {
+                // In some cases, YamlDotNet's parser/scanner is unexpectedly *not* erroring out.
+                // Throw, if it is not a known case.
+
+                if (!(error && knownFalsePositives.Contains(name)))
+                {
+                    throw;
                 }
             }
         }

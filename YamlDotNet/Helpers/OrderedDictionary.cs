@@ -143,7 +143,9 @@ namespace YamlDotNet.Helpers
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value) =>
             dictionary.TryGetValue(key, out value);
 
+#if !(NETCOREAPP3_1)
 #pragma warning restore 8767
+#endif
 
         IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
 
@@ -180,8 +182,10 @@ namespace YamlDotNet.Helpers
 
             public void CopyTo(TKey[] array, int arrayIndex)
             {
-                for (int i = 0; i < orderedDictionary.list.Count; i++)
+                for (var i = 0; i < orderedDictionary.list.Count; i++)
+                {
                     array[i] = orderedDictionary.list[i + arrayIndex].Key;
+                }
             }
 
             public IEnumerator<TKey> GetEnumerator() =>
@@ -213,8 +217,10 @@ namespace YamlDotNet.Helpers
 
             public void CopyTo(TValue[] array, int arrayIndex)
             {
-                for (int i = 0; i < orderedDictionary.list.Count; i++)
+                for (var i = 0; i < orderedDictionary.list.Count; i++)
+                {
                     array[i] = orderedDictionary.list[i + arrayIndex].Value;
+                }
             }
 
             public IEnumerator<TValue> GetEnumerator() =>

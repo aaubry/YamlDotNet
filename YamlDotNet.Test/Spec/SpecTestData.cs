@@ -48,17 +48,26 @@ namespace YamlDotNet.Test.Spec
             {
                 var testName = Path.GetFileName(testPath);
                 // comment the following line to run spec tests (requires 'Rebuild')
-                if (IgnoredSuites.Contains(testName)) continue;
+                if (IgnoredSuites.Contains(testName))
+                {
+                    continue;
+                }
 
                 var inputFile = Path.Combine(testPath, InputFilename);
-                if (!File.Exists(inputFile)) continue;
+                if (!File.Exists(inputFile))
+                {
+                    continue;
+                }
 
                 var descriptionFile = Path.Combine(testPath, DescriptionFilename);
                 var hasErrorFile = File.Exists(Path.Combine(testPath, ErrorFilename));
                 var expectedEventFile = Path.Combine(testPath, ExpectedEventFilename);
 
                 var outputFile = Path.Combine(testPath, OutputFilename);
-                if (!File.Exists(outputFile)) outputFile = inputFile;
+                if (!File.Exists(outputFile))
+                {
+                    outputFile = inputFile;
+                }
 
                 yield return new object[]
                 {
@@ -74,7 +83,7 @@ namespace YamlDotNet.Test.Spec
         private static string GetTestFixtureDirectory()
         {
             // check if environment variable YAMLDOTNET_SPEC_SUITE_DIR is set
-            string fixturesPath = Environment.GetEnvironmentVariable("YAMLDOTNET_SPEC_SUITE_DIR");
+            var fixturesPath = Environment.GetEnvironmentVariable("YAMLDOTNET_SPEC_SUITE_DIR");
 
             if (!string.IsNullOrEmpty(fixturesPath))
             {

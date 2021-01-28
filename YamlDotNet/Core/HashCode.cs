@@ -19,12 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core
 {
     /// <summary>
-    /// Supports implementations of <see cref="Object.GetHashCode"/> by providing methods to combine two hash codes.
+    /// Supports implementations of <see cref="object.GetHashCode"/> by providing methods to combine two hash codes.
     /// </summary>
     internal static class HashCode
     {

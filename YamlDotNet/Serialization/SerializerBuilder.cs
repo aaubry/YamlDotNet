@@ -559,11 +559,11 @@ namespace YamlDotNet.Serialization
                     traversalStrategy.Traverse(graph, visitor, null!);
                 }
 
-                void nestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
+                void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
 
                 var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
                     new EmittingObjectGraphVisitor(eventEmitter),
-                    inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, nestedObjectSerializer)
+                    inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, NestedObjectSerializer)
                 );
 
                 traversalStrategy.Traverse(graph, emittingVisitor, emitter);

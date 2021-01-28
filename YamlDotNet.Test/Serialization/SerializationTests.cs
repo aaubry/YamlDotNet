@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using FakeItEasy;
-using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +30,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using FakeItEasy;
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -48,20 +48,20 @@ namespace YamlDotNet.Test.Serialization
         private static readonly string[] TrueStrings = { "true", "y", "yes", "on" };
         private static readonly string[] FalseStrings = { "false", "n", "no", "off" };
 
-        public static IEnumerable<Object[]> DeserializeScalarBoolean_TestCases
+        public static IEnumerable<object[]> DeserializeScalarBoolean_TestCases
         {
             get
             {
-                foreach (var trueString in SerializationTests.TrueStrings)
+                foreach (var trueString in TrueStrings)
                 {
-                    yield return new Object[] { trueString, true };
-                    yield return new Object[] { trueString.ToUpper(), true };
+                    yield return new object[] { trueString, true };
+                    yield return new object[] { trueString.ToUpper(), true };
                 }
 
-                foreach (var falseString in SerializationTests.FalseStrings)
+                foreach (var falseString in FalseStrings)
                 {
-                    yield return new Object[] { falseString, false };
-                    yield return new Object[] { falseString.ToUpper(), false };
+                    yield return new object[] { falseString, false };
+                    yield return new object[] { falseString.ToUpper(), false };
                 }
             }
         }
@@ -486,7 +486,7 @@ Value: foo");
         {
             var stream = Yaml.ReaderFrom("list.yaml");
 
-            var result = Deserializer.Deserialize<String[]>(stream);
+            var result = Deserializer.Deserialize<string[]>(stream);
 
             result.Should().Equal(new[] { "one", "two", "three" });
         }
@@ -1115,7 +1115,7 @@ y:
 
             var result = Deserializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(parser);
 
-            int index = 0;
+            var index = 0;
             foreach (var mapping in result["results"])
             {
                 mapping.Should()
@@ -1275,8 +1275,11 @@ y:
         [Fact]
         public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
         {
-            var obj = new Dictionary<string, object>();
-            obj["property_one"] = new GenericTestDictionary<string, object>();
+            var obj = new Dictionary<string, object>
+            {
+                ["property_one"] = new GenericTestDictionary<string, object>()
+            };
+
             ((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
 
             var mockNamingConvention = A.Fake<INamingConvention>();
@@ -1485,7 +1488,7 @@ y:
             var yaml = new Serializer().Serialize(value);
             Assert.Contains(value.ToString(), yaml);
 
-            ulong parsed = new Deserializer().Deserialize<ulong>(yaml);
+            var parsed = new Deserializer().Deserialize<ulong>(yaml);
             Assert.Equal(value, parsed);
         }
 
@@ -1498,7 +1501,7 @@ y:
             var yaml = new Serializer().Serialize(value);
             Assert.Contains(value.ToString(), yaml);
 
-            long parsed = new Deserializer().Deserialize<long>(yaml);
+            var parsed = new Deserializer().Deserialize<long>(yaml);
             Assert.Equal(value, parsed);
         }
 
@@ -1560,7 +1563,7 @@ c:  *anchor1");
             var serializer = new SerializerBuilder()
                 .WithTypeConverter(new MethodInfoConverter())
                 .Build();
-            string yaml = serializer.Serialize(ex);
+            var yaml = serializer.Serialize(ex);
             Assert.Contains("GetExceptionWithStackTrace", yaml);
         }
 
@@ -1845,7 +1848,7 @@ c: *anchor1");
             Assert.Equal("public2,internal,protected,private", deserialized.ToString());
         }
 
-                [Fact]
+        [Fact]
         public void DeserializationNonPublicPropertiesAreIncluded()
         {
             var sut = new DeserializerBuilder().IncludeNonPublicProperties().Build();

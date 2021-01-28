@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class DefaultObjectFactory : IObjectFactory
     {
-        private static readonly Dictionary<Type, Type> defaultGenericInterfaceImplementations = new Dictionary<Type, Type>
+        private static readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
             { typeof(IEnumerable<>), typeof(List<>) },
             { typeof(ICollection<>), typeof(List<>) },
@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(IDictionary<,>), typeof(Dictionary<,>) }
         };
 
-        private static readonly Dictionary<Type, Type> defaultNonGenericInterfaceImplementations = new Dictionary<Type, Type>
+        private static readonly Dictionary<Type, Type> DefaultNonGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
             { typeof(IEnumerable), typeof(List<object>) },
             { typeof(ICollection), typeof(List<object>) },
@@ -52,14 +52,14 @@ namespace YamlDotNet.Serialization.ObjectFactories
             {
                 if (type.IsGenericType())
                 {
-                    if (defaultGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
+                    if (DefaultGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
                     {
                         type = implementationType.MakeGenericType(type.GetGenericArguments());
                     }
                 }
                 else
                 {
-                    if (defaultNonGenericInterfaceImplementations.TryGetValue(type, out var implementationType))
+                    if (DefaultNonGenericInterfaceImplementations.TryGetValue(type, out var implementationType))
                     {
                         type = implementationType;
                     }

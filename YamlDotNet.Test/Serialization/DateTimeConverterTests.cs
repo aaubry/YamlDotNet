@@ -21,13 +21,9 @@
 
 using System;
 using System.Globalization;
-
 using FakeItEasy;
-
 using FluentAssertions;
-
 using Xunit;
-
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -105,13 +101,13 @@ namespace YamlDotNet.Test.Serialization
             var result = converter.ReadYaml(parser, typeof(DateTime));
 
             result.Should().BeOfType<DateTime>();
-            ((DateTime) result).Kind.Should().Be(DateTimeKind.Utc);
-            ((DateTime) result).ToUniversalTime().Year.Should().Be(year);
-            ((DateTime) result).ToUniversalTime().Month.Should().Be(month);
-            ((DateTime) result).ToUniversalTime().Day.Should().Be(day);
-            ((DateTime) result).ToUniversalTime().Hour.Should().Be(hour);
-            ((DateTime) result).ToUniversalTime().Minute.Should().Be(minute);
-            ((DateTime) result).ToUniversalTime().Second.Should().Be(second);
+            ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
+            ((DateTime)result).ToUniversalTime().Year.Should().Be(year);
+            ((DateTime)result).ToUniversalTime().Month.Should().Be(month);
+            ((DateTime)result).ToUniversalTime().Day.Should().Be(day);
+            ((DateTime)result).ToUniversalTime().Hour.Should().Be(hour);
+            ((DateTime)result).ToUniversalTime().Minute.Should().Be(minute);
+            ((DateTime)result).ToUniversalTime().Second.Should().Be(second);
         }
 
         /// <summary>
@@ -198,18 +194,18 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(yaml));
 
-            var converter = new DateTimeConverter(formats: new[] {format1, format2});
+            var converter = new DateTimeConverter(formats: new[] { format1, format2 });
 
             var result = converter.ReadYaml(parser, typeof(DateTime));
 
             result.Should().BeOfType<DateTime>();
-            ((DateTime) result).Kind.Should().Be(DateTimeKind.Utc);
-            ((DateTime) result).ToUniversalTime().Year.Should().Be(year);
-            ((DateTime) result).ToUniversalTime().Month.Should().Be(month);
-            ((DateTime) result).ToUniversalTime().Day.Should().Be(day);
-            ((DateTime) result).ToUniversalTime().Hour.Should().Be(0);
-            ((DateTime) result).ToUniversalTime().Minute.Should().Be(0);
-            ((DateTime) result).ToUniversalTime().Second.Should().Be(0);
+            ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
+            ((DateTime)result).ToUniversalTime().Year.Should().Be(year);
+            ((DateTime)result).ToUniversalTime().Month.Should().Be(month);
+            ((DateTime)result).ToUniversalTime().Day.Should().Be(day);
+            ((DateTime)result).ToUniversalTime().Hour.Should().Be(0);
+            ((DateTime)result).ToUniversalTime().Minute.Should().Be(0);
+            ((DateTime)result).ToUniversalTime().Second.Should().Be(0);
         }
 
         /// <summary>
@@ -385,13 +381,13 @@ namespace YamlDotNet.Test.Serialization
         public void Given_Yaml_WithLocaleAndTimeFormat_ReadYaml_ShouldReturn_Result(string format, string locale, string value)
         {
             var culture = new CultureInfo(locale);
-            
+
             var expected = default(DateTime);
             try
             {
                 expected = DateTime.ParseExact(value, format, culture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var message = string.Format("Failed to parse the test argument to DateTime. The expected date format should look like this: '{0}'", DateTime.Now.ToString(format, culture));
                 throw new Exception(message, ex);
@@ -560,7 +556,7 @@ namespace YamlDotNet.Test.Serialization
 
             var builder = new SerializerBuilder();
             builder.WithNamingConvention(CamelCaseNamingConvention.Instance);
-            builder.WithTypeConverter(new DateTimeConverter(kind, formats: new [] {format, "G"}));
+            builder.WithTypeConverter(new DateTimeConverter(kind, formats: new[] { format, "G" }));
 
             var serialiser = builder.Build();
 

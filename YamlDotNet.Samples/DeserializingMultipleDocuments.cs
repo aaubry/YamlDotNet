@@ -21,11 +21,11 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Xunit.Abstractions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
 using YamlDotNet.Samples.Helpers;
-using Xunit.Abstractions;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {

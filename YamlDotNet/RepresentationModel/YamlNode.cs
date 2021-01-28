@@ -20,10 +20,10 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -79,7 +79,7 @@ namespace YamlDotNet.RepresentationModel
         /// Parses the node represented by the next event in <paramref name="parser" />.
         /// </summary>
         /// <returns>Returns the node that has been parsed.</returns>
-        static internal YamlNode ParseNode(IParser parser, DocumentLoadingState state)
+        internal static YamlNode ParseNode(IParser parser, DocumentLoadingState state)
         {
             if (parser.Accept<Scalar>(out var _))
             {
@@ -179,7 +179,7 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="System.String"/> to <see cref="YamlDotNet.RepresentationModel.YamlNode"/>.
+        /// Performs an implicit conversion from <see cref="string"/> to <see cref="YamlNode"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -189,7 +189,7 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Performs an implicit conversion from string[] to <see cref="YamlDotNet.RepresentationModel.YamlNode"/>.
+        /// Performs an implicit conversion from string[] to <see cref="YamlNode"/>.
         /// </summary>
         /// <param name="sequence">The value.</param>
         /// <returns>The result of the conversion.</returns>

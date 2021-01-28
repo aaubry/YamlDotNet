@@ -61,13 +61,13 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
         protected struct ObjectPathSegment
         {
-            public object name;
-            public IObjectDescriptor value;
+            public readonly object Name;
+            public readonly IObjectDescriptor Value;
 
             public ObjectPathSegment(object name, IObjectDescriptor value)
             {
-                this.name = name;
-                this.value = value;
+                this.Name = name;
+                this.Value = value;
             }
         }
 
@@ -83,9 +83,9 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                 var maxNameLength = 0;
                 foreach (var segment in path)
                 {
-                    var segmentName = TypeConverter.ChangeType<string>(segment.name);
+                    var segmentName = TypeConverter.ChangeType<string>(segment.Name);
                     maxNameLength = Math.Max(maxNameLength, segmentName.Length);
-                    lines.Push(new KeyValuePair<string, string>(segmentName, segment.value.Type.FullName!));
+                    lines.Push(new KeyValuePair<string, string>(segmentName, segment.Value.Type.FullName!));
                 }
 
                 foreach (var line in lines)

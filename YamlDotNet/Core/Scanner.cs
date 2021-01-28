@@ -36,7 +36,7 @@ namespace YamlDotNet.Core
     {
         private const int MaxVersionNumberLength = 9;
 
-        private static readonly IDictionary<char, char> simpleEscapeCodes = new SortedDictionary<char, char>
+        private static readonly IDictionary<char, char> SimpleEscapeCodes = new SortedDictionary<char, char>
         {
             { '0', '\0' },
             { 'a', '\x07' },
@@ -94,12 +94,18 @@ namespace YamlDotNet.Core
 
         private bool IsDocumentIndicator() => IsDocumentStart() || IsDocumentEnd();
 
-        public bool SkipComments { get; private set; }
+        public bool SkipComments
+        {
+            get; private set;
+        }
 
         /// <summary>
         /// Gets the current token.
         /// </summary>
-        public Token? Current { get; private set; }
+        public Token? Current
+        {
+            get; private set;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Scanner"/> class.
@@ -197,7 +203,7 @@ namespace YamlDotNet.Core
             {
                 // Check if we really need to fetch more tokens.
 
-                bool needsMoreTokens = false;
+                var needsMoreTokens = false;
 
                 if (tokens.Count == 0)
                 {
@@ -472,9 +478,9 @@ namespace YamlDotNet.Core
             // The last rule is more restrictive than the specification requires.
 
 
-            bool isInvalidPlainScalarCharacter = analyzer.IsWhiteBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
+            var isInvalidPlainScalarCharacter = analyzer.IsWhiteBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
 
-            bool isPlainScalar =
+            var isPlainScalar =
                 !isInvalidPlainScalarCharacter ||
                 (analyzer.Check('-') && !analyzer.IsWhite(1)) ||
                 (flowLevel == 0 && analyzer.Check("?:") && !analyzer.IsWhiteBreakOrZero(1)) ||
@@ -1242,7 +1248,7 @@ namespace YamlDotNet.Core
 
             Skip();
 
-            bool isAliasKey = false;
+            var isAliasKey = false;
             if (isAlias)
             {
                 var key = simpleKeys.Peek();
@@ -1436,10 +1442,10 @@ namespace YamlDotNet.Core
             var leadingBreak = new StringBuilder();
             var trailingBreaks = new StringBuilder();
 
-            int chomping = 0;
-            int increment = 0;
-            int currentIndent = 0;
-            bool leadingBlank = false;
+            var chomping = 0;
+            var increment = 0;
+            var currentIndent = 0;
+            var leadingBlank = false;
             bool? isFirstLine = null;
 
             // Eat the indicator '|' or '>'.
@@ -1547,7 +1553,6 @@ namespace YamlDotNet.Core
 
             // Scan the leading line breaks and determine the indentation level if needed.
 
-            var breaksBefore = trailingBreaks.Length;
             currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, isLiteral, ref end, ref isFirstLine);
             isFirstLine = false;
 
@@ -1621,7 +1626,7 @@ namespace YamlDotNet.Core
 
             // Create a token.
 
-            ScalarStyle style = isLiteral ? ScalarStyle.Literal : ScalarStyle.Folded;
+            var style = isLiteral ? ScalarStyle.Literal : ScalarStyle.Folded;
             return new Scalar(value.ToString(), style, start, end);
         }
 
@@ -1632,8 +1637,8 @@ namespace YamlDotNet.Core
 
         private int ScanBlockScalarBreaks(int currentIndent, StringBuilder breaks, bool isLiteral, ref Mark end, ref bool? isFirstLine)
         {
-            int maxIndent = 0;
-            int indentOfFirstLine = -1;
+            var maxIndent = 0;
+            var indentOfFirstLine = -1;
 
             end = cursor.Mark();
 
@@ -1659,9 +1664,14 @@ namespace YamlDotNet.Core
                 {
                     if (isLiteral && isFirstLine == true)
                     {
-                        int localIndent = cursor.LineOffset;
-                        int i = 0;
-                        for (; !analyzer.IsBreak(i) && analyzer.IsSpace(i); ++i, ++localIndent) ;
+                        var localIndent = cursor.LineOffset;
+                        var i = 0;
+                        while (!analyzer.IsBreak(i) && analyzer.IsSpace(i))
+                        {
+                            ++i;
+                            ++localIndent;
+                        }
+
                         if (analyzer.IsBreak(i) && localIndent > cursor.LineOffset)
                         {
                             isFirstLine = false;
@@ -1753,7 +1763,7 @@ namespace YamlDotNet.Core
             var whitespaces = new StringBuilder();
             var leadingBreak = new StringBuilder();
             var trailingBreaks = new StringBuilder();
-            bool hasLeadingBlanks = false;
+            var hasLeadingBlanks = false;
 
             while (true)
             {
@@ -1812,7 +1822,7 @@ namespace YamlDotNet.Core
 
                     else if (!isSingleQuoted && analyzer.Check('\\'))
                     {
-                        int codeLength = 0;
+                        var codeLength = 0;
 
                         // Check the escape character.
 
@@ -1833,7 +1843,7 @@ namespace YamlDotNet.Core
 
                             default:
                                 char unescapedCharacter;
-                                if (simpleEscapeCodes.TryGetValue(escapeCharacter, out unescapedCharacter))
+                                if (SimpleEscapeCodes.TryGetValue(escapeCharacter, out unescapedCharacter))
                                 {
                                     value.Append(unescapedCharacter);
                                 }
@@ -1851,11 +1861,11 @@ namespace YamlDotNet.Core
 
                         if (codeLength > 0)
                         {
-                            int character = 0;
+                            var character = 0;
 
                             // Scan the character value.
 
-                            for (int k = 0; k < codeLength; ++k)
+                            for (var k = 0; k < codeLength; ++k)
                             {
                                 if (!analyzer.IsHex(k))
                                 {
@@ -1875,7 +1885,7 @@ namespace YamlDotNet.Core
 
                             // Advance the pointer.
 
-                            for (int k = 0; k < codeLength; ++k)
+                            for (var k = 0; k < codeLength; ++k)
                             {
                                 Skip();
                             }
@@ -1892,7 +1902,9 @@ namespace YamlDotNet.Core
                 // Check if we are at the end of the scalar.
 
                 if (analyzer.Check(isSingleQuoted ? '\'' : '"'))
+                {
                     break;
+                }
 
                 // Consume blank characters.
 
@@ -1982,7 +1994,7 @@ namespace YamlDotNet.Core
             simpleKeyAllowed = false;
 
             // Create the SCALAR token and append it to the queue.
-            bool isMultiline = false;
+            var isMultiline = false;
             var scalar = ScanPlainScalar(ref isMultiline);
 
             if (isMultiline && analyzer.Check(':') && flowLevel == 0 && indent < cursor.LineOffset)
@@ -2003,17 +2015,13 @@ namespace YamlDotNet.Core
             var leadingBreak = new StringBuilder();
             var trailingBreaks = new StringBuilder();
 
-            bool hasLeadingBlanks = false;
-            int currentIndent = indent + 1;
+            var hasLeadingBlanks = false;
+            var currentIndent = indent + 1;
 
             var start = cursor.Mark();
             var end = start;
 
             var key = simpleKeys.Peek();
-
-            // Check if this is the same line as DocumentStart or DocumentEnd marker.
-
-            bool onDocumentStartLine = previous is DocumentStart documentStart && documentStart.Start.Line == cursor.Line;
 
             // Consume the content of the plain scalar.
 
@@ -2368,9 +2376,9 @@ namespace YamlDotNet.Core
         {
             // Decode the required number of characters.
 
-            byte[] charBytes = EmptyBytes;
-            int nextInsertionIndex = 0;
-            int width = 0;
+            var charBytes = EmptyBytes;
+            var nextInsertionIndex = 0;
+            var width = 0;
             do
             {
                 // Check for a URI-escaped octet.
@@ -2382,7 +2390,7 @@ namespace YamlDotNet.Core
 
                 // Get the octet.
 
-                int octet = (analyzer.AsHex(1) << 4) + analyzer.AsHex(2);
+                var octet = (analyzer.AsHex(1) << 4) + analyzer.AsHex(2);
 
                 // If it is the leading octet, determine the length of the UTF-8 sequence.
 
@@ -2490,8 +2498,8 @@ namespace YamlDotNet.Core
         /// </summary>
         private int ScanVersionDirectiveNumber(Mark start)
         {
-            int value = 0;
-            int length = 0;
+            var value = 0;
+            var length = 0;
 
             // Repeat while the next character is digit.
 
@@ -2532,7 +2540,7 @@ namespace YamlDotNet.Core
             // level.
 
 
-            bool isRequired = (flowLevel == 0 && indent == cursor.LineOffset);
+            var isRequired = (flowLevel == 0 && indent == cursor.LineOffset);
 
 
             // A simple key is required only when it is the first token in the current

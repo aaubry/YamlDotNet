@@ -78,11 +78,9 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         public string Serialize(object graph)
         {
-            using (var buffer = new StringWriter())
-            {
-                Serialize(buffer, graph);
-                return buffer.ToString();
-            }
+            using var buffer = new StringWriter();
+            Serialize(buffer, graph);
+            return buffer.ToString();
         }
 
         /// <summary>

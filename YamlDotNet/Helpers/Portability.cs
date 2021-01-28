@@ -20,7 +20,6 @@
 // SOFTWARE.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -95,7 +94,7 @@ namespace YamlDotNet
 
         public static TypeCode GetTypeCode(this Type type)
         {
-            bool isEnum = type.IsEnum();
+            var isEnum = type.IsEnum();
             if (isEnum)
             {
                 type = Enum.GetUnderlyingType(type);
@@ -157,7 +156,7 @@ namespace YamlDotNet
             {
                 return TypeCode.DateTime;
             }
-            else if (type == typeof(String))
+            else if (type == typeof(string))
             {
                 return TypeCode.String;
             }
@@ -389,7 +388,7 @@ namespace YamlDotNet
             return type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance);
         }
 
-        private static readonly FieldInfo? remoteStackTraceField = typeof(Exception)
+        private static readonly FieldInfo? RemoteStackTraceField = typeof(Exception)
                 .GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
 
         public static Exception Unwrap(this TargetInvocationException ex)
@@ -400,9 +399,9 @@ namespace YamlDotNet
                 return ex;
             }
 
-            if (remoteStackTraceField != null)
+            if (RemoteStackTraceField != null)
             {
-                remoteStackTraceField.SetValue(result, result.StackTrace + "\r\n");
+                RemoteStackTraceField.SetValue(result, result.StackTrace + "\r\n");
             }
             return result;
         }
@@ -524,13 +523,13 @@ namespace System.Linq
             }
         }
 
-        public static IEnumerable<T> OfType<T>(this IEnumerable sequence)
+        public static IEnumerable<T> OfType<T>(this System.Collections.IEnumerable sequence)
         {
             foreach (var item in sequence)
             {
-                if (item is T)
+                if (item is T t)
                 {
-                    yield return (T)item;
+                    yield return t;
                 }
             }
         }
@@ -566,36 +565,32 @@ namespace System.Linq
 
         public static T SingleOrDefault<T>(this IEnumerable<T> sequence)
         {
-            using (var enumerator = sequence.GetEnumerator())
+            using var enumerator = sequence.GetEnumerator();
+            if (!enumerator.MoveNext())
             {
-                if (!enumerator.MoveNext())
-                {
-                    return default!;
-                }
-                var result = enumerator.Current;
-                if (enumerator.MoveNext())
-                {
-                    throw new InvalidOperationException();
-                }
-                return result;
+                return default!;
             }
+            var result = enumerator.Current;
+            if (enumerator.MoveNext())
+            {
+                throw new InvalidOperationException();
+            }
+            return result;
         }
 
         public static T Single<T>(this IEnumerable<T> sequence)
         {
-            using (var enumerator = sequence.GetEnumerator())
+            using var enumerator = sequence.GetEnumerator();
+            if (!enumerator.MoveNext())
             {
-                if (!enumerator.MoveNext())
-                {
-                    throw new InvalidOperationException();
-                }
-                var result = enumerator.Current;
-                if (enumerator.MoveNext())
-                {
-                    throw new InvalidOperationException();
-                }
-                return result;
+                throw new InvalidOperationException();
             }
+            var result = enumerator.Current;
+            if (enumerator.MoveNext())
+            {
+                throw new InvalidOperationException();
+            }
+            return result;
         }
 
         public static T FirstOrDefault<T>(this IEnumerable<T> sequence, Func<T, bool> predicate)
@@ -672,7 +667,7 @@ namespace System.Linq
 
         public static bool Any<T>(this IEnumerable<T> sequence)
         {
-            foreach (var item in sequence)
+            foreach (var _ in sequence)
             {
                 return true;
             }
@@ -698,19 +693,17 @@ namespace System.Linq
 
         public static TSource Aggregate<TSource>(this IEnumerable<TSource> source, Func<TSource, TSource, TSource> func)
         {
-            using (var enumerator = source.GetEnumerator())
+            using var enumerator = source.GetEnumerator();
+            if (!enumerator.MoveNext())
             {
-                if (!enumerator.MoveNext())
-                {
-                    throw new InvalidOperationException();
-                }
-                var accumulator = enumerator.Current;
-                while (enumerator.MoveNext())
-                {
-                    accumulator = func(accumulator, enumerator.Current);
-                }
-                return accumulator;
+                throw new InvalidOperationException();
             }
+            var accumulator = enumerator.Current;
+            while (enumerator.MoveNext())
+            {
+                accumulator = func(accumulator, enumerator.Current);
+            }
+            return accumulator;
         }
 
         public static TAccumulate Aggregate<TSource, TAccumulate>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func)
@@ -789,7 +782,7 @@ namespace System.Runtime.Versioning
 
 namespace System.Collections.Concurrent
 {
-    #if NET20 || NET35 || UNITY
+#if NET20 || NET35 || UNITY
     internal sealed class ConcurrentDictionary<TKey, TValue>
     {
         private readonly Dictionary<TKey, TValue> entries = new Dictionary<TKey, TValue>();
@@ -809,5 +802,5 @@ namespace System.Collections.Concurrent
             }
         }
     }
-    #endif
+#endif
 }

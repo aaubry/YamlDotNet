@@ -119,7 +119,7 @@ namespace YamlDotNet.Core
         {
             events.MarkDeleted(node);
 
-            LinkedListNode<ParsingEvent>? current = node;
+            var current = node;
             while (current != null)
             {
                 if (current.Value is SequenceEnd)
@@ -190,17 +190,14 @@ namespace YamlDotNet.Core
             public IEnumerable<LinkedListNode<ParsingEvent>> FromAnchor(string anchor)
             {
                 var node = references[anchor].Next;
-                var iterator = GetEnumerator(node);
-
-                while (iterator.MoveNext())
-                    yield return iterator.Current;
+                return Enumerate(node);
             }
 
-            public IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator() => GetEnumerator(events.First);
+            public IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator() => Enumerate(events.First).GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            private IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator(LinkedListNode<ParsingEvent>? node)
+            private IEnumerable<LinkedListNode<ParsingEvent>> Enumerate(LinkedListNode<ParsingEvent>? node)
             {
                 while (node != null)
                 {

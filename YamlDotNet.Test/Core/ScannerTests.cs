@@ -19,18 +19,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Xunit;
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using FluentAssertions;
+using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
-using System.IO;
-using System.Reflection;
-using System;
-using System.Linq;
-
-#if !PORTABLE && !NETCOREAPP1_0
-using System.Runtime.Serialization.Formatters.Binary;
-#endif
 
 namespace YamlDotNet.Test.Core
 {
@@ -345,8 +341,7 @@ namespace YamlDotNet.Test.Core
 
             while (sut.MoveNext())
             {
-                var comment = sut.Current as Comment;
-                if (comment != null)
+                if (sut.Current is Comment comment)
                 {
                     Assert.Equal(8, comment.Start.Index);
                     Assert.Equal(31, comment.End.Index);
@@ -403,7 +398,7 @@ namespace YamlDotNet.Test.Core
             var scanner = new Scanner(new StreamReader(slowStream));
 
             scanner.MoveNext();
-            
+
             // Should not fail
             scanner.MoveNext();
         }
@@ -414,7 +409,9 @@ namespace YamlDotNet.Test.Core
             var yaml = "MainItem4:\n" + string.Join("\n", Enumerable.Range(1, 100).Select(e => $"- {{item: {{foo1: {e}, foo2: 'bar{e}' }}}}"));
 
             var scanner = new Scanner(new StringReader(yaml));
-            while (scanner.MoveNext()) ;
+            while (scanner.MoveNext())
+            {
+            }
         }
 
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)

@@ -320,7 +320,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private VersionDirective? ProcessDirectives(TagDirectiveCollection tags)
         {
-            bool hasOwnDirectives = false;
+            var hasOwnDirectives = false;
             VersionDirective? localVersion = null;
 
             while (true)
@@ -683,7 +683,7 @@ namespace YamlDotNet.Core
             var current = GetCurrentToken();
             if (current is BlockEntry blockEntry)
             {
-                Mark mark = blockEntry.End;
+                var mark = blockEntry.End;
 
                 Skip();
                 current = GetCurrentToken();
@@ -721,7 +721,7 @@ namespace YamlDotNet.Core
             var current = GetCurrentToken();
             if (current is BlockEntry blockEntry)
             {
-                Mark mark = blockEntry.End;
+                var mark = blockEntry.End;
                 Skip();
 
                 current = GetCurrentToken();
@@ -765,7 +765,7 @@ namespace YamlDotNet.Core
             var current = GetCurrentToken();
             if (current is Key key)
             {
-                Mark mark = key.End;
+                var mark = key.End;
                 Skip();
                 current = GetCurrentToken();
                 if (!(current is Key || current is Value || current is BlockEnd))
@@ -827,7 +827,7 @@ namespace YamlDotNet.Core
             var current = GetCurrentToken();
             if (current is Value value)
             {
-                Mark mark = value.End;
+                var mark = value.End;
                 Skip();
 
                 current = GetCurrentToken();
@@ -842,12 +842,10 @@ namespace YamlDotNet.Core
                     return ProcessEmptyScalar(mark);
                 }
             }
-
-            else if(current is Error error)
+            else if (current is Error error)
             {
                 throw new SemanticErrorException(error.Start, error.End, error.Value);
             }
-
             else
             {
                 state = ParserState.BlockMappingKey;
@@ -928,7 +926,7 @@ namespace YamlDotNet.Core
             }
             else
             {
-                Mark mark = current?.End ?? Mark.Empty;
+                var mark = current?.End ?? Mark.Empty;
                 Skip();
                 state = ParserState.FlowSequenceEntryMappingValue;
                 return ProcessEmptyScalar(mark);

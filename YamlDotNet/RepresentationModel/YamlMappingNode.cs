@@ -70,7 +70,7 @@ namespace YamlDotNet.RepresentationModel
             Load(mapping, state);
             Style = mapping.Style;
 
-            bool hasUnresolvedAliases = false;
+            var hasUnresolvedAliases = false;
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var key = ParseNode(parser, state);
@@ -135,18 +135,16 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="children">A sequence of <see cref="YamlNode"/> where even elements are keys and odd elements are values.</param>
         public YamlMappingNode(IEnumerable<YamlNode> children)
         {
-            using (var enumerator = children.GetEnumerator())
+            using var enumerator = children.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                while (enumerator.MoveNext())
+                var key = enumerator.Current;
+                if (!enumerator.MoveNext())
                 {
-                    var key = enumerator.Current;
-                    if (!enumerator.MoveNext())
-                    {
-                        throw new ArgumentException("When constructing a mapping node with a sequence, the number of elements of the sequence must be even.");
-                    }
-
-                    Add(key, enumerator.Current);
+                    throw new ArgumentException("When constructing a mapping node with a sequence, the number of elements of the sequence must be even.");
                 }
+
+                Add(key, enumerator.Current);
             }
         }
 
@@ -230,7 +228,7 @@ namespace YamlDotNet.RepresentationModel
             {
                 foreach (var entry in keysToUpdate)
                 {
-                    YamlNode value = children[entry.Key];
+                    var value = children[entry.Key];
                     children.Remove(entry.Key);
                     children.Add(entry.Value, value);
                 }
@@ -338,10 +336,10 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// Returns a <see cref="string"/> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
+        /// A <see cref="string"/> that represents this instance.
         /// </returns>
         internal override string ToString(RecursionLevel level)
         {

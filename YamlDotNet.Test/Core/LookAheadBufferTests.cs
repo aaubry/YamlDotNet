@@ -19,10 +19,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using FakeItEasy;
-using FluentAssertions;
 using System;
 using System.IO;
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 

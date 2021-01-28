@@ -21,7 +21,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.Utilities
@@ -57,7 +56,7 @@ namespace YamlDotNet.Serialization.Utilities
         }
 
         /// <summary>
-        /// Gets the <see cref="System.Object"/> with the specified anchor.
+        /// Gets the <see cref="object"/> with the specified anchor.
         /// </summary>
         /// <value></value>
         public object this[string anchor]

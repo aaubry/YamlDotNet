@@ -21,11 +21,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using YamlDotNet.Core;
-using YamlDotNet.Helpers;
 using System.Linq.Expressions;
+using YamlDotNet.Helpers;
 using HashCode = YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.Serialization
@@ -89,7 +87,7 @@ namespace YamlDotNet.Serialization
             public int Matches(Type matchType)
             {
                 var currentPriority = 0;
-                Type? currentType = matchType;
+                var currentType = matchType;
                 while (currentType != null)
                 {
                     ++currentPriority;
@@ -115,7 +113,7 @@ namespace YamlDotNet.Serialization
         {
             if (overrides.TryGetValue(new AttributeKey(typeof(T), member), out var mappings))
             {
-                int bestMatchPriority = 0;
+                var bestMatchPriority = 0;
                 AttributeMapping? bestMatch = null;
 
                 foreach (var mapping in mappings)

@@ -19,7 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +26,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -71,7 +71,7 @@ namespace YamlDotNet.Test.Serialization
         {
             get
             {
-                return serializerBuilder = serializerBuilder ?? new SerializerBuilder();
+                return serializerBuilder ??= new SerializerBuilder();
             }
         }
 
@@ -87,7 +87,7 @@ namespace YamlDotNet.Test.Serialization
         {
             get
             {
-                return deserializerBuilder = deserializerBuilder ?? new DeserializerBuilder();
+                return deserializerBuilder ??= new DeserializerBuilder();
             }
         }
 
@@ -269,7 +269,10 @@ namespace YamlDotNet.Test.Serialization
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (!(value is string))
+            {
                 throw new InvalidOperationException();
+            }
+
             var parts = (value as string).Split(' ');
             return new Convertible
             {
@@ -397,16 +400,16 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [YamlMember(Order = 2)]
-        public String Order2 { get; set; }
+        public string Order2 { get; set; }
 
         [YamlMember(Order = 1)]
-        public String Order1 { get; set; }
+        public string Order1 { get; set; }
     }
 
     public class IgnoreExample
     {
         [YamlIgnore]
-        public String IgnoreMe
+        public string IgnoreMe
         {
             get { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
             set { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
@@ -416,7 +419,7 @@ namespace YamlDotNet.Test.Serialization
     public class IgnoreExampleBase
     {
         [YamlIgnore]
-        public virtual String IgnoreMe
+        public virtual string IgnoreMe
         {
             get { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
             set { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
@@ -425,7 +428,7 @@ namespace YamlDotNet.Test.Serialization
 
     public class IgnoreExampleDerived : IgnoreExampleBase
     {
-        public override String IgnoreMe
+        public override string IgnoreMe
         {
             get { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
             set { throw new InvalidOperationException("Accessing a [YamlIgnore] property"); }
@@ -437,15 +440,15 @@ namespace YamlDotNet.Test.Serialization
         public ScalarStyleExample()
         {
             var content = "Test";
-            this.LiteralString = content;
-            this.DoubleQuotedString = content;
+            LiteralString = content;
+            DoubleQuotedString = content;
         }
 
         [YamlMember(ScalarStyle = ScalarStyle.Literal)]
-        public String LiteralString { get; set; }
+        public string LiteralString { get; set; }
 
         [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
-        public String DoubleQuotedString { get; set; }
+        public string DoubleQuotedString { get; set; }
     }
 
     public class DefaultsExample
@@ -573,6 +576,7 @@ namespace YamlDotNet.Test.Serialization
         public override string ToString() => $"{Public},{Internal},{Protected},{Private}";
     }
 
+#pragma warning disable IDE0044 // Add readonly modifier
     public class NonPublicFieldsExample
     {
         public string Public = "public";
@@ -586,4 +590,5 @@ namespace YamlDotNet.Test.Serialization
         /// <inheritdoc />
         public override string ToString() => $"{Public},{Internal},{Protected},{Private}";
     }
+#pragma warning restore IDE0044 // Add readonly modifier
 }

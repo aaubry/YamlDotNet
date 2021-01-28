@@ -22,8 +22,8 @@
 #if !NET20
 
 using System;
-using System.Reflection;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace YamlDotNet.Helpers
 {

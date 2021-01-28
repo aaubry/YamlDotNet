@@ -22,39 +22,30 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Linq;
 using Xunit;
-using Xunit.Abstractions;
 using YamlDotNet.Core;
+using YamlDotNet.Samples.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Samples.Helpers;
 
 namespace YamlDotNet.Samples
 {
     public class ValidatingDuringDeserialization
     {
-        private readonly ITestOutputHelper output;
-
-        public ValidatingDuringDeserialization(ITestOutputHelper output)
-        {
-            this.output = output;
-        }
-
         // First, we'll implement a new INodeDeserializer
         // that will decorate another INodeDeserializer with validation:
         public class ValidatingNodeDeserializer : INodeDeserializer
         {
-            private readonly INodeDeserializer _nodeDeserializer;
+            private readonly INodeDeserializer nodeDeserializer;
 
             public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
             {
-                _nodeDeserializer = nodeDeserializer;
+                this.nodeDeserializer = nodeDeserializer;
             }
 
             public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
             {
-                if (_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
+                if (nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
                 {
                     var context = new ValidationContext(value, null, null);
                     Validator.ValidateObject(value, context, true);

@@ -19,9 +19,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using FluentAssertions;
 using System.Collections;
 using System.Reflection;
+using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
@@ -306,18 +306,18 @@ namespace YamlDotNet.Test.Core
 
                 var value = property.GetValue(actual, null);
                 var expectedValue = property.GetValue(expected, null);
-                if (expectedValue is IEnumerable && !(expectedValue is string))
+                if (expectedValue is IEnumerable enumerable && !(expectedValue is string))
                 {
-                    if (expectedValue is ICollection && value is ICollection)
+                    if (expectedValue is ICollection expectedCollection && value is ICollection valueCollection)
                     {
-                        var expectedCount = ((ICollection)expectedValue).Count;
-                        var valueCount = ((ICollection)value).Count;
+                        var expectedCount = expectedCollection.Count;
+                        var valueCount = valueCollection.Count;
                         valueCount.Should().Be(expectedCount, "Compared size of collections in property {0} in parse event {1}",
                             property.Name, eventNumber);
                     }
 
                     var values = ((IEnumerable)value).GetEnumerator();
-                    var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
+                    var expectedValues = enumerable.GetEnumerator();
                     while (expectedValues.MoveNext())
                     {
                         values.MoveNext().Should().BeTrue("Property {0} in parse event {1} had too few elements", property.Name, eventNumber);

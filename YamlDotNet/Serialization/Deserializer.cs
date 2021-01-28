@@ -20,19 +20,10 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization.Converters;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Serialization.NodeTypeResolvers;
-using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.TypeInspectors;
-using YamlDotNet.Serialization.TypeResolvers;
 using YamlDotNet.Serialization.Utilities;
-using YamlDotNet.Serialization.ValueDeserializers;
 
 namespace YamlDotNet.Serialization
 {
@@ -77,10 +68,8 @@ namespace YamlDotNet.Serialization
 
         public T Deserialize<T>(string input)
         {
-            using (var reader = new StringReader(input))
-            {
-                return Deserialize<T>(reader);
-            }
+            using var reader = new StringReader(input);
+            return Deserialize<T>(reader);
         }
 
         public T Deserialize<T>(TextReader input)
@@ -95,10 +84,8 @@ namespace YamlDotNet.Serialization
 
         public object? Deserialize(string input, Type type)
         {
-            using (var reader = new StringReader(input))
-            {
-                return Deserialize(reader, type);
-            }
+            using var reader = new StringReader(input);
+            return Deserialize(reader, type);
         }
 
         public object? Deserialize(TextReader input, Type type)
@@ -141,11 +128,9 @@ namespace YamlDotNet.Serialization
             object? result = null;
             if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
             {
-                using (var state = new SerializerState())
-                {
-                    result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
-                    state.OnDeserialization();
-                }
+                using var state = new SerializerState();
+                result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
+                state.OnDeserialization();
             }
 
             if (hasDocumentStart)

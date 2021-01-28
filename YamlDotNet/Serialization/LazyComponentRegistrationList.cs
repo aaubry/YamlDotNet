@@ -71,7 +71,7 @@ namespace YamlDotNet.Serialization
 
         public void Remove(Type componentType)
         {
-            for (int i = 0; i < entries.Count; ++i)
+            for (var i = 0; i < entries.Count; ++i)
             {
                 if (entries[i].ComponentType == componentType)
                 {
@@ -83,13 +83,13 @@ namespace YamlDotNet.Serialization
             throw new KeyNotFoundException($"A component registration of type '{componentType.FullName}' was not found.");
         }
 
-        public int Count {  get { return entries.Count; } }
+        public int Count => entries.Count;
 
         public IEnumerable<Func<TArgument, TComponent>> InReverseOrder
         {
             get
             {
-                for (int i = entries.Count - 1; i >= 0; --i)
+                for (var i = entries.Count - 1; i >= 0; --i)
                 {
                     yield return entries[i].Factory;
                 }
@@ -130,7 +130,7 @@ namespace YamlDotNet.Serialization
 
         private int IndexOfRegistration(Type registrationType)
         {
-            for (int i = 0; i < entries.Count; ++i)
+            for (var i = 0; i < entries.Count; ++i)
             {
                 if (registrationType == entries[i].ComponentType)
                 {

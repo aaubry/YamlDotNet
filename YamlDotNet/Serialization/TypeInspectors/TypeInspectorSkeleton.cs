@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -37,8 +36,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             var candidates = GetProperties(type, container)
                 .Where(p => p.Name == name);
 
-            using (var enumerator = candidates.GetEnumerator())
-            {
+            using var enumerator = candidates.GetEnumerator();
             if (!enumerator.MoveNext())
             {
                 if (ignoreUnmatched)
@@ -61,5 +59,4 @@ namespace YamlDotNet.Serialization.TypeInspectors
             return property;
         }
     }
-}
 }
