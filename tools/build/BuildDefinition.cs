@@ -1,4 +1,5 @@
 ﻿using Bullseye;
+using SimpleExec;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -105,9 +106,23 @@ namespace build
             return default;
         }
 
-        public static SuccessfulAotTests AotTest(SuccessfulBuild _)
+        public static SuccessfulAotTests AotTest(Options options, SuccessfulBuild _)
         {
-            Run("wsl", $"--user root YamlDotNet.AotTest/run.sh", BasePath);
+            var testsDir = Path.Combine(BasePath, "YamlDotNet.AotTest");
+
+            try
+            {
+                Run("docker", $"run --rm -v {testsDir}:/build -w /build aaubry/mono-aot bash ./run.sh");
+            }
+            catch (NonZeroExitCodeException ex) when (options.Host == Host.Appveyor && ex.ExitCode == -1)
+            {
+                // Appveyor fails with exit code -1 for some reason...
+                var realExitCode = int.Parse(File.ReadAllLines(Path.Combine(testsDir, "exitcode.txt")).First(), CultureInfo.InvariantCulture);
+                if (realExitCode != 0)
+                {
+                    throw new NonZeroExitCodeException(realExitCode);
+                }
+            }
 
             return default;
         }
