@@ -6,7 +6,7 @@ test: off
 
 environment:
   NUGET_API_KEY:
-    secure: ojJHQQHSQs/rgIRopbuHUQcjWpVgwaXhjYpW2kdkjS6NZta2A3Zzaz9k2yf+XooV
+    secure: pomYNeSluKjzaqIYea800dn9dd/CZg5AOSJQnkpjFFxNO13qcA2l6KW/6dTxfQEb
 
 install:
   - cmd: git submodule update --init
