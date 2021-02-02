@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Core.Events;
+using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
@@ -34,12 +35,60 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
         }
 
+        private static List<(Regex, string)> ImplicitRegEx { get; } = new List<(Regex, string)>();
+
+        static TagNodeTypeResolver()
+        {
+            //see 10.3.2 Tag Resolution (https://yaml.org/spec/1.2/spec.html#id2804356)
+            void AddRegExp(string pattern, string tag, string tagPrefix = "tag:yaml.org,2002:")
+            {
+                ImplicitRegEx.Add((new Regex(pattern, RegexOptions.Compiled), $"{tagPrefix}{tag}"));
+            }
+
+            //Null and bool are handled special (can be ignored here)
+            AddRegExp("^[-+]?[0-9]+$", "int");
+            AddRegExp("^0o[0-7]+$", "int");
+            AddRegExp("^0x[0-9a-fA-F]+$", "int");
+            AddRegExp(@"^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$", "float");
+            AddRegExp(@"^[-+]?(\.inf|\.Inf|\.INF)$", "float");
+            AddRegExp(@"^[-+]?(\.nan|\.NaN|\.NAN)$", "float");
+        }
+
+        private bool ResolveImplicitTag(NodeEvent nodeEvent, ref string tag)
+        {
+            string value;
+            if (nodeEvent is Scalar scalar && scalar.Style == Core.ScalarStyle.Plain)
+            {
+                value = scalar.Value;
+                foreach(var (regEx, t) in ImplicitRegEx)
+                {
+                    if (regEx.IsMatch(value))
+                    {
+                        tag = t;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
-            if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Tag) && tagMappings.TryGetValue(nodeEvent.Tag, out var predefinedType))
+            if (nodeEvent != null)
             {
-                currentType = predefinedType;
-                return true;
+                var tag = nodeEvent.Tag;
+                if (string.IsNullOrEmpty(tag))
+                {
+                    if (!ResolveImplicitTag(nodeEvent, ref tag))
+                    {
+                        return false;
+                    }
+                }
+                if (tagMappings.TryGetValue(tag, out var predefinedType))
+                {
+                    currentType = predefinedType;
+                    return true;
+                }
             }
             return false;
         }
