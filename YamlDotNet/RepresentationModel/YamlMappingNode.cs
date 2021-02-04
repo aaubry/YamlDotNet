@@ -27,6 +27,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
 using YamlDotNet.Serialization;
+using YamlDotNet.Helpers;
 using static YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.RepresentationModel
