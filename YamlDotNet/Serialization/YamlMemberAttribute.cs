@@ -31,6 +31,11 @@ namespace YamlDotNet.Serialization
     public sealed class YamlMemberAttribute : Attribute
     {
         /// <summary>
+        /// Decription/Comment about this property
+        /// </summary>
+        public string? Description { get; set; }
+        
+        /// <summary>
         /// Specifies that this property should be serialized as the given type, rather than using the actual runtime value's type.
         /// </summary>
         public Type? SerializeAs { get; set; }
