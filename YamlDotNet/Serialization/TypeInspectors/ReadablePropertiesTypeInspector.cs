@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
         private readonly bool includeNonPublicProperties;
 
         public ReadablePropertiesTypeInspector(ITypeResolver typeResolver)
-            :this(typeResolver, false)
+            : this(typeResolver, false)
         {
         }
 
@@ -81,7 +81,31 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public void Write(object target, object? value)
             {
+                if (!propertyInfo.CanWrite && value != null)
+                {
+                    var propertyCurrentValue = propertyInfo.GetValue(target);
+                    if (propertyCurrentValue != null)
+                    {
+                        var targetType = propertyInfo.PropertyType;
+                        var valueType = value.GetType();
+                        if (targetType.IsGenericType && typeof(ICollection<>).MakeGenericType(targetType.GenericTypeArguments[0]).IsAssignableFrom(targetType)
+                            && valueType.IsGenericType && typeof(ICollection<>).MakeGenericType(valueType.GenericTypeArguments[0]).IsAssignableFrom(valueType))
+                        {
+                            var copyMethod = typeof(ReflectionPropertyDescriptor).GetMethod(nameof(CopyCollection))!.MakeGenericMethod(targetType.GenericTypeArguments[0]);
+                            copyMethod.Invoke(null, new object[] { propertyCurrentValue, value });
+                            return;
+                        }
+                    }
+                }
                 propertyInfo.SetValue(target, value, null);
+            }
+
+            public static void CopyCollection<T>(ICollection<T> target, ICollection<T> source)
+            {
+                foreach (var element in source)
+                {
+                    target.Add(element);
+                }
             }
 
             public T GetCustomAttribute<T>() where T : Attribute
