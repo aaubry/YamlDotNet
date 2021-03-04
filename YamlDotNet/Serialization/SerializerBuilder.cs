@@ -495,6 +495,22 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Creates sequences with extra indentation
+        /// </summary>
+        /// <example>
+        ///  list:
+        ///    - item
+        ///    - item
+        /// </example>
+        /// <returns></returns>
+        public SerializerBuilder WithIndentedSequences()
+        {
+            emitterSettings = emitterSettings.WithIndentedSequences();
+
+            return this;
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Serializer" /> according to the current configuration.
         /// </summary>
         public ISerializer Build()
