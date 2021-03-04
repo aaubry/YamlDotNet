@@ -62,6 +62,7 @@ namespace YamlDotNet.Core
         private int column;
         private bool isWhitespace;
         private bool isIndentation;
+        private bool forceIndentLess;
 
         private bool isDocumentEndWritten;
 
@@ -142,6 +143,7 @@ namespace YamlDotNet.Core
             this.isCanonical = settings.IsCanonical;
             this.maxSimpleKeyLength = settings.MaxSimpleKeyLength;
             this.skipAnchorName = settings.SkipAnchorName;
+            this.forceIndentLess = !settings.IndentSequences;
 
             this.output = output;
             this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
@@ -1636,7 +1638,7 @@ namespace YamlDotNet.Core
             {
                 indent = isFlow ? bestIndent : 0;
             }
-            else if (!isIndentless)
+            else if (!isIndentless || !forceIndentLess)
             {
                 indent += bestIndent;
             }

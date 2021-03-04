@@ -1845,7 +1845,7 @@ c: *anchor1");
             Assert.Equal("public2,internal,protected,private", deserialized.ToString());
         }
 
-                [Fact]
+        [Fact]
         public void DeserializationNonPublicPropertiesAreIncluded()
         {
             var sut = new DeserializerBuilder().IncludeNonPublicProperties().Build();
@@ -1879,6 +1879,93 @@ c: *anchor1");
             "));
 
             Assert.Equal("public2,internal,protected,private", deserialized.ToString());
+        }
+
+        [Fact]
+        public void ShouldNotIndentSequences()
+        {
+            var sut = new SerializerBuilder()
+                .Build();
+
+            var yaml = sut.Serialize(new
+            {
+                first = "first",
+                items = new[]
+                {
+                    "item1",
+                    "item2"
+                },
+                nested = new[]
+                {
+                    new
+                    {
+                        name = "name1",
+                        more = new[]
+                        {
+                            "nested1",
+                            "nested2"
+                        }
+                    }
+                }
+            });
+
+            var expected = Yaml.Text(@"
+                first: first
+                items:
+                - item1
+                - item2
+                nested:
+                - name: name1
+                  more:
+                  - nested1
+                  - nested2
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void ShouldIndentSequences()
+        {
+            var sut = new SerializerBuilder()
+                .WithIndentedSequences()
+                .Build();
+
+            var yaml = sut.Serialize(new
+            {
+                first = "first",
+                items = new[]
+                {
+                    "item1",
+                    "item2"
+                },
+                nested = new[]
+                {
+                    new
+                    {
+                        name = "name1",
+                        more = new[]
+                        {
+                            "nested1",
+                            "nested2"
+                        }
+                    }
+                }
+            });
+
+            var expected = Yaml.Text(@"
+                first: first
+                items:
+                  - item1
+                  - item2
+                nested:
+                  - name: name1
+                    more:
+                      - nested1
+                      - nested2
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
