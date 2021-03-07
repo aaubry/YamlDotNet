@@ -26,22 +26,22 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Keeps track of the <see cref="current"/> recursion level,
     /// and throws <see cref="MaximumRecursionLevelReachedException"/>
-    /// whenever <see cref="Maximum"/> is reached.
+    /// whenever <see cref="maximum"/> is reached.
     /// </summary>
-    internal sealed class RecursionLevel
+    public sealed class RecursionLevel
     {
         private int current;
-        public int Maximum { get; }
+        private readonly int maximum;
 
         public RecursionLevel(int maximum)
         {
-            Maximum = maximum;
+            this.maximum = maximum;
         }
 
         /// <summary>
         /// Increments the <see cref="current"/> recursion level,
         /// and throws <see cref="MaximumRecursionLevelReachedException"/>
-        /// if <see cref="Maximum"/> is reached.
+        /// if <see cref="maximum"/> is reached.
         /// </summary>
         public void Increment()
         {
@@ -53,11 +53,11 @@ namespace YamlDotNet.Core
 
         /// <summary>
         /// Increments the <see cref="current"/> recursion level,
-        /// and returns whether <see cref="current"/> is still less than <see cref="Maximum"/>.
+        /// and returns whether <see cref="current"/> is still less than <see cref="maximum"/>.
         /// </summary>
         public bool TryIncrement()
         {
-            if (current < Maximum)
+            if (current < maximum)
             {
                 ++current;
                 return true;

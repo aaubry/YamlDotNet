@@ -21,17 +21,17 @@
 
 using System;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
     public class PreventUnknownTagsNodeTypeResolver : INodeTypeResolver
     {
-        bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
+        bool INodeTypeResolver.Resolve(Node node, ref Type currentType)
         {
-            if (nodeEvent != null && !nodeEvent.Tag.Name.IsNonSpecific)
+            if (!node.Tag.IsNonSpecific)
             {
-                throw new YamlException(nodeEvent.Start, nodeEvent.End, $"Encountered an unresolved tag '{nodeEvent.Tag}'");
+                throw new YamlException(node.Start, node.End, $"Encountered an unresolved tag '{node.Tag}'");
             }
             return false;
         }

@@ -20,8 +20,7 @@
 // THE SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -39,26 +38,26 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.ignoreUnmatched = ignoreUnmatched;
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
-            if (!parser.TryConsume<MappingStart>(out var mapping))
+            if (!(node is Mapping mapping))
             {
                 value = null;
                 return false;
             }
 
             value = objectFactory.Create(expectedType);
-            while (!parser.TryConsume<MappingEnd>(out var _))
+
+            foreach (var tuple in mapping)
             {
-                var propertyName = parser.Consume<Scalar>();
-                var property = typeDescriptor.GetProperty(expectedType, null, propertyName.Value, ignoreUnmatched);
+                var propertyName = (string)deserializer.DeserializeValue(tuple.Key, typeof(string))!;
+                var property = typeDescriptor.GetProperty(expectedType, null, propertyName, ignoreUnmatched);
                 if (property == null)
                 {
-                    parser.SkipThisAndNestedEvents();
                     continue;
                 }
 
-                var propertyValue = nestedObjectDeserializer(parser, property.Type);
+                var propertyValue = deserializer.DeserializeValue(tuple.Value, property.Type);
                 if (propertyValue is IValuePromise propertyValuePromise)
                 {
                     var valueRef = value;

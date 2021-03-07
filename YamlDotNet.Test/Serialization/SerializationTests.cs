@@ -31,10 +31,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Representation.Schemas;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
@@ -43,31 +45,6 @@ namespace YamlDotNet.Test.Serialization
 {
     public class SerializationTests : SerializationTestHelper
     {
-        #region Test Cases
-
-        private static readonly string[] TrueStrings = { "true", "y", "yes", "on" };
-        private static readonly string[] FalseStrings = { "false", "n", "no", "off" };
-
-        public static IEnumerable<Object[]> DeserializeScalarBoolean_TestCases
-        {
-            get
-            {
-                foreach (var trueString in SerializationTests.TrueStrings)
-                {
-                    yield return new Object[] { trueString, true };
-                    yield return new Object[] { trueString.ToUpper(), true };
-                }
-
-                foreach (var falseString in SerializationTests.FalseStrings)
-                {
-                    yield return new Object[] { falseString, false };
-                    yield return new Object[] { falseString.ToUpper(), false };
-                }
-            }
-        }
-
-        #endregion
-
         [Fact]
         public void DeserializeEmptyDocument()
         {
@@ -88,21 +65,12 @@ namespace YamlDotNet.Test.Serialization
             result.Should().Be("a scalar");
         }
 
-        [Theory]
-        [MemberData(nameof(DeserializeScalarBoolean_TestCases))]
-        public void DeserializeScalarBoolean(string value, bool expected)
-        {
-            var result = Deserializer.Deserialize<bool>(UsingReaderFor(value));
-
-            result.Should().Be(expected);
-        }
-
         [Fact]
         public void DeserializeScalarBooleanThrowsWhenInvalid()
         {
             Action action = () => Deserializer.Deserialize<bool>(UsingReaderFor("not-a-boolean"));
 
-            action.ShouldThrow<YamlException>().WithInnerException<FormatException>();
+            action.ShouldThrow<FormatException>();
         }
 
         [Fact]
@@ -116,7 +84,10 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarDecimal()
         {
-            var result = Deserializer.Deserialize<int>(UsingReaderFor("+1_234_567"));
+            var result = new DeserializerBuilder()
+                .WithSchema(Yaml11Schema.Complete)
+                .Build()
+                .Deserialize<int>(UsingReaderFor("+1_234_567"));
 
             result.Should().Be(1234567);
         }
@@ -124,7 +95,10 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarBinaryNumber()
         {
-            var result = Deserializer.Deserialize<int>(UsingReaderFor("-0b1_0010_1001_0010"));
+            var result = new DeserializerBuilder()
+                .WithSchema(Yaml11Schema.Complete)
+                .Build()
+                .Deserialize<int>(UsingReaderFor("-0b1_0010_1001_0010"));
 
             result.Should().Be(-4754);
         }
@@ -132,7 +106,10 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarOctalNumber()
         {
-            var result = Deserializer.Deserialize<int>(UsingReaderFor("+071_352"));
+            var result = new DeserializerBuilder()
+                .WithSchema(Yaml11Schema.Complete)
+                .Build()
+                .Deserialize<int>(UsingReaderFor("+071_352"));
 
             result.Should().Be(29418);
         }
@@ -148,7 +125,10 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarHexNumber()
         {
-            var result = Deserializer.Deserialize<int>(UsingReaderFor("-0x_0F_B9"));
+            var result = new DeserializerBuilder()
+                .WithSchema(Yaml11Schema.Complete)
+                .Build()
+                .Deserialize<int>(UsingReaderFor("-0x_0F_B9"));
 
             result.Should().Be(-0xFB9);
         }
@@ -156,9 +136,12 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarLongBase60Number()
         {
-            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:6_2:10"));
+            var result = new DeserializerBuilder()
+                .WithSchema(Yaml11Schema.Complete)
+                .Build()
+                .Deserialize<long>(UsingReaderFor("99_:58:47:3:52:10"));
 
-            result.Should().Be(77744246530L);
+            result.Should().Be(77744245930L);
         }
 
         [Fact]
@@ -181,9 +164,9 @@ namespace YamlDotNet.Test.Serialization
                 Child2 = obj
             };
 
-            Action action = () => SerializerBuilder.EnsureRoundtrip().Build().Serialize(new StringWriter(), obj, typeof(CircularReference));
+            SerializerBuilder.EnsureRoundtrip().Build().Serialize(new StringWriter(), obj, typeof(CircularReference));
 
-            action.ShouldNotThrow();
+            // Should not throw
         }
 
         [Fact]
@@ -661,7 +644,7 @@ Value: foo");
 
             Serializer.Serialize(writer, guid);
             var serialized = writer.ToString();
-            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: " + serialized);
+            Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: {0}", serialized);
         }
 
         [Fact]
@@ -1198,7 +1181,6 @@ y:
                     "scratch: 'scratcher'",
                     "deleteScratch: false",
                     "notScratch: 9443",
-                    "notScratch: 192.168.1.30",
                     "mappedScratch:",
                     "- '/work/'"
                 );
@@ -1218,7 +1200,7 @@ y:
         {
             var text = Lines("- 1", "- two", "- 3");
 
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var exception = Assert.Throws<YamlException>(() => sut.Deserialize<List<int>>(UsingReaderFor(text)));
 
             Assert.Equal(2, exception.Start.Line);
@@ -1234,7 +1216,7 @@ y:
         {
             var value = Lines("--- " + text);
 
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var actual = sut.Deserialize<string>(UsingReaderFor(value));
 
             Assert.Equal(text, actual);
@@ -1245,7 +1227,7 @@ y:
         {
             var value = Lines("--- x: y");
 
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var exception = Assert.Throws<SemanticErrorException>(() => sut.Deserialize<string>(UsingReaderFor(value)));
 
             Assert.Equal(1, exception.Start.Line);
@@ -1301,7 +1283,7 @@ y:
             var firstLine = buffer.ToString().Split('\r', '\n')[0];
             Assert.Equal(testCase.ExpectedTextRepresentation, firstLine);
 
-            var deserializer = new Deserializer();
+            var deserializer = new DeserializerBuilder().Build();
             var deserializedValue = deserializer.Deserialize(new StringReader(buffer.ToString()), testCase.Value.GetType());
 
             Assert.Equal(testCase.Value, deserializedValue);
@@ -1354,7 +1336,7 @@ y:
         [Fact]
         public void NegativeIntegersCanBeDeserialized()
         {
-            var deserializer = new Deserializer();
+            var deserializer = new DeserializerBuilder().Build();
 
             var value = deserializer.Deserialize<int>(Yaml.ReaderForText(@"
                 '-123'
@@ -1365,7 +1347,7 @@ y:
         [Fact]
         public void GenericDictionaryThatDoesNotImplementIDictionaryCanBeDeserialized()
         {
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
                 a: 1
                 b: 2
@@ -1378,7 +1360,7 @@ y:
         [Fact]
         public void GenericListThatDoesNotImplementIListCanBeDeserialized()
         {
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var deserialized = sut.Deserialize<GenericTestList<string>>(Yaml.ReaderForText(@"
                 - a
                 - b
@@ -1439,10 +1421,10 @@ y:
         [Fact]
         public void YamlConvertiblesAreAbleToEmitAndParseComments()
         {
-            var serializer = new Serializer();
+            var serializer = new SerializerBuilder().Build();
             var yaml = serializer.Serialize(new CommentWrapper<string> { Comment = "A comment", Value = "The value" });
 
-            var deserializer = new Deserializer();
+            var deserializer = new DeserializerBuilder().Build();
             var parser = new Parser(new Scanner(new StringReader(yaml), skipComments: false));
             var parsed = deserializer.Deserialize<CommentWrapper<string>>(parser);
 
@@ -1483,10 +1465,10 @@ y:
         [InlineData(0x8000000000000000UL)]
         public void DeserializationOfUInt64Succeeds(ulong value)
         {
-            var yaml = new Serializer().Serialize(value);
+            var yaml = new SerializerBuilder().Build().Serialize(value);
             Assert.Contains(value.ToString(), yaml);
 
-            ulong parsed = new Deserializer().Deserialize<ulong>(yaml);
+            ulong parsed = new DeserializerBuilder().Build().Deserialize<ulong>(yaml);
             Assert.Equal(value, parsed);
         }
 
@@ -1496,10 +1478,10 @@ y:
         [InlineData(0L)]
         public void DeserializationOfInt64Succeeds(long value)
         {
-            var yaml = new Serializer().Serialize(value);
+            var yaml = new SerializerBuilder().Build().Serialize(value);
             Assert.Contains(value.ToString(), yaml);
 
-            long parsed = new Deserializer().Deserialize<long>(yaml);
+            long parsed = new DeserializerBuilder().Build().Deserialize<long>(yaml);
             Assert.Equal(value, parsed);
         }
 
@@ -1509,6 +1491,11 @@ y:
             public List<string>? b { get; set; }
             public List<string>? c { get; set; }
             public List<string>? d { get; set; }
+
+            public string? e { get; set; }
+            public string? f { get; set; }
+            public string? g { get; set; }
+            public string? h { get; set; }
         }
 
         [Fact]
@@ -1516,10 +1503,22 @@ y:
         {
             var yaml = Yaml.ParserForResource("anchors-overwriting.yaml");
             var serializer = new DeserializerBuilder()
-                .IgnoreUnmatchedProperties()
                 .Build();
             var deserialized = serializer.Deserialize<AnchorsOverwritingTestCase>(yaml);
+            
             Assert.NotNull(deserialized);
+
+            Assert.Equal(new[] { "foo" }, deserialized.a);
+            Assert.Same(deserialized.a, deserialized.b);
+
+            Assert.Equal(new[] { "bar" }, deserialized.c);
+            Assert.Same(deserialized.c, deserialized.d);
+
+            Assert.Equal("baz", deserialized.e);
+            Assert.Same(deserialized.e, deserialized.f);
+
+            Assert.Equal("foobar", deserialized.g);
+            Assert.Same(deserialized.g, deserialized.h);
         }
 
         private sealed class AnchorPrecedence
@@ -1538,7 +1537,7 @@ y:
         [Fact]
         public void DeserializationWithDuplicateAnchorsSucceeds()
         {
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var deserialized = sut.Deserialize<AnchorPrecedence>(@"
 a: &anchor1 test0
 b:
@@ -1769,7 +1768,7 @@ c:  *anchor1");
         [Fact]
         public void AnchorNameWithTrailingColonReferencedInKeyCanBeDeserialized()
         {
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
                 a: &::::scaryanchor:::: anchor "" value ""
                 *::::scaryanchor::::: 2
@@ -1784,7 +1783,7 @@ c:  *anchor1");
         [Fact]
         public void AliasBeforeAnchorCannotBeDeserialized()
         {
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             Action action = () => sut.Deserialize<GenericTestDictionary<string, string>>(@"
 a: *anchor1
 b: &anchor1 test0
@@ -1796,7 +1795,7 @@ c: *anchor1");
         [Fact]
         public void AnchorWithAllowedCharactersCanBeDeserialized()
         {
-            var sut = new Deserializer();
+            var sut = new DeserializerBuilder().Build();
             var deserialized = sut.Deserialize<GenericTestDictionary<string, string>>(Yaml.ReaderForText(@"
                 a: &@nchor<>""@-_123$>>>😁🎉🐻🍔end some value
                 myvalue: my *@nchor<>""@-_123$>>>😁🎉🐻🍔end test

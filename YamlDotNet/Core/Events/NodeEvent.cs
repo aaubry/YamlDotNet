@@ -24,7 +24,7 @@ namespace YamlDotNet.Core.Events
     /// <summary>
     /// Contains the behavior that is common between node events.
     /// </summary>
-    public abstract class NodeEvent : ParsingEvent
+    public abstract class NodeEvent : ParsingEvent, INode
     {
         /// <summary>
         /// Gets the anchor.
@@ -36,7 +36,7 @@ namespace YamlDotNet.Core.Events
         /// Gets the tag.
         /// </summary>
         /// <value></value>
-        public ITag Tag { get; }
+        public TagName Tag { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeEvent"/> class.
@@ -45,7 +45,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        protected NodeEvent(AnchorName anchor, ITag tag, Mark start, Mark end)
+        protected NodeEvent(AnchorName anchor, TagName tag, Mark start, Mark end)
             : base(start, end)
         {
             this.Anchor = anchor;
@@ -55,9 +55,11 @@ namespace YamlDotNet.Core.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeEvent"/> class.
         /// </summary>
-        protected NodeEvent(AnchorName anchor, ITag tag)
+        protected NodeEvent(AnchorName anchor, TagName tag)
             : this(anchor, tag, Mark.Empty, Mark.Empty)
         {
         }
+
+        public abstract NodeKind Kind { get; }
     }
 }

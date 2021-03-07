@@ -19,12 +19,14 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+using System;
+
 namespace YamlDotNet.Core.Events
 {
     /// <summary>
     /// Represents a mapping start event.
     /// </summary>
-    public sealed class MappingStart : NodeEvent
+    public sealed class MappingStart : CollectionEvent, IMapping
     {
         /// <summary>
         /// Gets a value indicating the variation of depth caused by this event.
@@ -52,7 +54,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
         /// 
-        public MappingStart(AnchorName anchor, ITag tag, MappingStyle style, Mark start, Mark end)
+        public MappingStart(AnchorName anchor, TagName tag, MappingStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
             this.Style = style;
@@ -65,7 +67,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="style">The style of the mapping.</param>
         /// 
-        public MappingStart(AnchorName anchor, ITag tag, MappingStyle style)
+        public MappingStart(AnchorName anchor, TagName tag, MappingStyle style)
             : this(anchor, tag, style, Mark.Empty, Mark.Empty)
         {
         }
@@ -74,7 +76,7 @@ namespace YamlDotNet.Core.Events
         /// Initializes a new instance of the <see cref="MappingStart"/> class.
         /// </summary>
         public MappingStart()
-            : this(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, MappingStyle.Any, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, TagName.Empty, MappingStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
 
@@ -97,5 +99,7 @@ namespace YamlDotNet.Core.Events
         {
             return visitor.Visit(this);
         }
+
+        public override NodeKind Kind => NodeKind.Mapping;
     }
 }

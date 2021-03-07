@@ -23,43 +23,25 @@ using System;
 using System.IO;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
+using YamlDotNet.Representation.Schemas;
+using Stream = YamlDotNet.Representation.Stream;
 
 namespace YamlDotNet.Serialization
 {
     public sealed class Serializer : ISerializer
     {
-        private readonly IValueSerializer valueSerializer;
+        private readonly Func<Type, ISchema> schemaFactory;
         private readonly EmitterSettings emitterSettings;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Serializer" /> using the default configuration.
-        /// </summary>
-        /// <remarks>
-        /// To customize the behavior of the serializer, use <see cref="SerializerBuilder" />.
-        /// </remarks>
-        public Serializer()
-            : this(new SerializerBuilder().BuildValueSerializer(), EmitterSettings.Default)
-        {
-        }
 
         /// <remarks>
         /// This constructor is private to discourage its use.
         /// To invoke it, call the <see cref="FromValueSerializer"/> method.
         /// </remarks>
-        private Serializer(IValueSerializer valueSerializer, EmitterSettings emitterSettings)
+        internal Serializer(Func<Type, ISchema> schemaFactory, EmitterSettings emitterSettings)
         {
-            this.valueSerializer = valueSerializer ?? throw new ArgumentNullException(nameof(valueSerializer));
+            this.schemaFactory = schemaFactory ?? throw new ArgumentNullException(nameof(schemaFactory));
             this.emitterSettings = emitterSettings ?? throw new ArgumentNullException(nameof(emitterSettings));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Serializer" /> that uses the specified <see cref="IValueSerializer" />.
-        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
-        /// deserializer is to use <see cref="SerializerBuilder" />.
-        /// </summary>
-        public static Serializer FromValueSerializer(IValueSerializer valueSerializer, EmitterSettings emitterSettings)
-        {
-            return new Serializer(valueSerializer, emitterSettings);
         }
 
         /// <summary>
@@ -108,7 +90,8 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(emitter));
             }
 
-            EmitDocument(emitter, graph, null);
+            Serialize(emitter, graph, graph?.GetType() ?? typeof(object));
+            //EmitDocument(emitter, graph, null);
         }
 
         /// <summary>
@@ -129,18 +112,25 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            EmitDocument(emitter, graph, type);
+            var schema = schemaFactory(type);
+            var iterator = schema.Root.EnterValue(graph, out var mapper);
+            var content = mapper.RepresentMemorized(graph, iterator, new RepresentationState());
+
+            var document = new Document(content, schema);
+            Stream.Dump(emitter, new[] { document });
+
+            //EmitDocument(emitter, graph, type);
         }
 
-        private void EmitDocument(IEmitter emitter, object graph, Type? type)
-        {
-            emitter.Emit(new StreamStart());
-            emitter.Emit(new DocumentStart());
+        //private void EmitDocument(IEmitter emitter, object graph, Type? type)
+        //{
+        //    emitter.Emit(new StreamStart());
+        //    emitter.Emit(new DocumentStart());
 
-            valueSerializer.SerializeValue(emitter, graph, type);
+        //    valueSerializer.SerializeValue(emitter, graph, type);
 
-            emitter.Emit(new DocumentEnd(true));
-            emitter.Emit(new StreamEnd());
-        }
+        //    emitter.Emit(new DocumentEnd(true));
+        //    emitter.Emit(new StreamEnd());
+        //}
     }
 }

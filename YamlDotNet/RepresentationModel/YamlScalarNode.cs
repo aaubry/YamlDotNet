@@ -114,7 +114,7 @@ namespace YamlDotNet.RepresentationModel
         public override bool Equals(object? obj)
         {
             return obj is YamlScalarNode other
-                && ((Tag.Name.IsNonSpecific && other.Tag.Name.IsNonSpecific) || Equals(Tag, other.Tag))
+                && ((Tag.IsNonSpecific && other.Tag.IsNonSpecific) || Equals(Tag, other.Tag))
                 && Equals(Value, other.Value);
         }
 
@@ -126,7 +126,7 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         public override int GetHashCode()
         {
-            return CombineHashCodes(Tag.Name.IsNonSpecific ? 0 : Tag.GetHashCode(), Value);
+            return CombineHashCodes(Tag.IsNonSpecific ? 0 : Tag.GetHashCode(), Value);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Recursively enumerates all the nodes from the document, starting on the current node,
         /// and throwing <see cref="MaximumRecursionLevelReachedException"/>
-        /// if <see cref="RecursionLevel.Maximum"/> is reached.
+        /// if <see cref="RecursionLevel.maximum"/> is reached.
         /// </summary>
         internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
         {

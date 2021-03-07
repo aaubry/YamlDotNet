@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ValueDeserializers
@@ -38,16 +38,15 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
         }
 
-        public object? DeserializeValue (IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object? DeserializeValue(Node node, Type expectedType)
         {
-            parser.Accept<NodeEvent>(out var nodeEvent);
-            var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
+            var nodeType = GetTypeFromNode(node, expectedType);
 
             try
             {
                 foreach (var deserializer in deserializers)
                 {
-                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
+                    if (deserializer.Deserialize(node, nodeType, this, out var value))
                     {
                         return TypeConverter.ChangeType(value, expectedType);
                     }
@@ -60,25 +59,25 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             catch (Exception ex)
             {
                 throw new YamlException(
-                    nodeEvent?.Start ?? Mark.Empty,
-                    nodeEvent?.End ?? Mark.Empty,
+                    node.Start,
+                    node.End,
                     "Exception during deserialization",
                     ex
                 );
             }
 
             throw new YamlException(
-                nodeEvent?.Start ?? Mark.Empty,
-                nodeEvent?.End ?? Mark.Empty,
+                node.Start,
+                node.End,
                 $"No node deserializer was able to deserialize the node into type {expectedType.AssemblyQualifiedName}"
             );
         }
 
-        private Type GetTypeFromEvent(NodeEvent? nodeEvent, Type currentType)
+        private Type GetTypeFromNode(Node node, Type currentType)
         {
             foreach (var typeResolver in typeResolvers)
             {
-                if (typeResolver.Resolve(nodeEvent, ref currentType))
+                if (typeResolver.Resolve(node, ref currentType))
                 {
                     break;
                 }

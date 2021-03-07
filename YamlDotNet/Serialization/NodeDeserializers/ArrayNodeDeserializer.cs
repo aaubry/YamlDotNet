@@ -22,12 +22,13 @@
 using System;
 using System.Collections;
 using YamlDotNet.Core;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
             if (!expectedType.IsArray)
             {
@@ -36,83 +37,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
 
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
+            var sequence = node.Expect<Sequence>();
 
-            var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
-
-            var array = Array.CreateInstance(itemType, items.Count);
-            items.CopyTo(array, 0);
+            var array = Array.CreateInstance(itemType, sequence.Count);
+            CollectionNodeDeserializer.DeserializeHelper(itemType, sequence, deserializer, array);
 
             value = array;
             return true;
-        }
-
-        private sealed class ArrayList : IList
-        {
-            private object?[] data;
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Initialized inside Clear()
-            public ArrayList()
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
-            {
-                Clear();
-            }
-
-            public int Add(object? value)
-            {
-                if (Count == data.Length)
-                {
-                    Array.Resize(ref data, data.Length * 2);
-                }
-                data[Count] = value;
-                return Count++;
-            }
-
-            public void Clear()
-            {
-                data = new object[10];
-                Count = 0;
-            }
-
-            bool IList.Contains(object? value) => throw new NotSupportedException();
-             int IList.IndexOf(object? value) => throw new NotSupportedException();
-            void IList.Insert(int index, object? value) => throw new NotSupportedException();
-            void IList.Remove(object? value) => throw new NotSupportedException();
-            void IList.RemoveAt(int index) => throw new NotSupportedException();
-
-            public bool IsFixedSize => false;
-
-            public bool IsReadOnly => false;
-
-            public object? this[int index]
-            {
-                get
-                {
-                    return data[index];
-                }
-                set
-                {
-                    data[index] = value;
-                }
-            }
-
-            public void CopyTo(Array array, int index)
-            {
-                Array.Copy(data, 0, array, index, Count);
-            }
-
-            public int Count { get; private set; }
-
-            public bool IsSynchronized => false;
-            public object SyncRoot => data;
-
-            public IEnumerator GetEnumerator()
-            {
-                for (int i = 0; i < Count; ++i)
-                {
-                    yield return data[i];
-                }
-            }
         }
     }
 }

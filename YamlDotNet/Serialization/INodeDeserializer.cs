@@ -20,13 +20,12 @@
 // THE SOFTWARE.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using YamlDotNet.Core;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization
 {
     public interface INodeDeserializer
     {
-        bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value);
+        bool Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value);
     }
 }

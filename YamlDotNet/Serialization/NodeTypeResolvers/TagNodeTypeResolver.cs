@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
@@ -35,10 +35,10 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
         }
 
-        bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
+        bool INodeTypeResolver.Resolve(Node node, ref Type currentType)
         {
             // TODO: Get this information from the tag ?
-            if (nodeEvent != null && !nodeEvent.Tag.Name.IsEmpty && tagMappings.TryGetValue(nodeEvent.Tag.Name, out var predefinedType))
+            if (!node.Tag.IsEmpty && tagMappings.TryGetValue(node.Tag, out var predefinedType))
             {
                 currentType = predefinedType;
                 return true;

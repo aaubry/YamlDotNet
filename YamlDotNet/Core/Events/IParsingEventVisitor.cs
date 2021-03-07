@@ -23,24 +23,6 @@
 namespace YamlDotNet.Core.Events
 {
     /// <summary>
-    /// Callback interface for external event Visitor without a return value.
-    /// </summary>
-    public interface IParsingEventVisitor
-    {
-        void Visit(AnchorAlias anchorAlias);
-        void Visit(StreamStart streamStart);
-        void Visit(StreamEnd streamEnd);
-        void Visit(DocumentStart documentStart);
-        void Visit(DocumentEnd documentEnd);
-        void Visit(Scalar scalar);
-        void Visit(SequenceStart sequenceStart);
-        void Visit(SequenceEnd sequenceEnd);
-        void Visit(MappingStart mappingStart);
-        void Visit(MappingEnd mappingEnd);
-        void Visit(Comment comment);
-    }
-
-    /// <summary>
     /// Callback interface for external event Visitor that returns a value.
     /// </summary>
     public interface IParsingEventVisitor<T>

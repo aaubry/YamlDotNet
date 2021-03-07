@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.EventEmitters;
 using YamlDotNet.Serialization.NamingConventions;
@@ -45,7 +46,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
-        private readonly IDictionary<Type, ITag> tagMappings = new Dictionary<Type, ITag>();
+        private readonly Dictionary<Type, TagName> tagMappings = new Dictionary<Type, TagName>();
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
@@ -54,7 +55,7 @@ namespace YamlDotNet.Serialization
             : base(new DynamicTypeResolver())
         {
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
-            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
+            //typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
 
@@ -206,7 +207,7 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentException($"Type already has a registered tag '{alreadyRegisteredTag}' for type '{type.FullName}'", nameof(type));
             }
 
-            tagMappings.Add(type, new SimpleTag(tag));
+            tagMappings.Add(type, tag);
             return this;
         }
 
@@ -515,75 +516,81 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public ISerializer Build()
         {
-            return Serializer.FromValueSerializer(BuildValueSerializer(), emitterSettings);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="IValueDeserializer" /> that implements the current configuration.
-        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
-        /// deserializer is to use the <see cref="Build" /> method.
-        /// </summary>
-        public IValueSerializer BuildValueSerializer()
-        {
-            var typeConverters = BuildTypeConverters();
-            var typeInspector = BuildTypeInspector();
-            var traversalStrategy = objectGraphTraversalStrategyFactory(typeInspector, typeResolver, typeConverters, maximumRecursion);
-            var eventEmitter = eventEmitterFactories.BuildComponentChain(new WriterEventEmitter());
-
-            return new ValueSerializer(
-                traversalStrategy,
-                eventEmitter,
-                typeConverters,
-                preProcessingPhaseObjectGraphVisitorFactories.Clone(),
-                emissionPhaseObjectGraphVisitorFactories.Clone()
+            return new Serializer(
+                BuildSchemaFactory(
+                    tagMappings.AsReadonlyDictionary(),
+                    false
+                ),
+                emitterSettings
             );
         }
 
-        private class ValueSerializer : IValueSerializer
-        {
-            private readonly IObjectGraphTraversalStrategy traversalStrategy;
-            private readonly IEventEmitter eventEmitter;
-            private readonly IEnumerable<IYamlTypeConverter> typeConverters;
-            private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
-            private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
+        ///// <summary>
+        ///// Creates a new <see cref="IValueDeserializer" /> that implements the current configuration.
+        ///// This method is available for advanced scenarios. The preferred way to customize the behavior of the
+        ///// deserializer is to use the <see cref="Build" /> method.
+        ///// </summary>
+        //public IValueSerializer BuildValueSerializer()
+        //{
+        //    var typeConverters = BuildTypeConverters();
+        //    var typeInspector = BuildTypeInspector();
+        //    var traversalStrategy = objectGraphTraversalStrategyFactory(typeInspector, typeResolver, typeConverters, maximumRecursion);
+        //    var eventEmitter = eventEmitterFactories.BuildComponentChain(new WriterEventEmitter());
 
-            public ValueSerializer(
-                IObjectGraphTraversalStrategy traversalStrategy,
-                IEventEmitter eventEmitter,
-                IEnumerable<IYamlTypeConverter> typeConverters,
-                LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories,
-                LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories
-            )
-            {
-                this.traversalStrategy = traversalStrategy;
-                this.eventEmitter = eventEmitter;
-                this.typeConverters = typeConverters;
-                this.preProcessingPhaseObjectGraphVisitorFactories = preProcessingPhaseObjectGraphVisitorFactories;
-                this.emissionPhaseObjectGraphVisitorFactories = emissionPhaseObjectGraphVisitorFactories;
-            }
+        //    return new ValueSerializer(
+        //        traversalStrategy,
+        //        eventEmitter,
+        //        typeConverters,
+        //        preProcessingPhaseObjectGraphVisitorFactories.Clone(),
+        //        emissionPhaseObjectGraphVisitorFactories.Clone()
+        //    );
+        //}
 
-            public void SerializeValue(IEmitter emitter, object? value, Type? type)
-            {
-                var actualType = type ?? (value != null ? value.GetType() : typeof(object));
-                var staticType = type ?? typeof(object);
+        //private class ValueSerializer : IValueSerializer
+        //{
+        //    private readonly IObjectGraphTraversalStrategy traversalStrategy;
+        //    private readonly IEventEmitter eventEmitter;
+        //    private readonly IEnumerable<IYamlTypeConverter> typeConverters;
+        //    private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
+        //    private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
 
-                var graph = new ObjectDescriptor(value, actualType, staticType);
+        //    public ValueSerializer(
+        //        IObjectGraphTraversalStrategy traversalStrategy,
+        //        IEventEmitter eventEmitter,
+        //        IEnumerable<IYamlTypeConverter> typeConverters,
+        //        LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories,
+        //        LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories
+        //    )
+        //    {
+        //        this.traversalStrategy = traversalStrategy;
+        //        this.eventEmitter = eventEmitter;
+        //        this.typeConverters = typeConverters;
+        //        this.preProcessingPhaseObjectGraphVisitorFactories = preProcessingPhaseObjectGraphVisitorFactories;
+        //        this.emissionPhaseObjectGraphVisitorFactories = emissionPhaseObjectGraphVisitorFactories;
+        //    }
 
-                var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
-                foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
-                {
-                    traversalStrategy.Traverse(graph, visitor, default);
-                }
+        //    public void SerializeValue(IEmitter emitter, object? value, Type? type)
+        //    {
+        //        var actualType = type ?? (value != null ? value.GetType() : typeof(object));
+        //        var staticType = type ?? typeof(object);
 
-                void nestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
+        //        var graph = new ObjectDescriptor(value, actualType, staticType);
 
-                var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
-                    new EmittingObjectGraphVisitor(eventEmitter),
-                    inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, nestedObjectSerializer)
-                );
+        //        var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
+        //        foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
+        //        {
+        //            traversalStrategy.Traverse(graph, visitor, default);
+        //        }
 
-                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
-            }
-        }
+        //        void nestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
+
+        //        var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
+        //            new EmittingObjectGraphVisitor(eventEmitter),
+        //            inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, nestedObjectSerializer)
+        //        );
+
+        //        traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+        //    }
+        //}
     }
 }

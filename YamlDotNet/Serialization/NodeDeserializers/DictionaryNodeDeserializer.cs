@@ -22,9 +22,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
+using YamlDotNet.Representation;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -38,7 +37,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
             IDictionary? dictionary;
             Type keyType, valueType;
@@ -72,72 +71,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(keyType, valueType, parser, nestedObjectDeserializer, dictionary!);
+            var mapping = node.Expect<Mapping>();
+            DeserializeHelper(keyType, valueType, mapping, deserializer, dictionary!);
 
             return true;
         }
 
-        private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
+        private static void DeserializeHelper(Type tKey, Type tValue, Mapping mapping, IValueDeserializer deserializer, IDictionary result)
         {
-            parser.Consume<MappingStart>();
-            while (!parser.TryConsume<MappingEnd>(out var _))
+            foreach (var tuple in mapping)
             {
-                var key = nestedObjectDeserializer(parser, tKey);
-                var value = nestedObjectDeserializer(parser, tValue);
-                var valuePromise = value as IValuePromise;
-
-                if (key is IValuePromise keyPromise)
-                {
-                    if (valuePromise == null)
-                    {
-                        // Key is pending, value is known
-                        keyPromise.ValueAvailable += v => result[v!] = value!;
-                    }
-                    else
-                    {
-                        // Both key and value are pending. We need to wait until both of them become available.
-                        var hasFirstPart = false;
-
-                        keyPromise.ValueAvailable += v =>
-                        {
-                            if (hasFirstPart)
-                            {
-                                result[v!] = value!;
-                            }
-                            else
-                            {
-                                key = v!;
-                                hasFirstPart = true;
-                            }
-                        };
-
-                        valuePromise.ValueAvailable += v =>
-                        {
-                            if (hasFirstPart)
-                            {
-                                result[key] = v!;
-                            }
-                            else
-                            {
-                                value = v;
-                                hasFirstPart = true;
-                            }
-                        };
-                    }
-                }
-                else
-                {
-                    if (valuePromise == null)
-                    {
-                        // Happy path: both key and value are known
-                        result[key!] = value!;
-                    }
-                    else
-                    {
-                        // Key is known, value is pending
-                        valuePromise.ValueAvailable += v => result[key!] = v!;
-                    }
-                }
+                var key = deserializer.DeserializeValue(tuple.Key, tKey);
+                var value = deserializer.DeserializeValue(tuple.Value, tValue);
+                result[key!] = value;
             }
         }
     }

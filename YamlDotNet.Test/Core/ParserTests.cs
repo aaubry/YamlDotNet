@@ -54,7 +54,7 @@ namespace YamlDotNet.Test.Core
             AssertSequenceOfEventsFrom(Yaml.ParserForResource("02-scalar-in-imp-doc.yaml"),
                 StreamStart,
                 DocumentStart(Implicit),
-                SingleQuotedScalar("a scalar"),
+                SingleQuotedScalar("a scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 StreamEnd);
         }
@@ -65,7 +65,7 @@ namespace YamlDotNet.Test.Core
             AssertSequenceOfEventsFrom(Yaml.ParserForResource("03-scalar-in-exp-doc.yaml"),
                 StreamStart,
                 DocumentStart(Explicit),
-                SingleQuotedScalar("a scalar"),
+                SingleQuotedScalar("a scalar").T(TagName.NonSpecific),
                 DocumentEnd(Explicit),
                 StreamEnd);
         }
@@ -76,13 +76,13 @@ namespace YamlDotNet.Test.Core
             AssertSequenceOfEventsFrom(Yaml.ParserForResource("04-scalars-in-multi-docs.yaml"),
                 StreamStart,
                 DocumentStart(Implicit),
-                SingleQuotedScalar("a scalar"),
+                SingleQuotedScalar("a scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 DocumentStart(Explicit),
-                SingleQuotedScalar("another scalar"),
+                SingleQuotedScalar("another scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 DocumentStart(Explicit),
-                SingleQuotedScalar("yet another scalar"),
+                SingleQuotedScalar("yet another scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 StreamEnd);
         }
@@ -124,16 +124,16 @@ namespace YamlDotNet.Test.Core
                 PlainScalar("a plain scalar"),
                 DocumentEnd(Implicit),
                 DocumentStart(Explicit),
-                SingleQuotedScalar("a single-quoted scalar"),
+                SingleQuotedScalar("a single-quoted scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 DocumentStart(Explicit),
-                DoubleQuotedScalar("a double-quoted scalar"),
+                DoubleQuotedScalar("a double-quoted scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 DocumentStart(Explicit),
-                LiteralScalar("a literal scalar"),
+                LiteralScalar("a literal scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 DocumentStart(Explicit),
-                FoldedScalar("a folded scalar"),
+                FoldedScalar("a folded scalar").T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 StreamEnd);
         }
@@ -433,7 +433,7 @@ namespace YamlDotNet.Test.Core
             AssertSequenceOfEventsFrom(new Parser(new Scanner(Yaml.ReaderForText("|-\r\n  text\r\n#comment"), false)),
                 StreamStart,
                 DocumentStart(Implicit),
-                LiteralScalar("text"),
+                LiteralScalar("text").T(TagName.NonSpecific),
                 StandaloneComment("comment"),
                 DocumentEnd(Implicit),
                 StreamEnd);
@@ -451,7 +451,7 @@ namespace YamlDotNet.Test.Core
             AssertSequenceOfEventsFrom(Yaml.ParserForText(yaml),
                 StreamStart,
                 DocumentStart(Implicit),
-                LiteralScalar(expected),
+                LiteralScalar(expected).T(TagName.NonSpecific),
                 DocumentEnd(Implicit),
                 StreamEnd);
         }

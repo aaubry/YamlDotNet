@@ -20,19 +20,12 @@
 //  SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization.Converters;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.NodeDeserializers;
-using YamlDotNet.Serialization.NodeTypeResolvers;
-using YamlDotNet.Serialization.ObjectFactories;
-using YamlDotNet.Serialization.TypeInspectors;
-using YamlDotNet.Serialization.TypeResolvers;
+using YamlDotNet.Representation.Schemas;
+using YamlDotNet.Serialization.Schemas;
 using YamlDotNet.Serialization.Utilities;
-using YamlDotNet.Serialization.ValueDeserializers;
 
 namespace YamlDotNet.Serialization
 {
@@ -43,44 +36,17 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public sealed class Deserializer : IDeserializer
     {
-        private readonly IValueDeserializer valueDeserializer;
+        private readonly Func<Type, ISchema> schemaFactory;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="Deserializer" /> using the default configuration.
-        /// </summary>
-        /// <remarks>
-        /// To customize the behavior of the deserializer, use <see cref="DeserializerBuilder" />.
-        /// </remarks>
-        public Deserializer()
-            : this(new DeserializerBuilder().BuildValueDeserializer())
+        internal Deserializer(Func<Type, ISchema> schemaFactory)
         {
-        }
-
-        /// <remarks>
-        /// This constructor is private to discourage its use.
-        /// To invoke it, call the <see cref="FromValueDeserializer"/> method.
-        /// </remarks>
-        private Deserializer(IValueDeserializer valueDeserializer)
-        {
-            this.valueDeserializer = valueDeserializer ?? throw new ArgumentNullException(nameof(valueDeserializer));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Deserializer" /> that uses the specified <see cref="IValueDeserializer" />.
-        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
-        /// deserializer is to use <see cref="DeserializerBuilder" />.
-        /// </summary>
-        public static Deserializer FromValueDeserializer(IValueDeserializer valueDeserializer)
-        {
-            return new Deserializer(valueDeserializer);
+            this.schemaFactory = schemaFactory ?? throw new ArgumentNullException(nameof(schemaFactory));
         }
 
         public T Deserialize<T>(string input)
         {
-            using (var reader = new StringReader(input))
-            {
-                return Deserialize<T>(reader);
-            }
+            using var reader = new StringReader(input);
+            return Deserialize<T>(reader);
         }
 
         public T Deserialize<T>(TextReader input)
@@ -95,10 +61,8 @@ namespace YamlDotNet.Serialization
 
         public object? Deserialize(string input, Type type)
         {
-            using (var reader = new StringReader(input))
-            {
-                return Deserialize(reader, type);
-            }
+            using var reader = new StringReader(input);
+            return Deserialize(reader, type);
         }
 
         public object? Deserialize(TextReader input, Type type)
@@ -134,31 +98,17 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var hasStreamStart = parser.TryConsume<StreamStart>(out var _);
+            var schema = schemaFactory(type);
 
-            var hasDocumentStart = parser.TryConsume<DocumentStart>(out var _);
-
-            object? result = null;
-            if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
+            var documents = Representation.Stream.Load(parser, _ => schema);
+            var document = documents.FirstOrDefault();
+            if (document == null)
             {
-                using (var state = new SerializerState())
-                {
-                    result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
-                    state.OnDeserialization();
-                }
+                return TypeConverter.ChangeType(null, type);
             }
 
-            if (hasDocumentStart)
-            {
-                parser.Consume<DocumentEnd>();
-            }
-
-            if (hasStreamStart)
-            {
-                parser.Consume<StreamEnd>();
-            }
-
-            return result;
+            var native = document.Content.Mapper.Construct(document.Content);
+            return TypeConverter.ChangeType(native, type);
         }
     }
 }

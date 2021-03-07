@@ -21,15 +21,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Schemas;
+using YamlDotNet.Helpers;
+using YamlDotNet.Representation.Schemas;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
 using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Serialization.Schemas;
 using YamlDotNet.Serialization.TypeInspectors;
 using YamlDotNet.Serialization.TypeResolvers;
-using YamlDotNet.Serialization.ValueDeserializers;
 
 namespace YamlDotNet.Serialization
 {
@@ -56,15 +58,16 @@ namespace YamlDotNet.Serialization
             tagMappings = new Dictionary<TagName, Type>
             {
                 { YamlTagRepository.Mapping, typeof(Dictionary<object, object>) },
-                { YamlTagRepository.String, typeof(string) },
-                { YamlTagRepository.Boolean, typeof(bool) },
-                { YamlTagRepository.FloatingPoint, typeof(double) },
-                { YamlTagRepository.Integer, typeof(int) },
-                { YamlTagRepository.Timestamp, typeof(DateTime) }
+                { YamlTagRepository.Sequence, typeof(List<object>) },
+                //{ YamlTagRepository.String, typeof(string) },
+                //{ YamlTagRepository.Boolean, typeof(bool) },
+                //{ YamlTagRepository.FloatingPoint, typeof(double) },
+                //{ YamlTagRepository.Integer, typeof(int) },
+                //{ YamlTagRepository.Timestamp, typeof(DateTime) }
             };
 
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
-            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
+            //typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
             typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner));
@@ -74,7 +77,6 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(objectFactory) },
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
-                { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
                 { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer() },
                 { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
                 { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory) },
@@ -89,7 +91,6 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableTypeResolver), _ => new YamlSerializableTypeResolver() },
                 { typeof(TagNodeTypeResolver), _ => new TagNodeTypeResolver(tagMappings) },
                 { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
-                { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
         }
 
@@ -332,20 +333,10 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IDeserializer Build()
         {
-            return Deserializer.FromValueDeserializer(BuildValueDeserializer());
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="IValueDeserializer" /> that implements the current configuration.
-        /// This method is available for advanced scenarios. The preferred way to customize the behavior of the
-        /// deserializer is to use the <see cref="Build" /> method.
-        /// </summary>
-        public IValueDeserializer BuildValueDeserializer()
-        {
-            return new AliasValueDeserializer(
-                new NodeValueDeserializer(
-                    nodeDeserializerFactories.BuildComponentList(),
-                    nodeTypeResolverFactories.BuildComponentList()
+            return new Deserializer(
+                BuildSchemaFactory(
+                    tagMappings.ToDictionary(p => p.Value, p => p.Key).AsReadonlyDictionary(),
+                    ignoreUnmatched
                 )
             );
         }

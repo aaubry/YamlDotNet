@@ -21,6 +21,7 @@
 
 using System;
 using YamlDotNet.Core;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
@@ -33,15 +34,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.objectFactory = objectFactory;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
 #pragma warning disable 0618 // IYamlSerializable is obsolete
             if (typeof(IYamlSerializable).IsAssignableFrom(expectedType))
             {
-                var serializable = (IYamlSerializable)objectFactory.Create(expectedType);
-                serializable.ReadYaml(parser);
-                value = serializable;
-                return true;
+                //var serializable = (IYamlSerializable)objectFactory.Create(expectedType);
+                //serializable.ReadYaml(parser);
+                //value = serializable;
+                //return true;
+                throw new NotImplementedException("TODO");
             }
 #pragma warning restore
 

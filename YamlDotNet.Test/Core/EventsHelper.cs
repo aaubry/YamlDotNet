@@ -161,18 +161,18 @@ namespace YamlDotNet.Test.Core
         {
             private readonly string text;
             private readonly ScalarStyle style;
-            private ITag tag;
+            private TagName tag;
 
             public ScalarBuilder(string text, ScalarStyle style)
             {
                 this.text = text;
                 this.style = style;
-                this.tag = style != ScalarStyle.Plain ? SimpleTag.NonSpecificNonPlainScalar : SimpleTag.NonSpecificOtherNodes;
+                this.tag = TagName.Empty;
             }
 
-            public ScalarBuilder T(string tag)
+            public ScalarBuilder T(TagName tag)
             {
-                this.tag = new SimpleTag(tag);
+                this.tag = tag;
                 return this;
             }
 
@@ -203,14 +203,14 @@ namespace YamlDotNet.Test.Core
 
             public static implicit operator SequenceStart(SequenceStartBuilder builder)
             {
-                return new SequenceStart(builder.anchor, SimpleTag.NonSpecificOtherNodes, builder.style);
+                return new SequenceStart(builder.anchor, TagName.Empty, builder.style);
             }
         }
 
         protected class MappingStartBuilder
         {
             private readonly MappingStyle style;
-            private ITag tag = SimpleTag.NonSpecificOtherNodes;
+            private TagName tag = TagName.Empty;
 
             public MappingStartBuilder(MappingStyle style)
             {
@@ -219,7 +219,7 @@ namespace YamlDotNet.Test.Core
 
             public MappingStartBuilder T(string tag)
             {
-                this.tag = new SimpleTag(tag);
+                this.tag = new TagName(tag);
                 return this;
             }
 

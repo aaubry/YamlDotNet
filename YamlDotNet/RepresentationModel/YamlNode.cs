@@ -20,10 +20,10 @@
 //  SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -45,7 +45,7 @@ namespace YamlDotNet.RepresentationModel
         /// Gets or sets the tag of the node.
         /// </summary>
         /// <value>The tag.</value>
-        public ITag Tag { get; set; }
+        public TagName Tag { get; set; }
 
         /// <summary>
         /// Gets the position in the input stream where the event that originated the node starts.
@@ -57,11 +57,11 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         public Mark End { get; private set; } = Mark.Empty;
 
-        protected YamlNode() : this(SimpleTag.NonSpecificOtherNodes)
+        protected YamlNode() : this(TagName.Empty)
         {
         }
         
-        protected YamlNode(ITag tag)
+        protected YamlNode(TagName tag)
         {
             this.Tag = tag;
         }
@@ -173,7 +173,7 @@ namespace YamlDotNet.RepresentationModel
 
         /// <summary>
         /// When implemented, recursively enumerates all the nodes from the document, starting on the current node.
-        /// If <see cref="RecursionLevel.Maximum"/> is reached, a <see cref="MaximumRecursionLevelReachedException"/> is thrown
+        /// If <see cref="RecursionLevel.maximum"/> is reached, a <see cref="MaximumRecursionLevelReachedException"/> is thrown
         /// instead of continuing and crashing with a <see cref="StackOverflowException"/>.
         /// </summary>
         internal abstract IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level);

@@ -547,15 +547,12 @@ namespace YamlDotNet.Core
 
             while (true)
             {
-
                 // Eat whitespaces.
 
                 // Tabs are allowed:
-
                 //  - in the flow context;
                 //  - in the block context, but not at the beginning of the line or
                 //  after '-', '?', or ':' (complex value).
-
 
                 while (CheckWhiteSpace())
                 {

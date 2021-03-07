@@ -27,7 +27,10 @@ using System.Linq;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Core.Schemas;
+using YamlDotNet.Representation;
+using YamlDotNet.Representation.Schemas;
+using Events = YamlDotNet.Core.Events;
+using Stream = YamlDotNet.Representation.Stream;
 
 namespace YamlDotNet.Test.Spec
 {
@@ -55,15 +58,15 @@ namespace YamlDotNet.Test.Spec
 
             while (!parser.TryConsume<MappingEnd>(out _))
             {
-                var inputYaml = parser.Consume<Scalar>();
+                var inputYaml = parser.Consume<Events.Scalar>();
                 parser.Consume<MappingStart>();
                 while (!parser.TryConsume<MappingEnd>(out _))
                 {
-                    var schemaIds = parser.Consume<Scalar>();
+                    var schemaIds = parser.Consume<Events.Scalar>();
                     parser.Consume<SequenceStart>();
-                    var type = parser.Consume<Scalar>().Value;
-                    var loadedValueText = parser.Consume<Scalar>().Value;
-                    var dumpedYaml = parser.Consume<Scalar>().Value;
+                    var type = parser.Consume<Events.Scalar>().Value;
+                    var loadedValueText = parser.Consume<Events.Scalar>().Value;
+                    var dumpedYaml = parser.Consume<Events.Scalar>().Value;
                     parser.Consume<SequenceEnd>();
 
                     foreach (var schemaId in schemaIds.Value.Split(','))
@@ -92,8 +95,8 @@ namespace YamlDotNet.Test.Spec
         {
             { "failsafe", FailsafeSchema.Lenient },
             { "json", JsonSchema.Lenient },
-            { "core", CoreSchema.Instance },
-            { "yaml11", Yaml11Schema.Instance },
+            { "core", CoreSchema.Complete },
+            { "yaml11", Yaml11Schema.Complete },
         };
 
         private static readonly Dictionary<string, object?> Functions = new Dictionary<string, object?>
@@ -137,26 +140,21 @@ namespace YamlDotNet.Test.Spec
                 throw new KeyNotFoundException($"Schema '{schemaId}' not found");
             }
 
+            var document = Stream.Load("--- " + inputYaml, _ => schema).Single();
 
-            using var reader = new StringReader("--- " + inputYaml);
-            var parser = new SchemaAwareParser(new Parser(reader), schema);
+            var actual = (YamlDotNet.Representation.Scalar)document.Content;
 
-            parser.TryConsume<StreamStart>(out _);
-            parser.TryConsume<DocumentStart>(out _);
-
-            var actual = parser.Consume<Scalar>();
-
+            // Check expected tag
             var expectedTag = YamlTagRepository.Prefix + type switch
             {
                 "inf" => "float",
                 "nan" => "float",
                 _ => type
             };
-            Assert.Equal(expectedTag, actual.Tag.Name.Value);
+            Assert.Equal(expectedTag, actual.Tag.Value);
 
-            var scalarParser = actual.Tag.ScalarParser!;
-            Assert.NotNull(scalarParser);
-            var actualLoadedValue = scalarParser(actual);
+            // Check loaded value
+            var actualLoadedValue = actual.Mapper.Construct(actual);
 
             object? expectedLoadedValue;
             if (expectedLoadedValueText.EndsWith("()"))
@@ -166,7 +164,7 @@ namespace YamlDotNet.Test.Spec
                     throw new KeyNotFoundException($"Function '{expectedLoadedValueText}' not found");
                 }
             }
-            else if (actual.Tag.Name == YamlTagRepository.Integer)
+            else if (actual.Tag == YamlTagRepository.Integer)
             {
                 if (actualLoadedValue is long)
                 {
@@ -177,7 +175,7 @@ namespace YamlDotNet.Test.Spec
                     expectedLoadedValue = ulong.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
                 }
             }
-            else if (actual.Tag.Name == YamlTagRepository.FloatingPoint)
+            else if (actual.Tag == YamlTagRepository.FloatingPoint)
             {
                 expectedLoadedValue = double.Parse(expectedLoadedValueText, CultureInfo.InvariantCulture);
             }
@@ -187,6 +185,17 @@ namespace YamlDotNet.Test.Spec
             }
 
             Assert.Equal(expectedLoadedValue, actualLoadedValue);
+
+            // Check dumped value
+            var dumpedScalar = actual.Mapper.RepresentMemorized(actualLoadedValue, schema.Root, new RepresentationState());
+
+            var emittedYaml = Stream.Dump(new[] { new Document(dumpedScalar, schema) }, explicitSeparators: true);
+
+            if (schemaId == "json")
+            {
+                dumpedYaml = dumpedYaml.Replace('\'', '"');
+            }
+            Assert.Equal("--- " + dumpedYaml + Environment.NewLine + "..." + Environment.NewLine, emittedYaml);
         }
     }
 }

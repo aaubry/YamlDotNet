@@ -48,6 +48,8 @@ namespace YamlDotNet.Core
         /// </summary>
         public int Column { get; }
 
+        public bool IsEmpty => ReferenceEquals(this, Empty);
+
         public Mark()
         {
             Line = 1;

@@ -301,7 +301,7 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Recursively enumerates all the nodes from the document, starting on the current node,
         /// and throwing <see cref="MaximumRecursionLevelReachedException"/>
-        /// if <see cref="RecursionLevel.Maximum"/> is reached.
+        /// if <see cref="RecursionLevel.maximum"/> is reached.
         /// </summary>
         internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
         {

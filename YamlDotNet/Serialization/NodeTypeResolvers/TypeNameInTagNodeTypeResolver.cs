@@ -20,20 +20,20 @@
 // THE SOFTWARE.
 
 using System;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
     [Obsolete("The mechanism that this class uses to specify type names is non-standard. Register the tags explicitly instead of using this convention.")]
     public sealed class TypeNameInTagNodeTypeResolver : INodeTypeResolver
     {
-        bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
+        bool INodeTypeResolver.Resolve(Node node, ref Type currentType)
         {
-            if (nodeEvent != null && !nodeEvent.Tag.Name.IsEmpty)
+            if (!node.Tag.IsEmpty)
             {
                 // If type could not be loaded, make sure to pass resolving
                 // to the next resolver
-                var resolvedType = Type.GetType(nodeEvent.Tag.Name.Value.Substring(1), throwOnError: false);
+                var resolvedType = Type.GetType(node.Tag.Value.Substring(1), throwOnError: false);
                 if (resolvedType != null)
                 {
                     currentType = resolvedType;

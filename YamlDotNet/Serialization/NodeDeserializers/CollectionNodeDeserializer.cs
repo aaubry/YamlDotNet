@@ -22,9 +22,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
+using YamlDotNet.Representation;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -38,10 +37,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
             IList? list;
-            bool canUpdate = true;
             Type itemType;
             var genericCollectionType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
             if (genericCollectionType != null)
@@ -54,8 +52,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 if (list == null)
                 {
                     // Uncommon case where a type implements IList<T> but not IList
-                    var genericListType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IList<>));
-                    canUpdate = genericListType != null;
                     list = (IList?)Activator.CreateInstance(typeof(GenericCollectionToNonGenericAdapter<>).MakeGenericType(itemType), value);
                 }
             }
@@ -72,38 +68,25 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate);
+            var sequence = node.Expect<Sequence>();
+            DeserializeHelper(itemType, sequence, deserializer, list!);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, Sequence sequence, IValueDeserializer deserializer, IList result)
         {
-            parser.Consume<SequenceStart>();
-            while (!parser.TryConsume<SequenceEnd>(out var _))
+            for (int i = 0; i < sequence.Count; ++i)
             {
-                var current = parser.Current;
-
-                var value = nestedObjectDeserializer(parser, tItem);
-                if (value is IValuePromise promise)
+                var value = deserializer.DeserializeValue(sequence[i], tItem);
+                // TODO: Do we need TypeConverter.ChangeType(value, tItem) ?
+                if (i >= result.Count)
                 {
-                    if (canUpdate)
-                    {
-                        var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
-                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
-                    }
-                    else
-                    {
-                        throw new ForwardAnchorNotSupportedException(
-                            current?.Start ?? Mark.Empty,
-                            current?.End ?? Mark.Empty,
-                            "Forward alias references are not allowed because this type does not implement IList<>"
-                        );
-                    }
+                    result.Add(value);
                 }
                 else
                 {
-                    result.Add(TypeConverter.ChangeType(value, tItem));
+                    result[i] = value;
                 }
             }
         }

@@ -22,14 +22,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using YamlDotNet.Core;
+using YamlDotNet.Representation;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class EnumerableNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
             Type itemsType;
             if (expectedType == typeof(IEnumerable))
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
 
             var collectionType = typeof(List<>).MakeGenericType(itemsType);
-            value = nestedObjectDeserializer(parser, collectionType);
+            value = deserializer.DeserializeValue(node, collectionType);
             return true;
         }
     }

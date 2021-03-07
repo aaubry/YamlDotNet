@@ -91,7 +91,7 @@ namespace YamlDotNet.Serialization.Converters
             var adjusted = this.kind == DateTimeKind.Local ? dt.ToLocalTime() : dt.ToUniversalTime();
             var formatted = adjusted.ToString(this.formats.First(), this.provider); // Always take the first format of the list.
 
-            emitter.Emit(new Scalar(AnchorName.Empty, SimpleTag.NonSpecificOtherNodes, formatted, ScalarStyle.Any));
+            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, ScalarStyle.Any));
         }
 
         private static DateTime EnsureDateTimeKind(DateTime dt, DateTimeKind kind)

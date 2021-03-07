@@ -26,7 +26,9 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Base exception that is thrown when the a problem occurs in the YamlDotNet library.
     /// </summary>
+#pragma warning disable CA1032 // Implement standard exception constructors
     public class YamlException : Exception
+#pragma warning restore CA1032 // Implement standard exception constructors
     {
         /// <summary>
         /// Gets the position in the input stream where the event that originated the exception starts.
@@ -59,10 +61,17 @@ namespace YamlDotNet.Core
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
         public YamlException(Mark start, Mark end, string message, Exception? innerException)
-            : base($"({start}) - ({end}): {message}", innerException)
+            : base(FormatMessage(start, end, message), innerException)
         {
             Start = start;
             End = end;
+        }
+
+        private static string FormatMessage(Mark start, Mark end, string message)
+        {
+            return start.IsEmpty && end.IsEmpty
+                ? message
+                : $"({start}) - ({end}): {message}";
         }
 
         /// <summary>

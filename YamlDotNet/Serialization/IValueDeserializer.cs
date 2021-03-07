@@ -20,13 +20,12 @@
 // THE SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.Utilities;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization
 {
     public interface IValueDeserializer
     {
-        object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer);
+        object? DeserializeValue(Node node, Type expectedType);
     }
 }

@@ -20,13 +20,13 @@
 // THE SOFTWARE.
 
 using System;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
     public sealed class YamlSerializableTypeResolver : INodeTypeResolver
     {
-        public bool Resolve(NodeEvent? nodeEvent, ref Type currentType)
+        public bool Resolve(Node node, ref Type currentType)
         {
 #pragma warning disable 0618 // IYamlSerializable is obsolete
             return typeof(IYamlSerializable).IsAssignableFrom(currentType);

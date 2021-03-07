@@ -26,7 +26,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Core.Schemas;
 using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
@@ -36,7 +35,7 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Emits YAML streams.
     /// </summary>
-    public class Emitter : IEmitter
+    public sealed class Emitter : IEmitter
     {
         private static readonly Regex uriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
@@ -262,8 +261,9 @@ namespace YamlDotNet.Core
                 AnalyzeAnchor(nodeEvent.Anchor, false);
 
                 // TODO: if (!nodeEvent.Tag.IsImplicit)
+                if (!nodeEvent.Tag.IsEmpty) // TODO: Confirm this line
                 {
-                    AnalyzeTag(nodeEvent.Tag.Name);
+                    AnalyzeTag(nodeEvent.Tag);
                 }
             }
         }
@@ -281,7 +281,7 @@ namespace YamlDotNet.Core
 
             if (value.Length == 0)
             {
-                if (scalar.Tag.Name.Equals(YamlTagRepository.Null))
+                if (scalar.Tag.Equals(YamlTagRepository.Null))
                 {
                     scalarData.isMultiline = false;
                     scalarData.isFlowPlainAllowed = false;
@@ -875,13 +875,6 @@ namespace YamlDotNet.Core
             var scalar = (Scalar)evt;
 
             var style = scalar.Style;
-            var noTag = tagData.handle == null && tagData.suffix == null;
-
-            // TODO: 
-            //if (noTag && !scalar.Tag.IsImplicit)
-            //{
-            //    throw new YamlException("Neither tag nor isImplicit flags are specified.");
-            //}
 
             if (style == ScalarStyle.Any)
             {
@@ -908,11 +901,6 @@ namespace YamlDotNet.Core
                 {
                     style = ScalarStyle.SingleQuoted;
                 }
-                // TODO: 
-                //if (noTag && !scalar.Tag.IsImplicit)
-                //{
-                //    style = ScalarStyle.SingleQuoted;
-                //}
             }
 
             if (style == ScalarStyle.SingleQuoted)

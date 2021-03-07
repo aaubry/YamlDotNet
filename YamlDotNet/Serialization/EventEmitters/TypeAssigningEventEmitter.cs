@@ -22,16 +22,15 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Schemas;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
-        private readonly IDictionary<Type, ITag> tagMappings;
+        private readonly IDictionary<Type, TagName> tagMappings;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, ITag> tagMappings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
@@ -45,7 +44,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             var value = eventInfo.Source.Value;
             if (value == null)
             {
-                eventInfo.Tag = new SimpleTag(YamlTagRepository.Null);
+                eventInfo.Tag = YamlTagRepository.Null;
                 eventInfo.RenderedValue = "";
             }
             else
@@ -54,7 +53,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Boolean);
+                        eventInfo.Tag = YamlTagRepository.Boolean;
                         eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
                         break;
 
@@ -66,39 +65,39 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Integer);
+                        eventInfo.Tag = YamlTagRepository.Integer;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Single:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.FloatingPoint);
+                        eventInfo.Tag = YamlTagRepository.FloatingPoint;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
                         break;
 
                     case TypeCode.Double:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.FloatingPoint);
+                        eventInfo.Tag = YamlTagRepository.FloatingPoint;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
                         break;
 
                     case TypeCode.Decimal:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.FloatingPoint);
+                        eventInfo.Tag = YamlTagRepository.FloatingPoint;
                         eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
                     case TypeCode.Char:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.String);
+                        eventInfo.Tag = YamlTagRepository.String;
                         eventInfo.RenderedValue = value.ToString()!;
                         suggestedStyle = ScalarStyle.Any;
                         break;
 
                     case TypeCode.DateTime:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Timestamp);
+                        eventInfo.Tag = YamlTagRepository.Timestamp;
                         eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
-                        eventInfo.Tag = new SimpleTag(YamlTagRepository.Null);
+                        eventInfo.Tag = YamlTagRepository.Null;
                         eventInfo.RenderedValue = "";
                         break;
 

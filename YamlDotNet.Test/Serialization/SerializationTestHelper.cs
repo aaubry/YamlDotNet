@@ -64,7 +64,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var writer = new StringWriter();
             serializer.Serialize(writer, obj, typeof(T));
-            return new Deserializer().Deserialize<T>(UsingReaderFor(writer));
+            return new DeserializerBuilder().Build().Deserialize<T>(UsingReaderFor(writer));
         }
 
         protected SerializerBuilder SerializerBuilder

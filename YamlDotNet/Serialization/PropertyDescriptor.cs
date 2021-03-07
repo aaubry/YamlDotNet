@@ -71,5 +71,7 @@ namespace YamlDotNet.Serialization
         {
             return baseDescriptor.Read(target);
         }
+
+        public override string ToString() => $"{Name}: {Type.FullName}";
     }
 }

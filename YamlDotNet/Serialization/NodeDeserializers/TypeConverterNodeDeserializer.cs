@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
@@ -35,7 +36,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(Node node, Type expectedType, IValueDeserializer deserializer, out object? value)
         {
             var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
             if (converter == null)
@@ -44,8 +45,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            throw new NotImplementedException("TODO");
+            //value = converter.ReadYaml(parser, expectedType);
+            //return true;
         }
     }
 }
