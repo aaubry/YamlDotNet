@@ -231,10 +231,11 @@ namespace YamlDotNet
                 });
         }
 
-        public static MethodInfo? GetPublicInstanceMethod(this Type type, string name)
+        public static MethodInfo? GetPublicInstanceMethod(this Type type, string name, params Type[] parameterTypes)
         {
             return type.GetRuntimeMethods()
-                .FirstOrDefault(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name));
+                .Where(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name))
+                .SingleOrDefault(m => m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes));
         }
 
         public static MethodInfo? GetGetMethod(this PropertyInfo property, bool nonPublic)

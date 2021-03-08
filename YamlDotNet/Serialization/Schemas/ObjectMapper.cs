@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -50,28 +51,63 @@ namespace YamlDotNet.Serialization.Schemas
         public TagName Tag { get; }
         public INodeMapper Canonical => this;
 
+        [return: MaybeNull]
+        private static T GetNodeValue<T>(Mapping mapping, string key)
+        {
+            if (!mapping.TryGetValue(key, out var node))
+            {
+                throw new Exception($"TODO: Missing constructor argument '{key}'.");
+            }
+
+            var value = node.Mapper.Construct(node);
+            return (T)value;
+        }
+
+        private static readonly MethodInfo GetNodeValueGenericMethod = typeof(ObjectMapper2).GetPrivateStaticMethod(nameof(GetNodeValue));
+
         private static Func<Node, object?> GenerateConstructor(Type type, IEnumerable<IPropertyDescriptor> properties, bool ignoreUnmatchedProperties)
         {
-            // TODO: >>>>>> Continue here
+            var candidateConstructors = type.GetConstructors();
 
-            //var candidateConstructors = type.GetConstructors(BindingFlags.Public);
             // TODO: Allow to filter the list of candidate constructors
+
+            //new TimeSpan()
 
             // TODO: Support multiple constructors
             //Expression.IfThen
 
 
-            //var constructor = candidateConstructors.Single();
 
-            //var newExpression = 
+            var constructor = candidateConstructors.Single();
 
-            throw new NotImplementedException();
+            //Node n;
+            //n.Mapper.Construct(n)
+
+            // TODO: Move reusable objects to static fields (expressions and array)
+            var mapping = Expression.Parameter(typeof(Node), "m");
+            var instanceCreator = Expression.Lambda<Func<Mapping, object?>>(
+                Expression.New(
+                    constructor,
+                    constructor
+                        .GetParameters()
+                        .Select(p => (Expression)Expression.Call(
+                            GetNodeValueGenericMethod.MakeGenericMethod(p.ParameterType),
+                            mapping,
+                            Expression.Constant(p.Name)
+                        ))
+                ),
+                mapping
+            );
+
+            var call = instanceCreator.Compile();
+            return n => call((Mapping)n);
         }
 
         public object? Construct(Node node) => constructor(node);
         public Node Represent(object? native, ISchemaIterator iterator, IRepresentationState state)
         {
-            throw new NotImplementedException();
+            // TODO
+            return new ObjectMapper(type, Tag, ignoreUnmatchedProperties).Represent(native, iterator, state);
         }
     }
 

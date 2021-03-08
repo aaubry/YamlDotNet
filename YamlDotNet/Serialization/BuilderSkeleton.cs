@@ -409,7 +409,8 @@ namespace YamlDotNet.Serialization
                         var tag = tagNameResolver.Resolve(concrete);
 
                         var properties = typeInspector.GetProperties(concrete, null).OrderBy(p => p.Order);
-                        var mapper = new ObjectMapper2(concrete, properties, tag, ignoreUnmatched);
+                        // TODO: var mapper = new ObjectMapper2(concrete, properties, tag, ignoreUnmatched);
+                        var mapper = new ObjectMapper(concrete, tag, ignoreUnmatched);
 
                         var matcher = NodeMatcher
                             .ForMappings(mapper, concrete)
