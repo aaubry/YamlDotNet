@@ -1102,13 +1102,7 @@ y:
                     label: center/big
                   
                   - # Override
-                    #<< : [ *BIG, *LEFT, *SMALL ]    # This does not work because, in the current implementation,
-                                                     # later keys override former keys. This could be fixed, but that
-                                                     # is not trivial because the deserializer allows aliases to refer to
-                                                     # an anchor that is defined later in the document, and the way it is
-                                                     # implemented, the value is assigned later when the anchored value is
-                                                     # deserialized.
-                    << : [ *SMALL, *LEFT, *BIG ]
+                    << : [ *BIG, *LEFT, *SMALL ]
                     x: 1
                     label: center/big
             "));
@@ -1162,7 +1156,7 @@ y:
 
             result["derived3"].Should()
                 .Contain("key", "D3", "key should be overriden by the actual mapping")
-                .And.Contain("level", "2", "level should be inherited from the backreferenced mapping");
+                .And.Contain("level", "1", "level should be inherited from the backreferenced mapping");
         }
 
         [Fact]
@@ -1966,6 +1960,54 @@ c: *anchor1");
             ");
 
             Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+       
+        [Fact]
+        public void ExampleFromSpecificationIsHandledCorrectlyWithLateDefine()
+        {
+            var parser = new MergingParser(Yaml.ParserForText(@"               
+                # All the following maps are equal:
+                results:
+                  - # Explicit keys
+                    x: 1
+                    y: 2
+                    r: 10
+                    label: center/big
+                  
+                  - # Merge one map
+                    << : *CENTER
+                    r: 10
+                    label: center/big
+                  
+                  - # Merge multiple maps
+                    << : [ *CENTER, *BIG ]
+                    label: center/big
+                  
+                  - # Override
+                    << : [ *BIG, *LEFT, *SMALL ]
+                    x: 1
+                    label: center/big
+                
+                obj:
+                  - &CENTER { x: 1, y: 2 }
+                  - &LEFT { x: 0, y: 2 }
+                  - &SMALL { r: 1 }
+                  - &BIG { r: 10 }
+            "));
+
+            var result = Deserializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(parser);
+
+            int index = 0;
+            foreach (var mapping in result["results"])
+            {
+                mapping.Should()
+                    .Contain("x", "1", "'x' should be '1' in result #{0}", index)
+                    .And.Contain("y", "2", "'y' should be '2' in result #{0}", index)
+                    .And.Contain("r", "10", "'r' should be '10' in result #{0}", index)
+                    .And.Contain("label", "center/big", "'label' should be 'center/big' in result #{0}", index);
+
+                ++index;
+            }
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
