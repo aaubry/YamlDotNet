@@ -114,6 +114,11 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             if (parser.Accept<NodeEvent>(out var nodeEvent) && !nodeEvent.Anchor.IsEmpty)
             {
                 anchor = nodeEvent.Anchor;
+                var aliasState = state.Get<AliasState>();
+                if (!aliasState.ContainsKey(nodeEvent.Anchor))
+                {
+                    aliasState[anchor] = new ValuePromise(new AnchorAlias(anchor));
+                }
             }
 
             value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);

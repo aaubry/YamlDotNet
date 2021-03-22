@@ -1968,6 +1968,41 @@ c: *anchor1");
             Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
         }
 
+        public class CycleTestEntity
+        {
+            public CycleTestEntity Cycle { get; set; }
+        }
+
+        [Fact]
+        public void SerializeCycleWithAnchors()
+        {
+            var sut = new SerializerBuilder()
+                .WithTagMapping("!CycleTag", typeof(CycleTestEntity))
+                .Build();
+
+            var entity = new CycleTestEntity();
+            entity.Cycle = entity;
+            var yaml = sut.Serialize(entity);
+            var expected = Yaml.Text(@"&o0 !CycleTag
+Cycle: *o0");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void DeserializeCycleWithAnchors()
+        {
+            var sut = new DeserializerBuilder()
+                .WithTagMapping("!CycleTag", typeof(CycleTestEntity))
+                .Build();
+
+            var yaml = Yaml.Text(@"&o0 !CycleTag
+Cycle: *o0");
+            var obj = sut.Deserialize<CycleTestEntity>(yaml);
+
+            Assert.Same(obj, obj.Cycle);
+        }
+
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {
