@@ -115,7 +115,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             {
                 anchor = nodeEvent.Anchor;
                 var aliasState = state.Get<AliasState>();
-                if (!aliasState.ContainsKey(nodeEvent.Anchor))
+                if (!aliasState.ContainsKey(anchor))
                 {
                     aliasState[anchor] = new ValuePromise(new AnchorAlias(anchor));
                 }
