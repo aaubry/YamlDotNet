@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;netstandard1.3;net35;net40;net45</TargetFrameworks>
+    <!--<TargetFrameworks>netcoreapp3.1;netstandard2.1;netstandard1.3;net35;net40;net45</TargetFrameworks>-->
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net45</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>

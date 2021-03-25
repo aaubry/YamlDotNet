@@ -25,6 +25,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using YamlDotNet.Core;
 using YamlDotNet.Helpers;
 using YamlDotNet.Representation;
@@ -69,14 +70,20 @@ namespace YamlDotNet.Serialization.Schemas
         {
             var candidateConstructors = type.GetConstructors();
 
-            // TODO: Allow to filter the list of candidate constructors
-
-            //new TimeSpan()
+            // TODO: Allow to filter and order the list of candidate constructors
 
             // TODO: Support multiple constructors
             //Expression.IfThen
 
-
+            var constructors = type
+                .GetConstructors()
+                .Select(c => new
+                {
+                    Constructor = c,
+                    Parameters = c.GetParameters(),
+                })
+                .OrderBy(c => c.Parameters.Length)
+                .ToList();
 
             var constructor = candidateConstructors.Single();
 

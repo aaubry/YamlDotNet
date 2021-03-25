@@ -94,6 +94,8 @@ namespace YamlDotNet.Core
             public ScalarStyle style;
         }
 
+        public IOutputFormatter? OutputFormatter { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Emitter"/> class.
         /// </summary>
@@ -159,18 +161,11 @@ namespace YamlDotNet.Core
             while (!NeedMoreEvents())
             {
                 var current = events.Peek();
-                try
-                {
 
-                    AnalyzeEvent(current);
-                    StateMachine(current);
-                }
-                finally
-                {
-                    // Only dequeue after calling state_machine because it checks how many events are in the queue.
-                    // Todo: well, move into StateMachine() then
-                    events.Dequeue();
-                }
+                AnalyzeEvent(current);
+                StateMachine(current);
+
+                events.Dequeue();
             }
         }
 
@@ -668,6 +663,8 @@ namespace YamlDotNet.Core
                 throw new ArgumentException("Expected STREAM-START.", nameof(evt));
             }
 
+            OutputFormatter?.StreamStart();
+
             indent = -1;
             column = 0;
             isWhitespace = true;
@@ -683,6 +680,12 @@ namespace YamlDotNet.Core
         {
             if (evt is DocumentStart documentStart)
             {
+                if (!isFirst)
+                {
+                    OutputFormatter?.DocumentEnd();
+                }
+                OutputFormatter?.DocumentStart();
+
                 var isImplicit = documentStart.IsImplicit
                     && isFirst
                     && !isCanonical;
@@ -692,7 +695,9 @@ namespace YamlDotNet.Core
                 if (!isFirst && !isDocumentEndWritten && (documentStart.Version != null || documentTagDirectives.Count > 0))
                 {
                     isDocumentEndWritten = false;
+                    OutputFormatter?.DocumentStartIndicatorStart();
                     WriteIndicator("...", true, false, false);
+                    OutputFormatter?.DocumentStartIndicatorEnd();
                     WriteIndent();
                 }
 
@@ -702,10 +707,12 @@ namespace YamlDotNet.Core
 
                     var documentVersion = documentStart.Version.Version;
                     isImplicit = false;
+                    OutputFormatter?.DirectiveStart();
                     WriteIndicator("%YAML", true, false, false);
                     WriteIndicator(string.Format(CultureInfo.InvariantCulture,
                         "{0}.{1}", documentVersion.Major, documentVersion.Minor),
                         true, false, false);
+                    OutputFormatter?.DirectiveEnd();
                     WriteIndent();
                 }
 
@@ -729,9 +736,11 @@ namespace YamlDotNet.Core
 
                     foreach (var tagDirective in documentTagDirectives)
                     {
+                        OutputFormatter?.DirectiveStart();
                         WriteIndicator("%TAG", true, false, false);
                         WriteTagHandle(tagDirective.Handle);
                         WriteTagContent(tagDirective.Prefix, true);
+                        OutputFormatter?.DirectiveEnd();
                         WriteIndent();
                     }
                 }
@@ -744,7 +753,9 @@ namespace YamlDotNet.Core
                 if (!isImplicit)
                 {
                     WriteIndent();
+                    OutputFormatter?.DocumentSeparatorIndicatorStart();
                     WriteIndicator("---", true, false, false);
+                    OutputFormatter?.DocumentSeparatorIndicatorEnd();
                     if (isCanonical)
                     {
                         WriteIndent();
@@ -756,6 +767,8 @@ namespace YamlDotNet.Core
 
             else if (evt is StreamEnd)
             {
+                OutputFormatter?.DocumentEnd();
+                OutputFormatter?.StreamEnd();
                 state = EmitterState.StreamEnd;
             }
             else
@@ -924,6 +937,8 @@ namespace YamlDotNet.Core
 
         private void ProcessScalar()
         {
+            OutputFormatter?.ScalarStart(scalarData.style);
+
             switch (scalarData.style)
             {
                 case ScalarStyle.Plain:
@@ -949,6 +964,8 @@ namespace YamlDotNet.Core
                 default:
                     throw new InvalidOperationException();
             }
+
+            OutputFormatter?.ScalarEnd(scalarData.style);
         }
 
         #region Write scalar Methods
@@ -1384,8 +1401,20 @@ namespace YamlDotNet.Core
         {
             if (!anchorData.anchor.IsEmpty && !skipAnchorName)
             {
-                WriteIndicator(anchorData.isAlias ? "*" : "&", true, false, false);
-                WriteAnchor(anchorData.anchor);
+                if (anchorData.isAlias)
+                {
+                    OutputFormatter?.AliasStart();
+                    WriteIndicator("*", true, false, false);
+                    WriteAnchor(anchorData.anchor);
+                    OutputFormatter?.AliasEnd();
+                }
+                else
+                {
+                    OutputFormatter?.AnchorStart();
+                    WriteIndicator("&", true, false, false);
+                    WriteAnchor(anchorData.anchor);
+                    OutputFormatter?.AnchorEnd();
+                }
             }
         }
 
@@ -1396,6 +1425,7 @@ namespace YamlDotNet.Core
                 return;
             }
 
+            OutputFormatter?.TagStart();
             if (tagData.handle != null)
             {
                 WriteTagHandle(tagData.handle);
@@ -1410,6 +1440,7 @@ namespace YamlDotNet.Core
                 WriteTagContent(tagData.suffix!, false);
                 WriteIndicator(">", false, false, false);
             }
+            OutputFormatter?.TagEnd();
         }
 
         /// <summary>
@@ -1422,7 +1453,9 @@ namespace YamlDotNet.Core
                 WriteIndent();
                 if (!documentEnd.IsImplicit)
                 {
+                    OutputFormatter?.DocumentEndIndicatorStart();
                     WriteIndicator("...", true, false, false);
+                    OutputFormatter?.DocumentEndIndicatorEnd();
                     WriteIndent();
                     isDocumentEndWritten = true;
                 }
@@ -1444,7 +1477,10 @@ namespace YamlDotNet.Core
         {
             if (isFirst)
             {
+                OutputFormatter?.FlowSequenceStart();
+                OutputFormatter?.FlowSequenceStartIndicatorStart();
                 WriteIndicator("[", true, true, false);
+                OutputFormatter?.FlowSequenceStartIndicatorEnd();
                 IncreaseIndent(true, false);
                 ++flowLevel;
             }
@@ -1455,17 +1491,24 @@ namespace YamlDotNet.Core
                 indent = indents.Pop();
                 if (isCanonical && !isFirst)
                 {
+                    OutputFormatter?.FlowSequenceSeparatorStart();
                     WriteIndicator(",", false, false, false);
+                    OutputFormatter?.FlowSequenceSeparatorEnd();
                     WriteIndent();
                 }
+                OutputFormatter?.FlowSequenceEndIndicatorStart();
                 WriteIndicator("]", false, false, false);
+                OutputFormatter?.FlowSequenceEndIndicatorEnd();
+                OutputFormatter?.FlowSequenceEnd();
                 state = states.Pop();
                 return;
             }
 
             if (!isFirst)
             {
+                OutputFormatter?.FlowSequenceSeparatorStart();
                 WriteIndicator(",", false, false, false);
+                OutputFormatter?.FlowSequenceSeparatorEnd();
             }
 
             if (isCanonical || column > bestWidth)
@@ -1475,7 +1518,9 @@ namespace YamlDotNet.Core
 
             states.Push(EmitterState.FlowSequenceItem);
 
+            OutputFormatter?.SequenceItemStart();
             EmitNode(evt, false, false, false);
+            OutputFormatter?.SequenceItemEnd();
         }
 
         /// <summary>
@@ -1485,7 +1530,10 @@ namespace YamlDotNet.Core
         {
             if (isFirst)
             {
+                OutputFormatter?.FlowMappingStart();
+                OutputFormatter?.FlowMappingStartIndicatorStart();
                 WriteIndicator("{", true, true, false);
+                OutputFormatter?.FlowMappingStartIndicatorEnd();
                 IncreaseIndent(true, false);
                 ++flowLevel;
             }
@@ -1496,17 +1544,24 @@ namespace YamlDotNet.Core
                 indent = indents.Pop();
                 if (isCanonical && !isFirst)
                 {
+                    OutputFormatter?.FlowMappingSeparatorStart();
                     WriteIndicator(",", false, false, false);
+                    OutputFormatter?.FlowMappingSeparatorEnd();
                     WriteIndent();
                 }
+                OutputFormatter?.FlowMappingEndIndicatorStart();
                 WriteIndicator("}", false, false, false);
+                OutputFormatter?.FlowMappingEndIndicatorEnd();
+                OutputFormatter?.FlowMappingEnd();
                 state = states.Pop();
                 return;
             }
 
             if (!isFirst)
             {
+                OutputFormatter?.FlowMappingSeparatorStart();
                 WriteIndicator(",", false, false, false);
+                OutputFormatter?.FlowMappingSeparatorEnd();
             }
             if (isCanonical || column > bestWidth)
             {
@@ -1520,9 +1575,13 @@ namespace YamlDotNet.Core
             }
             else
             {
+                OutputFormatter?.MappingKeyIndicatorStart();
                 WriteIndicator("?", true, false, false);
+                OutputFormatter?.MappingKeyIndicatorEnd();
                 states.Push(EmitterState.FlowMappingValue);
+                OutputFormatter?.MappingKeyStart();
                 EmitNode(evt, false, true, false);
+                OutputFormatter?.MappingKeyEnd();
             }
         }
 
@@ -1533,7 +1592,9 @@ namespace YamlDotNet.Core
         {
             if (isSimple)
             {
+                OutputFormatter?.MappingValueIndicatorStart();
                 WriteIndicator(":", false, false, false);
+                OutputFormatter?.MappingValueIndicatorEnd();
             }
             else
             {
@@ -1541,10 +1602,14 @@ namespace YamlDotNet.Core
                 {
                     WriteIndent();
                 }
+                OutputFormatter?.MappingValueIndicatorStart();
                 WriteIndicator(":", true, false, false);
+                OutputFormatter?.MappingValueIndicatorEnd();
             }
             states.Push(EmitterState.FlowMappingKey);
+            OutputFormatter?.MappingValueStart();
             EmitNode(evt, false, true, false);
+            OutputFormatter?.MappingValueEnd();
         }
 
         /// <summary>
@@ -1554,21 +1619,27 @@ namespace YamlDotNet.Core
         {
             if (isFirst)
             {
+                OutputFormatter?.BlockSequenceStart();
                 IncreaseIndent(false, (isMappingContext && !isIndentation));
             }
 
             if (evt is SequenceEnd)
             {
+                OutputFormatter?.BlockSequenceEnd();
                 indent = indents.Pop();
                 state = states.Pop();
                 return;
             }
 
             WriteIndent();
+            OutputFormatter?.BlockSequenceItemIndicatorStart();
             WriteIndicator("-", true, false, true);
+            OutputFormatter?.BlockSequenceItemIndicatorEnd();
             states.Push(EmitterState.BlockSequenceItem);
 
+            OutputFormatter?.SequenceItemStart();
             EmitNode(evt, false, false, false);
+            OutputFormatter?.SequenceItemEnd();
         }
 
         /// <summary>
@@ -1593,13 +1664,19 @@ namespace YamlDotNet.Core
             if (CheckSimpleKey())
             {
                 states.Push(EmitterState.BlockMappingSimpleValue);
+                OutputFormatter?.MappingKeyStart();
                 EmitNode(evt, false, true, true);
+                OutputFormatter?.MappingKeyEnd();
             }
             else
             {
+                OutputFormatter?.MappingKeyIndicatorStart();
                 WriteIndicator("?", true, false, true);
+                OutputFormatter?.MappingKeyIndicatorEnd();
                 states.Push(EmitterState.BlockMappingValue);
+                OutputFormatter?.MappingKeyStart();
                 EmitNode(evt, false, true, false);
+                OutputFormatter?.MappingKeyEnd();
             }
         }
 
@@ -1610,15 +1687,21 @@ namespace YamlDotNet.Core
         {
             if (isSimple)
             {
+                OutputFormatter?.MappingValueIndicatorStart();
                 WriteIndicator(":", false, false, false);
+                OutputFormatter?.MappingValueIndicatorEnd();
             }
             else
             {
                 WriteIndent();
+                OutputFormatter?.MappingValueIndicatorStart();
                 WriteIndicator(":", true, false, true);
+                OutputFormatter?.MappingValueIndicatorEnd();
             }
             states.Push(EmitterState.BlockMappingKey);
+            OutputFormatter?.MappingValueStart();
             EmitNode(evt, false, true, false);
+            OutputFormatter?.MappingValueEnd();
         }
 
         private void IncreaseIndent(bool isFlow, bool isIndentless)
@@ -1759,7 +1842,10 @@ namespace YamlDotNet.Core
             if (analyzer.IsSpace() || analyzer.IsBreak())
             {
                 var indentHint = bestIndent.ToString(CultureInfo.InvariantCulture);
+
+                OutputFormatter?.BlockScalarHintIndicatorStart();
                 WriteIndicator(indentHint, false, false, false);
+                OutputFormatter?.BlockScalarHintIndicatorEnd();
             }
 
             string? chompHint = null;
@@ -1774,7 +1860,9 @@ namespace YamlDotNet.Core
 
             if (chompHint != null)
             {
+                OutputFormatter?.BlockScalarHintIndicatorStart();
                 WriteIndicator(chompHint, false, false, false);
+                OutputFormatter?.BlockScalarHintIndicatorEnd();
             }
         }
 

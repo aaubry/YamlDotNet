@@ -229,6 +229,11 @@ namespace YamlDotNet.Representation
 
             void AssignAnchors(Node node)
             {
+                if (node is Scalar)
+                {
+                    return;
+                }
+
                 if (encounteredNodes.Add(node))
                 {
                     foreach (var child in node.Children)
