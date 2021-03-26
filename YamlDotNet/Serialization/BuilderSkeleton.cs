@@ -410,7 +410,7 @@ namespace YamlDotNet.Serialization
 
                         var properties = typeInspector.GetProperties(concrete, null).OrderBy(p => p.Order);
                         //var mapper = new ObjectMapper2(concrete, properties, tag, ignoreUnmatched);
-                        var mapper = new ObjectMapper(concrete, tag, ignoreUnmatched);
+                        var mapper = new ObjectMapper(concrete, properties, tag, ignoreUnmatched);
 
                         var matcher = NodeMatcher
                             .ForMappings(mapper, concrete)
@@ -444,22 +444,6 @@ namespace YamlDotNet.Serialization
                                             valueMatchers: lookupMatcher(property.Type)
                                         );
                                     }
-                                }
-                                {
-                                    //// TODO: Type inspector
-                                    //var properties = concrete.GetPublicProperties();
-                                    //foreach (var property in properties)
-                                    //{
-                                    //    var keyName = namingConvention.Apply(property.Name);
-
-                                    //    matcher.AddItemMatcher(
-                                    //        keyMatcher: NodeMatcher
-                                    //            .ForScalars(new TranslateStringMapper(keyName, property.Name))
-                                    //            .MatchValue(keyName)
-                                    //            .Create(),
-                                    //        valueMatchers: lookupMatcher(property.PropertyType)
-                                    //    );
-                                    //}
                                 }
                             }
                         );

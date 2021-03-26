@@ -30,6 +30,8 @@ using YamlDotNet.Core;
 using YamlDotNet.Helpers;
 using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
+using YamlDotNet.Serialization.TypeInspectors;
+using YamlDotNet.Serialization.TypeResolvers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.Schemas
@@ -37,12 +39,14 @@ namespace YamlDotNet.Serialization.Schemas
     public sealed class ObjectMapper2 : INodeMapper
     {
         private readonly Type type;
+        private readonly IEnumerable<IPropertyDescriptor> properties;
         private readonly bool ignoreUnmatchedProperties;
         private readonly Func<Node, object?> constructor;
 
         public ObjectMapper2(Type type, IEnumerable<IPropertyDescriptor> properties, TagName tag, bool ignoreUnmatchedProperties)
         {
             this.type = type;
+            this.properties = properties;
             Tag = tag;
             this.ignoreUnmatchedProperties = ignoreUnmatchedProperties;
 
@@ -114,7 +118,8 @@ namespace YamlDotNet.Serialization.Schemas
         public Node Represent(object? native, ISchemaIterator iterator, IRepresentationState state)
         {
             // TODO
-            return new ObjectMapper(type, Tag, ignoreUnmatchedProperties).Represent(native, iterator, state);
+            var properties = new ReadablePropertiesTypeInspector(new DynamicTypeResolver()).GetProperties(type, null).OrderBy(p => p.Order);
+            return new ObjectMapper(type, properties, Tag, ignoreUnmatchedProperties).Represent(native, iterator, state);
         }
     }
 
@@ -122,11 +127,13 @@ namespace YamlDotNet.Serialization.Schemas
     public sealed class ObjectMapper : INodeMapper
     {
         private readonly Type type;
+        private readonly IEnumerable<IPropertyDescriptor> properties;
         private readonly bool ignoreUnmatchedProperties;
 
-        public ObjectMapper(Type type, TagName tag, bool ignoreUnmatchedProperties)
+        public ObjectMapper(Type type, IEnumerable<IPropertyDescriptor> properties, TagName tag, bool ignoreUnmatchedProperties)
         {
             this.type = type;
+            this.properties = properties;
             Tag = tag;
             this.ignoreUnmatchedProperties = ignoreUnmatchedProperties;
         }
@@ -144,10 +151,9 @@ namespace YamlDotNet.Serialization.Schemas
             foreach (var (keyNode, valueNode) in mapping)
             {
                 var key = keyNode.Mapper.Construct(keyNode);
+                // TODO: Do we need this cast ? It should already be a string!
                 var keyAsString = TypeConverter.ChangeType<string>(key);
-                // TODO: Naming convention
-                // TODO: Type inspector
-                var property = type.GetPublicProperty(keyAsString);
+                var property = properties.FirstOrDefault(p => p.Name.Equals(keyAsString));
                 if (property == null)
                 {
                     if (ignoreUnmatchedProperties)
@@ -158,8 +164,8 @@ namespace YamlDotNet.Serialization.Schemas
                 }
 
                 var value = valueNode.Mapper.Construct(valueNode);
-                var convertedValue = TypeConverter.ChangeType(value, property.PropertyType);
-                property.SetValue(native, convertedValue, null);
+                var convertedValue = TypeConverter.ChangeType(value, property.Type);
+                property.Write(native, convertedValue);
             }
             return native;
         }
@@ -180,24 +186,22 @@ namespace YamlDotNet.Serialization.Schemas
             var mapping = new Mapping(this, children.AsReadonlyDictionary());
             state.MemorizeRepresentation(native, mapping);
 
-            // TODO: Type inspector
             // TODO: Get the properties from the iterator ?
-            var properties = native.GetType().GetPublicProperties();
             foreach (var property in properties)
             {
-                var value = property.GetValue(native, null);
+                var value = property.Read(native);
                 // TODO: Proper null handling
                 if (value != null)
                 {
-                    var key = property.Name; // TODO: Naming convention
+                    var key = property.Name;
 
                     // Here we use EnterNode instead of EnterValue because we'll need to match the value
                     // TODO: If we iterated the children from the iterator, we wouldn't need to do this!
                     var keyIterator = iterator.EnterNode(new PropertyName(key), out var keyMapper);
                     var keyNode = keyMapper.RepresentMemorized(key, keyIterator, state);
 
-                    var valueIterator = keyIterator.EnterMappingValue().EnterValue(value, out var valueMapper);
-                    var valueNode = valueMapper.RepresentMemorized(value, valueIterator, state);
+                    var valueIterator = keyIterator.EnterMappingValue().EnterValue(value.Value, out var valueMapper);
+                    var valueNode = valueMapper.RepresentMemorized(value.Value, valueIterator, state);
 
                     children.Add(keyNode, valueNode);
                 }

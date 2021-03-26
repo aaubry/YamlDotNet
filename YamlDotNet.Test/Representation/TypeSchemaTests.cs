@@ -29,6 +29,8 @@ using YamlDotNet.Helpers;
 using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
 using YamlDotNet.Serialization.Schemas;
+using YamlDotNet.Serialization.TypeInspectors;
+using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Test.Representation
 {
@@ -312,7 +314,8 @@ namespace YamlDotNet.Test.Representation
                         {
                             throw new ArgumentException($"Could not resolve a tag for type '{concrete.FullName}'.");
                         }
-                        var mapper = new ObjectMapper(concrete, tag, false);
+                        var properties = new ReadablePropertiesTypeInspector(new DynamicTypeResolver()).GetProperties(concrete, null).OrderBy(p => p.Order);
+                        var mapper = new ObjectMapper(concrete, properties, tag, false);
 
                         var matcher = NodeMatcher
                             .ForMappings(mapper, concrete)
