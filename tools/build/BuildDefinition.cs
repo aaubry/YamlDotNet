@@ -5,10 +5,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using static build.Program;
 using static SimpleExec.Command;
@@ -175,62 +179,72 @@ namespace build
                 throw new InvalidOperationException("Cannot release a pre-release version.");
             }
 
-            var releaseNotesPath = Path.Combine(BasePath, "releases", $"{version.NuGetVersion}.md");
+            var previousVersion = releases.Versions.First();
 
-            string releaseNotes;
-            bool reviewed;
-            WriteVerbose($"ReleaseNotesPath: {releaseNotesPath}");
-            if (File.Exists(releaseNotesPath))
-            {
-                WriteInformation("Keeping existing release notes.");
-
-                releaseNotes = File.ReadAllText(releaseNotesPath);
-                reviewed = true;
-            }
-            else
-            {
-                var previousVersion = releases.Versions.First();
-
-                // Get the git log to scaffold the release notes
-                string? currentHash = null;
-                var commits = ReadLines("git", $"rev-list v{previousVersion}..HEAD --first-parent --reverse --pretty=tformat:%B")
-                    .Select(l =>
+            // Get the git log to scaffold the release notes
+            string? currentHash = null;
+            var commits = ReadLines("git", $"rev-list v{previousVersion}..HEAD --first-parent --reverse --pretty=tformat:%B")
+                .Select(l =>
+                {
+                    var match = Regex.Match(l, "^commit (?<hash>[a-f0-9]+)$");
+                    if (match.Success)
                     {
-                        var match = Regex.Match(l, "^commit (?<hash>[a-f0-9]+)$");
-                        if (match.Success)
-                        {
-                            currentHash = match.Groups["hash"].Value;
-                        }
-                        return new
-                        {
-                            message = l,
-                            commit = currentHash
-                        };
-                    })
-                    .GroupBy(l => l.commit, (k, list) => new
+                        currentHash = match.Groups["hash"].Value;
+                    }
+                    return new
                     {
-                        commit = k,
-                        message = list
-                            .Skip(1)
-                            .Select(l => Regex.Replace(l.message, @"\+semver:\s*\w+", "").Trim())
-                            .Where(l => !string.IsNullOrEmpty(l))
-                            .ToList()
-                    });
+                        message = l,
+                        commit = currentHash
+                    };
+                })
+                .GroupBy(l => l.commit, (k, list) => new
+                {
+                    commit = k,
+                    message = list
+                        .Skip(1)
+                        .Select(l => Regex.Replace(l.message, @"\+semver:\s*\w+", "").Trim())
+                        .Where(l => !string.IsNullOrEmpty(l))
+                        .ToList()
+                });
 
-                var log = commits
-                    .Select(c => c.message.Select((l, i) => $"{(i == 0 ? '-' : ' ')} {l}"))
-                    .Select(c => string.Join("  \n", c));
+            var log = commits
+                .Select(c => c.message.Select((l, i) => $"{(i == 0 ? '-' : ' ')} {l}"))
+                .Select(c => string.Join("  \n", c));
 
-                releaseNotes = $"# Release {version.NuGetVersion}\n\n{string.Join("\n\n", log)}";
-
-                File.WriteAllText(releaseNotesPath, releaseNotes);
-
-                WriteImportant($"Please review the release notes:\n{releaseNotesPath}");
-                reviewed = false;
-            }
+            var releaseNotes = $"# Release {version.NuGetVersion}\n\n{string.Join("\n\n", log)}";
+            
             WriteVerbose(releaseNotes);
 
-            return new ScaffoldedRelease(releaseNotes, releaseNotesPath, reviewed);
+            return new ScaffoldedRelease(releaseNotes);
+        }
+
+        public static async Task CreateGithubRelease(GitVersion version, ScaffoldedRelease release)
+        {
+            var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("Please set the GITHUB_TOKEN environment variable.");
+            var repository = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY") ?? "aaubry/YamlDotNet.Sandbox";
+
+            using var apiClient = new HttpClient(new LoggerHttpHandler())
+            {
+                BaseAddress = new Uri("https://api.github.com"),
+            };
+
+            apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            apiClient.DefaultRequestHeaders.Add("User-Agent", repository.Split('/')[0]);
+            apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
+
+            var releaseResponse = await apiClient.PostAsJsonAsync($"/repos/{repository}/releases", new
+            {
+                tag_name = $"v{version.NuGetVersion}",
+                target_commitish = version.Sha,
+                body = release.ReleaseNotes,
+                draft = true,
+                prerelease = version.IsPreRelease,
+            });
+
+            releaseResponse.EnsureSuccessStatusCode();
+
+            var releaseInfo = await releaseResponse.Content.ReadAsAsync<GitHubApiModels.Release>();
+            WriteImportant($"Release draft created:\n{releaseInfo.html_url}");
         }
 
         public static PreviousReleases DiscoverPreviousReleases()
@@ -252,45 +266,6 @@ namespace build
             WriteVerbose("Releases:\n - " + string.Join("\n - ", releases));
 
             return previousReleases;
-        }
-
-        public static void Release(GitVersion version, ScaffoldedRelease scaffoldedRelease, PreviousReleases previousReleases)
-        {
-            if (!scaffoldedRelease.Reviewed)
-            {
-                WriteImportant("Please review the release notes before proceeding.");
-                return;
-            }
-
-            var previousReleaseNotesLinks = previousReleases.Versions
-                .Select(v => new
-                {
-                    Version = v,
-                    RelativePath = $"releases/{v}.md",
-                    AbsolutePath = Path.Combine(BasePath, "releases", $"{v}.md"),
-                })
-                .Where(r => File.Exists(r.AbsolutePath))
-                .Select(r => $"- [{r.Version}]({r.RelativePath})");
-
-            var releaseNotesFile = string.Join("\n",
-                "# Release notes",
-                "",
-                Regex.Replace(scaffoldedRelease.ReleaseNotes, @"^#", "##"),
-                "",
-                "# Previous releases",
-                "",
-                string.Join("\n", previousReleaseNotesLinks)
-            );
-
-            var releaseNotesPath = Path.Combine(BasePath, "RELEASE_NOTES.md");
-            File.WriteAllText(releaseNotesPath, releaseNotesFile);
-
-            Run("git", $"add \"{releaseNotesPath}\"");
-            Run("git", $"add \"{scaffoldedRelease.ReleaseNotesPath}\"");
-            Run("git", $"commit -m \"Prepare release {version.NuGetVersion}\"");
-            Run("git", $"tag v{version.NuGetVersion}");
-
-            WriteImportant($"Your release is ready. Remember to push it using the following commands:\n\n    git push && git push origin v{version.NuGetVersion}");
         }
 
         public static void Document(Options options)
@@ -413,6 +388,7 @@ namespace build
         public int Patch { get; set; }
         public string? PreReleaseLabel { get; set; }
         public string? CommitsSinceVersionSourcePadded { get; set; }
+        public string? Sha { get; set; }
 
         public string NuGetVersion
         {
@@ -447,16 +423,12 @@ namespace build
 
     public class ScaffoldedRelease
     {
-        public ScaffoldedRelease(string releaseNotes, string releaseNotesPath, bool reviewed)
+        public ScaffoldedRelease(string releaseNotes)
         {
             ReleaseNotes = releaseNotes;
-            ReleaseNotesPath = releaseNotesPath;
-            Reviewed = reviewed;
         }
 
         public string ReleaseNotes { get; set; }
-        public string ReleaseNotesPath { get; set; }
-        public bool Reviewed { get; }
     }
 
     public class PreviousReleases
@@ -479,5 +451,21 @@ namespace build
         }
 
         public string Path { get; }
+    }
+
+    internal class LoggerHttpHandler : HttpClientHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var requestText = await request.Content.ReadAsStringAsync();
+            WriteVerbose($"> {request.Method} {request.RequestUri}\n{requestText}\n".Replace("\n", "\n> "));
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            var responseText = await response.Content.ReadAsStringAsync();
+            WriteVerbose($"< {response.StatusCode}\n{responseText}\n".Replace("\n", "\n< "));
+
+            return response;
+        }
     }
 }

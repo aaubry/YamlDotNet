@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Bullseye" Version="3.6.0" />
+        <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
         <PackageReference Include="SimpleExec" Version="6.4.0" />
     </ItemGroup>
 

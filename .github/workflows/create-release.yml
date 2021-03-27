@@ -1,0 +1,28 @@
+name: Create a new release
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit name to release (defaults to master)
+        required: false
+
+jobs:
+  release:
+    name: Draft Release
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.inputs.ref }}
+
+    - name: Install GitVersion.Tool
+      run: dotnet tool install --global GitVersion.Tool
+
+    - name: Create draft release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: ./build.sh CreateGithubRelease
