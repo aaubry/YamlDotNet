@@ -211,7 +211,7 @@ namespace build
                 .Select(c => c.message.Select((l, i) => $"{(i == 0 ? '-' : ' ')} {l}"))
                 .Select(c => string.Join("  \n", c));
 
-            var releaseNotes = $"# Release {version.NuGetVersion}\n\n{string.Join("\n\n", log)}";
+            var releaseNotes = string.Join("\n\n", log);
             
             WriteVerbose(releaseNotes);
 
@@ -236,6 +236,7 @@ namespace build
             {
                 tag_name = $"v{version.NuGetVersion}",
                 target_commitish = version.Sha,
+                name = $"Release {version.NuGetVersion}",
                 body = release.ReleaseNotes,
                 draft = true,
                 prerelease = version.IsPreRelease,

@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using static Bullseye.Targets;
 using OperatingSystem = Bullseye.Internal.OperatingSystem;
 
@@ -21,7 +22,7 @@ namespace build
         private static Palette palette = default!;
         public static bool NoPrerelease { get; private set; }
         private static bool verbose;
-
+        private static Host host;
         private static readonly Dictionary<Type, object> state = new Dictionary<Type, object>();
 
         private static T GetState<T>() where T : notnull
@@ -130,6 +131,7 @@ namespace build
 
             var (options, targets) = Options.Parse(filteredArguments);
             verbose = options.Verbose;
+            host = options.Host;
 
             var operatingSystem =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -224,6 +226,12 @@ namespace build
 
         public static void WriteImportant(string text)
         {
+            switch (host)
+            {
+                case Host.GitHubActions:
+                    Console.WriteLine($"::warning ::{text.Replace("\\n", "%0A")}");
+                    break;
+            }
             WriteBoxed(text, palette.Warning);
         }
 
