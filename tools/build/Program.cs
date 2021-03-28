@@ -158,6 +158,7 @@ namespace build
                             WriteInformation("Publishable build detected");
                             targets.Add(nameof(BuildDefinition.SetBuildVersion));
                             targets.Add(nameof(BuildDefinition.Publish));
+                            targets.Add(nameof(BuildDefinition.TweetRelease));
                         }
                         else
                         {

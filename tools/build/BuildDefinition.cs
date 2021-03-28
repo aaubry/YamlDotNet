@@ -172,6 +172,20 @@ namespace build
             }
         }
 
+        public static async Task TweetRelease(GitVersion version)
+        {
+            var twitterClient = new TwitterProvider(
+                consumerKey: Environment.GetEnvironmentVariable("TWITTER_CONSUMER_API_KEY") ?? throw new InvalidOperationException("Please set the TWITTER_CONSUMER_API_KEY environment variable."),
+                consumerKeySecret: Environment.GetEnvironmentVariable("TWITTER_CONSUMER_API_SECRET") ?? throw new InvalidOperationException("Please set the TWITTER_CONSUMER_API_SECRET environment variable."),
+                accessToken: Environment.GetEnvironmentVariable("TWITTER_ACCESS_TOKEN") ?? throw new InvalidOperationException("Please set the TWITTER_ACCESS_TOKEN environment variable."),
+                accessTokenSecret: Environment.GetEnvironmentVariable("TWITTER_ACCESS_TOKEN_SECRET") ?? throw new InvalidOperationException("Please set the TWITTER_ACCESS_TOKEN_SECRET environment variable.")
+            );
+
+            var message = $"YamlDotNet {version.NuGetVersion} has just been released! https://github.com/aaubry/YamlDotNet/releases/tag/v{version.NuGetVersion}";
+            var result = await twitterClient.Tweet(message);
+            WriteVerbose(result);
+        }
+
         public static ScaffoldedRelease ScaffoldReleaseNotes(GitVersion version, PreviousReleases releases)
         {
             if (version.IsPreRelease)
@@ -459,12 +473,18 @@ namespace build
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var requestText = await request.Content.ReadAsStringAsync();
-            WriteVerbose($"> {request.Method} {request.RequestUri}\n{requestText}\n".Replace("\n", "\n> "));
+            var requestHeaders = request.Headers.Concat(request.Content.Headers)
+                .Select(h => $"\n{h.Key}: {string.Join(", ", h.Value)}");
+
+            WriteVerbose($"> {request.Method} {request.RequestUri}{string.Concat(requestHeaders)}\n\n{requestText}\n".Replace("\n", "\n> "));
 
             var response = await base.SendAsync(request, cancellationToken);
 
             var responseText = await response.Content.ReadAsStringAsync();
-            WriteVerbose($"< {response.StatusCode}\n{responseText}\n".Replace("\n", "\n< "));
+            var responseHeaders = response.Headers.Concat(response.Content.Headers)
+                .Select(h => $"\n{h.Key}: {string.Join(", ", h.Value)}");
+
+            WriteVerbose($"< {(int)response.StatusCode} {response.ReasonPhrase}{string.Concat(responseHeaders)}\n\n{responseText}\n".Replace("\n", "\n< "));
 
             return response;
         }
