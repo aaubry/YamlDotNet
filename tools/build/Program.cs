@@ -131,7 +131,7 @@ namespace build
 
             var (options, targets) = Options.Parse(filteredArguments);
             verbose = options.Verbose;
-            host = options.Host;
+            host = options.Host.DetectIfUnknown().Item1;
 
             var operatingSystem =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -229,6 +229,7 @@ namespace build
             switch (host)
             {
                 case Host.GitHubActions:
+                    Console.WriteLine($"Writing a warning");
                     Console.WriteLine($"::warning ::{text.Replace("\\n", "%0A")}");
                     break;
             }
