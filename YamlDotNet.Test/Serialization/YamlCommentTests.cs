@@ -23,7 +23,9 @@ namespace YamlDotNet.Test.Serialization
             Serializer serializer = new Serializer();
             string result = serializer.Serialize(person);
 
-            Output.WriteLine(result);
+            Assert.Contains("# this is a yaml comment about name property", result);
+            Assert.Contains("# this is age", result);
+            Assert.Contains("# male or female", result);
         }
 
         class Person
