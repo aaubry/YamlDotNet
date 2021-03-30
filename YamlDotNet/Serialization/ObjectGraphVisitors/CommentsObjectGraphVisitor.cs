@@ -20,19 +20,15 @@
 //  SOFTWARE.
 
 using System;
-using System.ComponentModel;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    public sealed class DefaultValuesObjectGraphVisitor : ChainedObjectGraphVisitor
+    public sealed class CommentsObjectGraphVisitor : ChainedObjectGraphVisitor
     {
-        private readonly DefaultValuesHandling handling;
-
-        public DefaultValuesObjectGraphVisitor(DefaultValuesHandling handling, IObjectGraphVisitor<IEmitter> nextVisitor)
+        public CommentsObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
             : base(nextVisitor)
         {
-            this.handling = handling;
         }
 
         private static object? GetDefault(Type type)
@@ -42,29 +38,10 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            var configuration = this.handling;
             var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
-            if (yamlMember != null && yamlMember.IsDefaultValuesHandlingSpecified)
+            if (yamlMember?.Description != null)
             {
-                configuration = yamlMember.DefaultValuesHandling;
-            }
-
-            switch (configuration)
-            {
-                case DefaultValuesHandling.OmitNull:
-                    if (value.Value is null)
-                    {
-                        return false;
-                    }
-                    break;
-
-                case DefaultValuesHandling.OmitDefaults:
-                    var defaultValue = key.GetCustomAttribute<DefaultValueAttribute>()?.Value ?? GetDefault(key.Type);
-                    if (Equals(value.Value, defaultValue))
-                    {
-                        return false;
-                    }
-                    break;
+                context.Emit(new Core.Events.Comment(yamlMember.Description, false));
             }
 
             return base.EnterMapping(key, value, context);

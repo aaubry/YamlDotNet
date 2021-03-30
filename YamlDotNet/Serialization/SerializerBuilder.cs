@@ -76,6 +76,10 @@ namespace YamlDotNet.Serialization
                 {
                     typeof(DefaultValuesObjectGraphVisitor),
                     args => new DefaultValuesObjectGraphVisitor(defaultValuesHandlingConfiguration, args.InnerVisitor)
+                },
+                {
+                    typeof(CommentsObjectGraphVisitor),
+                    args => new CommentsObjectGraphVisitor(args.InnerVisitor)
                 }
             };
 
