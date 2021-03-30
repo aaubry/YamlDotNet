@@ -184,6 +184,12 @@ namespace build
 
         public static async Task TweetRelease(GitVersion version)
         {
+            if (version.IsPreRelease)
+            {
+                WriteWarning("Not tweeting about a pre-release.");
+                return;
+            }
+
             var twitterClient = new TwitterProvider(
                 consumerKey: Environment.GetEnvironmentVariable("TWITTER_CONSUMER_API_KEY") ?? throw new InvalidOperationException("Please set the TWITTER_CONSUMER_API_KEY environment variable."),
                 consumerKeySecret: Environment.GetEnvironmentVariable("TWITTER_CONSUMER_API_SECRET") ?? throw new InvalidOperationException("Please set the TWITTER_CONSUMER_API_SECRET environment variable."),
