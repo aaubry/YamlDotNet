@@ -24,7 +24,17 @@ namespace build
     {
         public static GitVersion ResolveVersion(Options options, PreviousReleases releases)
         {
-            var versionJson = Read("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
+            string versionJson;
+            try
+            {
+                versionJson = Read("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
+            }
+            catch (NonZeroExitCodeException)
+            {
+                Run("dotnet", "gitversion /nofetch /diag", BasePath);
+                throw;
+            }
+
             WriteVerbose(versionJson);
 
             if (options.Verbose)
@@ -226,7 +236,7 @@ namespace build
                 .Select(c => string.Join("  \n", c));
 
             var releaseNotes = string.Join("\n\n", log);
-            
+
             WriteVerbose(releaseNotes);
 
             return new ScaffoldedRelease(releaseNotes);
