@@ -7,6 +7,14 @@ test: off
 environment:
   NUGET_API_KEY:
     secure: pomYNeSluKjzaqIYea800dn9dd/CZg5AOSJQnkpjFFxNO13qcA2l6KW/6dTxfQEb
+  TWITTER_CONSUMER_API_KEY:
+    secure: o4jM6NnXqtI3/Bzef2xpcTAOuPn/WwO+khiWvrbletk=
+  TWITTER_CONSUMER_API_SECRET:
+    secure: a4TQjB1vp0lRFZ7aA7RamHAhkHlPlMqdvsaZvzGs/pPkR+YfuGQ7AKlknD26HIE0xGUTi8M1wqffQUKJL1knHg==
+  TWITTER_ACCESS_TOKEN:
+    secure: TfgxKzf9AAbDuJmuYnnzjYKhHcxyYv7Z+AnFRzlQc5CcIJ3h52YZAokQGF3n3K8r21V1DxeKHc/qWG1yZs4NKg==
+  TWITTER_ACCESS_TOKEN_SECRET:
+    secure: aMvxmavbq8tylMDe8QGEdemNMPzrd7i6982i/iVydNYHhUvzV7lw5AJsiEpfRyzt
 
 install:
   - cmd: git submodule update --init

@@ -29,6 +29,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using FakeItEasy;
 using FluentAssertions;
@@ -217,7 +218,7 @@ Value: foo");
             var expectedResult = Yaml.ReaderFrom("tags.yaml").ReadToEnd().NormalizeNewLines();
             SerializerBuilder
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
-                .WithTagMapping("tag:yaml.org,2002:point", typeof(Point));
+                .WithTagMapping(new TagName("tag:yaml.org,2002:point"), typeof(Point));
 
             var point = new Point(10, 20);
             var result = Serializer.Serialize(point);
@@ -1882,6 +1883,171 @@ c: *anchor1");
             "));
 
             Assert.Equal("public2,internal,protected,private", deserialized.ToString());
+        }
+
+        [Fact]
+        public void ShouldNotIndentSequences()
+        {
+            var sut = new SerializerBuilder()
+                .Build();
+
+            var yaml = sut.Serialize(new
+            {
+                first = "first",
+                items = new[]
+                {
+                    "item1",
+                    "item2"
+                },
+                nested = new[]
+                {
+                    new
+                    {
+                        name = "name1",
+                        more = new[]
+                        {
+                            "nested1",
+                            "nested2"
+                        }
+                    }
+                }
+            });
+
+            var expected = Yaml.Text(@"
+                first: first
+                items:
+                - item1
+                - item2
+                nested:
+                - name: name1
+                  more:
+                  - nested1
+                  - nested2
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void ShouldIndentSequences()
+        {
+            var sut = new SerializerBuilder()
+                .WithIndentedSequences()
+                .Build();
+
+            var yaml = sut.Serialize(new
+            {
+                first = "first",
+                items = new[]
+                {
+                    "item1",
+                    "item2"
+                },
+                nested = new[]
+                {
+                    new
+                    {
+                        name = "name1",
+                        more = new[]
+                        {
+                            "nested1",
+                            "nested2"
+                        }
+                    }
+                }
+            });
+
+            var expected = Yaml.Text(@"
+                first: first
+                items:
+                  - item1
+                  - item2
+                nested:
+                  - name: name1
+                    more:
+                      - nested1
+                      - nested2
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        public class CycleTestEntity
+        {
+            public CycleTestEntity Cycle { get; set; }
+        }
+
+        [Fact]
+        public void SerializeCycleWithAlias()
+        {
+            var sut = new SerializerBuilder()
+                .WithTagMapping("!CycleTag", typeof(CycleTestEntity))
+                .Build();
+
+            var entity = new CycleTestEntity();
+            entity.Cycle = entity;
+            var yaml = sut.Serialize(entity);
+            var expected = Yaml.Text(@"&o0 !CycleTag
+Cycle: *o0");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void DeserializeCycleWithAlias()
+        {
+            var sut = new DeserializerBuilder()
+                .WithTagMapping("!CycleTag", typeof(CycleTestEntity))
+                .Build();
+
+            var yaml = Yaml.Text(@"&o0 !CycleTag
+Cycle: *o0");
+            var obj = sut.Deserialize<CycleTestEntity>(yaml);
+
+            Assert.Same(obj, obj.Cycle);
+        }
+
+        [Fact]
+        public void DeserializeCycleWithoutAlias()
+        {
+            var sut = new DeserializerBuilder()
+                .Build();
+
+            var yaml = Yaml.Text(@"&o0
+Cycle: *o0");
+            var obj = sut.Deserialize<CycleTestEntity>(yaml);
+
+            Assert.Same(obj, obj.Cycle);
+        }
+
+        public static IEnumerable<object[]> Depths => Enumerable.Range(1, 10).Select(i => new[] { (object)i });
+
+        [Theory]
+        [MemberData(nameof(Depths))]
+        public void DeserializeCycleWithAnchorsWithDepth(int? depth)
+        {
+            var sut = new DeserializerBuilder()
+                .WithTagMapping("!CycleTag", typeof(CycleTestEntity))
+                .Build();
+
+            StringBuilder builder = new StringBuilder(@"&o0 !CycleTag");
+            builder.AppendLine();
+            string indentation;
+            for (int i = 0; i < depth - 1; ++i)
+            {
+                indentation = string.Concat(Enumerable.Repeat("  ", i));
+                builder.AppendLine($"{indentation}Cycle: !CycleTag");
+            }
+            indentation = string.Concat(Enumerable.Repeat("  ", depth.Value - 1));
+            builder.AppendLine($"{indentation}Cycle: *o0");
+            var yaml = Yaml.Text(builder.ToString());
+            var obj = sut.Deserialize<CycleTestEntity>(yaml);
+            CycleTestEntity iterator = obj;
+            for (int i = 0; i < depth; ++i)
+            {
+                iterator = iterator.Cycle;
+            }
+            Assert.Same(obj, iterator);
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]

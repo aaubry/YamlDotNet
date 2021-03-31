@@ -421,7 +421,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private static ParsingEvent ProcessEmptyScalar(Mark position)
         {
-            return new Events.Scalar(null, null, string.Empty, ScalarStyle.Plain, true, false, position, position);
+            return new Events.Scalar(AnchorName.Empty, TagName.Empty, string.Empty, ScalarStyle.Plain, true, false, position, position);
         }
 
         /// <summary>
@@ -470,38 +470,34 @@ namespace YamlDotNet.Core
 
             var start = current.Start;
 
-            string? anchorName = null;
-            string? tagName = null;
+            var anchorName = AnchorName.Empty;
+            var tagName = TagName.Empty;
             Anchor? lastAnchor = null;
             Tag? lastTag = null;
 
             // The anchor and the tag can be in any order. This loop repeats at most twice.
             while (true)
             {
-                if (anchorName == null && current is Anchor anchor)
+                if (anchorName.IsEmpty && current is Anchor anchor)
                 {
                     lastAnchor = anchor;
-                    anchorName = string.IsNullOrEmpty(anchor.Value) ? null : anchor.Value;
+                    anchorName = anchor.Value;
                     Skip();
                 }
-                else if (tagName == null && current is Tag tag)
+                else if (tagName.IsEmpty && current is Tag tag)
                 {
                     lastTag = tag;
                     if (string.IsNullOrEmpty(tag.Handle))
                     {
-                        tagName = tag.Suffix;
+                        tagName = new TagName(tag.Suffix);
                     }
                     else if (tagDirectives.Contains(tag.Handle))
                     {
-                        tagName = string.Concat(tagDirectives[tag.Handle].Prefix, tag.Suffix);
+                        tagName = new TagName(string.Concat(tagDirectives[tag.Handle].Prefix, tag.Suffix));
                     }
                     else
                     {
                         throw new SemanticErrorException(tag.Start, tag.End, "While parsing a node, found undefined tag handle.");
-                    }
-                    if (string.IsNullOrEmpty(tagName))
-                    {
-                        tagName = null;
                     }
 
                     Skip();
@@ -516,7 +512,7 @@ namespace YamlDotNet.Core
                 }
                 else if (current is Error error)
                 {
-                    if (lastTag != null && lastAnchor != null && !string.IsNullOrEmpty(anchorName))
+                    if (lastTag != null && lastAnchor != null && !anchorName.IsEmpty)
                     {
                         return new Events.Scalar(anchorName, default, string.Empty, default, false, false, lastAnchor.Start, lastAnchor.End);
                     }
@@ -530,7 +526,7 @@ namespace YamlDotNet.Core
                 current = GetCurrentToken() ?? throw new SemanticErrorException("Reached the end of the stream while parsing a node");
             }
 
-            var isImplicit = string.IsNullOrEmpty(tagName);
+            var isImplicit = tagName.IsEmpty;
 
             if (isIndentlessSequence && GetCurrentToken() is BlockEntry)
             {
@@ -551,11 +547,11 @@ namespace YamlDotNet.Core
                 {
                     var isPlainImplicit = false;
                     var isQuotedImplicit = false;
-                    if ((scalar.Style == ScalarStyle.Plain && tagName == null) || tagName == Constants.DefaultHandle)
+                    if ((scalar.Style == ScalarStyle.Plain && tagName.IsEmpty) || tagName.IsNonSpecific)
                     {
                         isPlainImplicit = true;
                     }
-                    else if (tagName == null)
+                    else if (tagName.IsEmpty)
                     {
                         isQuotedImplicit = true;
                     }
@@ -568,7 +564,7 @@ namespace YamlDotNet.Core
                     // Read next token to ensure the error case spec test 'CXX2':
                     // "Mapping with anchor on document start line".
 
-                    if (anchorName != null && scanner.MoveNextWithoutConsuming())
+                    if (!anchorName.IsEmpty && scanner.MoveNextWithoutConsuming())
                     {
                         currentToken = scanner.Current;
                         if (currentToken is Error)
@@ -620,7 +616,7 @@ namespace YamlDotNet.Core
                     }
                 }
 
-                if (anchorName != null || tagName != null)
+                if (!anchorName.IsEmpty || !tagName.IsEmpty)
                 {
                     state = states.Pop();
                     return new Events.Scalar(anchorName, tagName, string.Empty, ScalarStyle.Plain, isImplicit, false, start, current.End);
@@ -894,7 +890,7 @@ namespace YamlDotNet.Core
                 if (current is Key)
                 {
                     state = ParserState.FlowSequenceEntryMappingKey;
-                    evt = new Events.MappingStart(null, null, true, MappingStyle.Flow);
+                    evt = new Events.MappingStart(AnchorName.Empty, TagName.Empty, true, MappingStyle.Flow);
                     Skip();
                     return evt;
                 }

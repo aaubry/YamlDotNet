@@ -66,7 +66,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="style">The style of the mapping.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public MappingStart(string? anchor, string? tag, bool isImplicit, MappingStyle style, Mark start, Mark end)
+        public MappingStart(AnchorName anchor, TagName tag, bool isImplicit, MappingStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
             this.IsImplicit = isImplicit;
@@ -80,7 +80,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="tag">The tag.</param>
         /// <param name="isImplicit">Indicates whether the event is implicit.</param>
         /// <param name="style">The style of the mapping.</param>
-        public MappingStart(string? anchor, string? tag, bool isImplicit, MappingStyle style)
+        public MappingStart(AnchorName anchor, TagName tag, bool isImplicit, MappingStyle style)
             : this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
         {
         }
@@ -89,7 +89,7 @@ namespace YamlDotNet.Core.Events
         /// Initializes a new instance of the <see cref="MappingStart"/> class.
         /// </summary>
         public MappingStart()
-            : this(null, null, true, MappingStyle.Any, Mark.Empty, Mark.Empty)
+            : this(AnchorName.Empty, TagName.Empty, true, MappingStyle.Any, Mark.Empty, Mark.Empty)
         {
         }
 

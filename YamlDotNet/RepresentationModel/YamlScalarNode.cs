@@ -33,7 +33,6 @@ namespace YamlDotNet.RepresentationModel
     /// Represents a scalar node in the YAML document.
     /// </summary>
     [DebuggerDisplay("{Value}")]
-    [Serializable]
     public sealed class YamlScalarNode : YamlNode, IYamlConvertible
     {
         /// <summary>
@@ -96,7 +95,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag == null, false));
+            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag.IsEmpty, false));
         }
 
         /// <summary>

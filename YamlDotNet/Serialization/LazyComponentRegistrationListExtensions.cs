@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization
         public static List<TComponent> BuildComponentList<TComponent>(this LazyComponentRegistrationList<Nothing, TComponent> registrations)
         {
             return registrations
-                .Select(factory => factory(Nothing.Instance))
+                .Select(factory => factory(default))
                 .ToList();
         }
 

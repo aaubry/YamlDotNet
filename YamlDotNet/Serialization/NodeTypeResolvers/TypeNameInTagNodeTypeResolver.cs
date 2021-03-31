@@ -29,11 +29,11 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
     {
         bool INodeTypeResolver.Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
-            if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Tag))
+            if (nodeEvent != null && !nodeEvent.Tag.IsEmpty)
             {
                 // If type could not be loaded, make sure to pass resolving
                 // to the next resolver
-                var resolvedType = Type.GetType(nodeEvent.Tag.Substring(1), throwOnError: false);
+                var resolvedType = Type.GetType(nodeEvent.Tag.Value.Substring(1), throwOnError: false);
                 if (resolvedType != null)
                 {
                     currentType = resolvedType;

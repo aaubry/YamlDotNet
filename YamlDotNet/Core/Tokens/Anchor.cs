@@ -26,20 +26,19 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents an anchor token.
     /// </summary>
-    [Serializable]
     public class Anchor : Token
     {
         /// <summary>
         /// Gets the value.
         /// </summary>
         /// <value>The value.</value>
-        public string Value { get; }
+        public AnchorName Value { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Anchor"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        public Anchor(string value)
+        public Anchor(AnchorName value)
             : this(value, Mark.Empty, Mark.Empty)
         {
         }
@@ -50,10 +49,14 @@ namespace YamlDotNet.Core.Tokens
         /// <param name="value">The value.</param>
         /// <param name="start">The start position of the token.</param>
         /// <param name="end">The end position of the token.</param>
-        public Anchor(string value, Mark start, Mark end)
+        public Anchor(AnchorName value, Mark start, Mark end)
             : base(start, end)
         {
-            this.Value = value ?? throw new ArgumentNullException(nameof(value));
+            if (value.IsEmpty)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            this.Value = value;
         }
     }
 }

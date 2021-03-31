@@ -26,7 +26,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Exception that is thrown when a syntax error is detected on a YAML stream.
     /// </summary>
-    [Serializable]
     public sealed class SyntaxErrorException : YamlException
     {
         /// <summary>

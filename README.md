@@ -136,7 +136,7 @@ PM> Install-Package YamlDotNet
 
 If you do not want to use NuGet, you can [download binaries here](https://ci.appveyor.com/project/aaubry/yamldotnet).
 
-YamlDotNet is also available on the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/36292).
+YamlDotNet is also available on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/integration/yamldotnet-for-unity-36292).
 
 ## Contributing
 

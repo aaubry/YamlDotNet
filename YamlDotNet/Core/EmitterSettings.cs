@@ -53,13 +53,18 @@ namespace YamlDotNet.Core
         /// </remarks>
         public int MaxSimpleKeyLength { get; } = 1024;
 
+        /// <summary>
+        /// Indent sequences. The default is to not indent.
+        /// </summary>
+        public bool IndentSequences { get; } = false;
+
         public static readonly EmitterSettings Default = new EmitterSettings();
 
         public EmitterSettings()
         {
         }
 
-        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false)
+        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false)
         {
             if (bestIndent < 2 || bestIndent > 9)
             {
@@ -81,6 +86,7 @@ namespace YamlDotNet.Core
             IsCanonical = isCanonical;
             MaxSimpleKeyLength = maxSimpleKeyLength;
             SkipAnchorName = skipAnchorName;
+            IndentSequences = indentSequences;
         }
 
         public EmitterSettings WithBestIndent(int bestIndent)
@@ -127,6 +133,18 @@ namespace YamlDotNet.Core
         {
             SkipAnchorName = true;
             return this;
+        }
+
+        public EmitterSettings WithIndentedSequences()
+        {
+            return new EmitterSettings(
+                BestIndent,
+                BestWidth,
+                IsCanonical,
+                MaxSimpleKeyLength,
+                SkipAnchorName,
+                true
+            );
         }
     }
 }

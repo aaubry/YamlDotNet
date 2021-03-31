@@ -34,7 +34,6 @@ namespace YamlDotNet.RepresentationModel
     /// Represents a sequence node in the YAML document.
     /// </summary>
     [DebuggerDisplay("Count = {children.Count}")]
-    [Serializable]
     public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible
     {
         private readonly IList<YamlNode> children = new List<YamlNode>();
@@ -152,7 +151,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new SequenceStart(Anchor, Tag, string.IsNullOrEmpty(Tag), Style));
+            emitter.Emit(new SequenceStart(Anchor, Tag, Tag.IsEmpty, Style));
             foreach (var node in children)
             {
                 node.Save(emitter, state);

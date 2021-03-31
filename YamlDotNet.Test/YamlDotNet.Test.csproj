@@ -38,9 +38,19 @@
     <EmbeddedResource Include="files\*.yaml;files\*.template" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="xunit.runner.json" Condition="'$(OS)' == 'Unix'">
+  <ItemGroup Condition="'$(OS)' == 'Unix'">
+    <None Update="xunit.runner.linux.json">
+      <Link>xunit.runner.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Remove="xunit.runner.windows.json" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' != 'Unix'">
+    <None Update="xunit.runner.windows.json">
+      <Link>xunit.runner.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Remove="xunit.runner.linux.json" />
   </ItemGroup>
 </Project>

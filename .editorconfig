@@ -35,6 +35,10 @@ indent_size = 2
 end_of_line = lf
 indent_size = 2
 
+#[*.cs]
+#dotnet_analyzer_diagnostic.category-Style.severity = error
+#dotnet_analyzer_diagnostic.category-CodeQuality.severity = error
+
 # Dotnet code style settings:
 [*.{cs,vb}]
 

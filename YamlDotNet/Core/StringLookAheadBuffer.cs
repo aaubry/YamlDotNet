@@ -23,7 +23,6 @@ using System;
 
 namespace YamlDotNet.Core
 {
-    [Serializable]
     internal sealed class StringLookAheadBuffer : ILookAheadBuffer
     {
         private readonly string value;

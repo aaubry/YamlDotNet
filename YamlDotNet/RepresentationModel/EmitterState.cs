@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System.Collections.Generic;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.RepresentationModel
 {
@@ -28,18 +29,10 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     internal class EmitterState
     {
-        private readonly HashSet<string> emittedAnchors = new HashSet<string>();
-
         /// <summary>
         /// Gets the already emitted anchors.
         /// </summary>
         /// <value>The emitted anchors.</value>
-        public HashSet<string> EmittedAnchors
-        {
-            get
-            {
-                return emittedAnchors;
-            }
-        }
+        public HashSet<AnchorName> EmittedAnchors { get; } = new HashSet<AnchorName>();
     }
 }

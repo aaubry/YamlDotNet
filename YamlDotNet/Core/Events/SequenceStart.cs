@@ -67,7 +67,7 @@ namespace YamlDotNet.Core.Events
         /// <param name="style">The style.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public SequenceStart(string? anchor, string? tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
+        public SequenceStart(AnchorName anchor, TagName tag, bool isImplicit, SequenceStyle style, Mark start, Mark end)
             : base(anchor, tag, start, end)
         {
             this.IsImplicit = isImplicit;
@@ -77,7 +77,7 @@ namespace YamlDotNet.Core.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="SequenceStart"/> class.
         /// </summary>
-        public SequenceStart(string? anchor, string? tag, bool isImplicit, SequenceStyle style)
+        public SequenceStart(AnchorName anchor, TagName tag, bool isImplicit, SequenceStyle style)
             : this(anchor, tag, isImplicit, style, Mark.Empty, Mark.Empty)
         {
         }

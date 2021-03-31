@@ -19,15 +19,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
-using System;
-
 namespace YamlDotNet.Core.Tokens
 {
     /// <summary>
     /// Represents a flow mapping end token.
     /// </summary>
-    [Serializable]
     public sealed class FlowMappingEnd : Token
     {
         /// <summary>

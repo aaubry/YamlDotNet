@@ -19,14 +19,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core.Tokens
 {
     /// <summary>
     /// Base class for YAML tokens.
     /// </summary>
-    [Serializable]
     internal class Error : Token
     {
         /// <summary>

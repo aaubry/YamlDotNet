@@ -31,7 +31,6 @@ namespace YamlDotNet.Core
     /// <summary>
     /// Converts a sequence of characters into a sequence of YAML tokens.
     /// </summary>
-    [Serializable]
     public class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;
@@ -1293,14 +1292,14 @@ namespace YamlDotNet.Core
             }
 
             // Create a token.
-
+            var name = new AnchorName(value.ToString());
             if (isAlias)
             {
-                return new AnchorAlias(value.ToString(), start, cursor.Mark());
+                return new AnchorAlias(name, start, cursor.Mark());
             }
             else
             {
-                return previousAnchor = new Anchor(value.ToString(), start, cursor.Mark());
+                return previousAnchor = new Anchor(name, start, cursor.Mark());
             }
         }
 

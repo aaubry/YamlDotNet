@@ -24,43 +24,17 @@
 // used in YamlDotNet.
 
 using System;
-using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace YamlDotNet.Serialization.Utilities
 {
     /// <summary>
     /// Performs type conversions using every standard provided by the .NET library.
     /// </summary>
-    public static class TypeConverter
+    public static partial class TypeConverter
     {
-#if !(NETSTANDARD1_3 || UNITY)
-        /// <summary>
-        /// Registers a <see cref="System.ComponentModel.TypeConverter"/> dynamically.
-        /// </summary>
-        /// <typeparam name="TConvertible">The type to which the converter should be associated.</typeparam>
-        /// <typeparam name="TConverter">The type of the converter.</typeparam>
-#endif
-#if !(NETCOREAPP3_1 || NETSTANDARD2_1 || NETSTANDARD1_3 || UNITY)
-        [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
-#endif
-#if !(NETSTANDARD1_3 || UNITY)
-        public static void RegisterTypeConverter<TConvertible, TConverter>()
-            where TConverter : System.ComponentModel.TypeConverter
-        {
-            var alreadyRegistered = TypeDescriptor.GetAttributes(typeof(TConvertible))
-                .OfType<TypeConverterAttribute>()
-                .Any(a => a.ConverterTypeName == typeof(TConverter).AssemblyQualifiedName);
-
-            if (!alreadyRegistered)
-            {
-                TypeDescriptor.AddAttributes(typeof(TConvertible), new TypeConverterAttribute(typeof(TConverter)));
-            }
-        }
-#endif
-
         /// <summary>
         /// Converts the specified value.
         /// </summary>
@@ -260,3 +234,35 @@ namespace YamlDotNet.Serialization.Utilities
         }
     }
 }
+
+#if !(NETSTANDARD1_3 || UNITY)
+namespace YamlDotNet.Serialization.Utilities
+{
+    using System.Linq;
+
+    partial class TypeConverter
+    {
+        /// <summary>
+        /// Registers a <see cref="System.ComponentModel.TypeConverter"/> dynamically.
+        /// </summary>
+        /// <typeparam name="TConvertible">The type to which the converter should be associated.</typeparam>
+        /// <typeparam name="TConverter">The type of the converter.</typeparam>
+#if !(NETCOREAPP3_1 || NETSTANDARD2_1 || NETSTANDARD1_3 || UNITY)
+        [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
+#endif
+        public static void RegisterTypeConverter<TConvertible, TConverter>()
+            where TConverter : System.ComponentModel.TypeConverter
+        {
+            var alreadyRegistered = TypeDescriptor.GetAttributes(typeof(TConvertible))
+                .OfType<TypeConverterAttribute>()
+                .Any(a => a.ConverterTypeName == typeof(TConverter).AssemblyQualifiedName);
+
+            if (!alreadyRegistered)
+            {
+                TypeDescriptor.AddAttributes(typeof(TConvertible), new TypeConverterAttribute(typeof(TConverter)));
+            }
+        }
+
+    }
+}
+#endif

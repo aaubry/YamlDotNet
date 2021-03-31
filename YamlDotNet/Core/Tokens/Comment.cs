@@ -26,7 +26,6 @@ namespace YamlDotNet.Core.Tokens
     /// <summary>
     /// Represents a comment
     /// </summary>
-    [Serializable]
     public sealed class Comment : Token
     {
         /// <summary>

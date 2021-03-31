@@ -45,7 +45,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
-        private readonly IDictionary<Type, string> tagMappings = new Dictionary<Type, string>();
+        private readonly IDictionary<Type, TagName> tagMappings = new Dictionary<Type, TagName>();
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
@@ -76,6 +76,10 @@ namespace YamlDotNet.Serialization
                 {
                     typeof(DefaultValuesObjectGraphVisitor),
                     args => new DefaultValuesObjectGraphVisitor(defaultValuesHandlingConfiguration, args.InnerVisitor)
+                },
+                {
+                    typeof(CommentsObjectGraphVisitor),
+                    args => new CommentsObjectGraphVisitor(args.InnerVisitor)
                 }
             };
 
@@ -189,11 +193,11 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public override SerializerBuilder WithTagMapping(string tag, Type type)
+        public override SerializerBuilder WithTagMapping(TagName tag, Type type)
         {
-            if (tag == null)
+            if (tag.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(tag));
+                throw new ArgumentException("Non-specific tags cannot be maped");
             }
 
             if (type == null)
@@ -495,6 +499,22 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Creates sequences with extra indentation
+        /// </summary>
+        /// <example>
+        ///  list:
+        ///    - item
+        ///    - item
+        /// </example>
+        /// <returns></returns>
+        public SerializerBuilder WithIndentedSequences()
+        {
+            emitterSettings = emitterSettings.WithIndentedSequences();
+
+            return this;
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Serializer" /> according to the current configuration.
         /// </summary>
         public ISerializer Build()
@@ -556,7 +576,7 @@ namespace YamlDotNet.Serialization
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
                 {
-                    traversalStrategy.Traverse(graph, visitor, null!);
+                    traversalStrategy.Traverse(graph, visitor, default);
                 }
 
                 void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);

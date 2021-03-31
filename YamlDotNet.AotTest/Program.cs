@@ -33,11 +33,10 @@ namespace YamlDotNet.AotTest
         static int Main()
         {
             Console.WriteLine();
-            Console.WriteLine("---------------------------------------------------------------------------------");
+            Console.WriteLine("\x1b[37m---------------------------------------------------------------------------------"); 
             Console.WriteLine();
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Running AOT tests...");
+            Console.WriteLine("\x1b[97m Running AOT tests...");
             Console.WriteLine();
 
             TryDeserialize<MyDictionary>("DictionaryNodeDeserializer", "myDictionary: { winners: 3 }");
@@ -46,13 +45,11 @@ namespace YamlDotNet.AotTest
             TrySerialize("TraverseGenericDictionary", new GenericTestDictionary<long, long> { { 1, 2 } });
 
             Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" {0} test succeeded, {1} tests failed", SucceededTestCount, FailedTestCount);
+            Console.WriteLine(" \x1b[93m{0}\x1b[97m test succeeded, \x1b[93m{1}\x1b[97m tests failed", SucceededTestCount, FailedTestCount);
 
-            Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine();
-            Console.WriteLine("---------------------------------------------------------------------------------");
-            Console.WriteLine();
+            Console.WriteLine("\x1b[37m---------------------------------------------------------------------------------");
+            Console.WriteLine("\x1b[0m");
 
             return FailedTestCount;
         }
@@ -80,16 +77,13 @@ namespace YamlDotNet.AotTest
 
         private static void PerformTest(string testName, Action act)
         {
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(" ");
+            Console.Write("\x1b[37m ");
             Console.Write(testName.PadRight(70));
 
             try
             {
                 act();
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("[success]");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine("\x1b[92m[success]\x1b[37m");
                 ++SucceededTestCount;
             }
             catch (Exception ex)
@@ -101,19 +95,17 @@ namespace YamlDotNet.AotTest
                     if (current is ExecutionEngineException)
 #pragma warning restore CS0618 // Type or member is obsolete
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("[failure]");
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(" ");
+                        Console.WriteLine("\x1b[91m[failure]");
+                        Console.Write("\x1b[93m ");
                         Console.WriteLine(current.Message);
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.Write("\x1b[37m");
                         ++FailedTestCount;
                         return;
                     }
 
                     current = current.InnerException;
                 }
-                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("\x1b[91m");
                 throw;
             }
         }

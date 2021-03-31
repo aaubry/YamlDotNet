@@ -19,15 +19,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
-using System;
-
 namespace YamlDotNet.Core.Tokens
 {
     /// <summary>
     /// Represents a stream end event.
     /// </summary>
-    [Serializable]
     public sealed class StreamEnd : Token
     {
         /// <summary>

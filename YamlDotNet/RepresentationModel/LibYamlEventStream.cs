@@ -119,15 +119,16 @@ namespace YamlDotNet.RepresentationModel
 
         private void WriteAnchorAndTag(TextWriter textWriter, NodeEvent nodeEvent)
         {
-            if (!string.IsNullOrEmpty(nodeEvent.Anchor))
+            if (!nodeEvent.Anchor.IsEmpty)
             {
                 textWriter.Write(" &");
                 textWriter.Write(nodeEvent.Anchor);
             }
-            if (!string.IsNullOrEmpty(nodeEvent.Tag))
+
+            if (!nodeEvent.Tag.IsEmpty)
             {
                 textWriter.Write(" <");
-                textWriter.Write(nodeEvent.Tag);
+                textWriter.Write(nodeEvent.Tag.Value);
                 textWriter.Write(">");
             }
         }

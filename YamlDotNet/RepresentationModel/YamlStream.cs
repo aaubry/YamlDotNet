@@ -19,7 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Core;
@@ -30,7 +29,6 @@ namespace YamlDotNet.RepresentationModel
     /// <summary>
     /// Represents an YAML stream.
     /// </summary>
-    [Serializable]
     public class YamlStream : IEnumerable<YamlDocument>
     {
         private readonly IList<YamlDocument> documents = new List<YamlDocument>();

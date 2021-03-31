@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web;
 using static Bullseye.Targets;
 using OperatingSystem = Bullseye.Internal.OperatingSystem;
 
@@ -20,7 +22,7 @@ namespace build
         private static Palette palette = default!;
         public static bool NoPrerelease { get; private set; }
         private static bool verbose;
-
+        private static Host host;
         private static readonly Dictionary<Type, object> state = new Dictionary<Type, object>();
 
         private static T GetState<T>() where T : notnull
@@ -57,20 +59,43 @@ namespace build
                     dependencies.Select(d => Expression.Call(getState.MakeGenericMethod(d)))
                 );
 
-                if (targetMethod.ReturnType != typeof(void))
+                var returnType = targetMethod.ReturnType;
+                var isAsync = typeof(Task).IsAssignableFrom(returnType);
+                if (isAsync)
+                {
+                    returnType = returnType.IsGenericType ? returnType.GetGenericArguments()[0] : typeof(void);
+
+                    if (returnType != typeof(void))
+                    {
+                        actionExpression = Expression.Property(
+                            actionExpression,
+                            nameof(Task<object>.Result)
+                        ); ;
+                    }
+                    else
+                    {
+                        actionExpression = Expression.Call(
+                            actionExpression,
+                            nameof(Task.Wait),
+                            null
+                        );
+                    }
+                }
+
+                if (returnType != typeof(void))
                 {
                     actionExpression = Expression.Call(
-                        setState.MakeGenericMethod(targetMethod.ReturnType),
+                        setState.MakeGenericMethod(returnType),
                         actionExpression
                     );
 
-                    if (providerTargets.ContainsKey(targetMethod.ReturnType))
+                    if (providerTargets.ContainsKey(returnType))
                     {
-                        var duplicates = targetMethods.Where(m => m.ReturnType == targetMethod.ReturnType).Select(m => m.Name);
-                        throw new InvalidOperationException($"Multiple targets provide the same type '{targetMethod.ReturnType.FullName}': {string.Join(", ", duplicates)}");
+                        var duplicates = targetMethods.Where(m => m.ReturnType == returnType).Select(m => m.Name);
+                        throw new InvalidOperationException($"Multiple targets provide the same type '{returnType.FullName}': {string.Join(", ", duplicates)}");
                     }
 
-                    providerTargets.Add(targetMethod.ReturnType, targetMethod.Name);
+                    providerTargets.Add(returnType, targetMethod.Name);
                 }
 
                 var action = Expression.Lambda<Action>(actionExpression);
@@ -106,6 +131,7 @@ namespace build
 
             var (options, targets) = Options.Parse(filteredArguments);
             verbose = options.Verbose;
+            host = options.Host.DetectIfUnknown().Item1;
 
             var operatingSystem =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -132,6 +158,7 @@ namespace build
                             WriteInformation("Publishable build detected");
                             targets.Add(nameof(BuildDefinition.SetBuildVersion));
                             targets.Add(nameof(BuildDefinition.Publish));
+                            targets.Add(nameof(BuildDefinition.TweetRelease));
                         }
                         else
                         {
@@ -200,23 +227,32 @@ namespace build
 
         public static void WriteImportant(string text)
         {
+            switch (host)
+            {
+                case Host.GitHubActions:
+                    Console.WriteLine($"Writing a warning");
+                    Console.WriteLine($"::warning ::{text.Replace("\\n", "%0A")}");
+                    break;
+            }
             WriteBoxed(text, palette.Warning);
         }
 
         private static void WriteBoxed(string text, string color)
         {
-            const int boxWidth = 50;
-
             var boxElements = palette.Dash == '─'
                 ? "┌┐└┘│─"
                 : "++++|-";
+
+            var boxWidth = 50;
+            var wrappedText = WrapText(text, boxWidth - 4).ToList();
+            boxWidth = Math.Max(boxWidth, wrappedText.Max(l => l.Length) + 4);
 
             Console.WriteLine();
             Write($"       {boxElements[0]}{new string(boxElements[5], boxWidth - 2)}{boxElements[1]}", color);
 
             foreach (var line in WrapText(text, boxWidth - 4))
             {
-                Write($"       {boxElements[4]} {line,-(boxWidth - 4)} {boxElements[4]}", color);
+                Write($"       {boxElements[4]} {line.PadRight(boxWidth - 4)} {boxElements[4]}", color);
             }
 
             Write($"       {boxElements[2]}{new string(boxElements[5], boxWidth - 2)}{boxElements[3]}", color);

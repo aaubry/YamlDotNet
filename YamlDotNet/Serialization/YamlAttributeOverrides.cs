@@ -22,8 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using YamlDotNet.Helpers;
 using HashCode = YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.Serialization
@@ -31,7 +29,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Define a collection of YamlAttribute Overrides for pre-defined object types.
     /// </summary>
-    public sealed class YamlAttributeOverrides
+    public sealed partial class YamlAttributeOverrides
     {
         private struct AttributeKey
         {
@@ -159,17 +157,6 @@ namespace YamlDotNet.Serialization
             mappings.Add(mapping);
         }
 
-#if !NET20
-        /// <summary>
-        /// Adds a Member Attribute Override
-        /// </summary>
-        public void Add<TClass>(Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
-        {
-            var property = propertyAccessor.AsProperty();
-            Add(typeof(TClass), property.Name, attribute);
-        }
-#endif
-
         /// <summary>
         /// Creates a copy of this instance.
         /// </summary>
@@ -187,3 +174,23 @@ namespace YamlDotNet.Serialization
         }
     }
 }
+
+#if !NET20
+namespace YamlDotNet.Serialization
+{
+    using System.Linq.Expressions;
+    using YamlDotNet.Helpers;
+
+    partial class YamlAttributeOverrides
+    {
+        /// <summary>
+        /// Adds a Member Attribute Override
+        /// </summary>
+        public void Add<TClass>(Expression<Func<TClass, object>> propertyAccessor, Attribute attribute)
+        {
+            var property = propertyAccessor.AsProperty();
+            Add(typeof(TClass), property.Name, attribute);
+        }
+    }
+}
+#endif

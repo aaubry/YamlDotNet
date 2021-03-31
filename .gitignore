@@ -30,3 +30,4 @@ YamlDotNet/Properties/AssemblyInfo.Generated.cs
 /YamlDotNet/Properties/AssemblyInfo.cs
 BenchmarkDotNet.Artifacts
 
+/YamlDotNet.AotTest/exitcode.txt
