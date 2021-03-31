@@ -14,6 +14,7 @@
     <DocumentationFile>bin\$(Configuration)\YamlDotNet.xml</DocumentationFile>
     <NoWarn>1591;1574</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -91,6 +92,9 @@
    -->
   <PropertyGroup Condition="'$(NetStandard)' == 'false'">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup Condition="'$(NetStandard)' == 'false'">
     <Reference Include="System" />

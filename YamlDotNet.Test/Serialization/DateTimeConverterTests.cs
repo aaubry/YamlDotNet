@@ -1,12 +1,29 @@
-﻿using System;
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using System;
 using System.Globalization;
-
 using FakeItEasy;
-
 using FluentAssertions;
-
 using Xunit;
-
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -84,13 +101,13 @@ namespace YamlDotNet.Test.Serialization
             var result = converter.ReadYaml(parser, typeof(DateTime));
 
             result.Should().BeOfType<DateTime>();
-            ((DateTime) result).Kind.Should().Be(DateTimeKind.Utc);
-            ((DateTime) result).ToUniversalTime().Year.Should().Be(year);
-            ((DateTime) result).ToUniversalTime().Month.Should().Be(month);
-            ((DateTime) result).ToUniversalTime().Day.Should().Be(day);
-            ((DateTime) result).ToUniversalTime().Hour.Should().Be(hour);
-            ((DateTime) result).ToUniversalTime().Minute.Should().Be(minute);
-            ((DateTime) result).ToUniversalTime().Second.Should().Be(second);
+            ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
+            ((DateTime)result).ToUniversalTime().Year.Should().Be(year);
+            ((DateTime)result).ToUniversalTime().Month.Should().Be(month);
+            ((DateTime)result).ToUniversalTime().Day.Should().Be(day);
+            ((DateTime)result).ToUniversalTime().Hour.Should().Be(hour);
+            ((DateTime)result).ToUniversalTime().Minute.Should().Be(minute);
+            ((DateTime)result).ToUniversalTime().Second.Should().Be(second);
         }
 
         /// <summary>
@@ -177,18 +194,18 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(yaml));
 
-            var converter = new DateTimeConverter(formats: new[] {format1, format2});
+            var converter = new DateTimeConverter(formats: new[] { format1, format2 });
 
             var result = converter.ReadYaml(parser, typeof(DateTime));
 
             result.Should().BeOfType<DateTime>();
-            ((DateTime) result).Kind.Should().Be(DateTimeKind.Utc);
-            ((DateTime) result).ToUniversalTime().Year.Should().Be(year);
-            ((DateTime) result).ToUniversalTime().Month.Should().Be(month);
-            ((DateTime) result).ToUniversalTime().Day.Should().Be(day);
-            ((DateTime) result).ToUniversalTime().Hour.Should().Be(0);
-            ((DateTime) result).ToUniversalTime().Minute.Should().Be(0);
-            ((DateTime) result).ToUniversalTime().Second.Should().Be(0);
+            ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
+            ((DateTime)result).ToUniversalTime().Year.Should().Be(year);
+            ((DateTime)result).ToUniversalTime().Month.Should().Be(month);
+            ((DateTime)result).ToUniversalTime().Day.Should().Be(day);
+            ((DateTime)result).ToUniversalTime().Hour.Should().Be(0);
+            ((DateTime)result).ToUniversalTime().Minute.Should().Be(0);
+            ((DateTime)result).ToUniversalTime().Second.Should().Be(0);
         }
 
         /// <summary>
@@ -364,13 +381,13 @@ namespace YamlDotNet.Test.Serialization
         public void Given_Yaml_WithLocaleAndTimeFormat_ReadYaml_ShouldReturn_Result(string format, string locale, string value)
         {
             var culture = new CultureInfo(locale);
-            
+
             var expected = default(DateTime);
             try
             {
                 expected = DateTime.ParseExact(value, format, culture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var message = string.Format("Failed to parse the test argument to DateTime. The expected date format should look like this: '{0}'", DateTime.Now.ToString(format, culture));
                 throw new Exception(message, ex);
@@ -539,7 +556,7 @@ namespace YamlDotNet.Test.Serialization
 
             var builder = new SerializerBuilder();
             builder.WithNamingConvention(CamelCaseNamingConvention.Instance);
-            builder.WithTypeConverter(new DateTimeConverter(kind, formats: new [] {format, "G"}));
+            builder.WithTypeConverter(new DateTimeConverter(kind, formats: new[] { format, "G" }));
 
             var serialiser = builder.Build();
 

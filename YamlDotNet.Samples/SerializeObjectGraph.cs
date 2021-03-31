@@ -1,7 +1,28 @@
-﻿using System;
-using YamlDotNet.Serialization;
-using YamlDotNet.Samples.Helpers;
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using System;
 using Xunit.Abstractions;
+using YamlDotNet.Samples.Helpers;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Samples
 {
@@ -67,31 +88,37 @@ namespace YamlDotNet.Samples
         }
     }
 
-    public class Address {
+#pragma warning disable IDE1006 // Naming Styles
+    public class Address
+    {
         public string street { get; set; }
-        public string city   { get; set; }
-        public string state  { get; set; }
+        public string city { get; set; }
+        public string state { get; set; }
     }
 
-    public class Receipt {
-        public string   receipt         { get; set; }
-        public DateTime date            { get; set; }
-        public Customer customer        { get; set; }
-        public Item[]   items           { get; set; }
-        public Address  bill_to         { get; set; }
-        public Address  ship_to         { get; set; }
-        public string   specialDelivery { get; set; }
+    public class Receipt
+    {
+        public string receipt { get; set; }
+        public DateTime date { get; set; }
+        public Customer customer { get; set; }
+        public Item[] items { get; set; }
+        public Address bill_to { get; set; }
+        public Address ship_to { get; set; }
+        public string specialDelivery { get; set; }
     }
 
-    public class Customer {
-        public string given  { get; set; }
+    public class Customer
+    {
+        public string given { get; set; }
         public string family { get; set; }
     }
 
-    public class Item {
-        public string  part_no  { get; set; }
-        public string  descrip  { get; set; }
-        public decimal price    { get; set; }
-        public int     quantity { get; set; }
+    public class Item
+    {
+        public string part_no { get; set; }
+        public string descrip { get; set; }
+        public decimal price { get; set; }
+        public int quantity { get; set; }
     }
+#pragma warning restore IDE1006 // Naming Styles
 }

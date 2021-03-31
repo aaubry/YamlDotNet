@@ -1,36 +1,32 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) Antoine Aubry and contributors
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of
-//  this software and associated documentation files (the "Software"), to deal in
-//  the Software without restriction, including without limitation the rights to
-//  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-//  of the Software, and to permit persons to whom the Software is furnished to do
-//  so, subject to the following conditions:
-
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
-
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
-
-using Xunit;
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using FluentAssertions;
+using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Tokens;
-using System.IO;
-using System.Reflection;
-using System;
-using System.Linq;
-
-#if !PORTABLE && !NETCOREAPP1_0
-using System.Runtime.Serialization.Formatters.Binary;
-#endif
 
 namespace YamlDotNet.Test.Core
 {
@@ -345,8 +341,7 @@ namespace YamlDotNet.Test.Core
 
             while (sut.MoveNext())
             {
-                var comment = sut.Current as Comment;
-                if (comment != null)
+                if (sut.Current is Comment comment)
                 {
                     Assert.Equal(8, comment.Start.Index);
                     Assert.Equal(31, comment.End.Index);
@@ -403,7 +398,7 @@ namespace YamlDotNet.Test.Core
             var scanner = new Scanner(new StreamReader(slowStream));
 
             scanner.MoveNext();
-            
+
             // Should not fail
             scanner.MoveNext();
         }
@@ -414,7 +409,9 @@ namespace YamlDotNet.Test.Core
             var yaml = "MainItem4:\n" + string.Join("\n", Enumerable.Range(1, 100).Select(e => $"- {{item: {{foo1: {e}, foo2: 'bar{e}' }}}}"));
 
             var scanner = new Scanner(new StringReader(yaml));
-            while (scanner.MoveNext()) ;
+            while (scanner.MoveNext())
+            {
+            }
         }
 
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)

@@ -1,4 +1,25 @@
-﻿using System;
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Serialization;
@@ -9,7 +30,7 @@ namespace YamlDotNet.AotTest
 {
     class Program
     {
-        static int Main(string[] args)
+        static int Main()
         {
             Console.WriteLine();
             Console.WriteLine("\x1b[37m---------------------------------------------------------------------------------"); 
@@ -24,17 +45,17 @@ namespace YamlDotNet.AotTest
             TrySerialize("TraverseGenericDictionary", new GenericTestDictionary<long, long> { { 1, 2 } });
 
             Console.WriteLine();
-            Console.WriteLine(" \x1b[93m{0}\x1b[97m test succeeded, \x1b[93m{1}\x1b[97m tests failed", succeededTestCount, failedTestCount);
+            Console.WriteLine(" \x1b[93m{0}\x1b[97m test succeeded, \x1b[93m{1}\x1b[97m tests failed", SucceededTestCount, FailedTestCount);
 
             Console.WriteLine();
             Console.WriteLine("\x1b[37m---------------------------------------------------------------------------------");
             Console.WriteLine("\x1b[0m");
 
-            return failedTestCount;
+            return FailedTestCount;
         }
 
-        private static int succeededTestCount;
-        private static int failedTestCount;
+        private static int SucceededTestCount;
+        private static int FailedTestCount;
 
         private static void TrySerialize<T>(string testName, T graph)
         {
@@ -63,7 +84,7 @@ namespace YamlDotNet.AotTest
             {
                 act();
                 Console.WriteLine("\x1b[92m[success]\x1b[37m");
-                ++succeededTestCount;
+                ++SucceededTestCount;
             }
             catch (Exception ex)
             {
@@ -78,7 +99,7 @@ namespace YamlDotNet.AotTest
                         Console.Write("\x1b[93m ");
                         Console.WriteLine(current.Message);
                         Console.Write("\x1b[37m");
-                        ++failedTestCount;
+                        ++FailedTestCount;
                         return;
                     }
 
@@ -90,6 +111,7 @@ namespace YamlDotNet.AotTest
         }
     }
 
+#pragma warning disable IDE1006 // Naming Styles
     public class MyDictionary
     {
         public Dictionary<string, int> myDictionary { get; set; }
@@ -104,4 +126,5 @@ namespace YamlDotNet.AotTest
     {
         public int[] myArray { get; set; }
     }
+#pragma warning restore IDE1006 // Naming Styles
 }
