@@ -197,7 +197,7 @@ namespace build
                 accessTokenSecret: Environment.GetEnvironmentVariable("TWITTER_ACCESS_TOKEN_SECRET") ?? throw new InvalidOperationException("Please set the TWITTER_ACCESS_TOKEN_SECRET environment variable.")
             );
 
-            var message = $"YamlDotNet {version.NuGetVersion} has just been released! https://github.com/aaubry/YamlDotNet/releases/tag/v{version.NuGetVersion}";
+            var message = $"#YamlDotNet {version.NuGetVersion} has just been released! https://github.com/aaubry/YamlDotNet/releases/tag/v{version.NuGetVersion}";
             var result = await twitterClient.Tweet(message);
             WriteVerbose(result);
         }
