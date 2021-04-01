@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -24,39 +25,47 @@ namespace build
     {
         public static GitVersion ResolveVersion(Options options, PreviousReleases releases)
         {
-            string versionJson;
-            try
+            GitVersion version;
+            if (ForcedVersion != null)
             {
-                versionJson = Read("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
+                version = new GitVersion(ForcedVersion);
             }
-            catch (NonZeroExitCodeException)
+            else
             {
-                Run("dotnet", "gitversion /nofetch /diag", BasePath);
-                throw;
+                string versionJson;
+                try
+                {
+                    versionJson = Read("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
+                }
+                catch (NonZeroExitCodeException)
+                {
+                    Run("dotnet", "gitversion /nofetch /diag", BasePath);
+                    throw;
+                }
+
+                WriteVerbose(versionJson);
+
+                if (options.Verbose)
+                {
+                    // Remove extra output from versionJson
+                    var lines = versionJson
+                        .Split('\n')
+                        .Select(l => l.TrimEnd('\r'))
+                        .SkipWhile(l => !l.StartsWith('{'))
+                        .TakeWhile(l => !l.StartsWith('}'))
+                        .Append("}");
+
+                    versionJson = string.Join('\n', lines);
+                }
+
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                };
+                jsonOptions.Converters.Add(new AutoNumberToStringConverter());
+
+                version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions);
             }
-
-            WriteVerbose(versionJson);
-
-            if (options.Verbose)
-            {
-                // Remove extra output from versionJson
-                var lines = versionJson
-                    .Split('\n')
-                    .Select(l => l.TrimEnd('\r'))
-                    .SkipWhile(l => !l.StartsWith('{'))
-                    .TakeWhile(l => !l.StartsWith('}'))
-                    .Append("}");
-
-                versionJson = string.Join('\n', lines);
-            }
-
-            var jsonOptions = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-            };
-            jsonOptions.Converters.Add(new AutoNumberToStringConverter());
-
-            var version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions);
 
             if (version.CommitsSinceVersionSource > 0 && version.Equals(releases.Latest))
             {
@@ -250,19 +259,7 @@ namespace build
 
         public static async Task CreateGithubRelease(GitVersion version, ScaffoldedRelease release)
         {
-            var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("Please set the GITHUB_TOKEN environment variable.");
-            var repository = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY") ?? "aaubry/YamlDotNet.Sandbox";
-
-            using var apiClient = new HttpClient(new LoggerHttpHandler())
-            {
-                BaseAddress = new Uri("https://api.github.com"),
-            };
-
-            apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            apiClient.DefaultRequestHeaders.Add("User-Agent", repository.Split('/')[0]);
-            apiClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
-
-            var releaseResponse = await apiClient.PostAsJsonAsync($"/repos/{repository}/releases", new
+            var releaseResponse = await GitHubClient.Value.PostAsJsonAsync($"/repos/{GitHubRepository}/releases", new
             {
                 tag_name = $"v{version.NuGetVersion}",
                 target_commitish = version.Sha,
@@ -276,6 +273,37 @@ namespace build
 
             var releaseInfo = await releaseResponse.Content.ReadAsAsync<GitHubApiModels.Release>();
             WriteImportant($"Release draft created:\n{releaseInfo.html_url}");
+        }
+
+        public static async Task LinkPullRequestsToReleases(GitVersion version)
+        {
+            if (version.IsPreRelease)
+            {
+                WriteWarning("Not linking to pre-releases.");
+                return;
+            }
+
+            var releaseResponse = await GitHubClient.Value.GetAsync($"/repos/{GitHubRepository}/releases/tags/v{version.NuGetVersion}");
+
+            var release = await releaseResponse.EnsureSuccessStatusCode().Content.ReadAsAsync<GitHubApiModels.Release>();
+
+            var linkedIssues = Regex.Matches(release.body, @"#(\d+)").Select(m => m.Groups[1].Value);
+            WriteVerbose($"Found the following issues / pull requests: {string.Join(",", linkedIssues)}");
+
+            foreach (var issueNumber in linkedIssues)
+            {
+                var prResponse = await GitHubClient.Value.GetAsync($"/repos/{GitHubRepository}/pulls/{issueNumber}");
+                var isIssue = prResponse.StatusCode == HttpStatusCode.NotFound;
+
+                var commentResponse = await GitHubClient.Value.PostAsJsonAsync($"/repos/{GitHubRepository}/issues/{issueNumber}/comments", new
+                {
+                    body = isIssue
+                        ? $"A fix for this issue has been released in [version {version.NuGetVersion}](https://github.com/{GitHubRepository}/releases/tag/v{version.NuGetVersion})."
+                        : $"This heature has been released in [version {version.NuGetVersion}](https://github.com/{GitHubRepository}/releases/tag/v{version.NuGetVersion})."
+                });
+
+                commentResponse.EnsureSuccessStatusCode();
+            }
         }
 
         public static PreviousReleases DiscoverPreviousReleases()
@@ -410,10 +438,49 @@ namespace build
 * [Building Custom Formatters for .Net Core (Yaml Formatters)](http://www.fiyazhasan.me/building-custom-formatters-for-net-core-yaml-formatters/) by @FiyazBinHasan
 ");
         }
+
+        private static string GitHubRepository => Environment.GetEnvironmentVariable("GITHUB_REPOSITORY") ?? "aaubry/YamlDotNet.Sandbox";
+
+
+        private static readonly Lazy<HttpClient> GitHubClient = new Lazy<HttpClient>(() =>
+        {
+            var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("Please set the GITHUB_TOKEN environment variable.");
+
+            var gitHubClient = new HttpClient(new LoggerHttpHandler())
+            {
+                BaseAddress = new Uri("https://api.github.com"),
+            };
+
+            gitHubClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            gitHubClient.DefaultRequestHeaders.Add("User-Agent", GitHubRepository.Split('/')[0]);
+            gitHubClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
+
+            return gitHubClient;
+        });
     }
 
     public class GitVersion : IEquatable<Version>
     {
+        public GitVersion()
+        {
+        }
+
+        public GitVersion(string version)
+        {
+            var partsMatch = Regex.Match(version, @"^(?<major>\d+).(?<minor>\d+).(?<patch>\d+)(?:-(?<label>.*))?");
+            if (!partsMatch.Success)
+            {
+                throw new ArgumentException($"Invalid version name '{version}'.", nameof(version));
+            }
+
+            Major = int.Parse(partsMatch.Groups["major"].Value, CultureInfo.InvariantCulture);
+            Minor = int.Parse(partsMatch.Groups["minor"].Value, CultureInfo.InvariantCulture);
+            Patch = int.Parse(partsMatch.Groups["patch"].Value, CultureInfo.InvariantCulture);
+            PreReleaseLabel = partsMatch.Groups["label"].Value;
+            CommitsSinceVersionSourcePadded = "0000";
+            Sha = "invalid commit name";
+        }
+
         public int Major { get; set; }
         public int Minor { get; set; }
         public int Patch { get; set; }
@@ -488,9 +555,16 @@ namespace build
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var requestText = await request.Content.ReadAsStringAsync();
-            var requestHeaders = request.Headers.Concat(request.Content.Headers)
-                .Select(h => $"\n{h.Key}: {string.Join(", ", h.Value)}");
+            string requestText = string.Empty;
+            var allHeaders = request.Headers.AsEnumerable();
+
+            if (request.Content is object)
+            {
+                requestText = await request.Content.ReadAsStringAsync();
+                allHeaders = allHeaders.Concat(request.Content.Headers);
+            }
+
+            var requestHeaders = allHeaders.Select(h => $"\n{h.Key}: {string.Join(", ", h.Value)}");
 
             WriteVerbose($"> {request.Method} {request.RequestUri}{string.Concat(requestHeaders)}\n\n{requestText}\n".Replace("\n", "\n> "));
 

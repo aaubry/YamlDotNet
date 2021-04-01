@@ -1,6 +1,4 @@
-﻿using Bullseye;
-using Bullseye.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
+using Bullseye;
+using Bullseye.Internal;
 using static Bullseye.Targets;
 using OperatingSystem = Bullseye.Internal.OperatingSystem;
 
@@ -21,6 +20,7 @@ namespace build
         public static string BasePath { get; private set; } = default!;
         private static Palette palette = default!;
         public static bool NoPrerelease { get; private set; }
+        public static string? ForcedVersion { get; private set; }
         private static bool verbose;
         private static Host host;
         private static readonly Dictionary<Type, object> state = new Dictionary<Type, object>();
@@ -117,15 +117,20 @@ namespace build
             var filteredArguments = args
                 .Where(a =>
                 {
-                    switch (a)
+                    if (a == "--no-prerelease")
                     {
-                        case "--no-prerelease":
-                            NoPrerelease = true;
-                            return false;
-
-                        default:
-                            return true;
+                        NoPrerelease = true;
+                        return false;
                     }
+
+                    var match = Regex.Match(a, "^--version=(.*)");
+                    if (match.Success)
+                    {
+                        ForcedVersion = match.Groups[1].Value;
+                        return false;
+                    }
+
+                    return true;
                 })
                 .ToList();
 
@@ -159,6 +164,7 @@ namespace build
                             targets.Add(nameof(BuildDefinition.SetBuildVersion));
                             targets.Add(nameof(BuildDefinition.Publish));
                             targets.Add(nameof(BuildDefinition.TweetRelease));
+                            targets.Add(nameof(BuildDefinition.LinkPullRequestsToReleases));
                         }
                         else
                         {
@@ -202,6 +208,7 @@ namespace build
                 Console.WriteLine();
                 Console.WriteLine($"{palette.Default}Additional options:");
                 Console.WriteLine($"  {palette.Option}--no-prerelease            {palette.Default}Force the current version to be considered final{palette.Reset}");
+                Console.WriteLine($"  {palette.Option}--version=<version>        {palette.Default}Force the current version to equal to the specified value{palette.Reset}");
             }
 
             return exitCode;
