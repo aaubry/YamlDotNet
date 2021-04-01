@@ -89,7 +89,7 @@ namespace YamlDotNet.Core
 
             if (node.Value is AnchorAlias anchorAlias)
             {
-                return HandleAnchorAlias(node, anchorAlias);
+                return HandleAnchorAlias(node, node, anchorAlias);
             }
 
             if (node.Value is SequenceStart)
@@ -100,23 +100,41 @@ namespace YamlDotNet.Core
             return false;
         }
 
+        private bool HandleMergeSequence(LinkedListNode<ParsingEvent> sequenceStart, LinkedListNode<ParsingEvent>? node)
+        {
+            if (node is null)
+            {
+                return false;
+            }
+            if (node.Value is AnchorAlias anchorAlias)
+            {
+                return HandleAnchorAlias(sequenceStart, node, anchorAlias);
+            }
+            if (node.Value is SequenceStart)
+            {
+                return HandleSequence(node);
+            }
+            return false;
+        }
+
         private bool IsMergeToken(LinkedListNode<ParsingEvent> node)
         {
             return node.Value is Scalar merge && merge.Value == "<<";
         }
 
-        private bool HandleAnchorAlias(LinkedListNode<ParsingEvent> node, AnchorAlias anchorAlias)
+        private bool HandleAnchorAlias(LinkedListNode<ParsingEvent> node, LinkedListNode<ParsingEvent> anchorNode, AnchorAlias anchorAlias)
         {
             var mergedEvents = GetMappingEvents(anchorAlias.Value);
 
             events.AddAfter(node, mergedEvents);
-            events.MarkDeleted(node);
+            events.MarkDeleted(anchorNode);
 
             return true;
         }
 
         private bool HandleSequence(LinkedListNode<ParsingEvent> node)
         {
+            var sequenceStart = node;
             events.MarkDeleted(node);
 
             var current = node;
@@ -129,7 +147,7 @@ namespace YamlDotNet.Core
                 }
 
                 var next = current.Next;
-                HandleMerge(next);
+                HandleMergeSequence(sequenceStart, next);
                 current = next;
             }
 
