@@ -162,14 +162,25 @@ namespace YamlDotNet.Test.Serialization
             result.Should().Be(77744246530L);
         }
 
-        [Fact]
-        public void RoundtripEnums()
+        [Theory]
+        [InlineData(EnumExample.One)]
+        [InlineData(EnumExample.One | EnumExample.Two)]
+        public void RoundtripEnums(EnumExample value)
         {
-            var flags = EnumExample.One | EnumExample.Two;
+            var result = DoRoundtripFromObjectTo<EnumExample>(value);
 
-            var result = DoRoundtripFromObjectTo<EnumExample>(flags);
+            result.Should().Be(value);
+        }
 
-            result.Should().Be(flags);
+        [Theory]
+        [InlineData(EnumExample.One)]
+        [InlineData(EnumExample.One | EnumExample.Two)]
+        [InlineData(null)]
+        public void RoundtripNullableEnums(EnumExample? value)
+        {
+            var result = DoRoundtripFromObjectTo<EnumExample?>(value);
+
+            result.Should().Be(value);
         }
 
         [Fact]
