@@ -1,23 +1,23 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
-// Copyright (c) Antoine Aubry
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 using System;
 using System.Globalization;
@@ -70,15 +70,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     break;
 
                 case TypeCode.Single:
-                    value = Single.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    value = float.Parse(scalar.Value, YamlFormatter.NumberFormat);
                     break;
 
                 case TypeCode.Double:
-                    value = Double.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    value = double.Parse(scalar.Value, YamlFormatter.NumberFormat);
                     break;
 
                 case TypeCode.Decimal:
-                    value = Decimal.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    value = decimal.Parse(scalar.Value, YamlFormatter.NumberFormat);
                     break;
 
                 case TypeCode.String:
@@ -113,17 +113,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         {
             bool result;
 
-            if (Regex.IsMatch(value, ScalarNodeDeserializer.BooleanTruePattern, RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(value, BooleanTruePattern, RegexOptions.IgnoreCase))
             {
                 result = true;
             }
-            else if (Regex.IsMatch(value, ScalarNodeDeserializer.BooleanFalsePattern, RegexOptions.IgnoreCase))
+            else if (Regex.IsMatch(value, BooleanFalsePattern, RegexOptions.IgnoreCase))
             {
                 result = false;
             }
             else
             {
-                throw new FormatException(String.Format("The value \"{0}\" is not a valid YAML Boolean", value));
+                throw new FormatException($"The value \"{value}\" is not a valid YAML Boolean");
             }
 
             return result;
@@ -132,8 +132,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private object DeserializeIntegerHelper(TypeCode typeCode, string value)
         {
             var numberBuilder = new StringBuilder();
-            int currentIndex = 0;
-            bool isNegative = false;
+            var currentIndex = 0;
+            var isNegative = false;
             int numberBase;
             ulong result = 0;
 
@@ -222,7 +222,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 var chunks = value.Substring(currentIndex).Split(':');
                 result = 0;
 
-                for (int chunkIndex = 0; chunkIndex < chunks.Length; chunkIndex++)
+                for (var chunkIndex = 0; chunkIndex < chunks.Length; chunkIndex++)
                 {
                     result *= 60;
 
@@ -245,35 +245,18 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         {
             checked
             {
-                switch (typeCode)
+                return typeCode switch
                 {
-                    case TypeCode.Byte:
-                        return (byte)number;
-
-                    case TypeCode.Int16:
-                        return (short)number;
-
-                    case TypeCode.Int32:
-                        return (int)number;
-
-                    case TypeCode.Int64:
-                        return number;
-
-                    case TypeCode.SByte:
-                        return (sbyte)number;
-
-                    case TypeCode.UInt16:
-                        return (ushort)number;
-
-                    case TypeCode.UInt32:
-                        return (uint)number;
-
-                    case TypeCode.UInt64:
-                        return (ulong)number;
-
-                    default:
-                        return number;
-                }
+                    TypeCode.Byte => (byte)number,
+                    TypeCode.Int16 => (short)number,
+                    TypeCode.Int32 => (int)number,
+                    TypeCode.Int64 => number,
+                    TypeCode.SByte => (sbyte)number,
+                    TypeCode.UInt16 => (ushort)number,
+                    TypeCode.UInt32 => (uint)number,
+                    TypeCode.UInt64 => (ulong)number,
+                    _ => number,
+                };
             }
         }
 
@@ -281,35 +264,18 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         {
             checked
             {
-                switch (typeCode)
+                return typeCode switch
                 {
-                    case TypeCode.Byte:
-                        return (byte)number;
-
-                    case TypeCode.Int16:
-                        return (short)number;
-
-                    case TypeCode.Int32:
-                        return (int)number;
-
-                    case TypeCode.Int64:
-                        return (long)number;
-
-                    case TypeCode.SByte:
-                        return (sbyte)number;
-
-                    case TypeCode.UInt16:
-                        return (ushort)number;
-
-                    case TypeCode.UInt32:
-                        return (uint)number;
-
-                    case TypeCode.UInt64:
-                        return number;
-
-                    default:
-                        return number;
-                }
+                    TypeCode.Byte => (byte)number,
+                    TypeCode.Int16 => (short)number,
+                    TypeCode.Int32 => (int)number,
+                    TypeCode.Int64 => (long)number,
+                    TypeCode.SByte => (sbyte)number,
+                    TypeCode.UInt16 => (ushort)number,
+                    TypeCode.UInt32 => (uint)number,
+                    TypeCode.UInt64 => number,
+                    _ => number,
+                };
             }
         }
     }

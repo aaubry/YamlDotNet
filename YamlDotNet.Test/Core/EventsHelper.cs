@@ -1,27 +1,27 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) Antoine Aubry and contributors
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of
-//  this software and associated documentation files (the "Software"), to deal in
-//  the Software without restriction, including without limitation the rights to
-//  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-//  of the Software, and to permit persons to whom the Software is furnished to do
-//  so, subject to the following conditions:
-
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
-
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
-
-using FluentAssertions;
 using System.Collections;
 using System.Reflection;
+using FluentAssertions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
@@ -306,18 +306,18 @@ namespace YamlDotNet.Test.Core
 
                 var value = property.GetValue(actual, null);
                 var expectedValue = property.GetValue(expected, null);
-                if (expectedValue is IEnumerable && !(expectedValue is string))
+                if (expectedValue is IEnumerable enumerable && !(expectedValue is string))
                 {
-                    if (expectedValue is ICollection && value is ICollection)
+                    if (expectedValue is ICollection expectedCollection && value is ICollection valueCollection)
                     {
-                        var expectedCount = ((ICollection)expectedValue).Count;
-                        var valueCount = ((ICollection)value).Count;
+                        var expectedCount = expectedCollection.Count;
+                        var valueCount = valueCollection.Count;
                         valueCount.Should().Be(expectedCount, "Compared size of collections in property {0} in parse event {1}",
                             property.Name, eventNumber);
                     }
 
                     var values = ((IEnumerable)value).GetEnumerator();
-                    var expectedValues = ((IEnumerable)expectedValue).GetEnumerator();
+                    var expectedValues = enumerable.GetEnumerator();
                     while (expectedValues.MoveNext())
                     {
                         values.MoveNext().Should().BeTrue("Property {0} in parse event {1} had too few elements", property.Name, eventNumber);

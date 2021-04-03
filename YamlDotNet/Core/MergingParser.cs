@@ -1,23 +1,23 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) Antoine Aubry and contributors
-
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of
-//  this software and associated documentation files (the "Software"), to deal in
-//  the Software without restriction, including without limitation the rights to
-//  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-//  of the Software, and to permit persons to whom the Software is furnished to do
-//  so, subject to the following conditions:
-
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
-
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 using System;
 using System.Collections;
@@ -89,7 +89,7 @@ namespace YamlDotNet.Core
 
             if (node.Value is AnchorAlias anchorAlias)
             {
-                return HandleAnchorAlias(node, anchorAlias);
+                return HandleAnchorAlias(node, node, anchorAlias);
             }
 
             if (node.Value is SequenceStart)
@@ -100,26 +100,44 @@ namespace YamlDotNet.Core
             return false;
         }
 
+        private bool HandleMergeSequence(LinkedListNode<ParsingEvent> sequenceStart, LinkedListNode<ParsingEvent>? node)
+        {
+            if (node is null)
+            {
+                return false;
+            }
+            if (node.Value is AnchorAlias anchorAlias)
+            {
+                return HandleAnchorAlias(sequenceStart, node, anchorAlias);
+            }
+            if (node.Value is SequenceStart)
+            {
+                return HandleSequence(node);
+            }
+            return false;
+        }
+
         private bool IsMergeToken(LinkedListNode<ParsingEvent> node)
         {
             return node.Value is Scalar merge && merge.Value == "<<";
         }
 
-        private bool HandleAnchorAlias(LinkedListNode<ParsingEvent> node, AnchorAlias anchorAlias)
+        private bool HandleAnchorAlias(LinkedListNode<ParsingEvent> node, LinkedListNode<ParsingEvent> anchorNode, AnchorAlias anchorAlias)
         {
             var mergedEvents = GetMappingEvents(anchorAlias.Value);
 
             events.AddAfter(node, mergedEvents);
-            events.MarkDeleted(node);
+            events.MarkDeleted(anchorNode);
 
             return true;
         }
 
         private bool HandleSequence(LinkedListNode<ParsingEvent> node)
         {
+            var sequenceStart = node;
             events.MarkDeleted(node);
 
-            LinkedListNode<ParsingEvent>? current = node;
+            var current = node;
             while (current != null)
             {
                 if (current.Value is SequenceEnd)
@@ -129,7 +147,7 @@ namespace YamlDotNet.Core
                 }
 
                 var next = current.Next;
-                HandleMerge(next);
+                HandleMergeSequence(sequenceStart, next);
                 current = next;
             }
 
@@ -190,17 +208,14 @@ namespace YamlDotNet.Core
             public IEnumerable<LinkedListNode<ParsingEvent>> FromAnchor(AnchorName anchor)
             {
                 var node = references[anchor].Next;
-                var iterator = GetEnumerator(node);
-
-                while (iterator.MoveNext())
-                    yield return iterator.Current;
+                return Enumerate(node);
             }
 
-            public IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator() => GetEnumerator(events.First);
+            public IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator() => Enumerate(events.First).GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            private IEnumerator<LinkedListNode<ParsingEvent>> GetEnumerator(LinkedListNode<ParsingEvent>? node)
+            private IEnumerable<LinkedListNode<ParsingEvent>> Enumerate(LinkedListNode<ParsingEvent>? node)
             {
                 while (node != null)
                 {

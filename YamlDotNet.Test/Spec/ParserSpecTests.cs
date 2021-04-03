@@ -1,23 +1,23 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) Antoine Aubry and contributors
-
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of
-//  this software and associated documentation files (the "Software"), to deal in
-//  the Software without restriction, including without limitation the rights to
-//  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-//  of the Software, and to permit persons to whom the Software is furnished to do
-//  so, subject to the following conditions:
-
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
-
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 using System;
 using System.Collections.Generic;
@@ -56,57 +56,53 @@ namespace YamlDotNet.Test.Spec
         public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error)
         {
             var expectedResult = File.ReadAllText(expectedEventFile);
-            using (var writer = new StringWriter())
+            using var writer = new StringWriter();
+            try
             {
-                try
+                using var reader = File.OpenText(inputFile);
+                new LibYamlEventStream(new Parser(reader)).WriteTo(writer);
+            }
+            catch (Exception ex)
+            {
+                Assert.True(error, $"Unexpected spec failure ({name}).\n{description}\nExpected:\n{expectedResult}\nActual:\n[Writer Output]\n{writer}\n[Exception]\n{ex}");
+
+                if (error)
                 {
-                    using (var reader = File.OpenText(inputFile))
+                    Debug.Assert(!knownFalsePositives.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
+
+                    try
                     {
-                        new LibYamlEventStream(new Parser(reader)).WriteTo(writer);
+                        Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
+                        Debug.Assert(!knownParserDesyncInErrorCases.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownParserDesyncInErrorCases)}' list. Consider removing it from the list.");
                     }
-                }
-                catch (Exception ex)
-                {
-                    Assert.True(error, $"Unexpected spec failure ({name}).\n{description}\nExpected:\n{expectedResult}\nActual:\n[Writer Output]\n{writer}\n[Exception]\n{ex}");
-
-                    if (error)
+                    catch (EqualException)
                     {
-                        Debug.Assert(!knownFalsePositives.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownFalsePositives)}' list. Consider removing it from the list.");
+                        // In some error cases, YamlDotNet's parser output is in desync with what is expected by the spec.
+                        // Throw, if it is not a known case.
 
-                        try
+                        if (!knownParserDesyncInErrorCases.Contains(name))
                         {
-                            Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
-                            Debug.Assert(!knownParserDesyncInErrorCases.Contains(name), $"Spec test '{name}' passed but present in '{nameof(knownParserDesyncInErrorCases)}' list. Consider removing it from the list.");
-                        }
-                        catch (EqualException)
-                        {
-                            // In some error cases, YamlDotNet's parser output is in desync with what is expected by the spec.
-                            // Throw, if it is not a known case.
-
-                            if (!knownParserDesyncInErrorCases.Contains(name))
-                            {
-                                throw;
-                            }
+                            throw;
                         }
                     }
-
-                    return;
                 }
 
-                try
-                {
-                    Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
-                    Debug.Assert(!ignoredSuites.Contains(name), $"Spec test '{name}' passed but present in '{nameof(ignoredSuites)}' list. Consider removing it from the list.");
-                }
-                catch (EqualException)
-                {
-                    // In some cases, YamlDotNet's parser/scanner is unexpectedly *not* erroring out.
-                    // Throw, if it is not a known case.
+                return;
+            }
 
-                    if (!(error && knownFalsePositives.Contains(name)))
-                    {
-                        throw;
-                    }
+            try
+            {
+                Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
+                Debug.Assert(!ignoredSuites.Contains(name), $"Spec test '{name}' passed but present in '{nameof(ignoredSuites)}' list. Consider removing it from the list.");
+            }
+            catch (EqualException)
+            {
+                // In some cases, YamlDotNet's parser/scanner is unexpectedly *not* erroring out.
+                // Throw, if it is not a known case.
+
+                if (!(error && knownFalsePositives.Contains(name)))
+                {
+                    throw;
                 }
             }
         }

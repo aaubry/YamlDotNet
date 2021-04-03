@@ -1,26 +1,24 @@
-﻿//  This file is part of YamlDotNet - A .NET library for YAML.
-//  Copyright (c) Antoine Aubry and contributors
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// Copyright (c) Antoine Aubry and contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of
-//  this software and associated documentation files (the "Software"), to deal in
-//  the Software without restriction, including without limitation the rights to
-//  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-//  of the Software, and to permit persons to whom the Software is furnished to do
-//  so, subject to the following conditions:
-
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
-
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
-
-using FakeItEasy;
-using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,6 +31,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using FakeItEasy;
+using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -49,20 +49,20 @@ namespace YamlDotNet.Test.Serialization
         private static readonly string[] TrueStrings = { "true", "y", "yes", "on" };
         private static readonly string[] FalseStrings = { "false", "n", "no", "off" };
 
-        public static IEnumerable<Object[]> DeserializeScalarBoolean_TestCases
+        public static IEnumerable<object[]> DeserializeScalarBoolean_TestCases
         {
             get
             {
-                foreach (var trueString in SerializationTests.TrueStrings)
+                foreach (var trueString in TrueStrings)
                 {
-                    yield return new Object[] { trueString, true };
-                    yield return new Object[] { trueString.ToUpper(), true };
+                    yield return new object[] { trueString, true };
+                    yield return new object[] { trueString.ToUpper(), true };
                 }
 
-                foreach (var falseString in SerializationTests.FalseStrings)
+                foreach (var falseString in FalseStrings)
                 {
-                    yield return new Object[] { falseString, false };
-                    yield return new Object[] { falseString.ToUpper(), false };
+                    yield return new object[] { falseString, false };
+                    yield return new object[] { falseString.ToUpper(), false };
                 }
             }
         }
@@ -498,7 +498,7 @@ Value: foo");
         {
             var stream = Yaml.ReaderFrom("list.yaml");
 
-            var result = Deserializer.Deserialize<String[]>(stream);
+            var result = Deserializer.Deserialize<string[]>(stream);
 
             result.Should().Equal(new[] { "one", "two", "three" });
         }
@@ -1114,20 +1114,14 @@ y:
                     label: center/big
                   
                   - # Override
-                    #<< : [ *BIG, *LEFT, *SMALL ]    # This does not work because, in the current implementation,
-                                                     # later keys override former keys. This could be fixed, but that
-                                                     # is not trivial because the deserializer allows aliases to refer to
-                                                     # an anchor that is defined later in the document, and the way it is
-                                                     # implemented, the value is assigned later when the anchored value is
-                                                     # deserialized.
-                    << : [ *SMALL, *LEFT, *BIG ]
+                    << : [ *BIG, *LEFT, *SMALL ]
                     x: 1
                     label: center/big
             "));
 
             var result = Deserializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(parser);
 
-            int index = 0;
+            var index = 0;
             foreach (var mapping in result["results"])
             {
                 mapping.Should()
@@ -1174,7 +1168,7 @@ y:
 
             result["derived3"].Should()
                 .Contain("key", "D3", "key should be overriden by the actual mapping")
-                .And.Contain("level", "2", "level should be inherited from the backreferenced mapping");
+                .And.Contain("level", "1", "level should be inherited from the backreferenced mapping");
         }
 
         [Fact]
@@ -1287,8 +1281,11 @@ y:
         [Fact]
         public void SerializeGenericDictionaryPropertyAndDoNotApplyNamingConvention()
         {
-            var obj = new Dictionary<string, object>();
-            obj["property_one"] = new GenericTestDictionary<string, object>();
+            var obj = new Dictionary<string, object>
+            {
+                ["property_one"] = new GenericTestDictionary<string, object>()
+            };
+
             ((IDictionary<string, object>)obj["property_one"]).Add("new_key_here", "new_value");
 
             var mockNamingConvention = A.Fake<INamingConvention>();
@@ -1497,7 +1494,7 @@ y:
             var yaml = new Serializer().Serialize(value);
             Assert.Contains(value.ToString(), yaml);
 
-            ulong parsed = new Deserializer().Deserialize<ulong>(yaml);
+            var parsed = new Deserializer().Deserialize<ulong>(yaml);
             Assert.Equal(value, parsed);
         }
 
@@ -1510,7 +1507,7 @@ y:
             var yaml = new Serializer().Serialize(value);
             Assert.Contains(value.ToString(), yaml);
 
-            long parsed = new Deserializer().Deserialize<long>(yaml);
+            var parsed = new Deserializer().Deserialize<long>(yaml);
             Assert.Equal(value, parsed);
         }
 
@@ -1572,7 +1569,7 @@ c:  *anchor1");
             var serializer = new SerializerBuilder()
                 .WithTypeConverter(new MethodInfoConverter())
                 .Build();
-            string yaml = serializer.Serialize(ex);
+            var yaml = serializer.Serialize(ex);
             Assert.Contains("GetExceptionWithStackTrace", yaml);
         }
 
@@ -1978,6 +1975,54 @@ c: *anchor1");
             ");
 
             Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+       
+        [Fact]
+        public void ExampleFromSpecificationIsHandledCorrectlyWithLateDefine()
+        {
+            var parser = new MergingParser(Yaml.ParserForText(@"               
+                # All the following maps are equal:
+                results:
+                  - # Explicit keys
+                    x: 1
+                    y: 2
+                    r: 10
+                    label: center/big
+                  
+                  - # Merge one map
+                    << : *CENTER
+                    r: 10
+                    label: center/big
+                  
+                  - # Merge multiple maps
+                    << : [ *CENTER, *BIG ]
+                    label: center/big
+                  
+                  - # Override
+                    << : [ *BIG, *LEFT, *SMALL ]
+                    x: 1
+                    label: center/big
+                
+                obj:
+                  - &CENTER { x: 1, y: 2 }
+                  - &LEFT { x: 0, y: 2 }
+                  - &SMALL { r: 1 }
+                  - &BIG { r: 10 }
+            "));
+
+            var result = Deserializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(parser);
+
+            int index = 0;
+            foreach (var mapping in result["results"])
+            {
+                mapping.Should()
+                    .Contain("x", "1", "'x' should be '1' in result #{0}", index)
+                    .And.Contain("y", "2", "'y' should be '2' in result #{0}", index)
+                    .And.Contain("r", "10", "'r' should be '10' in result #{0}", index)
+                    .And.Contain("label", "center/big", "'label' should be 'center/big' in result #{0}", index);
+
+                ++index;
+            }
         }
 
         public class CycleTestEntity
