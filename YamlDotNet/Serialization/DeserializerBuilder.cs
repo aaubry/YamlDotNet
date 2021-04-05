@@ -45,6 +45,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<Nothing, INodeDeserializer> nodeDeserializerFactories;
         private readonly LazyComponentRegistrationList<Nothing, INodeTypeResolver> nodeTypeResolverFactories;
         private readonly Dictionary<TagName, Type> tagMappings;
+        private readonly Dictionary<Type, Type> typeMappings = new Dictionary<Type, Type>();
         private bool ignoreUnmatched;
 
         /// <summary>
@@ -85,6 +86,7 @@ namespace YamlDotNet.Serialization
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
             {
+                { typeof(MappingNodeTypeResolver), _ => new MappingNodeTypeResolver(typeMappings) },
                 { typeof(YamlConvertibleTypeResolver), _ => new YamlConvertibleTypeResolver() },
                 { typeof(YamlSerializableTypeResolver), _ => new YamlSerializableTypeResolver() },
                 { typeof(TagNodeTypeResolver), _ => new TagNodeTypeResolver(tagMappings) },
@@ -302,6 +304,31 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Registers a type mapping.
+        /// </summary>
+        public override DeserializerBuilder WithTypeMapping<TInterface, TConcrete>()
+        {
+            var interfaceType = typeof(TInterface);
+            var concreteType = typeof(TConcrete);
+
+            if (!interfaceType.IsAssignableFrom(concreteType))
+            {
+                throw new InvalidOperationException($"The type '{concreteType.Name}' does not implement interface '{interfaceType.Name}'.");
+            }
+
+            if (typeMappings.ContainsKey(interfaceType))
+            {
+                typeMappings[interfaceType] = concreteType;
+            }
+            else
+            {
+                typeMappings.Add(interfaceType, concreteType);
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Unregisters an existing tag mapping.
         /// </summary>
         public DeserializerBuilder WithoutTagMapping(TagName tag)
@@ -332,6 +359,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IDeserializer Build()
         {
+            objectFactory = new DefaultObjectFactory(typeMappings);
             return Deserializer.FromValueDeserializer(BuildValueDeserializer());
         }
 

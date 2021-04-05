@@ -111,6 +111,9 @@ namespace YamlDotNet.Serialization
 
         public abstract TBuilder WithTagMapping(TagName tag, Type type);
 
+        public abstract TBuilder WithTypeMapping<TInterface, TConcrete>()
+            where TConcrete : TInterface;
+
 #if !NET20
         /// <summary>
         /// Register an <see cref="Attribute"/> for a given property.

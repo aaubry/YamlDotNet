@@ -46,6 +46,23 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(IDictionary), typeof(Dictionary<object, object>) }
         };
 
+        public DefaultObjectFactory()
+        {
+        }
+
+        public DefaultObjectFactory(IDictionary<Type, Type> mappings)
+        {
+            foreach (var pair in mappings)
+            {
+				if (!pair.Key.IsAssignableFrom(pair.Value))
+                {
+                    throw new InvalidOperationException($"Type '{pair.Value}' does not implement type '{pair.Key}'.");
+                }
+
+                DefaultNonGenericInterfaceImplementations.Add(pair.Key, pair.Value);
+            }
+        }
+
         public object Create(Type type)
         {
             if (type.IsInterface())
