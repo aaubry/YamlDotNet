@@ -86,6 +86,6 @@ namespace YamlDotNet.Core
             return !(left == right);
         }
 
-        public static implicit operator TagName(string value) => value == null ? Empty : new TagName(value);
+        public static implicit operator TagName(string? value) => value == null ? Empty : new TagName(value);
     }
 }
