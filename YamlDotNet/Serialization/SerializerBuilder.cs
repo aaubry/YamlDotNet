@@ -543,11 +543,6 @@ namespace YamlDotNet.Serialization
             );
         }
 
-        public override SerializerBuilder WithTypeMapping<TInterface, TConcrete>()
-        {
-            throw new NotImplementedException("This is only used by the deserializer");
-        }
-
         private class ValueSerializer : IValueSerializer
         {
             private readonly IObjectGraphTraversalStrategy traversalStrategy;

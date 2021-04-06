@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class DefaultObjectFactory : IObjectFactory
     {
-        private static readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
+        private readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
             { typeof(IEnumerable<>), typeof(List<>) },
             { typeof(ICollection<>), typeof(List<>) },
@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(IDictionary<,>), typeof(Dictionary<,>) }
         };
 
-        private static readonly Dictionary<Type, Type> DefaultNonGenericInterfaceImplementations = new Dictionary<Type, Type>
+        private readonly Dictionary<Type, Type> DefaultNonGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
             { typeof(IEnumerable), typeof(List<object>) },
             { typeof(ICollection), typeof(List<object>) },
@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
         {
             foreach (var pair in mappings)
             {
-				if (!pair.Key.IsAssignableFrom(pair.Value))
+                if (!pair.Key.IsAssignableFrom(pair.Value))
                 {
                     throw new InvalidOperationException($"Type '{pair.Value}' does not implement type '{pair.Key}'.");
                 }
