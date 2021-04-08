@@ -439,8 +439,13 @@ namespace build
 ");
         }
 
-        private static string GitHubRepository => Environment.GetEnvironmentVariable("GITHUB_REPOSITORY") ?? "aaubry/YamlDotNet.Sandbox";
-
+        private static string GitHubRepository =>
+            Program.Host switch
+            {
+                Host.Appveyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME"),
+                _ => Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
+            }
+            ?? "aaubry/YamlDotNet.Sandbox";
 
         private static readonly Lazy<HttpClient> GitHubClient = new Lazy<HttpClient>(() =>
         {

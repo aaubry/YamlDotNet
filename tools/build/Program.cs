@@ -22,7 +22,7 @@ namespace build
         public static bool NoPrerelease { get; private set; }
         public static string? ForcedVersion { get; private set; }
         private static bool verbose;
-        private static Host host;
+        public static Host Host { get; private set; }
         private static readonly Dictionary<Type, object> state = new Dictionary<Type, object>();
 
         private static T GetState<T>() where T : notnull
@@ -136,7 +136,7 @@ namespace build
 
             var (options, targets) = Options.Parse(filteredArguments);
             verbose = options.Verbose;
-            host = options.Host.DetectIfUnknown().Item1;
+            Host = options.Host.DetectIfUnknown().Item1;
 
             var operatingSystem =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -234,7 +234,7 @@ namespace build
 
         public static void WriteImportant(string text)
         {
-            switch (host)
+            switch (Host)
             {
                 case Host.GitHubActions:
                     Console.WriteLine($"Writing a warning");
