@@ -71,6 +71,6 @@ namespace YamlDotNet.Core
             return !(left == right);
         }
 
-        public static implicit operator AnchorName(string value) => value == null ? Empty : new AnchorName(value);
+        public static implicit operator AnchorName(string? value) => value == null ? Empty : new AnchorName(value);
     }
 }
