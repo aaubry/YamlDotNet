@@ -41,6 +41,13 @@ namespace System
             valueState = ValueState.Created;
         }
 
+        public Lazy(Func<T> valueFactory)
+        {
+            this.valueFactory = valueFactory;
+            this.isThreadSafe = false;
+            valueState = ValueState.NotCreated;
+        }
+
         public Lazy(Func<T> valueFactory, bool isThreadSafe)
         {
             this.valueFactory = valueFactory;

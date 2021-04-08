@@ -41,10 +41,11 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
     {
-        private IObjectFactory objectFactory = new DefaultObjectFactory();
+        private Lazy<IObjectFactory> objectFactory;
         private readonly LazyComponentRegistrationList<Nothing, INodeDeserializer> nodeDeserializerFactories;
         private readonly LazyComponentRegistrationList<Nothing, INodeTypeResolver> nodeTypeResolverFactories;
         private readonly Dictionary<TagName, Type> tagMappings;
+        private readonly Dictionary<Type, Type> typeMappings;
         private bool ignoreUnmatched;
 
         /// <summary>
@@ -53,6 +54,9 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder()
             : base(new StaticTypeResolver())
         {
+            typeMappings = new Dictionary<Type, Type>();
+            objectFactory = new Lazy<IObjectFactory>(() => new DefaultObjectFactory(typeMappings), true);
+
             tagMappings = new Dictionary<TagName, Type>
             {
                 { FailsafeSchema.Tags.Map, typeof(Dictionary<object, object>) },
@@ -71,20 +75,21 @@ namespace YamlDotNet.Serialization
 
             nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
-                { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(objectFactory) },
-                { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory) },
+                { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(objectFactory.Value) },
+                { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory.Value) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
                 { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer() },
                 { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
-                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory) },
-                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory) },
+                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value) },
+                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
-                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory, BuildTypeInspector(), ignoreUnmatched) }
+                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched) }
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
             {
+                { typeof(MappingNodeTypeResolver), _ => new MappingNodeTypeResolver(typeMappings) },
                 { typeof(YamlConvertibleTypeResolver), _ => new YamlConvertibleTypeResolver() },
                 { typeof(YamlSerializableTypeResolver), _ => new YamlSerializableTypeResolver() },
                 { typeof(TagNodeTypeResolver), _ => new TagNodeTypeResolver(tagMappings) },
@@ -100,7 +105,12 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public DeserializerBuilder WithObjectFactory(IObjectFactory objectFactory)
         {
-            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            if (objectFactory == null)
+            {
+                throw new ArgumentNullException(nameof(objectFactory));
+            }
+
+            this.objectFactory = new Lazy<IObjectFactory>(() => objectFactory, true);
             return this;
         }
 
@@ -298,6 +308,32 @@ namespace YamlDotNet.Serialization
             }
 
             tagMappings.Add(tag, type);
+            return this;
+        }
+
+        /// <summary>
+        /// Registers a type mapping using the default object factory.
+        /// </summary>
+        public DeserializerBuilder WithTypeMapping<TInterface, TConcrete>()
+            where TConcrete : TInterface
+        {
+            var interfaceType = typeof(TInterface);
+            var concreteType = typeof(TConcrete);
+
+            if (!interfaceType.IsAssignableFrom(concreteType))
+            {
+                throw new InvalidOperationException($"The type '{concreteType.Name}' does not implement interface '{interfaceType.Name}'.");
+            }
+
+            if (typeMappings.ContainsKey(interfaceType))
+            {
+                typeMappings[interfaceType] = concreteType;
+            }
+            else
+            {
+                typeMappings.Add(interfaceType, concreteType);
+            }
+
             return this;
         }
 
