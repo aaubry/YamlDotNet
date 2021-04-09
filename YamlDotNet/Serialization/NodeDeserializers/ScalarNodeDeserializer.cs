@@ -42,68 +42,69 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            if (expectedType.IsEnum())
+            // Strip off the nullable type, if present
+            var underlyingType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
+
+            if (underlyingType.IsEnum())
             {
-                value = Enum.Parse(expectedType, scalar.Value, true);
+                value = Enum.Parse(underlyingType, scalar.Value, true);
+                return true;
             }
-            else
+
+            var typeCode = underlyingType.GetTypeCode();
+            switch (typeCode)
             {
-                var underlyingType = Nullable.GetUnderlyingType(expectedType);
-                var typeCode = underlyingType != null ? underlyingType.GetTypeCode() : expectedType.GetTypeCode();
-                switch (typeCode)
-                {
-                    case TypeCode.Boolean:
-                        value = DeserializeBooleanHelper(scalar.Value);
-                        break;
+                case TypeCode.Boolean:
+                    value = DeserializeBooleanHelper(scalar.Value);
+                    break;
 
-                    case TypeCode.Byte:
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                    case TypeCode.SByte:
-                    case TypeCode.UInt16:
-                    case TypeCode.UInt32:
-                    case TypeCode.UInt64:
-                        value = DeserializeIntegerHelper(typeCode, scalar.Value);
-                        break;
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    value = DeserializeIntegerHelper(typeCode, scalar.Value);
+                    break;
 
-                    case TypeCode.Single:
-                        value = float.Parse(scalar.Value, YamlFormatter.NumberFormat);
-                        break;
+                case TypeCode.Single:
+                    value = float.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    break;
 
-                    case TypeCode.Double:
-                        value = double.Parse(scalar.Value, YamlFormatter.NumberFormat);
-                        break;
+                case TypeCode.Double:
+                    value = double.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    break;
 
-                    case TypeCode.Decimal:
-                        value = decimal.Parse(scalar.Value, YamlFormatter.NumberFormat);
-                        break;
+                case TypeCode.Decimal:
+                    value = decimal.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    break;
 
-                    case TypeCode.String:
+                case TypeCode.String:
+                    value = scalar.Value;
+                    break;
+
+                case TypeCode.Char:
+                    value = scalar.Value[0];
+                    break;
+
+                case TypeCode.DateTime:
+                    // TODO: This is probably incorrect. Use the correct regular expression.
+                    value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
+                    break;
+
+                default:
+                    if (expectedType == typeof(object))
+                    {
+                        // Default to string
                         value = scalar.Value;
-                        break;
-
-                    case TypeCode.Char:
-                        value = scalar.Value[0];
-                        break;
-
-                    case TypeCode.DateTime:
-                        // TODO: This is probably incorrect. Use the correct regular expression.
-                        value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
-                        break;
-
-                    default:
-                        if (expectedType == typeof(object))
-                        {
-                            // Default to string
-                            value = scalar.Value;
-                        }
-                        else
-                        {
-                            value = TypeConverter.ChangeType(scalar.Value, expectedType);
-                        }
-                        break;
-                }
+                    }
+                    else
+                    {
+                        value = TypeConverter.ChangeType(scalar.Value, expectedType);
+                    }
+                    break;
             }
             return true;
         }
