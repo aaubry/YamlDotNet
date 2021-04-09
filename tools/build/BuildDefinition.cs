@@ -299,7 +299,7 @@ namespace build
                 {
                     body = isIssue
                         ? $"A fix for this issue has been released in [version {version.NuGetVersion}](https://github.com/{GitHubRepository}/releases/tag/v{version.NuGetVersion})."
-                        : $"This heature has been released in [version {version.NuGetVersion}](https://github.com/{GitHubRepository}/releases/tag/v{version.NuGetVersion})."
+                        : $"This feature has been released in [version {version.NuGetVersion}](https://github.com/{GitHubRepository}/releases/tag/v{version.NuGetVersion})."
                 });
 
                 commentResponse.EnsureSuccessStatusCode();
