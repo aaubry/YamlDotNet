@@ -22,6 +22,7 @@
 using System;
 using System.IO;
 using YamlDotNet.Core;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization
 {
@@ -62,5 +63,8 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         /// <param name="type">The static type of the object to serialize.</param>
         void Serialize(IEmitter emitter, object graph, Type type);
+
+        Document SerializeToDocument(object graph);
+        Document SerializeToDocument(object graph, Type type);
     }
 }

@@ -255,6 +255,12 @@ namespace YamlDotNet.Serialization.Utilities
                 return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture)!);
             }
 
+            // Handle DateTimeOffset to DateTime
+            if (sourceType == typeof(DateTimeOffset) && destinationType == typeof(DateTime))
+            {
+                return ((DateTimeOffset)value).DateTime;
+            }
+
             // Default to the Convert class
             return Convert.ChangeType(value, destinationType, CultureInfo.InvariantCulture);
         }

@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using System.Linq;
 using YamlDotNet.Core;
+using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
 using YamlDotNet.Serialization.Schemas;
 using YamlDotNet.Serialization.Utilities;
@@ -109,6 +110,12 @@ namespace YamlDotNet.Serialization
 
             var native = document.Content.Mapper.Construct(document.Content);
             return TypeConverter.ChangeType(native, type);
+        }
+
+        public T Deserialize<T>(Document document)
+        {
+            var native = document.Content.Mapper.Construct(document.Content);
+            return TypeConverter.ChangeType<T>(native);
         }
     }
 }

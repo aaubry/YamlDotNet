@@ -36,7 +36,8 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Common implementation of <see cref="SerializerBuilder" /> and <see cref="DeserializerBuilder" />.
     /// </summary>
-    public abstract class BuilderSkeleton<TBuilder>where TBuilder : BuilderSkeleton<TBuilder>
+    public abstract class BuilderSkeleton<TBuilder>
+        where TBuilder : BuilderSkeleton<TBuilder>
     {
         internal ISchema schema = new CompositeSchema(
             DotNetSchema.Instance,
@@ -451,15 +452,17 @@ namespace YamlDotNet.Serialization
                 }
             };
 
-            foreach (var knownType in schema.KnownTypes)
+            foreach (var matcher in schema.RootMatchers)
             {
-                typeMatchers.Add(knownType, (_, __, ___) => NodeMatcher.NoMatch);
+                typeMatchers.Add(matcher);
             }
 
-            return root => new CompositeSchema(
-                new TypeSchema(typeMatchers, root, tagMappings.Keys),
-                schema
-            );
+            return root => new TypeSchema(typeMatchers, root, tagMappings.Keys);
+
+            //return root => new CompositeSchema(
+            //    new TypeSchema(typeMatchers, root, tagMappings.Keys),
+            //    schema
+            //);
         }
     }
 

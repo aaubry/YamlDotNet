@@ -36,11 +36,10 @@ namespace YamlDotNet.Representation.Schemas
         {
             this.primary = primary ?? throw new ArgumentNullException(nameof(primary));
             this.secondary = secondary ?? throw new ArgumentNullException(nameof(secondary));
-            KnownTypes = new HashSet<Type>(primary.KnownTypes.Concat(secondary.KnownTypes));
         }
 
         public ISchemaIterator Root => new CompositeIterator(primary.Root, secondary.Root);
-        public IEnumerable<Type> KnownTypes { get; }
+        public IEnumerable<NodeMatcher> RootMatchers => primary.RootMatchers.Concat(secondary.RootMatchers);
 
         private sealed class CompositeIterator : ISchemaIterator
         {

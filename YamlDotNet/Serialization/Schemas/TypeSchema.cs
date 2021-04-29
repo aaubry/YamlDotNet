@@ -31,6 +31,8 @@ namespace YamlDotNet.Serialization.Schemas
 {
     public sealed class TypeSchema : ISchema
     {
+        private List<NodeMatcher> rootMatchers;
+
         public TypeSchema(TypeMatcherTable typeMatchers, Type root, params Type[] wellKnownTypes)
             : this(typeMatchers, root, (IEnumerable<Type>)wellKnownTypes)
         {
@@ -38,7 +40,7 @@ namespace YamlDotNet.Serialization.Schemas
 
         public TypeSchema(TypeMatcherTable typeMatchers, Type root, IEnumerable<Type> wellKnownTypes)
         {
-            var rootMatchers = new List<NodeMatcher>();
+            rootMatchers = new List<NodeMatcher>();
             if (root != typeof(object))
             {
                 rootMatchers.Add(typeMatchers.GetNodeMatcher(root));
@@ -53,18 +55,11 @@ namespace YamlDotNet.Serialization.Schemas
         }
 
         public override string ToString() => Root.ToString()!;
+        public string DebugView => ToString();
 
         public ISchemaIterator Root { get; }
 
-        public IEnumerable<Type> KnownTypes => Enumerable.Empty<Type>(); // TODO: See if we need this
-
-        public Document Represent(object? value)
-        {
-            var iterator = Root.EnterValue(value, out var mapper);
-            var content = mapper.RepresentMemorized(value, iterator, new RepresentationState());
-
-            return new Document(content, this);
-        }
+        public IEnumerable<NodeMatcher> RootMatchers => rootMatchers;
 
         private sealed class SingleNodeMatcherIterator : ISchemaIterator
         {

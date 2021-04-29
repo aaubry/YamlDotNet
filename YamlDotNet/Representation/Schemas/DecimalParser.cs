@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,25 +19,23 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
-namespace YamlDotNet.Serialization.TypeResolvers
+namespace YamlDotNet.Representation.Schemas
 {
-    /// <summary>
-    /// The type returned will always be the static type.
-    /// </summary>
-    public sealed class StaticTypeResolver : ITypeResolver
+    internal static class DecimalParser
     {
-#pragma warning disable CS0618 // Type or member is obsolete
-        public static readonly ITypeResolver Instance = new StaticTypeResolver();
-#pragma warning restore CS0618 // Type or member is obsolete
+        public static readonly Regex DecimalPattern = new Regex(@"^-?\d*\.?\d*$", StandardRegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
-        [Obsolete("Please use the Instance static property instead.")]
-        public StaticTypeResolver() { }
-
-        public Type Resolve(Type staticType, object? actualValue)
+        public static decimal Parse(string value)
         {
-            return staticType;
+            return decimal.Parse(value, CultureInfo.InvariantCulture);
+        }
+
+        internal static string Represent(object value)
+        {
+            return ((decimal)value).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

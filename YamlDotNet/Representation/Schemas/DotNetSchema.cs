@@ -51,7 +51,7 @@ namespace YamlDotNet.Representation.Schemas
             yield return NodeMatcher
                 .ForScalars(
                     NodeMapper.CreateScalarMapper(
-                        YamlTagRepository.Timestamp,
+                        new TagName("tag:dotnet:decimal"), // TODO: Find a good tag name for this
                         s => TimestampParser.Parse(s.Value),
                         val => TimestampParser.Represent(val!)
                     ),
@@ -72,6 +72,19 @@ namespace YamlDotNet.Representation.Schemas
                     typeof(Guid)
                 )
                 .MatchPattern(@"^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){4}[0-9a-fA-F]{8}$")
+                .MatchEmptyTags()
+                .Create();
+
+            yield return NodeMatcher
+                .ForScalars(
+                    NodeMapper.CreateScalarMapper(
+                        YamlTagRepository.Timestamp,
+                        s => DecimalParser.Parse(s.Value),
+                        val => DecimalParser.Represent(val!)
+                    ),
+                    typeof(decimal)
+                )
+                .MatchPattern(DecimalParser.DecimalPattern)
                 .MatchEmptyTags()
                 .Create();
         }

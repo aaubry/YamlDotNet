@@ -28,6 +28,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Helpers;
 using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
+using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Schemas;
 using YamlDotNet.Serialization.TypeInspectors;
 using YamlDotNet.Serialization.TypeResolvers;
@@ -46,12 +47,9 @@ namespace YamlDotNet.Test.Representation
         [Fact]
         public void ExplicitTag()
         {
-            var matcherTable = BuildTypeMatcherTable(new Dictionary<TagName, Type>
-            {
-                { "!Dictionary", typeof(Dictionary<string, int>) }
-            });
-
-            var sut = new TypeSchema(matcherTable, typeof(SimpleModel), typeof(Dictionary<string, int>));
+            var sut = new TypeSchemaBuilder()
+                .WithTagMapping("!Dictionary", typeof(Dictionary<string, int>))
+                .Build(typeof(SimpleModel));
 
             var stream = Stream.Load(Yaml.ParserForText(@"
                 !Dictionary {
@@ -62,7 +60,7 @@ namespace YamlDotNet.Test.Representation
 
             var content = stream.First().Content;
 
-            var yaml = Stream.Dump(new[] { new Document(content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
 
@@ -72,13 +70,10 @@ namespace YamlDotNet.Test.Representation
         [Fact]
         public void ExplicitChildTag()
         {
-            var matcherTable = BuildTypeMatcherTable(new Dictionary<TagName, Type>
-            {
-                { "!List", typeof(List<IDictionary<string, int>>) },
-                { "!Dictionary", typeof(Dictionary<string, int>) },
-            });
-
-            var sut = new TypeSchema(matcherTable, typeof(List<IDictionary<string, int>>), typeof(Dictionary<string, int>));
+            var sut = new TypeSchemaBuilder()
+                .WithTagMapping("!List", typeof(List<IDictionary<string, int>>))
+                .WithTagMapping("!Dictionary", typeof(Dictionary<string, int>))
+                .Build(typeof(List<IDictionary<string, int>>));
 
             var stream = Stream.Load(Yaml.ParserForText(@"
                 !List
@@ -87,7 +82,7 @@ namespace YamlDotNet.Test.Representation
 
             var content = stream.First().Content;
 
-            var yaml = Stream.Dump(new[] { new Document(content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
 
@@ -95,9 +90,31 @@ namespace YamlDotNet.Test.Representation
         }
 
         [Fact]
+        public void TypesFromSchemaAreUsed()
+        {
+            var sut = new TypeSchemaBuilder()
+                .Build(typeof(Dictionary<int, string>));
+
+            var iterator = sut.Root;
+            iterator = iterator.EnterNode(new FakeEvents.Mapping(TagName.Empty), out var mappingMapper);
+            Assert.IsNotType<UnresolvedTagMapper>(mappingMapper);
+
+            iterator = iterator.EnterNode(new FakeEvents.Scalar(TagName.Empty, "123"), out var keyMapper);
+            Assert.IsNotType<UnresolvedTagMapper>(keyMapper);
+
+            iterator = iterator.EnterMappingValue();
+            iterator = iterator.EnterNode(new FakeEvents.Scalar(TagName.Empty, "World"), out var valueMapper);
+            Assert.IsNotType<UnresolvedTagMapper>(valueMapper);
+
+            Assert.IsNotType<NullSchemaIterator>(iterator);
+        }
+
+        [Fact]
         public void X()
         {
-            var sut = new TypeSchema(BuildTypeMatcherTable(), typeof(SimpleModel));
+            var sut = new TypeSchemaBuilder()
+                .Build(typeof(SimpleModel));
+
             output.WriteLine(sut.ToString());
 
             var stream = Stream.Load(Yaml.ParserForText(@"
@@ -113,7 +130,7 @@ namespace YamlDotNet.Test.Representation
 
             var content = stream.First().Content;
 
-            var yaml = Stream.Dump(new[] { new Document(content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
 
@@ -133,7 +150,7 @@ namespace YamlDotNet.Test.Representation
 
             var representation = sut.Represent(model);
 
-            yaml = Stream.Dump(new[] { new Document(representation.Content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            yaml = Stream.Dump(new[] { new Document(representation.Content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
 
@@ -144,7 +161,7 @@ namespace YamlDotNet.Test.Representation
             //output.WriteLine(yaml);
 
             //var yaml = Stream.Dump(new[] { new Document(content, FailsafeSchema.Strict) });
-            //var yaml = Stream.Dump(new[] { new Document(content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            //var yaml = Stream.Dump(new[] { new Document(content, NullSchema.Instance) });
             //output.WriteLine("=== Dumped YAML ===");
             //output.WriteLine(yaml);
         }
@@ -152,12 +169,14 @@ namespace YamlDotNet.Test.Representation
         [Fact]
         public void SequenceMapperTest()
         {
-            var sut = new TypeSchema(BuildTypeMatcherTable(), typeof(IList<int>));
+            var sut = new TypeSchemaBuilder()
+                .Build(typeof(IList<int>));
+
             output.WriteLine(sut.ToString());
 
             var doc = sut.Represent(new[] { 1, 2 });
 
-            var yaml = Stream.Dump(new[] { new Document(doc.Content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(doc.Content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
         }
@@ -165,7 +184,9 @@ namespace YamlDotNet.Test.Representation
         [Fact]
         public void SequenceMapperTest2()
         {
-            var sut = new TypeSchema(BuildTypeMatcherTable(), typeof(IList<IList<int>>));
+            var sut = new TypeSchemaBuilder()
+                .Build(typeof(IList<IList<int>>));
+
             output.WriteLine(sut.ToString());
 
             //var stream = Stream.Load(Yaml.ParserForText(@"
@@ -181,7 +202,7 @@ namespace YamlDotNet.Test.Representation
 
             var doc = sut.Represent(new[] { new[] { 1, 2 }, new[] { 3 } });
 
-            var yaml = Stream.Dump(new[] { new Document(doc.Content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(doc.Content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
 
@@ -192,12 +213,14 @@ namespace YamlDotNet.Test.Representation
         [Fact]
         public void MappingMapperTest()
         {
-            var sut = new TypeSchema(BuildTypeMatcherTable(), typeof(IDictionary<int, string>));
+            var sut = new TypeSchemaBuilder()
+                .Build(typeof(IDictionary<int, string>));
+
             output.WriteLine(sut.ToString());
 
             var doc = sut.Represent(new Dictionary<int, string> { { 1, "one" }, { 2, "two" } });
 
-            var yaml = Stream.Dump(new[] { new Document(doc.Content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(doc.Content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
         }
@@ -207,146 +230,57 @@ namespace YamlDotNet.Test.Representation
         {
             var model = new { one = 1, two = "abc" };
 
-            var sut = new TypeSchema(BuildTypeMatcherTable(), model.GetType());
+            var sut = new TypeSchemaBuilder()
+                .Build(model.GetType());
+
             output.WriteLine(sut.ToString());
 
             var doc = sut.Represent(model);
 
-            var yaml = Stream.Dump(new[] { new Document(doc.Content, new ContextFreeSchema(Enumerable.Empty<NodeMatcher>())) });
+            var yaml = Stream.Dump(new[] { new Document(doc.Content, NullSchema.Instance) });
             output.WriteLine("=== Dumped YAML ===");
             output.WriteLine(yaml);
         }
 
-        private static TypeMatcherTable BuildTypeMatcherTable(Dictionary<TagName, Type>? tagMappings = null)
+        class TypeSchemaBuilder : BuilderSkeleton<TypeSchemaBuilder>
         {
-            var tagNameResolver = TypeNameTagNameResolver.Instance;
-            if (tagMappings != null)
+            private readonly Dictionary<TagName, Type> tagMappings;
+
+            public TypeSchemaBuilder() : base(DynamicTypeResolver.Instance)
             {
-                tagNameResolver = new CompositeTagNameResolver(
-                    new TableTagNameResolver(tagMappings.ToDictionary(p => p.Value, p => p.Key).AsReadonlyDictionary()),
-                    tagNameResolver
-                );
+                tagMappings = new Dictionary<TagName, Type>();
             }
 
-            var schema = (ContextFreeSchema)CoreSchema.Complete;
+            protected override TypeSchemaBuilder Self => this;
 
-            var typeMatchers = new TypeMatcherTable(false)
+            public override TypeSchemaBuilder WithTagMapping(TagName tag, Type type)
             {
-                schema.GetNodeMatcherForTag(YamlTagRepository.Integer),
-                schema.GetNodeMatcherForTag(YamlTagRepository.String),
+                tagMappings.Add(tag, type);
+                return this;
+            }
 
-                {
-                    typeof(ICollection<>),
-                    (concrete, iCollection, lookupMatcher) =>
-                    {
-                        if (!tagNameResolver.Resolve(concrete, out var tag))
-                        {
-                            throw new ArgumentException($"Could not resolve a tag for type '{concrete.FullName}'.");
-                        }
+            public ISchema Build(Type type)
+            {
+                return BuildSchemaFactory(tagMappings.ToDictionary(p => p.Value, p => p.Key).AsReadonlyDictionary(), false)(type);
+            }
+        }
 
-                        var genericArguments = iCollection.GetGenericArguments();
-                        var itemType = genericArguments[0];
+        private static class FakeEvents
+        {
+            public record Scalar(TagName Tag, string Value) : IScalar
+            {
+                public NodeKind Kind => NodeKind.Scalar;
+            }
 
-                        var implementation = concrete;
-                        if (concrete.IsInterface)
-                        {
-                            implementation = typeof(List<>).MakeGenericType(genericArguments);
-                        }
+            public record Mapping(TagName Tag) : IMapping
+            {
+                public NodeKind Kind => NodeKind.Mapping;
+            }
 
-                        var matcher = NodeMatcher
-                            .ForSequences(SequenceMapper.Create(tag, implementation, itemType), concrete)
-                            .Either(
-                                s => s.MatchEmptyTags(),
-                                s => s.MatchTag(tag)
-                            )
-                            .Create();
-
-                        return (
-                            matcher,
-                            () => matcher.AddItemMatcher(lookupMatcher(itemType))
-                        );
-                    }
-                },
-                {
-                    typeof(IDictionary<,>),
-                    (concrete, iDictionary, lookupMatcher) =>
-                    {
-                        if (!tagNameResolver.Resolve(concrete, out var tag))
-                        {
-                            throw new ArgumentException($"Could not resolve a tag for type '{concrete.FullName}'.");
-                        }
-
-                        var genericArguments = iDictionary.GetGenericArguments();
-                        var keyType = genericArguments[0];
-                        var valueType = genericArguments[1];
-
-                        var implementation = concrete;
-                        if (concrete.IsInterface)
-                        {
-                            implementation = typeof(Dictionary<,>).MakeGenericType(genericArguments);
-                        }
-
-                        var matcher = NodeMatcher
-                            .ForMappings(MappingMapper.Create(tag, implementation, keyType, valueType), concrete)
-                            .Either(
-                                s => s.MatchEmptyTags(),
-                                s => s.MatchTag(tag)
-                            )
-                            .Create();
-
-                        return (
-                            matcher,
-                            () =>
-                            {
-                                matcher.AddItemMatcher(
-                                    keyMatcher: lookupMatcher(keyType),
-                                    valueMatchers: lookupMatcher(valueType)
-                                );
-                            }
-                        );
-                    }
-                },
-                {
-                    typeof(object),
-                    (concrete, _, lookupMatcher) =>
-                    {
-                        if (!tagNameResolver.Resolve(concrete, out var tag))
-                        {
-                            throw new ArgumentException($"Could not resolve a tag for type '{concrete.FullName}'.");
-                        }
-                        var properties = new ReadablePropertiesTypeInspector(new DynamicTypeResolver()).GetProperties(concrete, null).OrderBy(p => p.Order);
-                        var mapper = new ObjectMapper(concrete, properties, tag, false);
-
-                        var matcher = NodeMatcher
-                            .ForMappings(mapper, concrete)
-                            .Either(
-                                s => s.MatchEmptyTags(),
-                                s => s.MatchTag(tag)
-                            )
-                            .Create();
-
-                        return (
-                            matcher,
-                            () =>
-                            {
-                                // TODO: Type inspector
-                                var properties = concrete.GetPublicProperties();
-                                foreach (var property in properties)
-                                {
-                                    matcher.AddItemMatcher(
-                                        keyMatcher: NodeMatcher
-                                            .ForScalars(StringMapper.Default) // TODO: Naming convention
-                                            .MatchValue(property.Name) // TODO: Naming convention
-                                            .Create(),
-                                        valueMatchers: lookupMatcher(property.PropertyType)
-                                    );
-                                }
-                            }
-                        );
-                    }
-                }
-            };
-            return typeMatchers;
+            public record Sequence(TagName Tag) : ISequence
+            {
+                public NodeKind Kind => NodeKind.Sequence;
+            }
         }
 
 #nullable disable

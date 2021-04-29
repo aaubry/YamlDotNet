@@ -27,28 +27,18 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Representation.Schemas
 {
+
     public sealed class ContextFreeSchema : ISchema
     {
         public ContextFreeSchema(IEnumerable<NodeMatcher> matchers)
         {
             root = new Iterator(matchers);
-            KnownTypes = new HashSet<Type>(root.nodeMatchers.SelectMany(m => m.HandledTypes));
         }
 
         private readonly Iterator root;
 
         public ISchemaIterator Root => root;
-        public IEnumerable<Type> KnownTypes { get; }
-
-        public IEnumerable<NodeMatcher> GetNodeMatchersForTag(TagName tag)
-        {
-            return root.matchersByTag[tag];
-        }
-
-        public NodeMatcher GetNodeMatcherForTag(TagName tag)
-        {
-            return GetNodeMatchersForTag(tag).First();
-        }
+        public IEnumerable<NodeMatcher> RootMatchers => root.nodeMatchers;
 
         private sealed class Iterator : ISchemaIterator
         {

@@ -22,12 +22,14 @@
 using System;
 using System.IO;
 using YamlDotNet.Core;
+using YamlDotNet.Representation;
 
 namespace YamlDotNet.Serialization
 {
     public interface IDeserializer
     {
         T Deserialize<T>(string input);
+        T Deserialize<T>(Document input);
         T Deserialize<T>(TextReader input);
         object? Deserialize(TextReader input);
         object? Deserialize(string input, Type type);

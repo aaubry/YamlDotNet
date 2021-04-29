@@ -28,6 +28,13 @@ namespace YamlDotNet.Serialization.TypeResolvers
     /// </summary>
     public sealed class DynamicTypeResolver : ITypeResolver
     {
+#pragma warning disable CS0618 // Type or member is obsolete
+        public static readonly ITypeResolver Instance = new DynamicTypeResolver();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        [Obsolete("Please use the Instance static property instead.")]
+        public DynamicTypeResolver() { }
+
         public Type Resolve(Type staticType, object? actualValue)
         {
             return actualValue != null ? actualValue.GetType() : staticType;

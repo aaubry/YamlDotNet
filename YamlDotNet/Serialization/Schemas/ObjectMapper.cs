@@ -191,7 +191,7 @@ namespace YamlDotNet.Serialization.Schemas
             {
                 var value = property.Read(native);
                 // TODO: Proper null handling
-                if (value != null)
+                if (value.Value != null)
                 {
                     var key = property.Name;
 

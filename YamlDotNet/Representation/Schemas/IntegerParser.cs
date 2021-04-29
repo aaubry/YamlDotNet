@@ -21,8 +21,6 @@
 
 using System;
 using System.Globalization;
-using System.Text;
-using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Representation.Schemas
 {

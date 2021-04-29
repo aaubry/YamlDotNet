@@ -92,21 +92,40 @@ namespace YamlDotNet.Representation
             return buffer.ToString();
         }
 
+        public static string Dump(Document document, bool explicitSeparators = false)
+        {
+            using var buffer = new StringWriter();
+            Dump(new Emitter(buffer), document, explicitSeparators);
+            return buffer.ToString();
+        }
+
         public static void Dump(IEmitter emitter, IEnumerable<Document> stream, bool explicitSeparators = false)
         {
             emitter.Emit(new StreamStart());
             foreach (var document in stream)
             {
-                emitter.Emit(new DocumentStart(null, null, isImplicit: !explicitSeparators));
-
-                var count = 0;
-                var anchors = AssignAnchors(document.Content, _ => $"n{count++}");
-                var dumper = new NodeDumper(emitter, anchors);
-                dumper.Dump(document.Content, document.Schema.Root, out _);
-
-                emitter.Emit(new DocumentEnd(isImplicit: !explicitSeparators));
+                EmitDocument(emitter, explicitSeparators, document);
             }
             emitter.Emit(new StreamEnd());
+        }
+
+        public static void Dump(IEmitter emitter, Document document, bool explicitSeparators = false)
+        {
+            emitter.Emit(new StreamStart());
+            EmitDocument(emitter, explicitSeparators, document);
+            emitter.Emit(new StreamEnd());
+        }
+
+        private static void EmitDocument(IEmitter emitter, bool explicitSeparators, Document document)
+        {
+            emitter.Emit(new DocumentStart(null, null, isImplicit: !explicitSeparators));
+
+            var count = 0;
+            var anchors = AssignAnchors(document.Content, _ => $"n{count++}");
+            var dumper = new NodeDumper(emitter, anchors);
+            dumper.Dump(document.Content, document.Schema.Root, out _);
+
+            emitter.Emit(new DocumentEnd(isImplicit: !explicitSeparators));
         }
 
         private sealed class NodeLoader

@@ -47,7 +47,7 @@ namespace YamlDotNet.Test.Representation
         [InlineData("[ a, b ]", "!? [ a, b ]")]
         public void ParseWithoutSchemaProducesNonSpecificTags(string input, string expected)
         {
-            ParseWithSchemaProducesCorrectTags(NullSchema, input, expected);
+            ParseWithSchemaProducesCorrectTags(NullSchema.Instance, input, expected);
         }
 
         [Theory]
@@ -165,8 +165,6 @@ namespace YamlDotNet.Test.Representation
 
             Assert.Equal(expectedTag, actualNode.Tag);
         }
-
-        private static readonly ISchema NullSchema = new ContextFreeSchema(Enumerable.Empty<NodeMatcher>());
     }
 }
 

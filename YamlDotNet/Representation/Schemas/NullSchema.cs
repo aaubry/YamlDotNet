@@ -1,4 +1,4 @@
-//  This file is part of YamlDotNet - A .NET library for YAML.
+﻿//  This file is part of YamlDotNet - A .NET library for YAML.
 //  Copyright (c) Antoine Aubry and contributors
 
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,25 +19,16 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace YamlDotNet.Serialization.TypeResolvers
+namespace YamlDotNet.Representation.Schemas
 {
-    /// <summary>
-    /// The type returned will always be the static type.
-    /// </summary>
-    public sealed class StaticTypeResolver : ITypeResolver
+    public sealed class NullSchema : ISchema
     {
-#pragma warning disable CS0618 // Type or member is obsolete
-        public static readonly ITypeResolver Instance = new StaticTypeResolver();
-#pragma warning restore CS0618 // Type or member is obsolete
+        public static readonly ISchema Instance = new NullSchema();
 
-        [Obsolete("Please use the Instance static property instead.")]
-        public StaticTypeResolver() { }
-
-        public Type Resolve(Type staticType, object? actualValue)
-        {
-            return staticType;
-        }
+        public ISchemaIterator Root => NullSchemaIterator.Instance;
+        public IEnumerable<NodeMatcher> RootMatchers => Enumerable.Empty<NodeMatcher>();
     }
 }

@@ -55,7 +55,7 @@ namespace YamlDotNet.Serialization
             : base(new DynamicTypeResolver())
         {
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
-            //typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
+            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
 
@@ -273,7 +273,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <remarks>
         /// If more control is needed, create a class that extends from ChainedObjectGraphVisitor and override its EnterMapping methods.
-        /// Then register it as follows: 
+        /// Then register it as follows:
         /// WithEmissionPhaseObjectGraphVisitor(args => new MyDefaultHandlingStrategy(args.InnerVisitor));
         /// </remarks>
         public SerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)

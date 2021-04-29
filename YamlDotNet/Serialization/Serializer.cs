@@ -22,7 +22,6 @@
 using System;
 using System.IO;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
 using Stream = YamlDotNet.Representation.Stream;
@@ -107,6 +106,16 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(emitter));
             }
 
+            Document document = SerializeToDocument(graph, type);
+            Stream.Dump(emitter, document);
+
+            //EmitDocument(emitter, graph, type);
+        }
+
+        public Document SerializeToDocument(object graph) => SerializeToDocument(graph, graph?.GetType() ?? typeof(object));
+
+        public Document SerializeToDocument(object graph, Type type)
+        {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
@@ -116,10 +125,7 @@ namespace YamlDotNet.Serialization
             var iterator = schema.Root.EnterValue(graph, out var mapper);
             var content = mapper.RepresentMemorized(graph, iterator, new RepresentationState());
 
-            var document = new Document(content, schema);
-            Stream.Dump(emitter, new[] { document });
-
-            //EmitDocument(emitter, graph, type);
+            return new Document(content, schema);
         }
 
         //private void EmitDocument(IEmitter emitter, object graph, Type? type)
