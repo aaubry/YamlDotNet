@@ -177,7 +177,7 @@ namespace YamlDotNet.Representation
 
             private Node LoadScalar(ScalarEvent scalar, INodeMapper mapper)
             {
-                var node = new Scalar(mapper, scalar.Value);
+                var node = new Scalar(mapper, scalar.Value, scalar.Start, scalar.End);
                 AddAnchoredNode(scalar.Anchor, node);
                 return node;
             }
@@ -188,7 +188,7 @@ namespace YamlDotNet.Representation
 
                 // Notice that the items collection will still be mutated after constructing the Sequence object.
                 // We need to create it now in order to support recursive anchors.
-                var sequence = new Sequence(mapper, items.AsReadonlyList());
+                var sequence = new Sequence(mapper, items.AsReadonlyList(), sequenceStart.Start, sequenceStart.End);
                 AddAnchoredNode(sequenceStart.Anchor, sequence);
 
                 while (!parser.TryConsume<SequenceEnd>(out _))
@@ -206,7 +206,7 @@ namespace YamlDotNet.Representation
 
                 // Notice that the items collection will still be mutated after constructing the Sequence object.
                 // We need to create it now in order to support recursive anchors.
-                var mapping = new Mapping(mapper, items.AsReadonlyDictionary());
+                var mapping = new Mapping(mapper, items.AsReadonlyDictionary(), mappingStart.Start, mappingStart.End);
                 AddAnchoredNode(mappingStart.Anchor, mapping);
 
                 while (!parser.TryConsume<MappingEnd>(out _))

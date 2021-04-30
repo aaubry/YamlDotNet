@@ -161,7 +161,7 @@ namespace YamlDotNet.Representation.Schemas
     internal sealed class NoneNodeMatcher : NodeMatcher
     {
         public NoneNodeMatcher()
-            :  base(new UnresolvedValueMapper(null), Enumerable.Empty<Type>()) 
+            :  base(new UnresolvedValueMapper(null), Enumerable.Empty<Type>())
         {
         }
 
@@ -367,7 +367,7 @@ namespace YamlDotNet.Representation.Schemas
                     return true;
                 }
             }
-            
+
             return false;
         }
 

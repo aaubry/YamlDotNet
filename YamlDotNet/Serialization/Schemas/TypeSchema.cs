@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using YamlDotNet.Core;
+using YamlDotNet.Helpers;
 using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
 
@@ -31,27 +32,50 @@ namespace YamlDotNet.Serialization.Schemas
 {
     public sealed class TypeSchema : ISchema
     {
-        private List<NodeMatcher> rootMatchers;
+        private readonly List<NodeMatcher> nodeMatchers;
+        private readonly ICache<Type, NodeMatcher> nodeMatchersCache;
+        private readonly ITagNameResolver tagNameResolver;
+        private readonly ITypeInspector typeInspector;
+        private readonly INamingConvention namingConvention;
+        private readonly bool ignoreUnmatched;
 
-        public TypeSchema(TypeMatcherTable typeMatchers, Type root, params Type[] wellKnownTypes)
-            : this(typeMatchers, root, (IEnumerable<Type>)wellKnownTypes)
+        public TypeSchema(
+            ISchema baseSchema,
+            ITagNameResolver tagNameResolver,
+            ITypeInspector typeInspector,
+            INamingConvention namingConvention,
+            bool ignoreUnmatched,
+            Type root,
+            IEnumerable<Type> wellKnownTypes,
+            bool requireThreadSafety
+        )
         {
-        }
+            this.tagNameResolver = tagNameResolver;
+            this.typeInspector = typeInspector;
+            this.namingConvention = namingConvention;
+            this.ignoreUnmatched = ignoreUnmatched;
 
-        public TypeSchema(TypeMatcherTable typeMatchers, Type root, IEnumerable<Type> wellKnownTypes)
-        {
-            rootMatchers = new List<NodeMatcher>();
+            if (requireThreadSafety)
+            {
+                nodeMatchersCache = new ThreadSafeCache<Type, NodeMatcher>();
+            }
+            else
+            {
+                nodeMatchersCache = new SingleThreadCache<Type, NodeMatcher>();
+            }
+
+            this.nodeMatchers = baseSchema.RootMatchers.ToList();
             if (root != typeof(object))
             {
-                rootMatchers.Add(typeMatchers.GetNodeMatcher(root));
+                this.nodeMatchers.Insert(0, GetCachedNodeMatcher(root));
             }
 
             foreach (var wellKnownType in wellKnownTypes)
             {
-                rootMatchers.Add(typeMatchers.GetNodeMatcher(wellKnownType));
+                this.nodeMatchers.Add(GetCachedNodeMatcher(wellKnownType));
             }
 
-            Root = new RootNodeMatchersIterator(rootMatchers);
+            Root = new RootNodeMatchersIterator(this.nodeMatchers);
         }
 
         public override string ToString() => Root.ToString()!;
@@ -59,7 +83,193 @@ namespace YamlDotNet.Serialization.Schemas
 
         public ISchemaIterator Root { get; }
 
-        public IEnumerable<NodeMatcher> RootMatchers => rootMatchers;
+        public IEnumerable<NodeMatcher> RootMatchers => nodeMatchers;
+
+        private NodeMatcher GetCachedNodeMatcher(Type type)
+        {
+            if (type.IsGenericParameter)
+            {
+                throw new ArgumentException("Cannot get a node matcher for a generic parameter.", nameof(type));
+            }
+
+            return nodeMatchersCache.GetOrAdd(type, ResolveNodeMatcher);
+        }
+
+        private (NodeMatcher, Action?) ResolveNodeMatcher(Type type)
+        {
+            foreach (var candidate in GetSuperTypes(type))
+            {
+                foreach (var nodeMatcher in nodeMatchers)
+                {
+                    if (nodeMatcher.Matches(candidate))
+                    {
+                        return (nodeMatcher, null);
+                    }
+                }
+
+                if (candidate == typeof(object))
+                {
+                    return CreateObjectMatcher(type);
+                }
+
+                if (candidate.IsGenericType())
+                {
+                    var genericCandidateType = candidate.GetGenericTypeDefinition();
+                    if (genericCandidateType == typeof(IEnumerable<>))
+                    {
+                        return CreateEnumerableMatcher(type, candidate);
+                    }
+                    if (genericCandidateType == typeof(IDictionary<,>))
+                    {
+                        return CreateDictionartyMatcher(type, candidate);
+                    }
+                }
+            }
+
+            throw new ArgumentException($"Could not resolve a tag for type '{type.FullName}'.");
+        }
+
+        private (NodeMatcher nodeMatcher, Action? afterCreation) CreateEnumerableMatcher(Type concrete, Type iEnumerable)
+        {
+            var tag = tagNameResolver.Resolve(concrete);
+
+            var genericArguments = iEnumerable.GetGenericArguments();
+            var itemType = genericArguments[0];
+
+            var implementation = concrete;
+            if (concrete.IsInterface())
+            {
+                implementation = typeof(List<>).MakeGenericType(genericArguments);
+            }
+
+            var matcher = NodeMatcher
+                .ForSequences(SequenceMapper.Create(tag, implementation, itemType), concrete)
+                .Either(
+                    s => s.MatchEmptyTags(),
+                    s => s.MatchTag(tag)
+                )
+                .Create();
+
+            return (
+                matcher,
+                () => matcher.AddItemMatcher(GetCachedNodeMatcher(itemType))
+            );
+        }
+
+        private (NodeMatcher nodeMatcher, Action? afterCreation) CreateDictionartyMatcher(Type concrete, Type iDictionary)
+        {
+            var tag = tagNameResolver.Resolve(concrete);
+
+            var genericArguments = iDictionary.GetGenericArguments();
+            var keyType = genericArguments[0];
+            var valueType = genericArguments[1];
+
+            var implementation = concrete;
+            if (concrete.IsInterface())
+            {
+                implementation = typeof(Dictionary<,>).MakeGenericType(genericArguments);
+            }
+
+            var matcher = NodeMatcher
+                .ForMappings(MappingMapper.Create(tag, implementation, keyType, valueType), concrete)
+                .Either(
+                    s => s.MatchEmptyTags(),
+                    s => s.MatchTag(tag)
+                )
+                .Create();
+
+            return (
+                matcher,
+                () =>
+                {
+                    matcher.AddItemMatcher(
+                        keyMatcher: GetCachedNodeMatcher(keyType),
+                        valueMatchers: GetCachedNodeMatcher(valueType)
+                    );
+                }
+            );
+        }
+
+        private (NodeMatcher nodeMatcher, Action? afterCreation) CreateObjectMatcher(Type concrete)
+        {
+            if (concrete == typeof(object))
+            {
+                return (NodeMatcher.NoMatch, null);
+            }
+
+            var tag = tagNameResolver.Resolve(concrete);
+
+            var properties = typeInspector.GetProperties(concrete, null).OrderBy(p => p.Order);
+            //var mapper = new ObjectMapper2(concrete, properties, tag, ignoreUnmatched);
+            var mapper = new ObjectMapper(concrete, properties, tag, ignoreUnmatched);
+
+            var matcher = NodeMatcher
+                .ForMappings(mapper, concrete)
+                .Either(
+                    s => s.MatchEmptyTags(),
+                    s => s.MatchTag(tag)
+                )
+                .Create();
+
+            return (
+                matcher,
+                () =>
+                {
+                    // TODO: Update the object mapper with the specific properties that exist (or create it complete from the start)
+
+                    {
+                        foreach (var property in properties)
+                        {
+                            var keyName = namingConvention.Apply(property.Name);
+
+                            // TODO: Use the following:
+                            //        - property.CanWrite
+                            //        - property.ScalarStyle
+                            //        - property.TypeOverride
+
+                            matcher.AddItemMatcher(
+                                keyMatcher: NodeMatcher
+                                    .ForScalars(new TranslateStringMapper(keyName, property.Name))
+                                    .MatchValue(keyName)
+                                    .Create(),
+                                valueMatchers: GetCachedNodeMatcher(property.Type)
+                            );
+                        }
+                    }
+                }
+            );
+        }
+
+        /// <summary>
+        /// Returns type and all its parent classes and implemented interfaces in this order:
+        /// 1. the type itself;
+        /// 2. its superclasses, starting on the base class, except object;
+        /// 3. all interfaces implemented by the type;
+        /// 4. typeof(object).
+        /// </summary>
+        private static IEnumerable<Type> GetSuperTypes(Type type)
+        {
+            if (type.IsInterface())
+            {
+                yield return type;
+            }
+            else
+            {
+                Type? ancestor = type;
+                // Object will be returned last
+                while (ancestor != null && ancestor != typeof(object))
+                {
+                    yield return ancestor;
+                    ancestor = ancestor.BaseType();
+                }
+            }
+            foreach (var itf in type.GetInterfaces())
+            {
+                yield return itf;
+            }
+            yield return typeof(object);
+        }
+
 
         private sealed class SingleNodeMatcherIterator : ISchemaIterator
         {
@@ -164,9 +374,8 @@ namespace YamlDotNet.Serialization.Schemas
                 }
                 else
                 {
-                    // There's no need to fall back to the root because it will never recognize mapping values
-                    childIterator = null;
-                    return false;
+                    childIterator = root;
+                    return true;
                 }
             }
 
@@ -258,9 +467,8 @@ namespace YamlDotNet.Serialization.Schemas
 
             public bool TryEnterMappingValue([NotNullWhen(true)] out ISchemaIterator? childIterator)
             {
-                // There's no need to fall back to the root because it will never recognize mapping values
-                childIterator = null;
-                return false;
+                childIterator = root;
+                return true;
             }
 
             public bool IsTagImplicit(IScalar scalar, out ScalarStyle style)

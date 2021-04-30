@@ -40,8 +40,8 @@ namespace YamlDotNet.Serialization
         where TBuilder : BuilderSkeleton<TBuilder>
     {
         internal ISchema schema = new CompositeSchema(
-            DotNetSchema.Instance,
-            CoreSchema.Scalars
+            CoreSchema.Scalars,
+            DotNetSchema.Instance
         );
 
         internal INamingConvention namingConvention = NullNamingConvention.Instance;
@@ -331,133 +331,16 @@ namespace YamlDotNet.Serialization
 
             var typeInspector = BuildTypeInspector();
 
-            var typeMatchers = new TypeMatcherTable(requireThreadSafety: true) // TODO: Configure requireThreadSafety
-            {
-                {
-                    typeof(IEnumerable<>),
-                    (concrete, iCollection, lookupMatcher) =>
-                    {
-                        var tag = tagNameResolver.Resolve(concrete);
-
-                        var genericArguments = iCollection.GetGenericArguments();
-                        var itemType = genericArguments[0];
-
-                        var implementation = concrete;
-                        if (concrete.IsInterface())
-                        {
-                            implementation = typeof(List<>).MakeGenericType(genericArguments);
-                        }
-
-                        var matcher = NodeMatcher
-                            .ForSequences(SequenceMapper.Create(tag, implementation, itemType), concrete)
-                            .Either(
-                                s => s.MatchEmptyTags(),
-                                s => s.MatchTag(tag)
-                            )
-                            .Create();
-
-                        return (
-                            matcher,
-                            () => matcher.AddItemMatcher(lookupMatcher(itemType))
-                        );
-                    }
-                },
-                {
-                    typeof(IDictionary<,>),
-                    (concrete, iDictionary, lookupMatcher) =>
-                    {
-                        var tag = tagNameResolver.Resolve(concrete);
-
-                        var genericArguments = iDictionary.GetGenericArguments();
-                        var keyType = genericArguments[0];
-                        var valueType = genericArguments[1];
-
-                        var implementation = concrete;
-                        if (concrete.IsInterface())
-                        {
-                            implementation = typeof(Dictionary<,>).MakeGenericType(genericArguments);
-                        }
-
-                        var matcher = NodeMatcher
-                            .ForMappings(MappingMapper.Create(tag, implementation, keyType, valueType), concrete)
-                            .Either(
-                                s => s.MatchEmptyTags(),
-                                s => s.MatchTag(tag)
-                            )
-                            .Create();
-
-                        return (
-                            matcher,
-                            () =>
-                            {
-                                matcher.AddItemMatcher(
-                                    keyMatcher: lookupMatcher(keyType),
-                                    valueMatchers: lookupMatcher(valueType)
-                                );
-                            }
-                        );
-                    }
-                },
-                {
-                    typeof(object),
-                    (concrete, _, lookupMatcher) =>
-                    {
-                        if (concrete == typeof(object))
-                        {
-                            return (NodeMatcher.NoMatch, null);
-                        }
-
-                        var tag = tagNameResolver.Resolve(concrete);
-
-                        var properties = typeInspector.GetProperties(concrete, null).OrderBy(p => p.Order);
-                        //var mapper = new ObjectMapper2(concrete, properties, tag, ignoreUnmatched);
-                        var mapper = new ObjectMapper(concrete, properties, tag, ignoreUnmatched);
-
-                        var matcher = NodeMatcher
-                            .ForMappings(mapper, concrete)
-                            .Either(
-                                s => s.MatchEmptyTags(),
-                                s => s.MatchTag(tag)
-                            )
-                            .Create();
-
-                        return (
-                            matcher,
-                            () =>
-                            {
-                                // TODO: Update the object mapper with the specific properties that exist (or create it complete from the start)
-
-                                {
-                                    foreach (var property in properties)
-                                    {
-                                        var keyName = namingConvention.Apply(property.Name);
-
-                                        // TODO: Use the following:
-                                        //        - property.CanWrite
-                                        //        - property.ScalarStyle
-                                        //        - property.TypeOverride
-
-                                        matcher.AddItemMatcher(
-                                            keyMatcher: NodeMatcher
-                                                .ForScalars(new TranslateStringMapper(keyName, property.Name))
-                                                .MatchValue(keyName)
-                                                .Create(),
-                                            valueMatchers: lookupMatcher(property.Type)
-                                        );
-                                    }
-                                }
-                            }
-                        );
-                    }
-                }
-            };
-
-            foreach (var matcher in schema.RootMatchers)
-            {
-                typeMatchers.Add(matcher);
-            }
-
-            return root => new TypeSchema(typeMatchers, root, tagMappings.Keys);
+            return root => new TypeSchema(
+                schema,
+                tagNameResolver,
+                typeInspector,
+                namingConvention,
+                ignoreUnmatched,
+                root,
+                tagMappings.Keys,
+                requireThreadSafety: true  // TODO: Configure requireThreadSafety
+            );
 
             //return root => new CompositeSchema(
             //    new TypeSchema(typeMatchers, root, tagMappings.Keys),

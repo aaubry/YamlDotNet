@@ -32,6 +32,13 @@ namespace YamlDotNet.Representation.Schemas
     {
         public static readonly ContextFreeSchema Instance = new ContextFreeSchema(CreateMatchers());
 
+        public static class Tags
+        {
+            // TODO: Find good tag names for these
+            public static readonly TagName Decimal = "tag:dotnet:System.Decimal";
+            public static readonly TagName Guid = "tag:dotnet:System.Guid";
+        }
+
         private static IEnumerable<NodeMatcher> CreateMatchers()
         {
             yield return NodeMatcher
@@ -51,7 +58,7 @@ namespace YamlDotNet.Representation.Schemas
             yield return NodeMatcher
                 .ForScalars(
                     NodeMapper.CreateScalarMapper(
-                        new TagName("tag:dotnet:decimal"), // TODO: Find a good tag name for this
+                        YamlTagRepository.Timestamp,
                         s => TimestampParser.Parse(s.Value),
                         val => TimestampParser.Represent(val!)
                     ),
@@ -65,20 +72,23 @@ namespace YamlDotNet.Representation.Schemas
             yield return NodeMatcher
                 .ForScalars(
                     NodeMapper.CreateScalarMapper(
-                        new TagName("tag:dotnet:guid"), // TODO: Find a good tag name for this
+                        Tags.Guid,
                         s => new Guid(s.Value),
                         val => ((Guid)val!).ToString("D")
                     ),
                     typeof(Guid)
                 )
                 .MatchPattern(@"^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){4}[0-9a-fA-F]{8}$")
-                .MatchEmptyTags()
+                .Either(
+                    s => s.MatchEmptyTags(),
+                    s => s.MatchTag(Tags.Guid)
+                )
                 .Create();
 
             yield return NodeMatcher
                 .ForScalars(
                     NodeMapper.CreateScalarMapper(
-                        YamlTagRepository.Timestamp,
+                        Tags.Decimal,
                         s => DecimalParser.Parse(s.Value),
                         val => DecimalParser.Represent(val!)
                     ),
