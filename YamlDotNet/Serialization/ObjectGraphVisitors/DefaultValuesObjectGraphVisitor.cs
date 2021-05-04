@@ -59,13 +59,13 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                     }
                     break;
 
-                case DefaultValuesHandling.OmitDefaultsOrEmpty:
+                case DefaultValuesHandling.OmitNullOrEmpty:
                     if (value.Value is IEnumerable enumerable && !enumerable.GetEnumerator().MoveNext())
                     {
                         return false;
                     }
 
-                    goto case DefaultValuesHandling.OmitDefaults;
+                    goto case DefaultValuesHandling.OmitNull;
 
                 case DefaultValuesHandling.OmitDefaults:
                     var defaultValue = key.GetCustomAttribute<DefaultValueAttribute>()?.Value ?? GetDefault(key.Type);
@@ -74,6 +74,14 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                         return false;
                     }
                     break;
+
+                case DefaultValuesHandling.OmitDefaultsOrEmpty:
+                    if (value.Value is IEnumerable ienumerable && !ienumerable.GetEnumerator().MoveNext())
+                    {
+                        return false;
+                    }
+
+                    goto case DefaultValuesHandling.OmitDefaults;
             }
 
             return base.EnterMapping(key, value, context);

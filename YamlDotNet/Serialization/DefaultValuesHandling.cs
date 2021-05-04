@@ -37,6 +37,11 @@ namespace YamlDotNet.Serialization
         OmitNull,
 
         /// <summary>
+        /// More relaxed than OmitNull - omits null values and also collections/arrays/enumerations that are empty.
+        /// </summary>
+        OmitNullOrEmpty,
+
+        /// <summary>
         /// Specifies that properties that that contain their default value, either default(T) or the value specified in DefaultValueAttribute are to be omitted. 
         /// </summary>
         OmitDefaults,
