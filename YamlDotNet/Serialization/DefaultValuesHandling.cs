@@ -40,5 +40,10 @@ namespace YamlDotNet.Serialization
         /// Specifies that properties that that contain their default value, either default(T) or the value specified in DefaultValueAttribute are to be omitted. 
         /// </summary>
         OmitDefaults,
+
+        /// <summary>
+        /// More relaxed than OmitDefaults - omits default values and also collections/arrays/enumerations that are empty.
+        /// </summary>
+        OmitDefaultsOrEmpty,
     }
 }

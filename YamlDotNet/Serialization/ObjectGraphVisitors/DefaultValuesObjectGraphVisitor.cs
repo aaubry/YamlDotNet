@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.ComponentModel;
 using YamlDotNet.Core;
 
@@ -57,6 +58,20 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                         return false;
                     }
                     break;
+
+                case DefaultValuesHandling.OmitDefaultsOrEmpty:
+                    if (value.Value is null)
+                    {
+                        // Null is default for enumerable so it falls into OmitDefaults
+                        return false;
+                    }
+
+                    if (value.Value is IEnumerable enumerable && !enumerable.GetEnumerator().MoveNext())
+                    {
+                        return false;
+                    }
+
+                    goto case DefaultValuesHandling.OmitDefaults;
 
                 case DefaultValuesHandling.OmitDefaults:
                     var defaultValue = key.GetCustomAttribute<DefaultValueAttribute>()?.Value ?? GetDefault(key.Type);
