@@ -60,12 +60,6 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                     break;
 
                 case DefaultValuesHandling.OmitDefaultsOrEmpty:
-                    if (value.Value is null)
-                    {
-                        // Null is default for enumerable so it falls into OmitDefaults
-                        return false;
-                    }
-
                     if (value.Value is IEnumerable enumerable && !enumerable.GetEnumerator().MoveNext())
                     {
                         return false;
