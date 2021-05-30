@@ -35,18 +35,18 @@ namespace YamlDotNet.Serialization
         Preserve = 0,
 
         /// <summary>
-        /// Specifies that properties that contain null references or a null Nullable&lt;T&gt; are to be omitted. 
+        /// Specifies that properties that contain null references or a null Nullable&lt;T&gt; are to be omitted.
         /// </summary>
         OmitNull = 1,
 
         /// <summary>
-        /// Omits collections/arrays/enumerations that are empty.
+        /// Specifies that properties that that contain their default value, either default(T) or the value specified in DefaultValueAttribute are to be omitted.
         /// </summary>
-        OmitEmpty = 2,
+        OmitDefaults = 2,
 
         /// <summary>
-        /// Specifies that properties that that contain their default value, either default(T) or the value specified in DefaultValueAttribute are to be omitted. 
+        /// Specifies that properties that that contain collections/arrays/enumerations that are empty are to be omitted.
         /// </summary>
-        OmitDefaults = 4,
+        OmitEmptyCollections = 4,
     }
 }

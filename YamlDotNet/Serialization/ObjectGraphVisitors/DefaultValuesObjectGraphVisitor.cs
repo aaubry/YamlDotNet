@@ -58,7 +58,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 }
             }
 
-            if ((configuration & DefaultValuesHandling.OmitEmpty) != 0)
+            if ((configuration & DefaultValuesHandling.OmitEmptyCollections) != 0)
             {
                 if (value.Value is IEnumerable enumerable)
                 {

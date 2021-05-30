@@ -124,7 +124,7 @@ namespace YamlDotNet.Test.Serialization
         {
             // Arrange
             var sut = new SerializerBuilder()
-                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmpty)
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
                 .Build();
 
             // Act
