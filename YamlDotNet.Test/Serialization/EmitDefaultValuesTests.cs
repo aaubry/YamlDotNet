@@ -62,6 +62,34 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void All_default_values_and_nulls_are_emitted_when_no_configuration_is_performed()
+        {
+            // Arrange
+            var sut = new SerializerBuilder()
+                .Build();
+
+            // Act
+            var yaml = sut.Serialize(new Model());
+
+            // Assert
+            Assert.Contains(nameof(Model.ANullString) + ':', yaml);
+            Assert.Contains(nameof(Model.ADefaultString) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonDefaultString) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonDefaultNullString) + ':', yaml);
+
+            Assert.Contains(nameof(Model.AZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ADefaultInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonDefaultZeroInteger) + ':', yaml);
+
+            Assert.Contains(nameof(Model.ANullInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableNonZeroInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableNonZeroDefaultInteger) + ':', yaml);
+            Assert.Contains(nameof(Model.ANullableNonZeroNonDefaultInteger) + ':', yaml);
+        }
+
+        [Fact]
         public void Only_null_values_are_omitted_when_DefaultValuesHandling_is_OmitNull()
         {
             // Arrange
