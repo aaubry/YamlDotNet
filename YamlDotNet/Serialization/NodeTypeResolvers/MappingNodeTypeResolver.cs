@@ -31,10 +31,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 
         public MappingNodeTypeResolver(IDictionary<Type, Type> mappings)
         {
-            if (mappings == null)
-            {
-                throw new ArgumentNullException(nameof(mappings));
-            }
+            if (mappings == null) throw new ArgumentNullException(nameof(mappings));
 
             foreach (var pair in mappings)
             {
