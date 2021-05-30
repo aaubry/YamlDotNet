@@ -55,8 +55,8 @@ namespace YamlDotNet.Test.Serialization
             public Dictionary<string, string> AnEmptyDictionary => new Dictionary<string, string>();
             public IEnumerable<int> AnEmptyEnumerable => Enumerable.Empty<int>();
 
-            public string[] AnNonEmptyArray => new[] { "foo", "bar" };
-            public IList<int> AnNonEmptyList => new List<int> { 6, 9, 42 };
+            public string[] ANonEmptyArray => new[] { "foo", "bar" };
+            public IList<int> ANonEmptyList => new List<int> { 6, 9, 42 };
             public IEnumerable<bool> ANonEmptyEnumerable => new[] { true, false };
             public Dictionary<string, string> ANonEmptyDictionary => new Dictionary<string, string>() { { "foo", "bar" } };
         }
@@ -163,6 +163,11 @@ namespace YamlDotNet.Test.Serialization
             Assert.DoesNotContain(nameof(Model.AnEmptyList) + ':', yaml);
             Assert.DoesNotContain(nameof(Model.AnEmptyDictionary) + ':', yaml);
             Assert.DoesNotContain(nameof(Model.AnEmptyEnumerable) + ':', yaml);
+
+            Assert.Contains(nameof(Model.ANonEmptyArray) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonEmptyList) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonEmptyDictionary) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonEmptyEnumerable) + ':', yaml);
         }
 
         [Fact]
