@@ -48,8 +48,6 @@ namespace YamlDotNet.Test.Serialization
             [DefaultValue(2)] public int? ANullableNonZeroNonDefaultInteger => 1;
 
             // Enumerables
-            public IList<int> ANullList => null;
-
             public int[] AnEmptyArray => new int[0];
             public IList<int> AnEmptyList => new List<int>();
             public Dictionary<string, string> AnEmptyDictionary => new Dictionary<string, string>();
