@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using YamlDotNet.Core;
-using YamlDotNet.Helpers;
 using YamlDotNet.Representation;
 using YamlDotNet.Representation.Schemas;
 
@@ -33,7 +32,7 @@ namespace YamlDotNet.Serialization.Schemas
     public sealed class TypeSchema : ISchema
     {
         private readonly List<NodeMatcher> nodeMatchers;
-        private readonly ICache<Type, NodeMatcher> nodeMatchersCache;
+        private readonly Dictionary<Type, NodeMatcher> nodeMatchersCache; // TODO: Thread safety
         private readonly ITagNameResolver tagNameResolver;
         private readonly ITypeInspector typeInspector;
         private readonly INamingConvention namingConvention;
@@ -57,25 +56,25 @@ namespace YamlDotNet.Serialization.Schemas
 
             if (requireThreadSafety)
             {
-                nodeMatchersCache = new ThreadSafeCache<Type, NodeMatcher>();
+                nodeMatchersCache = new Dictionary<Type, NodeMatcher>();
             }
             else
             {
-                nodeMatchersCache = new SingleThreadCache<Type, NodeMatcher>();
+                nodeMatchersCache = new Dictionary<Type, NodeMatcher>();
             }
 
             this.nodeMatchers = baseSchema.RootMatchers.ToList();
-            if (root != typeof(object))
+            if (TryResolveNodeMatcher(root, out var rootMatcher))
             {
-                this.nodeMatchers.Insert(0, GetCachedNodeMatcher(root));
+                this.nodeMatchers.Insert(0, rootMatcher);
             }
 
             foreach (var wellKnownType in wellKnownTypes)
             {
-                this.nodeMatchers.Add(GetCachedNodeMatcher(wellKnownType));
+                this.nodeMatchers.Add(ResolveNodeMatcher(wellKnownType));
             }
 
-            Root = new RootNodeMatchersIterator(this.nodeMatchers);
+            Root = new RootNodeMatchersIterator(this);
         }
 
         public override string ToString() => Root.ToString()!;
@@ -85,31 +84,40 @@ namespace YamlDotNet.Serialization.Schemas
 
         public IEnumerable<NodeMatcher> RootMatchers => nodeMatchers;
 
-        private NodeMatcher GetCachedNodeMatcher(Type type)
+        private NodeMatcher ResolveNodeMatcher(Type type)
+        {
+            return TryResolveNodeMatcher(type, out var matcher)
+                ? matcher
+                : throw new ArgumentException($"Could not resolve a tag for type '{type.FullName}'.");
+        }
+
+        private bool TryResolveNodeMatcher(Type type, [NotNullWhen(true)] out NodeMatcher? matcher)
         {
             if (type.IsGenericParameter)
             {
                 throw new ArgumentException("Cannot get a node matcher for a generic parameter.", nameof(type));
             }
 
-            return nodeMatchersCache.GetOrAdd(type, ResolveNodeMatcher);
-        }
+            if (nodeMatchersCache.TryGetValue(type, out matcher))
+            {
+                return true;
+            }
 
-        private (NodeMatcher, Action?) ResolveNodeMatcher(Type type)
-        {
             foreach (var candidate in GetSuperTypes(type))
             {
                 foreach (var nodeMatcher in nodeMatchers)
                 {
                     if (nodeMatcher.Matches(candidate))
                     {
-                        return (nodeMatcher, null);
+                        matcher = nodeMatcher;
+                        return true;
                     }
                 }
 
-                if (candidate == typeof(object))
+                if (candidate == typeof(object) && type != typeof(object))
                 {
-                    return CreateObjectMatcher(type);
+                    matcher = CreateObjectMatcher(type);
+                    return true;
                 }
 
                 if (candidate.IsGenericType())
@@ -117,19 +125,22 @@ namespace YamlDotNet.Serialization.Schemas
                     var genericCandidateType = candidate.GetGenericTypeDefinition();
                     if (genericCandidateType == typeof(IEnumerable<>))
                     {
-                        return CreateEnumerableMatcher(type, candidate);
+                        matcher = CreateSequenceMatcher(type, candidate);
+                        return true;
                     }
                     if (genericCandidateType == typeof(IDictionary<,>))
                     {
-                        return CreateDictionartyMatcher(type, candidate);
+                        matcher = CreateMappingMatcher(type, candidate);
+                        return true;
                     }
                 }
             }
 
-            throw new ArgumentException($"Could not resolve a tag for type '{type.FullName}'.");
+            matcher = null;
+            return false;
         }
 
-        private (NodeMatcher nodeMatcher, Action? afterCreation) CreateEnumerableMatcher(Type concrete, Type iEnumerable)
+        private NodeMatcher CreateSequenceMatcher(Type concrete, Type iEnumerable)
         {
             var tag = tagNameResolver.Resolve(concrete);
 
@@ -142,7 +153,7 @@ namespace YamlDotNet.Serialization.Schemas
                 implementation = typeof(List<>).MakeGenericType(genericArguments);
             }
 
-            var matcher = NodeMatcher
+            var sequenceMatcher = NodeMatcher
                 .ForSequences(SequenceMapper.Create(tag, implementation, itemType), concrete)
                 .Either(
                     s => s.MatchEmptyTags(),
@@ -150,13 +161,17 @@ namespace YamlDotNet.Serialization.Schemas
                 )
                 .Create();
 
-            return (
-                matcher,
-                () => matcher.AddItemMatcher(GetCachedNodeMatcher(itemType))
-            );
+            // Add to the cache before attempting to resolve child matchers
+            nodeMatchersCache.Add(concrete, sequenceMatcher);
+
+            var itemMatcher = ResolveNodeMatcher(itemType);
+
+            sequenceMatcher.AddItemMatcher(itemMatcher);
+
+            return sequenceMatcher;
         }
 
-        private (NodeMatcher nodeMatcher, Action? afterCreation) CreateDictionartyMatcher(Type concrete, Type iDictionary)
+        private NodeMatcher CreateMappingMatcher(Type concrete, Type iDictionary)
         {
             var tag = tagNameResolver.Resolve(concrete);
 
@@ -170,7 +185,7 @@ namespace YamlDotNet.Serialization.Schemas
                 implementation = typeof(Dictionary<,>).MakeGenericType(genericArguments);
             }
 
-            var matcher = NodeMatcher
+            var mappingMatcher = NodeMatcher
                 .ForMappings(MappingMapper.Create(tag, implementation, keyType, valueType), concrete)
                 .Either(
                     s => s.MatchEmptyTags(),
@@ -178,32 +193,26 @@ namespace YamlDotNet.Serialization.Schemas
                 )
                 .Create();
 
-            return (
-                matcher,
-                () =>
-                {
-                    matcher.AddItemMatcher(
-                        keyMatcher: GetCachedNodeMatcher(keyType),
-                        valueMatchers: GetCachedNodeMatcher(valueType)
-                    );
-                }
+            // Add to the cache before attempting to resolve child matchers
+            nodeMatchersCache.Add(concrete, mappingMatcher);
+
+            mappingMatcher.AddItemMatcher(
+                keyMatcher: ResolveNodeMatcher(keyType),
+                valueMatchers: ResolveNodeMatcher(valueType)
             );
+
+            return mappingMatcher;
         }
 
-        private (NodeMatcher nodeMatcher, Action? afterCreation) CreateObjectMatcher(Type concrete)
+        private NodeMatcher CreateObjectMatcher(Type concrete)
         {
-            if (concrete == typeof(object))
-            {
-                return (NodeMatcher.NoMatch, null);
-            }
-
             var tag = tagNameResolver.Resolve(concrete);
 
             var properties = typeInspector.GetProperties(concrete, null).OrderBy(p => p.Order);
             //var mapper = new ObjectMapper2(concrete, properties, tag, ignoreUnmatched);
             var mapper = new ObjectMapper(concrete, properties, tag, ignoreUnmatched);
 
-            var matcher = NodeMatcher
+            var objectMatcher = NodeMatcher
                 .ForMappings(mapper, concrete)
                 .Either(
                     s => s.MatchEmptyTags(),
@@ -211,33 +220,28 @@ namespace YamlDotNet.Serialization.Schemas
                 )
                 .Create();
 
-            return (
-                matcher,
-                () =>
-                {
-                    // TODO: Update the object mapper with the specific properties that exist (or create it complete from the start)
+            // Add to the cache before attempting to resolve child matchers
+            nodeMatchersCache.Add(concrete, objectMatcher);
 
-                    {
-                        foreach (var property in properties)
-                        {
-                            var keyName = namingConvention.Apply(property.Name);
+            foreach (var property in properties)
+            {
+                var keyName = namingConvention.Apply(property.Name);
 
-                            // TODO: Use the following:
-                            //        - property.CanWrite
-                            //        - property.ScalarStyle
-                            //        - property.TypeOverride
+                // TODO: Use the following:
+                //        - property.CanWrite
+                //        - property.ScalarStyle
+                //        - property.TypeOverride
 
-                            matcher.AddItemMatcher(
-                                keyMatcher: NodeMatcher
-                                    .ForScalars(new TranslateStringMapper(keyName, property.Name))
-                                    .MatchValue(keyName)
-                                    .Create(),
-                                valueMatchers: GetCachedNodeMatcher(property.Type)
-                            );
-                        }
-                    }
-                }
-            );
+                objectMatcher.AddItemMatcher(
+                    keyMatcher: NodeMatcher
+                        .ForScalars(new TranslateStringMapper(keyName, property.Name))
+                        .MatchValue(keyName)
+                        .Create(),
+                    valueMatchers: ResolveNodeMatcher(property.Type)
+                );
+            }
+
+            return objectMatcher;
         }
 
         /// <summary>
@@ -274,16 +278,16 @@ namespace YamlDotNet.Serialization.Schemas
         private sealed class SingleNodeMatcherIterator : ISchemaIterator
         {
             private readonly NodeMatcher matcher;
-            private readonly ISchemaIterator root;
+            private readonly TypeSchema schema;
             private readonly IEnumerable<NodeMatcher>? valueMatchers;
 
-            public SingleNodeMatcherIterator(NodeMatcher matcher, ISchemaIterator root)
+            public SingleNodeMatcherIterator(NodeMatcher matcher, TypeSchema schema)
             {
                 this.matcher = matcher ?? throw new ArgumentNullException(nameof(matcher));
-                this.root = root ?? throw new ArgumentNullException(nameof(root));
+                this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
             }
 
-            public SingleNodeMatcherIterator(NodeMatcher matcher, ISchemaIterator root, IEnumerable<NodeMatcher> valueMatchers)
+            public SingleNodeMatcherIterator(NodeMatcher matcher, TypeSchema root, IEnumerable<NodeMatcher> valueMatchers)
                 : this(matcher, root)
             {
                 this.valueMatchers = valueMatchers ?? throw new ArgumentNullException(nameof(valueMatchers));
@@ -299,7 +303,7 @@ namespace YamlDotNet.Serialization.Schemas
                             if (itemMatcher.Matches(node))
                             {
                                 mapper = itemMatcher.Mapper;
-                                childIterator = new SingleNodeMatcherIterator(itemMatcher, root);
+                                childIterator = new SingleNodeMatcherIterator(itemMatcher, schema);
                                 return true;
                             }
                         }
@@ -311,7 +315,7 @@ namespace YamlDotNet.Serialization.Schemas
                             if (keyMatcher.Matches(node))
                             {
                                 mapper = keyMatcher.Mapper;
-                                childIterator = new SingleNodeMatcherIterator(keyMatcher, root, valueMatchers);
+                                childIterator = new SingleNodeMatcherIterator(keyMatcher, schema, valueMatchers);
                                 return true;
                             }
                         }
@@ -322,7 +326,7 @@ namespace YamlDotNet.Serialization.Schemas
                         break;
                 }
 
-                return root.TryEnterNode(node, out childIterator, out mapper);
+                return schema.Root.TryEnterNode(node, out childIterator, out mapper);
             }
 
             public bool TryEnterValue(object? value, [NotNullWhen(true)] out ISchemaIterator? childIterator, [NotNullWhen(true)] out INodeMapper? mapper)
@@ -338,9 +342,21 @@ namespace YamlDotNet.Serialization.Schemas
                                 if (itemMatcher.Matches(typeOfValue))
                                 {
                                     mapper = itemMatcher.Mapper;
-                                    childIterator = new SingleNodeMatcherIterator(itemMatcher, root);
+                                    childIterator = new SingleNodeMatcherIterator(itemMatcher, schema);
                                     return true;
                                 }
+                            }
+
+                            if (schema.Root.TryEnterValue(value, out childIterator, out mapper))
+                            {
+                                return true;
+                            }
+
+                            if (schema.TryResolveNodeMatcher(typeOfValue, out var dynamicMatcher))
+                            {
+                                mapper = dynamicMatcher.Mapper;
+                                childIterator = new SingleNodeMatcherIterator(dynamicMatcher, schema);
+                                return true;
                             }
                             break;
 
@@ -350,9 +366,15 @@ namespace YamlDotNet.Serialization.Schemas
                                 if (keyMatcher.Matches(typeOfValue))
                                 {
                                     mapper = keyMatcher.Mapper;
-                                    childIterator = new SingleNodeMatcherIterator(keyMatcher, root, valueMatchers);
+                                    childIterator = new SingleNodeMatcherIterator(keyMatcher, schema, valueMatchers);
                                     return true;
                                 }
+
+                                if (schema.Root.TryEnterValue(value, out childIterator, out mapper))
+                                {
+                                    return true;
+                                }
+
                             }
                             break;
 
@@ -362,19 +384,19 @@ namespace YamlDotNet.Serialization.Schemas
                     }
                 }
 
-                return root.TryEnterValue(value, out childIterator, out mapper);
+                return schema.Root.TryEnterValue(value, out childIterator, out mapper);
             }
 
             public bool TryEnterMappingValue([NotNullWhen(true)] out ISchemaIterator? childIterator)
             {
                 if (valueMatchers != null)
                 {
-                    childIterator = new MultipleNodeMatchersIterator(valueMatchers, root);
+                    childIterator = new MultipleNodeMatchersIterator(valueMatchers, schema);
                     return true;
                 }
                 else
                 {
-                    childIterator = root;
+                    childIterator = schema.Root;
                     return true;
                 }
             }
@@ -425,12 +447,12 @@ namespace YamlDotNet.Serialization.Schemas
         private sealed class MultipleNodeMatchersIterator : ISchemaIterator
         {
             private readonly IEnumerable<NodeMatcher> nodeMatchers;
-            private readonly ISchemaIterator root;
+            private readonly TypeSchema schema;
 
-            public MultipleNodeMatchersIterator(IEnumerable<NodeMatcher> nodeMatchers, ISchemaIterator root)
+            public MultipleNodeMatchersIterator(IEnumerable<NodeMatcher> nodeMatchers, TypeSchema schema)
             {
                 this.nodeMatchers = nodeMatchers ?? throw new ArgumentNullException(nameof(nodeMatchers));
-                this.root = root ?? throw new ArgumentNullException(nameof(root));
+                this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
             }
 
             public bool TryEnterNode(INode node, [NotNullWhen(true)] out ISchemaIterator? childIterator, [NotNullWhen(true)] out INodeMapper? mapper)
@@ -439,12 +461,12 @@ namespace YamlDotNet.Serialization.Schemas
                 if (matcher != null)
                 {
                     mapper = matcher.Mapper;
-                    childIterator = new SingleNodeMatcherIterator(matcher, root);
+                    childIterator = new SingleNodeMatcherIterator(matcher, schema);
                     return true;
                 }
                 else
                 {
-                    return root.TryEnterNode(node, out childIterator, out mapper);
+                    return schema.Root.TryEnterNode(node, out childIterator, out mapper);
                 }
             }
 
@@ -457,17 +479,17 @@ namespace YamlDotNet.Serialization.Schemas
                     if (matcher != null)
                     {
                         mapper = matcher.Mapper;
-                        childIterator = new SingleNodeMatcherIterator(matcher, root);
+                        childIterator = new SingleNodeMatcherIterator(matcher, schema);
                         return true;
                     }
                 }
 
-                return root.TryEnterValue(value, out childIterator, out mapper);
+                return schema.Root.TryEnterValue(value, out childIterator, out mapper);
             }
 
             public bool TryEnterMappingValue([NotNullWhen(true)] out ISchemaIterator? childIterator)
             {
-                childIterator = root;
+                childIterator = schema.Root;
                 return true;
             }
 
@@ -491,20 +513,20 @@ namespace YamlDotNet.Serialization.Schemas
 
         private sealed class RootNodeMatchersIterator : ISchemaIterator
         {
-            private readonly IEnumerable<NodeMatcher> nodeMatchers;
+            private readonly TypeSchema schema;
 
-            public RootNodeMatchersIterator(IEnumerable<NodeMatcher> nodeMatchers)
+            public RootNodeMatchersIterator(TypeSchema schema)
             {
-                this.nodeMatchers = nodeMatchers ?? throw new ArgumentNullException(nameof(nodeMatchers));
+                this.schema = schema;
             }
 
             public bool TryEnterNode(INode node, [NotNullWhen(true)] out ISchemaIterator? childIterator, [NotNullWhen(true)] out INodeMapper? mapper)
             {
-                var matcher = nodeMatchers.FirstOrDefault(m => m.Matches(node));
+                var matcher = schema.RootMatchers.FirstOrDefault(m => m.Matches(node));
                 if (matcher != null)
                 {
                     mapper = matcher.Mapper;
-                    childIterator = new SingleNodeMatcherIterator(matcher, this);
+                    childIterator = new SingleNodeMatcherIterator(matcher, schema);
                     return true;
                 }
                 else
@@ -520,11 +542,11 @@ namespace YamlDotNet.Serialization.Schemas
                 if (value != null)
                 {
                     var typeOfValue = value.GetType();
-                    var matcher = nodeMatchers.FirstOrDefault(m => m.Matches(typeOfValue));
+                    var matcher = schema.RootMatchers.FirstOrDefault(m => m.Matches(typeOfValue));
                     if (matcher != null)
                     {
                         mapper = matcher.Mapper;
-                        childIterator = new SingleNodeMatcherIterator(matcher, this);
+                        childIterator = new SingleNodeMatcherIterator(matcher, schema);
                         return true;
                     }
                 }
@@ -555,7 +577,7 @@ namespace YamlDotNet.Serialization.Schemas
                 throw new NotImplementedException("TODO");
             }
 
-            public override string ToString() => string.Join(", ", nodeMatchers.Select(m => m.ToString()).ToArray());
+            public override string ToString() => string.Join(", ", schema.RootMatchers.Select(m => m.ToString()).ToArray());
         }
     }
 }

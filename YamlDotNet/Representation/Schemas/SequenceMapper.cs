@@ -81,7 +81,7 @@ namespace YamlDotNet.Representation.Schemas
         public Node Represent(object? native, ISchemaIterator iterator, IRepresentationState state)
         {
             state.RecursionLevel.Increment();
-            
+
             var children = new List<Node>();
 
             // Notice that the children collection will still be mutated after constructing the Sequence object.
