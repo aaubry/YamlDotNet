@@ -92,7 +92,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 case TypeCode.DateTime:
                     // TODO: This is probably incorrect. Use the correct regular expression.
                     var style = scalar.Value.EndsWith("Z")
-                        ? DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal
+                        ? DateTimeStyles.RoundtripKind
                         : scalar.Value.Length > 27 ? DateTimeStyles.AssumeLocal : DateTimeStyles.None;
                     value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture, style);
                     break;
