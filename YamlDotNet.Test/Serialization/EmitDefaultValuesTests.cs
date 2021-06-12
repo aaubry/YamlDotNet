@@ -19,7 +19,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Xunit;
 using YamlDotNet.Serialization;
 
@@ -44,6 +46,17 @@ namespace YamlDotNet.Test.Serialization
             public int? ANullableNonZeroInteger => 1;
             [DefaultValue(2)] public int? ANullableNonZeroDefaultInteger => 2;
             [DefaultValue(2)] public int? ANullableNonZeroNonDefaultInteger => 1;
+
+            // Enumerables
+            public int[] AnEmptyArray => new int[0];
+            public IList<int> AnEmptyList => new List<int>();
+            public Dictionary<string, string> AnEmptyDictionary => new Dictionary<string, string>();
+            public IEnumerable<int> AnEmptyEnumerable => Enumerable.Empty<int>();
+
+            public string[] ANonEmptyArray => new[] { "foo", "bar" };
+            public IList<int> ANonEmptyList => new List<int> { 6, 9, 42 };
+            public IEnumerable<bool> ANonEmptyEnumerable => new[] { true, false };
+            public Dictionary<string, string> ANonEmptyDictionary => new Dictionary<string, string>() { { "foo", "bar" } };
         }
 
         [Fact]
@@ -130,6 +143,29 @@ namespace YamlDotNet.Test.Serialization
             Assert.Contains(nameof(Model.ANullableNonZeroInteger) + ':', yaml);
             Assert.DoesNotContain(nameof(Model.ANullableNonZeroDefaultInteger) + ':', yaml);
             Assert.Contains(nameof(Model.ANullableNonZeroNonDefaultInteger) + ':', yaml);
+        }
+
+        [Fact]
+        public void Empty_enumerables_are_omitted_when_DefaultValuesHandling_is_OmitEmpty()
+        {
+            // Arrange
+            var sut = new SerializerBuilder()
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
+                .Build();
+
+            // Act
+            var yaml = sut.Serialize(new Model());
+
+            // Assert enumerables
+            Assert.DoesNotContain(nameof(Model.AnEmptyArray) + ':', yaml);
+            Assert.DoesNotContain(nameof(Model.AnEmptyList) + ':', yaml);
+            Assert.DoesNotContain(nameof(Model.AnEmptyDictionary) + ':', yaml);
+            Assert.DoesNotContain(nameof(Model.AnEmptyEnumerable) + ':', yaml);
+
+            Assert.Contains(nameof(Model.ANonEmptyArray) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonEmptyList) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonEmptyDictionary) + ':', yaml);
+            Assert.Contains(nameof(Model.ANonEmptyEnumerable) + ':', yaml);
         }
 
         [Fact]

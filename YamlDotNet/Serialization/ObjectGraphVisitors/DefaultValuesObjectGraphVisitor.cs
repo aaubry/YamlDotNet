@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.ComponentModel;
 using YamlDotNet.Core;
 
@@ -42,29 +43,46 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {
-            var configuration = this.handling;
+            var configuration = handling;
             var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
             if (yamlMember != null && yamlMember.IsDefaultValuesHandlingSpecified)
             {
                 configuration = yamlMember.DefaultValuesHandling;
             }
 
-            switch (configuration)
+            if ((configuration & DefaultValuesHandling.OmitNull) != 0)
             {
-                case DefaultValuesHandling.OmitNull:
-                    if (value.Value is null)
-                    {
-                        return false;
-                    }
-                    break;
+                if (value.Value is null)
+                {
+                    return false;
+                }
+            }
 
-                case DefaultValuesHandling.OmitDefaults:
-                    var defaultValue = key.GetCustomAttribute<DefaultValueAttribute>()?.Value ?? GetDefault(key.Type);
-                    if (Equals(value.Value, defaultValue))
+            if ((configuration & DefaultValuesHandling.OmitEmptyCollections) != 0)
+            {
+                if (value.Value is IEnumerable enumerable)
+                {
+                    var enumerator = enumerable.GetEnumerator();
+                    var canMoveNext = enumerator.MoveNext();
+                    if (enumerator is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+
+                    if (!canMoveNext)
                     {
                         return false;
                     }
-                    break;
+                }
+            }
+
+            if ((configuration & DefaultValuesHandling.OmitDefaults) != 0)
+            {
+                var defaultValue = key.GetCustomAttribute<DefaultValueAttribute>()?.Value ?? GetDefault(key.Type);
+                if (Equals(value.Value, defaultValue))
+                {
+                    return false;
+                }
             }
 
             return base.EnterMapping(key, value, context);
