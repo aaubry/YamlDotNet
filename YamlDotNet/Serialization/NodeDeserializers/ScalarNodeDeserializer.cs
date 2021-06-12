@@ -91,7 +91,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
                 case TypeCode.DateTime:
                     // TODO: This is probably incorrect. Use the correct regular expression.
-                    value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture);
+                    value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
                     break;
 
                 default:

@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
@@ -34,6 +35,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var yaml = @"
 name: Jack
+momentOfBirth: 1983-04-21T20:21:03.0041599Z
 cars:
 - name: Mercedes
   year: 2018
@@ -48,6 +50,13 @@ cars:
 
             var person = sut.Deserialize<Person>(yaml);
             person.Name.Should().Be("Jack");
+            person.MomentOfBirth.Kind.Should().Be(DateTimeKind.Utc);
+            person.MomentOfBirth.ToUniversalTime().Year.Should().Be(1983);
+            person.MomentOfBirth.ToUniversalTime().Month.Should().Be(4);
+            person.MomentOfBirth.ToUniversalTime().Day.Should().Be(21);
+            person.MomentOfBirth.ToUniversalTime().Hour.Should().Be(20);
+            person.MomentOfBirth.ToUniversalTime().Minute.Should().Be(21);
+            person.MomentOfBirth.ToUniversalTime().Second.Should().Be(3);
             person.Cars.Should().HaveCount(2);
             person.Cars[0].Name.Should().Be("Mercedes");
             person.Cars[0].Spec.Should().BeNull();
@@ -60,6 +69,7 @@ cars:
         {
             var yaml = @"
 name: Jack
+momentOfBirth: 1983-04-21T20:21:03.0041599Z
 cars:
 - name: Mercedes
   year: 2018
@@ -81,6 +91,13 @@ cars:
 
             var person = sut.Deserialize<Person>(yaml);
             person.Name.Should().Be("Jack");
+            person.MomentOfBirth.Kind.Should().Be(DateTimeKind.Utc);
+            person.MomentOfBirth.ToUniversalTime().Year.Should().Be(1983);
+            person.MomentOfBirth.ToUniversalTime().Month.Should().Be(4);
+            person.MomentOfBirth.ToUniversalTime().Day.Should().Be(21);
+            person.MomentOfBirth.ToUniversalTime().Hour.Should().Be(20);
+            person.MomentOfBirth.ToUniversalTime().Minute.Should().Be(21);
+            person.MomentOfBirth.ToUniversalTime().Second.Should().Be(3);
             person.Cars.Should().HaveCount(2);
             person.Cars[0].Name.Should().Be("Mercedes");
             person.Cars[0].Spec.EngineType.Should().Be("V6");
@@ -93,6 +110,8 @@ cars:
         public class Person
         {
             public string Name { get; private set; }
+
+            public DateTime MomentOfBirth { get; private set; }
 
             public IList<ICar> Cars { get; private set; }
         }
