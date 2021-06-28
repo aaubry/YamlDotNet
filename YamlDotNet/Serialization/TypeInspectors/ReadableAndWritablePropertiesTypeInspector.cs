@@ -39,8 +39,16 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            return innerTypeDescriptor.GetProperties(type, container)
-                .Where(p => p.CanWrite);
+            return innerTypeDescriptor
+                .GetProperties(type, container)
+                .Where(p =>
+                    p.CanWrite ||
+                    (p.Type.IsGenericType
+                        && typeof(ICollection<>)
+                            .MakeGenericType(p.Type.GenericTypeArguments[0])
+                            .IsAssignableFrom(p.Type)
+                    )
+                );
         }
     }
 }
