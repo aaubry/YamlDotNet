@@ -184,6 +184,24 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void RoundtripNullableStructWithValue()
+        {
+            var value = new StructExample { Value = 2 };
+
+            var result = DoRoundtripFromObjectTo<StructExample?>(value);
+
+            result.Should().Be(value);
+        }
+
+        [Fact]
+        public void RoundtripNullableStructWithoutValue()
+        {
+            var result = DoRoundtripFromObjectTo<StructExample?>(null);
+
+            result.Should().Be(null);
+        }
+
+        [Fact]
         public void SerializeCircularReference()
         {
             var obj = new CircularReference();

@@ -141,6 +141,11 @@ namespace YamlDotNet.Test.Serialization
         Two
     }
 
+    public struct StructExample
+    {
+        public int Value { get; set; }
+    }
+
     public enum SByteEnum : sbyte { Default, Sbyte }
     public enum ByteEnum : byte { Default, Byte }
     public enum Int16Enum : short { Default, Short }
