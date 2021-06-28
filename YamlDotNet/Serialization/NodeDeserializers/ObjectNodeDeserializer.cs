@@ -47,11 +47,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            value = objectFactory.Create(expectedType);
+            // Strip off the nullable type, if present. This is needed for nullable structs.
+            var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
+
+            value = objectFactory.Create(implementationType);
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
-                var property = typeDescriptor.GetProperty(expectedType, null, propertyName.Value, ignoreUnmatched);
+                var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
                 if (property == null)
                 {
                     parser.SkipThisAndNestedEvents();
