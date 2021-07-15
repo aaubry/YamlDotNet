@@ -59,7 +59,7 @@ namespace YamlDotNet.Core
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
         public YamlException(Mark start, Mark end, string message, Exception? innerException)
-            : base($"({start}) - ({end}): {message}", innerException)
+            : base(message, innerException)
         {
             Start = start;
             End = end;
@@ -73,6 +73,11 @@ namespace YamlDotNet.Core
         public YamlException(string message, Exception inner)
             : this(Mark.Empty, Mark.Empty, message, inner)
         {
+        }
+
+        public override string ToString()
+        {
+            return $"({Start}) - ({End}): {Message}";
         }
     }
 }
