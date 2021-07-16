@@ -99,6 +99,8 @@ namespace YamlDotNet.Representation
             return buffer.ToString();
         }
 
+        public static void Dump(IEmitter emitter, params Document[] stream) => Dump(emitter, stream.AsEnumerable());
+
         public static void Dump(IEmitter emitter, IEnumerable<Document> stream, bool explicitSeparators = false)
         {
             emitter.Emit(new StreamStart());

@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using YamlDotNet.Core;
 using HashCode = YamlDotNet.Core.HashCode;
 
@@ -31,6 +32,8 @@ namespace YamlDotNet.Representation
     public sealed class Mapping : Node, IMapping, IReadOnlyDictionary<Node, Node>
     {
         private readonly IReadOnlyDictionary<Node, Node> items;
+
+        public Mapping(INodeMapper mapper, params (Node key, Node value)[] items) : this(mapper, items.ToDictionary(i => i.key, i => i.value)) { }
 
         public Mapping(INodeMapper mapper, IReadOnlyDictionary<Node, Node> items)
             : this(mapper, items, Mark.Empty, Mark.Empty)

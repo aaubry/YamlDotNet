@@ -24,6 +24,8 @@
 using System;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace YamlDotNet.Helpers
 {
@@ -77,6 +79,69 @@ namespace YamlDotNet.Helpers
                 return memberExpression.Member as TMemberInfo;
             }
             return null;
+        }
+
+        public static Expression Apply(this LambdaExpression expression, Expression value)
+        {
+            if (1 != expression.Parameters.Count)
+            {
+                throw new ArgumentException($"The number of values (1) must be equal to the number of parameters of the lambda expression ({expression.Parameters.Count}).", nameof(value));
+            }
+
+            var visitor = new SingleParameterReplacementVisitor(expression.Parameters[0], value);
+            return visitor.Visit(expression.Body);
+        }
+
+        // TODO: Consider a special case for 2 parameters
+        public static Expression Apply(this LambdaExpression expression, params Expression[] values)
+        {
+            if (values.Length != expression.Parameters.Count)
+            {
+                throw new ArgumentException($"The number of values ({values.Length}) must be equal to the number of parameters of the lambda expression ({expression.Parameters.Count}).", nameof(values));
+            }
+
+            var replacements = new Dictionary<ParameterExpression, Expression>(values.Length);
+            for (int i = 0; i < values.Length; ++i)
+            {
+                replacements.Add(expression.Parameters[i], values[i]);
+            }
+
+            var visitor = new MultipleParametersReplacementVisitor(replacements);
+            return visitor.Visit(expression.Body);
+        }
+
+        private sealed class SingleParameterReplacementVisitor : ExpressionVisitor
+        {
+            private readonly ParameterExpression parameter;
+            private readonly Expression value;
+
+            public SingleParameterReplacementVisitor(ParameterExpression parameter, Expression value)
+            {
+                this.parameter = parameter;
+                this.value = value;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                return node == parameter ? value : base.VisitParameter(node);
+            }
+        }
+
+        private sealed class MultipleParametersReplacementVisitor : ExpressionVisitor
+        {
+            private readonly Dictionary<ParameterExpression, Expression> replacements;
+
+            public MultipleParametersReplacementVisitor(Dictionary<ParameterExpression, Expression> replacements)
+            {
+                this.replacements = replacements;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                return replacements.TryGetValue(node, out var replacement)
+                    ? replacement
+                    : base.VisitParameter(node);
+            }
         }
     }
 }

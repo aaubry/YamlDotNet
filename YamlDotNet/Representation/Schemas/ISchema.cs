@@ -25,6 +25,12 @@ using YamlDotNet.Core;
 
 namespace YamlDotNet.Representation.Schemas
 {
+
+
+
+
+
+
     public interface ISchema
     {
         ISchemaIterator Root { get; }

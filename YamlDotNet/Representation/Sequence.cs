@@ -32,6 +32,8 @@ namespace YamlDotNet.Representation
     {
         private readonly IReadOnlyList<Node> items;
 
+        public Sequence(INodeMapper mapper, params Node[] items) : this(mapper, (IReadOnlyList<Node>)items) { }
+
         public Sequence(INodeMapper mapper, IReadOnlyList<Node> items)
             : this(mapper, items, Mark.Empty, Mark.Empty)
         {
