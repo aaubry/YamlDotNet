@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -54,27 +55,42 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
-                var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
-                if (property == null)
+                try
                 {
-                    parser.SkipThisAndNestedEvents();
-                    continue;
-                }
-
-                var propertyValue = nestedObjectDeserializer(parser, property.Type);
-                if (propertyValue is IValuePromise propertyValuePromise)
-                {
-                    var valueRef = value;
-                    propertyValuePromise.ValueAvailable += v =>
+                    var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
+                    if (property == null)
                     {
-                        var convertedValue = TypeConverter.ChangeType(v, property.Type);
-                        property.Write(valueRef, convertedValue);
-                    };
+                        parser.SkipThisAndNestedEvents();
+                        continue;
+                    }
+
+                    var propertyValue = nestedObjectDeserializer(parser, property.Type);
+                    if (propertyValue is IValuePromise propertyValuePromise)
+                    {
+                        var valueRef = value;
+                        propertyValuePromise.ValueAvailable += v =>
+                        {
+                            var convertedValue = TypeConverter.ChangeType(v, property.Type);
+                            property.Write(valueRef, convertedValue);
+                        };
+                    }
+                    else
+                    {
+                        var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
+                        property.Write(value, convertedValue);
+                    }
                 }
-                else
+                catch (SerializationException ex)
                 {
-                    var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
-                    property.Write(value, convertedValue);
+                    throw new YamlException(propertyName.Start, propertyName.End, ex.Message);
+                }
+                catch (YamlException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    throw new YamlException(propertyName.Start, propertyName.End, "Exception during deserialization", ex);
                 }
             }
 

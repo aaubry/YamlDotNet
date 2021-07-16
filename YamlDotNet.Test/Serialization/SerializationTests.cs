@@ -1204,6 +1204,13 @@ y:
             var text = Lines("aaa: hello", "bbb: world");
             var actual = Record.Exception(() => Deserializer.Deserialize<Simple>(UsingReaderFor(text)));
             Assert.IsType<YamlException>(actual);
+            ((YamlException)actual).Start.Column.Should().Be(1);
+            ((YamlException)actual).Start.Line.Should().Be(2);
+            ((YamlException)actual).Start.Index.Should().Be(12);
+            ((YamlException)actual).End.Column.Should().Be(4);
+            ((YamlException)actual).End.Line.Should().Be(2);
+            ((YamlException)actual).End.Index.Should().Be(15);
+            ((YamlException)actual).Message.Should().Be("Property 'bbb' not found on type 'YamlDotNet.Test.Serialization.Simple'.");
         }
 
         [Fact]
