@@ -29,10 +29,10 @@ namespace YamlDotNet.Sandbox
         public void AnchorEnd() => PopColor();
         public void BlockScalarHintIndicatorStart() { }
         public void BlockScalarHintIndicatorEnd() { }
-        public void BlockSequenceItemIndicatorEnd() { }
-        public void BlockSequenceEnd() { }
         public void BlockSequenceStart() { }
-        public void BlockSequenceItemIndicatorStart() { }
+        public void BlockSequenceEnd() { }
+        public void BlockSequenceItemIndicatorStart() => PushColor(ConsoleColor.Cyan);
+        public void BlockSequenceItemIndicatorEnd() => PopColor();
         public void DirectiveStart() { }
         public void DirectiveEnd() { }
         public void DocumentEndIndicatorStart() { }
