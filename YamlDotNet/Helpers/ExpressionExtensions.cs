@@ -241,6 +241,7 @@ namespace YamlDotNet.Helpers
 
     public static class ExpressionBuilder
     {
+        public static TValue Inject<TValue>(Expression expression) => throw new NotSupportedException("Not to be called directly");
         public static TValue Inject<TValue>(Expr<TValue> expression) => throw new NotSupportedException("Not to be called directly");
         public static TResult Inject<T1, TResult>(Expression<Func<T1, TResult>> expression, T1 arg1) => throw new NotSupportedException("Not to be called directly");
 
