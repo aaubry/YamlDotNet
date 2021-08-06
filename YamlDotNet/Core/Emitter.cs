@@ -176,7 +176,7 @@ namespace YamlDotNet.Core
 
         /// <summary>
         /// Check if we need to accumulate more events before emitting.
-        /// 
+        ///
         /// We accumulate extra
         ///  - 1 event for DOCUMENT-START
         ///  - 2 events for SEQUENCE-START
@@ -1256,7 +1256,12 @@ namespace YamlDotNet.Core
                 var character = value[i];
                 if (IsBreak(character, out var breakCharacter))
                 {
-                    if (!previousBreak && !leadingSpaces && character == '\n')
+                    if (character == '\r' && (i + 1) < value.Length && value[i + 1] == '\n')
+                    {
+                        continue;
+                    }
+
+                    if (!previousBreak && !leadingSpaces && breakCharacter == '\n')
                     {
                         var k = 0;
                         while (i + k < value.Length && IsBreak(value[i + k], out _))
@@ -1268,6 +1273,7 @@ namespace YamlDotNet.Core
                             WriteBreak();
                         }
                     }
+
                     WriteBreak(breakCharacter);
                     isIndentation = true;
                     previousBreak = true;

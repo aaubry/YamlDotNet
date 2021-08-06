@@ -360,6 +360,7 @@ namespace YamlDotNet.Test.Core
 
         [Theory]
         [InlineData("b-carriage-return,b-line-feed\r\nlll", "b-carriage-return,b-line-feed\nlll")]
+        [InlineData("b-carriage-return,b-line-feed\r\n\r\nlll", "b-carriage-return,b-line-feed\n\nlll")]
         [InlineData("b-carriage-return\rlll", "b-carriage-return\nlll")]
         [InlineData("b-line-feed\nlll", "b-line-feed\nlll")]
         [InlineData("b-next-line\x85lll", "b-next-line\nlll")]
@@ -377,6 +378,28 @@ namespace YamlDotNet.Test.Core
                 LiteralScalar(expected),
                 DocumentEnd(Implicit),
                 StreamEnd);
+        }
+
+        [Theory]
+        [InlineData("b-carriage-return,b-line-feed\r\nlll", "b-carriage-return,b-line-feed\nlll")]
+        [InlineData("b-carriage-return,b-line-feed\r\n\r\nlll", "b-carriage-return,b-line-feed\n\nlll")]
+        [InlineData("b-carriage-return\rlll", "b-carriage-return\nlll")]
+        [InlineData("b-line-feed\nlll", "b-line-feed\nlll")]
+        [InlineData("b-next-line\x85lll", "b-next-line\nlll")]
+        [InlineData("b-line-separator\x2028lll", "b-line-separator\x2028lll")]
+        [InlineData("b-paragraph-separator\x2029lll", "b-paragraph-separator\x2029lll")]
+        public void NewLinesAreNotDuplicatedWhenEmittedInFoldedScalar(string input, string expected)
+        {
+            var yaml = EmittedTextFrom(StreamOf(DocumentWith(
+                                                             FoldedScalar(input)
+                                                            )));
+
+            AssertSequenceOfEventsFrom(Yaml.ParserForText(yaml),
+                                       StreamStart,
+                                       DocumentStart(Implicit),
+                                       FoldedScalar(expected),
+                                       DocumentEnd(Implicit),
+                                       StreamEnd);
         }
 
         [Theory]

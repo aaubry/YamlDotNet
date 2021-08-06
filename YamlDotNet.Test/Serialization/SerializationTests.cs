@@ -2001,7 +2001,7 @@ c: *anchor1");
 
             Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
         }
-       
+
         [Fact]
         public void ExampleFromSpecificationIsHandledCorrectlyWithLateDefine()
         {
@@ -2128,6 +2128,23 @@ Cycle: *o0");
             Assert.Same(obj, iterator);
         }
 
+        [Fact]
+        public void RoundtripWindowsNewlines()
+        {
+            var text = "Line1\r\nLine2\r\nLine3\r\n\r\nLine4";
+
+            var sut = new SerializerBuilder().Build();
+            var dut = new DeserializerBuilder().Build();
+
+            using var writer = new StringWriter { NewLine = Environment.NewLine };
+            sut.Serialize(writer, new StringContainer { Text = text });
+            var serialized = writer.ToString();
+
+            using var reader = new StringReader(serialized);
+            var roundtrippedText = dut.Deserialize<StringContainer>(reader).Text.NormalizeNewLines();
+            Assert.Equal(text, roundtrippedText);
+        }
+
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]
         public class DoublyConverted
         {
@@ -2172,6 +2189,11 @@ Cycle: *o0");
         {
             public string WillThrow { get { throw new Exception(); } }
 
+            public string Text { get; set; }
+        }
+
+        public class StringContainer
+        {
             public string Text { get; set; }
         }
 
