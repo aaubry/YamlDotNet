@@ -1206,10 +1206,10 @@ y:
             Assert.IsType<YamlException>(actual);
             ((YamlException)actual).Start.Column.Should().Be(1);
             ((YamlException)actual).Start.Line.Should().Be(2);
-            ((YamlException)actual).Start.Index.Should().Be(12);
+            ((YamlException)actual).Start.Index.Should().Be(Environment.OSVersion.Platform == PlatformID.Unix ? 11 : 12);
             ((YamlException)actual).End.Column.Should().Be(4);
             ((YamlException)actual).End.Line.Should().Be(2);
-            ((YamlException)actual).End.Index.Should().Be(15);
+            ((YamlException)actual).End.Index.Should().Be(Environment.OSVersion.Platform == PlatformID.Unix ? 14 : 15);
             ((YamlException)actual).Message.Should().Be("Property 'bbb' not found on type 'YamlDotNet.Test.Serialization.Simple'.");
         }
 
@@ -2142,7 +2142,7 @@ Cycle: *o0");
 
             using var reader = new StringReader(serialized);
             var roundtrippedText = dut.Deserialize<StringContainer>(reader).Text.NormalizeNewLines();
-            Assert.Equal(text, roundtrippedText);
+            Assert.Equal(text, Environment.OSVersion.Platform == PlatformID.Win32NT ? roundtrippedText : roundtrippedText.Replace("\n", "\r\n"));
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]

@@ -39,17 +39,17 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            // no spec test is ignored as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
+            "5T43", "JR7V", "NKF9", "CFD4", "U99R"
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
         {
-            // no false-positives known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
+            // no false-positives known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-08-01
         };
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
         {
-            "5LLU" // remove 5LLU once https://github.com/yaml/yaml-test-suite/pull/61 is released
+            // no desync cases known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-08-01
         };
 
         [Theory, ClassData(typeof(ParserSpecTestsData))]
