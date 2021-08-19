@@ -324,7 +324,7 @@ namespace YamlDotNet.Test.Core
                 )
             );
             var buffer = new MemoryStream();
-#if (NETCOREAPP2_1 || NETCOREAPP3_1)
+#if NETCOREAPP3_1_OR_GREATER
             // Code pages such as Cyrillic are not recognized by default in
             // .NET Core.  We need to register this provider.
             // https://msdn.microsoft.com/en-us/library/mt643899(v=vs.110).aspx#Remarks

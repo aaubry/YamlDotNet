@@ -136,14 +136,14 @@ namespace YamlDotNet.Helpers
             list.RemoveAt(index);
         }
 
-#if !(NETCOREAPP3_1)
+#if !NETCOREAPP3_1_OR_GREATER
 #pragma warning disable 8767 // Nullability of reference types in type of parameter ... doesn't match implicitly implemented member
 #endif
 
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value) =>
             dictionary.TryGetValue(key, out value);
 
-#if !(NETCOREAPP3_1)
+#if !NETCOREAPP3_1_OR_GREATER
 #pragma warning restore 8767
 #endif
 

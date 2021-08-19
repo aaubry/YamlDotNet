@@ -24,9 +24,9 @@
 // used in YamlDotNet.
 
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
-using System.ComponentModel;
 
 namespace YamlDotNet.Serialization.Utilities
 {
@@ -247,7 +247,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// </summary>
         /// <typeparam name="TConvertible">The type to which the converter should be associated.</typeparam>
         /// <typeparam name="TConverter">The type of the converter.</typeparam>
-#if !(NETCOREAPP3_1 || NETSTANDARD2_1 || NETSTANDARD1_3 || UNITY)
+#if !(NETCOREAPP3_1_OR_GREATER || NETSTANDARD2_1 || NETSTANDARD1_3 || UNITY)
         [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
 #endif
         public static void RegisterTypeConverter<TConvertible, TConverter>()

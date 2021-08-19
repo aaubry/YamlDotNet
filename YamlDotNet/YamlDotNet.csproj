@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;netstandard1.3;net20;net35;net40;net45</TargetFrameworks>
-
+    <TargetFrameworks>net5;netcoreapp3.1;netstandard2.1;netstandard1.3;net20;net35;net40;net45</TargetFrameworks>
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
@@ -19,7 +18,6 @@
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
 
-    <NetStandard>false</NetStandard>
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
   </PropertyGroup>
 
@@ -32,10 +30,6 @@
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netcoreapp3.1'">
-    <NetStandard>true</NetStandard>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Include="Helpers/Portability/**/*.cs" />
     <Compile Remove="Helpers/Portability/**/*.cs" />
@@ -46,30 +40,6 @@
 
   <ItemGroup>
     <PackageReference Include="Nullable" Version="1.1.1" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <PackageReference Include="System.ComponentModel.TypeConverter">
-      <Version>4.3.0</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <PackageReference Include="System.ComponentModel.TypeConverter">
-      <Version>4.3.0</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="System.ComponentModel.TypeConverter">
-      <Version>4.3.0</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="System.ComponentModel.TypeConverter">
-      <Version>4.3.0</Version>
-    </PackageReference>
   </ItemGroup>
 
   <Import Project="../build/common.props" />
@@ -90,28 +60,24 @@
     Remove implicit framework references, to prevent warning of missing System.Drawing
     when targetting Unity.
    -->
-  <PropertyGroup Condition="'$(NetStandard)' == 'false'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <ItemGroup Condition="'$(NetStandard)' == 'false'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
   </ItemGroup>
-  <ItemGroup Condition="'$(NetStandard)' == 'false' And '$(TargetFramework)' != 'net20'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(TargetFramework)' != 'net20'">
     <Reference Include="System.Core" />
   </ItemGroup>
-  <ItemGroup Condition="'$(NetStandard)' == 'true'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters">
-      <Version>4.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.ComponentModel.TypeConverter">
-      <Version>4.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Diagnostics.Debug">
-      <Version>4.3.0</Version>
-    </PackageReference>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' or '$(TargetFramework)' == 'net45'">
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
   </ItemGroup>
 
   <Target Name="Info" BeforeTargets="CoreCompile">
