@@ -53,7 +53,18 @@ namespace YamlDotNet.Test.Spec
         };
 
         [Theory, ClassData(typeof(ParserSpecTestsData))]
-        public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error)
+        public void ConformsWithYamlSpec1(string name, string description, string inputFile, string expectedEventFile, bool error)
+        {
+            ConformsWithYamlSpec(name, description, inputFile, expectedEventFile, error, (r, w) => new LibYamlEventStream(new Parser(r)).WriteTo(w));
+        }
+
+        [Theory, ClassData(typeof(ParserSpecTestsData))]
+        public void ConformsWithYamlSpec2(string name, string description, string inputFile, string expectedEventFile, bool error)
+        {
+            ConformsWithYamlSpec(name, description, inputFile, expectedEventFile, error, (r, w) => new Parser2(r, new LibYamlEventStream2(w)).Load());
+        }
+
+        private void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error, Action<TextReader, TextWriter> transform)
         {
             var expectedResult = File.ReadAllText(expectedEventFile);
             using (var writer = new StringWriter())
@@ -62,7 +73,7 @@ namespace YamlDotNet.Test.Spec
                 {
                     using (var reader = File.OpenText(inputFile))
                     {
-                        new LibYamlEventStream(new Parser(reader)).WriteTo(writer);
+                        transform(reader, writer);
                     }
                 }
                 catch (Exception ex)

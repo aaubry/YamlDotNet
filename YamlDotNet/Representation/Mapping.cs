@@ -29,11 +29,31 @@ using HashCode = YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.Representation
 {
+    public sealed class MappingEntry : INode
+    {
+        public NodeKind Kind => (NodeKind)(-1);
+        public TagName Tag => TagName.Empty;
+
+        public Node Key { get; }
+        public Node Value { get; }
+
+        public MappingEntry(Node key, Node value)
+        {
+            Key = key;
+            Value = value;
+        }
+    }
+
     public sealed class Mapping : Node, IMapping, IReadOnlyDictionary<Node, Node>
     {
+        // TODO: Do not use a dictionary since keys may be repeated
         private readonly IReadOnlyDictionary<Node, Node> items;
 
-        public Mapping(INodeMapper mapper, params (Node key, Node value)[] items) : this(mapper, items.ToDictionary(i => i.key, i => i.value)) { }
+        public Mapping(INodeMapper mapper, params (Node key, Node value)[] items)
+            : this(mapper, items.ToDictionary(i => i.key, i => i.value)) { }
+
+        public Mapping(INodeMapper mapper, IEnumerable<KeyValuePair<Node, Node>> items)
+            : this(mapper, items.ToDictionary(i => i.Key, i => i.Value)) { }
 
         public Mapping(INodeMapper mapper, IReadOnlyDictionary<Node, Node> items)
             : this(mapper, items, Mark.Empty, Mark.Empty)
