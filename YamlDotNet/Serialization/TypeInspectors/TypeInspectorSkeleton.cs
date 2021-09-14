@@ -31,7 +31,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     {
         public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container);
 
-        public IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched)
+        public IPropertyDescriptor GetProperty(Type type, object? container, string name, bool ignoreUnmatched)
         {
             var candidates = GetProperties(type, container)
                 .Where(p => p.Name == name);

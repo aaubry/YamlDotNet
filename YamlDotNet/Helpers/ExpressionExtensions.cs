@@ -47,7 +47,7 @@ namespace YamlDotNet.Helpers
             return property;
         }
 
-        private static TMemberInfo? TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
+        private static TMemberInfo TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
             where TMemberInfo : MemberInfo
         {
             if (lambdaExpression.Parameters.Count != 1)

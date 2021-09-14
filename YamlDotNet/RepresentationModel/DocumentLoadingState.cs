@@ -81,7 +81,7 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="anchor">The anchor.</param>
         /// <param name="node">The node that was retrieved.</param>
         /// <returns>true if the anchor was found; otherwise false.</returns>
-        public bool TryGetNode(AnchorName anchor, [NotNullWhen(true)] out YamlNode? node)
+        public bool TryGetNode(AnchorName anchor, out YamlNode? node)
         {
             return anchors.TryGetValue(anchor, out node);
         }

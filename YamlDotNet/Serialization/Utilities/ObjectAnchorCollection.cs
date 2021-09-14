@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="object">The object.</param>
         /// <param name="anchor">The anchor.</param>
         /// <returns></returns>
-        public bool TryGetAnchor(object @object, [MaybeNullWhen(false)] out string? anchor)
+        public bool TryGetAnchor(object @object, out string? anchor)
         {
             return anchorsByObject.TryGetValue(@object, out anchor);
         }

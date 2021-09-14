@@ -49,6 +49,6 @@ namespace YamlDotNet.Serialization
         /// found in <paramref name="type"/>
         /// </param>
         /// <returns></returns>
-        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched);
+        IPropertyDescriptor GetProperty(Type type, object? container, string name, bool ignoreUnmatched);
     }
 }
