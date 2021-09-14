@@ -20,7 +20,6 @@
 // SOFTWARE.
 
 using System.IO;
-using Xunit.Abstractions;
 using YamlDotNet.Samples.Helpers;
 using YamlDotNet.Serialization;
 

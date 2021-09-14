@@ -21,7 +21,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Xunit.Abstractions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Samples.Helpers;
