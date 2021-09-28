@@ -32,5 +32,12 @@ BenchmarkDotNet.Artifacts
 
 /YamlDotNet.AotTest/exitcode.txt
 /tools/build/Properties/launchSettings.json
-/YamlDotNet.Unity
-*.meta
+
+/YamlDotNet.Unity/Library
+/YamlDotNet.Unity/Logs
+/YamlDotNet.Unity/MonoBleedingEdge
+/YamlDotNet.Unity/UserSettings
+/YamlDotNet.Unity/YamlDotNet.Unity_Data
+
+/YamlDotNet/**/*.meta
+/YamlDotNet.Unity/build
