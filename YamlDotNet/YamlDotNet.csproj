@@ -37,11 +37,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Helpers/Portability/**/*.cs" />
-    <Compile Remove="Helpers/Portability/**/*.cs" />
-    <Compile Include="Helpers/Portability/*$(RealTargetFramework)*/*.cs" />
-    <Compile Include="Helpers/Portability/*/others/*.cs" />
-    <Compile Remove="Helpers/Portability/*$(RealTargetFramework)*/others/*.cs" />
+    <None Include="Portability/**/*.cs" />
+    <Compile Remove="Portability/**/*.cs" />
+    <Compile Include="Portability/*$(RealTargetFramework)*/include/*.cs" />
+    <Compile Include="Portability/*/exclude/*.cs" />
+    <Compile Remove="Portability/*$(RealTargetFramework)*/exclude/*.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HashCode = YamlDotNet.Core.HashCode;
 
@@ -107,7 +108,8 @@ namespace YamlDotNet.Serialization
 
         private readonly Dictionary<AttributeKey, List<AttributeMapping>> overrides = new Dictionary<AttributeKey, List<AttributeMapping>>();
 
-        public T? GetAttribute<T>(Type type, string member) where T : Attribute
+        [return: MaybeNull]
+        public T GetAttribute<T>(Type type, string member) where T : Attribute
         {
             if (overrides.TryGetValue(new AttributeKey(typeof(T), member), out var mappings))
             {

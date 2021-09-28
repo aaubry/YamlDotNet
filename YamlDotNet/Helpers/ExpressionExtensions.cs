@@ -22,6 +22,7 @@
 #if !NET20
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -47,7 +48,8 @@ namespace YamlDotNet.Helpers
             return property;
         }
 
-        private static TMemberInfo? TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
+        [return: MaybeNull]
+        private static TMemberInfo TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
             where TMemberInfo : MemberInfo
         {
             if (lambdaExpression.Parameters.Count != 1)
