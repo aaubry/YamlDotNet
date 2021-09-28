@@ -1,0 +1,1 @@
+../../../YamlDotNet.Samples/LoadingAYamlStream.cs
