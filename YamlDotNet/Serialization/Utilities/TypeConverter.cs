@@ -234,35 +234,3 @@ namespace YamlDotNet.Serialization.Utilities
         }
     }
 }
-
-#if !(NETSTANDARD1_3 || UNITY)
-namespace YamlDotNet.Serialization.Utilities
-{
-    using System.Linq;
-
-    partial class TypeConverter
-    {
-        /// <summary>
-        /// Registers a <see cref="System.ComponentModel.TypeConverter"/> dynamically.
-        /// </summary>
-        /// <typeparam name="TConvertible">The type to which the converter should be associated.</typeparam>
-        /// <typeparam name="TConverter">The type of the converter.</typeparam>
-#if NET20 || NET35 || NET45
-        [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
-#endif
-        public static void RegisterTypeConverter<TConvertible, TConverter>()
-            where TConverter : System.ComponentModel.TypeConverter
-        {
-            var alreadyRegistered = TypeDescriptor.GetAttributes(typeof(TConvertible))
-                .OfType<TypeConverterAttribute>()
-                .Any(a => a.ConverterTypeName == typeof(TConverter).AssemblyQualifiedName);
-
-            if (!alreadyRegistered)
-            {
-                TypeDescriptor.AddAttributes(typeof(TConvertible), new TypeConverterAttribute(typeof(TConverter)));
-            }
-        }
-
-    }
-}
-#endif

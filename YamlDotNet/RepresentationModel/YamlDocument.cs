@@ -77,11 +77,8 @@ namespace YamlDotNet.RepresentationModel
 
             state.ResolveAliases();
 
-            if (RootNode == null)
-            {
-                // This should not happen unless the parser has a bug
-                throw new ArgumentException("Atempted to parse an empty document");
-            }
+            // Throw should not happen unless the parser has a bug
+            RootNode = RootNode ?? throw new ArgumentException("Atempted to parse an empty document");
         }
 
         /// <summary>
