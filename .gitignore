@@ -27,6 +27,8 @@ samples/dotnet/project.lock.json
 YamlDotNet/Properties/AssemblyInfo.Generated.cs
 
 .vs
+.idea
+
 /YamlDotNet/Properties/AssemblyInfo.cs
 BenchmarkDotNet.Artifacts
 

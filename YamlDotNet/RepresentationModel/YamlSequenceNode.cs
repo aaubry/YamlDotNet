@@ -22,9 +22,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization;
 using static YamlDotNet.Core.HashCode;
 
@@ -251,7 +251,9 @@ namespace YamlDotNet.RepresentationModel
                 return MaximumRecursionLevelReachedToStringValue;
             }
 
-            var text = new StringBuilder("[ ");
+            using var textBuilder = StringBuilderPool.Rent();
+            var text = textBuilder.Builder;
+            text.Append("[ ");
 
             foreach (var child in children)
             {

@@ -26,6 +26,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
@@ -1860,11 +1861,12 @@ namespace YamlDotNet.Core
             isIndentation = false;
         }
 
-        private string UrlEncode(string text)
+        private static string UrlEncode(string text)
         {
             return UriReplacer.Replace(text, delegate (Match match)
             {
-                var buffer = new StringBuilder();
+                using var bufferBuilder = StringBuilderPool.Rent();
+                var buffer = bufferBuilder.Builder;
                 foreach (var toEncode in Encoding.UTF8.GetBytes(match.Value))
                 {
                     buffer.AppendFormat("%{0:X02}", toEncode);
