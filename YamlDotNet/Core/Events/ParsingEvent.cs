@@ -59,10 +59,10 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        internal ParsingEvent(Mark start, Mark end)
+        internal ParsingEvent(in Mark start, in Mark end)
         {
-            this.Start = start ?? throw new System.ArgumentNullException(nameof(start));
-            this.End = end ?? throw new System.ArgumentNullException(nameof(end));
+            this.Start = start;
+            this.End = end;
         }
     }
 }

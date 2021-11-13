@@ -50,7 +50,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        public YamlException(Mark start, Mark end, string message)
+        public YamlException(in Mark start, in Mark end, string message)
             : this(start, end, message, null)
         {
         }
@@ -58,7 +58,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        public YamlException(Mark start, Mark end, string message, Exception? innerException)
+        public YamlException(in Mark start, in Mark end, string message, Exception? innerException)
             : base(message, innerException)
         {
             Start = start;

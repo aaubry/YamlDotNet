@@ -40,7 +40,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="AnchorNotFoundException"/> class.
         /// </summary>
-        public AnchorNotFoundException(Mark start, Mark end, string message)
+        public AnchorNotFoundException(in Mark start, in Mark end, string message)
             : base(start, end, message)
         {
         }

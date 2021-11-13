@@ -419,7 +419,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Generate an empty scalar event.
         /// </summary>
-        private static ParsingEvent ProcessEmptyScalar(Mark position)
+        private static ParsingEvent ProcessEmptyScalar(in Mark position)
         {
             return new Events.Scalar(AnchorName.Empty, TagName.Empty, string.Empty, ScalarStyle.Plain, true, false, position, position);
         }

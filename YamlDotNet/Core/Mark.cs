@@ -20,18 +20,19 @@
 // SOFTWARE.
 
 using System;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {
     /// <summary>
     /// Represents a location inside a file
     /// </summary>
-    public sealed class Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
+    public readonly struct Mark : IEquatable<Mark>, IComparable<Mark>, IComparable
     {
         /// <summary>
         /// Gets a <see cref="Mark"/> with empty values.
         /// </summary>
-        public static readonly Mark Empty = new Mark();
+        public static readonly Mark Empty = new Mark(0, 1, 1);
 
         /// <summary>
         /// Gets / sets the absolute offset in the file
@@ -48,25 +49,19 @@ namespace YamlDotNet.Core
         /// </summary>
         public int Column { get; }
 
-        public Mark()
-        {
-            Line = 1;
-            Column = 1;
-        }
-
         public Mark(int index, int line, int column)
         {
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Index must be greater than or equal to zero.");
+                ThrowHelper.ThrowArgumentOutOfRangeException(nameof(index), "Index must be greater than or equal to zero.");
             }
             if (line < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(line), "Line must be greater than or equal to 1.");
+                ThrowHelper.ThrowArgumentOutOfRangeException(nameof(line), "Line must be greater than or equal to 1.");
             }
             if (column < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(column), "Column must be greater than or equal to 1.");
+                ThrowHelper.ThrowArgumentOutOfRangeException(nameof(column), "Column must be greater than or equal to 1.");
             }
 
             Index = index;
@@ -88,14 +83,13 @@ namespace YamlDotNet.Core
         /// <summary />
         public override bool Equals(object? obj)
         {
-            return Equals(obj as Mark);
+            return Equals((Mark)(obj ?? Empty));
         }
 
         /// <summary />
-        public bool Equals(Mark? other)
+        public bool Equals(Mark other)
         {
-            return other != null
-                && Index == other.Index
+            return Index == other.Index
                 && Line == other.Line
                 && Column == other.Column;
         }
@@ -115,21 +109,12 @@ namespace YamlDotNet.Core
         /// <summary />
         public int CompareTo(object? obj)
         {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-            return CompareTo(obj as Mark);
+            return CompareTo((Mark)(obj ?? Empty));
         }
 
         /// <summary />
-        public int CompareTo(Mark? other)
+        public int CompareTo(Mark other)
         {
-            if (other == null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
             var cmp = Line.CompareTo(other.Line);
             if (cmp == 0)
             {

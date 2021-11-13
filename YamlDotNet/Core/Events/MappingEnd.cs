@@ -43,7 +43,7 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public MappingEnd(Mark start, Mark end)
+        public MappingEnd(in Mark start, in Mark end)
             : base(start, end)
         {
         }
