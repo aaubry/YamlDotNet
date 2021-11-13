@@ -23,7 +23,7 @@ using System;
 
 namespace YamlDotNet.Core
 {
-    public struct TagName : IEquatable<TagName>
+    public readonly struct TagName : IEquatable<TagName>
     {
         public static readonly TagName Empty = default;
 
