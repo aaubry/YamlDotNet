@@ -25,6 +25,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using YamlDotNet.Core.Tokens;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {
@@ -35,7 +36,7 @@ namespace YamlDotNet.Core
     {
         private const int MaxVersionNumberLength = 9;
 
-        private static readonly IDictionary<char, char> SimpleEscapeCodes = new SortedDictionary<char, char>
+        private static readonly SortedDictionary<char, char> SimpleEscapeCodes = new SortedDictionary<char, char>
         {
             { '0', '\0' },
             { 'a', '\x07' },
@@ -607,7 +608,8 @@ namespace YamlDotNet.Core
                     Skip();
                 }
 
-                var text = new StringBuilder();
+                using var textBuilder = StringBuilderPool.Rent();
+                var text = textBuilder.Builder;
                 while (!analyzer.IsBreakOrZero())
                 {
                     text.Append(ReadCurrentCharacter());
@@ -1260,7 +1262,8 @@ namespace YamlDotNet.Core
             //     '[', ']', '{', '}' and ','
             // ref: https://yaml.org/spec/1.2/spec.html#id2785586
 
-            var value = new StringBuilder();
+            using var valueBuilder = StringBuilderPool.Rent();
+            var value = valueBuilder.Builder;
             while (!analyzer.IsWhiteBreakOrZero())
             {
                 // Anchor: read all allowed characters
@@ -1437,9 +1440,14 @@ namespace YamlDotNet.Core
 
         Token ScanBlockScalar(bool isLiteral)
         {
-            var value = new StringBuilder();
-            var leadingBreak = new StringBuilder();
-            var trailingBreaks = new StringBuilder();
+            using var valueBuilder = StringBuilderPool.Rent();
+            var value = valueBuilder.Builder;
+
+            using var leadingBreakBuilder = StringBuilderPool.Rent();
+            var leadingBreak = leadingBreakBuilder.Builder;
+
+            using var trailingBreaksBuilder = StringBuilderPool.Rent();
+            var trailingBreaks = trailingBreaksBuilder.Builder;
 
             var chomping = 0;
             var increment = 0;
@@ -1758,10 +1766,18 @@ namespace YamlDotNet.Core
 
             // Consume the content of the quoted scalar.
 
-            var value = new StringBuilder();
-            var whitespaces = new StringBuilder();
-            var leadingBreak = new StringBuilder();
-            var trailingBreaks = new StringBuilder();
+            using var valueBuilder = StringBuilderPool.Rent();
+            var value = valueBuilder.Builder;
+
+            using var whitespacesBuilder = StringBuilderPool.Rent();
+            var whitespaces = whitespacesBuilder.Builder;
+
+            using var leadingBreakBuilder = StringBuilderPool.Rent();
+            var leadingBreak = leadingBreakBuilder.Builder;
+
+            using var trailingBreaksBuilder = StringBuilderPool.Rent();
+            var trailingBreaks = trailingBreaksBuilder.Builder;
+
             var hasLeadingBlanks = false;
 
             while (true)
@@ -2009,10 +2025,17 @@ namespace YamlDotNet.Core
 
         private Scalar ScanPlainScalar(ref bool isMultiline)
         {
-            var value = new StringBuilder();
-            var whitespaces = new StringBuilder();
-            var leadingBreak = new StringBuilder();
-            var trailingBreaks = new StringBuilder();
+            using var valueBuilder = StringBuilderPool.Rent();
+            var value = valueBuilder.Builder;
+
+            using var whitespacesBuilder = StringBuilderPool.Rent();
+            var whitespaces = whitespacesBuilder.Builder;
+
+            using var leadingBreakBuilder = StringBuilderPool.Rent();
+            var leadingBreak = leadingBreakBuilder.Builder;
+
+            using var trailingBreaksBuilder = StringBuilderPool.Rent();
+            var trailingBreaks = trailingBreaksBuilder.Builder;
 
             var hasLeadingBlanks = false;
             var currentIndent = indent + 1;
@@ -2209,7 +2232,8 @@ namespace YamlDotNet.Core
         /// </summary>
         private string ScanDirectiveName(Mark start)
         {
-            var name = new StringBuilder();
+            using var nameBuilder = StringBuilderPool.Rent();
+            var name = nameBuilder.Builder;
 
             // Consume the directive name.
 
@@ -2320,7 +2344,9 @@ namespace YamlDotNet.Core
 
         private string ScanTagUri(string? head, Mark start)
         {
-            var tag = new StringBuilder();
+            using var tagBuilder = StringBuilderPool.Rent();
+            var tag = tagBuilder.Builder;
+
             if (head != null && head.Length > 1)
             {
                 tag.Append(head.Substring(1));
@@ -2453,7 +2479,8 @@ namespace YamlDotNet.Core
 
             // Copy the '!' character.
 
-            var tagHandle = new StringBuilder();
+            using var tagHandleBuilder = StringBuilderPool.Rent();
+            var tagHandle = tagHandleBuilder.Builder;
             tagHandle.Append(ReadCurrentCharacter());
 
             // Copy all subsequent alphabetical and numerical characters.

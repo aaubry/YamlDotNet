@@ -29,7 +29,7 @@ using System.Runtime.Serialization;
 namespace YamlDotNet.Helpers
 {
     [Serializable]
-    internal class OrderedDictionary<TKey, TValue> : IOrderedDictionary<TKey, TValue>
+    internal sealed class OrderedDictionary<TKey, TValue> : IOrderedDictionary<TKey, TValue>
         where TKey : notnull
     {
         [NonSerialized]

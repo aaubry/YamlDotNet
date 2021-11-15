@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
@@ -35,7 +34,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly IOrderedDictionary<YamlNode, YamlNode> children = new OrderedDictionary<YamlNode, YamlNode>();
+        private readonly OrderedDictionary<YamlNode, YamlNode> children = new OrderedDictionary<YamlNode, YamlNode>();
 
         /// <summary>
         /// Gets the children of the current node.
@@ -347,7 +346,9 @@ namespace YamlDotNet.RepresentationModel
                 return MaximumRecursionLevelReachedToStringValue;
             }
 
-            var text = new StringBuilder("{ ");
+            using var textBuilder = StringBuilderPool.Rent();
+            var text = textBuilder.Builder;
+            text.Append("{ ");
 
             foreach (var child in children)
             {

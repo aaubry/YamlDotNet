@@ -21,10 +21,10 @@
 
 using System;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -129,9 +129,10 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return result;
         }
 
-        private object DeserializeIntegerHelper(TypeCode typeCode, string value)
+        private static object DeserializeIntegerHelper(TypeCode typeCode, string value)
         {
-            var numberBuilder = new StringBuilder();
+            using var numberBuilderStringBuilder = StringBuilderPool.Rent();
+            var numberBuilder = numberBuilderStringBuilder.Builder;
             var currentIndex = 0;
             var isNegative = false;
             int numberBase;
