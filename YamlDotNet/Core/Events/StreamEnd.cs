@@ -55,7 +55,7 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public StreamEnd(Mark start, Mark end)
+        public StreamEnd(in Mark start, in Mark end)
             : base(start, end)
         {
         }

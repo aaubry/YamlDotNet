@@ -40,7 +40,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="MaximumRecursionLevelReachedException"/> class.
         /// </summary>
-        public MaximumRecursionLevelReachedException(Mark start, Mark end, string message)
+        public MaximumRecursionLevelReachedException(in Mark start, in Mark end, string message)
             : base(start, end, message)
         {
         }

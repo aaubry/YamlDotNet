@@ -92,7 +92,7 @@ namespace YamlDotNet.Core.Events
         /// </summary>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public DocumentStart(Mark start, Mark end)
+        public DocumentStart(in Mark start, in Mark end)
             : this(null, null, true, start, end)
         {
         }

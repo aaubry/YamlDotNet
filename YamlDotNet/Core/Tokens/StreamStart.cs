@@ -39,7 +39,7 @@ namespace YamlDotNet.Core.Tokens
         /// </summary>
         /// <param name="start">The start position of the token.</param>
         /// <param name="end">The end position of the token.</param>
-        public StreamStart(Mark start, Mark end)
+        public StreamStart(in Mark start, in Mark end)
             : base(start, end)
         {
         }

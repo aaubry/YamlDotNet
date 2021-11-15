@@ -40,7 +40,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="SemanticErrorException"/> class.
         /// </summary>
-        public SemanticErrorException(Mark start, Mark end, string message)
+        public SemanticErrorException(in Mark start, in Mark end, string message)
             : base(start, end, message)
         {
         }

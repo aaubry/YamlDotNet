@@ -2230,7 +2230,7 @@ namespace YamlDotNet.Core
         ///      %TAG    !yaml!  tag:yaml.org,2002:  \n
         ///       ^^^
         /// </summary>
-        private string ScanDirectiveName(Mark start)
+        private string ScanDirectiveName(in Mark start)
         {
             using var nameBuilder = StringBuilderPool.Rent();
             var name = nameBuilder.Builder;
@@ -2276,7 +2276,7 @@ namespace YamlDotNet.Core
         ///      %YAML   1.1     # a comment \n
         ///           ^^^^^^
         /// </summary>
-        private Token ScanVersionDirectiveValue(Mark start)
+        private Token ScanVersionDirectiveValue(in Mark start)
         {
             SkipWhitespaces();
 
@@ -2307,7 +2307,7 @@ namespace YamlDotNet.Core
         ///      %TAG    !yaml!  tag:yaml.org,2002:  \n
         ///          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         /// </summary>
-        private Token ScanTagDirectiveValue(Mark start)
+        private Token ScanTagDirectiveValue(in Mark start)
         {
             SkipWhitespaces();
 
@@ -2397,7 +2397,7 @@ namespace YamlDotNet.Core
         /// Decode an URI-escape sequence corresponding to a single UTF-8 character.
         /// </summary>
 
-        private string ScanUriEscapes(Mark start)
+        private string ScanUriEscapes(in Mark start)
         {
             // Decode the required number of characters.
 
@@ -2522,7 +2522,7 @@ namespace YamlDotNet.Core
         ///      %YAML   1.1     # a comment \n
         ///                ^
         /// </summary>
-        private int ScanVersionDirectiveNumber(Mark start)
+        private int ScanVersionDirectiveNumber(in Mark start)
         {
             var value = 0;
             var length = 0;

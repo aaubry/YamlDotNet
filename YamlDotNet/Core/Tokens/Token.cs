@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Core.Tokens
 {
     /// <summary>
@@ -43,10 +41,10 @@ namespace YamlDotNet.Core.Tokens
         /// </summary>
         /// <param name="start">The start position of the token.</param>
         /// <param name="end">The end position of the token.</param>
-        protected Token(Mark start, Mark end)
+        protected Token(in Mark start, in Mark end)
         {
-            this.Start = start ?? throw new ArgumentNullException(nameof(start));
-            this.End = end ?? throw new ArgumentNullException(nameof(end));
+            this.Start = start;
+            this.End = end;
         }
     }
 }

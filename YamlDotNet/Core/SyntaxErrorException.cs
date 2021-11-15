@@ -40,7 +40,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="SyntaxErrorException"/> class.
         /// </summary>
-        public SyntaxErrorException(Mark start, Mark end, string message)
+        public SyntaxErrorException(in Mark start, in Mark end, string message)
             : base(start, end, message)
         {
         }
