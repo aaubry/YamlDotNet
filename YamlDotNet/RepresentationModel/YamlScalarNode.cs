@@ -125,7 +125,7 @@ namespace YamlDotNet.RepresentationModel
         /// </returns>
         public override int GetHashCode()
         {
-            return CombineHashCodes(Tag, Value);
+            return CombineHashCodes(Tag.GetHashCode(), Value);
         }
 
         /// <summary>
