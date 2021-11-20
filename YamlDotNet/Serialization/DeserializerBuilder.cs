@@ -84,6 +84,7 @@ namespace YamlDotNet.Serialization
                 { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value) },
                 { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
+                { typeof(AnnotatedConstructorObjectNodeDeserializer), _ => new AnnotatedConstructorObjectNodeDeserializer(ignoreUnmatched) },
                 { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched) }
             };
 

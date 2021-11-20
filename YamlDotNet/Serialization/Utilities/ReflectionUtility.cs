@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace YamlDotNet.Serialization.Utilities
 {
@@ -50,5 +52,35 @@ namespace YamlDotNet.Serialization.Utilities
                 yield return implementedInterface;
             }
         }
+
+        public static T? GetCustomAttribute<T>(this ConstructorInfo constructorInfo) where T : Attribute
+        {
+            return (T?)constructorInfo.GetCustomAttributes(typeof(T), false).FirstOrDefault();
+        }
+
+        public static bool TryGetFirstConstructorWithAttribute<T>(
+            this Type type,
+            out ConstructorInfo constructorInfo,
+            out T attribute
+        )
+            where T : Attribute
+        {
+            var constructors = type.GetConstructors();
+            foreach (var constructor in constructors)
+            {
+                var attr = constructor.GetCustomAttribute<T>();
+                if (null != attr)
+                {
+                    attribute = attr;
+                    constructorInfo = constructor;
+                    return true;
+                }
+            }
+
+            constructorInfo = null!;
+            attribute = null!;
+            return false;
+        }
+
     }
 }
