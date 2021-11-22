@@ -30,7 +30,7 @@ YamlDotNet/Properties/AssemblyInfo.Generated.cs
 .idea
 
 /YamlDotNet/Properties/AssemblyInfo.cs
-BenchmarkDotNet.Artifacts
+BenchmarkDotNet.Artifacts*
 
 /YamlDotNet.AotTest/exitcode.txt
 /tools/build/Properties/launchSettings.json
