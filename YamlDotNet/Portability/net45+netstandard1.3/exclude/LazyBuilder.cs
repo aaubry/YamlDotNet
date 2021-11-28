@@ -25,6 +25,10 @@ namespace YamlDotNet.Helpers
 {
     internal static class Lazy
     {
+#if NETSTANDARD2_0
+        public static Lazy<T> FromValue<T>(T value) => new Lazy<T>(() => value);
+#else
         public static Lazy<T> FromValue<T>(T value) => new Lazy<T>(value);
+#endif
     }
 }
