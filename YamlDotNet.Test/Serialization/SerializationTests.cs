@@ -217,6 +217,23 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void DeserializeIncompleteDirective()
+        {
+            Action action = () => Deserializer.Deserialize<object>(UsingReaderFor("%Y"));
+
+            action.ShouldThrow<SyntaxErrorException>()
+                .WithMessage("While scanning a directive, found unexpected end of stream.");
+        }
+
+        [Fact]
+        public void DeserializeSkippedReservedDirective()
+        {
+            Action action = () => Deserializer.Deserialize<object>(UsingReaderFor("%Y "));
+
+            action.ShouldNotThrow();
+        }
+
+        [Fact]
         public void DeserializeCustomTags()
         {
             var stream = Yaml.ReaderFrom("tags.yaml");
