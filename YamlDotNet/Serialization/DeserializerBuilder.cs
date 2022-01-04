@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.NamingConventions;
@@ -360,6 +361,25 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder IgnoreUnmatchedProperties()
         {
             ignoreUnmatched = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures how pre-existing collections are handled when using <see cref="Deserializer.PopulateObject{T}(IParser, T)"/> and overloads.
+        /// </summary>
+        /// <param name="arrayStrategy"></param>
+        /// <param name="collectionStrategy"></param>
+        /// <param name="dictionaryStrategy"></param>
+        /// <returns></returns>
+        public DeserializerBuilder WithCollectionPopulationOptions(
+            PreexistingArrayPopulationStrategy arrayStrategy = PreexistingArrayPopulationStrategy.CreateNew,
+            PreexistingCollectionPopulationStrategy collectionStrategy = PreexistingCollectionPopulationStrategy.CreateNew,
+            PreexistingDictionaryPopulationStrategy dictionaryStrategy = PreexistingDictionaryPopulationStrategy.CreateNew)
+        {
+            nodeDeserializerFactories.Replace(typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer(arrayStrategy));
+            nodeDeserializerFactories.Replace(typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, dictionaryStrategy));
+            nodeDeserializerFactories.Replace(typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value, collectionStrategy));
+
             return this;
         }
 

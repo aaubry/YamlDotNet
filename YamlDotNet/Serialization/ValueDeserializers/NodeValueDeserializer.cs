@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
         }
 
-        public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer, object? currentValue)
         {
             parser.Accept<NodeEvent>(out var nodeEvent);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             {
                 foreach (var deserializer in deserializers)
                 {
-                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
+                    if (deserializer.Deserialize(parser, nodeType, (r, t, o) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer, o), out var value, currentValue))
                     {
                         return TypeConverter.ChangeType(value, expectedType);
                     }

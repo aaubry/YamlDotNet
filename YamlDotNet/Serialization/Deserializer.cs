@@ -90,17 +90,17 @@ namespace YamlDotNet.Serialization
 
         public object? Deserialize(TextReader input, Type type)
         {
-            return Deserialize(new Parser(input), type);
+            return Deserialize(new Parser(input), type, null);
         }
 
         public T Deserialize<T>(IParser parser)
         {
-            return (T)Deserialize(parser, typeof(T))!; // We really want an exception if we are trying to deserialize null into a non-nullable type
+            return (T)Deserialize(parser, typeof(T), null)!; // We really want an exception if we are trying to deserialize null into a non-nullable type
         }
 
         public object? Deserialize(IParser parser)
         {
-            return Deserialize(parser, typeof(object));
+            return Deserialize(parser, typeof(object), null);
         }
 
         /// <summary>
@@ -110,6 +110,27 @@ namespace YamlDotNet.Serialization
         /// <param name="type">The static type of the object to deserialize.</param>
         /// <returns>Returns the deserialized object.</returns>
         public object? Deserialize(IParser parser, Type type)
+        {
+            return Deserialize(parser, type, null);
+        }
+
+        public T PopulateObject<T>(string input, T target)
+        {
+            using var reader = new StringReader(input);
+            return PopulateObject<T>(reader, target);
+        }
+
+        public T PopulateObject<T>(TextReader input, T target)
+        {
+            return PopulateObject<T>(new Parser(input), target);
+        }
+
+        public T PopulateObject<T>(IParser parser, T target)
+        {
+            return (T)Deserialize(parser, typeof(T), target)!;
+        }
+
+        private object? Deserialize(IParser parser, Type type, object? target)
         {
             if (parser == null)
             {
@@ -125,11 +146,11 @@ namespace YamlDotNet.Serialization
 
             var hasDocumentStart = parser.TryConsume<DocumentStart>(out var _);
 
-            object? result = null;
+            object? result = target;
             if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
             {
                 using var state = new SerializerState();
-                result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
+                result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer, result);
                 state.OnDeserialization();
             }
 

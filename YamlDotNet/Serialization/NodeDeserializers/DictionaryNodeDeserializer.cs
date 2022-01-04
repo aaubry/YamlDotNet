@@ -32,13 +32,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class DictionaryNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
+        private readonly PreexistingDictionaryPopulationStrategy populationStrategy;
 
-        public DictionaryNodeDeserializer(IObjectFactory objectFactory)
+        public DictionaryNodeDeserializer(IObjectFactory objectFactory, PreexistingDictionaryPopulationStrategy populationStrategy = PreexistingDictionaryPopulationStrategy.CreateNew)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.populationStrategy = populationStrategy;
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
         {
             IDictionary? dictionary;
             Type keyType, valueType;
@@ -49,13 +51,18 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 keyType = genericArguments[0];
                 valueType = genericArguments[1];
 
-                value = objectFactory.Create(expectedType);
-
+                value = (currentValue == null || populationStrategy == PreexistingDictionaryPopulationStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
                 dictionary = value as IDictionary;
                 if (dictionary == null)
                 {
                     // Uncommon case where a type implements IDictionary<TKey, TValue> but not IDictionary
                     dictionary = (IDictionary?)Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(keyType, valueType), value);
+
+                    // TODO: How to handle pre-existing instance in this case?
+                    if (populationStrategy != PreexistingDictionaryPopulationStrategy.CreateNew)
+                    {
+                        throw new NotSupportedException($"Types implementing generic interface {typeof(IDictionary<,>).Name} but not non-generic interface {typeof(IDictionary).Name} are not yet supported when using {nameof(Deserializer.PopulateObject)}() in combination with {populationStrategy}.");
+                    }
                 }
             }
             else if (typeof(IDictionary).IsAssignableFrom(expectedType))
@@ -63,7 +70,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 keyType = typeof(object);
                 valueType = typeof(object);
 
-                value = objectFactory.Create(expectedType);
+                value = (currentValue == null || populationStrategy == PreexistingDictionaryPopulationStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
                 dictionary = (IDictionary)value;
             }
             else
@@ -77,13 +84,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
+        private void DeserializeHelper(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?, object?> nestedObjectDeserializer, IDictionary result)
         {
             parser.Consume<MappingStart>();
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
-                var key = nestedObjectDeserializer(parser, tKey);
-                var value = nestedObjectDeserializer(parser, tValue);
+                var key = nestedObjectDeserializer(parser, tKey, null);
+                var value = nestedObjectDeserializer(parser, tValue, null);
                 var valuePromise = value as IValuePromise;
 
                 if (key is IValuePromise keyPromise)
@@ -91,7 +98,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Key is pending, value is known
-                        keyPromise.ValueAvailable += v => result[v!] = value!;
+                        keyPromise.ValueAvailable += v => AddKeyValuePair(result, v!, value!); ;
                     }
                     else
                     {
@@ -102,7 +109,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[v!] = value!;
+                                AddKeyValuePair(result, v!, value!);
                             }
                             else
                             {
@@ -115,7 +122,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[key] = v!;
+                                AddKeyValuePair(result, key!, v!);
                             }
                             else
                             {
@@ -130,14 +137,32 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Happy path: both key and value are known
-                        result[key!] = value!;
+                        AddKeyValuePair(result, key!, value!);
                     }
                     else
                     {
                         // Key is known, value is pending
-                        valuePromise.ValueAvailable += v => result[key!] = v!;
+                        valuePromise.ValueAvailable += v => AddKeyValuePair(result, key!, v!);
                     }
                 }
+            }
+        }
+
+        private void AddKeyValuePair(IDictionary result, object key, object value)
+        {
+            switch (populationStrategy)
+            {
+                case PreexistingDictionaryPopulationStrategy.AddItemsThrowOnExistingKeys:
+                    result.Add(key!, value!);
+                    break;
+
+                case PreexistingDictionaryPopulationStrategy.CreateNew:
+                case PreexistingDictionaryPopulationStrategy.AddItemsReplaceExistingKeys:
+                    result[key!] = value!;
+                    break;
+
+                default:
+                    throw new NotSupportedException();
             }
         }
     }

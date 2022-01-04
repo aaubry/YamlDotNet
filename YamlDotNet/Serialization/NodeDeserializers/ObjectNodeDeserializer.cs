@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.ignoreUnmatched = ignoreUnmatched;
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
         {
             if (!parser.TryConsume<MappingStart>(out var mapping))
             {
@@ -51,7 +51,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             // Strip off the nullable type, if present. This is needed for nullable structs.
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
-            value = objectFactory.Create(implementationType);
+            value = currentValue ?? objectFactory.Create(implementationType);
+
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
@@ -64,7 +65,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         continue;
                     }
 
-                    var propertyValue = nestedObjectDeserializer(parser, property.Type);
+                    var currentPropertyValue = property.Read(value).Value;
+
+                    var propertyValue = nestedObjectDeserializer(parser, property.Type, currentPropertyValue);
                     if (propertyValue is IValuePromise propertyValuePromise)
                     {
                         var valueRef = value;

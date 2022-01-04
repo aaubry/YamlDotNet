@@ -27,7 +27,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        private readonly PreexistingArrayPopulationStrategy populationStrategy;
+
+        public ArrayNodeDeserializer(PreexistingArrayPopulationStrategy populationStrategy = PreexistingArrayPopulationStrategy.CreateNew)
+        {
+            this.populationStrategy = populationStrategy;
+        }
+
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
         {
             if (!expectedType.IsArray)
             {
@@ -40,8 +47,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var items = new ArrayList();
             CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
 
-            var array = Array.CreateInstance(itemType, items.Count);
-            items.CopyTo(array, 0);
+            if (currentValue != null && populationStrategy == PreexistingArrayPopulationStrategy.FillExisting)
+            {
+                if (((Array)currentValue).Length < items.Count)
+                {
+                    throw new YamlException("Cannot populate pre-existing array: Deserialized items exceed size.");
+                }
+            }
+
+            var array = (currentValue == null || populationStrategy == PreexistingArrayPopulationStrategy.CreateNew) ? Array.CreateInstance(itemType, items.Count) : currentValue;
+            items.CopyTo((Array)array, 0);
 
             value = array;
             return true;

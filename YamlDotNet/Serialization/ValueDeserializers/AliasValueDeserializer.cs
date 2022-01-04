@@ -96,7 +96,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             }
         }
 
-        public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+        public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer, object? currentValue)
         {
             object? value;
             if (parser.TryConsume<AnchorAlias>(out var alias))
@@ -121,7 +121,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 }
             }
 
-            value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
+            value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer, currentValue);
 
             if (!anchor.IsEmpty)
             {

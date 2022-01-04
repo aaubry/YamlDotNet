@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
         {
             var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
             if (converter == null)

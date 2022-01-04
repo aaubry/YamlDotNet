@@ -32,13 +32,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class CollectionNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
+        private readonly PreexistingCollectionPopulationStrategy populationStrategy;
 
-        public CollectionNodeDeserializer(IObjectFactory objectFactory)
+        public CollectionNodeDeserializer(IObjectFactory objectFactory, PreexistingCollectionPopulationStrategy populationStrategy = PreexistingCollectionPopulationStrategy.CreateNew)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.populationStrategy = populationStrategy;
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
         {
             IList? list;
             var canUpdate = true;
@@ -49,7 +51,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 var genericArguments = genericCollectionType.GetGenericArguments();
                 itemType = genericArguments[0];
 
-                value = objectFactory.Create(expectedType);
+                value = (currentValue == null || populationStrategy == PreexistingCollectionPopulationStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
+
                 list = value as IList;
                 if (list == null)
                 {
@@ -57,13 +60,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     var genericListType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IList<>));
                     canUpdate = genericListType != null;
                     list = (IList?)Activator.CreateInstance(typeof(GenericCollectionToNonGenericAdapter<>).MakeGenericType(itemType), value);
+
+                    // TODO: How to handle pre-existing instance in this case?
+                    if (populationStrategy != PreexistingCollectionPopulationStrategy.CreateNew)
+                    {
+                        throw new NotSupportedException($"Types implementing generic interface {typeof(IList<>).Name} but not non-generic interface {typeof(IList).Name} are not yet supported when using {nameof(Deserializer.PopulateObject)}() in combination with {populationStrategy}.");
+                    }
                 }
             }
             else if (typeof(IList).IsAssignableFrom(expectedType))
             {
                 itemType = typeof(object);
 
-                value = objectFactory.Create(expectedType);
+                value = (currentValue == null || populationStrategy == PreexistingCollectionPopulationStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
                 list = (IList)value;
             }
             else
@@ -77,14 +86,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?, object?> nestedObjectDeserializer, IList result, bool canUpdate)
         {
             parser.Consume<SequenceStart>();
             while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var current = parser.Current;
 
-                var value = nestedObjectDeserializer(parser, tItem);
+                var value = nestedObjectDeserializer(parser, tItem, null);
                 if (value is IValuePromise promise)
                 {
                     if (canUpdate)

@@ -71,12 +71,23 @@ namespace YamlDotNet.Serialization
 
         public void Remove(Type componentType)
         {
+            var index = IndexOf(componentType);
+            entries.RemoveAt(index);
+        }
+
+        public void Replace(Type componentType, Func<TArgument, TComponent> factory)
+        {
+            var index = IndexOf(componentType);
+            entries[index] = new LazyComponentRegistration(componentType, factory);
+        }
+
+        private int IndexOf(Type componentType)
+        {
             for (var i = 0; i < entries.Count; ++i)
             {
                 if (entries[i].ComponentType == componentType)
                 {
-                    entries.RemoveAt(i);
-                    return;
+                    return i;
                 }
             }
 

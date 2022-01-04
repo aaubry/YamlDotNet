@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class EnumerableNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
         {
             Type itemsType;
             if (expectedType == typeof(IEnumerable))
@@ -49,7 +49,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
 
             var collectionType = typeof(List<>).MakeGenericType(itemsType);
-            value = nestedObjectDeserializer(parser, collectionType);
+            value = nestedObjectDeserializer(parser, collectionType, null);
             return true;
         }
     }
