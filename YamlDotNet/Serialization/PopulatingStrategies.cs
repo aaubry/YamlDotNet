@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Defines how arrays will be treated during deserialization when populating a pre-existing object (via <see cref="Deserializer.PopulateObject{T}(IParser, T)"/> and overloads)
     /// </summary>
-    public enum PreexistingArrayPopulationStrategy
+    public enum ArrayPopulatingStrategy
     {
         /// <summary>
         /// Always create a new instance.
@@ -46,7 +46,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Defines how types inherting from <see cref="ICollection"/> and <see cref="ICollection{T}"/> will be treated during deserialization when populating a pre-existing object (via <see cref="Deserializer.PopulateObject{T}(IParser, T)"/> and overloads)
     /// </summary>
-    public enum PreexistingCollectionPopulationStrategy
+    public enum CollectionPopulatingStrategy
     {
         /// <summary>
         /// Always create a new instance.
@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Defines how types inherting from <see cref="IDictionary"/> and <see cref="IDictionary{TKey, TValue}"/> will be treated during  deserialization when populating a pre-existing object (via <see cref="Deserializer.PopulateObject{T}(IParser, T)"/> and overloads)
     /// </summary>
-    public enum PreexistingDictionaryPopulationStrategy
+    public enum DictionaryPopulatingStrategy
     {
         /// <summary>
         /// Always create a new instance.

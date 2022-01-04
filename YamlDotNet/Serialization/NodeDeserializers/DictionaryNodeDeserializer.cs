@@ -32,12 +32,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class DictionaryNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
-        private readonly PreexistingDictionaryPopulationStrategy populationStrategy;
+        private readonly DictionaryPopulatingStrategy populatingStrategy;
 
-        public DictionaryNodeDeserializer(IObjectFactory objectFactory, PreexistingDictionaryPopulationStrategy populationStrategy = PreexistingDictionaryPopulationStrategy.CreateNew)
+        public DictionaryNodeDeserializer(IObjectFactory objectFactory, DictionaryPopulatingStrategy populatingStrategy = DictionaryPopulatingStrategy.CreateNew)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
-            this.populationStrategy = populationStrategy;
+            this.populatingStrategy = populatingStrategy;
         }
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
@@ -51,7 +51,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 keyType = genericArguments[0];
                 valueType = genericArguments[1];
 
-                value = (currentValue == null || populationStrategy == PreexistingDictionaryPopulationStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
+                value = (currentValue == null || populatingStrategy == DictionaryPopulatingStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
                 dictionary = value as IDictionary;
                 if (dictionary == null)
                 {
@@ -59,9 +59,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     dictionary = (IDictionary?)Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(keyType, valueType), value);
 
                     // TODO: How to handle pre-existing instance in this case?
-                    if (populationStrategy != PreexistingDictionaryPopulationStrategy.CreateNew)
+                    if (populatingStrategy != DictionaryPopulatingStrategy.CreateNew)
                     {
-                        throw new NotSupportedException($"Types implementing generic interface {typeof(IDictionary<,>).Name} but not non-generic interface {typeof(IDictionary).Name} are not yet supported when using {nameof(Deserializer.PopulateObject)}() in combination with {populationStrategy}.");
+                        throw new NotSupportedException($"Types implementing generic interface {typeof(IDictionary<,>).Name} but not non-generic interface {typeof(IDictionary).Name} are not yet supported when using {nameof(Deserializer.PopulateObject)}() in combination with {populatingStrategy}.");
                     }
                 }
             }
@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 keyType = typeof(object);
                 valueType = typeof(object);
 
-                value = (currentValue == null || populationStrategy == PreexistingDictionaryPopulationStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
+                value = (currentValue == null || populatingStrategy == DictionaryPopulatingStrategy.CreateNew) ? objectFactory.Create(expectedType) : currentValue;
                 dictionary = (IDictionary)value;
             }
             else
@@ -150,14 +150,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         private void AddKeyValuePair(IDictionary result, object key, object value)
         {
-            switch (populationStrategy)
+            switch (populatingStrategy)
             {
-                case PreexistingDictionaryPopulationStrategy.AddItemsThrowOnExistingKeys:
+                case DictionaryPopulatingStrategy.AddItemsThrowOnExistingKeys:
                     result.Add(key!, value!);
                     break;
 
-                case PreexistingDictionaryPopulationStrategy.CreateNew:
-                case PreexistingDictionaryPopulationStrategy.AddItemsReplaceExistingKeys:
+                case DictionaryPopulatingStrategy.CreateNew:
+                case DictionaryPopulatingStrategy.AddItemsReplaceExistingKeys:
                     result[key!] = value!;
                     break;
 

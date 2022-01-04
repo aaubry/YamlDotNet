@@ -371,10 +371,10 @@ namespace YamlDotNet.Serialization
         /// <param name="collectionStrategy"></param>
         /// <param name="dictionaryStrategy"></param>
         /// <returns></returns>
-        public DeserializerBuilder WithCollectionPopulationOptions(
-            PreexistingArrayPopulationStrategy arrayStrategy = PreexistingArrayPopulationStrategy.CreateNew,
-            PreexistingCollectionPopulationStrategy collectionStrategy = PreexistingCollectionPopulationStrategy.CreateNew,
-            PreexistingDictionaryPopulationStrategy dictionaryStrategy = PreexistingDictionaryPopulationStrategy.CreateNew)
+        public DeserializerBuilder WithPopulatingOptions(
+            ArrayPopulatingStrategy arrayStrategy = ArrayPopulatingStrategy.CreateNew,
+            CollectionPopulatingStrategy collectionStrategy = CollectionPopulatingStrategy.CreateNew,
+            DictionaryPopulatingStrategy dictionaryStrategy = DictionaryPopulatingStrategy.CreateNew)
         {
             nodeDeserializerFactories.Replace(typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer(arrayStrategy));
             nodeDeserializerFactories.Replace(typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, dictionaryStrategy));

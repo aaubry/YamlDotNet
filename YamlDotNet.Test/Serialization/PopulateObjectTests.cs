@@ -126,7 +126,7 @@ Ints:
 - 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(arrayStrategy: PreexistingArrayPopulationStrategy.CreateNew)
+                .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.CreateNew)
                 .Build()
                 .PopulateObject(yaml, container);
 
@@ -148,7 +148,7 @@ Ints:
 - 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(arrayStrategy: PreexistingArrayPopulationStrategy.FillExisting)
+                .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.FillExisting)
                 .Build()
                 .PopulateObject(yaml, container);
 
@@ -170,7 +170,7 @@ Ints:
 - 30";
 
             Action action = () => DeserializerBuilder
-                  .WithCollectionPopulationOptions(arrayStrategy: PreexistingArrayPopulationStrategy.FillExisting)
+                  .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.FillExisting)
                   .Build()
                   .PopulateObject(yaml, container);
 
@@ -185,7 +185,7 @@ Ints:
             var yaml = @"- 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(arrayStrategy: PreexistingArrayPopulationStrategy.CreateNew)
+                .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.CreateNew)
                 .Build()
                 .PopulateObject(yaml, intArray);
 
@@ -204,7 +204,7 @@ Ints:
             var yaml = @"- 10";
 
             var result = DeserializerBuilder
-                 .WithCollectionPopulationOptions(arrayStrategy: PreexistingArrayPopulationStrategy.FillExisting)
+                 .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.FillExisting)
                  .Build()
                  .PopulateObject(yaml, intArray);
 
@@ -231,7 +231,7 @@ Ints:
 - 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(collectionStrategy: PreexistingCollectionPopulationStrategy.CreateNew)
+                .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.CreateNew)
                 .Build()
                 .PopulateObject(yaml, container);
 
@@ -250,7 +250,7 @@ Ints:
 - 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(collectionStrategy: PreexistingCollectionPopulationStrategy.AddItems)
+                .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.AddItems)
                 .Build()
                 .PopulateObject(yaml, container);
 
@@ -266,7 +266,7 @@ Ints:
             var yaml = @"- 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(collectionStrategy: PreexistingCollectionPopulationStrategy.CreateNew)
+                .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.CreateNew)
                 .Build()
                 .PopulateObject(yaml, intCollection);
 
@@ -282,7 +282,7 @@ Ints:
             var yaml = @"- 10";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(collectionStrategy: PreexistingCollectionPopulationStrategy.AddItems)
+                .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.AddItems)
                 .Build()
                 .PopulateObject(yaml, intCollection);
 
@@ -313,7 +313,7 @@ StringInts:
     three: 30";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.CreateNew)
+                .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.CreateNew)
                 .Build()
                 .PopulateObject(yaml, container);
 
@@ -340,7 +340,7 @@ StringInts:
     three: 30";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.AddItemsReplaceExistingKeys)
+                .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.AddItemsReplaceExistingKeys)
                 .Build()
                 .PopulateObject(yaml, container);
 
@@ -368,13 +368,12 @@ StringInts:
     three: 30";
 
             Action action = () => DeserializerBuilder
-                .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.AddItemsThrowOnExistingKeys)
+                .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.AddItemsThrowOnExistingKeys)
                 .Build()
                 .PopulateObject(yaml, container);
 
             action.ShouldThrow<YamlException>().WithInnerException<ArgumentException>().Where(ex => ex.InnerException.Message.Contains("same key"));
         }
-
 
         [Fact]
         public void PopulateDictionary_OfValueTypes_AsRootNode_CreateNew()
@@ -390,7 +389,7 @@ one: 10
 three: 30";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.CreateNew)
+                .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.CreateNew)
                 .Build()
                 .PopulateObject(yaml, stringInts);
 
@@ -415,7 +414,7 @@ one: 10
 three: 30";
 
             var result = DeserializerBuilder
-                .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.AddItemsReplaceExistingKeys)
+                .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.AddItemsReplaceExistingKeys)
                 .Build()
                 .PopulateObject(yaml, stringInts);
 
@@ -496,12 +495,12 @@ three: 30";
         }
 
         [Fact]
-        public void PopulateDictionary_WithTypeNotSupportingPopulation_CreateNew()
+        public void PopulateDictionary_WithTypeNotSupportedForPopulating_CreateNew()
         {
             var dictionary = new GenericDictionaryButNotNonGenericDictionary<string, string>();
 
             Action action = () => DeserializerBuilder
-                    .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.CreateNew)
+                    .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.CreateNew)
                     .Build()
                     .PopulateObject("one: ten", dictionary);
 
@@ -509,16 +508,16 @@ three: 30";
         }
 
         [Fact]
-        public void PopulateDictionary_WithTypeNotSupportingPopulation_AddItemsReplaceExistingKeys()
+        public void PopulateDictionary_WithTypeNotSupportedForPopulating_AddItemsReplaceExistingKeys()
         {
             var dictionary = new GenericDictionaryButNotNonGenericDictionary<string, string>();
 
             Action action = () => DeserializerBuilder
-                .WithCollectionPopulationOptions(dictionaryStrategy: PreexistingDictionaryPopulationStrategy.AddItemsReplaceExistingKeys)
+                .WithPopulatingOptions(dictionaryStrategy: DictionaryPopulatingStrategy.AddItemsReplaceExistingKeys)
                 .Build()
                 .PopulateObject("one: ten", dictionary);
 
-            action.ShouldThrow<YamlException>().WithInnerException<NotSupportedException>().Where(ex => ex.InnerException.Message.Contains("Types implementing generic interface")); ;
+            action.ShouldThrow<YamlException>().WithInnerException<NotSupportedException>();
         }
         #endregion
         #endregion

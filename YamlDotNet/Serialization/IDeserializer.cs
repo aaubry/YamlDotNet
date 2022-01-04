@@ -48,7 +48,7 @@ namespace YamlDotNet.Serialization
 
         /// <summary>
         /// Populates a pre-existing object. Values of fields/properties missing in the given YAML remain unchanged.
-        /// Use <see cref="DeserializerBuilder.WithCollectionPopulationOptions(PreexistingArrayPopulationStrategy, PreexistingCollectionPopulationStrategy, PreexistingDictionaryPopulationStrategy)"/> to configure how pre-existing collections are handled.
+        /// Use <see cref="DeserializerBuilder.WithPopulatingOptions(ArrayPopulatingStrategy, CollectionPopulatingStrategy, DictionaryPopulatingStrategy)"/> to configure how pre-existing collections are handled.
         /// </summary>
         /// <typeparam name="T">The type of the target object.</typeparam>
         /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>

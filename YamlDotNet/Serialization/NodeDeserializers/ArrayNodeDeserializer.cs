@@ -27,11 +27,11 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
-        private readonly PreexistingArrayPopulationStrategy populationStrategy;
+        private readonly ArrayPopulatingStrategy populatingStrategy;
 
-        public ArrayNodeDeserializer(PreexistingArrayPopulationStrategy populationStrategy = PreexistingArrayPopulationStrategy.CreateNew)
+        public ArrayNodeDeserializer(ArrayPopulatingStrategy populatingStrategy = ArrayPopulatingStrategy.CreateNew)
         {
-            this.populationStrategy = populationStrategy;
+            this.populatingStrategy = populatingStrategy;
         }
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?, object?> nestedObjectDeserializer, out object? value, object? currentValue)
@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var items = new ArrayList();
             CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
 
-            if (currentValue != null && populationStrategy == PreexistingArrayPopulationStrategy.FillExisting)
+            if (currentValue != null && populatingStrategy == ArrayPopulatingStrategy.FillExisting)
             {
                 if (((Array)currentValue).Length < items.Count)
                 {
@@ -55,7 +55,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
 
-            var array = (currentValue == null || populationStrategy == PreexistingArrayPopulationStrategy.CreateNew) ? Array.CreateInstance(itemType, items.Count) : currentValue;
+            var array = (currentValue == null || populatingStrategy == ArrayPopulatingStrategy.CreateNew) ? Array.CreateInstance(itemType, items.Count) : currentValue;
             items.CopyTo((Array)array, 0);
 
             value = array;
