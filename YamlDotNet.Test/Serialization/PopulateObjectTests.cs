@@ -425,6 +425,93 @@ three: 30";
                 { "three", 30 }
             });
         }
+        #endregion
+
+        #region Edge cases
+        class GenericListButNotNonGenericList<T> : IList<T>
+        {
+            public T this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public int Count => throw new NotImplementedException();
+
+            public bool IsReadOnly => throw new NotImplementedException();
+
+            public void Add(T item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(T item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CopyTo(T[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            public int IndexOf(T item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Insert(int index, T item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Remove(T item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void RemoveAt(int index)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [Fact]
+        public void PopulateList_WithTypeNotSupportedForPopulating_CreateNew()
+        {
+            var list = new GenericListButNotNonGenericList<string>();
+
+            Action action = () => DeserializerBuilder
+                .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.CreateNew)
+                .Build()
+                .PopulateObject("- one", list);
+
+            action.ShouldThrow<YamlException>().WithInnerException<NotImplementedException>();
+        }
+
+        [Fact]
+        public void PopulateList_WithTypeNotSupportedForPopulating_AddItems()
+        {
+            var list = new GenericListButNotNonGenericList<string>();
+
+            Action action = () => DeserializerBuilder
+                .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.AddItems)
+                .Build()
+                .PopulateObject("- one", list);
+
+            action.ShouldThrow<YamlException>().WithInnerException<NotSupportedException>();
+        }
 
         class GenericDictionaryButNotNonGenericDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         {
