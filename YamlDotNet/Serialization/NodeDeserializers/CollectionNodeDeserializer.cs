@@ -81,25 +81,32 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate);
+            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate, populatingStrategy);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?, object?> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?, object?> nestedObjectDeserializer, IList result, bool canUpdate, CollectionPopulatingStrategy populatingStrategy = CollectionPopulatingStrategy.CreateNew)
         {
             parser.Consume<SequenceStart>();
+            var i = 0;
             while (!parser.TryConsume<SequenceEnd>(out var _))
             {
                 var current = parser.Current;
 
-                var value = nestedObjectDeserializer(parser, tItem, null);
+                var currentValue = populatingStrategy == CollectionPopulatingStrategy.PopulateOrAddItems ? (result.Count > i ? result[i] : null) : null;
+                var isPopulating = currentValue != null;
+
+                var value = nestedObjectDeserializer(parser, tItem, currentValue);
                 if (value is IValuePromise promise)
                 {
                     if (canUpdate)
                     {
-                        var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
-                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
+                        if (isPopulating == false)
+                        {
+                            var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
+                            promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
+                        }
                     }
                     else
                     {
@@ -112,8 +119,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 else
                 {
-                    result.Add(TypeConverter.ChangeType(value, tItem));
+                    if (isPopulating == false)
+                    {
+                        result.Add(TypeConverter.ChangeType(value, tItem));
+                    }
                 }
+
+                i++;
             }
         }
     }

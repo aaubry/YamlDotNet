@@ -40,7 +40,9 @@ namespace YamlDotNet.Serialization
         /// If the pre-existing array does not have sufficient length, a <see cref="YamlException"/> will be thrown.
         /// If the array does not exist yet, an instance will be created and populated.
         /// </summary>
-        FillExisting
+        FillExisting,
+        PopulateItems,
+        PopulateItemsAllowGrowingArray
     }
 
     /// <summary>
@@ -56,7 +58,12 @@ namespace YamlDotNet.Serialization
         /// Add items to the pre-existing collection.
         /// If the collection does not exist yet, an instance will be created and populated.
         /// </summary>
-        AddItems
+        AddItems,
+        /// <summary>
+        /// Populate pre-existing items, create and add new items where there is no pre-existing target.
+        /// If the collection does not exist yet, an instance will be created and populated.
+        /// </summary>
+        PopulateOrAddItems
     }
 
     /// <summary>

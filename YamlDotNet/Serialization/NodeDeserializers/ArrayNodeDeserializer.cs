@@ -44,24 +44,53 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
-            var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
-
-            if (currentValue != null && populatingStrategy == ArrayPopulatingStrategy.FillExisting)
+            ArrayList items;
+            if (currentValue != null && (populatingStrategy == ArrayPopulatingStrategy.PopulateItems || populatingStrategy == ArrayPopulatingStrategy.PopulateItemsAllowGrowingArray))
             {
-                if (((Array)currentValue).Length < items.Count)
+                var currentArray = (Array)currentValue;
+
+                items = new ArrayList(currentArray);
+                CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, CollectionPopulatingStrategy.PopulateOrAddItems);
+
+                if (currentArray.Length < items.Count)
                 {
-                    throw new YamlException("Cannot populate pre-existing array: Deserialized items exceed size.");
+                    if (populatingStrategy == ArrayPopulatingStrategy.PopulateItemsAllowGrowingArray)
+                    {
+                        currentArray = Array.CreateInstance(itemType, items.Count);
+                    }
+                    else
+                    {
+                        throw new YamlException("Cannot populate pre-existing array: Deserialized items exceed size.");
+                    }
                 }
+
+                items.CopyTo(currentArray, 0);
+                value = currentArray;
+                return true;
+            }
+            else
+            {
+                items = new ArrayList();
+                CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
+
+                if (currentValue != null && populatingStrategy == ArrayPopulatingStrategy.FillExisting)
+                {
+                    if (((Array)currentValue).Length < items.Count)
+                    {
+                        throw new YamlException("Cannot populate pre-existing array: Deserialized items exceed size.");
+                    }
+                }
+
+                var array = (currentValue == null || populatingStrategy == ArrayPopulatingStrategy.CreateNew) ? Array.CreateInstance(itemType, items.Count) : currentValue;
+                items.CopyTo((Array)array, 0);
+
+                value = array;
+                return true;
             }
 
-            var array = (currentValue == null || populatingStrategy == ArrayPopulatingStrategy.CreateNew) ? Array.CreateInstance(itemType, items.Count) : currentValue;
-            items.CopyTo((Array)array, 0);
-
-            value = array;
-            return true;
         }
 
+        /*
         private sealed class ArrayList : IList
         {
             private object?[] data;
@@ -129,6 +158,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
         }
+        */
     }
 }
 

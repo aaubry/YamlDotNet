@@ -23,8 +23,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Text;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
@@ -109,6 +107,304 @@ Child:
         #endregion
 
         #region Populate collections
+        #region Populate collections: Reference types
+        [Fact]
+        public void PopulateArray_OfReferenceType_DeserializeSameSize()
+        {
+            var array = new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            };
+
+            var firstItem = array[0];
+
+            var yaml = @"
+-
+    Int: 10
+-
+    String: TWO
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.PopulateItems)
+               .Build()
+               .PopulateObject(yaml, array);
+
+            Assert.Same(result, array);
+            Assert.Same(result[0], firstItem);
+
+            result.Length.Should().Be(2);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("TWO");
+        }
+
+        [Fact]
+        public void PopulateArray_OfReferenceType_DeserializeSmallerSize()
+        {
+            var array = new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            };
+
+            var firstItem = array[0];
+
+            var yaml = @"
+-
+    Int: 10
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.PopulateItems)
+               .Build()
+               .PopulateObject(yaml, array);
+
+            Assert.Same(result, array);
+            Assert.Same(result[0], firstItem);
+
+            result.Length.Should().Be(2);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("two");
+        }
+
+        [Fact]
+        public void PopulateArray_OfReferenceType_DeserializeBiggerSize()
+        {
+            var array = new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            };
+
+            var firstItem = array[0];
+
+            var yaml = @"
+-
+    Int: 10
+-
+    String: TWO
+-
+    Int: 30
+    String: THREE
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.PopulateItems)
+               .Build()
+               .PopulateObject(yaml, array);
+
+            Assert.NotSame(result, array);
+            Assert.Same(result[0], firstItem);
+
+            result.Length.Should().Be(3);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("two");
+
+            result[2].Int.Should().Be(30);
+            result[2].String.Should().Be("THREE");
+        }
+
+        [Fact]
+        public void PopulateArray_OfReferenceType_DeserializeBiggerSize_PopulateItemsAllowGrowingArray()
+        {
+            var array = new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            };
+
+            var firstItem = array[0];
+
+            var yaml = @"
+-
+    Int: 10
+-
+    String: TWO
+-
+    Int: 30
+    String: THREE
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(arrayStrategy: ArrayPopulatingStrategy.PopulateItemsAllowGrowingArray)
+               .Build()
+               .PopulateObject(yaml, array);
+
+            Assert.NotSame(result, array);
+            Assert.Same(result[0], firstItem);
+
+            result.Length.Should().Be(3);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("TWO");
+
+            result[2].Int.Should().Be(30);
+            result[2].String.Should().Be("THREE");
+        }
+
+        [Fact]
+        public void PopulateList_OfReferenceType_DeserializeBiggerSize_PopulateOrAddItems()
+        {
+            var list = new List<SimpleClass>(new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            });
+
+            var firstItem = list[0];
+
+            var yaml = @"
+-
+    Int: 10
+-
+    String: TWO
+-
+    Int: 30
+    String: THREE
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.PopulateOrAddItems)
+               .Build()
+               .PopulateObject(yaml, list);
+
+            Assert.Same(result, list);
+            Assert.Same(result[0], firstItem);
+
+            result.Count.Should().Be(3);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("TWO");
+
+            result[2].Int.Should().Be(30);
+            result[2].String.Should().Be("THREE");
+        }
+
+        [Fact]
+        public void PopulateList_OfReferenceType_DeserializeEqualSize_PopulateOrAddItems()
+        {
+            var list = new List<SimpleClass>(new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            });
+
+            var firstItem = list[0];
+
+            var yaml = @"
+-
+    Int: 10
+-
+    String: TWO
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.PopulateOrAddItems)
+               .Build()
+               .PopulateObject(yaml, list);
+
+            Assert.Same(result, list);
+            Assert.Same(result[0], firstItem);
+
+            result.Count.Should().Be(2);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("TWO");
+        }
+
+        [Fact]
+        public void PopulateList_OfReferenceType_DeserializeSmallerSize_PopulateOrAddItems()
+        {
+            var list = new List<SimpleClass>(new[]
+            {
+                new SimpleClass { Int = 1, String = "one" },
+                new SimpleClass { Int = 2, String = "two" }
+            });
+
+            var firstItem = list[0];
+
+            var yaml = @"
+-
+    Int: 10
+";
+
+            var result = DeserializerBuilder
+               .WithPopulatingOptions(collectionStrategy: CollectionPopulatingStrategy.PopulateOrAddItems)
+               .Build()
+               .PopulateObject(yaml, list);
+
+            Assert.Same(result, list);
+            Assert.Same(result[0], firstItem);
+
+            result.Count.Should().Be(2);
+
+            result[0].Int.Should().Be(10);
+            result[0].String.Should().Be("one");
+
+            result[1].Int.Should().Be(2);
+            result[1].String.Should().Be("two");
+        }
+        /*
+        [Fact]
+        public void PopulateReferenceTypeCollections()
+        {
+            var listOfDicts = new Dictionary<string, Dictionary<string, string>>()
+            {
+                { "A",  new Dictionary<string, string>()
+                {
+                    { "A1", "1" },
+                    { "A2", "2" }
+                }
+                }
+            };
+
+            var a = listOfDicts["A"];
+
+            var yaml = @"
+A:
+    A1: 10
+    C1: 30
+B:
+    B1: 100
+";
+
+            var result = DeserializerBuilder
+                .WithPopulatingOptions(ArrayPopulatingStrategy.PopulateItems)
+                .Build()
+                .PopulateObject(yaml, listOfDicts);
+
+            Assert.Same(result, listOfDicts);
+            Assert.Same(result["A"], a);
+            result["A"].Count.Should().Be(3);
+            result["A"]["A1"].Should().Be("10");
+            result.Count.Should().Be(2);
+            result["B"]["B1"].Should().Be("100");
+        }
+        */
+        #endregion
+
         #region Populate collections: Arrays of value types
         class IntArrayContainer
         {
