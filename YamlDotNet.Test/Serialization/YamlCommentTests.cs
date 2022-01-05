@@ -56,6 +56,14 @@ namespace YamlDotNet.Test.Serialization
             lines.Should().Contain("# or:");
             lines.Should().Contain("# This person owns the car");
         }
+
+        [Fact]
+        public void SerializationWithBlockComments_NullValue()
+        {
+            var serializer = new Serializer();
+            Action action = () => serializer.Serialize(new NullComment());
+            action.ShouldNotThrow();
+        }
         #endregion
 
         #region Indentation of block comments
@@ -213,6 +221,12 @@ namespace YamlDotNet.Test.Serialization
         {
             [YamlMember(Description = "The car parked in the garage")]
             public Car Car;
+        }
+
+        class NullComment
+        {
+            [YamlMember(Description = null)]
+            public int Foo { get; set; }
         }
 
         private static string[] SplitByLines(string result)
