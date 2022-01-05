@@ -642,6 +642,12 @@ namespace YamlDotNet.Core
 
         private void EmitComment(Comment comment)
         {
+            // If we're in flow mode or about to enter it: Skip comments.
+            if (flowLevel > 0 || state == EmitterState.FlowMappingFirstKey || state == EmitterState.FlowSequenceFirstItem)
+            {
+                return;
+            }
+
             if (comment.IsInline)
             {
                 Write(' ');
