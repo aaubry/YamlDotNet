@@ -40,21 +40,24 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void SerializationWithBlockComments_Multiline()
         {
-            var person = new Car();
+            var multilineComment = new MultilineComment();
 
             var serializer = new Serializer();
-            var result = serializer.Serialize(person);
+            var result = serializer.Serialize(multilineComment);
             Output.WriteLine(result);
 
             var deserializer = new Deserializer();
-            Action action = () => deserializer.Deserialize<Car>(result);
+            Action action = () => deserializer.Deserialize<MultilineComment>(result);
             action.ShouldNotThrow();
 
             var lines = SplitByLines(result);
 
-            lines.Should().Contain("# The car's rightful owner");
-            lines.Should().Contain("# or:");
-            lines.Should().Contain("# This person owns the car");
+            lines[0].Should().Be("# This");
+            lines[1].Should().Be("# is");
+            lines[2].Should().Be("# multiline");
+
+            lines[4].Should().Be("# This is");
+            lines[5].Should().Be("# too");
         }
 
         [Fact]
@@ -111,8 +114,6 @@ namespace YamlDotNet.Test.Serialization
             var indent2 = GetIndent(2);
 
             lines.Should().Contain(indent1 + "# The car's rightful owner");
-            lines.Should().Contain(indent1 + "# or:");
-            lines.Should().Contain(indent1 + "# This person owns the car");
             lines.Should().Contain(indent2 + "# The person's name");
             lines.Should().Contain(indent2 + "# The person's age");
         }
@@ -221,7 +222,7 @@ namespace YamlDotNet.Test.Serialization
 
         class Car
         {
-            [YamlMember(Description = "The car's rightful owner\nor:\nThis person owns the car")]
+            [YamlMember(Description = "The car's rightful owner")]
             public Person Owner { get; set; }
             public Person[] Passengers { get; set; }
         }
@@ -236,6 +237,16 @@ namespace YamlDotNet.Test.Serialization
         {
             [YamlMember(Description = null)]
             public int Foo { get; set; }
+        }
+
+        class MultilineComment
+        {
+            [YamlMember(Description = "This\nis\nmultiline")]
+            public int Foo { get; set; }
+
+            [YamlMember(Description = @"This is
+too")]
+            public int Bar { get; set; }
         }
 
         private static string[] SplitByLines(string result)
