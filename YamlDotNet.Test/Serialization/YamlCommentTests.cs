@@ -166,7 +166,7 @@ namespace YamlDotNet.Test.Serialization
             };
 
             var serializer = new SerializerBuilder()
-                .WithEventEmitter(e => new FlowPersonEmitter(e))
+                .WithEventEmitter(e => new FlowEmitter(e, typeof(Person)))
                 .Build();
             var result = serializer.Serialize(garage);
             Output.WriteLine(result);
@@ -185,17 +185,26 @@ namespace YamlDotNet.Test.Serialization
         }
 
         /// <summary>
-        /// This emits Person objects as flow mappings
+        /// This emits objects of given types as flow mappings
         /// </summary>
-        public class FlowPersonEmitter : ChainedEventEmitter
+        public class FlowEmitter : ChainedEventEmitter
         {
-            public FlowPersonEmitter(IEventEmitter nextEmitter) : base(nextEmitter) { }
+            private readonly Type[] types;
+
+            public FlowEmitter(IEventEmitter nextEmitter, params Type[] types) : base(nextEmitter)
+            {
+                this.types = types;
+            }
 
             public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
             {
-                if (eventInfo.Source.Type == typeof(Person))
+                foreach (var type in types)
                 {
-                    eventInfo.Style = MappingStyle.Flow;
+                    if (eventInfo.Source.Type == type)
+                    {
+                        eventInfo.Style = MappingStyle.Flow;
+                        break;
+                    }
                 }
                 base.Emit(eventInfo, emitter);
             }
