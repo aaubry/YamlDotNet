@@ -655,7 +655,7 @@ namespace YamlDotNet.Core
             if (comment.IsInline)
             {
                 Write(' ');
-                Write(string.Join(' ', lines));
+                Write(string.Join(" ", lines));
             }
             else
             {
