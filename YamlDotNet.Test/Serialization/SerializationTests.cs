@@ -67,6 +67,47 @@ namespace YamlDotNet.Test.Serialization
             }
         }
 
+        public static IEnumerable<object[]> DeserializeScalarEdgeCases_TestCases
+        {
+            get
+            {
+                yield return new object[] { byte.MinValue, typeof(byte) };
+                yield return new object[] { byte.MaxValue, typeof(byte) };
+                yield return new object[] { short.MinValue, typeof(short) };
+                yield return new object[] { short.MaxValue, typeof(short) };
+                yield return new object[] { int.MinValue, typeof(int) };
+                yield return new object[] { int.MaxValue, typeof(int) };
+                yield return new object[] { long.MinValue, typeof(long) };
+                yield return new object[] { long.MaxValue, typeof(long) };
+                yield return new object[] { sbyte.MinValue, typeof(sbyte) };
+                yield return new object[] { sbyte.MaxValue, typeof(sbyte) };
+                yield return new object[] { ushort.MinValue, typeof(ushort) };
+                yield return new object[] { ushort.MaxValue, typeof(ushort) };
+                yield return new object[] { uint.MinValue, typeof(uint) };
+                yield return new object[] { uint.MaxValue, typeof(uint) };
+                yield return new object[] { ulong.MinValue, typeof(ulong) };
+                yield return new object[] { ulong.MaxValue, typeof(ulong) };
+                yield return new object[] { decimal.MinValue, typeof(decimal) };
+                yield return new object[] { decimal.MaxValue, typeof(decimal) };
+                yield return new object[] { char.MaxValue, typeof(char) };
+
+                // This is considered invalid by the analyzer:
+                //yield return new object[] { char.MinValue, typeof(char) };
+            }
+        }
+
+        // These are only roundtrippable starting .NET Core 3.1 (see https://github.com/dotnet/coreclr/pull/22040)
+        public static IEnumerable<object[]> DeserializeScalarEdgeCases_NetCore31AndGreater_TestCases
+        {
+            get
+            {
+                yield return new object[] { float.MinValue, typeof(float) };
+                yield return new object[] { float.MaxValue, typeof(float) };
+                yield return new object[] { double.MinValue, typeof(double) };
+                yield return new object[] { double.MaxValue, typeof(double) };
+            }
+        }
+
         #endregion
 
         [Fact]
@@ -104,6 +145,18 @@ namespace YamlDotNet.Test.Serialization
             Action action = () => Deserializer.Deserialize<bool>(UsingReaderFor("not-a-boolean"));
 
             action.ShouldThrow<YamlException>().WithInnerException<FormatException>();
+        }
+
+        [Theory]
+        [MemberData(nameof(DeserializeScalarEdgeCases_TestCases))]
+#if NETCOREAPP3_1_OR_GREATER
+        [MemberData(nameof(DeserializeScalarEdgeCases_NetCore31AndGreater_TestCases))]
+#endif
+        public void DeserializeScalarEdgeCases(IConvertible value, Type type)
+        {
+            var result = Deserializer.Deserialize(value.ToString(YamlFormatter.NumberFormat), type);
+
+            result.Should().Be(value);
         }
 
         [Fact]

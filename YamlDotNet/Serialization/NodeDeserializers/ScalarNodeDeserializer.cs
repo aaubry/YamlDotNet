@@ -234,7 +234,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (isNegative)
             {
-                return CastInteger(checked(-(long)result), typeCode);
+                return CastInteger(unchecked(-(long)result), typeCode);
             }
             else
             {
