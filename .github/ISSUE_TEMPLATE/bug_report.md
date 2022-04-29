@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+**This project is on hold, and issues or pull requests will probably not be reviewed. [See this discussion for more details](https://github.com/aaubry/YamlDotNet/discussions/689).**
+
 **Describe the bug**
 A clear and concise description of what the bug is. Please explain what you observe and what you expected to happen instead. If there is an exception, include its message and stack trace.
 
