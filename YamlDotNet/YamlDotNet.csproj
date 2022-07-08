@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;netstandard1.3;net20;net35;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net35;net47</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
@@ -32,7 +32,7 @@
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netcoreapp3.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
@@ -45,7 +45,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nullable" Version="1.1.1" PrivateAssets="all" />
+    <None Remove="Portability\netstandard2.1\include\ReflectionExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
@@ -121,4 +125,11 @@
     <Message Importance="high" Text=" " Condition="'$(RealTargetFramework)' != ''" />
     <Message Importance="high" Text="==== Building $(RealTargetFramework) $(Empty.PadRight($([MSBuild]::Subtract(100, $(RealTargetFramework.Length))), '='))" Condition="'$(RealTargetFramework)' != ''" />
   </Target>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

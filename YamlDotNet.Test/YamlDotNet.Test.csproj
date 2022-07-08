@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net46;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net60</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -22,7 +22,7 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
