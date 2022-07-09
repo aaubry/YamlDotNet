@@ -122,7 +122,7 @@ namespace YamlDotNet.Test.Serialization
 
         protected string Lines(params string[] lines)
         {
-            return string.Join(Environment.NewLine, lines);
+            return string.Join("\r\n", lines);
         }
 
         protected object Entry(string key, string value)
