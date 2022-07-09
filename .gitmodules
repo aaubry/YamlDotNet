@@ -4,4 +4,4 @@
 [submodule "yaml-test-suite"]
 	path = YamlDotNet.Test/yaml-test-suite
 	url = https://github.com/yaml/yaml-test-suite
-	branch = data-2020-02-11
+	branch = data-2022-01-17
