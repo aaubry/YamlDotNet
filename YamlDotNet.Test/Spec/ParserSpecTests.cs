@@ -49,13 +49,16 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
         {
-            "5LLU" // remove 5LLU once https://github.com/yaml/yaml-test-suite/pull/61 is released
+            // no known desync errors
         };
 
         [Theory, ClassData(typeof(ParserSpecTestsData))]
         public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error)
         {
-            var expectedResult = File.ReadAllText(expectedEventFile);
+            var expectedResult = File.ReadAllText(expectedEventFile)
+                .Replace("+MAP {}", "+MAP")
+                .Replace("+SEQ []", "+SEQ");
+
             using var writer = new StringWriter();
             try
             {
