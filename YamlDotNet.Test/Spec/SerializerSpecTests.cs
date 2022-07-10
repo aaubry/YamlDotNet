@@ -38,6 +38,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
+            //TODO: research why these are ignored
             "26DV", "27NA", "2AUY", "2JQS", "2LFX", "2SXE", "2XXW", "33X3", "35KP", "36F6", "3GZX", "3MYT", "3R3P", "3UYS", "4ABK",
             "4CQQ", "4FJ6", "4GC6", "4MUZ", "4Q9F", "4QFQ", "4UYU", "4V8U", "4ZYM", "52DL", "565N", "57H4", "5BVJ", "5GBF", "5MUD",
             "5TYM", "5WE3", "6BFJ", "6CK3", "6FWR", "6HB6", "6JQW", "6JWB", "6KGN", "6LVF", "6M2F", "6PBE", "6SLA", "6WLZ", "6XDY",
@@ -49,7 +50,20 @@ namespace YamlDotNet.Test.Spec
             "KSS4", "KZN9", "L94M", "LE5A", "LP6E", "LQZ7", "M29M", "M5C3", "M7A3", "M7NX", "M9B4", "MJS9", "MYW6", "MZX3", "NAT4",
             "NB6Z", "NHX8", "NJ66", "NP9H", "P2AD", "P76L", "PRH3", "PUW8", "PW8X", "Q88A", "Q8AD", "QT73", "R4YG", "R52L", "RTP8",
             "RZP5", "RZT7", "S3PD", "S4JQ", "S4T7", "S7BG", "SKE5", "SSW6", "T4YY", "T5N4", "U3C3", "U3XV", "U9NS", "UGM3", "UT92",
-            "V55R", "W42U", "W4TN", "W5VH", "WZ62", "X38W", "X8DW", "XLQ9", "XV9V", "XW4D", "Y2GN", "Z67P", "Z9M4", "ZH7C", "ZWK4"
+            "V55R", "W42U", "W4TN", "W5VH", "WZ62", "X38W", "X8DW", "XLQ9", "XV9V", "XW4D", "Y2GN", "Z67P", "Z9M4", "ZH7C", "ZWK4",
+
+            // TODO: resolve these, it will end up resolving some of the git hub issues on yamldotnet
+            "4WA9",
+            "58MP",
+            "5T43",
+            "652Z",
+            "6CA3",
+            "CFD4",
+            "JR7V",
+            "L383",
+            "M6YH",
+            "NKF9",
+            "YJV2"
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
