@@ -24,6 +24,7 @@ using System.Diagnostics;
 
 namespace YamlDotNet.Core
 {
+    [DebuggerStepThrough]
     internal sealed class CharacterAnalyzer<TBuffer> where TBuffer : class, ILookAheadBuffer
     {
         public CharacterAnalyzer(TBuffer buffer)

@@ -33,6 +33,7 @@ namespace YamlDotNet.Core
     /// <remarks>
     /// This class implements a circular buffer with a fixed capacity.
     /// </remarks>
+    [DebuggerStepThrough]
     public sealed class LookAheadBuffer : ILookAheadBuffer
     {
         private readonly TextReader input;

@@ -69,6 +69,7 @@ namespace YamlDotNet.Core
         private bool plainScalarFollowedByComment;
         private int flowSequenceStartLine;
         private int indent = -1;
+        private bool flowScalarFetched;
         private bool simpleKeyAllowed;
         private int flowLevel;
         private int tokensParsed;
@@ -311,7 +312,6 @@ namespace YamlDotNet.Core
             if (analyzer.Buffer.EndOfInput)
             {
                 FetchStreamEnd();
-                return;
             }
 
             // Is it a directive?
@@ -388,19 +388,37 @@ namespace YamlDotNet.Core
 
             // Is it the key indicator?
 
-            if (analyzer.Check('?') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
+            if (analyzer.Check('?') &&
+                (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
             {
-                FetchKey();
-                return;
+                if (analyzer.IsWhiteBreakOrZero(1))
+                {
+                    FetchKey();
+                    return;
+                }
             }
 
             // Is it the value indicator?
 
-            if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)) &&
-                !(simpleKeyAllowed && flowLevel > 0))
+            if (analyzer.Check(':') &&
+                (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)) &&
+                !(simpleKeyAllowed && flowLevel > 0) &&
+                !(flowScalarFetched && analyzer.Check(':', 1)))
             {
-                FetchValue();
-                return;
+                if (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1))
+                {
+                    Debug.WriteLine("======");
+                    Debug.WriteLine(analyzer.Peek(0));
+                    Debug.WriteLine(analyzer.Peek(1));
+                    Debug.WriteLine(analyzer.Peek(2));
+                    FetchValue();
+                    Debug.WriteLine("======");
+                    Debug.WriteLine(analyzer.Peek(0));
+                    Debug.WriteLine(analyzer.Peek(1));
+                    Debug.WriteLine(analyzer.Peek(2));
+                    Debug.WriteLine("-----");
+                    return;
+                }
             }
 
             // Is it an alias?
@@ -483,8 +501,8 @@ namespace YamlDotNet.Core
             var isPlainScalar =
                 !isInvalidPlainScalarCharacter ||
                 (analyzer.Check('-') && !analyzer.IsWhite(1)) ||
-                (flowLevel == 0 && analyzer.Check("?:") && !analyzer.IsWhiteBreakOrZero(1)) ||
-                (simpleKeyAllowed && flowLevel > 0 && analyzer.Check("?:"));
+                (analyzer.Check("?:") && !analyzer.IsWhiteBreakOrZero(1)) ||
+                (simpleKeyAllowed && flowLevel > 0);
 
             if (isPlainScalar)
             {
@@ -492,6 +510,15 @@ namespace YamlDotNet.Core
                 {
                     var startMark = cursor.Mark();
                     tokens.Enqueue(new Error("While scanning plain scalar, found a comment between adjacent scalars.", startMark, startMark));
+                }
+                if (flowScalarFetched)
+                {
+                    if (analyzer.Check(':'))
+                    {
+                        Skip();
+                    }
+
+                    flowScalarFetched = false;
                 }
 
                 plainScalarFollowedByComment = false;
@@ -931,11 +958,6 @@ namespace YamlDotNet.Core
                 if (analyzer.Check('#'))
                 {
                     errorToken = new Error("While scanning a flow sequence end, found invalid comment after ']'.", start, start);
-                }
-
-                if (previous is StreamStart && flowSequenceStartLine != start.Line)
-                {
-                    tokens.Enqueue(new Error("While scanning a flow sequence end, found mapping key spanning across multiple lines.", start, start));
                 }
 
                 token = new FlowSequenceEnd(start, start);
@@ -1739,6 +1761,10 @@ namespace YamlDotNet.Core
 
             simpleKeyAllowed = false;
 
+            // Indicates the adjacent flow scalar that a prior flow scalar has been fetched.
+
+            flowScalarFetched = true;
+
             // Create the SCALAR token and append it to the queue.
 
             tokens.Enqueue(ScanFlowScalar(isSingleQuoted));
@@ -2074,7 +2100,11 @@ namespace YamlDotNet.Core
                 {
                     // Check for indicators that may end a plain scalar.
 
-                    if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || (flowLevel > 0 && analyzer.Check(',', 1))) || (flowLevel > 0 && analyzer.Check(",?[]{}")))
+                    if (analyzer.Check(':') &&
+                        !isAliasValue &&
+                        (analyzer.IsWhiteBreakOrZero(1) ||
+                         (flowLevel > 0 && analyzer.Check(',', 1))) ||
+                        (flowLevel > 0 && analyzer.Check(",[]{}")))
                     {
                         if (flowLevel == 0 && !key.IsPossible)
                         {
