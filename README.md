@@ -28,6 +28,7 @@ YAML, which stands for "YAML Ain't Markup Language", is described as "a human fr
 
 The library has now been successfully used in multiple projects and is considered fairly stable. It is compatible with the following runtimes:
 
+* netstandard 2.0
 * netstandard 2.1
 * .NET 6.0
 * .NET Framework 4.7

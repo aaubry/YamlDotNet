@@ -36,6 +36,7 @@ COPY . .
 RUN dotnet build -c Release --framework net35 YamlDotNet/YamlDotNet.csproj -o /output/net35
 RUN dotnet build -c Release --framework net45 YamlDotNet/YamlDotNet.csproj -o /output/net45
 RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /output/net47
+RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.0
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
 RUN dotnet build -c Release --framework net60 YamlDotNet/YamlDotNet.csproj -o /output/net60
 

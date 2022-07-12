@@ -30,6 +30,9 @@
         <file src="bin/Release/net60/YamlDotNet.dll" target="lib/net6.0" />
         <file src="bin/Release/net60/YamlDotNet.xml" target="lib/net6.0" />
 
+        <file src="bin/Release/netstandard2.0/YamlDotNet.dll" target="lib/netstandard2.0" />
+        <file src="bin/Release/netstandard2.0/YamlDotNet.xml" target="lib/netstandard2.0" />
+
         <file src="bin/Release/netstandard2.1/YamlDotNet.dll" target="lib/netstandard2.1" />
         <file src="bin/Release/netstandard2.1/YamlDotNet.xml" target="lib/netstandard2.1" />
 
