@@ -39,17 +39,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "L383", // this is a multi document test, yamldotnet does not support it.
-
-            // these tests need more research, though if get these to pass a number of the open issues in yamldotnet repo gets resolved
-            "58MP",
-            "5T43",
-            "652Z",
-            "6CA3",
-            "G5U8",
-            "JR7V",
-            "U99R",
-            "YJV2"
+            "L383" // this is a multi document test, yamldotnet does not support it.
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
@@ -59,7 +49,7 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
         {
-            // no known desync errors
+            "C2SP" // this is supposed to error out, which it does, just not in the same spot.
         };
 
         [Theory, ClassData(typeof(ParserSpecTestsData))]

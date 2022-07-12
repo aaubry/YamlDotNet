@@ -68,6 +68,8 @@ namespace YamlDotNet.Core
         private bool streamEndProduced;
         private bool plainScalarFollowedByComment;
         private int flowSequenceStartLine;
+        private bool flowCollectionFetched = false;
+        private bool startFlowCollectionFetched = false;
         private int indent = -1;
         private bool flowScalarFetched;
         private bool simpleKeyAllowed;
@@ -380,10 +382,17 @@ namespace YamlDotNet.Core
 
             // Is it the block entry indicator?
 
-            if (analyzer.Check('-') && analyzer.IsWhiteBreakOrZero(1))
+            if (analyzer.Check('-'))
             {
-                FetchBlockEntry();
-                return;
+                if (analyzer.IsWhiteBreakOrZero(1))
+                {
+                    FetchBlockEntry();
+                    return;
+                }
+                else if (analyzer.Check("?:,[]{}#&*!|>'\"%@`", 1))
+                {
+                    tokens.Enqueue(new Error("Invalid key indicator format.", cursor.Mark(), cursor.Mark()));
+                }
             }
 
             // Is it the key indicator?
@@ -405,7 +414,7 @@ namespace YamlDotNet.Core
                 !(simpleKeyAllowed && flowLevel > 0) &&
                 !(flowScalarFetched && analyzer.Check(':', 1)))
             {
-                if (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1))
+                if (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1) || flowScalarFetched || flowCollectionFetched || startFlowCollectionFetched)
                 {
                     Debug.WriteLine("======");
                     Debug.WriteLine(analyzer.Peek(0));
@@ -511,15 +520,18 @@ namespace YamlDotNet.Core
                     var startMark = cursor.Mark();
                     tokens.Enqueue(new Error("While scanning plain scalar, found a comment between adjacent scalars.", startMark, startMark));
                 }
-                if (flowScalarFetched)
+
+                if (flowScalarFetched || flowCollectionFetched && !startFlowCollectionFetched)
                 {
                     if (analyzer.Check(':'))
                     {
                         Skip();
                     }
 
-                    flowScalarFetched = false;
                 }
+                flowScalarFetched = false;
+                flowCollectionFetched = false;
+                startFlowCollectionFetched = false;
 
                 plainScalarFollowedByComment = false;
 
@@ -912,6 +924,7 @@ namespace YamlDotNet.Core
             }
 
             tokens.Enqueue(token);
+            startFlowCollectionFetched = true;
         }
 
         /// <summary>
@@ -972,6 +985,8 @@ namespace YamlDotNet.Core
             {
                 tokens.Enqueue(errorToken);
             }
+
+            flowCollectionFetched = true;
         }
 
         /// <summary>
@@ -2418,7 +2433,13 @@ namespace YamlDotNet.Core
                 return string.Empty;
             }
 
-            return tag.ToString();
+            var result = tag.ToString();
+            if (result.EndsWith(","))
+            {
+                throw new SyntaxErrorException(cursor.Mark(), cursor.Mark(), "Unexpected comma at end of tag");
+            }
+
+            return result;
         }
 
         private static readonly byte[] EmptyBytes = new byte[0];

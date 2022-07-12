@@ -52,18 +52,11 @@ namespace YamlDotNet.Test.Spec
             "RZP5", "RZT7", "S3PD", "S4JQ", "S4T7", "S7BG", "SKE5", "SSW6", "T4YY", "T5N4", "U3C3", "U3XV", "U9NS", "UGM3", "UT92",
             "V55R", "W42U", "W4TN", "W5VH", "WZ62", "X38W", "X8DW", "XLQ9", "XV9V", "XW4D", "Y2GN", "Z67P", "Z9M4", "ZH7C", "ZWK4",
 
-            // TODO: resolve these, it will end up resolving some of the git hub issues on yamldotnet
-            "4WA9",
-            "58MP",
-            "5T43",
-            "652Z",
-            "6CA3",
-            "CFD4",
-            "JR7V",
-            "L383",
-            "M6YH",
-            "NKF9",
-            "YJV2"
+            "L383", "NKF9", // We don't do multiple yaml documents in a single file
+            "4WA9", // we lose whether the source yaml used folding text so we know it will fail. If B3HG passes, then we're good.
+            "6CA3", // we lose whether the source yaml was originally tabbed in or not so we can't do this test.
+            "CFD4", // we don't support null key names
+            "M6YH", // we lose the folding context (see 4WA9 above) so this test will always fail.
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
@@ -99,6 +92,20 @@ namespace YamlDotNet.Test.Spec
 
             try
             {
+                // Some of the output files have the document separator at the start, we don't do that, so remove it.
+                if (expectedResult.StartsWith($"---"))
+                {
+                    expectedResult = expectedResult.Substring(4);
+                }
+                if (expectedResult.StartsWith("\r"))
+                {
+                    expectedResult = expectedResult.Substring(1);
+                }
+                if (expectedResult.StartsWith("\n"))
+                {
+                    expectedResult = expectedResult.Substring(1);
+                }
+
                 Assert.Equal(expectedResult, writer.ToString(), ignoreLineEndingDifferences: true);
                 Debug.Assert(!ignoredSuites.Contains(name), $"Spec test '{name}' passed but present in '{nameof(ignoredSuites)}' list. Consider removing it from the list.");
             }
