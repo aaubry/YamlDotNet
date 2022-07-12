@@ -20,6 +20,7 @@ RUN apt install -y dotnet-sdk-3.1
 
 FROM builder AS build
 WORKDIR /src
+ARG PACKAGE_VERSION=1.0.0
 
 COPY YamlDotNet.sln YamlDotNet.sln
 COPY YamlDotNet/YamlDotNet.csproj YamlDotNet/YamlDotNet.csproj
@@ -33,12 +34,18 @@ RUN dotnet restore YamlDotNet.sln
 COPY . .
 
 RUN dotnet build -c Release --framework net35 YamlDotNet/YamlDotNet.csproj -o /output/net35
+RUN dotnet build -c Release --framework net45 YamlDotNet/YamlDotNet.csproj -o /output/net45
 RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /output/net47
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
+RUN dotnet build -c Release --framework net60 YamlDotNet/YamlDotNet.csproj -o /output/net60
 
-RUN dotnet test YamlDotNet.sln
+RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
+
+RUN dotnet test -c Release YamlDotNet.sln --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework netcoreapp3.1 --logger:"trx;LogFileName=/output/tests.netcoreapp3.1.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
 VOLUME /output
+WORKDIR /libraries
 COPY --from=build /output /libraries
 CMD [ "cp", "-r", "/libraries", "/output" ]

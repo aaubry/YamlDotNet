@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net35;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net35;net45;net47;net60</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
-    <PackageLicenseFile>../LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
     <Configurations>Debug;Release</Configurations>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
@@ -35,6 +35,14 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net60'">
+    <NetStandard>true</NetStandard>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="Portability/**/*.cs" />
@@ -70,7 +78,7 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net60'">
     <PackageReference Include="System.ComponentModel.TypeConverter">
       <Version>4.3.0</Version>
     </PackageReference>

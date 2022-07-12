@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net60</TargetFramework>
+    <TargetFrameworks>net60;net45</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="../build/common.props" />
