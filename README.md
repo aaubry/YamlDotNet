@@ -1,8 +1,5 @@
 # YamlDotNet
 
-**This project is on hold, and issues or pull requests will probably not be reviewed. [See this discussion for more details](https://github.com/aaubry/YamlDotNet/discussions/689).**
-
-
 | Travis | Appveyor | NuGet |
 |--------|----------|-------|
 |[![Travis CI](https://travis-ci.org/aaubry/YamlDotNet.svg?branch=master)](https://travis-ci.org/aaubry/YamlDotNet/builds#)|[![Build status](https://ci.appveyor.com/api/projects/status/github/aaubry/yamldotnet?svg=true)](https://ci.appveyor.com/project/aaubry/yamldotnet/branch/master)|  [![NuGet](https://img.shields.io/nuget/v/YamlDotNet.svg)](https://www.nuget.org/packages/YamlDotNet/)
