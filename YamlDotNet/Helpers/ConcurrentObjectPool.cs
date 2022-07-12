@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -47,6 +47,7 @@ namespace YamlDotNet.Helpers
     /// Rationale:
     ///    If there is no intent for reusing the object, do not use pool - just use "new".
     /// </summary>
+    [DebuggerStepThrough]
     internal sealed class ConcurrentObjectPool<T> where T : class
     {
         [DebuggerDisplay("{value,nq}")]

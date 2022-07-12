@@ -994,7 +994,7 @@ namespace YamlDotNet.Core
                         Skip();
                         current = GetCurrentToken();
                     }
-                    else
+                    else if (!(current is Scalar))
                     {
                         throw new SemanticErrorException(current?.Start ?? Mark.Empty, current?.End ?? Mark.Empty, "While parsing a flow mapping,  did not find expected ',' or '}'.");
                     }
@@ -1041,13 +1041,7 @@ namespace YamlDotNet.Core
         private ParsingEvent ParseFlowMappingValue(bool isEmpty)
         {
             var current = GetCurrentToken();
-            if (isEmpty)
-            {
-                state = ParserState.FlowMappingKey;
-                return ProcessEmptyScalar(current?.Start ?? Mark.Empty);
-            }
-
-            if (current is Value)
+            if (!isEmpty && current is Value)
             {
                 Skip();
                 current = GetCurrentToken();
@@ -1059,6 +1053,13 @@ namespace YamlDotNet.Core
             }
 
             state = ParserState.FlowMappingKey;
+
+            if (!isEmpty && current is Scalar scalar)
+            {
+                Skip();
+                return new Events.Scalar(AnchorName.Empty, TagName.Empty, scalar.Value, scalar.Style, false, false, current.Start, scalar.End);
+            }
+
             return ProcessEmptyScalar(current?.Start ?? Mark.Empty);
         }
 

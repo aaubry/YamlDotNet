@@ -127,10 +127,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 else
                 {
+                    if (key == null)
+                    {
+                        throw new ArgumentException("key", "Empty key names are not supported yet.");
+                    }
+
                     if (valuePromise == null)
                     {
                         // Happy path: both key and value are known
-                        result[key!] = value!;
+                        result[key] = value!;
                     }
                     else
                     {

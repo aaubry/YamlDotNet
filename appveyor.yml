@@ -26,22 +26,25 @@ build_script:
   - cmd: .\build.cmd --appveyor
 
 artifacts:
+  - path: YamlDotNet\bin\Release\netstandard2.0
+    name: Release-NetStandard-2.0
+
   - path: YamlDotNet\bin\Release\netstandard2.1
     name: Release-NetStandard-2.1
-
-  - path: YamlDotNet\bin\Release\netstandard1.3
-    name: Release-NetStandard-1.3
 
   - path: YamlDotNet\bin\Release\net45
     name: Release-Net45
 
+  - path: YamlDotNet\bin\Release\net47
+    name: Release-Net47
+
   - path: YamlDotNet\bin\Release\net35
     name: Release-Net35
 
-  - path: YamlDotNet\bin\Release\net20
-    name: Release-Net20
-
   - path: YamlDotNet\bin\Release\net40
     name: Release-UnitySubset-v35
+
+  - path: YamlDotNet\bin\Release\net60
+    name: Release-Net60
 
   - path: YamlDotNet\bin\*.nupkg

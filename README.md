@@ -28,15 +28,16 @@ YAML, which stands for "YAML Ain't Markup Language", is described as "a human fr
 
 The library has now been successfully used in multiple projects and is considered fairly stable. It is compatible with the following runtimes:
 
+* netstandard 2.0
 * netstandard 2.1
-* netstandard 1.3
+* .NET 6.0
+* .NET Framework 4.7
 * .NET Framework 4.5
 * Unity Subset v3.5
 
 The following runtimes are also supported, with a few features missing:
 
 * .NET Framework 3.5
-* .NET Framework 2.0
 
 The library is compatible with mono's [Ahead-of-Time compilation](https://www.mono-project.com/docs/advanced/aot/) (AOT), and should work correctly on platforms that depend on it, such as Unity.
 

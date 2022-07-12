@@ -130,14 +130,14 @@ namespace YamlDotNet.Core
 
         [Obsolete("Please use TryConsume<T>(out var evt) instead")]
         [return: MaybeNull]
-        public static T Allow<T>(this IParser parser) where T : ParsingEvent
+        public static T? Allow<T>(this IParser parser) where T : ParsingEvent
         {
             return parser.TryConsume<T>(out var @event) ? @event : default;
         }
 
         [Obsolete("Please use Accept<T>(out var evt) instead")]
         [return: MaybeNull]
-        public static T Peek<T>(this IParser parser) where T : ParsingEvent
+        public static T? Peek<T>(this IParser parser) where T : ParsingEvent
         {
             return parser.Accept<T>(out var @event) ? @event : default;
         }

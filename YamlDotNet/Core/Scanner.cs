@@ -68,7 +68,10 @@ namespace YamlDotNet.Core
         private bool streamEndProduced;
         private bool plainScalarFollowedByComment;
         private int flowSequenceStartLine;
+        private bool flowCollectionFetched = false;
+        private bool startFlowCollectionFetched = false;
         private int indent = -1;
+        private bool flowScalarFetched;
         private bool simpleKeyAllowed;
         private int flowLevel;
         private int tokensParsed;
@@ -311,7 +314,6 @@ namespace YamlDotNet.Core
             if (analyzer.Buffer.EndOfInput)
             {
                 FetchStreamEnd();
-                return;
             }
 
             // Is it a directive?
@@ -380,27 +382,43 @@ namespace YamlDotNet.Core
 
             // Is it the block entry indicator?
 
-            if (analyzer.Check('-') && analyzer.IsWhiteBreakOrZero(1))
+            if (analyzer.Check('-'))
             {
-                FetchBlockEntry();
-                return;
+                if (analyzer.IsWhiteBreakOrZero(1))
+                {
+                    FetchBlockEntry();
+                    return;
+                }
+                else if (analyzer.Check("?:,[]{}#&*!|>'\"%@`", 1))
+                {
+                    tokens.Enqueue(new Error("Invalid key indicator format.", cursor.Mark(), cursor.Mark()));
+                }
             }
 
             // Is it the key indicator?
 
-            if (analyzer.Check('?') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
+            if (analyzer.Check('?') &&
+                (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)))
             {
-                FetchKey();
-                return;
+                if (analyzer.IsWhiteBreakOrZero(1))
+                {
+                    FetchKey();
+                    return;
+                }
             }
 
             // Is it the value indicator?
 
-            if (analyzer.Check(':') && (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)) &&
-                !(simpleKeyAllowed && flowLevel > 0))
+            if (analyzer.Check(':') &&
+                (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)) &&
+                !(simpleKeyAllowed && flowLevel > 0) &&
+                !(flowScalarFetched && analyzer.Check(':', 1)))
             {
-                FetchValue();
-                return;
+                if (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1) || flowScalarFetched || flowCollectionFetched || startFlowCollectionFetched)
+                {
+                    FetchValue();
+                    return;
+                }
             }
 
             // Is it an alias?
@@ -483,8 +501,8 @@ namespace YamlDotNet.Core
             var isPlainScalar =
                 !isInvalidPlainScalarCharacter ||
                 (analyzer.Check('-') && !analyzer.IsWhite(1)) ||
-                (flowLevel == 0 && analyzer.Check("?:") && !analyzer.IsWhiteBreakOrZero(1)) ||
-                (simpleKeyAllowed && flowLevel > 0 && analyzer.Check("?:"));
+                (analyzer.Check("?:") && !analyzer.IsWhiteBreakOrZero(1)) ||
+                (simpleKeyAllowed && flowLevel > 0);
 
             if (isPlainScalar)
             {
@@ -494,6 +512,17 @@ namespace YamlDotNet.Core
                     tokens.Enqueue(new Error("While scanning plain scalar, found a comment between adjacent scalars.", startMark, startMark));
                 }
 
+                if (flowScalarFetched || flowCollectionFetched && !startFlowCollectionFetched)
+                {
+                    if (analyzer.Check(':'))
+                    {
+                        Skip();
+                    }
+                }
+
+                flowScalarFetched = false;
+                flowCollectionFetched = false;
+                startFlowCollectionFetched = false;
                 plainScalarFollowedByComment = false;
 
                 FetchPlainScalar();
@@ -885,6 +914,7 @@ namespace YamlDotNet.Core
             }
 
             tokens.Enqueue(token);
+            startFlowCollectionFetched = true;
         }
 
         /// <summary>
@@ -933,11 +963,6 @@ namespace YamlDotNet.Core
                     errorToken = new Error("While scanning a flow sequence end, found invalid comment after ']'.", start, start);
                 }
 
-                if (previous is StreamStart && flowSequenceStartLine != start.Line)
-                {
-                    tokens.Enqueue(new Error("While scanning a flow sequence end, found mapping key spanning across multiple lines.", start, start));
-                }
-
                 token = new FlowSequenceEnd(start, start);
             }
             else
@@ -950,6 +975,8 @@ namespace YamlDotNet.Core
             {
                 tokens.Enqueue(errorToken);
             }
+
+            flowCollectionFetched = true;
         }
 
         /// <summary>
@@ -1739,6 +1766,10 @@ namespace YamlDotNet.Core
 
             simpleKeyAllowed = false;
 
+            // Indicates the adjacent flow scalar that a prior flow scalar has been fetched.
+
+            flowScalarFetched = true;
+
             // Create the SCALAR token and append it to the queue.
 
             tokens.Enqueue(ScanFlowScalar(isSingleQuoted));
@@ -2074,7 +2105,11 @@ namespace YamlDotNet.Core
                 {
                     // Check for indicators that may end a plain scalar.
 
-                    if (analyzer.Check(':') && !isAliasValue && (analyzer.IsWhiteBreakOrZero(1) || (flowLevel > 0 && analyzer.Check(',', 1))) || (flowLevel > 0 && analyzer.Check(",?[]{}")))
+                    if (analyzer.Check(':') &&
+                        !isAliasValue &&
+                        (analyzer.IsWhiteBreakOrZero(1) ||
+                         (flowLevel > 0 && analyzer.Check(',', 1))) ||
+                        (flowLevel > 0 && analyzer.Check(",[]{}")))
                     {
                         if (flowLevel == 0 && !key.IsPossible)
                         {
@@ -2388,7 +2423,13 @@ namespace YamlDotNet.Core
                 return string.Empty;
             }
 
-            return tag.ToString();
+            var result = tag.ToString();
+            if (result.EndsWith(","))
+            {
+                throw new SyntaxErrorException(cursor.Mark(), cursor.Mark(), "Unexpected comma at end of tag");
+            }
+
+            return result;
         }
 
         private static readonly byte[] EmptyBytes = new byte[0];

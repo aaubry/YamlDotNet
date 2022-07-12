@@ -2131,7 +2131,7 @@ Cycle: *o0");
         [Fact]
         public void RoundtripWindowsNewlines()
         {
-            var text = "Line1\r\nLine2\r\nLine3\r\n\r\nLine4";
+            var text = $"Line1{Environment.NewLine}Line2{Environment.NewLine}Line3{Environment.NewLine}{Environment.NewLine}Line4";
 
             var sut = new SerializerBuilder().Build();
             var dut = new DeserializerBuilder().Build();
