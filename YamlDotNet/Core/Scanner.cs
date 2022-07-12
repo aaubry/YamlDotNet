@@ -416,16 +416,7 @@ namespace YamlDotNet.Core
             {
                 if (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1) || flowScalarFetched || flowCollectionFetched || startFlowCollectionFetched)
                 {
-                    Debug.WriteLine("======");
-                    Debug.WriteLine(analyzer.Peek(0));
-                    Debug.WriteLine(analyzer.Peek(1));
-                    Debug.WriteLine(analyzer.Peek(2));
                     FetchValue();
-                    Debug.WriteLine("======");
-                    Debug.WriteLine(analyzer.Peek(0));
-                    Debug.WriteLine(analyzer.Peek(1));
-                    Debug.WriteLine(analyzer.Peek(2));
-                    Debug.WriteLine("-----");
                     return;
                 }
             }
@@ -527,12 +518,11 @@ namespace YamlDotNet.Core
                     {
                         Skip();
                     }
-
                 }
+
                 flowScalarFetched = false;
                 flowCollectionFetched = false;
                 startFlowCollectionFetched = false;
-
                 plainScalarFollowedByComment = false;
 
                 FetchPlainScalar();
