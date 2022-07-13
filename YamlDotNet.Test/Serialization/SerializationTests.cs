@@ -1370,16 +1370,18 @@ y:
                         new FloatTestCase("double.NaN", double.NaN, ".nan"),
                         new FloatTestCase("double.PositiveInfinity", double.PositiveInfinity, ".inf"),
                         new FloatTestCase("double.NegativeInfinity", double.NegativeInfinity, "-.inf"),
-                        new FloatTestCase("double.Epsilon", double.Epsilon, double.Epsilon.ToString("G17", CultureInfo.InvariantCulture)),
-                        new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G17", CultureInfo.InvariantCulture)),
-                        new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G17", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.Epsilon", double.Epsilon,  double.Epsilon.ToString("G", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("double.26.67", 26.67D, "26.67"),
 
                         new FloatTestCase("float.NaN", float.NaN, ".nan"),
                         new FloatTestCase("float.PositiveInfinity", float.PositiveInfinity, ".inf"),
                         new FloatTestCase("float.NegativeInfinity", float.NegativeInfinity, "-.inf"),
-                        new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G17", CultureInfo.InvariantCulture)),
-                        new FloatTestCase("float.MinValue", float.MinValue, float.MinValue.ToString("G17", CultureInfo.InvariantCulture)),
-                        new FloatTestCase("float.MaxValue", float.MaxValue, float.MaxValue.ToString("G17", CultureInfo.InvariantCulture))
+                        new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.MinValue", float.MinValue, float.MinValue.ToString("G", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.MaxValue", float.MaxValue, float.MaxValue.ToString("G", CultureInfo.InvariantCulture)),
+                        new FloatTestCase("float.26.67", 26.67F, "26.67")
                     }
                     .Select(tc => new object[] { tc });
             }
