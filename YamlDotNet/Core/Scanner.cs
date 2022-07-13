@@ -796,7 +796,7 @@ namespace YamlDotNet.Core
 
                 default:
                     // warning: skipping reserved directive line
-                    while (!analyzer.Check('#') && !analyzer.IsBreak())
+                    while (!analyzer.EndOfInput && !analyzer.Check('#') && !analyzer.IsBreak())
                     {
                         Skip();
                     }
@@ -2282,6 +2282,13 @@ namespace YamlDotNet.Core
             if (name.Length == 0)
             {
                 throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, could not find expected directive name.");
+            }
+
+            // Check for end of stream
+
+            if (analyzer.EndOfInput)
+            {
+                throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a directive, found unexpected end of stream.");
             }
 
             // Check for an blank character after the name.
