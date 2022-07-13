@@ -49,12 +49,12 @@ namespace YamlDotNet.Serialization
 
         public static string FormatNumber(double number)
         {
-            return number.ToString("G17", NumberFormat);
+            return number.ToString("G", NumberFormat);
         }
 
         public static string FormatNumber(float number)
         {
-            return number.ToString("G17", NumberFormat);
+            return number.ToString("G", NumberFormat);
         }
 
         public static string FormatBoolean(object boolean)
