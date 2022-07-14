@@ -107,6 +107,24 @@ cars:
             person.Cars[1].Spec.DriveType.Should().Be("FWD");
         }
 
+        [Fact]
+        public void SetterOnlySetsWithoutException()
+        {
+            var yaml = @"
+Value: bar
+";
+            var deserializer = new DeserializerBuilder().Build();
+            var result = deserializer.Deserialize<SetterOnly>(yaml);
+            result.Actual.Should().Be("bar");
+        }
+
+        public class SetterOnly
+        {
+            private string _value;
+            public string Value { set => _value = value; }
+            public string Actual { get => _value; }
+        }
+
         public class Person
         {
             public string Name { get; private set; }

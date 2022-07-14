@@ -100,6 +100,20 @@ namespace YamlDotNet.Serialization
 
         protected override DeserializerBuilder Self { get { return this; } }
 
+        internal override ITypeInspector BuildTypeInspector()
+        {
+            ITypeInspector innerInspector = new WritablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
+            if (!ignoreFields)
+            {
+                innerInspector = new CompositeTypeInspector(
+                    new ReadableFieldsTypeInspector(typeResolver),
+                    innerInspector
+                );
+            }
+
+            return typeInspectorFactories.BuildComponentChain(innerInspector);
+        }
+
         /// <summary>
         /// Sets the <see cref="IObjectFactory" /> that will be used by the deserializer.
         /// </summary>

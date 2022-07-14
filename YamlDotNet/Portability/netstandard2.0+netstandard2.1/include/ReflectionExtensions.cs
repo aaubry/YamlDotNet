@@ -182,8 +182,8 @@ namespace YamlDotNet
                 .Where(c => c.IsPublic && !c.IsStatic);
         }
 
-        private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !property.GetMethod.IsStatic;
-        private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && property.GetMethod.IsPublic;
+        private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod).IsStatic;
+        private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && (property.GetMethod ?? property.SetMethod).IsPublic;
 
         public static IEnumerable<PropertyInfo> GetProperties(this Type type, bool includeNonPublic)
         {

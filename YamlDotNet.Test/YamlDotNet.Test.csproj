@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net60;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net60;net47;netcoreapp3.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
