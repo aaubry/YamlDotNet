@@ -75,7 +75,17 @@ namespace YamlDotNet.Test.Spec
                     File.ReadAllText(descriptionFile).TrimEnd(),
                     inputFile,
                     (this is SerializerSpecTests.SerializerSpecTestsData) ? outputFile : expectedEventFile,
-                    hasErrorFile
+                    hasErrorFile,
+                    true //quoting enabled
+                };
+                yield return new object[]
+                {
+                    testName,
+                    File.ReadAllText(descriptionFile).TrimEnd(),
+                    inputFile,
+                    (this is SerializerSpecTests.SerializerSpecTestsData) ? outputFile : expectedEventFile,
+                    hasErrorFile,
+                    false //quoting not enabled
                 };
             }
         }

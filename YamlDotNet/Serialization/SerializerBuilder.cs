@@ -49,6 +49,7 @@ namespace YamlDotNet.Serialization
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
+        private bool quoteNecessaryStrings;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -85,13 +86,22 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings) }
+                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings) }
             };
 
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention);
         }
 
         protected override SerializerBuilder Self { get { return this; } }
+
+        /// <summary>
+        /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
+        /// </summary>
+        public SerializerBuilder WithQuotingNecessaryStrings()
+        {
+            quoteNecessaryStrings = true;
+            return this;
+        }
 
         /// <summary>
         /// Sets the maximum recursion that is allowed while traversing the object graph. The default value is 50.
@@ -244,7 +254,7 @@ namespace YamlDotNet.Serialization
                 maximumRecursion,
                 namingConvention
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 

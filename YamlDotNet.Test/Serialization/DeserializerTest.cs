@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Serialization;
@@ -116,6 +117,24 @@ Value: bar
             var deserializer = new DeserializerBuilder().Build();
             var result = deserializer.Deserialize<SetterOnly>(yaml);
             result.Actual.Should().Be("bar");
+        }
+
+        [Fact]
+        public void KeysOnDynamicClassDontGetQuoted()
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = @"
+True: null
+False: hello
+Null: true
+";
+            var obj = deserializer.Deserialize(yaml, typeof(object));
+            var result = serializer.Serialize(obj);
+            var dictionary = (Dictionary<object, object>)obj;
+            var keys = dictionary.Keys.ToArray();
+            Assert.Equal(keys, new[] { "True", "False", "Null" });
+            Assert.Equal(dictionary.Values, new object[] { null, "hello", true });
         }
 
         public class SetterOnly

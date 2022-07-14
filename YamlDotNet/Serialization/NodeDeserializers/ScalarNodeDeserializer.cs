@@ -33,6 +33,18 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     {
         private const string BooleanTruePattern = "^(true|y|yes|on)$";
         private const string BooleanFalsePattern = "^(false|n|no|off)$";
+        private readonly bool attemptUnknownTypeDeserialization;
+
+        public ScalarNodeDeserializer()
+            : this(false)
+        {
+
+        }
+
+        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization)
+        {
+            this.attemptUnknownTypeDeserialization = attemptUnknownTypeDeserialization;
+        }
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
@@ -97,8 +109,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 default:
                     if (expectedType == typeof(object))
                     {
-                        // Default to string
-                        value = scalar.Value;
+                        if (!scalar.IsKey && attemptUnknownTypeDeserialization)
+                        {
+                            value = AttemptUnknownTypeDeserialization(scalar);
+                        }
+                        else
+                        {
+                            // Default to string
+                            value = scalar.Value;
+                        }
                     }
                     else
                     {
@@ -277,6 +296,115 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     TypeCode.UInt64 => number,
                     _ => number,
                 };
+            }
+        }
+
+        private static object? AttemptUnknownTypeDeserialization(Scalar value)
+        {
+            if (value.Style == ScalarStyle.SingleQuoted ||
+                value.Style == ScalarStyle.DoubleQuoted ||
+                value.Style == ScalarStyle.Folded)
+            {
+                return value.Value;
+            }
+            var v = value.Value;
+            object result = null;
+
+            switch (v)
+            {
+                case "":
+                case "~":
+                case "null":
+                case "Null":
+                case "NULL":
+                    return null;
+                case "true":
+                case "True":
+                case "TRUE":
+                    return true;
+                case "false":
+                case "False":
+                case "FALSE":
+                    return false;
+                default:
+                    if (Regex.IsMatch(v, "0x[0-9a-fA-F]+")) //base16 number
+                    {
+                        if (TryAndSwallow(() => Convert.ToByte(v, 16), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToInt16(v, 16), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToInt32(v, 16), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToInt64(v, 16), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToUInt64(v, 16), out result)) { }
+                        else
+                        {
+                            //we couldn't parse it, default to a string. It's probably to big.
+                            result = v;
+                        }
+                    }
+                    else if (Regex.IsMatch(v, "0o[0-9a-fA-F]+")) //base8 number
+                    {
+                        if (TryAndSwallow(() => Convert.ToByte(v, 8), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToInt16(v, 8), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToInt32(v, 8), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToInt64(v, 8), out result)) { }
+                        else if (TryAndSwallow(() => Convert.ToUInt64(v, 8), out result)) { }
+                        else
+                        {
+                            //we couldn't parse it, default to a string. It's probably to big.
+                            result = v;
+                        }
+                    }
+                    else if (Regex.IsMatch(v, @"[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?")) //regular number
+                    {
+                        if (TryAndSwallow(() => byte.Parse(v), out result)) { }
+                        else if (TryAndSwallow(() => short.Parse(v), out result)) { }
+                        else if (TryAndSwallow(() => int.Parse(v), out result)) { }
+                        else if (TryAndSwallow(() => long.Parse(v), out result)) { }
+                        else if (TryAndSwallow(() => ulong.Parse(v), out result)) { }
+                        else if (TryAndSwallow(() => float.Parse(v), out result)) { }
+                        else if (TryAndSwallow(() => double.Parse(v), out result)) { }
+                        else
+                        {
+                            //we couldn't parse it, default to string, It's probably too big
+                            result = v;
+                        }
+                    }
+                    else if (Regex.IsMatch(v, @"[-+]?(\.inf|\.Inf|\.INF)")) //infinities
+                    {
+                        if (v.StartsWith("-"))
+                        {
+                            result = float.NegativeInfinity;
+                        }
+                        else
+                        {
+                            result = float.PositiveInfinity;
+                        }
+                    }
+                    else if (Regex.IsMatch(v, @"\.nan|\.NaN|\.NAN")) //not a number
+                    {
+                        result = float.NaN;
+                    }
+                    else
+                    {
+                        // not a known type, so make it a string.
+                        result = v;
+                    }
+                    break;
+            }
+
+            return result;
+        }
+
+        private static bool TryAndSwallow(Func<object> attempt, out object? value)
+        {
+            try
+            {
+                value = attempt();
+                return true;
+            }
+            catch
+            {
+                value = null;
+                return false;
             }
         }
     }

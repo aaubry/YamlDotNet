@@ -239,10 +239,9 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             foreach (var propertyDescriptor in typeDescriptor.GetProperties(value.Type, source))
             {
                 var propertyValue = propertyDescriptor.Read(source);
-
                 if (visitor.EnterMapping(propertyDescriptor, propertyValue, context))
                 {
-                    Traverse(propertyDescriptor.Name, new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string)), visitor, context, path);
+                    Traverse(propertyDescriptor.Name, new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string), ScalarStyle.Plain), visitor, context, path);
                     Traverse(propertyDescriptor.Name, propertyValue, visitor, context, path);
                 }
             }

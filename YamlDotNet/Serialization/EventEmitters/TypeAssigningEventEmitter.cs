@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Schemas;
 
@@ -30,6 +31,23 @@ namespace YamlDotNet.Serialization.EventEmitters
     {
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
         private readonly IDictionary<Type, TagName> tagMappings;
+        private readonly bool quoteNecessaryStrings;
+        private static readonly string IsSpecialStringValue_Regex =
+            @"^("
+                 + @"null|Null|NULL|\~"
+                 + @"|true|True|TRUE|false|False|FALSE"
+                 + @"|[-+]?[0-9]+|0o[0-7]+"
+                 + @"|0x[0-9a-fA-F]+"
+                 + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?"
+                 + @"|[-+]?(\.inf|\.Inf|\.INF)"
+                 + @"|\.nan|\.NaN|\.NAN"
+            + @")$";
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
+        {
+            this.quoteNecessaryStrings = quoteNecessaryStrings;
+        }
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
             : base(nextEmitter)
@@ -89,7 +107,16 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.Char:
                         eventInfo.Tag = FailsafeSchema.Tags.Str;
                         eventInfo.RenderedValue = value.ToString()!;
-                        suggestedStyle = ScalarStyle.Any;
+
+                        if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
+                        {
+                            suggestedStyle = ScalarStyle.DoubleQuoted;
+                        }
+                        else
+                        {
+                            suggestedStyle = ScalarStyle.Any;
+                        }
+
                         break;
 
                     case TypeCode.DateTime:
@@ -150,6 +177,13 @@ namespace YamlDotNet.Serialization.EventEmitters
                     + $"E.g: builder.WithTagMapping(\"!{eventInfo.Source.Type.Name}\", typeof({eventInfo.Source.Type.FullName}));"
                 );
             }
+        }
+
+        private bool IsSpecialStringValue(string value)
+        {
+            return Regex.IsMatch(
+                value,
+                IsSpecialStringValue_Regex);
         }
     }
 }

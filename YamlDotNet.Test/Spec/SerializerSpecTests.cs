@@ -64,12 +64,22 @@ namespace YamlDotNet.Test.Spec
             // no false-positives known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
-        private readonly IDeserializer deserializer = new DeserializerBuilder().Build();
-        private readonly ISerializer serializer = new SerializerBuilder().Build();
 
         [Theory, ClassData(typeof(SerializerSpecTestsData))]
-        public void ConformsWithYamlSpec(string name, string description, string inputFile, string outputFile, bool error)
+        public void ConformsWithYamlSpec(string name, string description, string inputFile, string outputFile, bool error, bool quoting)
         {
+            var deserializerBuilder = new DeserializerBuilder();
+            var serializerBuilder = new SerializerBuilder();
+
+            if (quoting)
+            {
+                deserializerBuilder.WithAttemptingUnquotedStringTypeDeserialization();
+                serializerBuilder.WithQuotingNecessaryStrings();
+            }
+
+            var serializer = serializerBuilder.Build();
+            var deserializer = deserializerBuilder.Build();
+
             var expectedResult = File.ReadAllText(outputFile);
             using var writer = new StringWriter();
             try
