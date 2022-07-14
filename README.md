@@ -145,4 +145,4 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Release notes
 
-[Release notes for the latest version](RELEASE_NOTES.md)
+Please see the Releases at https://github.com/aaubry/YamlDotNet/releases
