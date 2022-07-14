@@ -128,13 +128,28 @@ Value: bar
 True: null
 False: hello
 Null: true
+X:
 ";
             var obj = deserializer.Deserialize(yaml, typeof(object));
             var result = serializer.Serialize(obj);
             var dictionary = (Dictionary<object, object>)obj;
             var keys = dictionary.Keys.ToArray();
-            Assert.Equal(keys, new[] { "True", "False", "Null" });
-            Assert.Equal(dictionary.Values, new object[] { null, "hello", true });
+            Assert.Equal(keys, new[] { "True", "False", "Null", "X" });
+            Assert.Equal(dictionary.Values, new object[] { null, "hello", true, null });
+        }
+
+        [Fact]
+        public void EmptyQuotedStringsArentNull()
+        {
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = "Value: \"\"";
+            var result = deserializer.Deserialize<Test>(yaml);
+            Assert.Equal(string.Empty, result.Value);
+        }
+
+        public class Test
+        {
+            public string Value { get; set; }
         }
 
         public class SetterOnly

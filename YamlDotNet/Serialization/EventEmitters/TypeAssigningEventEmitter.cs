@@ -181,6 +181,11 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         private bool IsSpecialStringValue(string value)
         {
+            if (value.Trim() == string.Empty)
+            {
+                return true;
+            }
+
             return Regex.IsMatch(
                 value,
                 IsSpecialStringValue_Regex);

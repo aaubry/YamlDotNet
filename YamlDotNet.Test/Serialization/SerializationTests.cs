@@ -1370,6 +1370,16 @@ y:
             Assert.Equal(testCase.Value, deserializedValue);
         }
 
+        [Fact]
+        public void EmptyStringsAreQuoted()
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var o = new { test = string.Empty };
+            var result = serializer.Serialize(o);
+            var expected = $"test: \"\"{Environment.NewLine}";
+            Assert.Equal(expected, result);
+        }
+
         public class FloatTestCase
         {
             private readonly string description;
