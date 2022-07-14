@@ -45,6 +45,7 @@ RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Ve
 
 RUN dotnet test -c Release YamlDotNet.sln --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework netcoreapp3.1 --logger:"trx;LogFileName=/output/tests.netcoreapp3.1.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net47 --logger:"trx;LogFileName=/output/tests.net47.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
 VOLUME /output
