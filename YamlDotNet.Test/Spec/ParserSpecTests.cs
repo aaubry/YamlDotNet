@@ -53,8 +53,12 @@ namespace YamlDotNet.Test.Spec
         };
 
         [Theory, ClassData(typeof(ParserSpecTestsData))]
-        public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error)
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters
+        public void ConformsWithYamlSpec(string name, string description, string inputFile, string expectedEventFile, bool error, bool quoting)
+#pragma warning restore xUnit1026 // Theory methods should use all of their parameters
         {
+            // we don't care about quoting for this test.
+
             var expectedResult = File.ReadAllText(expectedEventFile)
                 .Replace("+MAP {}", "+MAP")
                 .Replace("+SEQ []", "+SEQ");

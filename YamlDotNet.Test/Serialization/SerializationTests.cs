@@ -829,6 +829,18 @@ y:
             result.MyString.Should().BeNull();
         }
 
+        [Fact]
+        public void NullsRoundTrip()
+        {
+            var writer = new StringWriter();
+            var obj = new Example { MyString = null };
+
+            SerializerBuilder.EnsureRoundtrip().Build().Serialize(writer, obj, typeof(Example));
+            var result = Deserializer.Deserialize<Example>(UsingReaderFor(writer));
+
+            result.MyString.Should().BeNull();
+        }
+
         [Theory]
         [InlineData(typeof(SByteEnum))]
         [InlineData(typeof(ByteEnum))]
@@ -1358,6 +1370,16 @@ y:
             Assert.Equal(testCase.Value, deserializedValue);
         }
 
+        [Fact]
+        public void EmptyStringsAreQuoted()
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var o = new { test = string.Empty };
+            var result = serializer.Serialize(o);
+            var expected = $"test: \"\"{Environment.NewLine}";
+            Assert.Equal(expected, result);
+        }
+
         public class FloatTestCase
         {
             private readonly string description;
@@ -1395,6 +1417,7 @@ y:
                         new FloatTestCase("float.NegativeInfinity", float.NegativeInfinity, "-.inf"),
                         new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("float.26.67", 26.67F, "26.67"),
+
 #if NETCOREAPP3_1_OR_GREATER
                         new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G", CultureInfo.InvariantCulture)),
@@ -2164,6 +2187,78 @@ Cycle: *o0");
             using var reader = new StringReader(serialized);
             var roundtrippedText = dut.Deserialize<StringContainer>(reader).Text.NormalizeNewLines();
             Assert.Equal(text, roundtrippedText);
+        }
+
+        [Theory]
+        [InlineData("NULL")]
+        [InlineData("Null")]
+        [InlineData("null")]
+        [InlineData("~")]
+        [InlineData("true")]
+        [InlineData("false")]
+        [InlineData("True")]
+        [InlineData("False")]
+        [InlineData("TRUE")]
+        [InlineData("FALSE")]
+        [InlineData("0o77")]
+        [InlineData("0x7A")]
+        [InlineData("+1e10")]
+        [InlineData("1E10")]
+        [InlineData("+.inf")]
+        [InlineData("-.inf")]
+        [InlineData(".inf")]
+        [InlineData(".nan")]
+        [InlineData(".NaN")]
+        [InlineData(".NAN")]
+        public void StringsThatMatchKeywordsAreQuoted(string input)
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var o = new { text = input };
+            var yaml = serializer.Serialize(o);
+            Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
+        }
+
+        [Fact]
+        public void KeysOnConcreteClassDontGetQuoted_TypeStringGetsQuoted()
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = @"
+True: null
+False: hello
+Null: true
+";
+            var obj = deserializer.Deserialize<ReservedWordsTestClass<string>>(yaml);
+            var result = serializer.Serialize(obj);
+            obj.True.Should().BeNull();
+            obj.False.Should().Be("hello");
+            obj.Null.Should().Be("true");
+            result.Should().Be($"True: {Environment.NewLine}False: hello{Environment.NewLine}Null: \"true\"{Environment.NewLine}");
+        }
+
+        [Fact]
+        public void KeysOnConcreteClassDontGetQuoted_TypeBoolDoesNotGetQuoted()
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = @"
+True: null
+False: hello
+Null: true
+";
+            var obj = deserializer.Deserialize<ReservedWordsTestClass<bool>>(yaml);
+            var result = serializer.Serialize(obj);
+            obj.True.Should().BeNull();
+            obj.False.Should().Be("hello");
+            obj.Null.Should().BeTrue();
+            result.Should().Be($"True: {Environment.NewLine}False: hello{Environment.NewLine}Null: true{Environment.NewLine}");
+        }
+
+        public class ReservedWordsTestClass<TNullType>
+        {
+            public string True { get; set; }
+            public string False { get; set; }
+            public TNullType Null { get; set; }
         }
 
         [TypeConverter(typeof(DoublyConvertedTypeConverter))]

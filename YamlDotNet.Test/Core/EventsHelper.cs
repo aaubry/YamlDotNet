@@ -299,7 +299,7 @@ namespace YamlDotNet.Test.Core
 
             foreach (var property in expected.GetType().GetTypeInfo().GetProperties())
             {
-                if (property.PropertyType == typeof(Mark) || !property.CanRead)
+                if (property.PropertyType == typeof(Mark) || !property.CanRead || property.Name == "IsKey")
                 {
                     continue;
                 }

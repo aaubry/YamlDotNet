@@ -438,7 +438,7 @@ namespace YamlDotNet.Test.Core
 
             foreach (var property in expected.GetType().GetTypeInfo().GetProperties())
             {
-                if (property.PropertyType != typeof(Mark) && property.CanRead)
+                if (property.PropertyType != typeof(Mark) && property.CanRead && property.Name != "IsKey")
                 {
                     var value = property.GetValue(actual, null);
                     var expectedValue = property.GetValue(expected, null);

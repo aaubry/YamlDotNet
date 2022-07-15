@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Serialization;
@@ -116,6 +117,84 @@ Value: bar
             var deserializer = new DeserializerBuilder().Build();
             var result = deserializer.Deserialize<SetterOnly>(yaml);
             result.Actual.Should().Be("bar");
+        }
+
+        [Fact]
+        public void KeysOnDynamicClassDontGetQuoted()
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = @"
+True: null
+False: hello
+Null: true
+X:
+";
+            var obj = deserializer.Deserialize(yaml, typeof(object));
+            var result = serializer.Serialize(obj);
+            var dictionary = (Dictionary<object, object>)obj;
+            var keys = dictionary.Keys.ToArray();
+            Assert.Equal(keys, new[] { "True", "False", "Null", "X" });
+            Assert.Equal(dictionary.Values, new object[] { null, "hello", true, null });
+        }
+
+        [Fact]
+        public void EmptyQuotedStringsArentNull()
+        {
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = "Value: \"\"";
+            var result = deserializer.Deserialize<Test>(yaml);
+            Assert.Equal(string.Empty, result.Value);
+        }
+
+        [Fact]
+        public void KeyAnchorIsHandledWithTypeDeserialization()
+        {
+            var yaml = @"a: &some_scalar this is also a key
+b: &number 1
+*some_scalar: ""will this key be handled correctly?""
+*number: 1";
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var result = deserializer.Deserialize(yaml, typeof(object));
+            Assert.IsType<Dictionary<object, object>>(result);
+            var dictionary = (Dictionary<object, object>)result;
+            Assert.Equal(new object[] { "a", "b", "this is also a key", (byte)1 }, dictionary.Keys);
+            Assert.Equal(new object[] { "this is also a key", (byte)1, "will this key be handled correctly?", (byte)1 }, dictionary.Values);
+        }
+
+        [Fact]
+        public void NonScalarKeyIsHandledWithTypeDeserialization()
+        {
+            var yaml = @"scalar: foo
+{ a: mapping }: bar
+[ a, sequence, 1 ]: baz";
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var result = deserializer.Deserialize(yaml, typeof(object));
+            Assert.IsType<Dictionary<object, object>>(result);
+
+            var dictionary = (Dictionary<object, object>)result;
+            var item = dictionary.ElementAt(0);
+            Assert.Equal("scalar", item.Key);
+            Assert.Equal("foo", item.Value);
+
+            item = dictionary.ElementAt(1);
+            Assert.IsType<Dictionary<object, object>>(item.Key);
+            Assert.Equal("bar", item.Value);
+            dictionary = (Dictionary<object, object>)item.Key;
+            item = dictionary.ElementAt(0);
+            Assert.Equal("a", item.Key);
+            Assert.Equal("mapping", item.Value);
+
+            dictionary = (Dictionary<object, object>)result;
+            item = dictionary.ElementAt(2);
+            Assert.IsType<List<object>>(item.Key);
+            Assert.Equal(new List<object> { "a", "sequence", (byte)1 }, (List<object>)item.Key);
+            Assert.Equal("baz", item.Value);
+        }
+
+        public class Test
+        {
+            public string Value { get; set; }
         }
 
         public class SetterOnly

@@ -60,6 +60,11 @@ namespace YamlDotNet.Core.Events
         public override bool IsCanonical => !IsPlainImplicit && !IsQuotedImplicit;
 
         /// <summary>
+        /// Gets whether this scalar event is a key
+        /// </summary>
+        public bool IsKey { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Scalar"/> class.
         /// </summary>
         /// <param name="anchor">The anchor.</param>
@@ -70,13 +75,15 @@ namespace YamlDotNet.Core.Events
         /// <param name="isQuotedImplicit">.</param>
         /// <param name="start">The start position of the event.</param>
         /// <param name="end">The end position of the event.</param>
-        public Scalar(AnchorName anchor, TagName tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end)
+        /// <param name="isKey">Whether or not this scalar event is for a key</param>
+        public Scalar(AnchorName anchor, TagName tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end, bool isKey = false)
             : base(anchor, tag, start, end)
         {
             this.Value = value;
             this.Style = style;
             this.IsPlainImplicit = isPlainImplicit;
             this.IsQuotedImplicit = isQuotedImplicit;
+            this.IsKey = isKey;
         }
 
         /// <summary>

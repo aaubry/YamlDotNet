@@ -559,7 +559,7 @@ namespace YamlDotNet.Core
                     state = states.Pop();
                     Skip();
 
-                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End);
+                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End, scalar.IsKey);
 
                     // Read next token to ensure the error case spec test 'CXX2':
                     // "Mapping with anchor on document start line".

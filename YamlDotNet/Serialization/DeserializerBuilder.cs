@@ -47,6 +47,7 @@ namespace YamlDotNet.Serialization
         private readonly Dictionary<TagName, Type> tagMappings;
         private readonly Dictionary<Type, Type> typeMappings;
         private bool ignoreUnmatched;
+        private bool attemptUnknownTypeDeserialization;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -79,7 +80,7 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory.Value) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
-                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer() },
+                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization) },
                 { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
                 { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value) },
                 { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
@@ -112,6 +113,16 @@ namespace YamlDotNet.Serialization
             }
 
             return typeInspectorFactories.BuildComponentChain(innerInspector);
+        }
+
+        /// <summary>
+        /// When deserializing it will attempt to convert unquoted strings to their correct datatype. If conversion is not sucessful, it will leave it as a string.
+        /// This option is only applicable when not specifying a type or specifying the object type during deserialization.
+        /// </summary>
+        public DeserializerBuilder WithAttemptingUnquotedStringTypeDeserialization()
+        {
+            attemptUnknownTypeDeserialization = true;
+            return this;
         }
 
         /// <summary>
