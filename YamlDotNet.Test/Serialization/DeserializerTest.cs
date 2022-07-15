@@ -147,6 +147,49 @@ X:
             Assert.Equal(string.Empty, result.Value);
         }
 
+        [Fact]
+        public void KeyAnchorIsHandledWithTypeDeserialization()
+        {
+            var yaml = @"a: &some_scalar this is also a key
+*some_scalar: ""will this key be handled correctly?""";
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var result = deserializer.Deserialize(yaml, typeof(object));
+            Assert.IsType<Dictionary<object, object>>(result);
+            var dictionary = (Dictionary<object, object>)result;
+            Assert.Equal(new[] { "a", "this is also a key" }, dictionary.Keys);
+            Assert.Equal(new[] { "this is also a key", "will this key be handled correctly?" }, dictionary.Values);
+        }
+
+        [Fact]
+        public void NonScalarKeyIsHandledWithTypeDeserialization()
+        {
+            var yaml = @"scalar: foo
+{ a: mapping }: bar
+[ a, sequence, 1 ]: baz";
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var result = deserializer.Deserialize(yaml, typeof(object));
+            Assert.IsType<Dictionary<object, object>>(result);
+
+            var dictionary = (Dictionary<object, object>)result;
+            var item = dictionary.ElementAt(0);
+            Assert.Equal("scalar", item.Key);
+            Assert.Equal("foo", item.Value);
+
+            item = dictionary.ElementAt(1);
+            Assert.IsType<Dictionary<object, object>>(item.Key);
+            Assert.Equal("bar", item.Value);
+            dictionary = (Dictionary<object, object>)item.Key;
+            item = dictionary.ElementAt(0);
+            Assert.Equal("a", item.Key);
+            Assert.Equal("mapping", item.Value);
+
+            dictionary = (Dictionary<object, object>)result;
+            item = dictionary.ElementAt(2);
+            Assert.IsType<List<object>>(item.Key);
+            Assert.Equal(new List<object> { "a", "sequence", (byte)1 }, (List<object>)item.Key);
+            Assert.Equal("baz", item.Value);
+        }
+
         public class Test
         {
             public string Value { get; set; }
