@@ -151,13 +151,15 @@ X:
         public void KeyAnchorIsHandledWithTypeDeserialization()
         {
             var yaml = @"a: &some_scalar this is also a key
-*some_scalar: ""will this key be handled correctly?""";
+b: &number 1
+*some_scalar: ""will this key be handled correctly?""
+*number: 1";
             var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
             var result = deserializer.Deserialize(yaml, typeof(object));
             Assert.IsType<Dictionary<object, object>>(result);
             var dictionary = (Dictionary<object, object>)result;
-            Assert.Equal(new[] { "a", "this is also a key" }, dictionary.Keys);
-            Assert.Equal(new[] { "this is also a key", "will this key be handled correctly?" }, dictionary.Values);
+            Assert.Equal(new object[] { "a", "b", "this is also a key", (byte)1 }, dictionary.Keys);
+            Assert.Equal(new object[] { "this is also a key", (byte)1, "will this key be handled correctly?", (byte)1 }, dictionary.Values);
         }
 
         [Fact]
