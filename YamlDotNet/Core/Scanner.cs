@@ -284,7 +284,6 @@ namespace YamlDotNet.Core
         private void FetchNextToken()
         {
             // Check if we just started scanning.  Fetch STREAM-START then.
-
             if (!streamStartProduced)
             {
                 FetchStreamStart();
@@ -418,7 +417,6 @@ namespace YamlDotNet.Core
             }
 
             // Is it the value indicator?
-
             if (analyzer.Check(':') &&
                 (flowLevel > 0 || analyzer.IsWhiteBreakOrZero(1)) &&
                 !(simpleKeyAllowed && flowLevel > 0) &&
@@ -1464,9 +1462,9 @@ namespace YamlDotNet.Core
 
         private void FetchBlockScalar(bool isLiteral)
         {
-            // Remove any potential simple keys.
+            // A block scalar can be a simple key
 
-            RemoveSimpleKey();
+            SaveSimpleKey();
 
             // A simple key may follow a block scalar.
 
