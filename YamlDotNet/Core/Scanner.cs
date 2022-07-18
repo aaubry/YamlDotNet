@@ -79,6 +79,7 @@ namespace YamlDotNet.Core
         private Token? previous;
         private Anchor? previousAnchor;
         private Scalar? lastScalar = null;
+        private Scalar? lastKeyScalar = null;
 
         private bool IsDocumentStart() =>
             !analyzer.EndOfInput &&
@@ -426,6 +427,7 @@ namespace YamlDotNet.Core
                 {
                     if (lastScalar != null)
                     {
+                        lastKeyScalar = lastScalar;
                         lastScalar.IsKey = true;
                         lastScalar = null;
                     }
@@ -1785,8 +1787,16 @@ namespace YamlDotNet.Core
             flowScalarFetched = true;
 
             // Create the SCALAR token and append it to the queue.
-
-            tokens.Enqueue(ScanFlowScalar(isSingleQuoted));
+            Token token;
+            if (isSingleQuoted)
+            {
+                token = ScanSingleQuotedFlowScalar();
+            }
+            else
+            {
+                token = ScanDoubleQuotedFlowScalar();
+            }
+            tokens.Enqueue(token);
 
             // Check if there is a comment subsequently after double-quoted scalar without space.
 
@@ -1798,10 +1808,10 @@ namespace YamlDotNet.Core
         }
 
         /// <summary>
-        /// Scan a quoted scalar.
+        /// Scan a single quoted scalar.
         /// </summary>
 
-        private Token ScanFlowScalar(bool isSingleQuoted)
+        private Token ScanSingleQuotedFlowScalar()
         {
             // Eat the left quote.
 
@@ -1841,7 +1851,169 @@ namespace YamlDotNet.Core
                     throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found unexpected end of stream.");
                 }
 
-                if (hasLeadingBlanks && !isSingleQuoted && indent >= cursor.LineOffset)
+                hasLeadingBlanks = false;
+
+                // Consume non-blank characters.
+
+                while (!analyzer.IsWhiteBreakOrZero())
+                {
+                    // Check for an escaped single quote.
+                    if (analyzer.Check('\'', 0) && analyzer.Check('\'', 1))
+                    {
+                        value.Append('\'');
+                        Skip();
+                        Skip();
+                    }
+                    // right quote
+                    else if (analyzer.Check('\''))
+                    {
+                        break;
+                    }
+                    // It is a non-escaped non-blank character.
+                    else
+                    {
+                        value.Append(ReadCurrentCharacter());
+                    }
+                }
+
+                // Check if we are at the end of the scalar.
+                if (analyzer.Check('\''))
+                {
+                    break;
+                }
+
+                Mark? last = cursor.Mark();
+                // Consume blank characters.
+                while (analyzer.IsWhite() || analyzer.IsBreak())
+                {
+                    if (analyzer.IsWhite())
+                    {
+                        // Consume a space or a tab character.
+                        if (!hasLeadingBlanks)
+                        {
+                            whitespaces.Append(ReadCurrentCharacter());
+                        }
+                        else
+                        {
+                            Skip();
+                        }
+                    }
+                    else
+                    {
+                        // Check if it is a first line break.
+                        if (!hasLeadingBlanks)
+                        {
+                            whitespaces.Length = 0;
+                            leadingBreak.Append(ReadLine());
+                            hasLeadingBlanks = true;
+                        }
+                        else
+                        {
+                            trailingBreaks.Append(ReadLine());
+                        }
+
+                        // go to the current indent level
+                        for (var i = 1; i <= indent; i++)
+                        {
+                            if (!analyzer.IsWhite())
+                            {
+                                throw new SyntaxErrorException(start, last ?? cursor.Mark(), "Unexpected non-space character while parsing multi-line single quoted scalar.");
+                            }
+                            Skip();
+                        }
+
+                        // make sure we are indented by a space or new-lined when indented.
+                        if (!analyzer.IsWhite() && !analyzer.IsBreak() && indent >= 0)
+                        {
+                            //single quotes need to have a white space character. Otherwise it is an invalid format.
+                            throw new SyntaxErrorException(start, last ?? cursor.Mark(), "Unexpected line break while parsing single quoted scalar.");
+                        }
+                    }
+                }
+
+                // Join the whitespaces or fold line breaks.
+                if (hasLeadingBlanks)
+                {
+                    // Do we need to fold line breaks?
+                    if (StartsWith(leadingBreak, '\n'))
+                    {
+                        if (trailingBreaks.Length == 0)
+                        {
+                            value.Append(' ');
+                        }
+                        else
+                        {
+                            value.Append(trailingBreaks.ToString());
+                        }
+                    }
+                    else
+                    {
+                        value.Append(leadingBreak.ToString());
+                        value.Append(trailingBreaks.ToString());
+                    }
+                    leadingBreak.Length = 0;
+                    trailingBreaks.Length = 0;
+                }
+                else
+                {
+                    value.Append(whitespaces.ToString());
+                    whitespaces.Length = 0;
+                }
+            }
+
+            // Eat the right quote.
+
+            Skip();
+
+            return new Scalar(value.ToString(), ScalarStyle.SingleQuoted, start, cursor.Mark());
+        }
+
+
+        /// <summary>
+        /// Scan a double quoted scalar.
+        /// </summary>
+
+        private Token ScanDoubleQuotedFlowScalar()
+        {
+            // Eat the left quote.
+
+            var start = cursor.Mark();
+
+            Skip();
+
+            // Consume the content of the quoted scalar.
+
+            using var valueBuilder = StringBuilderPool.Rent();
+            var value = valueBuilder.Builder;
+
+            using var whitespacesBuilder = StringBuilderPool.Rent();
+            var whitespaces = whitespacesBuilder.Builder;
+
+            using var leadingBreakBuilder = StringBuilderPool.Rent();
+            var leadingBreak = leadingBreakBuilder.Builder;
+
+            using var trailingBreaksBuilder = StringBuilderPool.Rent();
+            var trailingBreaks = trailingBreaksBuilder.Builder;
+
+            var hasLeadingBlanks = false;
+
+            while (true)
+            {
+                // Check that there are no document indicators at the beginning of the line.
+
+                if (IsDocumentIndicator())
+                {
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found unexpected document indicator.");
+                }
+
+                // Check for EOF.
+
+                if (analyzer.IsZero())
+                {
+                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found unexpected end of stream.");
+                }
+
+                if (hasLeadingBlanks && indent >= cursor.LineOffset)
                 {
                     throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a multi-line double-quoted scalar, found wrong indentation.");
                 }
@@ -1852,25 +2024,15 @@ namespace YamlDotNet.Core
 
                 while (!analyzer.IsWhiteBreakOrZero())
                 {
-                    // Check for an escaped single quote.
-
-                    if (isSingleQuoted && analyzer.Check('\'', 0) && analyzer.Check('\'', 1))
-                    {
-                        value.Append('\'');
-                        Skip();
-                        Skip();
-                    }
-
                     // Check for the right quote.
-
-                    else if (analyzer.Check(isSingleQuoted ? '\'' : '"'))
+                    if (analyzer.Check('"'))
                     {
                         break;
                     }
 
                     // Check for an escaped line break.
 
-                    else if (!isSingleQuoted && analyzer.Check('\\') && analyzer.IsBreak(1))
+                    else if (analyzer.Check('\\') && analyzer.IsBreak(1))
                     {
                         Skip();
                         SkipLine();
@@ -1880,7 +2042,7 @@ namespace YamlDotNet.Core
 
                     // Check for an escape sequence.
 
-                    else if (!isSingleQuoted && analyzer.Check('\\'))
+                    else if (analyzer.Check('\\'))
                     {
                         var codeLength = 0;
 
@@ -1961,13 +2123,13 @@ namespace YamlDotNet.Core
 
                 // Check if we are at the end of the scalar.
 
-                if (analyzer.Check(isSingleQuoted ? '\'' : '"'))
+                if (analyzer.Check('"'))
                 {
                     break;
                 }
 
+                Mark? last = cursor.Mark();
                 // Consume blank characters.
-
                 while (analyzer.IsWhite() || analyzer.IsBreak())
                 {
                     if (analyzer.IsWhite())
@@ -1986,7 +2148,6 @@ namespace YamlDotNet.Core
                     else
                     {
                         // Check if it is a first line break.
-
                         if (!hasLeadingBlanks)
                         {
                             whitespaces.Length = 0;
@@ -1996,6 +2157,23 @@ namespace YamlDotNet.Core
                         else
                         {
                             trailingBreaks.Append(ReadLine());
+                        }
+
+                        // go to the current indent level
+                        for (var i = 1; i <= indent; i++)
+                        {
+                            if (!analyzer.IsWhite())
+                            {
+                                throw new SyntaxErrorException(start, last ?? cursor.Mark(), "Unexpected character while parsing double quoted scalar.");
+                            }
+                            Skip();
+                        }
+
+                        // make sure we are indented by a space or new-lined when indented.
+                        if (!analyzer.IsWhite() && !analyzer.IsBreak() && indent >= 0)
+                        {
+                            //single quotes need to have a white space character. Otherwise it is an invalid format.
+                            throw new SyntaxErrorException(start, last ?? cursor.Mark(), "Unexpected line break while parsing double quoted scalar.");
                         }
                     }
                 }
@@ -2036,7 +2214,7 @@ namespace YamlDotNet.Core
 
             Skip();
 
-            return new Scalar(value.ToString(), isSingleQuoted ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted, start, cursor.Mark());
+            return new Scalar(value.ToString(), ScalarStyle.DoubleQuoted, start, cursor.Mark());
         }
 
         /// <summary>

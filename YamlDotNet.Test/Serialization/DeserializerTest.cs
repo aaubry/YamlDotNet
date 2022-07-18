@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -257,6 +258,117 @@ b: &number 1
             var result = deserializer.Deserialize(value.ToString(), type);
 
             result.Should().Be(value);
+        }
+
+        [Fact]
+        public void DeserializeMultiLineSingleQuoteRequiresCorrectFormatting()
+        {
+            var yaml = @"attach_workspace: &attach_workspace
+    attach_workspace:
+        at: '.'
+
+deploy_nonprod_job: &deploy_nonprod_job
+    working_directory: '~/build'
+    docker: [ {image: 'test.com'} ]
+    steps:
+        - *attach_workspace
+        - run: 'deploy-to-test'
+
+version: 2
+
+jobs:
+    build_test_image:
+        working_directory: '~/build
+        docker:
+            - image: docker:17.05.0-ce-git
+        environment:
+            DOCKER_IMAGE_NAME: testApp
+        steps:
+            - run:
+                name: Install bash and curl
+                command: |
+                    apk update
+                    apk add -y curl
+                    apk add -y bash
+                    apk update
+                    apk upgrade
+
+    deploy_test:
+        environment:
+            HAL_TARGETS: '45597'
+            HAL_BUILD_FILE: '.hal_build_id_test'
+
+workflows:
+    version: 2
+    pipeline:
+        jobs:
+            - build_test_image
+            - deploy_test
+";
+            var deserializer = new DeserializerBuilder().Build();
+            var exception = Assert.Throws<SyntaxErrorException>(() =>
+            {
+                var o = deserializer.Deserialize(yaml, typeof(object));
+            });
+            Assert.Equal(16, exception.Start.Line);
+            Assert.Equal(28, exception.Start.Column);
+            Assert.Equal(338, exception.Start.Index);
+            Assert.Equal(16, exception.End.Line);
+            Assert.Equal(36, exception.End.Column);
+            Assert.Equal(346, exception.End.Index);
+        }
+
+        [Fact]
+        public void DeserializeMultiLineSingleQuoteWorksWithCorrectFormatting()
+        {
+            var yaml = @"attach_workspace: &attach_workspace
+    attach_workspace:
+        at: '.'
+
+deploy_nonprod_job: &deploy_nonprod_job
+    working_directory: '~/build'
+    docker: [ {image: 'test.com'} ]
+    steps:
+        - *attach_workspace
+        - run: 'deploy-to-test'
+
+version: 2
+
+jobs:
+    build_test_image:
+        working_directory: '~/build
+         hello'
+        docker:
+            - image: docker:17.05.0-ce-git
+        environment:
+            DOCKER_IMAGE_NAME: testApp
+        steps:
+            - run:
+                name: Install bash and curl
+                command: |
+                    apk update
+                    apk add -y curl
+                    apk add -y bash
+                    apk update
+                    apk upgrade
+
+    deploy_test:
+        environment:
+            HAL_TARGETS: '45597'
+            HAL_BUILD_FILE: '.hal_build_id_test'
+
+workflows:
+    version: 2
+    pipeline:
+        jobs:
+            - build_test_image
+            - deploy_test
+";
+            var deserializer = new DeserializerBuilder().Build();
+            var o = (IDictionary<object, object>)deserializer.Deserialize(yaml, typeof(object));
+            o = (IDictionary<object, object>)o["jobs"];
+            o = (IDictionary<object, object>)o["build_test_image"];
+            Assert.Equal("~/build hello", o["working_directory"]);
         }
 
         public class Test
