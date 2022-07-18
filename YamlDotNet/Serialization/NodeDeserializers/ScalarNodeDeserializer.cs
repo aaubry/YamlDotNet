@@ -253,7 +253,20 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (isNegative)
             {
-                return CastInteger(checked(-(long)result), typeCode);
+                long toCast;
+
+                // we do this because abs(long.minvalue) is 1 more than long.maxvalue.
+                if (result == 9223372036854775808) // abs(long.minvalue) => ulong
+                {
+                    toCast = long.MinValue;
+                }
+                else
+                {
+                    // this will throw if it's too big.
+                    toCast = checked(-(long)result);
+                }
+
+                return CastInteger(toCast, typeCode);
             }
             else
             {

@@ -216,6 +216,49 @@ b: &number 1
             Assert.Equal($"value\na\nb", dictionary.First().Value);
         }
 
+        public static IEnumerable<object[]> DeserializeScalarEdgeCases_TestCases
+        {
+            get
+            {
+                yield return new object[] { byte.MinValue, typeof(byte) };
+                yield return new object[] { byte.MaxValue, typeof(byte) };
+                yield return new object[] { short.MinValue, typeof(short) };
+                yield return new object[] { short.MaxValue, typeof(short) };
+                yield return new object[] { int.MinValue, typeof(int) };
+                yield return new object[] { int.MaxValue, typeof(int) };
+                yield return new object[] { long.MinValue, typeof(long) };
+                yield return new object[] { long.MaxValue, typeof(long) };
+                yield return new object[] { sbyte.MinValue, typeof(sbyte) };
+                yield return new object[] { sbyte.MaxValue, typeof(sbyte) };
+                yield return new object[] { ushort.MinValue, typeof(ushort) };
+                yield return new object[] { ushort.MaxValue, typeof(ushort) };
+                yield return new object[] { uint.MinValue, typeof(uint) };
+                yield return new object[] { uint.MaxValue, typeof(uint) };
+                yield return new object[] { ulong.MinValue, typeof(ulong) };
+                yield return new object[] { ulong.MaxValue, typeof(ulong) };
+                yield return new object[] { decimal.MinValue, typeof(decimal) };
+                yield return new object[] { decimal.MaxValue, typeof(decimal) };
+                yield return new object[] { char.MaxValue, typeof(char) };
+
+#if NETCOREAPP3_1_OR_GREATER
+                yield return new object[] { float.MinValue, typeof(float) };
+                yield return new object[] { float.MaxValue, typeof(float) };
+                yield return new object[] { double.MinValue, typeof(double) };
+                yield return new object[] { double.MaxValue, typeof(double) };
+#endif
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DeserializeScalarEdgeCases_TestCases))]
+        public void DeserializeScalarEdgeCases(IConvertible value, Type type)
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var result = deserializer.Deserialize(value.ToString(), type);
+
+            result.Should().Be(value);
+        }
+
         public class Test
         {
             public string Value { get; set; }
