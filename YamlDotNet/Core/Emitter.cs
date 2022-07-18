@@ -41,6 +41,8 @@ namespace YamlDotNet.Core
         private static readonly Regex UriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
+        private static readonly string[] newLineSeparators = new[] { "\r\n", "\r", "\n" };
+
         private readonly TextWriter output;
         private readonly bool outputUsesUnicodeEncoding;
 
@@ -642,18 +644,42 @@ namespace YamlDotNet.Core
 
         private void EmitComment(Comment comment)
         {
+            // If we're in flow mode or about to enter it: Skip comments.
+            if (flowLevel > 0 || state == EmitterState.FlowMappingFirstKey || state == EmitterState.FlowSequenceFirstItem)
+            {
+                return;
+            }
+
+            var lines = comment.Value.Split(newLineSeparators, StringSplitOptions.None);
+
             if (comment.IsInline)
             {
-                Write(' ');
+                Write(" # ");
+                Write(string.Join(" ", lines));
             }
             else
             {
-                WriteIndent();
-            }
+                // If we're about to enter a YAML block we need to manually increase the indent for the comment and then decrease again.
+                var isFirst = state == EmitterState.BlockMappingFirstKey;
 
-            Write("# ");
-            Write(comment.Value);
-            WriteBreak();
+                if (isFirst)
+                {
+                    IncreaseIndent(false, false);
+                }
+
+                foreach (var line in lines)
+                {
+                    WriteIndent();
+                    Write("# ");
+                    Write(line);
+                    WriteBreak();
+                }
+
+                if (isFirst)
+                {
+                    indent = indents.Pop();
+                }
+            }
 
             isIndentation = true;
         }

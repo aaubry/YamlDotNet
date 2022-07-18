@@ -1,6 +1,11 @@
-﻿using Xunit;
+﻿using System;
+using FluentAssertions;
+using Xunit;
 using Xunit.Abstractions;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.EventEmitters;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -12,30 +17,253 @@ namespace YamlDotNet.Test.Serialization
             Output = helper;
         }
 
+        #region Simple block comments
         [Fact]
-        public void SerializationWithComment()
+        public void SerializationWithBlockComments()
         {
-            var person = new Person();
-            person.Name = "PandaTea";
-            person.Age = 100;
-            person.Sex = "male";
+            var person = new Person { Name = "PandaTea", Age = 100 };
 
-            Serializer serializer = new Serializer();
-            string result = serializer.Serialize(person);
+            var serializer = new Serializer();
+            var result = serializer.Serialize(person);
+            Output.WriteLine(result);
 
-            Assert.Contains("# this is a yaml comment about name property", result);
-            Assert.Contains("# this is age", result);
-            Assert.Contains("# male or female", result);
+            var deserializer = new Deserializer();
+            Action action = () => deserializer.Deserialize<Person>(result);
+            action.ShouldNotThrow();
+
+            var lines = SplitByLines(result);
+
+            lines.Should().Contain("# The person's name");
+            lines.Should().Contain("# The person's age");
         }
+
+        [Fact]
+        public void SerializationWithBlockComments_Multiline()
+        {
+            var multilineComment = new MultilineComment();
+
+            var serializer = new Serializer();
+            var result = serializer.Serialize(multilineComment);
+            Output.WriteLine(result);
+
+            var deserializer = new Deserializer();
+            Action action = () => deserializer.Deserialize<MultilineComment>(result);
+            action.ShouldNotThrow();
+
+            var lines = SplitByLines(result);
+
+            lines[0].Should().Be("# This");
+            lines[1].Should().Be("# is");
+            lines[2].Should().Be("# multiline");
+
+            lines[4].Should().Be("# This is");
+            lines[5].Should().Be("# too");
+        }
+
+        [Fact]
+        public void SerializationWithBlockComments_NullValue()
+        {
+            var serializer = new Serializer();
+            Action action = () => serializer.Serialize(new NullComment());
+            action.ShouldNotThrow();
+        }
+        #endregion
+
+        #region Indentation of block comments
+        [Fact]
+        public void SerializationWithBlockComments_IndentedInSequence()
+        {
+            var person = new Person { Name = "PandaTea", Age = 100 };
+
+            var serializer = new Serializer();
+            var result = serializer.Serialize(new Person[] { person });
+            Output.WriteLine(result);
+
+            var deserializer = new Deserializer();
+            Action action = () => deserializer.Deserialize<Person[]>(result);
+            action.ShouldNotThrow();
+
+            var lines = SplitByLines(result);
+            var indent = GetIndent(1);
+
+            lines.Should().Contain("- # The person's name");
+            lines.Should().Contain(indent + "# The person's age");
+        }
+
+        [Fact]
+        public void SerializationWithBlockComments_IndentedInBlock()
+        {
+            var garage = new Garage
+            {
+                Car = new Car
+                {
+                    Owner = new Person { Name = "PandaTea", Age = 100 }
+                }
+            };
+
+            var serializer = new Serializer();
+            var result = serializer.Serialize(garage);
+            Output.WriteLine(result);
+
+            var deserializer = new Deserializer();
+            Action action = () => deserializer.Deserialize<Garage>(result);
+            action.ShouldNotThrow();
+
+            var lines = SplitByLines(result);
+            var indent1 = GetIndent(1);
+            var indent2 = GetIndent(2);
+
+            lines.Should().Contain(indent1 + "# The car's rightful owner");
+            lines.Should().Contain(indent2 + "# The person's name");
+            lines.Should().Contain(indent2 + "# The person's age");
+        }
+
+        [Fact]
+        public void SerializationWithBlockComments_IndentedInBlockAndSequence()
+        {
+            var garage = new Garage
+            {
+                Car = new Car
+                {
+                    Passengers = new[]
+                    {
+                        new Person { Name = "PandaTea", Age = 100 }
+                    }
+                }
+            };
+
+            var serializer = new Serializer();
+            var result = serializer.Serialize(garage);
+            Output.WriteLine(result);
+
+            var deserializer = new Deserializer();
+            Action action = () => deserializer.Deserialize<Garage>(result);
+            action.ShouldNotThrow();
+
+            var lines = SplitByLines(result);
+            var indent1 = GetIndent(1);
+            var indent2 = GetIndent(2);
+
+            lines.Should().Contain(indent1 + "# The car's rightful owner");
+            lines.Should().Contain(indent1 + "- # The person's name");
+            lines.Should().Contain(indent2 + "# The person's age");
+        }
+        #endregion
+
+        #region Flow mapping
+        [Fact]
+        public void SerializationWithBlockComments_IndentedInBlockAndSequence_WithFlowMapping()
+        {
+            var garage = new Garage
+            {
+                Car = new Car
+                {
+                    Owner = new Person { Name = "Paul", Age = 50 },
+                    Passengers = new[]
+                    {
+                        new Person { Name = "PandaTea", Age = 100 }
+                    }
+                }
+            };
+
+            var serializer = new SerializerBuilder()
+                .WithEventEmitter(e => new FlowEmitter(e, typeof(Person)))
+                .Build();
+            var result = serializer.Serialize(garage);
+            Output.WriteLine(result);
+
+            var deserializer = new Deserializer();
+            Action action = () => deserializer.Deserialize<Garage>(result);
+            action.ShouldNotThrow();
+
+            var lines = SplitByLines(result);
+            var indent1 = GetIndent(1);
+
+            lines.Should().Contain("# The car parked in the garage");
+            lines.Should().Contain(indent1 + "# The car's rightful owner");
+            result.Should().NotContain("The person's name", "because the person's properties are inside of a flow map now");
+            result.Should().NotContain("The person's age", "because the person's properties are inside of a flow map now");
+        }
+
+        /// <summary>
+        /// This emits objects of given types as flow mappings
+        /// </summary>
+        public class FlowEmitter : ChainedEventEmitter
+        {
+            private readonly Type[] types;
+
+            public FlowEmitter(IEventEmitter nextEmitter, params Type[] types) : base(nextEmitter)
+            {
+                this.types = types;
+            }
+
+            public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
+            {
+                foreach (var type in types)
+                {
+                    if (eventInfo.Source.Type == type)
+                    {
+                        eventInfo.Style = MappingStyle.Flow;
+                        break;
+                    }
+                }
+                base.Emit(eventInfo, emitter);
+            }
+        }
+        #endregion
 
         class Person
         {
-            [YamlMember(Description = "this is a yaml comment about name property")]
+            [YamlMember(Description = "The person's name")]
             public string Name { get; set; }
-            [YamlMember(Description = "this is age")]
+            [YamlMember(Description = "The person's age")]
             public int Age { get; set; }
-            [YamlMember(Description = "male or female")]
-            public string Sex { get; set; }
+        }
+
+        class Car
+        {
+            [YamlMember(Description = "The car's rightful owner")]
+            public Person Owner { get; set; }
+            public Person[] Passengers { get; set; }
+        }
+
+        class Garage
+        {
+            [YamlMember(Description = "The car parked in the garage")]
+            public Car Car;
+        }
+
+        class NullComment
+        {
+            [YamlMember(Description = null)]
+            public int Foo { get; set; }
+        }
+
+        class MultilineComment
+        {
+            [YamlMember(Description = "This\nis\nmultiline")]
+            public int Foo { get; set; }
+
+            [YamlMember(Description = @"This is
+too")]
+            public int Bar { get; set; }
+        }
+
+        private static string[] SplitByLines(string result)
+        {
+            return result.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        }
+
+        private static string GetIndent(int depth)
+        {
+            var indentWidth = EmitterSettings.Default.BestIndent;
+            var indent = "";
+            while (indent.Length < indentWidth * depth)
+            {
+                indent += " ";
+            }
+
+            return indent;
         }
     }
 }
