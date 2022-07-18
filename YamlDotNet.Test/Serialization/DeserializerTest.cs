@@ -192,6 +192,30 @@ b: &number 1
             Assert.Equal("baz", item.Value);
         }
 
+        [Fact]
+        public void NewLinesInKeys()
+        {
+            var yaml = @"? >-
+  key
+
+  a
+
+  b
+: >-
+  value
+
+  a
+
+  b
+";
+            var deserializer = new DeserializerBuilder().Build();
+            var o = deserializer.Deserialize(yaml, typeof(object));
+            Assert.IsType<Dictionary<object, object>>(o);
+            var dictionary = (Dictionary<object, object>)o;
+            Assert.Equal($"key\na\nb", dictionary.First().Key);
+            Assert.Equal($"value\na\nb", dictionary.First().Value);
+        }
+
         public class Test
         {
             public string Value { get; set; }
