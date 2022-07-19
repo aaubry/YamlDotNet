@@ -65,6 +65,11 @@ namespace build
                 jsonOptions.Converters.Add(new AutoNumberToStringConverter());
 
                 version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions);
+
+                // Workaround to prevent issues with some consumers of the NuGet API that build
+                // links manually instead of following the links that come in the response.
+                // https://github.com/aaubry/YamlDotNet/issues/703
+                version.PreReleaseLabel = version.PreReleaseLabel?.ToLowerInvariant();
             }
 
             if (version.CommitsSinceVersionSource > 0 && version.Equals(releases.Latest))
