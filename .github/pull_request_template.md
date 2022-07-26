@@ -1,7 +1,5 @@
 ## Welcome!
 
-**This project is on hold, and issues or pull requests will probably not be reviewed. [See this discussion for more details](https://github.com/aaubry/YamlDotNet/discussions/689).**
-
 Thanks for your interest in contributing to this project. Any contribution will
 be gladly accepted, provided that they are generally useful and follow the
 conventions of the project.
