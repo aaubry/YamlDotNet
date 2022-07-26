@@ -312,10 +312,8 @@ workflows:
             });
             Assert.Equal(16, exception.Start.Line);
             Assert.Equal(28, exception.Start.Column);
-            Assert.Equal(338, exception.Start.Index);
             Assert.Equal(16, exception.End.Line);
             Assert.Equal(36, exception.End.Column);
-            Assert.Equal(346, exception.End.Index);
         }
 
         [Fact]
