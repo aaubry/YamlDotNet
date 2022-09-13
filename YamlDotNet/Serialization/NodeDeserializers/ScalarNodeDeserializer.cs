@@ -321,7 +321,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return value.Value;
             }
             var v = value.Value;
-            object result = null;
+            object? result;
 
             switch (v)
             {
