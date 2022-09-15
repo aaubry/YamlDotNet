@@ -51,6 +51,7 @@ namespace YamlDotNet.Serialization
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
         private bool quoteNecessaryStrings;
 
+
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
         {
@@ -252,7 +253,8 @@ namespace YamlDotNet.Serialization
                 typeInspector,
                 typeResolver,
                 maximumRecursion,
-                namingConvention
+                namingConvention,
+                settings
             );
             WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
