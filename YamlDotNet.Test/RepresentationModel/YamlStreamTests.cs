@@ -218,6 +218,16 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.Throws<AnchorNotFoundException>(() => original.Load(Yaml.ReaderFrom("invalid-reference.yaml")));
         }
 
+        [Fact]
+        public void CanReadValueWithQuotes()
+        {
+            var yamlStream = new YamlStream();
+            yamlStream.Load(Yaml.ParserForText("description: -\"\" should be zero"));
+            var nodes = yamlStream.Documents.Single().AllNodes.ToArray();
+            Assert.Equal("description", nodes[1].ToString());
+            Assert.Equal("-\"\" should be zero", nodes[2].ToString());
+        }
+
         private void RoundtripTest(string yamlFileName)
         {
             var original = new YamlStream();
