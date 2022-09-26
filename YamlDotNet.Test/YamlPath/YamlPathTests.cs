@@ -30,11 +30,11 @@ namespace YamlDotNet.Test.YamlPath
             var yaml = new YamlStream();
             yaml.Load(new StringReader(arrayTestData));
             var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
-            var matching = mapping.Query(yamlPath);
+            var matching = mapping.Query(yamlPath).ToList();
             Assert.Equal(expectedNumMatches, matching.Count());
             foreach (var expectedFinding in expectedFindings)
             {
-                Assert.True(matching.Any(x => x is YamlScalarNode ysc && int.TryParse(ysc.Value, out int ysv) && ysv == expectedFinding));
+                Assert.Contains(matching, x => x is YamlScalarNode ysc && int.TryParse(ysc.Value, out int ysv) && ysv == expectedFinding);
             }
         }
         
@@ -59,11 +59,11 @@ namespace YamlDotNet.Test.YamlPath
             var yaml = new YamlStream();
             yaml.Load(new StringReader(mapSliceTestData));
             var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
-            var matching = mapping.Query(yamlPath);
+            var matching = mapping.Query(yamlPath).ToList();
             Assert.Equal(expectedNumMatches, matching.Count());
             foreach (var expectedFinding in expectedFindings)
             {
-                Assert.True(matching.Any(x => x is YamlScalarNode ysc && int.TryParse(ysc.Value, out int ysv) && ysv == expectedFinding));
+                Assert.Contains(matching, x => x is YamlScalarNode ysc && int.TryParse(ysc.Value, out int ysv) && ysv == expectedFinding);
             }
         }
         
@@ -160,7 +160,6 @@ products_array:
         [InlineData("products_array.**.dimensions[value_with_space=='value with space']", 1)]
         [InlineData("products_array.**.dimensions[other_values>=5]", 2)]
         [InlineData("products_array.**.[other_values>=5]", 2)]
-        [InlineData("products_array.**.dimensions[other_values>=5]", 2)]
         [InlineData("products_hash.**", 24)]
         [InlineData("products_array.**", 32)]
         [InlineData("products_array.[product=widget]", 1)]
@@ -373,12 +372,22 @@ non_anchored_hash:
             var yaml = new YamlStream();
             yaml.Load(new StringReader(minMaxData));
             var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
-            var matching = mapping.Query(yamlPath);
+            var matching = mapping.Query(yamlPath).ToList();
             Assert.Equal(expectedNumMatches, matching.Count());
             foreach (var expectedFinding in expectedFindings)
             {
-                Assert.True(matching.Any(x => x is YamlScalarNode ysc && decimal.TryParse(ysc.Value, out decimal ysv) && ysv == Decimal.Parse(expectedFinding)));
+                Assert.Contains(matching, x => x is YamlScalarNode ysc && decimal.TryParse(ysc.Value, out decimal ysv) && ysv == Decimal.Parse(expectedFinding));
             }
+        }
+
+        [InlineData("(thing) + (other thing)", 1)]
+        [InlineData("[notclosed=3", 1)]
+        [InlineData("[!field!==value]", 1)]
+        [InlineData("[field # value]", 1)]
+        [Theory]
+        public void QueryValidatorTests(string queryToValidate, int expectedNumProblems)
+        {
+            Assert.Equal(expectedNumProblems, YamlPathExtensions.GetQueryProblems(queryToValidate).Count);
         }
     }
 }

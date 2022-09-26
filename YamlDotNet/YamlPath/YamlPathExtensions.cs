@@ -124,12 +124,15 @@ namespace YamlDotNet.YamlPath
         /// <param name="yamlPathPieces"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        /// TODO: Not comprehensive
         private static List<string> GetQueryProblems(List<string> yamlPathPieces)
         {
             var problems = new List<string>();
             foreach (var piece in yamlPathPieces)
             {
+                if (piece.StartsWith("("))
+                {
+                    problems.Add("Collector math is not supported");
+                }
                 if (piece.StartsWith("["))
                 {
                     if (!piece.EndsWith("]"))
