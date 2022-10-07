@@ -381,7 +381,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                             result = v;
                         }
                     }
-                    else if (Regex.IsMatch(v, @"[-+]?(\.inf|\.Inf|\.INF)")) //infinities
+                    else if (Regex.IsMatch(v, @"^[-+]?(\.inf|\.Inf|\.INF)$")) //infinities
                     {
                         if (v.StartsWith("-"))
                         {
@@ -392,7 +392,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                             result = float.PositiveInfinity;
                         }
                     }
-                    else if (Regex.IsMatch(v, @"\.nan|\.NaN|\.NAN")) //not a number
+                    else if (Regex.IsMatch(v, @"^(\.nan|\.NaN|\.NAN)$")) //not a number
                     {
                         result = float.NaN;
                     }
