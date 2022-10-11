@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -112,7 +112,7 @@ namespace build
             }
         }
 
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             var filteredArguments = args
                 .Where(a =>
@@ -134,9 +134,9 @@ namespace build
                 })
                 .ToList();
 
-            var (options, targets) = Options.Parse(filteredArguments);
+            var (specifiedTargets, options, unknownOptions, showHelp) = CommandLine.Parse(filteredArguments);
             verbose = options.Verbose;
-            Host = options.Host.DetectIfUnknown().Item1;
+            Host = options.Host.DetectIfAutomatic();
 
             var operatingSystem =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -149,11 +149,13 @@ namespace build
 
             palette = new Palette(options.NoColor, options.NoExtendedChars, options.Host, operatingSystem);
 
-            if (targets.Count == 0 && !options.ShowHelp)
+            var targets = specifiedTargets.ToList();
+
+            if (targets.Count == 0 && !showHelp)
             {
                 switch (options.Host)
                 {
-                    case Host.Appveyor:
+                    case Host.AppVeyor:
 
                         // Default CI targets for AppVeyor
                         var isBuildingMaster = Environment.GetEnvironmentVariable("APPVEYOR_REPO_BRANCH")?.Equals("master", StringComparison.Ordinal) ?? true;
@@ -175,7 +177,8 @@ namespace build
                         break;
 
                     default:
-                        (options, targets) = Options.Parse(filteredArguments.Append("-?"));
+                        (specifiedTargets, options, unknownOptions, showHelp) = CommandLine.Parse(filteredArguments.Append("-?"));
+                        targets = specifiedTargets.ToList();
                         break;
                 }
             }
@@ -196,14 +199,14 @@ namespace build
             int exitCode = 0;
             try
             {
-                RunTargetsWithoutExiting(targets, options);
+                await RunTargetsWithoutExitingAsync(targets, options, unknownOptions, showHelp);
             }
             catch (TargetFailedException)
             {
                 exitCode = 1;
             }
 
-            if (options.ShowHelp)
+            if (showHelp)
             {
                 Console.WriteLine();
                 Console.WriteLine($"{palette.Default}Additional options:");
@@ -246,7 +249,7 @@ namespace build
 
         private static void WriteBoxed(string text, string color)
         {
-            var boxElements = palette.Dash == '─'
+            var boxElements = palette.Horizontal == '─'
                 ? "┌┐└┘│─"
                 : "++++|-";
 
