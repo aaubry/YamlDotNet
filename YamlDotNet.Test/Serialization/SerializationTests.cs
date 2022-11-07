@@ -2218,6 +2218,31 @@ Cycle: *o0");
             Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
         }
 
+        [Theory]
+        [InlineData("y")]
+        [InlineData("Y")]
+        [InlineData("yes")]
+        [InlineData("Yes")]
+        [InlineData("YES")]
+        [InlineData("n")]
+        [InlineData("N")]
+        [InlineData("no")]
+        [InlineData("No")]
+        [InlineData("NO")]
+        [InlineData("on")]
+        [InlineData("On")]
+        [InlineData("ON")]
+        [InlineData("off")]
+        [InlineData("Off")]
+        [InlineData("OFF")]
+        public void StringsThatMatchYaml1_1BooleanStringsAreQuoted(string input)
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings(true).Build();
+            var o = new { text = input };
+            var yaml = serializer.Serialize(o);
+            Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
+        }
+
         [Fact]
         public void KeysOnConcreteClassDontGetQuoted_TypeStringGetsQuoted()
         {

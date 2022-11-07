@@ -32,21 +32,25 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
         private readonly IDictionary<Type, TagName> tagMappings;
         private readonly bool quoteNecessaryStrings;
-        private static readonly string IsSpecialStringValue_Regex =
-            @"^("
-                 + @"null|Null|NULL|\~"
-                 + @"|true|True|TRUE|false|False|FALSE"
-                 + @"|[-+]?[0-9]+|0o[0-7]+"
-                 + @"|0x[0-9a-fA-F]+"
-                 + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?"
-                 + @"|[-+]?(\.inf|\.Inf|\.INF)"
-                 + @"|\.nan|\.NaN|\.NAN"
-            + @")$";
+        private readonly bool quoteYaml1_1BooleanStrings;
+        private readonly Regex isSpecialStringValue_Regex;
+        private static readonly string SpecialStringValues_Pattern = ""
+            + @"null|Null|NULL|\~"
+            + @"|true|True|TRUE|false|False|FALSE"
+            + @"|[-+]?[0-9]+|0o[0-7]+"
+            + @"|0x[0-9a-fA-F]+"
+            + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?"
+            + @"|[-+]?(\.inf|\.Inf|\.INF)"
+            + @"|\.nan|\.NaN|\.NAN";
+        private static readonly string Yaml1_1SpecialStringValues_Pattern = ""
+            + @"|y|Y|yes|Yes|YES|n|N|no|No|NO"
+            + @"|on|On|ON|off|Off|OFF";
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1BooleanStrings)
             : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
+            this.quoteYaml1_1BooleanStrings = quoteYaml1_1BooleanStrings;
         }
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
@@ -54,6 +58,18 @@ namespace YamlDotNet.Serialization.EventEmitters
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
+
+            var specialStringValuePattern = SpecialStringValues_Pattern;
+            if (quoteYaml1_1BooleanStrings)
+            {
+                specialStringValuePattern += Yaml1_1SpecialStringValues_Pattern;
+            }
+            specialStringValuePattern = @"^(" + specialStringValuePattern + @")$";
+#if NET40
+            isSpecialStringValue_Regex = new Regex(specialStringValuePattern);
+#else
+            isSpecialStringValue_Regex = new Regex(specialStringValuePattern, RegexOptions.Compiled);
+#endif
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -186,9 +202,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 return true;
             }
 
-            return Regex.IsMatch(
-                value,
-                IsSpecialStringValue_Regex);
+            return isSpecialStringValue_Regex.IsMatch(value);
         }
     }
 }
