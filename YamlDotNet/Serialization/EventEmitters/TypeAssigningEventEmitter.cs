@@ -32,7 +32,6 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
         private readonly IDictionary<Type, TagName> tagMappings;
         private readonly bool quoteNecessaryStrings;
-        private readonly bool quoteYaml1_1BooleanStrings;
         private readonly Regex isSpecialStringValue_Regex;
         private static readonly string SpecialStringValues_Pattern = ""
             + @"null|Null|NULL|\~"
@@ -47,17 +46,11 @@ namespace YamlDotNet.Serialization.EventEmitters
             + @"|on|On|ON|off|Off|OFF";
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1BooleanStrings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
-        {
-            this.quoteNecessaryStrings = quoteNecessaryStrings;
-            this.quoteYaml1_1BooleanStrings = quoteYaml1_1BooleanStrings;
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
+            this.quoteNecessaryStrings = quoteNecessaryStrings;
 
             var specialStringValuePattern = SpecialStringValues_Pattern;
             if (quoteYaml1_1BooleanStrings)
