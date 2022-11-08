@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
         private bool quoteNecessaryStrings;
-        private bool quoteYaml1_1BooleanStrings;
+        private bool quoteYaml1_1Strings;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -87,7 +87,7 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1BooleanStrings) }
+                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings) }
             };
 
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) => new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention);
@@ -98,11 +98,11 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
         /// </summary>
-        /// <param name="quoteYaml1_1BooleanStrings">Also quote YAML 1.1 boolean strings like Yes, No, On, Off and their short hand variations</param>
-        public SerializerBuilder WithQuotingNecessaryStrings(bool quoteYaml1_1BooleanStrings = false)
+        /// <param name="quoteYaml1_1Strings">Also quote strings that are valid scalars in the YAML 1.1 specification (which includes boolean Yes/No/On/Off, base 60 numbers and more)</param>
+        public SerializerBuilder WithQuotingNecessaryStrings(bool quoteYaml1_1Strings = false)
         {
             quoteNecessaryStrings = true;
-            this.quoteYaml1_1BooleanStrings = quoteYaml1_1BooleanStrings;
+            this.quoteYaml1_1Strings = quoteYaml1_1Strings;
             return this;
         }
 
@@ -257,7 +257,7 @@ namespace YamlDotNet.Serialization
                 maximumRecursion,
                 namingConvention
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1BooleanStrings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 
