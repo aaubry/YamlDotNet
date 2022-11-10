@@ -20,10 +20,6 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -46,12 +42,11 @@ namespace YamlDotNet.Test.Serialization
                 .WithTagMapping(new TagName("outer"), typeof(Outer))
                 .WithTagMapping(new TagName("inner"), typeof(Inner))
                 .Build();
-            var actual = serializer.Serialize(artifact);
+            var actual = serializer.Serialize(artifact).NormalizeNewLines().Trim(new char[] { '\r', '\n' });
             var expected = @"outer
 Value: test
 InnerValue: inner
-  Value: inner test
-";
+  Value: inner test".NormalizeNewLines();
             Assert.Equal(expected, actual);
         }
 
