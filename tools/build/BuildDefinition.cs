@@ -93,7 +93,7 @@ namespace build
         {
             switch (options.Host)
             {
-                case Host.Appveyor:
+                case Host.AppVeyor:
                     var buildNumber = Environment.GetEnvironmentVariable("APPVEYOR_BUILD_NUMBER");
                     Run("appveyor", $"UpdateBuild -Version {version.NuGetVersion}.{buildNumber}");
                     break;
@@ -142,7 +142,7 @@ namespace build
             {
                 Run("docker", $"run --rm -v {testsDir}:/build -w /build aaubry/mono-aot bash ./run.sh");
             }
-            catch (NonZeroExitCodeException ex) when (options.Host == Host.Appveyor && ex.ExitCode == -1)
+            catch (NonZeroExitCodeException ex) when (options.Host == Host.AppVeyor && ex.ExitCode == -1)
             {
                 // Appveyor fails with exit code -1 for some reason...
                 var realExitCode = int.Parse(File.ReadAllLines(Path.Combine(testsDir, "exitcode.txt")).First(), CultureInfo.InvariantCulture);
@@ -175,7 +175,7 @@ namespace build
 
             var isSandbox = options.Host switch
             {
-                Host.Appveyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME") != "aaubry/YamlDotNet",
+                Host.AppVeyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME") != "aaubry/YamlDotNet",
                 _ => false,
             };
 
@@ -447,7 +447,7 @@ namespace build
         private static string GitHubRepository =>
             Program.Host switch
             {
-                Host.Appveyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME"),
+                Host.AppVeyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME"),
                 _ => Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
             }
             ?? "aaubry/YamlDotNet.Sandbox";

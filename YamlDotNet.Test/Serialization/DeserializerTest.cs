@@ -216,6 +216,30 @@ b: &number 1
             Assert.Equal($"value\na\nb", dictionary.First().Value);
         }
 
+        
+        [Theory]
+        [InlineData(".nan", System.Single.NaN)]
+        [InlineData(".NaN", System.Single.NaN)]
+        [InlineData(".NAN", System.Single.NaN)]
+        [InlineData("-.inf", System.Single.NegativeInfinity)]
+        [InlineData("+.inf", System.Single.PositiveInfinity)]
+        [InlineData(".inf", System.Single.PositiveInfinity)]
+        [InlineData("start.nan", "start.nan")]
+        [InlineData(".nano", ".nano")]
+        [InlineData(".infinity", ".infinity")]
+        [InlineData("www.infinitetechnology.com", "www.infinitetechnology.com")]
+        [InlineData("https://api.inference.azure.com", "https://api.inference.azure.com")]
+        public void UnquotedStringTypeDeserializationHandlesInfAndNaN(string yamlValue, object expected)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var yaml = $"Value: {yamlValue}";
+
+            var resultDict = deserializer.Deserialize<IDictionary<string, object>>(yaml);
+            Assert.True(resultDict.ContainsKey("Value"));
+            Assert.Equal(expected, resultDict["Value"]);
+        }
+
         public static IEnumerable<object[]> DeserializeScalarEdgeCases_TestCases
         {
             get
