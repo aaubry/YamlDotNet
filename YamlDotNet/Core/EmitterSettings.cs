@@ -36,6 +36,11 @@ namespace YamlDotNet.Core
         public int BestWidth { get; } = int.MaxValue;
 
         /// <summary>
+        /// New line characters.
+        /// </summary>
+        public string NewLine { get; } = Environment.NewLine;
+
+        /// <summary>
         /// If true, write the output in canonical form.
         /// </summary>
         public bool IsCanonical { get; } = false;
@@ -64,7 +69,7 @@ namespace YamlDotNet.Core
         {
         }
 
-        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false)
+        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false, string? newLine = null)
         {
             if (bestIndent < 2 || bestIndent > 9)
             {
@@ -87,6 +92,7 @@ namespace YamlDotNet.Core
             MaxSimpleKeyLength = maxSimpleKeyLength;
             SkipAnchorName = skipAnchorName;
             IndentSequences = indentSequences;
+            NewLine = newLine ?? Environment.NewLine;
         }
 
         public EmitterSettings WithBestIndent(int bestIndent)
@@ -119,6 +125,19 @@ namespace YamlDotNet.Core
                 IsCanonical,
                 maxSimpleKeyLength,
                 SkipAnchorName
+            );
+        }
+
+        public EmitterSettings WithNewLine(string newLine)
+        {
+            return new EmitterSettings(
+                BestIndent,
+                BestWidth,
+                IsCanonical,
+                MaxSimpleKeyLength,
+                SkipAnchorName,
+                IndentSequences,
+                newLine
             );
         }
 

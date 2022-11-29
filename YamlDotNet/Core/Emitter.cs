@@ -66,6 +66,7 @@ namespace YamlDotNet.Core
         private bool isWhitespace;
         private bool isIndentation;
         private readonly bool forceIndentLess;
+        private readonly string newLine;
 
         private bool isDocumentEndWritten;
 
@@ -147,6 +148,7 @@ namespace YamlDotNet.Core
             this.maxSimpleKeyLength = settings.MaxSimpleKeyLength;
             this.skipAnchorName = settings.SkipAnchorName;
             this.forceIndentLess = !settings.IndentSequences;
+            this.newLine = settings.NewLine;
 
             this.output = output;
             this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
@@ -1917,7 +1919,7 @@ namespace YamlDotNet.Core
         {
             if (breakCharacter == '\n')
             {
-                output.WriteLine();
+                output.Write(newLine);
             }
             else
             {

@@ -273,6 +273,60 @@ Value: foo");
         }
 
         [Fact]
+        public void SerializeWithCRLFNewLine()
+        {
+            var expectedResult = Yaml
+                .ReaderFrom("list.yaml")
+                .ReadToEnd()
+                .NormalizeNewLines()
+                .Replace(Environment.NewLine, "\r\n");
+
+            var list = new string[] {"one", "two", "three"};
+            var result = SerializerBuilder
+                .WithNewLine("\r\n")
+                .Build()
+                .Serialize(list);
+
+            result.Should().Be(expectedResult);
+        }
+
+        [Fact]
+        public void SerializeWithLFNewLine()
+        {
+            var expectedResult = Yaml
+                .ReaderFrom("list.yaml")
+                .ReadToEnd()
+                .NormalizeNewLines()
+                .Replace(Environment.NewLine, "\n");
+
+            var list = new string[] {"one", "two", "three"};
+            var result = SerializerBuilder
+                .WithNewLine("\n")
+                .Build()
+                .Serialize(list);
+
+            result.Should().Be(expectedResult);
+        }
+
+        [Fact]
+        public void SerializeWithCRNewLine()
+        {
+            var expectedResult = Yaml
+                .ReaderFrom("list.yaml")
+                .ReadToEnd()
+                .NormalizeNewLines()
+                .Replace(Environment.NewLine, "\r");
+
+            var list = new string[] {"one", "two", "three"};
+            var result = SerializerBuilder
+                .WithNewLine("\r")
+                .Build()
+                .Serialize(list);
+
+            result.Should().Be(expectedResult);
+        }
+
+        [Fact]
         public void DeserializeExplicitType()
         {
             var text = Yaml.ReaderFrom("explicit-type.template").TemplatedOn<Simple>();
