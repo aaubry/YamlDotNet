@@ -102,7 +102,9 @@ namespace YamlDotNet.Core
                 BestWidth,
                 IsCanonical,
                 MaxSimpleKeyLength,
-                SkipAnchorName
+                SkipAnchorName,
+                IndentSequences,
+                NewLine
             );
         }
 
@@ -113,7 +115,9 @@ namespace YamlDotNet.Core
                 bestWidth,
                 IsCanonical,
                 MaxSimpleKeyLength,
-                SkipAnchorName
+                SkipAnchorName,
+                IndentSequences,
+                NewLine
             );
         }
 
@@ -124,7 +128,9 @@ namespace YamlDotNet.Core
                 BestWidth,
                 IsCanonical,
                 maxSimpleKeyLength,
-                SkipAnchorName
+                SkipAnchorName,
+                IndentSequences,
+                NewLine
             );
         }
 
@@ -159,7 +165,9 @@ namespace YamlDotNet.Core
                 BestWidth,
                 IsCanonical,
                 MaxSimpleKeyLength,
-                true
+                true,
+                IndentSequences,
+                NewLine
             );
         }
 
@@ -171,7 +179,8 @@ namespace YamlDotNet.Core
                 IsCanonical,
                 MaxSimpleKeyLength,
                 SkipAnchorName,
-                true
+                true,
+                NewLine
             );
         }
     }
