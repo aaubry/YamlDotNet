@@ -310,6 +310,16 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Allows you to override the new line character to use when serializing to YAML.
+        /// </summary>
+        /// <param name="newLine">NewLine character(s) to use when serializing to YAML.</param>
+        public SerializerBuilder WithNewLine(string newLine)
+        {
+            this.emitterSettings = this.emitterSettings.WithNewLine(newLine);
+            return this;
+        }
+
+        /// <summary>
         /// Registers an additional <see cref="IObjectGraphVisitor{Nothing}" /> to be used by the serializer
         /// before emitting an object graph.
         /// </summary>
