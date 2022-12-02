@@ -5,6 +5,9 @@ on:
       ref:
         description: Commit name to release (defaults to master)
         required: false
+      args:
+        description: Additional command line arguments
+        required: false
 
 jobs:
   release:
@@ -41,4 +44,4 @@ jobs:
     - name: Create draft release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./build.sh CreateGithubRelease
+      run: ./build.sh CreateGithubRelease ${{ github.event.inputs.args }}

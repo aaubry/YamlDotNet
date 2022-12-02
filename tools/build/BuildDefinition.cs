@@ -1,6 +1,7 @@
 ﻿using Bullseye;
 using SimpleExec;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -444,13 +445,23 @@ namespace build
 ");
         }
 
-        private static string GitHubRepository =>
-            Program.Host switch
+        private static string GitHubRepository
+        {
+            get
             {
-                Host.AppVeyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME"),
-                _ => Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
+                var repository = Program.Host switch
+                {
+                    Host.AppVeyor => Environment.GetEnvironmentVariable("APPVEYOR_REPO_NAME"),
+                    _ => Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
+                };
+                if (repository == null)
+                {
+                    WriteWarning($"Could not determine the current repository for host {Program.Host}. Falling-back to sandbox!");
+                    repository = "aaubry/YamlDotNet.Sandbox";
+                }
+                return repository;
             }
-            ?? "aaubry/YamlDotNet.Sandbox";
+        }
 
         private static readonly Lazy<HttpClient> GitHubClient = new Lazy<HttpClient>(() =>
         {
@@ -463,7 +474,7 @@ namespace build
 
             gitHubClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
             gitHubClient.DefaultRequestHeaders.Add("User-Agent", GitHubRepository.Split('/')[0]);
-            gitHubClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
+            gitHubClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             return gitHubClient;
         });
