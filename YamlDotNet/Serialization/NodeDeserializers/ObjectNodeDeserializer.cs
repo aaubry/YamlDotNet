@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -52,11 +53,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
             value = objectFactory.Create(implementationType);
+            var consumedProperties = new List<string>();
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
+                if (consumedProperties.Contains(propertyName.Value))
+                {
+                    throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate property {propertyName.Value}");
+                }
                 try
                 {
+                    consumedProperties.Add(propertyName.Value);
                     var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
                     if (property == null)
                     {
