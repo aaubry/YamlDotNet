@@ -62,6 +62,7 @@ namespace YamlDotNet
         /// Determines whether the specified type has a default constructor.
         /// </summary>
         /// <param name="type">The type.</param>
+        /// <param name="allowPrivateConstructors">Whether to include private constructors</param>
         /// <returns>
         ///     <c>true</c> if the type has a default constructor; otherwise, <c>false</c>.
         /// </returns>
