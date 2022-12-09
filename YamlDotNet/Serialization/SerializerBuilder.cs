@@ -52,6 +52,7 @@ namespace YamlDotNet.Serialization
         private bool quoteNecessaryStrings;
         private bool quoteYaml1_1Strings;
 
+
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
         {
@@ -255,7 +256,8 @@ namespace YamlDotNet.Serialization
                 typeInspector,
                 typeResolver,
                 maximumRecursion,
-                namingConvention
+                namingConvention,
+                settings
             );
             WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
@@ -310,6 +312,16 @@ namespace YamlDotNet.Serialization
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
                 .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+        }
+
+        /// <summary>
+        /// Allows you to override the new line character to use when serializing to YAML.
+        /// </summary>
+        /// <param name="newLine">NewLine character(s) to use when serializing to YAML.</param>
+        public SerializerBuilder WithNewLine(string newLine)
+        {
+            this.emitterSettings = this.emitterSettings.WithNewLine(newLine);
+            return this;
         }
 
         /// <summary>

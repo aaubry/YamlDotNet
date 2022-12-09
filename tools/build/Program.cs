@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
 using Bullseye;
 using Bullseye.Internal;
 using static Bullseye.Targets;
-using OperatingSystem = Bullseye.Internal.OperatingSystem;
 
 namespace build
 {
@@ -136,18 +136,19 @@ namespace build
 
             var (specifiedTargets, options, unknownOptions, showHelp) = CommandLine.Parse(filteredArguments);
             verbose = options.Verbose;
+
             Host = options.Host.DetectIfAutomatic();
 
-            var operatingSystem =
+            var osPlatform =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? OperatingSystem.Windows
+                    ? OSPlatform.Windows
                     : RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                        ? OperatingSystem.Linux
+                        ? OSPlatform.Linux
                         : RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
-                            ? OperatingSystem.MacOS
-                            : OperatingSystem.Unknown;
+                            ? OSPlatform.OSX
+                            : OSPlatform.Create("Unknown");
 
-            palette = new Palette(options.NoColor, options.NoExtendedChars, options.Host, operatingSystem);
+            palette = new Palette(options.NoColor, options.NoExtendedChars, Host, osPlatform);
 
             var targets = specifiedTargets.ToList();
 

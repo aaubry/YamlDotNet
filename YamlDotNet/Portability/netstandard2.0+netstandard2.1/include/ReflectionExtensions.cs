@@ -62,14 +62,15 @@ namespace YamlDotNet
         /// Determines whether the specified type has a default constructor.
         /// </summary>
         /// <param name="type">The type.</param>
+        /// <param name="allowPrivateConstructors">Whether to include private constructors</param>
         /// <returns>
         ///     <c>true</c> if the type has a default constructor; otherwise, <c>false</c>.
         /// </returns>
-        public static bool HasDefaultConstructor(this Type type)
+        public static bool HasDefaultConstructor(this Type type, bool allowPrivateConstructors)
         {
             var typeInfo = type.GetTypeInfo();
             return typeInfo.IsValueType || typeInfo.DeclaredConstructors
-                .Any(c => c.IsPublic && !c.IsStatic && c.GetParameters().Length == 0);
+                .Any(c => (c.IsPublic || (allowPrivateConstructors && c.IsPrivate)) && !c.IsStatic && c.GetParameters().Length == 0);
         }
 
         public static bool IsAssignableFrom(this Type type, Type source)
@@ -176,11 +177,6 @@ namespace YamlDotNet
             return type.GetRuntimeField(name);
         }
 
-        public static IEnumerable<ConstructorInfo> GetConstructors(this Type type)
-        {
-            return type.GetTypeInfo().DeclaredConstructors
-                .Where(c => c.IsPublic && !c.IsStatic);
-        }
 
         private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod).IsStatic;
         private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && (property.GetMethod ?? property.SetMethod).IsPublic;
