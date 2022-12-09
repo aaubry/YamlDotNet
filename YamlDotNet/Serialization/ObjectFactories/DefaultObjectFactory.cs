@@ -46,11 +46,19 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(IDictionary), typeof(Dictionary<object, object>) }
         };
 
+        private readonly Settings settings;
+
         public DefaultObjectFactory()
+            : this(new Dictionary<Type, Type>(), new Settings())
         {
         }
 
         public DefaultObjectFactory(IDictionary<Type, Type> mappings)
+            : this(mappings, new Settings())
+        {
+        }
+
+        public DefaultObjectFactory(IDictionary<Type, Type> mappings, Settings settings)
         {
             foreach (var pair in mappings)
             {
@@ -61,6 +69,8 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
                 DefaultNonGenericInterfaceImplementations.Add(pair.Key, pair.Value);
             }
+
+            this.settings = settings;
         }
 
         public object Create(Type type)
@@ -85,7 +95,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
             try
             {
-                return Activator.CreateInstance(type)!;
+                return Activator.CreateInstance(type, settings.AllowPrivateConstructors)!;
             }
             catch (Exception err)
             {

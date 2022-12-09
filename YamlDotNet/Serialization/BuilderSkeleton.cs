@@ -41,6 +41,7 @@ namespace YamlDotNet.Serialization
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
         internal bool ignoreFields;
         internal bool includeNonPublicProperties = false;
+        internal Settings settings;
 
         internal BuilderSkeleton(ITypeResolver typeResolver)
         {
@@ -54,6 +55,7 @@ namespace YamlDotNet.Serialization
 
             typeInspectorFactories = new LazyComponentRegistrationList<ITypeInspector, ITypeInspector>();
             this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
+            settings = new Settings();
         }
 
         protected abstract TBuilder Self { get; }
@@ -88,6 +90,15 @@ namespace YamlDotNet.Serialization
         public TBuilder IncludeNonPublicProperties()
         {
             includeNonPublicProperties = true;
+            return Self;
+        }
+
+        /// <summary>
+        /// Calling this will enable the support for private constructors when considering serialization and deserialization.
+        /// </summary>
+        public TBuilder EnablePrivateConstructors()
+        {
+            settings.AllowPrivateConstructors = true;
             return Self;
         }
 

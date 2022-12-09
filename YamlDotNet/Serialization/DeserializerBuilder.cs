@@ -56,7 +56,7 @@ namespace YamlDotNet.Serialization
             : base(new StaticTypeResolver())
         {
             typeMappings = new Dictionary<Type, Type>();
-            objectFactory = new Lazy<IObjectFactory>(() => new DefaultObjectFactory(typeMappings), true);
+            objectFactory = new Lazy<IObjectFactory>(() => new DefaultObjectFactory(typeMappings, settings), true);
 
             tagMappings = new Dictionary<TagName, Type>
             {
