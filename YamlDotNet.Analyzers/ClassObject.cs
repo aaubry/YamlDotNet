@@ -21,32 +21,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
+using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Analyzers
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public class ClassObject
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
+        public List<IFieldSymbol> FieldSymbols { get; }
+        public string FullName { get; }
+        public string GuidSuffix { get; }
+        public INamedTypeSymbol ModuleSymbol { get; }
+        public List<IPropertySymbol> PropertySymbols { get; }
+        public string SanitizedClassName { get; }
 
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public ClassObject(string sanitizedClassName, INamedTypeSymbol moduleSymbol)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
-        }
-
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
-        {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            FieldSymbols = new List<IFieldSymbol>();
+            PropertySymbols = new List<IPropertySymbol>();
+            FullName = moduleSymbol.GetFullName() ?? string.Empty;
+            GuidSuffix = Guid.NewGuid().ToString("N");
+            ModuleSymbol = moduleSymbol;
+            SanitizedClassName = sanitizedClassName;
         }
     }
 }
-

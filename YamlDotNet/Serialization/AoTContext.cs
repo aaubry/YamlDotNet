@@ -20,33 +20,19 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public abstract class AoTContext
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public virtual IObjectFactory GetFactory()
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
+            throw new NotImplementedException();
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public virtual ITypeInspector GetTypeInspector()
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            throw new NotImplementedException();
         }
     }
 }
-

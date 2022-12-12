@@ -20,33 +20,30 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
+using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Analyzers
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public class GeneratedObjectFactoryFile : File
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public GeneratedObjectFactoryFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
+            Write("public class GeneratedObjectFactory : IObjectFactory");
+            Write("{"); Indent();
+            Write("public object Create(Type type)");
+            Write("{"); Indent();
+            foreach (var o in classSyntaxReceiver.Classes)
             {
-                value = null;
-                return false;
+                var classObject = o.Value;
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName()}();");
             }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            UnIndent(); Write("}");
+            UnIndent(); Write("}");
         }
     }
 }
-

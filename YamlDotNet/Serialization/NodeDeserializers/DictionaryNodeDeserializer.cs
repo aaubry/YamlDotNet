@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             IDictionary? dictionary;
             Type keyType, valueType;
