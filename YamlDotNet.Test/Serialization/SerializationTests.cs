@@ -1312,6 +1312,7 @@ y:
                     "scratch: 'scratcher'",
                     "deleteScratch: false",
                     "notScratch: 9443",
+                    "notScratch: 192.168.1.30",
                     "mappedScratch:",
                     "- '/work/'"
                 );

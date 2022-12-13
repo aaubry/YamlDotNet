@@ -33,12 +33,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly IObjectFactory objectFactory;
         private readonly ITypeInspector typeDescriptor;
         private readonly bool ignoreUnmatched;
+        private readonly bool duplicateKeyChecking;
 
-        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched)
+        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, bool duplicateKeyChecking)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
             this.ignoreUnmatched = ignoreUnmatched;
+            this.duplicateKeyChecking = duplicateKeyChecking;
         }
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -57,9 +59,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
-                if (consumedProperties.Contains(propertyName.Value))
+                if (duplicateKeyChecking && consumedProperties.Contains(propertyName.Value))
                 {
-                    throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate property {propertyName.Value}");
+                    throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate key {propertyName.Value}");
                 }
                 try
                 {

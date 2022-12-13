@@ -284,7 +284,25 @@ b: &number 1
         }
 
         [Fact]
-        public void Deserialize_YamlWithDuplicateKeys_ThrowsYamlException()
+        public void DeserializeWithDuplicateKeyChecking_YamlWithDuplicateKeys_ThrowsYamlException()
+        {
+            var yaml = @"
+name: Jack
+momentOfBirth: 1983-04-21T20:21:03.0041599Z
+name: Jake
+";
+
+            var sut = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithDuplicateKeyChecking()
+                .Build();
+
+            Action act = () => sut.Deserialize<Person>(yaml);
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+        }
+
+        [Fact]
+        public void DeserializeWithoutDuplicateKeyChecking_YamlWithDuplicateKeys_DoesNotThrowYamlException()
         {
             var yaml = @"
 name: Jack
@@ -297,7 +315,7 @@ name: Jake
                 .Build();
 
             Action act = () => sut.Deserialize<Person>(yaml);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
 
         public class Test
