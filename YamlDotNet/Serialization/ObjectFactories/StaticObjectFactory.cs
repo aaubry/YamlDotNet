@@ -23,12 +23,44 @@ using System;
 
 namespace YamlDotNet.Serialization.ObjectFactories
 {
+    /// <summary>
+    /// Gets information about and creates statically known, serializable, types.
+    /// </summary>
     public abstract class StaticObjectFactory : IObjectFactory
     {
+        /// <summary>
+        /// Create an object of the specified type
+        /// </summary>
+        /// <param name="type">Type of object to create</param>
+        /// <returns></returns>
         public abstract object Create(Type type);
+
+        /// <summary>
+        /// Gets whether the type is a dictionary or not
+        /// </summary>
+        /// <param name="type">Type to check</param>
+        /// <returns></returns>
         public abstract bool IsDictionary(Type type);
+
+        /// <summary>
+        /// Gets whether the type is a list
+        /// </summary>
+        /// <param name="type">Type to check</param>
+        /// <returns></returns>
         public abstract bool IsList(Type type);
+
+        /// <summary>
+        /// Gets the type of the key of a dictionary
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public abstract Type GetKeyType(Type type);
+
+        /// <summary>
+        /// Gets the type of the value part of a dictionary or list.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public abstract Type GetValueType(Type type);
     }
 }

@@ -19,13 +19,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
 namespace YamlDotNet.Serialization
 {
+    /// <summary>
+    /// The interface to implement for getting/setting an objects fields and properties when using a static context
+    /// </summary>
     public interface IObjectAccessor
     {
+        /// <summary>
+        /// Set a field/property value
+        /// </summary>
+        /// <param name="name">Name of the field or property.</param>
+        /// <param name="target">Object to set the field/property on.</param>
+        /// <param name="value">Value to set the field/property to.</param>
         void Set(string name, object target, object value);
+
+        /// <summary>
+        /// Reads a value from a field/property
+        /// </summary>
+        /// <param name="name">Name of the field or property.</param>
+        /// <param name="target">Object to get the field/property from.</param>
+        /// <returns></returns>
         object? Read(string name, object target);
     }
 }

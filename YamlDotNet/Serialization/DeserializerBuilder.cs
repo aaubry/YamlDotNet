@@ -44,7 +44,7 @@ namespace YamlDotNet.Serialization
     /// </summary>
 
 #if NET7_0_OR_GREATER
-    [RequiresDynamicCode("By default, the deserializer uses reflection. Use the code generator/analyzer to generate static code and use the 'WithAoTContext' method.")]
+    [RequiresDynamicCode("By default, the deserializer uses reflection. Use the code generator/analyzer to generate static code and use the 'WithStaticContext' method.")]
 #endif
     public sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
     {

@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization
     /// with the desired customizations.
     /// </summary>
 #if NET7_0_OR_GREATER
-    [RequiresDynamicCode("By default, the serializer uses reflection. Use the code generator/analyzer to generate static code and use the 'WithAoTContext' method.")]
+    [RequiresDynamicCode("By default, the serializer uses reflection. Use the code generator/analyzer to generate static code and use the 'WithStaticContext' method.")]
 #endif
     public sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
     {
