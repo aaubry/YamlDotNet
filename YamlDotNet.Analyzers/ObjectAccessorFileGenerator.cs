@@ -42,41 +42,47 @@ namespace YamlDotNet.Analyzers
 
                 Write("public void Set(string propertyName, object target, object value)");
                 Write("{"); Indent();
-                Write($"var v = ({classObject.FullName})target;");
-                Write("switch (propertyName)");
-                Write("{"); Indent();
-                foreach (var field in classObject.FieldSymbols)
+                if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
-                    if (!field.IsReadOnly)
+                    Write($"var v = ({classObject.FullName})target;");
+                    Write("switch (propertyName)");
+                    Write("{"); Indent();
+                    foreach (var field in classObject.FieldSymbols)
                     {
-                        Write(GetSetter(field.Name, field.Type));
+                        if (!field.IsReadOnly)
+                        {
+                            Write(GetSetter(field.Name, field.Type));
+                        }
                     }
-                }
-                foreach (var property in classObject.PropertySymbols)
-                {
-                    if (property.SetMethod != null)
+                    foreach (var property in classObject.PropertySymbols)
                     {
-                        Write(GetSetter(property.Name, property.Type));
+                        if (property.SetMethod != null)
+                        {
+                            Write(GetSetter(property.Name, property.Type));
+                        }
                     }
+                    Write("default: throw new ArgumentOutOfRangeException(\"propertyName\", $\"{propertyName} does not exist or is not settable\");");
+                    UnIndent(); Write("}");
                 }
-                Write("default: throw new ArgumentOutOfRangeException(\"propertyName\", $\"{propertyName} does not exist or is not settable\");");
-                UnIndent(); Write("}");
                 UnIndent(); Write("}");
 
                 Write("public object Read(string propertyName, object target)");
                 Write("{"); Indent();
                 Write($"var v = ({classObject.FullName})target;");
-                Write("switch (propertyName)");
-                Write("{"); Indent();
-                foreach (var field in classObject.FieldSymbols)
+                if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
-                    Write(GetReader(field.Name));
+                    Write("switch (propertyName)");
+                    Write("{"); Indent();
+                    foreach (var field in classObject.FieldSymbols)
+                    {
+                        Write(GetReader(field.Name));
+                    }
+                    foreach (var property in classObject.PropertySymbols)
+                    {
+                        Write(GetReader(property.Name));
+                    }
+                    UnIndent(); Write("}");
                 }
-                foreach (var property in classObject.PropertySymbols)
-                {
-                    Write(GetReader(property.Name));
-                }
-                UnIndent(); Write("}");
                 Write("return null;");
                 UnIndent(); Write("}");
                 UnIndent(); Write("}");
