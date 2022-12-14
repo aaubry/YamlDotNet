@@ -20,30 +20,40 @@
 // SOFTWARE.
 
 using System;
-using Microsoft.CodeAnalysis;
+using System.Collections;
+using YamlDotNet.Core;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public class GeneratedObjectFactoryFile : File
+    public class StaticDictionaryNodeDeserializer : DictionaryNodeDeserializer
     {
-        public GeneratedObjectFactoryFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        private readonly ObjectFactories.StaticObjectFactory _objectFactory;
+
+        public StaticDictionaryNodeDeserializer(ObjectFactories.StaticObjectFactory objectFactory)
+            : base(objectFactory)
         {
+            _objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            Write("public class GeneratedObjectFactory : IObjectFactory");
-            Write("{"); Indent();
-            Write("public object Create(Type type)");
-            Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            if (_objectFactory.IsDictionary(expectedType))
             {
-                var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName()}();");
+                var result = _objectFactory.Create(expectedType) as IDictionary;
+                if (result == null)
+                {
+                    value = null;
+                    return false;
+                }
+                var keyType = _objectFactory.GetKeyType(expectedType);
+                var valueType = _objectFactory.GetValueType(expectedType);
+
+                value = result;
+                base.Deserialize(keyType, valueType, reader, nestedObjectDeserializer, result);
+                return true;
             }
-            Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
-            UnIndent(); Write("}");
-            UnIndent(); Write("}");
+            value = null;
+            return false;
         }
     }
 }

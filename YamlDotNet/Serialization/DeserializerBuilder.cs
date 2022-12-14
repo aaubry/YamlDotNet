@@ -132,12 +132,12 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// When using Ahead of Time compilation you need to pass in a generated Ahead of Time context. The context will contain a statically generated IObjectFactory and ITypeInspector.
-        /// This method will also remove the default dynamic, reflection based type inspectors and node deserializers.
+        /// When using Ahead of Time compilation or assembly trimming you need to pass in a generated static context. The context will contain a statically generated IObjectFactory and ITypeInspector.
+        /// This method will also remove the default reflection based type inspectors and node deserializers.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public DeserializerBuilder WithAoTContext(AoTContext context)
+        public DeserializerBuilder WithStaticContext(StaticContext context)
         {
             WithObjectFactory(context.GetFactory());
             typeInspectorFactories.Clear();
@@ -150,6 +150,7 @@ namespace YamlDotNet.Serialization
             _baseTypeInspector = context.GetTypeInspector();
 
             WithoutNodeDeserializer<DictionaryNodeDeserializer>();
+            WithNodeDeserializer(new StaticDictionaryNodeDeserializer(context.GetFactory()));
 
             return Self;
         }

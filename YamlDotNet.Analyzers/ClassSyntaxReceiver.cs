@@ -42,7 +42,7 @@ namespace YamlDotNet.Analyzers
                     if (classSymbol.GetAttributes().Any(attribute => attribute.AttributeClass?.ToDisplayString() == "YamlDotNet.Serialization.YamlSerializableAttribute"))
                     {
                         ClassObject classObject;
-                        var className = $"{classSymbol.GetFullName().Replace(".", "_")}";
+                        var className = SanitizeName(classSymbol.GetFullName());
                         if (Classes.ContainsKey(className))
                         {
                             classObject = Classes[className];
@@ -65,14 +65,40 @@ namespace YamlDotNet.Analyzers
                             if (member is IPropertySymbol propertySymbol)
                             {
                                 classObject.PropertySymbols.Add(propertySymbol);
+                                CheckForSupportedGeneric(propertySymbol.Type);
                             }
                             else if (member is IFieldSymbol fieldSymbol)
                             {
                                 classObject.FieldSymbols.Add(fieldSymbol);
+                                CheckForSupportedGeneric(fieldSymbol.Type);
                             }
                         }
                     }
                 }
+            }
+        }
+
+        private string SanitizeName(string name) => new string(name.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray());
+
+        private void CheckForSupportedGeneric(ITypeSymbol type)
+        {
+            var typeName = type.GetFullName();
+            var sanitizedTypeName = SanitizeName(typeName);
+
+            if (Classes.ContainsKey(sanitizedTypeName))
+            {
+                return;
+            }
+
+            if (typeName.StartsWith("System.Collections.Generic.Dictionary"))
+            {
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, true));
+                return;
+            }
+
+            if (typeName.StartsWith("System.Collections.Generic.List"))
+            {
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, false, true));
             }
         }
     }

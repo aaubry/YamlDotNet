@@ -24,18 +24,20 @@ using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers
 {
-    public class GeneratedAoTContextFile : File
+    public class StaticContextFile : File
     {
-        public GeneratedAoTContextFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticContextFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public partial class GeneratedAoTContext : AoTContext");
+            Write("public partial class StaticContext : YamlDotNet.Serialization.StaticContext");
             Write("{"); Indent();
-            Write("public override IObjectFactory GetFactory() => new GeneratedObjectFactory();");
-            Write("public override ITypeInspector GetTypeInspector() => new GeneratedTypeInspector();");
+            Write("public YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory ObjectFactory { get; } = new StaticObjectFactory();");
+            Write("public StaticTypeInspector TypeInspector { get; } = new StaticTypeInspector();");
+            Write("public override YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory GetFactory() => ObjectFactory;");
+            Write("public override YamlDotNet.Serialization.ITypeInspector GetTypeInspector() => TypeInspector;");
             UnIndent(); Write("}");
         }
     }

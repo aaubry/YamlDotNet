@@ -28,19 +28,19 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace YamlDotNet.Analyzers
 {
-    public class GeneratedTypeInspectorFile : File
+    public class StaticTypeInspectorFile : File
     {
-        public GeneratedTypeInspectorFile(Action<string> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
+        public StaticTypeInspectorFile(Action<string> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
         {
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public class GeneratedTypeInspector : ITypeInspector");
+            Write("public class StaticTypeInspector : YamlDotNet.Serialization.ITypeInspector");
             Write("{"); Indent();
 
             #region GetProperties
-            Write("public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)");
+            Write("public IEnumerable<YamlDotNet.Serialization.IPropertyDescriptor> GetProperties(Type type, object container)");
             Write("{"); Indent();
             foreach (var o in classSyntaxReceiver.Classes)
             {
@@ -48,7 +48,7 @@ namespace YamlDotNet.Analyzers
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()}))");
                 Write("{"); Indent();
                 Write($"var accessor = new {classObject.SanitizedClassName}_{classObject.GuidSuffix}();");
-                Write("return new IPropertyDescriptor[]");
+                Write("return new YamlDotNet.Serialization.IPropertyDescriptor[]");
                 Write("{"); Indent();
                 foreach (var field in classObject.FieldSymbols)
                 {
@@ -61,12 +61,12 @@ namespace YamlDotNet.Analyzers
                 UnIndent(); Write("};");
                 UnIndent(); Write("}");
             }
-            Write("return new List<IPropertyDescriptor>();");
+            Write("return new List<YamlDotNet.Serialization.IPropertyDescriptor>();");
             UnIndent(); Write("}");
             #endregion
 
             #region GetProperty
-            Write("public IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)");
+            Write("public YamlDotNet.Serialization.IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)");
             Write("{"); Indent();
             foreach (var o in classSyntaxReceiver.Classes)
             {
@@ -95,7 +95,7 @@ namespace YamlDotNet.Analyzers
 
         private string GetPropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
         {
-            var constructor = new StringBuilder($"new PropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName()}), new Attribute[] {{");
+            var constructor = new StringBuilder($"new StaticPropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName()}), new Attribute[] {{");
             constructor.AppendLine();
             foreach (var attribute in attributes)
             {
@@ -139,7 +139,6 @@ namespace YamlDotNet.Analyzers
                         break;
                 }
             }
-            UnIndent();
             constructor.Append("})");
             constructor.Append(finalChar.ToString());
             return constructor.ToString();

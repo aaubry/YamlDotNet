@@ -71,15 +71,13 @@ namespace YamlDotNet.Analyzers
 
             write("using System;");
             write("using System.Collections.Generic;");
-            write("using YamlDotNet.Core;");
-            write("using YamlDotNet.Serialization;");
-            write("namespace YamlDotNet");
+            write("namespace YamlDotNet.Static");
             write("{"); indent();
 
-            new GeneratedAoTContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new GeneratedObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new PropertyDescriptorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new GeneratedTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+            new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+            new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+            new StaticPropertyDescriptorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+            new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
             new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);
 
             unindent(); write("}");

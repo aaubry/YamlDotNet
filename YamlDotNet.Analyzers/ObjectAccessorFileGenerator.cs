@@ -37,7 +37,7 @@ namespace YamlDotNet.Analyzers
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"public class {classObject.SanitizedClassName}_{classObject.GuidSuffix} : IObjectAccessor");
+                Write($"public class {classObject.SanitizedClassName}_{classObject.GuidSuffix} : YamlDotNet.Serialization.IObjectAccessor");
                 Write("{"); Indent();
 
                 Write("public void Set(string propertyName, object target, object value)");

@@ -19,20 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Static
 {
-    public abstract class AoTContext
+    // The rest of this partial class gets generated at build time
+    public partial class StaticContext : YamlDotNet.Serialization.StaticContext
     {
-        public virtual IObjectFactory GetFactory()
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual ITypeInspector GetTypeInspector()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

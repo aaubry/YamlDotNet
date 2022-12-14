@@ -20,32 +20,15 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Serialization.ObjectFactories
 {
-    public class ClassObject
+    public abstract class StaticObjectFactory : IObjectFactory
     {
-        public List<IFieldSymbol> FieldSymbols { get; }
-        public string FullName { get; }
-        public string GuidSuffix { get; }
-        public INamedTypeSymbol ModuleSymbol { get; }
-        public List<IPropertySymbol> PropertySymbols { get; }
-        public string SanitizedClassName { get; }
-        public bool IsDictionary { get; }
-        public bool IsList { get; }
-
-        public ClassObject(string sanitizedClassName, INamedTypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false)
-        {
-            FieldSymbols = new List<IFieldSymbol>();
-            PropertySymbols = new List<IPropertySymbol>();
-            FullName = moduleSymbol.GetFullName() ?? string.Empty;
-            GuidSuffix = Guid.NewGuid().ToString("N");
-            ModuleSymbol = moduleSymbol;
-            SanitizedClassName = sanitizedClassName;
-            IsDictionary = isDictionary;
-            IsList = isList;
-        }
+        public abstract object Create(Type type);
+        public abstract bool IsDictionary(Type type);
+        public abstract bool IsList(Type type);
+        public abstract Type GetKeyType(Type type);
+        public abstract Type GetValueType(Type type);
     }
 }

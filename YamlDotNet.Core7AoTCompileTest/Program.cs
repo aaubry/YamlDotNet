@@ -20,8 +20,14 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NodeDeserializers;
 
 string yaml = $@"MyBool: true
 hi: 1
@@ -47,13 +53,20 @@ MyArray:
   - 1
   - 2
   - 3
+MyDictionary:
+  x: y
+  a: b
+MyList:
+  - a
+  - b
 ";
 
 var input = new StringReader(yaml);
 
 #pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
+var aotContext = new YamlDotNet.Static.StaticContext();
 var deserializer = new DeserializerBuilder()
-    .WithAoTContext(new YamlDotNet.GeneratedAoTContext())
+    .WithStaticContext(aotContext)
     .Build();
 #pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 
@@ -82,12 +95,31 @@ if (x.MyArray?.myArray != null)
 {
     Console.WriteLine("MyArray.myArray: <{0}>", string.Join(',', x.MyArray.myArray));
 }
+
+Console.WriteLine("MyDictionary == null: <{0}>", x.MyDictionary == null);
+if (x.MyDictionary != null)
+{
+    foreach (var kvp in x.MyDictionary)
+    {
+        Console.WriteLine("MyDictionary[{0}] = <{1}>", kvp.Key, kvp.Value);
+    }
+}
+
+Console.WriteLine("MyList == null: <{0}>", x.MyList == null);
+if (x.MyList != null)
+{
+    foreach (var value in x.MyList)
+    {
+        Console.WriteLine("MyList = <{0}>", value);
+    }
+}
+
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
 #pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 var serializer = new SerializerBuilder()
-    .WithAoTContext(new YamlDotNet.GeneratedAoTContext())
+    .WithStaticContext(new YamlDotNet.Static.StaticContext())
     .Build();
 #pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 
@@ -130,6 +162,8 @@ public class PrimitiveTypes
     public ulong MyUInt64 { get; set; }
     public Inner Inner { get; set; }
     public MyArray MyArray { get; set; }
+    public Dictionary<string, string> MyDictionary { get; set; }
+    public List<string> MyList { get; set; }
 }
 
 public enum MyTestEnum
@@ -137,3 +171,4 @@ public enum MyTestEnum
     Y = 0,
     Z = 1,
 }
+

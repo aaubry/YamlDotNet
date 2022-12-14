@@ -107,7 +107,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public SerializerBuilder WithAoTContext(AoTContext context)
+        public SerializerBuilder WithStaticContext(StaticContext context)
         {
             typeInspectorFactories.Clear();
 

@@ -26,24 +26,24 @@ using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers
 {
-    public class PropertyDescriptorFile : File
+    public class StaticPropertyDescriptorFile : File
     {
-        public PropertyDescriptorFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticPropertyDescriptorFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public class PropertyDescriptor : IPropertyDescriptor");
+            Write("public class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
             Write("{"); Indent();
-            Write("private IObjectAccessor _accessor;");
+            Write("private YamlDotNet.Serialization.IObjectAccessor _accessor;");
             Write("private readonly Attribute[] _attributes;");
             Write("public string Name { get; }");
             Write("public bool CanWrite { get; }");
             Write("public Type Type { get; }");
             Write("public Type TypeOverride { get; set; }");
             Write("public int Order { get; set; }");
-            Write("public ScalarStyle ScalarStyle { get; set; }");
+            Write("public YamlDotNet.Core.ScalarStyle ScalarStyle { get; set; }");
             Write("public T GetCustomAttribute<T>() where T : Attribute");
             Write("{"); Indent();
             Write("foreach (var attribute in this._attributes)");
@@ -52,15 +52,15 @@ namespace YamlDotNet.Analyzers
             UnIndent(); Write("}");
             Write("return null;");
             UnIndent(); Write("}");
-            Write("public IObjectDescriptor Read(object target)");
+            Write("public YamlDotNet.Serialization.IObjectDescriptor Read(object target)");
             Write("{"); Indent();
-            Write("return new ObjectDescriptor(_accessor.Read(Name, target), Type, Type, ScalarStyle.Any);");
+            Write("return new YamlDotNet.Serialization.ObjectDescriptor(_accessor.Read(Name, target), Type, Type, YamlDotNet.Core.ScalarStyle.Any);");
             UnIndent(); Write("}");
             Write("public void Write(object target, object value)");
             Write("{"); Indent();
             Write("_accessor.Set(Name, target, value);");
             UnIndent(); Write("}");
-            Write("public PropertyDescriptor(IObjectAccessor accessor, string name, bool canWrite, Type type, Attribute[] attributes)");
+            Write("public StaticPropertyDescriptor(YamlDotNet.Serialization.IObjectAccessor accessor, string name, bool canWrite, Type type, Attribute[] attributes)");
             Write("{"); Indent();
             Write("this._accessor = accessor;");
             Write("this._attributes = attributes;");
