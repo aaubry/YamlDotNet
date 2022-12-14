@@ -156,6 +156,7 @@ public class PrimitiveTypes
     public long MyInt64 { get; set; }
     public sbyte MySByte { get; set; }
     public float MySingle { get; set; }
+    [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
     public string MyString { get; set; }
     public ushort MyUInt16 { get; set; }
     public uint MyUInt32 { get; set; }

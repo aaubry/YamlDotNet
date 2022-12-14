@@ -54,7 +54,7 @@ namespace YamlDotNet.Analyzers
             UnIndent(); Write("}");
             Write("public YamlDotNet.Serialization.IObjectDescriptor Read(object target)");
             Write("{"); Indent();
-            Write("return new YamlDotNet.Serialization.ObjectDescriptor(_accessor.Read(Name, target), Type, Type, YamlDotNet.Core.ScalarStyle.Any);");
+            Write("return new YamlDotNet.Serialization.ObjectDescriptor(_accessor.Read(Name, target), Type, Type, this.ScalarStyle);");
             UnIndent(); Write("}");
             Write("public void Write(object target, object value)");
             Write("{"); Indent();
@@ -67,6 +67,7 @@ namespace YamlDotNet.Analyzers
             Write("this.Name = name;");
             Write("this.CanWrite = canWrite;");
             Write("this.Type = type;");
+            Write("this.ScalarStyle = YamlDotNet.Core.ScalarStyle.Any;");
             UnIndent(); Write("}");
             UnIndent(); Write("}");
         }
