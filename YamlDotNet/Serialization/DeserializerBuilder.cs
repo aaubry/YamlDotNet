@@ -47,6 +47,7 @@ namespace YamlDotNet.Serialization
         private readonly Dictionary<TagName, Type> tagMappings;
         private readonly Dictionary<Type, Type> typeMappings;
         private bool ignoreUnmatched;
+        private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
 
         /// <summary>
@@ -85,7 +86,7 @@ namespace YamlDotNet.Serialization
                 { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value) },
                 { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
-                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched) }
+                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking) }
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
@@ -385,6 +386,16 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder IgnoreUnmatchedProperties()
         {
             ignoreUnmatched = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Instructs the deserializer to check for duplicate keys and throw an exception if duplicate keys are found.
+        /// </summary>
+        /// <returns></returns>
+        public DeserializerBuilder WithDuplicateKeyChecking()
+        {
+            duplicateKeyChecking = true;
             return this;
         }
 

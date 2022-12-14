@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -32,12 +33,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly IObjectFactory objectFactory;
         private readonly ITypeInspector typeDescriptor;
         private readonly bool ignoreUnmatched;
+        private readonly bool duplicateKeyChecking;
 
-        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched)
+        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, bool duplicateKeyChecking)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
             this.ignoreUnmatched = ignoreUnmatched;
+            this.duplicateKeyChecking = duplicateKeyChecking;
         }
 
         bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -52,11 +55,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
             value = objectFactory.Create(implementationType);
+            var consumedProperties = new List<string>();
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
+                if (duplicateKeyChecking && consumedProperties.Contains(propertyName.Value))
+                {
+                    throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate key {propertyName.Value}");
+                }
                 try
                 {
+                    consumedProperties.Add(propertyName.Value);
                     var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
                     if (property == null)
                     {
