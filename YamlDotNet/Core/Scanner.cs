@@ -398,7 +398,7 @@ namespace YamlDotNet.Core
                     FetchBlockEntry();
                     return;
                 }
-                else if (analyzer.Check(",[]{}", 1))
+                else if (flowLevel > 0 && analyzer.Check(",[]{}", 1))
                 {
                     tokens.Enqueue(new Error("Invalid key indicator format.", cursor.Mark(), cursor.Mark()));
                 }

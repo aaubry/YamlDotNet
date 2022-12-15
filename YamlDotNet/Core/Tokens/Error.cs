@@ -22,16 +22,16 @@
 namespace YamlDotNet.Core.Tokens
 {
     /// <summary>
-    /// Base class for YAML tokens.
+    /// Error tokens.
     /// </summary>
-    internal class Error : Token
+    public class Error : Token
     {
         /// <summary>
-        /// Gets the value of the comment
+        /// Gets the value of the error
         /// </summary>
-        internal string Value { get; }
+        public string Value { get; }
 
-        internal Error(string value, Mark start, Mark end)
+        public Error(string value, Mark start, Mark end)
             : base(start, end)
         {
             Value = value;

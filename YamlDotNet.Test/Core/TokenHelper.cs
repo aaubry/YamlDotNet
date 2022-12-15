@@ -151,6 +151,11 @@ namespace YamlDotNet.Test.Core
             return new AnchorAlias(new AnchorName(alias));
         }
 
+        protected static Error Error(string value)
+        {
+            return new Error(value, new Mark(), new Mark());
+        }
+
         protected static Comment StandaloneComment(string text)
         {
             return new Comment(text, false);

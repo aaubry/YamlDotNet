@@ -414,6 +414,35 @@ namespace YamlDotNet.Test.Core
             }
         }
 
+        [Fact]
+        public void Plain_Scalar_outside_of_flow_allows_braces()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText(@"value: -[123]"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("value"),
+                Value,
+                PlainScalar("-[123]"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Plain_Scalar_inside_flow_does_not_allow_braces()
+        {
+            AssertPartialSequenceOfTokensFrom(Yaml.ScannerForText(@"
+[
+  value: -[123]
+]"),
+                StreamStart,
+                FlowSequenceStart,
+                Key,
+                PlainScalar("value"),
+                Value,
+                Error("Invalid key indicator format."));
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;
