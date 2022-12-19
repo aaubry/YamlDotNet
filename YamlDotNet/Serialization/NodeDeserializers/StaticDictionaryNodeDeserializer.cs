@@ -20,33 +20,40 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public class StaticDictionaryNodeDeserializer : DictionaryNodeDeserializer
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
+        private readonly ObjectFactories.StaticObjectFactory _objectFactory;
 
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public StaticDictionaryNodeDeserializer(ObjectFactories.StaticObjectFactory objectFactory)
+            : base(objectFactory)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
+            _objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public override bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
+            if (_objectFactory.IsDictionary(expectedType))
             {
-                value = null;
-                return false;
-            }
+                var result = _objectFactory.Create(expectedType) as IDictionary;
+                if (result == null)
+                {
+                    value = null;
+                    return false;
+                }
+                var keyType = _objectFactory.GetKeyType(expectedType);
+                var valueType = _objectFactory.GetValueType(expectedType);
 
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+                value = result;
+                base.Deserialize(keyType, valueType, reader, nestedObjectDeserializer, result);
+                return true;
+            }
+            value = null;
+            return false;
         }
     }
 }
-

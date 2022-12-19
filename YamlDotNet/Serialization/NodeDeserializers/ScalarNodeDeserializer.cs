@@ -46,7 +46,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.attemptUnknownTypeDeserialization = attemptUnknownTypeDeserialization;
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             if (!parser.TryConsume<Scalar>(out var scalar))
             {

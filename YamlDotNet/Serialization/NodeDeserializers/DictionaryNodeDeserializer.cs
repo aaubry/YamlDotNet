@@ -29,7 +29,7 @@ using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class DictionaryNodeDeserializer : INodeDeserializer
+    public class DictionaryNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
 
@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public virtual bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             IDictionary? dictionary;
             Type keyType, valueType;
@@ -72,12 +72,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(keyType, valueType, parser, nestedObjectDeserializer, dictionary!);
+            Deserialize(keyType, valueType, parser, nestedObjectDeserializer, dictionary!);
 
             return true;
         }
 
-        private static void DeserializeHelper(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
+        protected void Deserialize(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
         {
             parser.Consume<MappingStart>();
             while (!parser.TryConsume<MappingEnd>(out var _))

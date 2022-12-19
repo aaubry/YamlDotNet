@@ -40,6 +40,11 @@ namespace YamlDotNet.Serialization
             return clone;
         }
 
+        public void Clear()
+        {
+            entries.Clear();
+        }
+
         public sealed class LazyComponentRegistration
         {
             public readonly Type ComponentType;

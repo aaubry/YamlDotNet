@@ -19,34 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
-
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Static
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    // The rest of this partial class gets generated at build time
+    public partial class StaticContext : YamlDotNet.Serialization.StaticContext
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
-        {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
-        }
-
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
-        {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
-        }
     }
 }
-

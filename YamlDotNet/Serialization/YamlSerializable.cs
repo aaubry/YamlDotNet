@@ -20,33 +20,14 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    /// <summary>
+    /// Put this attribute on classes that you want the static analyzer to detect and use.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class YamlSerializableAttribute : Attribute
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
-        {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
-        }
-
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
-        {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
-        }
     }
 }
-

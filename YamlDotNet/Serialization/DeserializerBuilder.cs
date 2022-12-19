@@ -21,6 +21,9 @@
 
 using System;
 using System.Collections.Generic;
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
@@ -39,6 +42,10 @@ namespace YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the deserializer
     /// with the desired customizations.
     /// </summary>
+
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode("By default, the deserializer uses reflection. Use the code generator/analyzer to generate static code and use the 'WithStaticContext' method.")]
+#endif
     public sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
     {
         private Lazy<IObjectFactory> objectFactory;
@@ -49,6 +56,7 @@ namespace YamlDotNet.Serialization
         private bool ignoreUnmatched;
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
+        private ITypeInspector? _baseTypeInspector = null;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -102,18 +110,50 @@ namespace YamlDotNet.Serialization
 
         protected override DeserializerBuilder Self { get { return this; } }
 
-        internal override ITypeInspector BuildTypeInspector()
+        internal ITypeInspector BuildTypeInspector()
         {
-            ITypeInspector innerInspector = new WritablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
-            if (!ignoreFields)
+            ITypeInspector innerInspector;
+            if (this._baseTypeInspector != null)
             {
-                innerInspector = new CompositeTypeInspector(
-                    new ReadableFieldsTypeInspector(typeResolver),
-                    innerInspector
-                );
+                innerInspector = this._baseTypeInspector;
+            }
+            else
+            {
+                innerInspector = new WritablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
+                if (!ignoreFields)
+                {
+                    innerInspector = new CompositeTypeInspector(
+                        new ReadableFieldsTypeInspector(typeResolver),
+                        innerInspector
+                    );
+                }
             }
 
             return typeInspectorFactories.BuildComponentChain(innerInspector);
+        }
+
+        /// <summary>
+        /// When using Ahead of Time compilation or assembly trimming you need to pass in a generated static context. The context will contain a statically generated IObjectFactory and ITypeInspector.
+        /// This method will also remove the default reflection based type inspectors and node deserializers.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public DeserializerBuilder WithStaticContext(StaticContext context)
+        {
+            WithObjectFactory(context.GetFactory());
+            typeInspectorFactories.Clear();
+
+            typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
+            typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
+
+            _baseTypeInspector = context.GetTypeInspector();
+
+            WithoutNodeDeserializer<DictionaryNodeDeserializer>();
+            WithNodeDeserializer(new StaticDictionaryNodeDeserializer(context.GetFactory()));
+
+            return Self;
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class NullNodeDeserializer : INodeDeserializer
     {
-        bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             value = null;
             if (parser.Accept<NodeEvent>(out var evt))

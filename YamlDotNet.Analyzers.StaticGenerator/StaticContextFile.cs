@@ -20,33 +20,25 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
+using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public class StaticContextFile : File
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public StaticContextFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            Write("public partial class StaticContext : YamlDotNet.Serialization.StaticContext");
+            Write("{"); Indent();
+            Write("public YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory ObjectFactory { get; } = new StaticObjectFactory();");
+            Write("public StaticTypeInspector TypeInspector { get; } = new StaticTypeInspector();");
+            Write("public override YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory GetFactory() => ObjectFactory;");
+            Write("public override YamlDotNet.Serialization.ITypeInspector GetTypeInspector() => TypeInspector;");
+            UnIndent(); Write("}");
         }
     }
 }
-

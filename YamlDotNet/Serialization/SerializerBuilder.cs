@@ -21,6 +21,9 @@
 
 using System;
 using System.Collections.Generic;
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.EventEmitters;
@@ -39,6 +42,9 @@ namespace YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the serializer
     /// with the desired customizations.
     /// </summary>
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode("By default, the serializer uses reflection. Use the code generator/analyzer to generate static code and use the 'WithStaticContext' method.")]
+#endif
     public sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
     {
         private ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory;
@@ -50,7 +56,7 @@ namespace YamlDotNet.Serialization
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
         private bool quoteNecessaryStrings;
-
+        private ITypeInspector? _baseTypeInspector = null;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -94,6 +100,26 @@ namespace YamlDotNet.Serialization
         }
 
         protected override SerializerBuilder Self { get { return this; } }
+
+        /// <summary>
+        /// When using Ahead of Time compilation you need to pass in a generated Ahead of Time context. The context will contain a statically generated IObjectFactory and ITypeInspector.
+        /// This method will also remove the default dynamic, reflection based type inspectors and node deserializers.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public SerializerBuilder WithStaticContext(StaticContext context)
+        {
+            typeInspectorFactories.Clear();
+
+            typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
+            typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
+            typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
+
+            _baseTypeInspector = context.GetTypeInspector();
+
+            return Self;
+        }
 
         /// <summary>
         /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
@@ -563,6 +589,29 @@ namespace YamlDotNet.Serialization
                 preProcessingPhaseObjectGraphVisitorFactories.Clone(),
                 emissionPhaseObjectGraphVisitorFactories.Clone()
             );
+        }
+
+        internal ITypeInspector BuildTypeInspector()
+        {
+            ITypeInspector innerInspector;
+
+            if (this._baseTypeInspector != null)
+            {
+                innerInspector = this._baseTypeInspector;
+            }
+            else
+            {
+                innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
+                if (!ignoreFields)
+                {
+                    innerInspector = new CompositeTypeInspector(
+                        new ReadableFieldsTypeInspector(typeResolver),
+                        innerInspector
+                    );
+                }
+            }
+
+            return typeInspectorFactories.BuildComponentChain(innerInspector);
         }
 
         private class ValueSerializer : IValueSerializer
