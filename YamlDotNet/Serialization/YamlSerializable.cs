@@ -23,7 +23,10 @@ using System;
 
 namespace YamlDotNet.Serialization
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
+    /// <summary>
+    /// Put this attribute on classes that you want the static analyzer to detect and use.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class YamlSerializableAttribute : Attribute
     {
     }
