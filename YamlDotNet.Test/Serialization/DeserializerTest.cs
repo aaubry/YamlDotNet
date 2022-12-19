@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -216,7 +217,6 @@ b: &number 1
             Assert.Equal($"value\na\nb", dictionary.First().Value);
         }
 
-        
         [Theory]
         [InlineData(".nan", System.Single.NaN)]
         [InlineData(".NaN", System.Single.NaN)]
@@ -281,6 +281,41 @@ b: &number 1
             var result = deserializer.Deserialize(value.ToString(), type);
 
             result.Should().Be(value);
+        }
+
+        [Fact]
+        public void DeserializeWithDuplicateKeyChecking_YamlWithDuplicateKeys_ThrowsYamlException()
+        {
+            var yaml = @"
+name: Jack
+momentOfBirth: 1983-04-21T20:21:03.0041599Z
+name: Jake
+";
+
+            var sut = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithDuplicateKeyChecking()
+                .Build();
+
+            Action act = () => sut.Deserialize<Person>(yaml);
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+        }
+
+        [Fact]
+        public void DeserializeWithoutDuplicateKeyChecking_YamlWithDuplicateKeys_DoesNotThrowYamlException()
+        {
+            var yaml = @"
+name: Jack
+momentOfBirth: 1983-04-21T20:21:03.0041599Z
+name: Jake
+";
+
+            var sut = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            Action act = () => sut.Deserialize<Person>(yaml);
+            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
 
         public class Test
