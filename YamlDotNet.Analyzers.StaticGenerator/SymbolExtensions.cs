@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
     static class SymbolExtensions
     {

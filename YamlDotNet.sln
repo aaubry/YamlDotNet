@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Benchmark", "YamlDotNet.Benchmark\YamlDotNet.Benchmark.csproj", "{52D1E5F3-8337-48FC-AED5-968B51C7DAEB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Analyzers", "YamlDotNet.Analyzers\YamlDotNet.Analyzers.csproj", "{42DE4D20-AEF7-4235-9CB2-1ED0150B3D1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Analyzers.StaticGenerator", "YamlDotNet.Analyzers.StaticGenerator\YamlDotNet.Analyzers.StaticGenerator.csproj", "{42DE4D20-AEF7-4235-9CB2-1ED0150B3D1B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core7AoTCompileTest", "YamlDotNet.Core7AoTCompileTest\YamlDotNet.Core7AoTCompileTest.csproj", "{DEB5099E-D216-438B-86A7-03674F9185EF}"
 EndProject

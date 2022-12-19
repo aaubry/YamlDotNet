@@ -20,32 +20,38 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
-    public class ClassObject
+    public abstract class File
     {
-        public List<IFieldSymbol> FieldSymbols { get; }
-        public string FullName { get; }
-        public string GuidSuffix { get; }
-        public INamedTypeSymbol ModuleSymbol { get; }
-        public List<IPropertySymbol> PropertySymbols { get; }
-        public string SanitizedClassName { get; }
-        public bool IsDictionary { get; }
-        public bool IsList { get; }
+        private readonly Action<string> _write;
+        private readonly Action _indent;
+        private readonly Action _unindent;
 
-        public ClassObject(string sanitizedClassName, INamedTypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false)
+        public File(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context)
         {
-            FieldSymbols = new List<IFieldSymbol>();
-            PropertySymbols = new List<IPropertySymbol>();
-            FullName = moduleSymbol.GetFullName() ?? string.Empty;
-            GuidSuffix = Guid.NewGuid().ToString("N");
-            ModuleSymbol = moduleSymbol;
-            SanitizedClassName = sanitizedClassName;
-            IsDictionary = isDictionary;
-            IsList = isList;
+            _write = write;
+            _indent = indent;
+            _unindent = unindent;
         }
+
+        public void Write(string text)
+        {
+            _write(text);
+        }
+
+        public void Indent()
+        {
+            _indent();
+        }
+
+        public void UnIndent()
+        {
+            _unindent();
+        }
+
+        public abstract void Write(ClassSyntaxReceiver classSyntaxReceiver);
     }
 }

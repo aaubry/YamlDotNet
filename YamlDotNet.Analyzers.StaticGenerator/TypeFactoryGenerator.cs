@@ -23,7 +23,7 @@ using System;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
     [Generator]
     public class TypeFactoryGenerator : ISourceGenerator

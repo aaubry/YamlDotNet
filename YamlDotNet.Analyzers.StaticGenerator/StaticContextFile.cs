@@ -22,7 +22,7 @@
 using System;
 using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticContextFile : File
     {

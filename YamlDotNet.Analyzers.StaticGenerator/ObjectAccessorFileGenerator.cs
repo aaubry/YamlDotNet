@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class ObjectAccessorFileGenerator : File
     {

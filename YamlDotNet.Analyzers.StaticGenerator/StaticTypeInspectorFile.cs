@@ -21,12 +21,11 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace YamlDotNet.Analyzers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticTypeInspectorFile : File
     {
