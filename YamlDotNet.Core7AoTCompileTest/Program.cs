@@ -63,12 +63,9 @@ MyList:
 
 var input = new StringReader(yaml);
 
-#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 var aotContext = new YamlDotNet.Static.StaticContext();
-var deserializer = new DeserializerBuilder()
-    .WithStaticContext(aotContext)
+var deserializer = new StaticDeserializerBuilder(aotContext)
     .Build();
-#pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 
 var x = deserializer.Deserialize<PrimitiveTypes>(input);
 Console.WriteLine("Object read:");
@@ -117,11 +114,8 @@ if (x.MyList != null)
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
-#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
-var serializer = new SerializerBuilder()
-    .WithStaticContext(new YamlDotNet.Static.StaticContext())
+var serializer = new StaticSerializerBuilder(aotContext)
     .Build();
-#pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 
 var output = serializer.Serialize(x);
 Console.WriteLine(output);

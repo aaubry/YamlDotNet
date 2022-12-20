@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
@@ -37,10 +38,20 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override object Create(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in classSyntaxReceiver.Classes.Where(c => !c.Value.IsArray))
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName()}();");
+            }
+            Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            UnIndent(); Write("}");
+
+            Write("public override Array CreateArray(Type type, int count)");
+            Write("{"); Indent();
+            foreach (var o in classSyntaxReceiver.Classes.Where(c => c.Value.IsArray))
+            {
+                var classObject = o.Value;
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName(false)}[count];");
             }
             Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
@@ -51,6 +62,16 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsDictionary.ToString().ToLower()};");
+            }
+            Write("return false;");
+            UnIndent(); Write("}");
+
+            Write("public override bool IsArray(Type type)");
+            Write("{"); Indent();
+            foreach (var o in classSyntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsArray.ToString().ToLower()};");
             }
             Write("return false;");
             UnIndent(); Write("}");
@@ -76,9 +97,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 }
 
                 var keyType = "object";
-                if (classObject.ModuleSymbol.IsGenericType)
+                var type = (INamedTypeSymbol)classObject.ModuleSymbol;
+
+                if (type.IsGenericType)
                 {
-                    keyType = o.Value.ModuleSymbol.TypeArguments[0].GetFullName();
+                    keyType = type.TypeArguments[0].GetFullName();
                 }
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return typeof({keyType});");
             }
@@ -90,7 +113,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (!(classObject.IsList || classObject.IsDictionary))
+                if (!(classObject.IsList || classObject.IsDictionary || classObject.IsArray))
                 {
                     continue;
                 }
@@ -99,12 +122,17 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 if (classObject.IsDictionary)
                 {
                     //we're a dictionary
-                    valueType = o.Value.ModuleSymbol.TypeArguments[1].GetFullName();
+                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[1].GetFullName();
+                }
+                else if (classObject.IsList)
+                {
+                    //we're a list
+                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName();
                 }
                 else
                 {
-                    //we're a list
-                    valueType = o.Value.ModuleSymbol.TypeArguments[0].GetFullName();
+                    //we're an array
+                    valueType = ((IArrayTypeSymbol)classObject.ModuleSymbol).ElementType.GetFullName();
                 }
 
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return typeof({valueType});");

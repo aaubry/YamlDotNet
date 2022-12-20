@@ -26,22 +26,26 @@ using YamlDotNet.Serialization.ObjectFactories;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public sealed class ArrayNodeDeserializer : INodeDeserializer
+    public sealed class StaticArrayNodeDeserializer : INodeDeserializer
     {
+        private readonly StaticObjectFactory factory;
+
+        public StaticArrayNodeDeserializer(StaticObjectFactory factory)
+        {
+            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
+        }
+
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            if (!expectedType.IsArray)
+            if (!factory.IsArray(expectedType))
             {
                 value = false;
                 return false;
             }
-
-            var itemType = expectedType.GetElementType()!; // Arrays always have an element type
-
+            var itemType = factory.GetValueType(expectedType);
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
-
-            var array = Array.CreateInstance(itemType, items.Count);
+            StaticCollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, factory);
+            var array = factory.CreateArray(expectedType, items.Count);
             items.CopyTo(array, 0);
 
             value = array;

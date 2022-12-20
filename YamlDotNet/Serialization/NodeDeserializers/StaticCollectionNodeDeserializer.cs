@@ -25,56 +25,53 @@ using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
+using YamlDotNet.Serialization.ObjectFactories;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public class DictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
+    public sealed class StaticCollectionNodeDeserializer : INodeDeserializer
     {
-        private readonly IObjectFactory objectFactory;
+        private readonly StaticObjectFactory factory;
 
-        public DictionaryNodeDeserializer(IObjectFactory objectFactory)
+        public StaticCollectionNodeDeserializer(StaticObjectFactory factory)
         {
-            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            IDictionary? dictionary;
-            Type keyType, valueType;
-            var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IDictionary<,>));
-            if (genericDictionaryType != null)
-            {
-                var genericArguments = genericDictionaryType.GetGenericArguments();
-                keyType = genericArguments[0];
-                valueType = genericArguments[1];
-
-                value = objectFactory.Create(expectedType);
-
-                dictionary = value as IDictionary;
-                if (dictionary == null)
-                {
-                    // Uncommon case where a type implements IDictionary<TKey, TValue> but not IDictionary
-                    dictionary = (IDictionary?)Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(keyType, valueType), value);
-                }
-            }
-            else if (typeof(IDictionary).IsAssignableFrom(expectedType))
-            {
-                keyType = typeof(object);
-                valueType = typeof(object);
-
-                value = objectFactory.Create(expectedType);
-                dictionary = (IDictionary)value;
-            }
-            else
+            if (!factory.IsList(expectedType))
             {
                 value = null;
                 return false;
             }
+            var list = (factory.Create(expectedType) as IList)!;
+            value = list;
 
-            Deserialize(keyType, valueType, parser, nestedObjectDeserializer, dictionary!);
+            DeserializeHelper(factory.GetValueType(expectedType), parser, nestedObjectDeserializer, list!, factory);
 
             return true;
+        }
+
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, IObjectFactory factory)
+        {
+            parser.Consume<SequenceStart>();
+            while (!parser.TryConsume<SequenceEnd>(out var _))
+            {
+                var current = parser.Current;
+
+                var value = nestedObjectDeserializer(parser, tItem);
+                if (value is IValuePromise promise)
+                {
+                    var index = result.Add(factory.CreatePrimitive(tItem));
+                    promise.ValueAvailable += v => result[index] = v;
+                }
+                else
+                {
+                    result.Add(value);
+                }
+            }
         }
     }
 }

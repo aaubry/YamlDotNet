@@ -27,11 +27,15 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     static class SymbolExtensions
     {
-        public static string GetFullName(this ITypeSymbol symbol)
+        public static string GetFullName(this ITypeSymbol symbol, bool includeArrayDimensions = true)
         {
             if (symbol is IArrayTypeSymbol arrayTypeSymbol)
             {
-                return $"{arrayTypeSymbol.ElementType.GetFullName()}[{(new string(',', arrayTypeSymbol.Rank - 1))}]";
+                if (includeArrayDimensions)
+                {
+                    return $"{arrayTypeSymbol.ElementType.GetFullName()}[{(new string(',', arrayTypeSymbol.Rank - 1))}]";
+                }
+                return arrayTypeSymbol.ElementType.GetFullName();
             }
 
             if (symbol is INamedTypeSymbol namedTypeSymbol)

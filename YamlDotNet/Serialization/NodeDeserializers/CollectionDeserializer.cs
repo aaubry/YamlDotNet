@@ -21,38 +21,45 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Text;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    public class StaticDictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
+    public abstract class CollectionDeserializer
     {
-        private readonly ObjectFactories.StaticObjectFactory _objectFactory;
-
-        public StaticDictionaryNodeDeserializer(ObjectFactories.StaticObjectFactory objectFactory)
+        protected static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, IObjectFactory objectFactory)
         {
-            _objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
-        }
-
-        public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
-        {
-            if (_objectFactory.IsDictionary(expectedType))
+            parser.Consume<SequenceStart>();
+            while (!parser.TryConsume<SequenceEnd>(out var _))
             {
-                var result = _objectFactory.Create(expectedType) as IDictionary;
-                if (result == null)
-                {
-                    value = null;
-                    return false;
-                }
-                var keyType = _objectFactory.GetKeyType(expectedType);
-                var valueType = _objectFactory.GetValueType(expectedType);
+                var current = parser.Current;
 
-                value = result;
-                base.Deserialize(keyType, valueType, reader, nestedObjectDeserializer, result);
-                return true;
+                var value = nestedObjectDeserializer(parser, tItem);
+                if (value is IValuePromise promise)
+                {
+                    if (canUpdate)
+                    {
+                        var index = result.Add(objectFactory.CreatePrimitive(tItem));
+                        promise.ValueAvailable += v => result[index] = v;
+                    }
+                    else
+                    {
+                        throw new ForwardAnchorNotSupportedException(
+                            current?.Start ?? Mark.Empty,
+                            current?.End ?? Mark.Empty,
+                            "Forward alias references are not allowed because this type does not implement IList<>"
+                        );
+                    }
+                }
+                else
+                {
+                    result.Add(value);
+                }
             }
-            value = null;
-            return false;
         }
     }
 }

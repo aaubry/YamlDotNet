@@ -31,11 +31,13 @@ namespace YamlDotNet.Serialization.ValueDeserializers
     {
         private readonly IList<INodeDeserializer> deserializers;
         private readonly IList<INodeTypeResolver> typeResolvers;
+        private readonly ITypeConverter typeConverter;
 
-        public NodeValueDeserializer(IList<INodeDeserializer> deserializers, IList<INodeTypeResolver> typeResolvers)
+        public NodeValueDeserializer(IList<INodeDeserializer> deserializers, IList<INodeTypeResolver> typeResolvers, ITypeConverter typeConverter)
         {
             this.deserializers = deserializers ?? throw new ArgumentNullException(nameof(deserializers));
             this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
+            this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
         }
 
         public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
@@ -49,7 +51,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 {
                     if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
                     {
-                        return TypeConverter.ChangeType(value, expectedType);
+                        return typeConverter.ChangeType(value, expectedType);
                     }
                 }
             }

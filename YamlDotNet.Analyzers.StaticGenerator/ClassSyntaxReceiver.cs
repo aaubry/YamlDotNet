@@ -90,15 +90,17 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 return;
             }
 
-            if (typeName.StartsWith("System.Collections.Generic.Dictionary"))
+            if (type.Kind == SymbolKind.ArrayType)
+            {
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (IArrayTypeSymbol)type, isArray: true));
+            }
+            else if (typeName.StartsWith("System.Collections.Generic.Dictionary"))
             {
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, true));
-                return;
             }
-
-            if (typeName.StartsWith("System.Collections.Generic.List"))
+            else if (typeName.StartsWith("System.Collections.Generic.List"))
             {
-                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, false, true));
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isList: true));
             }
         }
     }
