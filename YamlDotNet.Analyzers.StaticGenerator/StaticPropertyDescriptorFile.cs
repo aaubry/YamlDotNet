@@ -26,7 +26,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticPropertyDescriptorFile : File
     {
-        public StaticPropertyDescriptorFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticPropertyDescriptorFile(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 

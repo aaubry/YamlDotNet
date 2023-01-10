@@ -27,7 +27,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticObjectFactoryFile : File
     {
-        public StaticObjectFactoryFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticObjectFactoryFile(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 

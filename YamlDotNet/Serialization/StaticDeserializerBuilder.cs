@@ -43,9 +43,6 @@ namespace YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the deserializer
     /// with the desired customizations.
     /// </summary>
-
-#if NET7_0_OR_GREATER
-#endif
     public sealed class StaticDeserializerBuilder : StaticBuilderSkeleton<StaticDeserializerBuilder>
     {
         private readonly StaticContext context;

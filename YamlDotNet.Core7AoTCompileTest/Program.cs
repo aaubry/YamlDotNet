@@ -152,6 +152,7 @@ public class PrimitiveTypes
     public float MySingle { get; set; }
     [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
     public string MyString { get; set; }
+    public string? MyNullableString { get; set; }
     public ushort MyUInt16 { get; set; }
     public uint MyUInt32 { get; set; }
     public ulong MyUInt64 { get; set; }

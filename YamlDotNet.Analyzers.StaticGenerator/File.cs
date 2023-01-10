@@ -26,20 +26,20 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public abstract class File
     {
-        private readonly Action<string> _write;
+        private readonly Action<string, bool> _write;
         private readonly Action _indent;
         private readonly Action _unindent;
 
-        public File(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context)
+        public File(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context)
         {
             _write = write;
             _indent = indent;
             _unindent = unindent;
         }
 
-        public void Write(string text)
+        public void Write(string text, bool newLine = true)
         {
-            _write(text);
+            _write(text, newLine);
         }
 
         public void Indent()

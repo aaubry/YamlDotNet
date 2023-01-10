@@ -28,7 +28,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class ObjectAccessorFileGenerator : File
     {
-        public ObjectAccessorFileGenerator(Action<string> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
+        public ObjectAccessorFileGenerator(Action<string, bool> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
         {
         }
 

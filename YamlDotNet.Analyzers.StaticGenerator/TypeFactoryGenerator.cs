@@ -60,19 +60,23 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             var indent = new Action(() => indentation++);
             var unindent = new Action(() => indentation--);
 
-            var write = new Action<string>((string line) =>
+            var write = new Action<string, bool>((string line, bool includeNewLine) =>
             {
                 if (indentation > 0)
                 {
                     result.Append(new string(' ', indentation * 4));
                 }
-                result.AppendLine(line);
+                result.Append(line);
+                if (includeNewLine)
+                {
+                    result.AppendLine();
+                }
             });
 
-            write("using System;");
-            write("using System.Collections.Generic;");
-            write("namespace YamlDotNet.Static");
-            write("{"); indent();
+            write("using System;", true);
+            write("using System.Collections.Generic;", true);
+            write("namespace YamlDotNet.Static", true);
+            write("{", true); indent();
 
             new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
             new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
@@ -80,7 +84,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
             new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);
 
-            unindent(); write("}");
+            unindent(); write("}", true);
             return result.ToString();
         }
     }

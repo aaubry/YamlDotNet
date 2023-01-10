@@ -26,7 +26,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticContextFile : File
     {
-        public StaticContextFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticContextFile(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 
