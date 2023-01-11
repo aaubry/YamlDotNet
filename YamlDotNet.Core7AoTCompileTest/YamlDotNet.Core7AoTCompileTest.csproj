@@ -5,6 +5,7 @@
     <TargetFramework>net70</TargetFramework>
     <PublishAot>true</PublishAot>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <Import Project="../build/common.props" />

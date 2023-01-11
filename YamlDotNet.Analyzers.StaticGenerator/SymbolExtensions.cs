@@ -46,6 +46,27 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             return symbol.Name;
         }
 
+        public static string GetNamespace(this ISymbol symbol)
+        {
+            var parts = new Stack<string>();
+            var currentNamespace = symbol.ContainingNamespace;
+
+            while (currentNamespace != null)
+            {
+                if (!string.IsNullOrEmpty(currentNamespace.Name))
+                {
+                    parts.Push(currentNamespace.Name);
+                    currentNamespace = currentNamespace.ContainingNamespace;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return string.Join(".", parts);
+        }
+
         static string GetNullable(this ITypeSymbol symbol)
         {
             if (symbol.IsValueType || symbol.NullableAnnotation != NullableAnnotation.Annotated)
@@ -96,27 +117,6 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
 
             return string.Empty;
-        }
-
-        static string GetNamespace(this ISymbol symbol)
-        {
-            var parts = new Stack<string>();
-            var currentNamespace = symbol.ContainingNamespace;
-
-            while (currentNamespace != null)
-            {
-                if (!string.IsNullOrEmpty(currentNamespace.Name))
-                {
-                    parts.Push(currentNamespace.Name);
-                    currentNamespace = currentNamespace.ContainingNamespace;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return string.Join(".", parts);
         }
     }
 }

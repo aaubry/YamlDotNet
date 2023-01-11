@@ -31,6 +31,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
     {
         public List<string> Log { get; } = new();
         public Dictionary<string, ClassObject> Classes { get; } = new Dictionary<string, ClassObject>();
+        public INamedTypeSymbol? YamlStaticContextType { get; set; }
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
@@ -39,6 +40,12 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)!;
                 if (classSymbol.GetAttributes().Any())
                 {
+                    var attributes = classSymbol.GetAttributes();
+                    if (attributes.Any(attribute => attribute.AttributeClass?.ToDisplayString() == "YamlDotNet.Serialization.YamlStaticContextAttribute"))
+                    {
+                        YamlStaticContextType = classSymbol;
+                    }
+
                     if (classSymbol.GetAttributes().Any(attribute => attribute.AttributeClass?.ToDisplayString() == "YamlDotNet.Serialization.YamlSerializableAttribute"))
                     {
                         ClassObject classObject;

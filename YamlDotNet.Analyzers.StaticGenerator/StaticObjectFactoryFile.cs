@@ -33,7 +33,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public class StaticObjectFactory : YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory");
+            Write($"class StaticObjectFactory : YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory");
             Write("{"); Indent();
 
             Write("public override object Create(Type type)");
@@ -41,7 +41,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes.Where(c => !c.Value.IsArray))
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName()}();");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}();");
             }
             Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
@@ -51,7 +51,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes.Where(c => c.Value.IsArray))
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName(false)}[count];");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName(false).Replace("?", string.Empty)}[count];");
             }
             Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
@@ -61,7 +61,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsDictionary.ToString().ToLower()};");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return {classObject.IsDictionary.ToString().ToLower()};");
             }
             Write("return false;");
             UnIndent(); Write("}");
@@ -71,7 +71,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsArray.ToString().ToLower()};");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return {classObject.IsArray.ToString().ToLower()};");
             }
             Write("return false;");
             UnIndent(); Write("}");
@@ -81,7 +81,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsList.ToString().ToLower()};");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return {classObject.IsList.ToString().ToLower()};");
             }
             Write("return false;");
             UnIndent(); Write("}");
@@ -101,9 +101,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                 if (type.IsGenericType)
                 {
-                    keyType = type.TypeArguments[0].GetFullName();
+                    keyType = type.TypeArguments[0].GetFullName().Replace("?", string.Empty);
                 }
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return typeof({keyType});");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return typeof({keyType});");
             }
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
@@ -122,20 +122,20 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 if (classObject.IsDictionary)
                 {
                     //we're a dictionary
-                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[1].GetFullName();
+                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[1].GetFullName().Replace("?", string.Empty);
                 }
                 else if (classObject.IsList)
                 {
                     //we're a list
-                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName();
+                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName().Replace("?", string.Empty);
                 }
                 else
                 {
                     //we're an array
-                    valueType = ((IArrayTypeSymbol)classObject.ModuleSymbol).ElementType.GetFullName();
+                    valueType = ((IArrayTypeSymbol)classObject.ModuleSymbol).ElementType.GetFullName().Replace("?", string.Empty);
                 }
 
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return typeof({valueType});");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return typeof({valueType});");
             }
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");

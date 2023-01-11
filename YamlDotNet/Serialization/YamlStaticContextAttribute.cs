@@ -19,13 +19,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Serialization;
+using System;
 
-namespace YamlDotNet.Core7AoTCompileTest
+namespace YamlDotNet.Serialization
 {
-    // The rest of this partial class gets generated at build time
-    [YamlStaticContext]
-    public partial class StaticContext : YamlDotNet.Serialization.StaticContext
+    public sealed class YamlStaticContextAttribute : Attribute
     {
     }
 }

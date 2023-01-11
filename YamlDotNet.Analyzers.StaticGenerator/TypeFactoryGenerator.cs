@@ -37,6 +37,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 return;
             }
 
+            if (receiver.Classes.Count == 0)
+            {
+                return;
+            }
+
             _context = context;
 
             foreach (var log in receiver.Log)
@@ -73,9 +78,18 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 }
             });
 
+            write("#pragma warning disable CS8767 // Nullability of reference types", true);
+            write("#pragma warning disable CS8767 // Nullability of reference types", true);
+            write("#pragma warning disable CS8603 // Possible null reference return", true);
+            write("#pragma warning disable CS8604 // Possible null reference argument", true);
+            write("#pragma warning disable CS8766 // Nullability of reference types", true);
+
             write("using System;", true);
             write("using System.Collections.Generic;", true);
-            write("namespace YamlDotNet.Static", true);
+
+            var namespaceName = classSyntaxReceiver.YamlStaticContextType?.ContainingNamespace.ContainingNamespace;
+
+            write($"namespace {classSyntaxReceiver.YamlStaticContextType?.GetNamespace() ?? "YamlDotNet.Static"}", true);
             write("{", true); indent();
 
             new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);

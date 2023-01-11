@@ -32,7 +32,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public partial class StaticContext : YamlDotNet.Serialization.StaticContext");
+            Write($"public partial class {classSyntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
             Write("{"); Indent();
             Write("public YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory ObjectFactory { get; } = new StaticObjectFactory();");
             Write("public StaticTypeInspector TypeInspector { get; } = new StaticTypeInspector();");

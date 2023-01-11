@@ -44,7 +44,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()}))");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
                 Write("{"); Indent();
                 Write($"var accessor = new {classObject.SanitizedClassName}_{classObject.GuidSuffix}();");
                 Write("return new YamlDotNet.Serialization.IPropertyDescriptor[]");
@@ -70,7 +70,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()}))");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
                 Write("{"); Indent();
                 Write($"var accessor = new {classObject.SanitizedClassName}_{classObject.GuidSuffix}();");
                 foreach (var field in classObject.FieldSymbols)
@@ -96,7 +96,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
         {
-            Write($"new StaticPropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().TrimEnd('?')}), new Attribute[] {{");
+            Write($"new StaticPropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
             foreach (var attribute in attributes)
             {
                 switch (attribute.AttributeClass?.ToDisplayString())

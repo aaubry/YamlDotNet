@@ -32,7 +32,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
+            Write("class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
             Write("{"); Indent();
             Write("private YamlDotNet.Serialization.IObjectAccessor _accessor;");
             Write("private readonly Attribute[] _attributes;");

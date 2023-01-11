@@ -63,7 +63,7 @@ MyList:
 
 var input = new StringReader(yaml);
 
-var aotContext = new YamlDotNet.Static.StaticContext();
+var aotContext = new YamlDotNet.Core7AoTCompileTest.StaticContext();
 var deserializer = new StaticDeserializerBuilder(aotContext)
     .Build();
 
@@ -123,13 +123,13 @@ Console.WriteLine(output);
 [YamlSerializable]
 public class MyArray
 {
-    public int[] myArray { get; set; }
+    public int[]? myArray { get; set; }
 }
 
 [YamlSerializable]
 public class Inner
 {
-    public string Text { get; set; }
+    public string? Text { get; set; }
 }
 
 [YamlSerializable]
@@ -151,15 +151,15 @@ public class PrimitiveTypes
     public sbyte MySByte { get; set; }
     public float MySingle { get; set; }
     [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
-    public string MyString { get; set; }
+    public string MyString { get; set; } = string.Empty;
     public string? MyNullableString { get; set; }
     public ushort MyUInt16 { get; set; }
     public uint MyUInt32 { get; set; }
     public ulong MyUInt64 { get; set; }
-    public Inner Inner { get; set; }
-    public MyArray MyArray { get; set; }
-    public Dictionary<string, string> MyDictionary { get; set; }
-    public List<string> MyList { get; set; }
+    public Inner? Inner { get; set; }
+    public MyArray? MyArray { get; set; }
+    public Dictionary<string, string>? MyDictionary { get; set; }
+    public List<string>? MyList { get; set; }
 }
 
 public enum MyTestEnum

@@ -37,14 +37,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"public class {classObject.SanitizedClassName}_{classObject.GuidSuffix} : YamlDotNet.Serialization.IObjectAccessor");
+                Write($"class {classObject.SanitizedClassName}_{classObject.GuidSuffix} : YamlDotNet.Serialization.IObjectAccessor");
                 Write("{"); Indent();
 
                 Write("public void Set(string propertyName, object target, object value)");
                 Write("{"); Indent();
                 if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
-                    Write($"var v = ({classObject.FullName})target;");
+                    Write($"var v = ({classObject.FullName.Replace("?", string.Empty)})target;");
                     Write("switch (propertyName)");
                     Write("{"); Indent();
                     foreach (var field in classObject.FieldSymbols)
@@ -68,7 +68,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                 Write("public object Read(string propertyName, object target)");
                 Write("{"); Indent();
-                Write($"var v = ({classObject.FullName})target;");
+                Write($"var v = ({classObject.FullName.Replace("?", string.Empty)})target;");
                 if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
                     Write("switch (propertyName)");
@@ -91,7 +91,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         private string GetSetter(string name, ITypeSymbol type)
         {
-            return $"case \"{name}\": v.{name} = ({type.GetFullName()})value; return;";
+            return $"case \"{name}\": v.{name} = ({type.GetFullName().Replace("?", string.Empty)})value; return;";
         }
 
         private string GetReader(string name)
