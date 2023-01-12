@@ -20,33 +20,31 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
+using YamlDotNet.Serialization.ObjectFactories;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    /// <summary>
+    /// Holds the static object factory and type inspector to use when statically serializing/deserializing YAML.
+    /// </summary>
+    public abstract class StaticContext
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        /// <summary>
+        /// Gets the factory to use for serialization and deserialization
+        /// </summary>
+        /// <returns></returns>
+        public virtual StaticObjectFactory GetFactory()
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
+            throw new NotImplementedException();
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        /// <summary>
+        /// Gets the type inspector to use when statically serializing/deserializing YAML.
+        /// </summary>
+        /// <returns></returns>
+        public virtual ITypeInspector GetTypeInspector()
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            throw new NotImplementedException();
         }
     }
 }
-

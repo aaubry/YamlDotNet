@@ -20,33 +20,38 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Core;
+using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public abstract class File
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
+        private readonly Action<string> _write;
+        private readonly Action _indent;
+        private readonly Action _unindent;
 
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public File(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
+            _write = write;
+            _indent = indent;
+            _unindent = unindent;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public void Write(string text)
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
-            {
-                value = null;
-                return false;
-            }
-
-            value = converter.ReadYaml(parser, expectedType);
-            return true;
+            _write(text);
         }
+
+        public void Indent()
+        {
+            _indent();
+        }
+
+        public void UnIndent()
+        {
+            _unindent();
+        }
+
+        public abstract void Write(ClassSyntaxReceiver classSyntaxReceiver);
     }
 }
-

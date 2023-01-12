@@ -60,20 +60,6 @@ namespace YamlDotNet.Serialization
 
         protected abstract TBuilder Self { get; }
 
-        internal virtual ITypeInspector BuildTypeInspector()
-        {
-            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
-            if (!ignoreFields)
-            {
-                innerInspector = new CompositeTypeInspector(
-                    new ReadableFieldsTypeInspector(typeResolver),
-                    innerInspector
-                );
-            }
-
-            return typeInspectorFactories.BuildComponentChain(innerInspector);
-        }
-
         /// <summary>
         /// Prevents serialization and deserialization of fields.
         /// </summary>

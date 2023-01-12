@@ -20,6 +20,7 @@
             <group targetFramework=".NETStandard2.0" />
             <group targetFramework=".NETStandard2.1" />
             <group targetFramework=".NET6.0" />
+            <group targetFramework=".NET7.0" />
         </dependencies>
     </metadata>
     <files>
@@ -34,6 +35,9 @@
 
         <file src="bin/Release/net60/YamlDotNet.dll" target="lib/net6.0" />
         <file src="bin/Release/net60/YamlDotNet.xml" target="lib/net6.0" />
+
+        <file src="bin/Release/net70/YamlDotNet.dll" target="lib/net7.0" />
+        <file src="bin/Release/net70/YamlDotNet.xml" target="lib/net7.0" />
 
         <file src="bin/Release/netstandard2.0/YamlDotNet.dll" target="lib/netstandard2.0" />
         <file src="bin/Release/netstandard2.0/YamlDotNet.xml" target="lib/netstandard2.0" />

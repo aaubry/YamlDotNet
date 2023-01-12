@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net35;net40;net45;net47;net60</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net35;net40;net45;net47;net60;net70</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
@@ -41,6 +41,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net60'">
+    <NetStandard>true</NetStandard>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net70'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
@@ -117,7 +121,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
+    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
