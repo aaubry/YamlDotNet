@@ -334,6 +334,7 @@ namespace YamlDotNet.Serialization
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
+                .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
                 .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 

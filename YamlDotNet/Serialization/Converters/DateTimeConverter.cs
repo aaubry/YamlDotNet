@@ -35,6 +35,7 @@ namespace YamlDotNet.Serialization.Converters
     {
         private readonly DateTimeKind kind;
         private readonly IFormatProvider provider;
+        private readonly bool doubleQuotes;
         private readonly string[] formats;
 
         /// <summary>
@@ -42,12 +43,14 @@ namespace YamlDotNet.Serialization.Converters
         /// </summary>
         /// <param name="kind"><see cref="DateTimeKind"/> value. Default value is <see cref="DateTimeKind.Utc"/>. <see cref="DateTimeKind.Unspecified"/> is considered as <see cref="DateTimeKind.Utc"/>.</param>
         /// <param name="provider"><see cref="IFormatProvider"/> instance. Default value is <see cref="CultureInfo.InvariantCulture"/>.</param>
+        /// <param name="doubleQuotes">If true, will use double quotes when writing the value to the stream.</param>
         /// <param name="formats">List of date/time formats for parsing. Default value is "<c>G</c>".</param>
         /// <remarks>On deserializing, all formats in the list are used for conversion, while on serializing, the first format in the list is used.</remarks>
-        public DateTimeConverter(DateTimeKind kind = DateTimeKind.Utc, IFormatProvider? provider = null, params string[] formats)
+        public DateTimeConverter(DateTimeKind kind = DateTimeKind.Utc, IFormatProvider? provider = null, bool doubleQuotes = false, params string[] formats)
         {
             this.kind = kind == DateTimeKind.Unspecified ? DateTimeKind.Utc : kind;
             this.provider = provider ?? CultureInfo.InvariantCulture;
+            this.doubleQuotes = doubleQuotes;
             this.formats = formats.DefaultIfEmpty("G").ToArray();
         }
 
@@ -91,7 +94,7 @@ namespace YamlDotNet.Serialization.Converters
             var adjusted = this.kind == DateTimeKind.Local ? dt.ToLocalTime() : dt.ToUniversalTime();
             var formatted = adjusted.ToString(this.formats.First(), this.provider); // Always take the first format of the list.
 
-            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, ScalarStyle.Any, true, false));
+            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, doubleQuotes ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
 
         private static DateTime EnsureDateTimeKind(DateTime dt, DateTimeKind kind)
