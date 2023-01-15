@@ -1424,6 +1424,21 @@ y:
             Assert.Equal(testCase.Value, deserializedValue);
         }
 
+        [Theory]
+        [InlineData(TestEnum.True)]
+        [InlineData(TestEnum.False)]
+        [InlineData(TestEnum.ABC)]
+        [InlineData(TestEnum.Null)]
+        public void RoundTripSpecialEnum(object testValue)
+        {
+            var test = new TestEnumTestCase { TestEnum = (TestEnum)testValue };
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var deserializer = new DeserializerBuilder().Build();
+            var serialized = serializer.Serialize(test);
+            var actual = deserializer.Deserialize<TestEnumTestCase>(serialized);
+            Assert.Equal(testValue, actual.TestEnum);
+        }
+
         [Fact]
         public void EmptyStringsAreQuoted()
         {
@@ -1432,6 +1447,19 @@ y:
             var result = serializer.Serialize(o);
             var expected = $"test: \"\"{Environment.NewLine}";
             Assert.Equal(expected, result);
+        }
+
+        public enum TestEnum
+        {
+            True,
+            False,
+            ABC,
+            Null
+        }
+
+        public class TestEnumTestCase
+        {
+            public TestEnum TestEnum { get; set; }
         }
 
         public class FloatTestCase
