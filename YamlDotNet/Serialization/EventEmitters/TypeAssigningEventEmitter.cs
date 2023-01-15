@@ -84,8 +84,26 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt16:
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
-                        eventInfo.Tag = JsonSchema.Tags.Int;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        //Enum's are special cases, they fall in here, but get sent out as a string.
+                        if (eventInfo.Source.Type.IsEnum)
+                        {
+                            eventInfo.Tag = FailsafeSchema.Tags.Str;
+                            eventInfo.RenderedValue = value.ToString()!;
+
+                            if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
+                            {
+                                suggestedStyle = ScalarStyle.DoubleQuoted;
+                            }
+                            else
+                            {
+                                suggestedStyle = ScalarStyle.Any;
+                            }
+                        }
+                        else
+                        {
+                            eventInfo.Tag = JsonSchema.Tags.Int;
+                            eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        }
                         break;
 
                     case TypeCode.Single:
