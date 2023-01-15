@@ -6,7 +6,7 @@ test: off
 
 environment:
   NUGET_API_KEY:
-    secure: CyrEwlVAh4SzkFIhuDsG+F/0oi4RPtdAlIG9JiFTEAEy9pfSA2EZAFzhMKnDCAwJ
+    secure: gKVampJvSdHxl1/L1+IjpG/TDnR7flhj6ZmwtDqd9a4M+pWJ8VJ78xv/yDarc4iC
   GITHUB_TOKEN:
     secure: ulVa56sjSUcOy/08/Qn88LsGVfndWBizu5gRdVTvsGu/ju1fKUe8XCZPvUvypvWH
   TWITTER_CONSUMER_API_KEY:
