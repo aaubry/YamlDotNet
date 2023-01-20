@@ -32,10 +32,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public class DictionaryNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
+        private readonly bool duplicateKeyChecking;
 
-        public DictionaryNodeDeserializer(IObjectFactory objectFactory)
+        public DictionaryNodeDeserializer(IObjectFactory objectFactory, bool duplicateKeyChecking)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.duplicateKeyChecking = duplicateKeyChecking;
         }
 
         public virtual bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -77,9 +79,18 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
+        private void TryAssign(IDictionary result, object key, object value, MappingStart propertyName)
+        {
+            if (duplicateKeyChecking && result.Contains(key))
+            {
+                throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate key {key}");
+            }
+            result[key] = value!;
+        }
+
         protected void Deserialize(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
         {
-            parser.Consume<MappingStart>();
+            var property = parser.Consume<MappingStart>();
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var key = nestedObjectDeserializer(parser, tKey);
@@ -91,7 +102,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Key is pending, value is known
-                        keyPromise.ValueAvailable += v => result[v!] = value!;
+                        keyPromise.ValueAvailable += v => TryAssign(result, v!, value!, property);
                     }
                     else
                     {
@@ -102,7 +113,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[v!] = value!;
+                                TryAssign(result, v!, value!, property);
                             }
                             else
                             {
@@ -115,7 +126,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[key] = v!;
+                                TryAssign(result, key, v!, property);
                             }
                             else
                             {
@@ -135,12 +146,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Happy path: both key and value are known
-                        result[key] = value!;
+                        TryAssign(result, key, value!, property);
                     }
                     else
                     {
                         // Key is known, value is pending
-                        valuePromise.ValueAvailable += v => result[key!] = v!;
+                        valuePromise.ValueAvailable += v => TryAssign(result, key!, v!, property);
                     }
                 }
             }

@@ -299,6 +299,13 @@ name: Jake
 
             Action act = () => sut.Deserialize<Person>(yaml);
             act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+            act = () => sut.Deserialize<IDictionary<object, object>>(yaml);
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+
+            var stream = Yaml.ReaderFrom("backreference.yaml");
+            var parser = new MergingParser(new Parser(stream));
+            act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
         }
 
         [Fact]
@@ -315,6 +322,13 @@ name: Jake
                 .Build();
 
             Action act = () => sut.Deserialize<Person>(yaml);
+            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
+            act = () => sut.Deserialize<IDictionary<object, object>>(yaml);
+            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
+
+            var stream = Yaml.ReaderFrom("backreference.yaml");
+            var parser = new MergingParser(new Parser(stream));
+            act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
             act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
 
