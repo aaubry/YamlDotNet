@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bullseye;
-using Bullseye.Internal;
 using static Bullseye.Targets;
 
 namespace build
@@ -137,7 +135,7 @@ namespace build
             var (specifiedTargets, options, unknownOptions, showHelp) = CommandLine.Parse(filteredArguments);
             verbose = options.Verbose;
 
-            Host = options.Host.DetectIfAutomatic();
+            Host = options.Host.DetectIfNull();
 
             var osPlatform =
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -210,9 +208,9 @@ namespace build
             if (showHelp)
             {
                 Console.WriteLine();
-                Console.WriteLine($"{palette.Default}Additional options:");
-                Console.WriteLine($"  {palette.Option}--no-prerelease            {palette.Default}Force the current version to be considered final{palette.Reset}");
-                Console.WriteLine($"  {palette.Option}--version=<version>        {palette.Default}Force the current version to equal to the specified value{palette.Reset}");
+                Console.WriteLine($"{palette.Text}Additional options:");
+                Console.WriteLine($"  {palette.Option}--no-prerelease            {palette.Text}Force the current version to be considered final{palette.Default}");
+                Console.WriteLine($"  {palette.Option}--version=<version>        {palette.Text}Force the current version to equal to the specified value{palette.Default}");
             }
 
             return exitCode;
@@ -228,12 +226,12 @@ namespace build
 
         public static void WriteInformation(string text)
         {
-            Console.WriteLine($"  {palette.Default}(i)  {text}{palette.Reset}");
+            Console.WriteLine($"  {palette.Text}(i)  {text}{palette.Default}");
         }
 
         public static void WriteWarning(string text)
         {
-            Console.WriteLine($"  {palette.Option}/!\\  {text}{palette.Reset}");
+            Console.WriteLine($"  {palette.Option}/!\\  {text}{palette.Default}");
         }
 
         public static void WriteImportant(string text)
@@ -301,7 +299,7 @@ namespace build
 
         private static void Write(string text, string color)
         {
-            Console.WriteLine($"{color}{text}{palette.Reset}");
+            Console.WriteLine($"{color}{text}{palette.Default}");
         }
 
         public static IEnumerable<string> ReadLines(string name, string? args = null, string? workingDirectory = null) => SimpleExec.Command
