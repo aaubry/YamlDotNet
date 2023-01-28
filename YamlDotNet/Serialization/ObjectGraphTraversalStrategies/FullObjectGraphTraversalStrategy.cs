@@ -39,8 +39,10 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
         private readonly ITypeInspector typeDescriptor;
         private readonly ITypeResolver typeResolver;
         private readonly INamingConvention namingConvention;
+        private readonly IObjectFactory objectFactory;
 
-        public FullObjectGraphTraversalStrategy(ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
+        public FullObjectGraphTraversalStrategy(ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion,
+            INamingConvention namingConvention, IObjectFactory objectFactory)
         {
             if (maxRecursion <= 0)
             {
@@ -52,6 +54,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
             this.maxRecursion = maxRecursion;
             this.namingConvention = namingConvention ?? throw new ArgumentNullException(nameof(namingConvention));
+            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
         void IObjectGraphTraversalStrategy.Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context)
@@ -83,7 +86,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                 var maxNameLength = 0;
                 foreach (var segment in path)
                 {
-                    var segmentName = TypeConverter.ChangeType<string>(segment.Name);
+                    var segmentName = segment.Name?.ToString() ?? string.Empty;
                     maxNameLength = Math.Max(maxNameLength, segmentName.Length);
                     lines.Push(new KeyValuePair<string, string>(segmentName, segment.Value.Type.FullName!));
                 }
@@ -173,11 +176,8 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                 return;
             }
 
-            var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(value.Type, typeof(IDictionary<,>));
-            if (genericDictionaryType != null)
+            if (objectFactory.GetDictionary(value, out var adaptedDictionary, out var genericArguments))
             {
-                var genericArguments = genericDictionaryType.GetGenericArguments();
-                var adaptedDictionary = Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(genericArguments), value.Value)!;
                 TraverseDictionary(new ObjectDescriptor(adaptedDictionary, value.Type, value.StaticType, value.ScalarStyle), visitor, genericArguments[0], genericArguments[1], context, path);
                 return;
             }
@@ -215,8 +215,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
         private void TraverseList<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
         {
-            var enumerableType = ReflectionUtility.GetImplementedGenericInterface(value.Type, typeof(IEnumerable<>));
-            var itemType = enumerableType != null ? enumerableType.GetGenericArguments()[0] : typeof(object);
+            var itemType = objectFactory.GetValueType(value.Type);
 
             visitor.VisitSequenceStart(value, itemType, context);
 

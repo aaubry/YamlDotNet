@@ -20,34 +20,17 @@
 // SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Analyzers.StaticGenerator
+namespace YamlDotNet.Serialization.Utilities
 {
-    public class ClassObject
+    public interface ITypeConverter
     {
-        public List<IFieldSymbol> FieldSymbols { get; }
-        public string FullName { get; }
-        public string GuidSuffix { get; }
-        public ITypeSymbol ModuleSymbol { get; }
-        public List<IPropertySymbol> PropertySymbols { get; }
-        public string SanitizedClassName { get; }
-        public bool IsArray { get; }
-        public bool IsDictionary { get; }
-        public bool IsList { get; }
-
-        public ClassObject(string sanitizedClassName, ITypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false, bool isArray = false)
-        {
-            FieldSymbols = new List<IFieldSymbol>();
-            PropertySymbols = new List<IPropertySymbol>();
-            FullName = moduleSymbol.GetFullName() ?? string.Empty;
-            GuidSuffix = Guid.NewGuid().ToString("N");
-            ModuleSymbol = moduleSymbol;
-            SanitizedClassName = sanitizedClassName;
-            IsDictionary = isDictionary;
-            IsList = isList;
-            IsArray = isArray;
-        }
+        /// <summary>
+        /// Convert a value to a specified type
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="expectedType"></param>
+        /// <returns></returns>
+        object? ChangeType(object? value, Type expectedType);
     }
 }

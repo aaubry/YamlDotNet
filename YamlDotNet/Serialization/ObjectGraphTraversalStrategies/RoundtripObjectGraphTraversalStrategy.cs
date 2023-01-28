@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 {
@@ -35,13 +36,9 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
         private readonly IEnumerable<IYamlTypeConverter> converters;
         private readonly Settings settings;
 
-        public RoundtripObjectGraphTraversalStrategy(IEnumerable<IYamlTypeConverter> converters, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
-            : this(converters, typeDescriptor, typeResolver, maxRecursion, namingConvention, new Settings())
-        {
-        }
-
-        public RoundtripObjectGraphTraversalStrategy(IEnumerable<IYamlTypeConverter> converters, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention, Settings settings)
-            : base(typeDescriptor, typeResolver, maxRecursion, namingConvention)
+        public RoundtripObjectGraphTraversalStrategy(IEnumerable<IYamlTypeConverter> converters, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion,
+            INamingConvention namingConvention, Settings settings, IObjectFactory factory)
+            : base(typeDescriptor, typeResolver, maxRecursion, namingConvention, factory)
         {
             this.converters = converters;
             this.settings = settings;

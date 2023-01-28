@@ -37,6 +37,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 return;
             }
 
+            if (receiver.Classes.Count == 0)
+            {
+                return;
+            }
+
             _context = context;
 
             foreach (var log in receiver.Log)
@@ -60,19 +65,32 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             var indent = new Action(() => indentation++);
             var unindent = new Action(() => indentation--);
 
-            var write = new Action<string>((string line) =>
+            var write = new Action<string, bool>((string line, bool includeNewLine) =>
             {
                 if (indentation > 0)
                 {
                     result.Append(new string(' ', indentation * 4));
                 }
-                result.AppendLine(line);
+                result.Append(line);
+                if (includeNewLine)
+                {
+                    result.AppendLine();
+                }
             });
 
-            write("using System;");
-            write("using System.Collections.Generic;");
-            write("namespace YamlDotNet.Static");
-            write("{"); indent();
+            write("#pragma warning disable CS8767 // Nullability of reference types", true);
+            write("#pragma warning disable CS8767 // Nullability of reference types", true);
+            write("#pragma warning disable CS8603 // Possible null reference return", true);
+            write("#pragma warning disable CS8604 // Possible null reference argument", true);
+            write("#pragma warning disable CS8766 // Nullability of reference types", true);
+
+            write("using System;", true);
+            write("using System.Collections.Generic;", true);
+
+            var namespaceName = classSyntaxReceiver.YamlStaticContextType?.ContainingNamespace.ContainingNamespace;
+
+            write($"namespace {classSyntaxReceiver.YamlStaticContextType?.GetNamespace() ?? "YamlDotNet.Static"}", true);
+            write("{", true); indent();
 
             new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
             new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
@@ -80,7 +98,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
             new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);
 
-            unindent(); write("}");
+            unindent(); write("}", true);
             return result.ToString();
         }
     }

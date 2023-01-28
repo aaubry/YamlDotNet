@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 
 namespace YamlDotNet.Serialization
 {
@@ -35,5 +36,29 @@ namespace YamlDotNet.Serialization
         /// Creates an instance of the specified type.
         /// </summary>
         object Create(Type type);
+
+        /// <summary>
+        /// Creates a default value for the .net primitive types (string, int, bool, etc)
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        object? CreatePrimitive(Type type);
+
+        /// <summary>
+        /// If the type is convertable to a non generic dictionary, then it will do so and set dictionary and genericArguments to the correct values and return true.
+        /// If not, values will be null and the result will be false..
+        /// </summary>
+        /// <param name="descriptor">Object descriptor to try and convert</param>
+        /// <param name="dictionary">The converted dictionary</param>
+        /// <param name="genericArguments">Generic type arguments that specify the key and value type</param>
+        /// <returns>True if converted, false if not</returns>
+        bool GetDictionary(IObjectDescriptor descriptor, out IDictionary? dictionary, out Type[]? genericArguments);
+
+        /// <summary>
+        /// Gets the type of the value part of a dictionary or list.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        Type GetValueType(Type type);
     }
 }

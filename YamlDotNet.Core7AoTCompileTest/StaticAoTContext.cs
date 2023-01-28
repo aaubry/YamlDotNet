@@ -19,9 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace YamlDotNet.Static
+using YamlDotNet.Serialization;
+
+namespace YamlDotNet.Core7AoTCompileTest
 {
     // The rest of this partial class gets generated at build time
+    [YamlStaticContext]
     public partial class StaticContext : YamlDotNet.Serialization.StaticContext
     {
     }

@@ -26,13 +26,13 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticPropertyDescriptorFile : File
     {
-        public StaticPropertyDescriptorFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticPropertyDescriptorFile(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
+            Write("class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
             Write("{"); Indent();
             Write("private YamlDotNet.Serialization.IObjectAccessor _accessor;");
             Write("private readonly Attribute[] _attributes;");

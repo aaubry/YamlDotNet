@@ -34,13 +34,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly ITypeInspector typeDescriptor;
         private readonly bool ignoreUnmatched;
         private readonly bool duplicateKeyChecking;
+        private readonly ITypeConverter typeConverter;
 
-        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, bool duplicateKeyChecking)
+        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, bool duplicateKeyChecking, ITypeConverter typeConverter)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
             this.ignoreUnmatched = ignoreUnmatched;
             this.duplicateKeyChecking = duplicateKeyChecking;
+            this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -79,13 +81,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         var valueRef = value;
                         propertyValuePromise.ValueAvailable += v =>
                         {
-                            var convertedValue = TypeConverter.ChangeType(v, property.Type);
+                            var convertedValue = typeConverter.ChangeType(v, property.Type);
                             property.Write(valueRef, convertedValue);
                         };
                     }
                     else
                     {
-                        var convertedValue = TypeConverter.ChangeType(propertyValue, property.Type);
+                        var convertedValue = typeConverter.ChangeType(propertyValue, property.Type);
                         property.Write(value, convertedValue);
                     }
                 }

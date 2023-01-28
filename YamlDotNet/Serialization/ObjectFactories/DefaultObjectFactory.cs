@@ -28,7 +28,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// <summary>
     /// Creates objects using Activator.CreateInstance.
     /// </summary>
-    public sealed class DefaultObjectFactory : IObjectFactory
+    public sealed class DefaultObjectFactory : ObjectFactoryBase
     {
         private readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
@@ -73,7 +73,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
             this.settings = settings;
         }
 
-        public object Create(Type type)
+        public override object Create(Type type)
         {
             if (type.IsInterface())
             {
@@ -103,5 +103,6 @@ namespace YamlDotNet.Serialization.ObjectFactories
                 throw new InvalidOperationException(message, err);
             }
         }
+
     }
 }

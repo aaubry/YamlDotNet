@@ -29,7 +29,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticTypeInspectorFile : File
     {
-        public StaticTypeInspectorFile(Action<string> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
+        public StaticTypeInspectorFile(Action<string, bool> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
         {
         }
 
@@ -44,18 +44,18 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()}))");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
                 Write("{"); Indent();
                 Write($"var accessor = new {classObject.SanitizedClassName}_{classObject.GuidSuffix}();");
                 Write("return new YamlDotNet.Serialization.IPropertyDescriptor[]");
                 Write("{"); Indent();
                 foreach (var field in classObject.FieldSymbols)
                 {
-                    Write(GetPropertyDescriptor(field.Name, field.Type, !field.IsReadOnly, field.GetAttributes(), ','));
+                    WritePropertyDescriptor(field.Name, field.Type, !field.IsReadOnly, field.GetAttributes(), ',');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
-                    Write(GetPropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ','));
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ',');
                 }
                 UnIndent(); Write("};");
                 UnIndent(); Write("}");
@@ -70,16 +70,18 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()}))");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
                 Write("{"); Indent();
                 Write($"var accessor = new {classObject.SanitizedClassName}_{classObject.GuidSuffix}();");
                 foreach (var field in classObject.FieldSymbols)
                 {
-                    Write($"if (name == \"{field.Name}\") return {GetPropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';')}");
+                    Write($"if (name == \"{field.Name}\") return ", false);
+                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
-                    Write($"if (name == \"{property.Name}\") return {GetPropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';')}");
+                    Write($"if (name == \"{property.Name}\") return ", false);
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';');
                 }
                 UnIndent(); Write("}");
 
@@ -92,10 +94,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             UnIndent(); Write("}");
         }
 
-        private string GetPropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
+        private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
         {
-            var constructor = new StringBuilder($"new StaticPropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName()}), new Attribute[] {{");
-            constructor.AppendLine();
+            Write($"new StaticPropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
             foreach (var attribute in attributes)
             {
                 switch (attribute.AttributeClass?.ToDisplayString())
@@ -104,43 +105,42 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         Write("new YamlDotNet.Serialization.YamlIgnoreAttribute(),");
                         break;
                     case "YamlDotNet.Serialization.YamlMemberAttribute":
-                        constructor.Append("new YamlDotNet.Serialization.YamlMemberAttribute() {");
+                        Write("new YamlDotNet.Serialization.YamlMemberAttribute() {");
                         for (var index = 0; index < attribute.NamedArguments.Length; index++)
                         {
                             if (index > 0)
                             {
-                                constructor.Append(", ");
+                                Write(", ");
                             }
                             var attributeData = attribute.NamedArguments[index];
                             switch (attributeData.Key)
                             {
                                 case "Description":
-                                    constructor.Append($"Description = {attributeData.Value.ToCSharpString()}");
+                                    Indent(); Write($"Description = {attributeData.Value.ToCSharpString()}"); UnIndent();
                                     break;
                                 case "Order":
-                                    constructor.Append($"Order = {attributeData.Value.Value}");
+                                    Indent(); Write($"Order = {attributeData.Value.Value}"); UnIndent();
                                     break;
                                 case "Alias":
-                                    constructor.Append($"Alias = {attributeData.Value.ToCSharpString()}");
+                                    Indent(); Write($"Alias = {attributeData.Value.ToCSharpString()}"); UnIndent();
                                     break;
                                 case "ApplyNamingConventions":
-                                    constructor.Append($"ApplyNamingConventions = {attributeData.Value.ToCSharpString()}");
+                                    Indent(); Write($"ApplyNamingConventions = {attributeData.Value.ToCSharpString()}"); UnIndent();
                                     break;
                                 case "DefaultValuesHandling":
-                                    constructor.Append($"DefaultValuesHandling = (YamlDotNet.Serialization.DefaultValuesHandling){attributeData.Value.Value}");
+                                    Indent(); Write($"DefaultValuesHandling = (YamlDotNet.Serialization.DefaultValuesHandling){attributeData.Value.Value}"); UnIndent();
                                     break;
                                 case "ScalarStyle":
-                                    constructor.Append($"ScalarStyle = (YamlDotNet.Core.ScalarStyle){attributeData.Value.Value}");
+                                    Indent(); Write($"ScalarStyle = (YamlDotNet.Core.ScalarStyle){attributeData.Value.Value}"); UnIndent();
                                     break;
                             }
                         }
-                        constructor.AppendLine("},");
+                        Write($"}},");
                         break;
                 }
             }
-            constructor.Append("})");
-            constructor.Append(finalChar.ToString());
-            return constructor.ToString();
+            Write($"}}){finalChar}");
+
         }
     }
 }
