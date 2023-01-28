@@ -91,7 +91,7 @@ namespace YamlDotNet.Serialization
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
                 { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization) },
                 { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
-                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value) },
+                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, duplicateKeyChecking) },
                 { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
                 { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking) }
@@ -151,7 +151,7 @@ namespace YamlDotNet.Serialization
             _baseTypeInspector = context.GetTypeInspector();
 
             WithoutNodeDeserializer<DictionaryNodeDeserializer>();
-            WithNodeDeserializer(new StaticDictionaryNodeDeserializer(context.GetFactory()));
+            WithNodeDeserializer(new StaticDictionaryNodeDeserializer(context.GetFactory(), duplicateKeyChecking));
 
             return Self;
         }
