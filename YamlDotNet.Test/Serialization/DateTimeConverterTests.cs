@@ -569,7 +569,7 @@ namespace YamlDotNet.Test.Serialization
         public void JsonCompatible_EncaseDateTimesInDoubleQuotes()
         {
             var serializer = new SerializerBuilder().JsonCompatible().Build();
-            var testObject = new TestObject { DateTime = new DateTime(2023, 01, 14, 0, 1, 2) };
+            var testObject = new TestObject { DateTime = new DateTime(2023, 01, 14, 0, 1, 2, DateTimeKind.Utc) };
             var actual = serializer.Serialize(testObject);
 
             actual.TrimNewLines().Should().ContainEquivalentOf("{\"DateTime\": \"01/14/2023 00:01:02\"}");

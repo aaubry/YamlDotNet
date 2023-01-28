@@ -33,7 +33,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     {
         private readonly IObjectFactory objectFactory;
 
-        public DictionaryNodeDeserializer(IObjectFactory objectFactory)
+        public DictionaryNodeDeserializer(IObjectFactory objectFactory, bool duplicateKeyChecking) :
+            base(duplicateKeyChecking)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }

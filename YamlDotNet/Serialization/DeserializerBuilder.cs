@@ -93,7 +93,7 @@ namespace YamlDotNet.Serialization
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
                 { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter) },
                 { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
-                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value) },
+                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, duplicateKeyChecking) },
                 { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
                 { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking, typeConverter) }

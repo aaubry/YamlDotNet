@@ -57,17 +57,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
             value = objectFactory.Create(implementationType);
-            var consumedProperties = new List<string>();
+            var consumedProperties = new HashSet<string>(StringComparer.Ordinal);
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
-                if (duplicateKeyChecking && consumedProperties.Contains(propertyName.Value))
+                if (duplicateKeyChecking && !consumedProperties.Add(propertyName.Value))
                 {
                     throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate key {propertyName.Value}");
                 }
                 try
                 {
-                    consumedProperties.Add(propertyName.Value);
                     var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
                     if (property == null)
                     {

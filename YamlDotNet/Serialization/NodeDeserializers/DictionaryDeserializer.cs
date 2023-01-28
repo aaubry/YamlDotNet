@@ -28,9 +28,25 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public abstract class DictionaryDeserializer
     {
-        protected void Deserialize(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
+        private readonly bool duplicateKeyChecking;
+
+        public DictionaryDeserializer(bool duplicateKeyChecking)
         {
-            parser.Consume<MappingStart>();
+            this.duplicateKeyChecking = duplicateKeyChecking;
+        }
+
+        private void TryAssign(IDictionary result, object key, object value, MappingStart propertyName)
+        {
+            if (duplicateKeyChecking && result.Contains(key))
+            {
+                throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate key {key}");
+            }
+            result[key] = value!;
+        }
+
+        protected virtual void Deserialize(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
+        {
+            var property = parser.Consume<MappingStart>();
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var key = nestedObjectDeserializer(parser, tKey);
@@ -53,7 +69,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[v!] = value!;
+                                TryAssign(result, v!, value!, property);
                             }
                             else
                             {
@@ -66,7 +82,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         {
                             if (hasFirstPart)
                             {
-                                result[key] = v!;
+                                TryAssign(result, key, v!, property);
                             }
                             else
                             {
@@ -86,7 +102,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (valuePromise == null)
                     {
                         // Happy path: both key and value are known
-                        result[key] = value!;
+                        TryAssign(result, key, value!, property);
                     }
                     else
                     {

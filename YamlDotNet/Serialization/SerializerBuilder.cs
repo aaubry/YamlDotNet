@@ -60,6 +60,7 @@ namespace YamlDotNet.Serialization
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
         private bool quoteNecessaryStrings;
+        private bool quoteYaml1_1Strings;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -96,7 +97,7 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings) }
+                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings) }
             };
 
             objectFactory = new DefaultObjectFactory();
@@ -110,9 +111,11 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
         /// </summary>
-        public SerializerBuilder WithQuotingNecessaryStrings()
+        /// <param name="quoteYaml1_1Strings">Also quote strings that are valid scalars in the YAML 1.1 specification (which includes boolean Yes/No/On/Off, base 60 numbers and more)</param>
+        public SerializerBuilder WithQuotingNecessaryStrings(bool quoteYaml1_1Strings = false)
         {
             quoteNecessaryStrings = true;
+            this.quoteYaml1_1Strings = quoteYaml1_1Strings;
             return this;
         }
 
@@ -269,7 +272,7 @@ namespace YamlDotNet.Serialization
                 settings,
                 objectFactory
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 

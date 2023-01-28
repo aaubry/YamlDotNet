@@ -29,7 +29,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     {
         private readonly ObjectFactories.StaticObjectFactory _objectFactory;
 
-        public StaticDictionaryNodeDeserializer(ObjectFactories.StaticObjectFactory objectFactory)
+        public StaticDictionaryNodeDeserializer(ObjectFactories.StaticObjectFactory objectFactory, bool duplicateKeyChecking)
+            : base(duplicateKeyChecking)
         {
             _objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }

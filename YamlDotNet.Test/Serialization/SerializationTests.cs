@@ -2300,6 +2300,29 @@ Cycle: *o0");
             Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
         }
 
+        public static IEnumerable<object[]> Yaml1_1SpecialStringsData = new[]
+        {
+            "-.inf", "-.Inf", "-.INF", "-0", "-0100_200", "-0b101", "-0x30", "-190:20:30", "-23", "-3.14",
+            "._", "._14", ".", ".0", ".1_4", ".14", ".3E-1", ".3e+3", ".inf", ".Inf",
+            ".INF", ".nan", ".NaN", ".NAN", "+.inf", "+.Inf", "+.INF", "+0.3e+3", "+0",
+            "+0100_200", "+0b100", "+190:20:30", "+23", "+3.14", "~", "0.0", "0", "00", "001.23",
+            "0011", "010", "02_0", "07", "0b0", "0b100_101", "0o0", "0o10", "0o7", "0x0",
+            "0x10", "0x2_0", "0x42", "0xa", "100_000", "190:20:30.15", "190:20:30", "23", "3.", "3.14", "3.3e+3",
+            "85_230.15", "85.230_15e+03", "false", "False", "FALSE", "n", "N", "no", "No", "NO",
+            "null", "Null", "NULL", "off", "Off", "OFF", "on", "On", "ON", "true", "True", "TRUE",
+            "y", "Y", "yes", "Yes", "YES"
+        }.Select(v => new object[] { v }).ToList();
+
+        [Theory]
+        [MemberData(nameof(Yaml1_1SpecialStringsData))]
+        public void StringsThatMatchYaml1_1KeywordsAreQuoted(string input)
+        {
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings(true).Build();
+            var o = new { text = input };
+            var yaml = serializer.Serialize(o);
+            Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
+        }
+
         [Fact]
         public void KeysOnConcreteClassDontGetQuoted_TypeStringGetsQuoted()
         {
