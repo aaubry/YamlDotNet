@@ -32,21 +32,64 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
         private readonly IDictionary<Type, TagName> tagMappings;
         private readonly bool quoteNecessaryStrings;
-        private static readonly string IsSpecialStringValue_Regex =
+        private readonly Regex? isSpecialStringValue_Regex;
+        private static readonly string SpecialStrings_Pattern =
             @"^("
-                 + @"null|Null|NULL|\~"
-                 + @"|true|True|TRUE|false|False|FALSE"
-                 + @"|[-+]?[0-9]+|0o[0-7]+"
-                 + @"|0x[0-9a-fA-F]+"
-                 + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?"
-                 + @"|[-+]?(\.inf|\.Inf|\.INF)"
-                 + @"|\.nan|\.NaN|\.NAN"
+                + @"null|Null|NULL|\~"
+                + @"|true|True|TRUE|false|False|FALSE"
+                + @"|[-+]?[0-9]+" // int base 10
+                + @"|0o[0-7]+" // int base 8
+                + @"|0x[0-9a-fA-F]+" // int base 16
+                + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?" // float number
+                + @"|[-+]?(\.inf|\.Inf|\.INF)"
+                + @"|\.nan|\.NaN|\.NAN"
             + @")$";
+
+        /// <summary>
+        /// This pattern matches strings that are special both in YAML 1.1 and 1.2
+        /// </summary>
+        private static readonly string CombinedYaml1_1SpecialStrings_Pattern =
+            @"^("
+                + @"null|Null|NULL|\~"
+                + @"|true|True|TRUE|false|False|FALSE"
+                + @"|y|Y|yes|Yes|YES|n|N|no|No|NO"
+                + @"|on|On|ON|off|Off|OFF"
+                + @"|[-+]?0b[0-1_]+" // int base 2
+                + @"|[-+]?0o?[0-7_]+" // int base 8 both with and without "o"
+                + @"|[-+]?(0|[1-9][0-9_]*)" // int base 10
+                + @"|[-+]?0x[0-9a-fA-F_]+" // int base 16
+                + @"|[-+]?[1-9][0-9_]*(:[0-5]?[0-9])+" // int base 60
+                + @"|[-+]?([0-9][0-9_]*)?\.[0-9_]*([eE][-+][0-9]+)?" // float base 10
+                + @"|[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+\.[0-9_]*" // float base 60
+                + @"|[-+]?\.(inf|Inf|INF)"
+                + @"|\.(nan|NaN|NAN)"
+            + @")$";
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
+        {
+            this.quoteNecessaryStrings = quoteNecessaryStrings;
+
+            var specialStringValuePattern = quoteYaml1_1Strings
+                ? CombinedYaml1_1SpecialStrings_Pattern
+                : SpecialStrings_Pattern;
+#if NET40
+            isSpecialStringValue_Regex = new Regex(specialStringValuePattern);
+#else
+            isSpecialStringValue_Regex = new Regex(specialStringValuePattern, RegexOptions.Compiled);
+#endif
+        }
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
             : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
+
+#if NET40
+            isSpecialStringValue_Regex = new Regex(SpecialStrings_Pattern);
+#else
+            isSpecialStringValue_Regex = new Regex(SpecialStrings_Pattern, RegexOptions.Compiled);
+#endif
         }
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
@@ -204,9 +247,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 return true;
             }
 
-            return Regex.IsMatch(
-                value,
-                IsSpecialStringValue_Regex);
+            return isSpecialStringValue_Regex?.IsMatch(value) ?? false;
         }
     }
 }
