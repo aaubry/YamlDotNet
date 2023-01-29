@@ -48,6 +48,9 @@ MyUInt32: {uint.MaxValue}
 MyUInt64: {ulong.MaxValue}
 Inner:
   Text: yay
+InnerArray:
+  - Text: hello
+  - Text: world
 MyArray:
   myArray:
   - 1
@@ -57,8 +60,8 @@ MyDictionary:
   x: y
   a: b
 MyList:
-  - a
-  - b
+- a
+- b
 ";
 
 var input = new StringReader(yaml);
@@ -85,6 +88,10 @@ Console.WriteLine("MyUInt32: <{0}>", x.MyUInt32);
 Console.WriteLine("MyUInt64: <{0}>", x.MyUInt64);
 Console.WriteLine("Inner == null: <{0}>", x.Inner == null);
 Console.WriteLine("Inner.Text: <{0}>", x.Inner?.Text);
+foreach (var inner in x.InnerArray)
+{
+    Console.WriteLine("InnerArray.Text: <{0}>", inner.Text);
+}
 Console.WriteLine("MyArray == null: <{0}>", x.MyArray == null);
 Console.WriteLine("MyArray.myArray == null: <{0}>", x.MyArray?.myArray == null);
 
@@ -119,6 +126,19 @@ var serializer = new StaticSerializerBuilder(aotContext)
 
 var output = serializer.Serialize(x);
 Console.WriteLine(output);
+
+yaml = @"- myArray:
+  - 1
+  - 2
+- myArray:
+  - 3
+  - 4
+";
+
+var o = deserializer.Deserialize<MyArray[]>(yaml);
+Console.WriteLine("Length: <{0}>", o.Length);
+Console.WriteLine("Items[0]: <{0}>", string.Join(',', o[0].myArray));
+Console.WriteLine("Items[1]: <{0}>", string.Join(',', o[1].myArray));
 
 [YamlSerializable]
 public class MyArray
@@ -157,6 +177,7 @@ public class PrimitiveTypes
     public uint MyUInt32 { get; set; }
     public ulong MyUInt64 { get; set; }
     public Inner? Inner { get; set; }
+    public Inner[]? InnerArray { get; set; }
     public MyArray? MyArray { get; set; }
     public Dictionary<string, string>? MyDictionary { get; set; }
     public List<string>? MyList { get; set; }

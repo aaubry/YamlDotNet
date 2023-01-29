@@ -75,7 +75,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 Write($"var accessor = new {classObject.SanitizedClassName}_{classObject.GuidSuffix}();");
                 foreach (var field in classObject.FieldSymbols)
                 {
-                    Write($"if (name == \"{field.Name}\") return ", false);
+                    Write($"if (name == \"{field.Name}\") return ");
                     WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';');
                 }
                 foreach (var property in classObject.PropertySymbols)
