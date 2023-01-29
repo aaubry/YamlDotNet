@@ -59,26 +59,30 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                             classObject = new ClassObject(className, classSymbol);
                             Classes[className] = classObject;
                         }
-                        var members = classSymbol.GetMembers();
-                        foreach (var member in members)
+                        while (classSymbol != null)
                         {
-                            if (member.IsStatic ||
-                                member.DeclaredAccessibility != Accessibility.Public ||
-                                member.GetAttributes().Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.YamlIgnoreAttribute"))
+                            var members = classSymbol.GetMembers();
+                            foreach (var member in members)
                             {
-                                continue;
-                            }
+                                if (member.IsStatic ||
+                                    member.DeclaredAccessibility != Accessibility.Public ||
+                                    member.GetAttributes().Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.YamlIgnoreAttribute"))
+                                {
+                                    continue;
+                                }
 
-                            if (member is IPropertySymbol propertySymbol)
-                            {
-                                classObject.PropertySymbols.Add(propertySymbol);
-                                CheckForSupportedGeneric(propertySymbol.Type);
+                                if (member is IPropertySymbol propertySymbol)
+                                {
+                                    classObject.PropertySymbols.Add(propertySymbol);
+                                    CheckForSupportedGeneric(propertySymbol.Type);
+                                }
+                                else if (member is IFieldSymbol fieldSymbol)
+                                {
+                                    classObject.FieldSymbols.Add(fieldSymbol);
+                                    CheckForSupportedGeneric(fieldSymbol.Type);
+                                }
                             }
-                            else if (member is IFieldSymbol fieldSymbol)
-                            {
-                                classObject.FieldSymbols.Add(fieldSymbol);
-                                CheckForSupportedGeneric(fieldSymbol.Type);
-                            }
+                            classSymbol = classSymbol.BaseType;
                         }
                     }
                 }

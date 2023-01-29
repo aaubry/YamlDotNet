@@ -24,6 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -62,6 +63,9 @@ MyDictionary:
 MyList:
 - a
 - b
+Inherited:
+  Inherited: hello
+  NotInherited: world
 ";
 
 var input = new StringReader(yaml);
@@ -117,6 +121,9 @@ if (x.MyList != null)
         Console.WriteLine("MyList = <{0}>", value);
     }
 }
+Console.WriteLine("Inherited == null: <{0}>", x.Inherited == null);
+Console.WriteLine("Inherited.Inherited: <{0}>", x.Inherited?.Inherited);
+Console.WriteLine("Inherited.NotInherited: <{0}>", x.Inherited?.NotInherited);
 
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
@@ -181,6 +188,18 @@ public class PrimitiveTypes
     public MyArray? MyArray { get; set; }
     public Dictionary<string, string>? MyDictionary { get; set; }
     public List<string>? MyList { get; set; }
+    public Inherited Inherited { get; set; }
+}
+
+public class InheritedBase
+{
+    public string Inherited { get; set; }
+}
+
+[YamlSerializable]
+public class Inherited : InheritedBase
+{
+    public string NotInherited { get; set; }
 }
 
 public enum MyTestEnum
