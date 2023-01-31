@@ -156,17 +156,24 @@ namespace build
             return default;
         }
 
-        public static NuGetPackage Pack(Options options, GitVersion version, SuccessfulUnitTests _, SuccessfulAotTests __)
+        public static List<NuGetPackage> Pack(Options options, GitVersion version, SuccessfulUnitTests _, SuccessfulAotTests __)
         {
+            var result = new List<NuGetPackage>();
             var verbosity = options.Verbose ? "detailed" : "minimal";
             var buildDir = Path.Combine(BasePath, "YamlDotNet");
             Run("nuget", $"pack YamlDotNet.nuspec -Version {version.NuGetVersion} -OutputDirectory bin", buildDir);
-
             var packagePath = Path.Combine(buildDir, "bin", $"YamlDotNet.{version.NuGetVersion}.nupkg");
-            return new NuGetPackage(packagePath);
+            result.Add(new NuGetPackage(packagePath, "YamlDotNet"));
+
+            buildDir = Path.Combine(BasePath, "YamlDotNet.Analyzers.StaticGenerator");
+            Run("nuget", $"pack YamlDotNet.Analyzers.StaticGenerator.nuspec -Version {version.NuGetVersion} -OutputDirectory bin", buildDir);
+            packagePath = Path.Combine(buildDir, "bin", $"YamlDotNet.Analyzers.StaticGenerator.{version.NuGetVersion}.nupkg");
+            result.Add(new NuGetPackage(packagePath, "YamlDotNet.Analyzers.StaticGenerator"));
+
+            return result;
         }
 
-        public static void Publish(Options options, GitVersion version, NuGetPackage package)
+        public static void Publish(Options options, GitVersion version, List<NuGetPackage> packages)
         {
             var apiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
             if (string.IsNullOrEmpty(apiKey))
@@ -186,13 +193,16 @@ namespace build
             }
             else
             {
-                Console.WriteLine($"nuget push {package.Path} -ApiKey *** -Source https://api.nuget.org/v3/index.json");
-                Run("nuget", $"push {package.Path} -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
-
-                if (version.IsPreRelease)
+                foreach (var package in packages)
                 {
-                    Console.WriteLine($"nuget delete YamlDotNet {version.NuGetVersion} -NonInteractive -ApiKey *** -Source https://api.nuget.org/v3/index.json");
-                    Run("nuget", $"delete YamlDotNet {version.NuGetVersion} -NonInteractive -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
+                    Console.WriteLine($"nuget push {package.Path} -ApiKey *** -Source https://api.nuget.org/v3/index.json");
+                    Run("nuget", $"push {package.Path} -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
+
+                    if (version.IsPreRelease && UnlistPackage)
+                    {
+                        Console.WriteLine($"nuget delete {package.Name} {version.NuGetVersion} -NonInteractive -ApiKey *** -Source https://api.nuget.org/v3/index.json");
+                        Run("nuget", $"delete {package.Name} {version.NuGetVersion} -NonInteractive -ApiKey {apiKey} -Source https://api.nuget.org/v3/index.json", noEcho: true);
+                    }
                 }
             }
         }
@@ -564,12 +574,14 @@ namespace build
 
     public class NuGetPackage
     {
-        public NuGetPackage(string path)
+        public NuGetPackage(string path, string name)
         {
             Path = path;
+            Name = name;
         }
 
         public string Path { get; }
+        public string Name { get; }
     }
 
     internal class LoggerHttpHandler : HttpClientHandler
