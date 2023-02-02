@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
                 out Scalar? key,
                 out ParsingEvent? value))
             {
-                // read the value of the kind key
+                // read the value of the discriminator key
                 if (value is Scalar valueScalar)
                 {
                     suggestedType = CheckName(valueScalar.Value);
@@ -82,7 +82,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
                 {
                     case Scalar scalar:
                         // we've found a scalar, check if it's value matches one
-                        // of our  predicate
+                        // of our predicate
                         var keyMatched = selector(scalar);
 
                         // move head so we can read or skip value

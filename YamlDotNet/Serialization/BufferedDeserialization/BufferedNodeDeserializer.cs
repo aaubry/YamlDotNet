@@ -54,7 +54,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             {
                 buffer = new ParserBuffer(reader, maxDepth: maxDepthToBuffer, maxLength: maxLengthToBuffer);
 
-                // use the descriminator to tell us what type it is really expecting by letting it inspect the parsing events
+                // use the discriminator to tell us what type it is really expecting by letting it inspect the parsing events
                 foreach (var discriminator in possibleDiscriminators)
                 {
                     buffer.Reset();
