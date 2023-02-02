@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 #endif
 using YamlDotNet.Core;
+using YamlDotNet.Serialization.BufferedDeserialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 using YamlDotNet.Serialization.NodeTypeResolvers;
@@ -244,6 +245,19 @@ namespace YamlDotNet.Serialization
 
             nodeDeserializerFactories.Remove(nodeDeserializerType);
             return this;
+        }
+
+        public DeserializerBuilder WithBufferedNodeDeserializer(
+            Action<IBufferedNodeDeserializerOptions> configureBufferedNodeDeserializerOptions, int maxDepth = -1, int maxLength = -1)
+        {
+            return WithNodeDeserializer(
+                inner => {
+                    var options = new BufferedNodeDeserializerOptions();
+                    configureBufferedNodeDeserializerOptions(options);
+                    var bufferedNodeDeserializer = new BufferedNodeDeserializer(inner, maxDepth, maxLength, options.discriminators);
+                    return bufferedNodeDeserializer;
+                },
+                s => s.InsteadOf<ObjectNodeDeserializer>());
         }
 
         /// <summary>
