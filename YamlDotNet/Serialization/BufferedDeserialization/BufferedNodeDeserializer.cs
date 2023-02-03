@@ -39,17 +39,17 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
                 return false;
             }
 
-            // can any of the registered discrimaintors deal with the expected type?
-            var possibleDiscriminators = typeDiscriminators.Where(t => expectedType.IsAssignableFrom(t.BaseType));
+            // Can any of the registered discriminators deal with the expected type?
+            // We check this first so we can avoid buffering the parser unless we know we need to
+            var possibleDiscriminators = typeDiscriminators.Where(t => expectedType.IsAssignableTo(t.BaseType));
             if (!possibleDiscriminators.Any())
             {
-                // no? then not a node/type we want to deal with
                 return originalDeserializer.Deserialize(reader, expectedType, nestedObjectDeserializer, out value);
             }
 
-            // now buffer all the nodes in this mapping
+            // Now buffer all the nodes in this mapping
             var start = reader.Current!.Start;
-            Type? actualType = null;
+            Type actualType = expectedType;
             ParserBuffer buffer;
             try
             {
@@ -63,11 +63,6 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
                     {
                         actualType = descriminatedType!;
                     }
-                }
-
-                if (actualType is null)
-                {
-                    throw new Exception($"None of the registered type discriminators could map to {expectedType}");
                 }
             }
             catch (Exception exception)
