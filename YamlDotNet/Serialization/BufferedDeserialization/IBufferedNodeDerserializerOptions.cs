@@ -12,8 +12,8 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
     {
         public void AddTypeDiscriminator(ITypeDiscriminator discriminator);
         public void AddKeyValueTypeDiscriminator<T>(string discriminatorKey, IDictionary<string, Type> valueTypeMapping);
-        public void AddKeyValueTypeDiscriminator<T>(string discriminatorKey, params (string, Type)[] valueTypeMapping) => AddKeyValueDiscriminator<T>(discriminatorKey, valueTypeMapping.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
+        public void AddKeyValueTypeDiscriminator<T>(string discriminatorKey, params (string, Type)[] valueTypeMapping) => AddKeyValueTypeDiscriminator<T>(discriminatorKey, valueTypeMapping.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
         public void AddUniqueKeyTypeDiscriminator<T>(IDictionary<string, Type> uniqueKeyTypeMapping);
-        public void AddUniqueKeyTypeDiscriminator<T>(params (string, Type)[] uniqueKeyTypeMapping) => AddUniqueKeyDiscriminator<T>(uniqueKeyTypeMapping.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
+        public void AddUniqueKeyTypeDiscriminator<T>(params (string, Type)[] uniqueKeyTypeMapping) => AddUniqueKeyTypeDiscriminator<T>(uniqueKeyTypeMapping.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
     }
 }
