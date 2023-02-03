@@ -1,9 +1,9 @@
 using System;
 using YamlDotNet.Core;
 
-namespace YamlDotNet.Serialization.BufferedDeserialization
+namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
 {
-    public interface IValueTypeDiscriminator
+    public interface ITypeDiscriminator
     {
         Type BaseType { get; }
 

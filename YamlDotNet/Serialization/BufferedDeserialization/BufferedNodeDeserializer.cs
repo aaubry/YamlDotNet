@@ -5,6 +5,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NodeDeserializers;
+using YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
 
 namespace YamlDotNet.Serialization.BufferedDeserialization
 {
@@ -13,9 +14,9 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
         private readonly INodeDeserializer originalDeserializer;
         private readonly int maxDepthToBuffer;
         private readonly int maxLengthToBuffer;
-        private readonly List<IValueTypeDiscriminator> typeDiscriminators;
+        private readonly List<ITypeDiscriminator> typeDiscriminators;
 
-        public BufferedNodeDeserializer(INodeDeserializer originalDeserializer, int maxDepthToBuffer, int maxLengthToBuffer, List<IValueTypeDiscriminator> typeDiscriminators)
+        public BufferedNodeDeserializer(INodeDeserializer originalDeserializer, int maxDepthToBuffer, int maxLengthToBuffer, List<ITypeDiscriminator> typeDiscriminators)
         {
             if (!(originalDeserializer is ObjectNodeDeserializer))
             {
@@ -38,8 +39,8 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
                 return false;
             }
 
-            // can any of the registered discrimaintors deal with the abstract type?
-            var possibleDiscriminators = typeDiscriminators.Where(t => t.BaseType == expectedType);
+            // can any of the registered discrimaintors deal with the expected type?
+            var possibleDiscriminators = typeDiscriminators.Where(t => expectedType.IsAssignableFrom(t.BaseType));
             if (!possibleDiscriminators.Any())
             {
                 // no? then not a node/type we want to deal with

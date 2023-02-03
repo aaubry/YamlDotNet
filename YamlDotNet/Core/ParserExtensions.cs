@@ -147,5 +147,50 @@ namespace YamlDotNet.Core
         {
             return Accept<T>(parser, out var _);
         }
+
+        public static bool TryFindMappingEntry(this IParser parser, Func<Scalar, bool> selector, out Scalar? key, out ParsingEvent? value)
+        {
+            parser.Consume<MappingStart>();
+            do
+            {
+                // so we only want to check keys in this mapping, don't descend
+                switch (parser.Current)
+                {
+                    case Scalar scalar:
+                        // we've found a scalar, check if it's value matches one
+                        // of our predicate
+                        var keyMatched = selector(scalar);
+
+                        // move head so we can read or skip value
+                        parser.MoveNext();
+
+                        // read the value of the mapping key
+                        if (keyMatched)
+                        {
+                            // success
+                            value = parser.Current;
+                            key = scalar;
+                            return true;
+                        }
+
+                        // skip the value
+                        parser.SkipThisAndNestedEvents();
+
+                        break;
+                    case MappingStart _:
+                    case SequenceStart _:
+                        parser.SkipThisAndNestedEvents();
+                        break;
+                    default:
+                        // do nothing, skip to next node
+                        parser.MoveNext();
+                        break;
+                }
+            } while (parser.Current != null);
+
+            key = null;
+            value = null;
+            return false;
+        }
     }
 }
