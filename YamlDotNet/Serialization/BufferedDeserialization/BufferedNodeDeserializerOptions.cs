@@ -11,17 +11,17 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
     {
         internal readonly List<ITypeDiscriminator> discriminators = new List<ITypeDiscriminator>();
 
-        public void AddValueTypeDiscriminator(ITypeDiscriminator discriminator)
+        public void AddTypeDiscriminator(ITypeDiscriminator discriminator)
         {
             this.discriminators.Add(discriminator);
         }
 
-        public void AddKeyValueDiscriminator<T>(string discriminatorKey, IDictionary<string, Type> valueTypeMapping)
+        public void AddKeyValueTypeDiscriminator<T>(string discriminatorKey, IDictionary<string, Type> valueTypeMapping)
         {
             this.discriminators.Add(new KeyValueTypeDiscriminator(typeof(T), discriminatorKey, valueTypeMapping));
         }
 
-        public void AddUniqueKeyDiscriminator<T>(IDictionary<string, Type> uniqueKeyTypeMapping)
+        public void AddUniqueKeyTypeDiscriminator<T>(IDictionary<string, Type> uniqueKeyTypeMapping)
         {
             this.discriminators.Add(new UniqueKeyTypeDiscriminator(typeof(T), uniqueKeyTypeMapping));
         }
