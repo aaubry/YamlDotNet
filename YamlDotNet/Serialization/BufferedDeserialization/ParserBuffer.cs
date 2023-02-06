@@ -24,11 +24,11 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
 
                 if (maxDepth > -1 && depth > maxDepth)
                 {
-                    throw new ArgumentOutOfRangeException("Parser buffer exceeded max depth");
+                    throw new ArgumentOutOfRangeException(nameof(parserToBuffer), "Parser buffer exceeded max depth");
                 }
                 if (maxLength > -1 && buffer.Count > maxLength)
                 {
-                    throw new ArgumentOutOfRangeException("Parser buffer exceeded max length");
+                    throw new ArgumentOutOfRangeException(nameof(parserToBuffer), "Parser buffer exceeded max length");
                 }
             } while (depth >= 0);
 
