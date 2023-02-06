@@ -11,28 +11,21 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
 {
     public class BufferedNodeDeserializer : INodeDeserializer
     {
-        private readonly INodeDeserializer originalDeserializer;
+        private readonly IList<INodeDeserializer> innerDeserializers;
+        private readonly IList<ITypeDiscriminator> typeDiscriminators;
         private readonly int maxDepthToBuffer;
         private readonly int maxLengthToBuffer;
-        private readonly List<ITypeDiscriminator> typeDiscriminators;
 
-        public BufferedNodeDeserializer(INodeDeserializer originalDeserializer, int maxDepthToBuffer, int maxLengthToBuffer, List<ITypeDiscriminator> typeDiscriminators)
+        public BufferedNodeDeserializer(IList<INodeDeserializer> innerDeserializers, IList<ITypeDiscriminator> typeDiscriminators, int maxDepthToBuffer, int maxLengthToBuffer)
         {
-            if (!(originalDeserializer is ObjectNodeDeserializer))
-            {
-                throw new ArgumentException($"{nameof(BufferedNodeDeserializer)} requires the original resolver to be a {nameof(ObjectNodeDeserializer)}");
-            }
-
+            this.innerDeserializers = innerDeserializers;
             this.typeDiscriminators = typeDiscriminators;
-            this.originalDeserializer = originalDeserializer;
             this.maxDepthToBuffer = maxDepthToBuffer;
             this.maxLengthToBuffer = maxLengthToBuffer;
         }
 
         public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            // we're essentially "in front of" the normal ObjectNodeDeserializer.
-            // We could let it check if the current event is a mapping, but we also need to know.
             if (!reader.Accept<MappingStart>(out var mapping))
             {
                 value = null;
@@ -40,11 +33,11 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             }
 
             // Can any of the registered discriminators deal with the expected type?
-            // We check this first so we can avoid buffering the parser unless we know we need to
             var possibleDiscriminators = typeDiscriminators.Where(t => expectedType.IsAssignableTo(t.BaseType));
             if (!possibleDiscriminators.Any())
             {
-                return originalDeserializer.Deserialize(reader, expectedType, nestedObjectDeserializer, out value);
+                value = null;
+                return false;
             }
 
             // Now buffer all the nodes in this mapping
@@ -54,7 +47,14 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             try
             {
                 buffer = new ParserBuffer(reader, maxDepth: maxDepthToBuffer, maxLength: maxLengthToBuffer);
+            }
+            catch (Exception exception)
+            {
+                throw new YamlException(start, reader.Current.End, "Failed to buffer yaml node", exception);
+            }
 
+            try
+            {
                 // use the discriminator to tell us what type it is really expecting by letting it inspect the parsing events
                 foreach (var discriminator in possibleDiscriminators)
                 {
@@ -62,17 +62,27 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
                     if (discriminator.TryDiscriminate(buffer, out var descriminatedType))
                     {
                         actualType = descriminatedType!;
+                        break;
                     }
                 }
             }
             catch (Exception exception)
             {
-                throw new YamlException(start, reader.Current.End, "Failed when resolving abstract type", exception);
+                throw new YamlException(start, reader.Current.End, "Failed to discriminate type", exception);
             }
 
-            // now continue by re-emitting parsing events
+            // now continue by re-emitting parsing events and using the inner deserializers to handle
             buffer.Reset();
-            return originalDeserializer.Deserialize(buffer, actualType, nestedObjectDeserializer, out value);
+            foreach (var deserializer in innerDeserializers)
+            {
+                if (deserializer.Deserialize(buffer, actualType, nestedObjectDeserializer, out value))
+                {
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
         }
     }   
 }

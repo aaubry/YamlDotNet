@@ -250,14 +250,15 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder WithBufferedNodeDeserializer(
             Action<IBufferedNodeDeserializerOptions> configureBufferedNodeDeserializerOptions, int maxDepth = -1, int maxLength = -1)
         {
-            return WithNodeDeserializer(
-                inner => {
-                    var options = new BufferedNodeDeserializerOptions();
-                    configureBufferedNodeDeserializerOptions(options);
-                    var bufferedNodeDeserializer = new BufferedNodeDeserializer(inner, maxDepth, maxLength, options.discriminators);
-                    return bufferedNodeDeserializer;
-                },
-                s => s.InsteadOf<ObjectNodeDeserializer>());
+            var options = new BufferedNodeDeserializerOptions();
+            configureBufferedNodeDeserializerOptions(options);
+            // We use all current NodeDeserializers as the inner deserializers for the BufferedNodeDeserializer,
+            // so that it can successfully deserialize anything our root deserializer can.
+            var bufferedNodeDeserializer = new BufferedNodeDeserializer(nodeDeserializerFactories.BuildComponentList(), options.discriminators, maxDepth, maxLength);
+
+            // We register this before the DictionaryNodeDeserializer, as otherwise it will take precedence
+            // and cases where BaseType = object will not reach the BufferedNodeDeserializer
+            return WithNodeDeserializer(bufferedNodeDeserializer, s => s.Before<DictionaryNodeDeserializer>());
         }
 
         /// <summary>
