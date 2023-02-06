@@ -9,7 +9,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization.BufferedDeserialization
 {
-    public class BufferedDeserializerTest
+    public class KeyValueTypeDiscriminatorTests
     {
         [Fact]
         public void KeyValueTypeDiscriminator_WithParentBaseType_Single()
