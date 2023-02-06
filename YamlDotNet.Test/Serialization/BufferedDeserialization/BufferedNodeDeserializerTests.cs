@@ -17,7 +17,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithBufferedNodeDeserializer(options => {
-                        options.AddKeyValueTypeDiscriminator<object>("kind");
+                        options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
                     },
                     maxDepth: 2,
                     maxLength: 40)
@@ -37,7 +37,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithBufferedNodeDeserializer(options => {
-                        options.AddKeyValueTypeDiscriminator<object>("kind");
+                        options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
                     },
                     maxDepth: 3,
                     maxLength: 20)

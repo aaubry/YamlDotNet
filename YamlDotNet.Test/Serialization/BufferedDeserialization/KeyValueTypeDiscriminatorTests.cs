@@ -19,8 +19,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                 .WithBufferedNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
-                        ("Namespace", typeof(KubernetesNamespace)),
-                        ("Service", typeof(KubernetesService)));
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                            { "Service", typeof(KubernetesService) }
+                        });
                     },
                     maxDepth: 3,
                     maxLength: 40)
@@ -38,8 +41,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                 .WithBufferedNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
-                        ("Namespace", typeof(KubernetesNamespace)),
-                        ("Service", typeof(KubernetesService)));
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                            { "Service", typeof(KubernetesService) }
+                        });
                     },
                     maxDepth: 3,
                     maxLength: 40)
@@ -58,8 +64,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                 .WithBufferedNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<object>(
                         "kind",
-                        ("Namespace", typeof(KubernetesNamespace)),
-                        ("Service", typeof(KubernetesService)));
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                            { "Service", typeof(KubernetesService) }
+                        });
                     },
                     maxDepth: 3,
                     maxLength: 40)
@@ -77,8 +86,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                 .WithBufferedNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<object>(
                         "kind",
-                        ("Namespace", typeof(KubernetesNamespace)),
-                        ("Service", typeof(KubernetesService)));
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                            { "Service", typeof(KubernetesService) }
+                        });
                     },
                     maxDepth: 3,
                     maxLength: 30)
@@ -97,8 +109,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                 .WithBufferedNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<IKubernetesResource>(
                         "kind",
-                        ("Namespace", typeof(KubernetesNamespace)),
-                        ("Service", typeof(KubernetesService)));
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                            { "Service", typeof(KubernetesService) }
+                        });
                     },
                     maxDepth: 3,
                     maxLength: 40)
@@ -116,8 +131,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                 .WithBufferedNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<IKubernetesResource>(
                         "kind",
-                        ("Namespace", typeof(KubernetesNamespace)),
-                        ("Service", typeof(KubernetesService)));
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                            { "Service", typeof(KubernetesService) }
+                        });
                     },
                     maxDepth: 3,
                     maxLength: 30)
