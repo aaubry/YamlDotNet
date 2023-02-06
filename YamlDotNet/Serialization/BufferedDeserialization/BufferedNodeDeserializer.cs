@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             }
 
             // Can any of the registered discriminators deal with the expected type?
-            var possibleDiscriminators = typeDiscriminators.Where(t => expectedType.IsAssignableTo(t.BaseType));
+            var possibleDiscriminators = typeDiscriminators.Where(t => t.BaseType.IsAssignableFrom(expectedType));
             if (!possibleDiscriminators.Any())
             {
                 value = null;
