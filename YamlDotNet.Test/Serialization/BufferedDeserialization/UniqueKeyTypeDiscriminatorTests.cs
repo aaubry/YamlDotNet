@@ -34,7 +34,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             characters[1].Should().BeOfType<Cat>();
         }
 
-                [Fact]
+        [Fact]
         public void UniqueKeyTypeDiscriminator_WithObjectBaseType()
         {
             var bufferedDeserializer = new DeserializerBuilder()
