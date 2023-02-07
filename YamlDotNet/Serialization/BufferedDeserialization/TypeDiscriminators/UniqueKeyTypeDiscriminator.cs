@@ -15,11 +15,11 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
 
         public UniqueKeyTypeDiscriminator(Type baseType, IDictionary<string, Type> typeMapping)
         {
-            foreach (var (_, type) in typeMapping)
+            foreach (var keyValuePair in typeMapping)
             {
-                if (!baseType.IsAssignableFrom(type))
+                if (!baseType.IsAssignableFrom(keyValuePair.Value))
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(typeMapping)} dictionary contains type {type} which is not a assignable to {baseType}");
+                    throw new ArgumentOutOfRangeException($"{nameof(typeMapping)} dictionary contains type {keyValuePair.Value} which is not a assignable to {baseType}");
                 }
             }
             this.BaseType = baseType;

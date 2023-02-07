@@ -15,11 +15,12 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
 
         public KeyValueTypeDiscriminator(Type baseType, string targetKey, IDictionary<string, Type> typeMapping)
         {
-            foreach (var (_, type) in typeMapping)
+            
+            foreach (var keyValuePair in typeMapping)
             {
-                if (!baseType.IsAssignableFrom(type))
+                if (!baseType.IsAssignableFrom(keyValuePair.Value))
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(typeMapping)} dictionary contains type {type} which is not a assignable to {baseType}");
+                    throw new ArgumentOutOfRangeException($"{nameof(typeMapping)} dictionary contains type {keyValuePair.Value} which is not a assignable to {baseType}");
                 }
             }
             this.BaseType = baseType;
@@ -58,7 +59,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
                 return childType;
             }
 
-            var known = string.Join(",", typeMapping.Keys);
+            var known = string.Join(",", typeMapping.Keys.ToArray());
             
             throw new Exception($"Could not determine {BaseType} to deserialize to, expecting '{targetKey}' to be one of: {known}, but got '{value}'");
         }
