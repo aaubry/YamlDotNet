@@ -247,6 +247,14 @@ namespace YamlDotNet.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Registers a <see cref="BufferedNodeDeserializer" /> to be used by the deserializer. This internally registers
+        /// all existing <see cref="INodeDeserializer" /> as inner deserializers available to the <see cref="BufferedNodeDeserializer" />.
+        /// Usually you will want to call this after any other changes to the <see cref="INodeDeserializer" />s used by the deserializer.
+        /// </summary>
+        /// <param name="configureBufferedNodeDeserializerOptions">An action that can configure the <see cref="BufferedNodeDeserializer" />.</param>
+        /// <param name="maxDepth">Configures the max depth of yaml nodes that will be buffered. A value of -1 (the default) means yaml nodes of any depth will be buffered.</param>
+        /// <param name="maxLength">Configures the max number of yaml nodes that will be buffered. A value of -1 (the default) means there is no limit on the number of yaml nodes buffered.</param>
         public DeserializerBuilder WithBufferedNodeDeserializer(
             Action<IBufferedNodeDeserializerOptions> configureBufferedNodeDeserializerOptions, int maxDepth = -1, int maxLength = -1)
         {
