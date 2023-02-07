@@ -9,6 +9,17 @@ using YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
 
 namespace YamlDotNet.Serialization.BufferedDeserialization
 {
+    /// <summary>
+    /// The BufferedNodeDeserializer acts as a psuedo <see cref="INodeDeserializer" />.
+    /// If any of it's <see cref="ITypeDiscriminator" /> has a matching BaseType, the BufferedNodeDeserializer will
+    /// begin buffering the yaml stream. It will then use the matching <see cref="ITypeDiscriminator" />s to determine
+    /// a dotnet output type for the yaml node. As the node is buffered, the <see cref="ITypeDiscriminator" />s are
+    /// able to examine the actual values within, and use these when discriminating a type.
+    /// Once a matching type is found, the BufferedNodeDeserializer uses it's inner deserializers to perform
+    /// the final deserialization for that type & object.
+    /// Usually you will want all default <see cref="INodeDeserializer" />s that exist in the outer
+    /// <see cref="Deserializer" /> to also be used as inner deserializers.
+    /// </summary>
     public class BufferedNodeDeserializer : INodeDeserializer
     {
         private readonly IList<INodeDeserializer> innerDeserializers;
