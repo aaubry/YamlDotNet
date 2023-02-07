@@ -298,14 +298,14 @@ name: Jake
                 .Build();
 
             Action act = () => sut.Deserialize<Person>(yaml);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys with concrete class");
             act = () => sut.Deserialize<IDictionary<object, object>>(yaml);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys with dictionary");
 
             var stream = Yaml.ReaderFrom("backreference.yaml");
             var parser = new MergingParser(new Parser(stream));
             act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys");
+            act.ShouldThrow<YamlException>("Because there are duplicate name keys with merging parser");
         }
 
         [Fact]

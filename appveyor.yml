@@ -47,4 +47,7 @@ artifacts:
   - path: YamlDotNet\bin\Release\net60
     name: Release-Net60
 
+  - path: YamlDotNet\bin\Release\net70
+    name: Release-Net70
+
   - path: YamlDotNet\bin\*.nupkg

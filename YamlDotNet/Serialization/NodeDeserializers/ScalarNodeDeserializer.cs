@@ -34,16 +34,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private const string BooleanTruePattern = "^(true|y|yes|on)$";
         private const string BooleanFalsePattern = "^(false|n|no|off)$";
         private readonly bool attemptUnknownTypeDeserialization;
+        private readonly ITypeConverter typeConverter;
 
-        public ScalarNodeDeserializer()
-            : this(false)
-        {
-
-        }
-
-        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization)
+        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter)
         {
             this.attemptUnknownTypeDeserialization = attemptUnknownTypeDeserialization;
+            this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -121,7 +117,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        value = TypeConverter.ChangeType(scalar.Value, expectedType);
+                        value = typeConverter.ChangeType(scalar.Value, expectedType);
                     }
                     break;
             }

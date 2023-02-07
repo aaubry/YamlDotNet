@@ -29,17 +29,16 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     public sealed class DefaultValuesObjectGraphVisitor : ChainedObjectGraphVisitor
     {
         private readonly DefaultValuesHandling handling;
+        private readonly IObjectFactory factory;
 
-        public DefaultValuesObjectGraphVisitor(DefaultValuesHandling handling, IObjectGraphVisitor<IEmitter> nextVisitor)
+        public DefaultValuesObjectGraphVisitor(DefaultValuesHandling handling, IObjectGraphVisitor<IEmitter> nextVisitor, IObjectFactory factory)
             : base(nextVisitor)
         {
             this.handling = handling;
+            this.factory = factory;
         }
 
-        private static object? GetDefault(Type type)
-        {
-            return type.IsValueType() ? Activator.CreateInstance(type) : null;
-        }
+        private object? GetDefault(Type type) => factory.CreatePrimitive(type);
 
         public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
         {

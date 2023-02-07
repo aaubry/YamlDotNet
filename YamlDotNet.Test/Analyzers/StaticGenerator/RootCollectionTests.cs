@@ -19,35 +19,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+using Xunit;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Analyzers.StaticGenerator
+namespace YamlDotNet.Test.Analyzers.StaticGenerator
 {
-    public class ClassObject
+    public class RootCollectionTests
     {
-        public List<IFieldSymbol> FieldSymbols { get; }
-        public string FullName { get; }
-        public string GuidSuffix { get; }
-        public ITypeSymbol ModuleSymbol { get; }
-        public List<IPropertySymbol> PropertySymbols { get; }
-        public string SanitizedClassName { get; }
-        public bool IsArray { get; }
-        public bool IsDictionary { get; }
-        public bool IsList { get; }
-
-        public ClassObject(string sanitizedClassName, ITypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false, bool isArray = false)
+        [Fact]
+        public void RootArrayWorks()
         {
-            FieldSymbols = new List<IFieldSymbol>();
-            PropertySymbols = new List<IPropertySymbol>();
-            FullName = moduleSymbol.GetFullName() ?? string.Empty;
-            GuidSuffix = Guid.NewGuid().ToString("N");
-            ModuleSymbol = moduleSymbol;
-            SanitizedClassName = sanitizedClassName;
-            IsDictionary = isDictionary;
-            IsList = isList;
-            IsArray = isArray;
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"
+- Test: hello
+- Test: world
+";
+
+            var actual = deserializer.Deserialize<RootObject[]>(yaml);
+            Assert.Equal("hello", actual[0].Test);
+            Assert.Equal("world", actual[1].Test);
         }
+
+        [Fact]
+        public void RootListWorks()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"
+- Test: hello
+- Test: world
+";
+
+            var actual = deserializer.Deserialize<List<RootObject>>(yaml);
+            Assert.Equal("hello", actual[0].Test);
+            Assert.Equal("world", actual[1].Test);
+        }
+    }
+    [YamlSerializable]
+    public class RootObject
+    {
+        public string Test { get; set; }
     }
 }

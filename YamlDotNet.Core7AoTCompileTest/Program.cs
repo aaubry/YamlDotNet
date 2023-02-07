@@ -24,6 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -48,6 +49,9 @@ MyUInt32: {uint.MaxValue}
 MyUInt64: {ulong.MaxValue}
 Inner:
   Text: yay
+InnerArray:
+  - Text: hello
+  - Text: world
 MyArray:
   myArray:
   - 1
@@ -57,18 +61,18 @@ MyDictionary:
   x: y
   a: b
 MyList:
-  - a
-  - b
+- a
+- b
+Inherited:
+  Inherited: hello
+  NotInherited: world
 ";
 
 var input = new StringReader(yaml);
 
-#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
-var aotContext = new YamlDotNet.Static.StaticContext();
-var deserializer = new DeserializerBuilder()
-    .WithStaticContext(aotContext)
+var aotContext = new YamlDotNet.Core7AoTCompileTest.StaticContext();
+var deserializer = new StaticDeserializerBuilder(aotContext)
     .Build();
-#pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 
 var x = deserializer.Deserialize<PrimitiveTypes>(input);
 Console.WriteLine("Object read:");
@@ -88,6 +92,10 @@ Console.WriteLine("MyUInt32: <{0}>", x.MyUInt32);
 Console.WriteLine("MyUInt64: <{0}>", x.MyUInt64);
 Console.WriteLine("Inner == null: <{0}>", x.Inner == null);
 Console.WriteLine("Inner.Text: <{0}>", x.Inner?.Text);
+foreach (var inner in x.InnerArray)
+{
+    Console.WriteLine("InnerArray.Text: <{0}>", inner.Text);
+}
 Console.WriteLine("MyArray == null: <{0}>", x.MyArray == null);
 Console.WriteLine("MyArray.myArray == null: <{0}>", x.MyArray?.myArray == null);
 
@@ -113,29 +121,42 @@ if (x.MyList != null)
         Console.WriteLine("MyList = <{0}>", value);
     }
 }
+Console.WriteLine("Inherited == null: <{0}>", x.Inherited == null);
+Console.WriteLine("Inherited.Inherited: <{0}>", x.Inherited?.Inherited);
+Console.WriteLine("Inherited.NotInherited: <{0}>", x.Inherited?.NotInherited);
 
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
-#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
-var serializer = new SerializerBuilder()
-    .WithStaticContext(new YamlDotNet.Static.StaticContext())
+var serializer = new StaticSerializerBuilder(aotContext)
     .Build();
-#pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 
 var output = serializer.Serialize(x);
 Console.WriteLine(output);
 
+yaml = @"- myArray:
+  - 1
+  - 2
+- myArray:
+  - 3
+  - 4
+";
+
+var o = deserializer.Deserialize<MyArray[]>(yaml);
+Console.WriteLine("Length: <{0}>", o.Length);
+Console.WriteLine("Items[0]: <{0}>", string.Join(',', o[0].myArray));
+Console.WriteLine("Items[1]: <{0}>", string.Join(',', o[1].myArray));
+
 [YamlSerializable]
 public class MyArray
 {
-    public int[] myArray { get; set; }
+    public int[]? myArray { get; set; }
 }
 
 [YamlSerializable]
 public class Inner
 {
-    public string Text { get; set; }
+    public string? Text { get; set; }
 }
 
 [YamlSerializable]
@@ -157,14 +178,28 @@ public class PrimitiveTypes
     public sbyte MySByte { get; set; }
     public float MySingle { get; set; }
     [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
-    public string MyString { get; set; }
+    public string MyString { get; set; } = string.Empty;
+    public string? MyNullableString { get; set; }
     public ushort MyUInt16 { get; set; }
     public uint MyUInt32 { get; set; }
     public ulong MyUInt64 { get; set; }
-    public Inner Inner { get; set; }
-    public MyArray MyArray { get; set; }
-    public Dictionary<string, string> MyDictionary { get; set; }
-    public List<string> MyList { get; set; }
+    public Inner? Inner { get; set; }
+    public Inner[]? InnerArray { get; set; }
+    public MyArray? MyArray { get; set; }
+    public Dictionary<string, string>? MyDictionary { get; set; }
+    public List<string>? MyList { get; set; }
+    public Inherited Inherited { get; set; }
+}
+
+public class InheritedBase
+{
+    public string Inherited { get; set; }
+}
+
+[YamlSerializable]
+public class Inherited : InheritedBase
+{
+    public string NotInherited { get; set; }
 }
 
 public enum MyTestEnum

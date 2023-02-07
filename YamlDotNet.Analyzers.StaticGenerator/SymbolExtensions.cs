@@ -27,11 +27,15 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     static class SymbolExtensions
     {
-        public static string GetFullName(this ITypeSymbol symbol)
+        public static string GetFullName(this ITypeSymbol symbol, bool includeArrayDimensions = true)
         {
             if (symbol is IArrayTypeSymbol arrayTypeSymbol)
             {
-                return $"{arrayTypeSymbol.ElementType.GetFullName()}[{(new string(',', arrayTypeSymbol.Rank - 1))}]";
+                if (includeArrayDimensions)
+                {
+                    return $"{arrayTypeSymbol.ElementType.GetFullName()}[{(new string(',', arrayTypeSymbol.Rank - 1))}]";
+                }
+                return arrayTypeSymbol.ElementType.GetFullName();
             }
 
             if (symbol is INamedTypeSymbol namedTypeSymbol)
@@ -40,6 +44,27 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
 
             return symbol.Name;
+        }
+
+        public static string GetNamespace(this ISymbol symbol)
+        {
+            var parts = new Stack<string>();
+            var currentNamespace = symbol.ContainingNamespace;
+
+            while (currentNamespace != null)
+            {
+                if (!string.IsNullOrEmpty(currentNamespace.Name))
+                {
+                    parts.Push(currentNamespace.Name);
+                    currentNamespace = currentNamespace.ContainingNamespace;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return string.Join(".", parts);
         }
 
         static string GetNullable(this ITypeSymbol symbol)
@@ -92,27 +117,6 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
 
             return string.Empty;
-        }
-
-        static string GetNamespace(this ISymbol symbol)
-        {
-            var parts = new Stack<string>();
-            var currentNamespace = symbol.ContainingNamespace;
-
-            while (currentNamespace != null)
-            {
-                if (!string.IsNullOrEmpty(currentNamespace.Name))
-                {
-                    parts.Push(currentNamespace.Name);
-                    currentNamespace = currentNamespace.ContainingNamespace;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return string.Join(".", parts);
         }
     }
 }

@@ -19,35 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Analyzers.StaticGenerator
+namespace YamlDotNet.Test.Analyzers.StaticGenerator
 {
-    public class ClassObject
+    [YamlStaticContext]
+    public partial class StaticContext : YamlDotNet.Serialization.StaticContext
     {
-        public List<IFieldSymbol> FieldSymbols { get; }
-        public string FullName { get; }
-        public string GuidSuffix { get; }
-        public ITypeSymbol ModuleSymbol { get; }
-        public List<IPropertySymbol> PropertySymbols { get; }
-        public string SanitizedClassName { get; }
-        public bool IsArray { get; }
-        public bool IsDictionary { get; }
-        public bool IsList { get; }
-
-        public ClassObject(string sanitizedClassName, ITypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false, bool isArray = false)
-        {
-            FieldSymbols = new List<IFieldSymbol>();
-            PropertySymbols = new List<IPropertySymbol>();
-            FullName = moduleSymbol.GetFullName() ?? string.Empty;
-            GuidSuffix = Guid.NewGuid().ToString("N");
-            ModuleSymbol = moduleSymbol;
-            SanitizedClassName = sanitizedClassName;
-            IsDictionary = isDictionary;
-            IsList = isList;
-            IsArray = isArray;
-        }
     }
 }

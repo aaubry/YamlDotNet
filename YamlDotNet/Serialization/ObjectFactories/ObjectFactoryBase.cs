@@ -27,21 +27,32 @@ using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectFactories
 {
-    /// <summary>
-    /// Creates objects using a Func{Type,object}"/>.
-    /// </summary>
-    public sealed class LambdaObjectFactory : ObjectFactoryBase
+    public abstract class ObjectFactoryBase : IObjectFactory
     {
-        private readonly Func<Type, object> factory;
+        public abstract object Create(Type type);
 
-        public LambdaObjectFactory(Func<Type, object> factory)
+        public virtual object? CreatePrimitive(Type type) => type.IsValueType() ? Activator.CreateInstance(type) : null;
+
+        public virtual bool GetDictionary(IObjectDescriptor descriptor, out IDictionary? dictionary, out Type[]? genericArguments)
         {
-            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(descriptor.Type, typeof(IDictionary<,>));
+            if (genericDictionaryType != null)
+            {
+                genericArguments = genericDictionaryType.GetGenericArguments();
+                var adaptedDictionary = Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(genericArguments), descriptor.Value)!;
+                dictionary = adaptedDictionary as IDictionary;
+                return true;
+            }
+            genericArguments = null;
+            dictionary = null;
+            return false;
         }
 
-        public override object Create(Type type)
+        public virtual Type GetValueType(Type type)
         {
-            return factory(type);
+            var enumerableType = ReflectionUtility.GetImplementedGenericInterface(type, typeof(IEnumerable<>));
+            var itemType = enumerableType != null ? enumerableType.GetGenericArguments()[0] : typeof(object);
+            return itemType;
         }
     }
 }

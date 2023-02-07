@@ -21,6 +21,7 @@
 
 using System;
 using System.Text;
+using System.Xml;
 using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
@@ -33,6 +34,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         public void Execute(GeneratorExecutionContext context)
         {
             if (!(context.SyntaxContextReceiver is ClassSyntaxReceiver receiver))
+            {
+                return;
+            }
+
+            if (receiver.Classes.Count == 0)
             {
                 return;
             }
@@ -60,27 +66,56 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             var indent = new Action(() => indentation++);
             var unindent = new Action(() => indentation--);
 
-            var write = new Action<string>((string line) =>
+            var write = new Action<string, bool>((string line, bool includeNewLine) =>
             {
                 if (indentation > 0)
                 {
                     result.Append(new string(' ', indentation * 4));
                 }
-                result.AppendLine(line);
+                result.Append(line);
+                if (includeNewLine)
+                {
+                    result.AppendLine();
+                }
             });
 
-            write("using System;");
-            write("using System.Collections.Generic;");
-            write("namespace YamlDotNet.Static");
-            write("{"); indent();
+            try
+            {
+                write("#pragma warning disable CS8767 // Nullability of reference types", true);
+                write("#pragma warning disable CS8767 // Nullability of reference types", true);
+                write("#pragma warning disable CS8603 // Possible null reference return", true);
+                write("#pragma warning disable CS8604 // Possible null reference argument", true);
+                write("#pragma warning disable CS8766 // Nullability of reference types", true);
 
-            new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new StaticPropertyDescriptorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-            new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                write("using System;", true);
+                write("using System.Collections.Generic;", true);
 
-            unindent(); write("}");
+                var namespaceName = classSyntaxReceiver.YamlStaticContextType?.ContainingNamespace.ContainingNamespace;
+
+                write($"namespace {classSyntaxReceiver.YamlStaticContextType?.GetNamespace() ?? "YamlDotNet.Static"}", true);
+                write("{", true); indent();
+
+                new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                new StaticPropertyDescriptorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);
+
+                unindent(); write("}", true);
+            }
+            catch (Exception exception)
+            {
+                write("/*", true);
+                var e = exception;
+                while (e != null)
+                {
+                    write(exception.Message, true);
+                    write(exception.StackTrace, true);
+                    write("======", true);
+                    e = exception.InnerException;
+                }
+                write("*/", true);
+            }
             return result.ToString();
         }
     }

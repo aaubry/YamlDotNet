@@ -28,6 +28,7 @@ The library has now been successfully used in multiple projects and is considere
 * netstandard 2.0
 * netstandard 2.1
 * .NET 6.0
+* .NET 7.0
 * .NET Framework 4.7
 * .NET Framework 4.5
 * Unity Subset v3.5

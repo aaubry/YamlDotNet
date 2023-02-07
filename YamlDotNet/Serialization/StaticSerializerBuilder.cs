@@ -44,31 +44,29 @@ namespace YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the serializer
     /// with the desired customizations.
     /// </summary>
-#if NET7_0_OR_GREATER
-    [RequiresDynamicCode("This builder configures the serializer to use reflection which is not compatible with ahead-of-time compilation or assembly trimming." +
-        " You need to use the code generator/analyzer to generate static code and use the 'StaticSerializerBuilder' object instead of this one.")]
-#endif
-    public sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
+    public sealed class StaticSerializerBuilder : StaticBuilderSkeleton<StaticSerializerBuilder>
     {
+        private readonly StaticContext context;
+        private readonly StaticObjectFactory factory;
         private ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory;
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
         private readonly IDictionary<Type, TagName> tagMappings = new Dictionary<Type, TagName>();
-        private readonly IObjectFactory objectFactory;
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
         private bool quoteNecessaryStrings;
-        private bool quoteYaml1_1Strings;
 
-        public SerializerBuilder()
+        public StaticSerializerBuilder(StaticContext context)
             : base(new DynamicTypeResolver())
         {
+            this.context = context;
+            factory = context.GetFactory();
+
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
             typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
-            typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
 
             preProcessingPhaseObjectGraphVisitorFactories = new LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>>
             {
@@ -87,7 +85,7 @@ namespace YamlDotNet.Serialization
                 },
                 {
                     typeof(DefaultValuesObjectGraphVisitor),
-                    args => new DefaultValuesObjectGraphVisitor(defaultValuesHandlingConfiguration, args.InnerVisitor, new DefaultObjectFactory())
+                    args => new DefaultValuesObjectGraphVisitor(defaultValuesHandlingConfiguration, args.InnerVisitor, factory)
                 },
                 {
                     typeof(CommentsObjectGraphVisitor),
@@ -97,32 +95,28 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings) }
+                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings) }
             };
 
-            objectFactory = new DefaultObjectFactory();
-
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) =>
-                new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention, objectFactory);
+                new FullObjectGraphTraversalStrategy(typeInspector, typeResolver, maximumRecursion, namingConvention, factory);
         }
 
-        protected override SerializerBuilder Self { get { return this; } }
+        protected override StaticSerializerBuilder Self { get { return this; } }
 
         /// <summary>
         /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
         /// </summary>
-        /// <param name="quoteYaml1_1Strings">Also quote strings that are valid scalars in the YAML 1.1 specification (which includes boolean Yes/No/On/Off, base 60 numbers and more)</param>
-        public SerializerBuilder WithQuotingNecessaryStrings(bool quoteYaml1_1Strings = false)
+        public StaticSerializerBuilder WithQuotingNecessaryStrings()
         {
             quoteNecessaryStrings = true;
-            this.quoteYaml1_1Strings = quoteYaml1_1Strings;
             return this;
         }
 
         /// <summary>
         /// Sets the maximum recursion that is allowed while traversing the object graph. The default value is 50.
         /// </summary>
-        public SerializerBuilder WithMaximumRecursion(int maximumRecursion)
+        public StaticSerializerBuilder WithMaximumRecursion(int maximumRecursion)
         {
             if (maximumRecursion <= 0)
             {
@@ -137,7 +131,7 @@ namespace YamlDotNet.Serialization
         /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
         /// </summary>
         /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
-        public SerializerBuilder WithEventEmitter<TEventEmitter>(Func<IEventEmitter, TEventEmitter> eventEmitterFactory)
+        public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(Func<IEventEmitter, TEventEmitter> eventEmitterFactory)
             where TEventEmitter : IEventEmitter
         {
             return WithEventEmitter(eventEmitterFactory, w => w.OnTop());
@@ -148,7 +142,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
-        public SerializerBuilder WithEventEmitter<TEventEmitter>(
+        public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(
             Func<IEventEmitter, TEventEmitter> eventEmitterFactory,
             Action<IRegistrationLocationSelectionSyntax<IEventEmitter>> where
         )
@@ -173,7 +167,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="eventEmitterFactory">A function that instantiates the event emitter based on a previously registered <see cref="IEventEmitter" />.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
-        public SerializerBuilder WithEventEmitter<TEventEmitter>(
+        public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(
             WrapperFactory<IEventEmitter, IEventEmitter, TEventEmitter> eventEmitterFactory,
             Action<ITrackingRegistrationLocationSelectionSyntax<IEventEmitter>> where
         )
@@ -196,7 +190,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="IEventEmitter" /> of type <typeparam name="TEventEmitter" />.
         /// </summary>
-        public SerializerBuilder WithoutEventEmitter<TEventEmitter>()
+        public StaticSerializerBuilder WithoutEventEmitter<TEventEmitter>()
             where TEventEmitter : IEventEmitter
         {
             return WithoutEventEmitter(typeof(TEventEmitter));
@@ -205,7 +199,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="IEventEmitter" /> of type <param name="eventEmitterType" />.
         /// </summary>
-        public SerializerBuilder WithoutEventEmitter(Type eventEmitterType)
+        public StaticSerializerBuilder WithoutEventEmitter(Type eventEmitterType)
         {
             if (eventEmitterType == null)
             {
@@ -219,7 +213,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public override SerializerBuilder WithTagMapping(TagName tag, Type type)
+        public override StaticSerializerBuilder WithTagMapping(TagName tag, Type type)
         {
             if (tag.IsEmpty)
             {
@@ -243,7 +237,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing tag mapping.
         /// </summary>
-        public SerializerBuilder WithoutTagMapping(Type type)
+        public StaticSerializerBuilder WithoutTagMapping(Type type)
         {
             if (type == null)
             {
@@ -261,7 +255,7 @@ namespace YamlDotNet.Serialization
         /// Ensures that it will be possible to deserialize the serialized objects.
         /// This option will force the emission of tags and emit only properties with setters.
         /// </summary>
-        public SerializerBuilder EnsureRoundtrip()
+        public StaticSerializerBuilder EnsureRoundtrip()
         {
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) => new RoundtripObjectGraphTraversalStrategy(
                 typeConverters,
@@ -270,9 +264,9 @@ namespace YamlDotNet.Serialization
                 maximumRecursion,
                 namingConvention,
                 settings,
-                objectFactory
+                factory
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 
@@ -286,7 +280,7 @@ namespace YamlDotNet.Serialization
         /// If this flag is not set, there is a performance penalty because the entire
         /// object graph must be walked twice.
         /// </remarks>
-        public SerializerBuilder DisableAliases()
+        public StaticSerializerBuilder DisableAliases()
         {
             preProcessingPhaseObjectGraphVisitorFactories.Remove(typeof(AnchorAssigner));
             emissionPhaseObjectGraphVisitorFactories.Remove(typeof(AnchorAssigningObjectGraphVisitor));
@@ -297,7 +291,7 @@ namespace YamlDotNet.Serialization
         /// Forces every value to be serialized, even if it is the default value for that type.
         /// </summary>
         [Obsolete("The default behavior is now to always emit default values, thefore calling this method has no effect. This behavior is now controlled by ConfigureDefaultValuesHandling.", error: true)]
-        public SerializerBuilder EmitDefaults() => ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve);
+        public StaticSerializerBuilder EmitDefaults() => ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve);
 
         /// <summary>
         /// Configures how properties with default and null values should be handled. The default value is DefaultValuesHandling.Preserve
@@ -307,7 +301,7 @@ namespace YamlDotNet.Serialization
         /// Then register it as follows: 
         /// WithEmissionPhaseObjectGraphVisitor(args => new MyDefaultHandlingStrategy(args.InnerVisitor));
         /// </remarks>
-        public SerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)
+        public StaticSerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)
         {
             this.defaultValuesHandlingConfiguration = configuration;
             return this;
@@ -316,7 +310,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Ensures that the result of the serialization is valid JSON.
         /// </summary>
-        public SerializerBuilder JsonCompatible()
+        public StaticSerializerBuilder JsonCompatible()
         {
             this.emitterSettings = this.emitterSettings
                                        .WithMaxSimpleKeyLength(int.MaxValue)
@@ -324,7 +318,6 @@ namespace YamlDotNet.Serialization
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
-                .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
                 .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
@@ -332,7 +325,7 @@ namespace YamlDotNet.Serialization
         /// Allows you to override the new line character to use when serializing to YAML.
         /// </summary>
         /// <param name="newLine">NewLine character(s) to use when serializing to YAML.</param>
-        public SerializerBuilder WithNewLine(string newLine)
+        public StaticSerializerBuilder WithNewLine(string newLine)
         {
             this.emitterSettings = this.emitterSettings.WithNewLine(newLine);
             return this;
@@ -348,7 +341,7 @@ namespace YamlDotNet.Serialization
         /// can be used later by another visitor registered in the emission phase.
         /// </remarks>
         /// <param name="objectGraphVisitor">The type inspector.</param>
-        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(TObjectGraphVisitor objectGraphVisitor)
+        public StaticSerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(TObjectGraphVisitor objectGraphVisitor)
             where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
         {
             return WithPreProcessingPhaseObjectGraphVisitor(objectGraphVisitor, w => w.OnTop());
@@ -365,7 +358,7 @@ namespace YamlDotNet.Serialization
         /// </remarks>
         /// <param name="objectGraphVisitor">The type inspector.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
-        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+        public StaticSerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
             TObjectGraphVisitor objectGraphVisitor,
             Action<IRegistrationLocationSelectionSyntax<IObjectGraphVisitor<Nothing>>> where
         )
@@ -396,7 +389,7 @@ namespace YamlDotNet.Serialization
         /// </remarks>
         /// <param name="objectGraphVisitorFactory">A factory that creates the <see cref="IObjectGraphVisitor{Nothing}" /> based on a previously registered <see cref="IObjectGraphVisitor{Nothing}" />.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
-        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+        public StaticSerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
             WrapperFactory<IObjectGraphVisitor<Nothing>, TObjectGraphVisitor> objectGraphVisitorFactory,
             Action<ITrackingRegistrationLocationSelectionSyntax<IObjectGraphVisitor<Nothing>>> where
         )
@@ -419,7 +412,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="IObjectGraphVisitor{Nothing}" /> of type <typeparam name="TObjectGraphVisitor" />.
         /// </summary>
-        public SerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>()
+        public StaticSerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>()
             where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
         {
             return WithoutPreProcessingPhaseObjectGraphVisitor(typeof(TObjectGraphVisitor));
@@ -428,7 +421,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="IObjectGraphVisitor{Nothing}" /> of type <param name="objectGraphVisitorType" />.
         /// </summary>
-        public SerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor(Type objectGraphVisitorType)
+        public StaticSerializerBuilder WithoutPreProcessingPhaseObjectGraphVisitor(Type objectGraphVisitorType)
         {
             if (objectGraphVisitorType == null)
             {
@@ -444,7 +437,7 @@ namespace YamlDotNet.Serialization
         /// while traversing the object graph.
         /// </summary>
         /// <param name="objectGraphTraversalStrategyFactory">A function that instantiates the traversal strategy.</param>
-        public SerializerBuilder WithObjectGraphTraversalStrategyFactory(ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory)
+        public StaticSerializerBuilder WithObjectGraphTraversalStrategyFactory(ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory)
         {
             this.objectGraphTraversalStrategyFactory = objectGraphTraversalStrategyFactory;
 
@@ -456,7 +449,7 @@ namespace YamlDotNet.Serialization
         /// while emitting an object graph.
         /// </summary>
         /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector.</param>
-        public SerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(Func<EmissionPhaseObjectGraphVisitorArgs, TObjectGraphVisitor> objectGraphVisitorFactory)
+        public StaticSerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(Func<EmissionPhaseObjectGraphVisitorArgs, TObjectGraphVisitor> objectGraphVisitorFactory)
             where TObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
         {
             return WithEmissionPhaseObjectGraphVisitor(objectGraphVisitorFactory, w => w.OnTop());
@@ -468,7 +461,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{IEmitter}" /></param>
-        public SerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+        public StaticSerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(
             Func<EmissionPhaseObjectGraphVisitorArgs, TObjectGraphVisitor> objectGraphVisitorFactory,
             Action<IRegistrationLocationSelectionSyntax<IObjectGraphVisitor<IEmitter>>> where
         )
@@ -494,7 +487,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector based on a previously registered <see cref="IObjectGraphVisitor{IEmitter}" />.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{IEmitter}" /></param>
-        public SerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+        public StaticSerializerBuilder WithEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>(
             WrapperFactory<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>, TObjectGraphVisitor> objectGraphVisitorFactory,
             Action<ITrackingRegistrationLocationSelectionSyntax<IObjectGraphVisitor<IEmitter>>> where
         )
@@ -517,7 +510,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="IObjectGraphVisitor{IEmitter}" /> of type <typeparam name="TObjectGraphVisitor" />.
         /// </summary>
-        public SerializerBuilder WithoutEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>()
+        public StaticSerializerBuilder WithoutEmissionPhaseObjectGraphVisitor<TObjectGraphVisitor>()
             where TObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
         {
             return WithoutEmissionPhaseObjectGraphVisitor(typeof(TObjectGraphVisitor));
@@ -526,7 +519,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="IObjectGraphVisitor{IEmitter}" /> of type <param name="objectGraphVisitorType" />.
         /// </summary>
-        public SerializerBuilder WithoutEmissionPhaseObjectGraphVisitor(Type objectGraphVisitorType)
+        public StaticSerializerBuilder WithoutEmissionPhaseObjectGraphVisitor(Type objectGraphVisitorType)
         {
             if (objectGraphVisitorType == null)
             {
@@ -546,7 +539,7 @@ namespace YamlDotNet.Serialization
         ///    - item
         /// </example>
         /// <returns></returns>
-        public SerializerBuilder WithIndentedSequences()
+        public StaticSerializerBuilder WithIndentedSequences()
         {
             emitterSettings = emitterSettings.WithIndentedSequences();
 
@@ -584,17 +577,9 @@ namespace YamlDotNet.Serialization
 
         internal ITypeInspector BuildTypeInspector()
         {
-            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
+            var typeInspector = context.GetTypeInspector();
 
-            if (!ignoreFields)
-            {
-                innerInspector = new CompositeTypeInspector(
-                    new ReadableFieldsTypeInspector(typeResolver),
-                    innerInspector
-                );
-            }
-
-            return typeInspectorFactories.BuildComponentChain(innerInspector);
+            return typeInspectorFactories.BuildComponentChain(typeInspector);
         }
 
         private class ValueSerializer : IValueSerializer

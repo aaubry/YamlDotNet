@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS builder
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS builder
 RUN apt update && \
     apt install -y \
         apt-transport-https \
@@ -28,6 +28,8 @@ COPY YamlDotNet.AotTest/YamlDotNet.AotTest.csproj YamlDotNet.AotTest/YamlDotNet.
 COPY YamlDotNet.Benchmark/YamlDotNet.Benchmark.csproj YamlDotNet.Benchmark/YamlDotNet.Benchmark.csproj
 COPY YamlDotNet.Samples/YamlDotNet.Samples.csproj YamlDotNet.Samples/YamlDotNet.Samples.csproj
 COPY YamlDotNet.Test/YamlDotNet.Test.csproj YamlDotNet.Test/YamlDotNet.Test.csproj
+COPY YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.csproj YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.csproj
+COPY YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj
 
 RUN dotnet restore YamlDotNet.sln
 
@@ -40,9 +42,11 @@ RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /o
 RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.0
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
 RUN dotnet build -c Release --framework net60 YamlDotNet/YamlDotNet.csproj -o /output/net60
+RUN dotnet build -c Release --framework net70 YamlDotNet/YamlDotNet.csproj -o /output/net70
 
 RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
 
+RUN dotnet test -c Release YamlDotNet.sln --framework net70 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.sln --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework netcoreapp3.1 --logger:"trx;LogFileName=/output/tests.netcoreapp3.1.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net47 --logger:"trx;LogFileName=/output/tests.net47.trx" --logger:"console;Verbosity=detailed"

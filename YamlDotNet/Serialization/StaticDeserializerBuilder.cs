@@ -43,19 +43,15 @@ namespace YamlDotNet.Serialization
     /// to apply customizations, then call <see cref="Build" /> to create an instance of the deserializer
     /// with the desired customizations.
     /// </summary>
-
-#if NET7_0_OR_GREATER
-    [RequiresDynamicCode("This builder configures the deserializer to use reflection which is not compatible with ahead-of-time compilation or assembly trimming." +
-        " You need to use the code generator/analyzer to generate static code and use the 'StaticDeserializerBuilder' object instead of this one.")]
-#endif
-    public sealed class DeserializerBuilder : BuilderSkeleton<DeserializerBuilder>
+    public sealed class StaticDeserializerBuilder : StaticBuilderSkeleton<StaticDeserializerBuilder>
     {
-        private Lazy<IObjectFactory> objectFactory;
+        private readonly StaticContext context;
+        private readonly StaticObjectFactory factory;
         private readonly LazyComponentRegistrationList<Nothing, INodeDeserializer> nodeDeserializerFactories;
         private readonly LazyComponentRegistrationList<Nothing, INodeTypeResolver> nodeTypeResolverFactories;
         private readonly Dictionary<TagName, Type> tagMappings;
-        private readonly Dictionary<Type, Type> typeMappings;
         private readonly ITypeConverter typeConverter;
+        private readonly Dictionary<Type, Type> typeMappings;
         private bool ignoreUnmatched;
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
@@ -63,11 +59,12 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
         /// </summary>
-        public DeserializerBuilder()
+        public StaticDeserializerBuilder(StaticContext context)
             : base(new StaticTypeResolver())
         {
+            this.context = context;
+            factory = context.GetFactory();
             typeMappings = new Dictionary<Type, Type>();
-            objectFactory = new Lazy<IObjectFactory>(() => new DefaultObjectFactory(typeMappings, settings), true);
 
             tagMappings = new Dictionary<TagName, Type>
             {
@@ -82,21 +79,18 @@ namespace YamlDotNet.Serialization
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
             typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
-            typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
-            typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner));
 
             nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
-                { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(objectFactory.Value) },
-                { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory.Value) },
+                { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(factory) },
+                { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(factory) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
                 { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter) },
-                { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer() },
-                { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, duplicateKeyChecking) },
-                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value) },
-                { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
-                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking, typeConverter) }
+                { typeof(StaticArrayNodeDeserializer), _ => new StaticArrayNodeDeserializer(factory) },
+                { typeof(StaticDictionaryNodeDeserializer), _ => new StaticDictionaryNodeDeserializer(factory, duplicateKeyChecking) },
+                { typeof(StaticCollectionNodeDeserializer), _ => new StaticCollectionNodeDeserializer(factory) },
+                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(factory, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking, typeConverter) },
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
@@ -109,22 +103,14 @@ namespace YamlDotNet.Serialization
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
 
-            typeConverter = new ReflectionTypeConverter();
+            typeConverter = new NullTypeConverter();
         }
 
-        protected override DeserializerBuilder Self { get { return this; } }
+        protected override StaticDeserializerBuilder Self { get { return this; } }
 
         internal ITypeInspector BuildTypeInspector()
         {
-            ITypeInspector innerInspector = new WritablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
-
-            if (!ignoreFields)
-            {
-                innerInspector = new CompositeTypeInspector(
-                    new ReadableFieldsTypeInspector(typeResolver),
-                    innerInspector
-                );
-            }
+            ITypeInspector innerInspector = context.GetTypeInspector();
 
             return typeInspectorFactories.BuildComponentChain(innerInspector);
         }
@@ -133,43 +119,16 @@ namespace YamlDotNet.Serialization
         /// When deserializing it will attempt to convert unquoted strings to their correct datatype. If conversion is not sucessful, it will leave it as a string.
         /// This option is only applicable when not specifying a type or specifying the object type during deserialization.
         /// </summary>
-        public DeserializerBuilder WithAttemptingUnquotedStringTypeDeserialization()
+        public StaticDeserializerBuilder WithAttemptingUnquotedStringTypeDeserialization()
         {
             attemptUnknownTypeDeserialization = true;
             return this;
         }
 
         /// <summary>
-        /// Sets the <see cref="IObjectFactory" /> that will be used by the deserializer.
-        /// </summary>
-        public DeserializerBuilder WithObjectFactory(IObjectFactory objectFactory)
-        {
-            if (objectFactory == null)
-            {
-                throw new ArgumentNullException(nameof(objectFactory));
-            }
-
-            this.objectFactory = new Lazy<IObjectFactory>(() => objectFactory, true);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the <see cref="IObjectFactory" /> that will be used by the deserializer.
-        /// </summary>
-        public DeserializerBuilder WithObjectFactory(Func<Type, object> objectFactory)
-        {
-            if (objectFactory == null)
-            {
-                throw new ArgumentNullException(nameof(objectFactory));
-            }
-
-            return WithObjectFactory(new LambdaObjectFactory(objectFactory));
-        }
-
-        /// <summary>
         /// Registers an additional <see cref="INodeDeserializer" /> to be used by the deserializer.
         /// </summary>
-        public DeserializerBuilder WithNodeDeserializer(INodeDeserializer nodeDeserializer)
+        public StaticDeserializerBuilder WithNodeDeserializer(INodeDeserializer nodeDeserializer)
         {
             return WithNodeDeserializer(nodeDeserializer, w => w.OnTop());
         }
@@ -179,7 +138,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="nodeDeserializer"></param>
         /// <param name="where">Configures the location where to insert the <see cref="INodeDeserializer" /></param>
-        public DeserializerBuilder WithNodeDeserializer(
+        public StaticDeserializerBuilder WithNodeDeserializer(
             INodeDeserializer nodeDeserializer,
             Action<IRegistrationLocationSelectionSyntax<INodeDeserializer>> where
         )
@@ -203,7 +162,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="nodeDeserializerFactory">A factory that creates the <see cref="INodeDeserializer" /> based on a previously registered <see cref="INodeDeserializer" />.</param>
         /// <param name="where">Configures the location where to insert the <see cref="INodeDeserializer" /></param>
-        public DeserializerBuilder WithNodeDeserializer<TNodeDeserializer>(
+        public StaticDeserializerBuilder WithNodeDeserializer<TNodeDeserializer>(
             WrapperFactory<INodeDeserializer, TNodeDeserializer> nodeDeserializerFactory,
             Action<ITrackingRegistrationLocationSelectionSyntax<INodeDeserializer>> where
         )
@@ -226,7 +185,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="INodeDeserializer" /> of type <typeparam name="TNodeDeserializer" />.
         /// </summary>
-        public DeserializerBuilder WithoutNodeDeserializer<TNodeDeserializer>()
+        public StaticDeserializerBuilder WithoutNodeDeserializer<TNodeDeserializer>()
             where TNodeDeserializer : INodeDeserializer
         {
             return WithoutNodeDeserializer(typeof(TNodeDeserializer));
@@ -235,7 +194,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="INodeDeserializer" /> of type <param name="nodeDeserializerType" />.
         /// </summary>
-        public DeserializerBuilder WithoutNodeDeserializer(Type nodeDeserializerType)
+        public StaticDeserializerBuilder WithoutNodeDeserializer(Type nodeDeserializerType)
         {
             if (nodeDeserializerType == null)
             {
@@ -249,7 +208,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers an additional <see cref="INodeTypeResolver" /> to be used by the deserializer.
         /// </summary>
-        public DeserializerBuilder WithNodeTypeResolver(INodeTypeResolver nodeTypeResolver)
+        public StaticDeserializerBuilder WithNodeTypeResolver(INodeTypeResolver nodeTypeResolver)
         {
             return WithNodeTypeResolver(nodeTypeResolver, w => w.OnTop());
         }
@@ -259,7 +218,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="nodeTypeResolver"></param>
         /// <param name="where">Configures the location where to insert the <see cref="INodeTypeResolver" /></param>
-        public DeserializerBuilder WithNodeTypeResolver(
+        public StaticDeserializerBuilder WithNodeTypeResolver(
             INodeTypeResolver nodeTypeResolver,
             Action<IRegistrationLocationSelectionSyntax<INodeTypeResolver>> where
         )
@@ -283,7 +242,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="nodeTypeResolverFactory">A factory that creates the <see cref="INodeTypeResolver" /> based on a previously registered <see cref="INodeTypeResolver" />.</param>
         /// <param name="where">Configures the location where to insert the <see cref="INodeTypeResolver" /></param>
-        public DeserializerBuilder WithNodeTypeResolver<TNodeTypeResolver>(
+        public StaticDeserializerBuilder WithNodeTypeResolver<TNodeTypeResolver>(
             WrapperFactory<INodeTypeResolver, TNodeTypeResolver> nodeTypeResolverFactory,
             Action<ITrackingRegistrationLocationSelectionSyntax<INodeTypeResolver>> where
         )
@@ -306,7 +265,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="INodeTypeResolver" /> of type <typeparam name="TNodeTypeResolver" />.
         /// </summary>
-        public DeserializerBuilder WithoutNodeTypeResolver<TNodeTypeResolver>()
+        public StaticDeserializerBuilder WithoutNodeTypeResolver<TNodeTypeResolver>()
             where TNodeTypeResolver : INodeTypeResolver
         {
             return WithoutNodeTypeResolver(typeof(TNodeTypeResolver));
@@ -315,7 +274,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing <see cref="INodeTypeResolver" /> of type <param name="nodeTypeResolverType" />.
         /// </summary>
-        public DeserializerBuilder WithoutNodeTypeResolver(Type nodeTypeResolverType)
+        public StaticDeserializerBuilder WithoutNodeTypeResolver(Type nodeTypeResolverType)
         {
             if (nodeTypeResolverType == null)
             {
@@ -329,7 +288,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a tag mapping.
         /// </summary>
-        public override DeserializerBuilder WithTagMapping(TagName tag, Type type)
+        public override StaticDeserializerBuilder WithTagMapping(TagName tag, Type type)
         {
             if (tag.IsEmpty)
             {
@@ -353,7 +312,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Registers a type mapping using the default object factory.
         /// </summary>
-        public DeserializerBuilder WithTypeMapping<TInterface, TConcrete>()
+        public StaticDeserializerBuilder WithTypeMapping<TInterface, TConcrete>()
             where TConcrete : TInterface
         {
             var interfaceType = typeof(TInterface);
@@ -379,7 +338,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Unregisters an existing tag mapping.
         /// </summary>
-        public DeserializerBuilder WithoutTagMapping(TagName tag)
+        public StaticDeserializerBuilder WithoutTagMapping(TagName tag)
         {
             if (tag.IsEmpty)
             {
@@ -396,7 +355,7 @@ namespace YamlDotNet.Serialization
         /// <summary>
         /// Instructs the deserializer to ignore unmatched properties instead of throwing an exception.
         /// </summary>
-        public DeserializerBuilder IgnoreUnmatchedProperties()
+        public StaticDeserializerBuilder IgnoreUnmatchedProperties()
         {
             ignoreUnmatched = true;
             return this;
@@ -406,7 +365,7 @@ namespace YamlDotNet.Serialization
         /// Instructs the deserializer to check for duplicate keys and throw an exception if duplicate keys are found.
         /// </summary>
         /// <returns></returns>
-        public DeserializerBuilder WithDuplicateKeyChecking()
+        public StaticDeserializerBuilder WithDuplicateKeyChecking()
         {
             duplicateKeyChecking = true;
             return this;

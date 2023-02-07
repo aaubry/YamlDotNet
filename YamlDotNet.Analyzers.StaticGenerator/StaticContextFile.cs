@@ -26,13 +26,13 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticContextFile : File
     {
-        public StaticContextFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticContextFile(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public partial class StaticContext : YamlDotNet.Serialization.StaticContext");
+            Write($"public partial class {classSyntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
             Write("{"); Indent();
             Write("public YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory ObjectFactory { get; } = new StaticObjectFactory();");
             Write("public StaticTypeInspector TypeInspector { get; } = new StaticTypeInspector();");

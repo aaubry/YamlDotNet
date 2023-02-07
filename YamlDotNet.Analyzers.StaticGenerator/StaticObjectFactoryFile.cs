@@ -20,37 +20,73 @@
 // SOFTWARE.
 
 using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticObjectFactoryFile : File
     {
-        public StaticObjectFactoryFile(Action<string> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
+        public StaticObjectFactoryFile(Action<string, bool> write, Action indent, Action unindent, GeneratorExecutionContext context) : base(write, indent, unindent, context)
         {
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
         {
-            Write("public class StaticObjectFactory : YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory");
+            Write($"class StaticObjectFactory : YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory");
             Write("{"); Indent();
 
             Write("public override object Create(Type type)");
             Write("{"); Indent();
+            foreach (var o in classSyntaxReceiver.Classes.Where(c => !c.Value.IsArray))
+            {
+                var classObject = o.Value;
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}();");
+                Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return new System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>();");
+            }
+            Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            UnIndent(); Write("}");
+
+            Write("public override Array CreateArray(Type type, int count)");
+            Write("{"); Indent();
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return new {classObject.ModuleSymbol.GetFullName()}();");
+                if (classObject.IsArray)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName(false).Replace("?", string.Empty)}[count];");
+                }
+                else
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return new {classObject.ModuleSymbol.GetFullName(false).Replace("?", string.Empty)}[count];");
+                }
             }
             Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
 
             Write("public override bool IsDictionary(Type type)");
             Write("{"); Indent();
+            foreach (var o in classSyntaxReceiver.Classes.Where(c => c.Value.IsDictionary))
+            {
+                Write($"if (type == typeof({o.Value.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+            }
+            Write("return false;");
+            UnIndent(); Write("}");
+
+            Write("public override bool IsArray(Type type)");
+            Write("{"); Indent();
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsDictionary.ToString().ToLower()};");
+                if (o.Value.IsArray)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+                }
+                else
+                {
+                    //always support an array of the type
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return true;");
+                }
             }
             Write("return false;");
             UnIndent(); Write("}");
@@ -60,7 +96,15 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return {classObject.IsList.ToString().ToLower()};");
+                if (classObject.IsList)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+                }
+                else
+                {
+                    //always support a list of the type
+                    Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
+                }
             }
             Write("return false;");
             UnIndent(); Write("}");
@@ -76,11 +120,13 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 }
 
                 var keyType = "object";
-                if (classObject.ModuleSymbol.IsGenericType)
+                var type = (INamedTypeSymbol)classObject.ModuleSymbol;
+
+                if (type.IsGenericType)
                 {
-                    keyType = o.Value.ModuleSymbol.TypeArguments[0].GetFullName();
+                    keyType = type.TypeArguments[0].GetFullName().Replace("?", string.Empty);
                 }
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return typeof({keyType});");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return typeof({keyType});");
             }
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
@@ -90,7 +136,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in classSyntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (!(classObject.IsList || classObject.IsDictionary))
+                if (!(classObject.IsList || classObject.IsDictionary || classObject.IsArray))
                 {
                     continue;
                 }
@@ -98,17 +144,28 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 string valueType;
                 if (classObject.IsDictionary)
                 {
-                    //we're a dictionary
-                    valueType = o.Value.ModuleSymbol.TypeArguments[1].GetFullName();
+                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[1].GetFullName().Replace("?", string.Empty);
+                }
+                else if (classObject.IsList)
+                {
+                    valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName().Replace("?", string.Empty);
                 }
                 else
                 {
-                    //we're a list
-                    valueType = o.Value.ModuleSymbol.TypeArguments[0].GetFullName();
+                    valueType = ((IArrayTypeSymbol)(classObject.ModuleSymbol)).ElementType.GetFullName().Replace("?", string.Empty);
                 }
 
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName()})) return typeof({valueType});");
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return typeof({valueType});");
             }
+
+            //always support array and list of all types
+            foreach (var o in classSyntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
+                Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
+            }
+
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
 
