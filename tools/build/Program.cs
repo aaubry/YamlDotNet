@@ -25,7 +25,7 @@ namespace build
         public static Host Host { get; private set; }
         private static readonly Dictionary<Type, object> state = new Dictionary<Type, object>();
         public static bool UnlistPackage { get; private set; } = true;
-
+        public static bool PushSerializer { get; private set; }
         private static T GetState<T>() where T : notnull
         {
             return state.TryGetValue(typeof(T), out var value)
@@ -137,6 +137,11 @@ namespace build
                         return false;
                     }
 
+                    if (a == "--push-serializer")
+                    {
+                        PushSerializer = true;
+                        return false;
+                    }
                     return true;
                 })
                 .ToList();
@@ -221,6 +226,7 @@ namespace build
                 Console.WriteLine($"  {palette.Option}--no-prerelease            {palette.Default}Force the current version to be considered final{palette.Reset}");
                 Console.WriteLine($"  {palette.Option}--version=<version>        {palette.Default}Force the current version to equal to the specified value{palette.Reset}");
                 Console.WriteLine($"  {palette.Option}--no-unlist                {palette.Default}Don't unlist the pushed NuGet package{palette.Reset}");
+                Console.WriteLine($"  {palette.Option}--push-serializer          {palette.Default}Push up the serializer nuget package{palette.Reset}");
             }
 
             return exitCode;
