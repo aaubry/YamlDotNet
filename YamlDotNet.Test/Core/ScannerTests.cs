@@ -443,6 +443,26 @@ namespace YamlDotNet.Test.Core
                 Error("Invalid key indicator format."));
         }
 
+        [Fact]
+        public void Quoted_string_on_block_level_and_subsequent_key_starting_with_colon() 
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText(@"
+:a: '1'
+:b: 2"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":a"),
+                Value,
+                SingleQuotedScalar("1"),
+                Key,
+                PlainScalar(":b"),
+                Value,
+                PlainScalar("2"),
+                BlockEnd,
+                StreamEnd);
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;
