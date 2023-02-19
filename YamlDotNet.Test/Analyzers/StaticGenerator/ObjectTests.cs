@@ -37,7 +37,7 @@ Inherited: world
             Assert.Equal("world", actual.Inherited);
             var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
             var actualYaml = serializer.Serialize(actual);
-            Assert.Equal(yaml, actualYaml);
+            Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
         }
 
         [Fact]
@@ -70,7 +70,7 @@ Inner:
   Prop1: a
   Prop2: 2
 ";
-            Assert.Equal(yaml, actualYaml);
+            Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
         }
     }
     public class InheritedClass
