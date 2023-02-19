@@ -140,7 +140,8 @@ namespace YamlDotNet.Core
             var current = node;
             while (current != null)
             {
-                if (current.Value is SequenceEnd)
+                if (current.Value is SequenceEnd &&
+                    current.Value.Start.Line >= sequenceStart.Value.Start.Line)
                 {
                     events.MarkDeleted(current);
                     return true;
