@@ -444,10 +444,14 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
-        public void Keys_can_start_with_colons()
+        public void Keys_can_start_with_colons_in_nested_block()
         {
-           AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: 1\n:second: 2"),
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText("root:\n  :first: 1\n  :second: 2"),
                 StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("root"),
+                Value,
                 BlockMappingStart,
                 Key,
                 PlainScalar(":first"),
@@ -458,11 +462,12 @@ namespace YamlDotNet.Test.Core
                 Value,
                 PlainScalar("2"),
                 BlockEnd,
+                BlockEnd,
                 StreamEnd);
         }
 
         [Fact]
-        public void Keys_can_start_with_colons_if_values_are_quoted() 
+        public void Keys_can_start_with_colons_after_quoted_values() 
         {
            AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: '1'\n:second: 2"),
                 StreamStart,
