@@ -444,19 +444,35 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
-        public void Quoted_string_on_block_level_and_subsequent_key_starting_with_colon() 
+        public void Keys_can_start_with_colons()
         {
-            AssertSequenceOfTokensFrom(Yaml.ScannerForText(@"
-:a: '1'
-:b: 2"),
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: 1\n:second: 2"),
                 StreamStart,
                 BlockMappingStart,
                 Key,
-                PlainScalar(":a"),
+                PlainScalar(":first"),
+                Value,
+                PlainScalar("1"),
+                Key,
+                PlainScalar(":second"),
+                Value,
+                PlainScalar("2"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Keys_can_start_with_colons_if_values_are_quoted() 
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: '1'\n:second: 2"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":first"),
                 Value,
                 SingleQuotedScalar("1"),
                 Key,
-                PlainScalar(":b"),
+                PlainScalar(":second"),
                 Value,
                 PlainScalar("2"),
                 BlockEnd,
