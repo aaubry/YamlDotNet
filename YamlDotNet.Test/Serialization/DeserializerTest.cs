@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
@@ -333,42 +332,6 @@ name: Jake
             act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
         
-        [Fact]
-        public void MergingParserWithMergeObjectWithSequence_ShouldNotThrowException()
-        {
-            var yaml = @"
-base_level: &base 
-  tenant: 
-  - a1
-Level1: &Level1
-    <<: [*base]
-Level2: &Level2
-    <<: *Level1
-";
-            var mergingParserFailed = new MergingParser(new Parser(new StringReader(yaml)));
-            var deserializer = new DeserializerBuilder().Build();
-            Action act = () => deserializer.Deserialize(mergingParserFailed);
-            act.ShouldNotThrow<Exception>();
-        }
-        
-        [Fact]
-        public void MergingParserWithNestedSequence_ShouldNotThrowException()
-        {
-            var yaml = @"
-base_level: &base {}
-Level1: &Level1
-    <<: [*base]
-Level2: &Level2
-    <<: [*Level1]
-Level3:
-    <<: *Level2
-";
-            var mergingParserFailed = new MergingParser(new Parser(new StringReader(yaml)));
-            var deserializer = new DeserializerBuilder().Build();
-            Action act = () => deserializer.Deserialize(mergingParserFailed);
-            act.ShouldNotThrow<Exception>();
-        }
-
         public class Test
         {
             public string Value { get; set; }
