@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
             {
                 if (!baseType.IsAssignableFrom(keyValuePair.Value))
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(typeMapping)} dictionary contains type {keyValuePair.Value} which is not a assignable to {baseType}");
+                    throw new ArgumentOutOfRangeException(nameof(typeMapping), $"{keyValuePair.Value} is not a assignable to {baseType}");
                 }
             }
             this.BaseType = baseType;
