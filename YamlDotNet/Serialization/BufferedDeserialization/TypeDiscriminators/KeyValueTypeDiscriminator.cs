@@ -25,7 +25,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
         /// <param name="baseType">The base type which all discriminated types will implement. Use object if you're discriminating
         /// unrelated types. Note the less specific you are with the base type the more yaml will need to be buffered.</param>
         /// <param name="targetKey">The known key to check the value of when discriminating.</param>
-        /// <param name="typeMapping">A mapping dictionary of string to types.</param>
+        /// <param name="typeMapping">A mapping dictionary of yaml values to types.</param>
         /// <exception cref="ArgumentOutOfRangeException">If any of the target types do not implement the base type.</exception>
         public KeyValueTypeDiscriminator(Type baseType, string targetKey, IDictionary<string, Type> typeMapping)
         {
