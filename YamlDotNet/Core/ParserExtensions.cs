@@ -148,45 +148,58 @@ namespace YamlDotNet.Core
             return Accept<T>(parser, out var _);
         }
 
-        public static bool TryFindMappingEntry(this IParser parser, Func<Scalar, bool> selector, out Scalar? key, out ParsingEvent? value)
+        /// <summary>
+        /// Checks whether the current event contains a mapping entry that returns true for the specified selector.
+        /// If one is found, it's key is returned as a Scalar and it's value as a ParsingEvent, the mapping entry
+        /// is consumed and the parser is moved to the next event, and the whole function returns true.
+        /// If the event is not a mapping event or a matching key is not found, returns false.
+        /// </summary>
+        /// <param name="selector">The selector to filter the mapping by.</param>
+        /// <param name="key">The matching key of the mapping as a Scalar, or null if no matching key found</param>
+        /// <param name="value">The matching value of the mapping as a ParsingEvent, or null if no matching key found</param>
+        /// <returns>Returns true if the current event is a mapping entry with a key that matches the selector;
+        /// otherwise returns false.</returns>
+        public static bool TryFindMappingEntry(this IParser parser, Func<Scalar, bool> selector, [MaybeNullWhen(false)] out Scalar? key, [MaybeNullWhen(false)] out ParsingEvent? value)
         {
-            parser.Consume<MappingStart>();
-            do
+            if (parser.TryConsume<MappingStart>(out var _start))
             {
-                // so we only want to check keys in this mapping, don't descend
-                switch (parser.Current)
+                while (parser.Current != null)
                 {
-                    case Scalar scalar:
-                        // we've found a scalar, check if it's value matches one
-                        // of our predicate
-                        var keyMatched = selector(scalar);
+                    // so we only want to check keys in this mapping, don't descend
+                    switch (parser.Current)
+                    {
+                        case Scalar scalar:
+                            // we've found a scalar, check if it's value matches one
+                            // of our predicate
+                            var keyMatched = selector(scalar);
 
-                        // move head so we can read or skip value
-                        parser.MoveNext();
+                            // move head so we can read or skip value
+                            parser.MoveNext();
 
-                        // read the value of the mapping key
-                        if (keyMatched)
-                        {
-                            // success
-                            value = parser.Current;
-                            key = scalar;
-                            return true;
-                        }
+                            // read the value of the mapping key
+                            if (keyMatched)
+                            {
+                                // success
+                                value = parser.Current;
+                                key = scalar;
+                                return true;
+                            }
 
-                        // skip the value
-                        parser.SkipThisAndNestedEvents();
+                            // skip the value
+                            parser.SkipThisAndNestedEvents();
 
-                        break;
-                    case MappingStart _:
-                    case SequenceStart _:
-                        parser.SkipThisAndNestedEvents();
-                        break;
-                    default:
-                        // do nothing, skip to next node
-                        parser.MoveNext();
-                        break;
+                            break;
+                        case MappingStart _:
+                        case SequenceStart _:
+                            parser.SkipThisAndNestedEvents();
+                            break;
+                        default:
+                            // do nothing, skip to next node
+                            parser.MoveNext();
+                            break;
+                    }
                 }
-            } while (parser.Current != null);
+            }
 
             key = null;
             value = null;
