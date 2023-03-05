@@ -5,12 +5,22 @@ using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization.BufferedDeserialization
 {
-        public class ParserBuffer : IParser
+    /// <summary>
+    /// Wraps a <see cref="IParser"/> instance and allows it to be buffered as a LinkedList in memory and replayed.
+    /// </summary>
+    public class ParserBuffer : IParser
     {
         private readonly LinkedList<ParsingEvent> buffer;
 
         private LinkedListNode<ParsingEvent>? current;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParserBuffer"/> class.
+        /// </summary>
+        /// <param name="parserToBuffer">The Parser to buffer.</param>
+        /// <param name="maxDepth">The maximum depth of the parser to buffer before raising an ArgumentOutOfRangeException.</param>
+        /// <param name="maxLength">The maximum length of the LinkedList can buffer before raising an ArgumentOutOfRangeException.</param>
+        /// <exception cref="ArgumentOutOfRangeException">If parser does not fit within the max depth and length specified.</exception>
         public ParserBuffer(IParser parserToBuffer, int maxDepth, int maxLength)
         {
             buffer = new LinkedList<ParsingEvent>();
@@ -35,14 +45,24 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             current = buffer.First;
         }
 
+        /// <summary>
+        /// Gets the current event. Returns null after <see cref="MoveNext" /> returns false.
+        /// </summary>
         public ParsingEvent? Current => current?.Value;
 
+        /// <summary>
+        /// Moves to the next event.
+        /// </summary>
+        /// <returns>Returns true if there are more events available, otherwise returns false.</returns>
         public bool MoveNext()
         {
             current = current?.Next;
             return current != null;
         }
 
+        /// <summary>
+        /// Resets the buffer back to it's first event.
+        /// </summary>
         public void Reset()
         {
             current = buffer.First;
