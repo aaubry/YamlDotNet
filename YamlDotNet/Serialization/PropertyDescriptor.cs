@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization
             baseDescriptor.Write(target, value);
         }
 
-        public T GetCustomAttribute<T>() where T : Attribute
+        public T? GetCustomAttribute<T>() where T : Attribute
         {
             return baseDescriptor.GetCustomAttribute<T>();
         }
