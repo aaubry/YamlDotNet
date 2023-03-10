@@ -8,7 +8,7 @@ using YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators;
 
 namespace YamlDotNet.Serialization.BufferedDeserialization
 {
-    public interface IBufferedNodeDeserializerOptions
+    public interface ITypeDiscriminatingNodeDeserializerOptions
     {
         public void AddTypeDiscriminator(ITypeDiscriminator discriminator);
         public void AddKeyValueTypeDiscriminator<T>(string discriminatorKey, IDictionary<string, Type> valueTypeMapping);

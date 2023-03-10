@@ -16,7 +16,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -38,7 +38,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -61,7 +61,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<object>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -83,7 +83,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<object>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -106,7 +106,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<IKubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -128,7 +128,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddKeyValueTypeDiscriminator<IKubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()

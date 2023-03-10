@@ -16,7 +16,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddUniqueKeyTypeDiscriminator<ICharacter>(
                         new Dictionary<string, Type>()
                         {
@@ -39,7 +39,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                     options.AddUniqueKeyTypeDiscriminator<object>(
                         new Dictionary<string, Type>()
                         {

@@ -5,7 +5,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
 {
     /// <summary>
     /// An ITypeDiscriminator provides an interface for discriminating which dotnet type to deserialize a yaml
-    /// stream into. They require the yaml stream to be buffered <see cref="BufferedNodeDeserializer" /> as they
+    /// stream into. They require the yaml stream to be buffered <see cref="TypeDiscriminatingNodeDeserializer" /> as they
     /// can inspect the yaml value, determine the desired type, and reset the yaml stream to then deserialize into
     /// that type.
     /// </summary>

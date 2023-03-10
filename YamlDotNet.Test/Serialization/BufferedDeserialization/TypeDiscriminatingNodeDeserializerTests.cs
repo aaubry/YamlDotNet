@@ -9,14 +9,14 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization.BufferedDeserialization
 {
-    public class BufferedNodeDeserializerTests
+    public class TypeDiscriminatingNodeDeserializerTests
     {
         [Fact]
-        public void BufferedNodeDeserializer_ThrowsWhen_MaxDepthExceeded()
+        public void TypeDiscriminatingNodeDeserializer_ThrowsWhen_MaxDepthExceeded()
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                         options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
                     },
                     maxDepth: 2,
@@ -32,11 +32,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         }
         
         [Fact]
-        public void BufferedNodeDeserializer_ThrowsWhen_MaxLengthExceeded()
+        public void TypeDiscriminatingNodeDeserializer_ThrowsWhen_MaxLengthExceeded()
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithBufferedNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options => {
                         options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
                     },
                     maxDepth: 3,
