@@ -149,9 +149,17 @@ namespace YamlDotNet.Core
         }
 
         /// <summary>
-        /// Checks whether the current event contains a mapping entry that returns true for the specified selector.
-        /// If one is found, it's key is returned as a Scalar and it's value as a ParsingEvent, the mapping entry
-        /// is consumed and the parser is moved to the next event, and the whole function returns true.
+        /// Attempts to find a key on a YAML mapping that matches our predicate.
+        /// This is useful for scanning a mapping for type discriminator information.
+        /// For example: looking for a `kind` key on an object.
+        ///
+        /// This function only checks mappings, and only looks at the current depth.
+        ///
+        /// If the event is a mapping and has a key that satisfies the predicate the scan 
+        /// will stop, return true, and set <paramref name="key" /> and
+        /// <paramref name="value" />. All events up until the predicate is matched will
+        /// be consumed.
+        ///
         /// If the event is not a mapping event or a matching key is not found, returns false.
         /// </summary>
         /// <param name="selector">The selector to filter the mapping by.</param>
@@ -169,8 +177,7 @@ namespace YamlDotNet.Core
                     switch (parser.Current)
                     {
                         case Scalar scalar:
-                            // we've found a scalar, check if it's value matches one
-                            // of our predicate
+                            // we've found a scalar, check if it's value matches our predicate
                             var keyMatched = selector(scalar);
 
                             // move head so we can read or skip value
