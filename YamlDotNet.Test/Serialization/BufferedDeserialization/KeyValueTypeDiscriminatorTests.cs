@@ -146,6 +146,34 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             resources[1].Should().BeOfType<KubernetesService>();
         }
 
+        [Fact]
+        public void KeyValueTypeDiscriminator_MultipleWithSameKey()
+        {
+            var bufferedDeserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeDiscriminatingNodeDeserializer(options => {
+                    options.AddKeyValueTypeDiscriminator<KubernetesResource>(
+                        "kind",
+                        new Dictionary<string, Type>()
+                        {
+                            { "Namespace", typeof(KubernetesNamespace) },
+                        });
+                    options.AddKeyValueTypeDiscriminator<KubernetesResource>(
+                        "kind",
+                        new Dictionary<string, Type>()
+                        {
+                            { "Service", typeof(KubernetesService) }
+                        });
+                    },
+                    maxDepth: 3,
+                    maxLength: 40)
+                .Build();
+            
+            var resources = bufferedDeserializer.Deserialize<List<KubernetesResource>>(ListOfKubernetesYaml);
+            resources[0].Should().BeOfType<KubernetesNamespace>();
+            resources[1].Should().BeOfType<KubernetesService>();
+        }
+
         public const string ListOfKubernetesYaml = @"
 - apiVersion: v1
   kind: Namespace
