@@ -82,6 +82,21 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             var space = GetNamespace(symbol);
             var suffix = GetGenericTypes(symbol.TypeArguments); ;
 
+            var containingSymbol = symbol.ContainingType;
+            while (containingSymbol != null)
+            {
+                if (string.IsNullOrWhiteSpace(space))
+                {
+                    space = containingSymbol.Name;
+                }
+                else
+                {
+                    space = $"{space}.{containingSymbol.Name}";
+                }
+
+                containingSymbol = containingSymbol.ContainingType;
+            }
+
             if (!string.IsNullOrWhiteSpace(space))
             {
                 return space + "." + symbol.Name + suffix + symbol.GetNullable();
