@@ -50,6 +50,8 @@ Hello: world
 Inner:
   Prop1: a
   Prop2: 2
+Nested:
+  NestedProp: abc
 ";
             var actual = deserializer.Deserialize<RegularObjectOuter>(yaml);
             Assert.Equal("hello", actual.Prop1);
@@ -59,6 +61,8 @@ Inner:
             Assert.NotNull(actual.Inner);
             Assert.Equal("a", actual.Inner.Prop1);
             Assert.Equal(2, actual.Inner.Prop2);
+            Assert.NotNull(actual.Nested);
+            Assert.Equal("abc", actual.Nested.NestedProp);
 
             var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
             var actualYaml = serializer.Serialize(actual);
@@ -69,6 +73,8 @@ Hello: ""world""
 Inner:
   Prop1: a
   Prop2: 2
+Nested:
+  NestedProp: abc
 ";
             Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
         }
@@ -94,6 +100,13 @@ Inner:
         [YamlIgnore]
         public string Ignored { get; set; } = "I am ignored";
         public RegularObjectInner Inner { get; set; }
+        public NestedClass Nested { get; set; }
+
+        [YamlSerializable]
+        public class NestedClass
+        {
+            public string NestedProp { get; set; }
+        }
     }
 
     [YamlSerializable]
