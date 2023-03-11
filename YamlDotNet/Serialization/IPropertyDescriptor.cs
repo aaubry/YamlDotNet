@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization
         int Order { get; set; }
         ScalarStyle ScalarStyle { get; set; }
 
-        T GetCustomAttribute<T>() where T : Attribute;
+        T? GetCustomAttribute<T>() where T : Attribute;
 
         IObjectDescriptor Read(object target);
         void Write(object target, object? value);

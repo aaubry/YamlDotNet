@@ -70,10 +70,10 @@ namespace YamlDotNet.Serialization.TypeInspectors
                 fieldInfo.SetValue(target, value);
             }
 
-            public T GetCustomAttribute<T>() where T : Attribute
+            public T? GetCustomAttribute<T>() where T : Attribute
             {
                 var attributes = fieldInfo.GetCustomAttributes(typeof(T), true);
-                return (T)attributes.FirstOrDefault();
+                return (T?)attributes.FirstOrDefault();
             }
 
             public IObjectDescriptor Read(object target)
