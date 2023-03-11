@@ -29,7 +29,7 @@ using YamlDotNet.Test.Core;
 
 namespace YamlDotNet.Test.Serialization
 {
-    public class MergingParserTests: EmitterTestsHelper
+    public class MergingParserTests : EmitterTestsHelper
     {
         [Fact]
         public void MergingParserWithMergeObjectWithSequence_EachLevelsShouldEquals()
@@ -43,12 +43,12 @@ Level1: &Level1
 Level2: &Level2
     <<: *Level1
 ";
-            
+
             var etalonLevel = @"tenant:
 - a1
 - a2
 ".NormalizeNewLines();
-            
+
             var mergingParser = new MergingParser(new Parser(new StringReader(yaml)));
             var yamlObject = new DeserializerBuilder().Build().Deserialize<Dictionary<string, object>>(mergingParser);
             yamlObject.Should().NotBeNull();
@@ -57,8 +57,8 @@ Level2: &Level2
             serializer.Serialize(yamlObject["base_level"]).NormalizeNewLines().Should().Be(etalonLevel);
             serializer.Serialize(yamlObject["Level1"]).NormalizeNewLines().Should().Be(etalonLevel);
             serializer.Serialize(yamlObject["Level2"]).NormalizeNewLines().Should().Be(etalonLevel);
-        } 
-        
+        }
+
         [Fact]
         public void MergingParserWithMergeObjectWithSequence_EmittedTextShouldNotContainsDeletedEvents()
         {
@@ -85,12 +85,12 @@ Level2:
   - a1
   - a2
 ".NormalizeNewLines();
-            
+
             var mergingParser = new MergingParser(new Parser(new StringReader(yaml)));
             var events = EnumerationOf(mergingParser);
             EmittedTextFrom(events).NormalizeNewLines().Should().Be(etalonEmittedText);
-        }  
-        
+        }
+
         [Fact]
         public void MergingParserWithMergeObjectWithSequenceAndScalarItems_EmittedTextShouldNotContainsDeletedEvents()
         {
@@ -122,7 +122,7 @@ Level2:
   item1: ''
   item2: ''
 ".NormalizeNewLines();
-            
+
             var mergingParser = new MergingParser(new Parser(new StringReader(yaml)));
             var events = EnumerationOf(mergingParser);
             EmittedTextFrom(events).NormalizeNewLines().Should().Be(etalonEmittedText);

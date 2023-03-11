@@ -52,7 +52,7 @@ namespace YamlDotNet.Test.Core
             events.Run(emitter.Emit);
             return writer.ToString();
         }
-        
+
         protected static IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
         {
             while (parser.MoveNext())
