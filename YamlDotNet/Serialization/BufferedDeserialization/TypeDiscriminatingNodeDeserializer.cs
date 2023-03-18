@@ -16,7 +16,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
     /// a dotnet output type for the yaml node. As the node is buffered, the <see cref="ITypeDiscriminator" />s are
     /// able to examine the actual values within, and use these when discriminating a type.
     /// Once a matching type is found, the TypeDiscriminatingNodeDeserializer uses it's inner deserializers to perform
-    /// the final deserialization for that type & object.
+    /// the final deserialization for that type &amp; object.
     /// Usually you will want all default <see cref="INodeDeserializer" />s that exist in the outer
     /// <see cref="Deserializer" /> to also be used as inner deserializers.
     /// </summary>
@@ -95,5 +95,5 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             value = null;
             return false;
         }
-    }   
+    }
 }

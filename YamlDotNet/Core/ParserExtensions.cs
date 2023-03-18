@@ -162,7 +162,8 @@ namespace YamlDotNet.Core
         ///
         /// If the event is not a mapping event or a matching key is not found, returns false.
         /// </summary>
-        /// <param name="selector">The selector to filter the mapping by.</param>
+        /// <param name="parser">The IParser which will have its current value checked for a matching mapping entry</param>
+        /// <param name="selector">The selector to filter the mapping by</param>
         /// <param name="key">The matching key of the mapping as a Scalar, or null if no matching key found</param>
         /// <param name="value">The matching value of the mapping as a ParsingEvent, or null if no matching key found</param>
         /// <returns>Returns true if the current event is a mapping entry with a key that matches the selector;

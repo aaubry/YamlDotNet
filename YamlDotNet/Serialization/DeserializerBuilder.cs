@@ -262,11 +262,11 @@ namespace YamlDotNet.Serialization
             configureTypeDiscriminatingNodeDeserializerOptions(options);
             // We use all current NodeDeserializers as the inner deserializers for the TypeDiscriminatingNodeDeserializer,
             // so that it can successfully deserialize anything our root deserializer can.
-            var TypeDiscriminatingNodeDeserializer = new TypeDiscriminatingNodeDeserializer(nodeDeserializerFactories.BuildComponentList(), options.discriminators, maxDepth, maxLength);
+            var typeDiscriminatingNodeDeserializer = new TypeDiscriminatingNodeDeserializer(nodeDeserializerFactories.BuildComponentList(), options.discriminators, maxDepth, maxLength);
 
             // We register this before the DictionaryNodeDeserializer, as otherwise it will take precedence
             // and cases where BaseType = object will not reach the TypeDiscriminatingNodeDeserializer
-            return WithNodeDeserializer(TypeDiscriminatingNodeDeserializer, s => s.Before<DictionaryNodeDeserializer>());
+            return WithNodeDeserializer(typeDiscriminatingNodeDeserializer, s => s.Before<DictionaryNodeDeserializer>());
         }
 
         /// <summary>
