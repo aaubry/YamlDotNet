@@ -281,7 +281,7 @@ Value: foo");
                 .NormalizeNewLines()
                 .Replace(Environment.NewLine, "\r\n");
 
-            var list = new string[] {"one", "two", "three"};
+            var list = new string[] { "one", "two", "three" };
             var result = SerializerBuilder
                 .WithNewLine("\r\n")
                 .Build()
@@ -299,7 +299,7 @@ Value: foo");
                 .NormalizeNewLines()
                 .Replace(Environment.NewLine, "\n");
 
-            var list = new string[] {"one", "two", "three"};
+            var list = new string[] { "one", "two", "three" };
             var result = SerializerBuilder
                 .WithNewLine("\n")
                 .Build()
@@ -317,7 +317,7 @@ Value: foo");
                 .NormalizeNewLines()
                 .Replace(Environment.NewLine, "\r");
 
-            var list = new string[] {"one", "two", "three"};
+            var list = new string[] { "one", "two", "three" };
             var result = SerializerBuilder
                 .WithNewLine("\r")
                 .Build()
@@ -763,6 +763,20 @@ Value: foo");
             Serializer.Serialize(writer, guid);
             var serialized = writer.ToString();
             Regex.IsMatch(serialized, "^" + guid.ToString("D")).Should().BeTrue("serialized content should contain the guid, but instead contained: " + serialized);
+        }
+
+        [Fact]
+        public void SerializeNullObject()
+        {
+#nullable enable
+            object? obj = null;
+
+            var writer = new StringWriter();
+
+            Serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+            serialized.Should().Be("--- " + writer.NewLine);
+#nullable restore
         }
 
         [Fact]

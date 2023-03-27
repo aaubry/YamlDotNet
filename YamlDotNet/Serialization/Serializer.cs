@@ -67,7 +67,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
         /// <param name="graph">The object to serialize.</param>
-        public void Serialize(TextWriter writer, object graph)
+        public void Serialize(TextWriter writer, object? graph)
         {
             Serialize(new Emitter(writer, emitterSettings), graph);
         }
@@ -76,7 +76,7 @@ namespace YamlDotNet.Serialization
         /// Serializes the specified object into a string.
         /// </summary>
         /// <param name="graph">The object to serialize.</param>
-        public string Serialize(object graph)
+        public string Serialize(object? graph)
         {
             using var buffer = new StringWriter();
             Serialize(buffer, graph);
@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization
         /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
         /// <param name="graph">The object to serialize.</param>
         /// <param name="type">The static type of the object to serialize.</param>
-        public void Serialize(TextWriter writer, object graph, Type type)
+        public void Serialize(TextWriter writer, object? graph, Type type)
         {
             Serialize(new Emitter(writer, emitterSettings), graph, type);
         }
@@ -99,7 +99,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
         /// <param name="graph">The object to serialize.</param>
-        public void Serialize(IEmitter emitter, object graph)
+        public void Serialize(IEmitter emitter, object? graph)
         {
             if (emitter == null)
             {
@@ -115,7 +115,7 @@ namespace YamlDotNet.Serialization
         /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
         /// <param name="graph">The object to serialize.</param>
         /// <param name="type">The static type of the object to serialize.</param>
-        public void Serialize(IEmitter emitter, object graph, Type type)
+        public void Serialize(IEmitter emitter, object? graph, Type type)
         {
             if (emitter == null)
             {
@@ -130,7 +130,7 @@ namespace YamlDotNet.Serialization
             EmitDocument(emitter, graph, type);
         }
 
-        private void EmitDocument(IEmitter emitter, object graph, Type? type)
+        private void EmitDocument(IEmitter emitter, object? graph, Type? type)
         {
             emitter.Emit(new StreamStart());
             emitter.Emit(new DocumentStart());
