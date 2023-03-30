@@ -364,13 +364,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else if (Regex.IsMatch(v, @"[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?")) //regular number
                     {
-                        if (TryAndSwallow(() => byte.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => short.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => int.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => long.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => ulong.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => float.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => double.Parse(v), out result)) { }
+                        if (TryAndSwallow(() => byte.Parse(v, YamlFormatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => short.Parse(v, YamlFormatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => int.Parse(v, YamlFormatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => long.Parse(v, YamlFormatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => ulong.Parse(v, YamlFormatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => float.Parse(v, YamlFormatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => double.Parse(v, YamlFormatter.NumberFormat), out result)) { }
                         else
                         {
                             //we couldn't parse it, default to string, It's probably too big
