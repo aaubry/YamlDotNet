@@ -147,5 +147,71 @@ namespace YamlDotNet.Core
         {
             return Accept<T>(parser, out var _);
         }
+
+        /// <summary>
+        /// Attempts to find a key on a YAML mapping that matches our predicate.
+        /// This is useful for scanning a mapping for type discriminator information.
+        /// For example: looking for a `kind` key on an object.
+        ///
+        /// This function only checks mappings, and only looks at the current depth.
+        ///
+        /// If the event is a mapping and has a key that satisfies the predicate the scan 
+        /// will stop, return true, and set <paramref name="key" /> and
+        /// <paramref name="value" />. All events up until the predicate is matched will
+        /// be consumed.
+        ///
+        /// If the event is not a mapping event or a matching key is not found, returns false.
+        /// </summary>
+        /// <param name="parser">The IParser which will have its current value checked for a matching mapping entry</param>
+        /// <param name="selector">The selector to filter the mapping by</param>
+        /// <param name="key">The matching key of the mapping as a Scalar, or null if no matching key found</param>
+        /// <param name="value">The matching value of the mapping as a ParsingEvent, or null if no matching key found</param>
+        /// <returns>Returns true if the current event is a mapping entry with a key that matches the selector;
+        /// otherwise returns false.</returns>
+        public static bool TryFindMappingEntry(this IParser parser, Func<Scalar, bool> selector, [MaybeNullWhen(false)] out Scalar? key, [MaybeNullWhen(false)] out ParsingEvent? value)
+        {
+            if (parser.TryConsume<MappingStart>(out var _start))
+            {
+                while (parser.Current != null)
+                {
+                    // so we only want to check keys in this mapping, don't descend
+                    switch (parser.Current)
+                    {
+                        case Scalar scalar:
+                            // we've found a scalar, check if it's value matches our predicate
+                            var keyMatched = selector(scalar);
+
+                            // move head so we can read or skip value
+                            parser.MoveNext();
+
+                            // read the value of the mapping key
+                            if (keyMatched)
+                            {
+                                // success
+                                value = parser.Current;
+                                key = scalar;
+                                return true;
+                            }
+
+                            // skip the value
+                            parser.SkipThisAndNestedEvents();
+
+                            break;
+                        case MappingStart _:
+                        case SequenceStart _:
+                            parser.SkipThisAndNestedEvents();
+                            break;
+                        default:
+                            // do nothing, skip to next node
+                            parser.MoveNext();
+                            break;
+                    }
+                }
+            }
+
+            key = null;
+            value = null;
+            return false;
+        }
     }
 }
