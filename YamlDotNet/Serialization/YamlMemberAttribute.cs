@@ -75,6 +75,11 @@ namespace YamlDotNet.Serialization
         public bool IsDefaultValuesHandlingSpecified => defaultValuesHandling.HasValue;
 
         /// <summary>
+        /// Adds a new line for this property
+        /// </summary>
+        public bool NewLine { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="YamlMemberAttribute" /> class.
         /// </summary>
         public YamlMemberAttribute()
