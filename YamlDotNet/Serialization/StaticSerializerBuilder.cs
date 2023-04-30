@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 #endif
 using YamlDotNet.Core;
-using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.EventEmitters;
 using YamlDotNet.Serialization.NamingConventions;
@@ -37,7 +36,6 @@ using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
-
     /// <summary>
     /// Creates and configures instances of <see cref="Serializer" />.
     /// This class is used to customize the behavior of <see cref="Serializer" />. Use the relevant methods
@@ -86,6 +84,10 @@ namespace YamlDotNet.Serialization
                 {
                     typeof(DefaultValuesObjectGraphVisitor),
                     args => new DefaultValuesObjectGraphVisitor(defaultValuesHandlingConfiguration, args.InnerVisitor, factory)
+                },
+                  {
+                    typeof(NewLineObjectGraphVisitor),
+                    args => new NewLineObjectGraphVisitor(args.InnerVisitor)
                 },
                 {
                     typeof(CommentsObjectGraphVisitor),
@@ -298,7 +300,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <remarks>
         /// If more control is needed, create a class that extends from ChainedObjectGraphVisitor and override its EnterMapping methods.
-        /// Then register it as follows: 
+        /// Then register it as follows:
         /// WithEmissionPhaseObjectGraphVisitor(args => new MyDefaultHandlingStrategy(args.InnerVisitor));
         /// </remarks>
         public StaticSerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)
