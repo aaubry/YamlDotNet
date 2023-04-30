@@ -307,6 +307,11 @@ namespace YamlDotNet.Core
             {
                 throw new NotSupportedException();
             }
+
+            public void Visit(NewLine e)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

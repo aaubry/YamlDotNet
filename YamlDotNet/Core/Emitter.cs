@@ -166,7 +166,6 @@ namespace YamlDotNet.Core
                 var current = events.Peek();
                 try
                 {
-
                     AnalyzeEvent(current);
                     StateMachine(current);
                 }
@@ -566,6 +565,12 @@ namespace YamlDotNet.Core
                 return;
             }
 
+            if (evt is NewLine)
+            {
+                EmitNewLine();
+                return;
+            }
+
             switch (state)
             {
                 case EmitterState.StreamStart:
@@ -686,6 +691,17 @@ namespace YamlDotNet.Core
             isIndentation = true;
         }
 
+        private void EmitNewLine()
+        {
+            // If we're in flow mode or about to enter it: Skip 
+            if (flowLevel > 0 || state == EmitterState.FlowMappingFirstKey || state == EmitterState.FlowSequenceFirstItem)
+            {
+                return;
+            }
+
+            WriteBreak();
+        }
+
         /// <summary>
         /// Expect STREAM-START.
         /// </summary>
@@ -781,7 +797,6 @@ namespace YamlDotNet.Core
 
                 state = EmitterState.DocumentContent;
             }
-
             else if (evt is StreamEnd)
             {
                 state = EmitterState.StreamEnd;

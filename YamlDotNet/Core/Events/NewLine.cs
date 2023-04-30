@@ -21,22 +21,17 @@
 
 namespace YamlDotNet.Core.Events
 {
-    /// <summary>
-    /// Callback interface for external event Visitor.
-    /// </summary>
-    public interface IParsingEventVisitor
+    public class NewLine : ParsingEvent
     {
-        void Visit(AnchorAlias e);
-        void Visit(StreamStart e);
-        void Visit(StreamEnd e);
-        void Visit(DocumentStart e);
-        void Visit(DocumentEnd e);
-        void Visit(Scalar e);
-        void Visit(SequenceStart e);
-        void Visit(SequenceEnd e);
-        void Visit(MappingStart e);
-        void Visit(MappingEnd e);
-        void Visit(Comment e);
-        void Visit(NewLine e);
+        public NewLine() : base(Mark.Empty, Mark.Empty)
+        {
+        }
+
+        internal override EventType Type => EventType.NewLine;
+
+        public override void Accept(IParsingEventVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 }
