@@ -35,6 +35,7 @@ namespace YamlDotNet.Test.Core
     public class EmitterTests : EmitterTestsHelper
     {
         [Theory]
+        [InlineData("00-comments-issue.yaml")]
         [InlineData("01-directives.yaml")]
         [InlineData("02-scalar-in-imp-doc.yaml")]
         [InlineData("03-scalar-in-exp-doc.yaml")]
@@ -65,7 +66,7 @@ namespace YamlDotNet.Test.Core
 
         private IList<ParsingEvent> ParsingEventsOf(string text)
         {
-            var parser = new Parser(new StringReader(text));
+            var parser = new Parser(new Scanner(new StringReader(text), skipComments: false));
             return EnumerationOf(parser).ToList();
         }
 
