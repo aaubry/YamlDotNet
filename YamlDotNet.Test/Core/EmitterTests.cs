@@ -35,7 +35,8 @@ namespace YamlDotNet.Test.Core
     public class EmitterTests : EmitterTestsHelper
     {
         [Theory]
-        [InlineData("00-comments-issue.yaml")]
+        [InlineData("000-comments-issue-block.yaml")]
+        [InlineData("001-comments-issue-inline.yaml")]
         [InlineData("01-directives.yaml")]
         [InlineData("02-scalar-in-imp-doc.yaml")]
         [InlineData("03-scalar-in-exp-doc.yaml")]
