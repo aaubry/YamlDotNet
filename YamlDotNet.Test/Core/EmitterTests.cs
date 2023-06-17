@@ -297,6 +297,28 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void CommentsBetweenMappingKeyAndValueAreEmittedCorrectly()
+        {
+            var events = MappingWith(
+                Scalar("key").ImplicitPlain,
+                InlineComment("inline comment"),
+                StandaloneComment("standalone comment"),
+                BlockSequenceStart,
+                Scalar("value").ImplicitPlain,
+                SequenceEnd
+            );
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+
+            yaml.Should()
+                .Contain(Lines(
+                    "key: # inline comment",
+                    "# standalone comment",
+                    "  - value"
+                ));
+        }
+
+        [Fact]
         public void ACommentAsTheFirstEventAddsANewLine()
         {
             var events = new ParsingEvent[]
