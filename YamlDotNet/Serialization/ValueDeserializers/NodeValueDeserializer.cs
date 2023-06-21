@@ -64,7 +64,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 throw new YamlException(
                     nodeEvent?.Start ?? Mark.Empty,
                     nodeEvent?.End ?? Mark.Empty,
-                    "Exception during deserialization",
+                    "Exception during deserialization, check the target data type",
                     ex
                 );
             }

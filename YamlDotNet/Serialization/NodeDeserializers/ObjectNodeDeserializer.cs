@@ -100,7 +100,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 catch (Exception ex)
                 {
-                    throw new YamlException(propertyName.Start, propertyName.End, "Exception during deserialization", ex);
+                    throw new YamlException(propertyName.Start, propertyName.End, "Exception during deserialization, check the target data type", ex);
                 }
             }
 
