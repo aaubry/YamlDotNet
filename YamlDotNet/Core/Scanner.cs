@@ -2405,7 +2405,11 @@ namespace YamlDotNet.Core
 
             if (head != null && head.Length > 1)
             {
+#if NETFRAMEWORK || NETSTANDARD2_0
                 tag.Append(head.Substring(1));
+#else
+                tag.Append(head.AsSpan()[1..]);
+#endif
             }
 
             // Scan the tag.
