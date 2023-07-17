@@ -1024,7 +1024,7 @@ y:
             var writer = new StringWriter();
             var obj = new MixedFormatScalarStyleExample(new string[] { "01", "0.1", "myString" });
 
-            var serializer = new SerializerBuilder().Build();
+            var serializer = new SerializerBuilder().WithDefaultScalarStyle(ScalarStyle.SingleQuoted).Build();
 
             serializer.Serialize(writer, obj);
 
