@@ -119,6 +119,11 @@ namespace YamlDotNet.Serialization
             return this;
         }
 
+        public SerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
+        {
+            return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, globalScalarStyle: style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+        }
+
         /// <summary>
         /// Sets the maximum recursion that is allowed while traversing the object graph. The default value is 50.
         /// </summary>
@@ -304,7 +309,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <remarks>
         /// If more control is needed, create a class that extends from ChainedObjectGraphVisitor and override its EnterMapping methods.
-        /// Then register it as follows: 
+        /// Then register it as follows:
         /// WithEmissionPhaseObjectGraphVisitor(args => new MyDefaultHandlingStrategy(args.InnerVisitor));
         /// </remarks>
         public SerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)
