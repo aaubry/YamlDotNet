@@ -65,10 +65,14 @@ namespace YamlDotNet.Serialization.EventEmitters
                 + @"|\.(nan|NaN|NAN)"
             + @")$";
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
+        private readonly ScalarStyle? globalScalarStyle;
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle? globalScalarStyle = null)
             : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
+
+            this.globalScalarStyle = globalScalarStyle;
 
             var specialStringValuePattern = quoteYaml1_1Strings
                 ? CombinedYaml1_1SpecialStrings_Pattern
@@ -137,6 +141,10 @@ namespace YamlDotNet.Serialization.EventEmitters
                             {
                                 suggestedStyle = ScalarStyle.DoubleQuoted;
                             }
+                            else if (globalScalarStyle != null)
+                            {
+                                suggestedStyle = (ScalarStyle)globalScalarStyle;
+                            }
                             else
                             {
                                 suggestedStyle = ScalarStyle.Any;
@@ -172,6 +180,10 @@ namespace YamlDotNet.Serialization.EventEmitters
                         if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
                         {
                             suggestedStyle = ScalarStyle.DoubleQuoted;
+                        }
+                        else if (globalScalarStyle != null)
+                        {
+                            suggestedStyle = (ScalarStyle)globalScalarStyle;
                         }
                         else
                         {
