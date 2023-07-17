@@ -1019,6 +1019,23 @@ y:
         }
 
         [Fact]
+        public void SerializationRespectsGlobalScalarStyleOverride()
+        {
+            var writer = new StringWriter();
+            var obj = new MixedFormatScalarStyleExample(new string[] { "01", "0.1", "myString" });
+
+            var serializer = new SerializerBuilder().Build();
+
+            serializer.Serialize(writer, obj);
+
+            var serialized = writer.ToString();
+
+            var expected = "Data:\r\n- '01'\r\n- '0.1'\r\n- 'myString'\r\n".NormalizeNewLines();
+
+            serialized.Should().Be(expected);
+        }
+
+        [Fact]
         public void SerializationDerivedAttributeOverride()
         {
             var writer = new StringWriter();
