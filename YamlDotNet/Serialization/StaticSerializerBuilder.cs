@@ -113,6 +113,9 @@ namespace YamlDotNet.Serialization
             return this;
         }
 
+        /// <summary>
+        /// Sets the default quoting style for scalar values. The default value is <see cref="ScalarStyle.Any"/>
+        /// </summary>
         public StaticSerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
         {
             return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, defaultScalarStyle: style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
