@@ -113,6 +113,11 @@ namespace YamlDotNet.Serialization
             return this;
         }
 
+        public StaticSerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
+        {
+            return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, defaultScalarStyle: style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+        }
+
         /// <summary>
         /// Sets the maximum recursion that is allowed while traversing the object graph. The default value is 50.
         /// </summary>
