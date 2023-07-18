@@ -68,11 +68,9 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly ScalarStyle defaultScalarStyle;
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle = ScalarStyle.Any)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, defaultScalarStyle: defaultScalarStyle)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
-
-            this.defaultScalarStyle = defaultScalarStyle;
 
             var specialStringValuePattern = quoteYaml1_1Strings
                 ? CombinedYaml1_1SpecialStrings_Pattern
@@ -84,8 +82,8 @@ namespace YamlDotNet.Serialization.EventEmitters
 #endif
         }
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle = ScalarStyle.Any)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, defaultScalarStyle: defaultScalarStyle)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
 
@@ -96,11 +94,12 @@ namespace YamlDotNet.Serialization.EventEmitters
 #endif
         }
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, ScalarStyle defaultScalarStyle = ScalarStyle.Any)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
+            this.defaultScalarStyle = defaultScalarStyle;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
