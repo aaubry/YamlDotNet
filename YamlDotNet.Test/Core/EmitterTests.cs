@@ -69,13 +69,7 @@ namespace YamlDotNet.Test.Core
             return EnumerationOf(parser).ToList();
         }
 
-        private IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
-        {
-            while (parser.MoveNext())
-            {
-                yield return parser.Current;
-            }
-        }
+
 
         [Fact]
         public void PlainScalarCanBeFollowedByImplicitDocument()

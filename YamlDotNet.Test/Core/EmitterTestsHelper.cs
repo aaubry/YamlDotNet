@@ -53,6 +53,14 @@ namespace YamlDotNet.Test.Core
             return writer.ToString();
         }
 
+        protected static IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
+        {
+            while (parser.MoveNext())
+            {
+                yield return parser.Current;
+            }
+        }
+
         protected IEnumerable<ParsingEvent> StreamedDocumentWith(IEnumerable<ParsingEvent> events)
         {
             return StreamOf(DocumentWith(events.ToArray()));
