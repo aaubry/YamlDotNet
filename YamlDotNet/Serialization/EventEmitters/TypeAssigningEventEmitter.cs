@@ -73,6 +73,12 @@ namespace YamlDotNet.Serialization.EventEmitters
             this.defaultScalarStyle = defaultScalarStyle;
         }
 
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings)
+        {
+            this.defaultScalarStyle = defaultScalarStyle;
+        }
+
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
             : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
@@ -86,12 +92,6 @@ namespace YamlDotNet.Serialization.EventEmitters
 #else
             isSpecialStringValue_Regex = new Regex(specialStringValuePattern, RegexOptions.Compiled);
 #endif
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings)
-        {
-            this.defaultScalarStyle = defaultScalarStyle;
         }
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
