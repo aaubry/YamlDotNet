@@ -65,10 +65,16 @@ namespace YamlDotNet.Serialization.EventEmitters
                 + @"|\.(nan|NaN|NAN)"
             + @")$";
 
-        private readonly ScalarStyle defaultScalarStyle;
+        private readonly ScalarStyle defaultScalarStyle = ScalarStyle.Any;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle = ScalarStyle.Any)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, defaultScalarStyle: defaultScalarStyle)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings)
+        {
+            this.defaultScalarStyle = defaultScalarStyle;
+        }
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
 
@@ -82,8 +88,14 @@ namespace YamlDotNet.Serialization.EventEmitters
 #endif
         }
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle = ScalarStyle.Any)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, defaultScalarStyle: defaultScalarStyle)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings)
+        {
+            this.defaultScalarStyle = defaultScalarStyle;
+        }
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
             this.quoteNecessaryStrings = quoteNecessaryStrings;
 
@@ -94,12 +106,11 @@ namespace YamlDotNet.Serialization.EventEmitters
 #endif
         }
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, ScalarStyle defaultScalarStyle = ScalarStyle.Any)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
             : base(nextEmitter)
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
-            this.defaultScalarStyle = defaultScalarStyle;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
