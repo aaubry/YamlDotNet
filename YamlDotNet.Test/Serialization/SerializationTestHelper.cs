@@ -463,6 +463,7 @@ namespace YamlDotNet.Test.Serialization
     public class MixedFormatScalarStyleExample
     {
         public string[] Data { get; }
+
         public MixedFormatScalarStyleExample(string[] data)
         {
             Data = data;
