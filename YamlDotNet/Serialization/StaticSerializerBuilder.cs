@@ -118,7 +118,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public StaticSerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
         {
-            return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, defaultScalarStyle: style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>
