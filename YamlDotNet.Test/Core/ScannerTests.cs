@@ -484,6 +484,52 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
+        [Fact]
+        public void Keys_can_start_with_colons_after_single_quoted_values_in_nested_block() 
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: 'world'\n  :goodbye: world"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("xyz"),
+                Value,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":hello"),
+                Value,
+                SingleQuotedScalar("world"),
+                Key,
+                PlainScalar(":goodbye"),
+                Value,
+                PlainScalar("world"),
+                BlockEnd,
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Keys_can_start_with_colons_after_double_quoted_values_in_nested_block() 
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: \"world\"\n  :goodbye: world"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("xyz"),
+                Value,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":hello"),
+                Value,
+                DoubleQuotedScalar("world"),
+                Key,
+                PlainScalar(":goodbye"),
+                Value,
+                PlainScalar("world"),
+                BlockEnd,
+                BlockEnd,
+                StreamEnd);
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;
