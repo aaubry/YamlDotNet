@@ -479,7 +479,7 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('\''))
             {
-                FetchFlowScalar(true);
+                FetchQuotedScalar(true);
                 return;
             }
 
@@ -487,7 +487,7 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('"'))
             {
-                FetchFlowScalar(false);
+                FetchQuotedScalar(false);
                 return;
             }
 
@@ -1770,7 +1770,7 @@ namespace YamlDotNet.Core
         /// Produce the SCALAR(...,single-quoted) or SCALAR(...,double-quoted) tokens.
         /// </summary>
 
-        private void FetchFlowScalar(bool isSingleQuoted)
+        private void FetchQuotedScalar(bool isSingleQuoted)
         {
             // A plain scalar could be a simple key.
 
@@ -1782,7 +1782,7 @@ namespace YamlDotNet.Core
 
             // Indicates the adjacent flow scalar that a prior flow scalar has been fetched.
 
-            flowScalarFetched = true;
+            flowScalarFetched = flowLevel > 0;
 
             // Create the SCALAR token and append it to the queue.
 

@@ -443,6 +443,93 @@ namespace YamlDotNet.Test.Core
                 Error("Invalid key indicator format."));
         }
 
+        [Fact]
+        public void Keys_can_start_with_colons_in_nested_block()
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText("root:\n  :first: 1\n  :second: 2"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("root"),
+                Value,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":first"),
+                Value,
+                PlainScalar("1"),
+                Key,
+                PlainScalar(":second"),
+                Value,
+                PlainScalar("2"),
+                BlockEnd,
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Keys_can_start_with_colons_after_quoted_values() 
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: '1'\n:second: 2"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":first"),
+                Value,
+                SingleQuotedScalar("1"),
+                Key,
+                PlainScalar(":second"),
+                Value,
+                PlainScalar("2"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Keys_can_start_with_colons_after_single_quoted_values_in_nested_block() 
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: 'world'\n  :goodbye: world"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("xyz"),
+                Value,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":hello"),
+                Value,
+                SingleQuotedScalar("world"),
+                Key,
+                PlainScalar(":goodbye"),
+                Value,
+                PlainScalar("world"),
+                BlockEnd,
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Keys_can_start_with_colons_after_double_quoted_values_in_nested_block() 
+        {
+           AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: \"world\"\n  :goodbye: world"),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("xyz"),
+                Value,
+                BlockMappingStart,
+                Key,
+                PlainScalar(":hello"),
+                Value,
+                DoubleQuotedScalar("world"),
+                Key,
+                PlainScalar(":goodbye"),
+                Value,
+                PlainScalar("world"),
+                BlockEnd,
+                BlockEnd,
+                StreamEnd);
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;
