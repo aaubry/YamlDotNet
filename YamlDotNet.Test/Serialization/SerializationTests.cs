@@ -1019,6 +1019,28 @@ y:
         }
 
         [Fact]
+        public void SerializationRespectsDefaultScalarStyle()
+        {
+            var writer = new StringWriter();
+            var obj = new MixedFormatScalarStyleExample(new string[] { "01", "0.1", "myString" });
+
+            var serializer = new SerializerBuilder().WithDefaultScalarStyle(ScalarStyle.SingleQuoted).Build();
+
+            serializer.Serialize(writer, obj);
+
+            var yaml = writer.ToString();
+
+            var expected = Yaml.Text(@"
+                Data:
+                - '01'
+                - '0.1'
+                - 'myString'
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
         public void SerializationDerivedAttributeOverride()
         {
             var writer = new StringWriter();

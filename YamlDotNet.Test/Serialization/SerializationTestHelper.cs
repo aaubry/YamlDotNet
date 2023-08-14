@@ -456,6 +456,20 @@ namespace YamlDotNet.Test.Serialization
         public string DoubleQuotedString { get; set; }
     }
 
+    /// <summary>
+    /// This class demonstrates an object with serializable data that will be
+    /// written to YAML with strings that are formatted as valid numbers.
+    /// </summary>
+    public class MixedFormatScalarStyleExample
+    {
+        public string[] Data { get; }
+
+        public MixedFormatScalarStyleExample(string[] data)
+        {
+            Data = data;
+        }
+    }
+
     public class DefaultsExample
     {
         public const string DefaultValue = "myDefault";

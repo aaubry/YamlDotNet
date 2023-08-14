@@ -65,6 +65,20 @@ namespace YamlDotNet.Serialization.EventEmitters
                 + @"|\.(nan|NaN|NAN)"
             + @")$";
 
+        private readonly ScalarStyle defaultScalarStyle = ScalarStyle.Any;
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings)
+        {
+            this.defaultScalarStyle = defaultScalarStyle;
+        }
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings)
+        {
+            this.defaultScalarStyle = defaultScalarStyle;
+        }
+
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
             : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
         {
@@ -139,7 +153,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                             }
                             else
                             {
-                                suggestedStyle = ScalarStyle.Any;
+                                suggestedStyle = defaultScalarStyle;
                             }
                         }
                         else
@@ -175,7 +189,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         }
                         else
                         {
-                            suggestedStyle = ScalarStyle.Any;
+                            suggestedStyle = defaultScalarStyle;
                         }
 
                         break;
