@@ -147,3 +147,8 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## Release notes
 
 Please see the Releases at https://github.com/aaubry/YamlDotNet/releases
+
+## Sponsorships
+A big shout out to all of our sponsors
+
+[![AWS](Sponsors/aws-logo-small.png)](https://www.github.com/aws)
