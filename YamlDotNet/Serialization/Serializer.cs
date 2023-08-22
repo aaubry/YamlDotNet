@@ -84,7 +84,7 @@ namespace YamlDotNet.Serialization
             Serialize(buffer, graph, type);
             return buffer.ToString();
         }
-        
+
         /// <summary>
         /// Serializes the specified object.
         /// </summary>

@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization
         /// <param name="graph">The object to serialize.</param>
         /// <param name="type">The static type of the object to serialize.</param> 
         string Serialize(object? graph, Type type);
-        
+
         /// <summary>
         /// Serializes the specified object.
         /// </summary>

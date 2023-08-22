@@ -46,6 +46,7 @@ namespace System
             this.valueFactory = valueFactory;
             this.isThreadSafe = false;
             valueState = ValueState.NotCreated;
+            value = default!;
         }
 
         public Lazy(Func<T> valueFactory, bool isThreadSafe)
