@@ -25,6 +25,7 @@ using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Schemas;
 using static YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.RepresentationModel
@@ -35,11 +36,30 @@ namespace YamlDotNet.RepresentationModel
     [DebuggerDisplay("{Value}")]
     public sealed class YamlScalarNode : YamlNode, IYamlConvertible
     {
+        private bool _forceImplicitPlain = false;
+        private string? _value;
+
         /// <summary>
         /// Gets or sets the value of the node.
         /// </summary>
         /// <value>The value.</value>
-        public string? Value { get; set; }
+        public string? Value
+        {
+            get => _value;
+            set
+            {
+                if (value == null)
+                {
+                    _forceImplicitPlain = true;
+                }
+                else
+                {
+                    _forceImplicitPlain = false;
+                }
+
+                _value = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the style of the node.
@@ -58,8 +78,25 @@ namespace YamlDotNet.RepresentationModel
         private void Load(IParser parser, DocumentLoadingState state)
         {
             var scalar = parser.Consume<Scalar>();
+
             Load(scalar, state);
-            Value = scalar.Value;
+
+            if (scalar.Style == ScalarStyle.Plain &&
+                Tag.IsEmpty &&
+                (scalar.Value == string.Empty ||
+                 scalar.Value.Equals("null", StringComparison.InvariantCulture) ||
+                 scalar.Value.Equals("Null", StringComparison.InvariantCulture) ||
+                 scalar.Value.Equals("NULL", StringComparison.InvariantCulture) ||
+                 scalar.Value == "~"))
+            {
+                // we have an implicit null value without a tag stating it, fake it out
+                _forceImplicitPlain = true;
+
+                // for backwards compatability we won't be setting the Value property
+                // to null
+            }
+
+            _value = scalar.Value;
             Style = scalar.Style;
         }
 
@@ -95,7 +132,24 @@ namespace YamlDotNet.RepresentationModel
         /// <param name="state">The state.</param>
         internal override void Emit(IEmitter emitter, EmitterState state)
         {
-            emitter.Emit(new Scalar(Anchor, Tag, Value ?? string.Empty, Style, Tag.IsEmpty, false));
+            var tag = Tag;
+            var implicitPlain = tag.IsEmpty;
+
+            if (_forceImplicitPlain &&
+                Style == ScalarStyle.Plain &&
+                (Value == null || Value == ""))
+            {
+                tag = JsonSchema.Tags.Null;
+                implicitPlain = true;
+            }
+            else if (tag.IsEmpty && Value == null &&
+                (Style == ScalarStyle.Plain || Style == ScalarStyle.Any))
+            {
+                tag = JsonSchema.Tags.Null;
+                implicitPlain = true;
+            }
+
+            emitter.Emit(new Scalar(Anchor, tag, Value ?? string.Empty, Style, implicitPlain, false));
         }
 
         /// <summary>
@@ -176,5 +230,6 @@ namespace YamlDotNet.RepresentationModel
         {
             Emit(emitter, new EmitterState());
         }
+
     }
 }
