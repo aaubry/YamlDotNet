@@ -27,6 +27,7 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using System.Globalization;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -278,7 +279,8 @@ b: &number 1
         public void DeserializeScalarEdgeCases(IConvertible value, Type type)
         {
             var deserializer = new DeserializerBuilder().Build();
-            var result = deserializer.Deserialize(value.ToString(), type);
+            var stringValue = string.Format(CultureInfo.InvariantCulture, "{0}", value);
+            var result = deserializer.Deserialize(stringValue, type);
 
             result.Should().Be(value);
         }
