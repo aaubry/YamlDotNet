@@ -1785,9 +1785,10 @@ namespace YamlDotNet.Core
             flowScalarFetched = flowLevel > 0;
 
             // Create the SCALAR token and append it to the queue.
+            var scalar = ScanFlowScalar(isSingleQuoted);
 
-            tokens.Enqueue(ScanFlowScalar(isSingleQuoted));
-
+            tokens.Enqueue(scalar);
+            lastScalar = scalar;
             // Check if there is a comment subsequently after double-quoted scalar without space.
 
             if (!isSingleQuoted && analyzer.Check('#'))
@@ -1801,7 +1802,7 @@ namespace YamlDotNet.Core
         /// Scan a quoted scalar.
         /// </summary>
 
-        private Token ScanFlowScalar(bool isSingleQuoted)
+        private Scalar ScanFlowScalar(bool isSingleQuoted)
         {
             // Eat the left quote.
 
