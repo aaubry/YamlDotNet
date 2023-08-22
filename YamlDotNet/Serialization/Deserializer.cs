@@ -81,12 +81,12 @@ namespace YamlDotNet.Serialization
         {
             return (T)Deserialize(parser, typeof(T))!; // We really want an exception if we are trying to deserialize null into a non-nullable type
         }
-        
+
         public object? Deserialize(string input)
         {
             return Deserialize(input, typeof(object));
         }
-        
+
         public object? Deserialize(TextReader input)
         {
             return Deserialize(input, typeof(object));
@@ -96,7 +96,7 @@ namespace YamlDotNet.Serialization
         {
             return Deserialize(parser, typeof(object));
         }
-        
+
         public object? Deserialize(string input, Type type)
         {
             using var reader = new StringReader(input);
