@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Schemas;
@@ -66,22 +68,14 @@ namespace YamlDotNet.Serialization.EventEmitters
             + @")$";
 
         private readonly ScalarStyle defaultScalarStyle = ScalarStyle.Any;
+        private readonly YamlFormatter formatter;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle, YamlFormatter formatter)
+            : base(nextEmitter)
         {
             this.defaultScalarStyle = defaultScalarStyle;
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings)
-        {
-            this.defaultScalarStyle = defaultScalarStyle;
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
-        {
+            this.formatter = formatter;
+            this.tagMappings = tagMappings;
             this.quoteNecessaryStrings = quoteNecessaryStrings;
 
             var specialStringValuePattern = quoteYaml1_1Strings
@@ -94,16 +88,24 @@ namespace YamlDotNet.Serialization.EventEmitters
 #endif
         }
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, YamlFormatter.Default)
         {
-            this.quoteNecessaryStrings = quoteNecessaryStrings;
+        }
 
-#if NET40
-            isSpecialStringValue_Regex = new Regex(SpecialStrings_Pattern);
-#else
-            isSpecialStringValue_Regex = new Regex(SpecialStrings_Pattern, RegexOptions.Compiled);
-#endif
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, false, defaultScalarStyle, YamlFormatter.Default)
+        {
+        }
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, ScalarStyle.Any)
+        {
+        }
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
+            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, false)
+        {
         }
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
@@ -111,6 +113,7 @@ namespace YamlDotNet.Serialization.EventEmitters
         {
             this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
+            formatter = YamlFormatter.Default;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -130,7 +133,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 {
                     case TypeCode.Boolean:
                         eventInfo.Tag = JsonSchema.Tags.Bool;
-                        eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
+                        eventInfo.RenderedValue = formatter.FormatBoolean(value);
                         break;
 
                     case TypeCode.Byte:
@@ -159,23 +162,23 @@ namespace YamlDotNet.Serialization.EventEmitters
                         else
                         {
                             eventInfo.Tag = JsonSchema.Tags.Int;
-                            eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                            eventInfo.RenderedValue = formatter.FormatNumber(value);
                         }
                         break;
 
                     case TypeCode.Single:
                         eventInfo.Tag = JsonSchema.Tags.Float;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
+                        eventInfo.RenderedValue = formatter.FormatNumber((float)value);
                         break;
 
                     case TypeCode.Double:
                         eventInfo.Tag = JsonSchema.Tags.Float;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
+                        eventInfo.RenderedValue = formatter.FormatNumber((double)value);
                         break;
 
                     case TypeCode.Decimal:
                         eventInfo.Tag = JsonSchema.Tags.Float;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
@@ -196,7 +199,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
                     case TypeCode.DateTime:
                         eventInfo.Tag = DefaultSchema.Tags.Timestamp;
-                        eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
+                        eventInfo.RenderedValue = formatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
@@ -207,7 +210,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     default:
                         if (eventInfo.Source.Type == typeof(TimeSpan))
                         {
-                            eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(value);
+                            eventInfo.RenderedValue = formatter.FormatTimeSpan(value);
                             break;
                         }
 

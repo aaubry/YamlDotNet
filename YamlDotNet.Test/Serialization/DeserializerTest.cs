@@ -278,7 +278,7 @@ b: &number 1
         public void DeserializeScalarEdgeCases(IConvertible value, Type type)
         {
             var deserializer = new DeserializerBuilder().Build();
-            var result = deserializer.Deserialize(value.ToString(), type);
+            var result = deserializer.Deserialize(value.ToString(YamlFormatter.Default.NumberFormat), type);
 
             result.Should().Be(value);
         }

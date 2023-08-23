@@ -27,8 +27,16 @@ namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class JsonEventEmitter : ChainedEventEmitter
     {
-        public JsonEventEmitter(IEventEmitter nextEmitter)
+        private readonly YamlFormatter formatter;
+
+        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter)
             : base(nextEmitter)
+        {
+            this.formatter = formatter;
+        }
+
+        public JsonEventEmitter(IEventEmitter nextEmitter)
+            : this(nextEmitter, YamlFormatter.Default)
         {
         }
 
@@ -53,7 +61,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
+                        eventInfo.RenderedValue = formatter.FormatBoolean(value);
                         break;
 
                     case TypeCode.Byte:
@@ -72,13 +80,13 @@ namespace YamlDotNet.Serialization.EventEmitters
                             break;
                         }
 
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Single:
                     case TypeCode.Double:
                     case TypeCode.Decimal:
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
@@ -88,7 +96,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         break;
 
                     case TypeCode.DateTime:
-                        eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
+                        eventInfo.RenderedValue = formatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
@@ -98,7 +106,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     default:
                         if (eventInfo.Source.Type == typeof(TimeSpan))
                         {
-                            eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(value);
+                            eventInfo.RenderedValue = formatter.FormatTimeSpan(value);
                             break;
                         }
 

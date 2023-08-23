@@ -87,7 +87,7 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(factory) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
-                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter) },
+                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, yamlFormatter) },
                 { typeof(StaticArrayNodeDeserializer), _ => new StaticArrayNodeDeserializer(factory) },
                 { typeof(StaticDictionaryNodeDeserializer), _ => new StaticDictionaryNodeDeserializer(factory, duplicateKeyChecking) },
                 { typeof(StaticCollectionNodeDeserializer), _ => new StaticCollectionNodeDeserializer(factory) },

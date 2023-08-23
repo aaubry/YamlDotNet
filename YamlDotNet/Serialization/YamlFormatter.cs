@@ -24,9 +24,11 @@ using System.Globalization;
 
 namespace YamlDotNet.Serialization
 {
-    internal static class YamlFormatter
+    public class YamlFormatter
     {
-        public static readonly NumberFormatInfo NumberFormat = new NumberFormatInfo
+        public static YamlFormatter Default { get; } = new YamlFormatter();
+
+        public NumberFormatInfo NumberFormat { get; set; } = new NumberFormatInfo
         {
             CurrencyDecimalSeparator = ".",
             CurrencyGroupSeparator = "_",
@@ -42,32 +44,32 @@ namespace YamlDotNet.Serialization
             NegativeInfinitySymbol = "-.inf"
         };
 
-        public static string FormatNumber(object number)
+        public string FormatNumber(object number)
         {
             return Convert.ToString(number, NumberFormat)!;
         }
 
-        public static string FormatNumber(double number)
+        public string FormatNumber(double number)
         {
             return number.ToString("G", NumberFormat);
         }
 
-        public static string FormatNumber(float number)
+        public string FormatNumber(float number)
         {
             return number.ToString("G", NumberFormat);
         }
 
-        public static string FormatBoolean(object boolean)
+        public string FormatBoolean(object boolean)
         {
             return boolean.Equals(true) ? "true" : "false";
         }
 
-        public static string FormatDateTime(object dateTime)
+        public string FormatDateTime(object dateTime)
         {
             return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
         }
 
-        public static string FormatTimeSpan(object timeSpan)
+        public string FormatTimeSpan(object timeSpan)
         {
             return ((TimeSpan)timeSpan).ToString();
         }
