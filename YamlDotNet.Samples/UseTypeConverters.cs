@@ -48,7 +48,7 @@ namespace YamlDotNet.Samples
             var serializer = new SerializerBuilder()
                 .WithTypeConverter(new DateTimeOffsetConverter())
                 .Build();
-            var o = new { Hello = new DateTimeOffset(DateTime.Now, new TimeSpan(-6, 0, 0)) };
+            var o = new { Hello = DateTime.UtcNow };
             var yaml = serializer.Serialize(o);
             output.WriteLine(yaml);
         }
