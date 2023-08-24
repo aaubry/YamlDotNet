@@ -59,6 +59,7 @@ namespace YamlDotNet.Serialization
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
+        private ScalarStyle defaultScalarStyle = ScalarStyle.Any;
         private bool quoteNecessaryStrings;
         private bool quoteYaml1_1Strings;
 
@@ -97,7 +98,7 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings) }
+                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, yamlFormatter) }
             };
 
             objectFactory = new DefaultObjectFactory();
@@ -124,7 +125,8 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public SerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
         {
-            return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            this.defaultScalarStyle = style;
+            return this;
         }
 
         /// <summary>
@@ -280,7 +282,7 @@ namespace YamlDotNet.Serialization
                 settings,
                 objectFactory
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, yamlFormatter), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 
@@ -333,7 +335,7 @@ namespace YamlDotNet.Serialization
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
                 .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
-                .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>

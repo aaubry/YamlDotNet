@@ -57,6 +57,8 @@ namespace YamlDotNet.Serialization
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
         private bool quoteNecessaryStrings;
+        private bool quoteYaml1_1Strings;
+        private ScalarStyle defaultScalarStyle;
 
         public StaticSerializerBuilder(StaticContext context)
             : base(new DynamicTypeResolver())
@@ -95,7 +97,7 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings) }
+                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, yamlFormatter) }
             };
 
             objectGraphTraversalStrategyFactory = (typeInspector, typeResolver, typeConverters, maximumRecursion) =>
@@ -103,6 +105,17 @@ namespace YamlDotNet.Serialization
         }
 
         protected override StaticSerializerBuilder Self { get { return this; } }
+
+        /// <summary>
+        /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
+        /// </summary>
+        /// <param name="quoteYaml1_1Strings">Also quote strings that are valid scalars in the YAML 1.1 specification (which includes boolean Yes/No/On/Off, base 60 numbers and more)</param>
+        public StaticSerializerBuilder WithQuotingNecessaryStrings(bool quoteYaml1_1Strings = false)
+        {
+            quoteNecessaryStrings = true;
+            this.quoteYaml1_1Strings = quoteYaml1_1Strings;
+            return this;
+        }
 
         /// <summary>
         /// Put double quotes around strings that need it, for example Null, True, False, a number. This should be called before any other "With" methods if you want this feature enabled.
@@ -118,7 +131,8 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public StaticSerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
         {
-            return WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, style), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+            this.defaultScalarStyle = style;
+            return this;
         }
 
         /// <summary>
@@ -326,7 +340,7 @@ namespace YamlDotNet.Serialization
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
-                .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>

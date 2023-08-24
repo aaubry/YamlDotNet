@@ -42,6 +42,7 @@ namespace YamlDotNet.Serialization
         internal bool ignoreFields;
         internal bool includeNonPublicProperties = false;
         internal Settings settings;
+        internal YamlFormatter yamlFormatter = YamlFormatter.Default;
 
         internal BuilderSkeleton(ITypeResolver typeResolver)
         {
@@ -292,6 +293,18 @@ namespace YamlDotNet.Serialization
             }
 
             typeInspectorFactories.Remove(inspectorType);
+            return Self;
+        }
+
+        /// <summary>
+        /// Override the default yaml formatter with the one passed in
+        /// </summary>
+        /// <param name="formatter"><seealso cref="YamlFormatter"/>to use when serializing and deserializing objects.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public TBuilder WithYamlFormatter(YamlFormatter formatter)
+        {
+            yamlFormatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
             return Self;
         }
 

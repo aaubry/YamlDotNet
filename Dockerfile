@@ -16,7 +16,7 @@ RUN apt install -y wget
 RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt update
-RUN apt install -y dotnet-sdk-3.1
+RUN apt install -y dotnet-sdk-3.1 dotnet-sdk-6.0
 
 FROM builder AS build
 WORKDIR /src
@@ -46,10 +46,9 @@ RUN dotnet build -c Release --framework net70 YamlDotNet/YamlDotNet.csproj -o /o
 
 RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
 
-RUN dotnet test -c Release YamlDotNet.sln --framework net70 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.sln --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net70 --logger:"trx;LogFileName=/output/tests.net70.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework netcoreapp3.1 --logger:"trx;LogFileName=/output/tests.netcoreapp3.1.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net47 --logger:"trx;LogFileName=/output/tests.net47.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
 VOLUME /output

@@ -18,6 +18,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8618 // Possible null reference argument.
+#pragma warning disable CS8602 // Possible null reference argument.
 
 using System;
 using System.Collections;
@@ -208,3 +211,6 @@ public enum MyTestEnum
     Z = 1,
 }
 
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8618 // Possible null reference argument.
+#pragma warning restore CS8602 // Possible null reference argument.
