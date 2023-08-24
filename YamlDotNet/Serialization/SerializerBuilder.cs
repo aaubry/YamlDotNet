@@ -335,6 +335,10 @@ namespace YamlDotNet.Serialization
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
                 .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
+#if NET6_0_OR_GREATER
+                .WithTypeConverter(new DateOnlyConverter(doubleQuotes: true))
+                .WithTypeConverter(new TimeOnlyConverter(doubleQuotes: true))
+#endif
                 .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
