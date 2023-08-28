@@ -530,6 +530,34 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
+        [Fact]
+        public void Utf16StringsAsUtf8SurrogatesWorkCorrectly()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("Test: \"\\uD83D\\uDC4D\""),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("Test"),
+                Value,
+                DoubleQuotedScalar("\uD83D\uDC4D"), // guaranteed thumbs up emoticon that will work in Windows Terminal since it pukes on displaying it.
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Utf16CharactersAreReadCorrectly()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("Test: \"\uD83D\uDC4D\""),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("Test"),
+                Value,
+                DoubleQuotedScalar("\uD83D\uDC4D"), // guaranteed thumbs up emoticon that will work in Windows Terminal since it pukes on displaying it.
+                BlockEnd,
+                StreamEnd);
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;
