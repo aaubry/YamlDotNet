@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -526,6 +526,20 @@ namespace YamlDotNet.Test.Core
                 Value,
                 PlainScalar("world"),
                 BlockEnd,
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void Utf16StringsAsUtf8SurrogatesWorkCorrectly()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("Test: \"\\uD83D\\uDC4D\""),
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar("Test"),
+                Value,
+                DoubleQuotedScalar("\uD83D\uDC4D"), // guaranteed thumbs up emoticon that will work in Windows Terminal since it pukes on displaying it.
                 BlockEnd,
                 StreamEnd);
         }

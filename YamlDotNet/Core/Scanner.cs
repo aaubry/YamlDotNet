@@ -1937,19 +1937,68 @@ namespace YamlDotNet.Core
 
                             // Check the value and write the character.
 
-                            if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
+                            //check for utf-8 surrogate pair
+                            if (character >= 0xD800 && character <= 0xDFFF)
+                            {
+                                for (var k = 0; k < codeLength; ++k)
+                                {
+                                    Skip();
+                                }
+
+                                if (analyzer.Peek(0) == '\\' &&
+                                    (analyzer.Peek(1) == 'u' || analyzer.Peek(1) == 'U'))
+                                {
+                                    Skip(); //escape character
+                                    if (analyzer.Peek(0) == 'u')
+                                    {
+                                        codeLength = 4;
+                                    }
+                                    else
+                                    {
+                                        codeLength = 8;
+                                    }
+                                    Skip(); //escape code
+
+                                    var lowSurrogate = 0;
+
+                                    // Scan the character value.
+                                    for (var k = 0; k < codeLength; ++k)
+                                    {
+                                        if (!analyzer.IsHex(0))
+                                        {
+                                            throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, did not find expected hexadecimal number.");
+                                        }
+                                        lowSurrogate = ((lowSurrogate << 4) + analyzer.AsHex(k));
+                                    }
+
+                                    for (var k = 0; k < codeLength; ++k)
+                                    {
+                                        Skip();
+                                    }
+
+                                    character = char.ConvertToUtf32((char)character, (char)lowSurrogate);
+                                }
+                                else
+                                {
+                                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found invalid Unicode surrogates.");
+                                }
+                            }
+                            else if (character > 0x10FFFF)
                             {
                                 throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found invalid Unicode character escape code.");
                             }
+                            else
+                            {
+                                // Advance the pointer.
+
+                                for (var k = 0; k < codeLength; ++k)
+                                {
+                                    Skip();
+                                }
+
+                            }
 
                             value.Append(char.ConvertFromUtf32(character));
-
-                            // Advance the pointer.
-
-                            for (var k = 0; k < codeLength; ++k)
-                            {
-                                Skip();
-                            }
                         }
                     }
                     else
