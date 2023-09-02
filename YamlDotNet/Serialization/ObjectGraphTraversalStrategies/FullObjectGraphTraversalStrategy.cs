@@ -104,6 +104,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                 throw new MaximumRecursionLevelReachedException(message.ToString());
             }
 
+
             if (!visitor.Enter(value, context))
             {
                 return;
@@ -232,6 +233,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
         protected virtual void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
         {
+            if (context.GetType() != typeof(Nothing))
+            {
+                objectFactory.ExecuteOnSerializing(value.Value);
+            }
+
             visitor.VisitMappingStart(value, typeof(string), typeof(object), context);
 
             var source = value.NonNullValue();
@@ -246,6 +252,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
 
             visitor.VisitMappingEnd(value, context);
+
+            if (context.GetType() != typeof(Nothing))
+            {
+                objectFactory.ExecuteOnSerialized(value.Value);
+            }
         }
 
         private IObjectDescriptor GetObjectDescriptor(object? value, Type staticType)

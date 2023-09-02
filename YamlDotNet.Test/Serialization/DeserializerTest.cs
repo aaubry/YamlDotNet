@@ -26,6 +26,7 @@ using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Callbacks;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization
@@ -331,7 +332,32 @@ name: Jake
             act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
             act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
-        
+
+        [Fact]
+        public void SerializeStateMethodsGetCalledOnce()
+        {
+            var yaml = "Test: Hi";
+            var deserializer = new DeserializerBuilder().Build();
+            var test = deserializer.Deserialize<TestState>(yaml);
+
+            Assert.Equal(1, test.OnDeserializedCallCount);
+            Assert.Equal(1, test.OnDeserializingCallCount);
+        }
+
+        public class TestState
+        {
+            public int OnDeserializedCallCount { get; set; }
+            public int OnDeserializingCallCount { get; set; }
+
+            public string Test { get; set; } = string.Empty;
+
+            [OnDeserialized]
+            public void Deserialized() => OnDeserializedCallCount++;
+
+            [OnDeserializing]
+            public void Deserializing() => OnDeserializingCallCount++;
+        }
+
         public class Test
         {
             public string Value { get; set; }

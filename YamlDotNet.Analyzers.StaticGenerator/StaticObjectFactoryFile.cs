@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -168,7 +169,36 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
+            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
+            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);
+            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnSerializing", (c) => c.OnSerializingMethods);
+            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnSerialized", (c) => c.OnSerializedMethods);
+            UnIndent(); Write("}");
+        }
 
+        private void WriteExecuteMethod(ClassSyntaxReceiver classSyntaxReceiver, string methodName, Func<ClassObject, IEnumerable<IMethodSymbol>> selector)
+        {
+            Write($"public override void {methodName}(object value)");
+            Write("{"); Indent();
+            Write("if (value == null) return;");
+            Write("var type = value.GetType();");
+            foreach (var o in classSyntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                var methods = selector(classObject);
+                if (methods.Any())
+                {
+                    var className = classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty);
+                    Write($"if (type == typeof({className}))");
+                    Write("{"); Indent();
+                    foreach (var m in methods)
+                    {
+                        Write($"(({className})value).{m.Name}();");
+                    }
+                    Write("return;");
+                    UnIndent(); Write("}");
+                }
+            }
             UnIndent(); Write("}");
         }
     }

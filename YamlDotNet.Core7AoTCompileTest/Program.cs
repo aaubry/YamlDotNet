@@ -23,15 +23,11 @@
 #pragma warning disable CS8602 // Possible null reference argument.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NodeDeserializers;
+using YamlDotNet.Serialization.Callbacks;
 
 string yaml = $@"MyBool: true
 hi: 1
@@ -203,6 +199,32 @@ public class InheritedBase
 public class Inherited : InheritedBase
 {
     public string NotInherited { get; set; }
+
+
+    [OnSerializing]
+    public void Serializing()
+    {
+        Console.WriteLine("Serializing");
+    }
+
+    [OnSerialized]
+    public void Serialized()
+    {
+        Console.WriteLine("Serialized");
+    }
+
+    [OnDeserialized]
+    public void Deserialized()
+    {
+        Console.WriteLine("Deserialized");
+    }
+
+    [OnDeserializing]
+    public void Deserializing()
+    {
+        Console.WriteLine("Deserializing");
+    }
+
 }
 
 public enum MyTestEnum
