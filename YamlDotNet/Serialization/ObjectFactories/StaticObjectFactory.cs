@@ -121,5 +121,13 @@ namespace YamlDotNet.Serialization.ObjectFactories
             genericArguments = null;
             return false;
         }
+
+        public abstract void ExecuteOnDeserializing(object value);
+
+        public abstract void ExecuteOnDeserialized(object value);
+
+        public abstract void ExecuteOnSerializing(object value);
+
+        public abstract void ExecuteOnSerialized(object value);
     }
 }

@@ -20,6 +20,7 @@
 // SOFTWARE.
 using Xunit;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Callbacks;
 
 namespace YamlDotNet.Test.Analyzers.StaticGenerator
 {
@@ -78,6 +79,46 @@ Nested:
 ";
             Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
         }
+
+        [Fact]
+        public void CallbacksAreExecuted()
+        {
+            var yaml = "Test: Hi";
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var test = deserializer.Deserialize<TestState>(yaml);
+
+            Assert.Equal(1, test.OnDeserializedCallCount);
+            Assert.Equal(1, test.OnDeserializingCallCount);
+
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            yaml = serializer.Serialize(test);
+            Assert.Equal(1, test.OnSerializedCallCount);
+            Assert.Equal(1, test.OnSerializingCallCount);
+        }
+
+        [YamlSerializable]
+        public class TestState
+        {
+            public int OnDeserializedCallCount { get; set; }
+            public int OnDeserializingCallCount { get; set; }
+            public int OnSerializedCallCount { get; set; }
+            public int OnSerializingCallCount { get; set; }
+
+            public string Test { get; set; } = string.Empty;
+
+            [OnDeserialized]
+            public void Deserialized() => OnDeserializedCallCount++;
+
+            [OnDeserializing]
+            public void Deserializing() => OnDeserializingCallCount++;
+
+            [OnSerialized]
+            public void Serialized() => OnSerializedCallCount++;
+
+            [OnSerializing]
+            public void Serializing() => OnSerializingCallCount++;
+        }
+
     }
     public class InheritedClass
     {

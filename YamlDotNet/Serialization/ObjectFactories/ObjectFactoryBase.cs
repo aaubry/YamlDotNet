@@ -33,6 +33,26 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
         public virtual object? CreatePrimitive(Type type) => type.IsValueType() ? Activator.CreateInstance(type) : null;
 
+        /// <inheritdoc />
+        public virtual void ExecuteOnDeserialized(object value)
+        {
+        }
+
+        /// <inheritdoc />
+        public virtual void ExecuteOnDeserializing(object value)
+        {
+        }
+
+        /// <inheritdoc />
+        public virtual void ExecuteOnSerialized(object value)
+        {
+        }
+
+        /// <inheritdoc />
+        public virtual void ExecuteOnSerializing(object value)
+        {
+        }
+
         public virtual bool GetDictionary(IObjectDescriptor descriptor, out IDictionary? dictionary, out Type[]? genericArguments)
         {
             var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(descriptor.Type, typeof(IDictionary<,>));

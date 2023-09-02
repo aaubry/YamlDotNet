@@ -22,6 +22,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using YamlDotNet.Serialization.Callbacks;
 
 namespace YamlDotNet.Serialization.ObjectFactories
 {
@@ -30,6 +33,14 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class DefaultObjectFactory : ObjectFactoryBase
     {
+        private readonly Dictionary<Type, Dictionary<Type, MethodInfo[]>> _stateMethods = new Dictionary<Type, Dictionary<Type, MethodInfo[]>>
+        {
+            { typeof(OnDeserializedAttribute), new Dictionary<Type, MethodInfo[]>() },
+            { typeof(OnDeserializingAttribute), new Dictionary<Type, MethodInfo[]>() },
+            { typeof(OnSerializedAttribute), new Dictionary<Type, MethodInfo[]>() },
+            { typeof(OnSerializingAttribute), new Dictionary<Type, MethodInfo[]>() },
+        };
+
         private readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
         {
             { typeof(IEnumerable<>), typeof(List<>) },
@@ -104,5 +115,49 @@ namespace YamlDotNet.Serialization.ObjectFactories
             }
         }
 
+        public override void ExecuteOnDeserialized(object value) =>
+            ExecuteState(typeof(OnDeserializedAttribute), value);
+
+        public override void ExecuteOnDeserializing(object value) =>
+            ExecuteState(typeof(OnDeserializingAttribute), value);
+
+        public override void ExecuteOnSerialized(object value) =>
+            ExecuteState(typeof(OnSerializedAttribute), value);
+
+        public override void ExecuteOnSerializing(object value) =>
+            ExecuteState(typeof(OnSerializingAttribute), value);
+
+        private void ExecuteState(Type attributeType, object value)
+        {
+            if (value == null)
+            {
+                return;
+            }
+
+            var type = value.GetType();
+            var methodsToExecute = GetStateMethods(attributeType, type);
+
+            foreach (var method in methodsToExecute)
+            {
+                method.Invoke(value, null);
+            }
+        }
+
+        private MethodInfo[] GetStateMethods(Type attributeType, Type valueType)
+        {
+            var stateDictionary = _stateMethods[attributeType];
+
+            if (stateDictionary.TryGetValue(valueType, out var methods))
+            {
+                return methods;
+            }
+
+            methods = valueType.GetMethods(BindingFlags.Public |
+                                          BindingFlags.Instance |
+                                          BindingFlags.NonPublic);
+            methods = methods.Where(x => x.GetCustomAttributes(attributeType, true).Any()).ToArray();
+            stateDictionary[valueType] = methods;
+            return methods;
+        }
     }
 }

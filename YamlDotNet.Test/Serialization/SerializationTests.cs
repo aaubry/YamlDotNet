@@ -37,6 +37,7 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Callbacks;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
 
@@ -2393,6 +2394,31 @@ Null: true
             obj.False.Should().Be("hello");
             obj.Null.Should().BeTrue();
             result.Should().Be($"True: {Environment.NewLine}False: hello{Environment.NewLine}Null: true{Environment.NewLine}");
+        }
+
+        [Fact]
+        public void SerializeStateMethodsGetCalledOnce()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var test = new TestState();
+            serializer.Serialize(test);
+
+            Assert.Equal(1, test.OnSerializedCallCount);
+            Assert.Equal(1, test.OnSerializingCallCount);
+        }
+
+        public class TestState
+        {
+            public int OnSerializedCallCount { get; set; }
+            public int OnSerializingCallCount { get; set; }
+
+            public string Test { get; set; } = string.Empty;
+
+            [OnSerialized]
+            public void Serialized() => OnSerializedCallCount++;
+
+            [OnSerializing]
+            public void Serializing() => OnSerializingCallCount++;
         }
 
         public class ReservedWordsTestClass<TNullType>

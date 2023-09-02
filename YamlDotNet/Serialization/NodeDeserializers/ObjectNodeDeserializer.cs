@@ -57,6 +57,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
             value = objectFactory.Create(implementationType);
+            objectFactory.ExecuteOnDeserializing(value);
+
             var consumedProperties = new HashSet<string>(StringComparer.Ordinal);
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
@@ -104,6 +106,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
 
+            objectFactory.ExecuteOnDeserialized(value);
             return true;
         }
     }

@@ -65,7 +65,8 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                             foreach (var member in members)
                             {
                                 if (member.IsStatic ||
-                                    member.DeclaredAccessibility != Accessibility.Public ||
+                                    (member.DeclaredAccessibility != Accessibility.Public &&
+                                     member.DeclaredAccessibility != Accessibility.Internal) ||
                                     member.GetAttributes().Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.YamlIgnoreAttribute"))
                                 {
                                     continue;
@@ -80,6 +81,26 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                                 {
                                     classObject.FieldSymbols.Add(fieldSymbol);
                                     CheckForSupportedGeneric(fieldSymbol.Type);
+                                }
+                                else if (member is IMethodSymbol methodSymbol)
+                                {
+                                    var methodAttributes = methodSymbol.GetAttributes();
+                                    if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnDeserializedAttribute"))
+                                    {
+                                        classObject.OnDeserializedMethods.Add(methodSymbol);
+                                    }
+                                    if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnDeserializingAttribute"))
+                                    {
+                                        classObject.OnDeserializingMethods.Add(methodSymbol);
+                                    }
+                                    if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnSerializedAttribute"))
+                                    {
+                                        classObject.OnSerializedMethods.Add(methodSymbol);
+                                    }
+                                    if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnSerializingAttribute"))
+                                    {
+                                        classObject.OnSerializingMethods.Add(methodSymbol);
+                                    }
                                 }
                             }
                             classSymbol = classSymbol.BaseType;

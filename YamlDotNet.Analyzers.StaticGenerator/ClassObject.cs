@@ -30,12 +30,16 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         public List<IFieldSymbol> FieldSymbols { get; }
         public string FullName { get; }
         public string GuidSuffix { get; }
-        public ITypeSymbol ModuleSymbol { get; }
-        public List<IPropertySymbol> PropertySymbols { get; }
-        public string SanitizedClassName { get; }
         public bool IsArray { get; }
         public bool IsDictionary { get; }
         public bool IsList { get; }
+        public ITypeSymbol ModuleSymbol { get; }
+        public List<IMethodSymbol> OnDeserializedMethods { get; }
+        public List<IMethodSymbol> OnDeserializingMethods { get; }
+        public List<IMethodSymbol> OnSerializedMethods { get; }
+        public List<IMethodSymbol> OnSerializingMethods { get; }
+        public List<IPropertySymbol> PropertySymbols { get; }
+        public string SanitizedClassName { get; }
 
         public ClassObject(string sanitizedClassName, ITypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false, bool isArray = false)
         {
@@ -43,11 +47,15 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             PropertySymbols = new List<IPropertySymbol>();
             FullName = moduleSymbol.GetFullName() ?? string.Empty;
             GuidSuffix = Guid.NewGuid().ToString("N");
-            ModuleSymbol = moduleSymbol;
-            SanitizedClassName = sanitizedClassName;
             IsDictionary = isDictionary;
             IsList = isList;
             IsArray = isArray;
+            ModuleSymbol = moduleSymbol;
+            OnDeserializedMethods = new List<IMethodSymbol>();
+            OnDeserializingMethods = new List<IMethodSymbol>();
+            OnSerializedMethods = new List<IMethodSymbol>();
+            OnSerializingMethods = new List<IMethodSymbol>();
+            SanitizedClassName = sanitizedClassName;
         }
     }
 }
