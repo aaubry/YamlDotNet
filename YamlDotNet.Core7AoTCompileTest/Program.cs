@@ -24,12 +24,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using YamlDotNet.Core;
+using YamlDotNet.Core7AoTCompileTest.Model;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Callbacks;
 
-string yaml = $@"MyBool: true
+string yaml = string.Create(CultureInfo.InvariantCulture, $@"MyBool: true
 hi: 1
 MyChar: h
 MyDateTime: {DateTime.Now}
@@ -65,7 +67,9 @@ MyList:
 Inherited:
   Inherited: hello
   NotInherited: world
-";
+External:
+  Text: hello
+");
 
 var input = new StringReader(yaml);
 
@@ -91,6 +95,7 @@ Console.WriteLine("MyUInt32: <{0}>", x.MyUInt32);
 Console.WriteLine("MyUInt64: <{0}>", x.MyUInt64);
 Console.WriteLine("Inner == null: <{0}>", x.Inner == null);
 Console.WriteLine("Inner.Text: <{0}>", x.Inner?.Text);
+Console.WriteLine("External.Text: <{0}>", x.External?.Text);
 foreach (var inner in x.InnerArray)
 {
     Console.WriteLine("InnerArray.Text: <{0}>", inner.Text);
@@ -188,6 +193,7 @@ public class PrimitiveTypes
     public Dictionary<string, string>? MyDictionary { get; set; }
     public List<string>? MyList { get; set; }
     public Inherited Inherited { get; set; }
+    public ExternalModel External { get; set; }
 }
 
 public class InheritedBase
