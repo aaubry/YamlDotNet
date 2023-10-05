@@ -94,30 +94,40 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                     if (member is IPropertySymbol propertySymbol)
                     {
-                        classObject.PropertySymbols.Add(propertySymbol);
-                        CheckForSupportedGeneric(propertySymbol.Type);
+                        if (!classObject.PropertySymbols.ContainsName(propertySymbol))
+                        {
+                            classObject.PropertySymbols.Add(propertySymbol);
+                            CheckForSupportedGeneric(propertySymbol.Type);
+                        }
                     }
                     else if (member is IFieldSymbol fieldSymbol)
                     {
-                        classObject.FieldSymbols.Add(fieldSymbol);
-                        CheckForSupportedGeneric(fieldSymbol.Type);
+                        if (!classObject.FieldSymbols.ContainsName(fieldSymbol))
+                        {
+                            classObject.FieldSymbols.Add(fieldSymbol);
+                            CheckForSupportedGeneric(fieldSymbol.Type);
+                        }
                     }
                     else if (member is IMethodSymbol methodSymbol)
                     {
                         var methodAttributes = methodSymbol.GetAttributes();
-                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnDeserializedAttribute"))
+                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnDeserializedAttribute")
+                            && !classObject.OnDeserializedMethods.ContainsName(methodSymbol))
                         {
                             classObject.OnDeserializedMethods.Add(methodSymbol);
                         }
-                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnDeserializingAttribute"))
+                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnDeserializingAttribute")
+                            && !classObject.OnDeserializingMethods.ContainsName(methodSymbol))
                         {
                             classObject.OnDeserializingMethods.Add(methodSymbol);
                         }
-                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnSerializedAttribute"))
+                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnSerializedAttribute")
+                            && !classObject.OnSerializedMethods.ContainsName(methodSymbol))
                         {
                             classObject.OnSerializedMethods.Add(methodSymbol);
                         }
-                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnSerializingAttribute"))
+                        if (methodAttributes.Any(x => x.AttributeClass!.ToDisplayString() == "YamlDotNet.Serialization.Callbacks.OnSerializingAttribute")
+                            && !classObject.OnSerializingMethods.ContainsName(methodSymbol))
                         {
                             classObject.OnSerializingMethods.Add(methodSymbol);
                         }
@@ -146,10 +156,12 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             else if (typeName.StartsWith("System.Collections.Generic.Dictionary"))
             {
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, true));
+                CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[1]);
             }
             else if (typeName.StartsWith("System.Collections.Generic.List"))
             {
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isList: true));
+                CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[0]);
             }
         }
     }
