@@ -61,6 +61,13 @@ MyArray:
 MyDictionary:
   x: y
   a: b
+MyDictionaryOfArrays:
+  a:
+  - a
+  - b
+  b:
+  - c
+  - d
 MyList:
 - a
 - b
@@ -114,6 +121,15 @@ if (x.MyDictionary != null)
     foreach (var kvp in x.MyDictionary)
     {
         Console.WriteLine("MyDictionary[{0}] = <{1}>", kvp.Key, kvp.Value);
+    }
+}
+
+Console.WriteLine("MyDictionaryOfArrays == null: <{0}>", x.MyDictionaryOfArrays == null);
+if (x.MyDictionaryOfArrays != null)
+{
+    foreach (var kvp in x.MyDictionaryOfArrays)
+    {
+        Console.WriteLine("MyDictionaryOfArrays[{0}] = <{1}>", kvp.Key, string.Join(',', kvp.Value));
     }
 }
 
@@ -191,6 +207,7 @@ public class PrimitiveTypes
     public Inner[]? InnerArray { get; set; }
     public MyArray? MyArray { get; set; }
     public Dictionary<string, string>? MyDictionary { get; set; }
+    public Dictionary<string, string[]>? MyDictionaryOfArrays { get; set; }
     public List<string>? MyList { get; set; }
     public Inherited Inherited { get; set; }
     public ExternalModel External { get; set; }

@@ -121,6 +121,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                     case ITypeParameterSymbol typeParameterSymbol:
                         output.Add(typeParameterSymbol.Name + typeParameterSymbol.GetNullable());
                         break;
+                    case IArrayTypeSymbol arrayTypeSymbol:
+                        output.Add(GetFullName(arrayTypeSymbol.ElementType) + "[]");
+                        break;
                     default:
                         throw new NotSupportedException($"Cannot generate type name from type argument {argument.GetType().FullName}");
                 }
