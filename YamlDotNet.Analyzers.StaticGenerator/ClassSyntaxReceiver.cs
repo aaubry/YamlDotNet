@@ -66,17 +66,17 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
         }
 
-        private void AddSerializableClass(INamedTypeSymbol classSymbol)
+        private void AddSerializableClass(INamedTypeSymbol? classSymbol)
         {
             ClassObject classObject;
-            var className = SanitizeName(classSymbol.GetFullName());
+            var className = SanitizeName(classSymbol!.GetFullName());
             if (Classes.ContainsKey(className))
             {
                 classObject = Classes[className];
             }
             else
             {
-                classObject = new ClassObject(className, classSymbol);
+                classObject = new ClassObject(className, classSymbol!);
                 Classes[className] = classObject;
             }
             while (classSymbol != null)
