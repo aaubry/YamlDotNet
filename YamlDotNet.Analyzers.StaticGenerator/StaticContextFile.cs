@@ -34,10 +34,48 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
             Write($"public partial class {classSyntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
             Write("{"); Indent();
-            Write("public YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory ObjectFactory { get; } = new StaticObjectFactory();");
-            Write("public StaticTypeInspector TypeInspector { get; } = new StaticTypeInspector();");
-            Write("public override YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory GetFactory() => ObjectFactory;");
-            Write("public override YamlDotNet.Serialization.ITypeInspector GetTypeInspector() => TypeInspector;");
+            Write("private readonly YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory _objectFactory;");
+            Write("private readonly YamlDotNet.Serialization.ITypeResolver _typeResolver;");
+            Write("private readonly YamlDotNet.Serialization.ITypeInspector _typeInspector;");
+            Write($"public {classSyntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"}()");
+            Write("{"); Indent();
+            Write("_objectFactory = new StaticObjectFactory();");
+            Write("_typeResolver = new StaticTypeResolver(this);");
+            Write("_typeInspector = new StaticTypeInspector(_typeResolver);");
+            UnIndent(); Write("}");
+            Write("public override YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory GetFactory() => _objectFactory;");
+            Write("public override YamlDotNet.Serialization.ITypeInspector GetTypeInspector() => _typeInspector;");
+            Write("public override YamlDotNet.Serialization.ITypeResolver GetTypeResolver() => _typeResolver;");
+            Write("public override bool IsKnownType(Type type)");
+            Write("{"); Indent();
+            foreach (var o in classSyntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                if (classObject.IsArray)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+                }
+                else if (classObject.IsList)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+                }
+                else if (classObject.IsDictionary)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+                }
+                else
+                {
+                    Write($"if (type == typeof({o.Value.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
+                    //always support a array, list and dictionary of the type
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return true;");
+                    Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
+                    Write($"if (type == typeof(System.Collections.Generic.Dictionary<string, {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
+                }
+            }
+            // always support dictionary object
+            Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return true;");
+            Write("return false;");
+            UnIndent(); Write("}");
             UnIndent(); Write("}");
         }
     }

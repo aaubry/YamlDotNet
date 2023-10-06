@@ -18,6 +18,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Callbacks;
@@ -53,6 +55,15 @@ Inner:
   Prop2: 2
 Nested:
   NestedProp: abc
+DictionaryOfArrays:
+  a:
+  - 1
+  b:
+  - 2
+SomeValue: ""abc""
+SomeDictionary:
+  a: 1
+  b: 2
 ";
             var actual = deserializer.Deserialize<RegularObjectOuter>(yaml);
             Assert.Equal("hello", actual.Prop1);
@@ -64,6 +75,11 @@ Nested:
             Assert.Equal(2, actual.Inner.Prop2);
             Assert.NotNull(actual.Nested);
             Assert.Equal("abc", actual.Nested.NestedProp);
+            Assert.Equal("1", actual.DictionaryOfArrays["a"][0]);
+            Assert.Equal("2", actual.DictionaryOfArrays["b"][0]);
+            Assert.Equal("abc", actual.SomeValue);
+            Assert.Equal("1", ((IDictionary<object, object>)actual.SomeDictionary)["a"]);
+            Assert.Equal("2", ((IDictionary<object, object>)actual.SomeDictionary)["b"]);
 
             var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
             var actualYaml = serializer.Serialize(actual);
@@ -76,7 +92,15 @@ Inner:
   Prop2: 2
 Nested:
   NestedProp: abc
-";
+DictionaryOfArrays:
+  a:
+  - 1
+  b:
+  - 2
+SomeValue: abc
+SomeDictionary:
+  a: 1
+  b: 2";
             Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
         }
 
@@ -142,6 +166,12 @@ Nested:
         public string Ignored { get; set; } = "I am ignored";
         public RegularObjectInner Inner { get; set; }
         public NestedClass Nested { get; set; }
+
+        public Dictionary<string, string[]> DictionaryOfArrays { get; set; }
+
+        public object SomeValue { get; set; }
+
+        public object SomeDictionary { get; set; }
 
         [YamlSerializable]
         public class NestedClass
