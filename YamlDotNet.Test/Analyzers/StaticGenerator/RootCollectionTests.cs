@@ -84,6 +84,22 @@ b: world
             Assert.Equal("hello", actual["a"]);
             Assert.Equal("world", actual["b"]);
         }
+
+        [Fact]
+        public void RootNestedObjectWorks()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"
+a:
+ Test: hello
+b:
+ Test: world
+";
+
+            var actual = (IDictionary<object, object>) deserializer.Deserialize<object>(yaml);
+            Assert.Equal("hello", ((IDictionary<object,object>)actual["a"])["Test"]);
+            Assert.Equal("world", ((IDictionary<object,object>)actual["b"])["Test"]);
+        }
     }
     [YamlSerializable]
     public class RootObject
