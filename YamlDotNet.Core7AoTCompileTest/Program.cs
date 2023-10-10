@@ -76,6 +76,10 @@ Inherited:
   NotInherited: world
 External:
   Text: hello
+SomeObject: a
+SomeDictionary:
+  a: 1
+  b: 2
 ");
 
 var input = new StringReader(yaml);
@@ -211,6 +215,8 @@ public class PrimitiveTypes
     public List<string>? MyList { get; set; }
     public Inherited Inherited { get; set; }
     public ExternalModel External { get; set; }
+    public object SomeObject { get; set; }
+    public object SomeDictionary { get; set; }
 }
 
 public class InheritedBase

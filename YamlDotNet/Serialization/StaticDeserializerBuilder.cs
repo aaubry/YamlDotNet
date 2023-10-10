@@ -61,7 +61,7 @@ namespace YamlDotNet.Serialization
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
         /// </summary>
         public StaticDeserializerBuilder(StaticContext context)
-            : base(new StaticTypeResolver())
+            : base(context.GetTypeResolver())
         {
             this.context = context;
             factory = context.GetFactory();

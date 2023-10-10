@@ -54,6 +54,52 @@ namespace YamlDotNet.Test.Analyzers.StaticGenerator
             Assert.Equal("hello", actual[0].Test);
             Assert.Equal("world", actual[1].Test);
         }
+
+        [Fact]
+        public void RootDictionaryWorks()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"
+a:
+ Test: hello
+b:
+ Test: world
+";
+
+            var actual = deserializer.Deserialize<Dictionary<string, RootObject>>(yaml);
+            Assert.Equal("hello", actual["a"].Test);
+            Assert.Equal("world", actual["b"].Test);
+        }
+
+        [Fact]
+        public void RootObjectWorks()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"
+a: hello
+b: world
+";
+
+            var actual = (IDictionary<object, object>) deserializer.Deserialize<object>(yaml);
+            Assert.Equal("hello", actual["a"]);
+            Assert.Equal("world", actual["b"]);
+        }
+
+        [Fact]
+        public void RootNestedObjectWorks()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"
+a:
+ Test: hello
+b:
+ Test: world
+";
+
+            var actual = (IDictionary<object, object>) deserializer.Deserialize<object>(yaml);
+            Assert.Equal("hello", ((IDictionary<object,object>)actual["a"])["Test"]);
+            Assert.Equal("world", ((IDictionary<object,object>)actual["b"])["Test"]);
+        }
     }
     [YamlSerializable]
     public class RootObject

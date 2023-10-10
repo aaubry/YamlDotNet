@@ -38,6 +38,12 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("public class StaticTypeInspector : YamlDotNet.Serialization.ITypeInspector");
             Write("{"); Indent();
 
+            Write("private readonly YamlDotNet.Serialization.ITypeResolver _typeResolver;");
+            Write("public StaticTypeInspector(YamlDotNet.Serialization.ITypeResolver typeResolver)");
+            Write("{"); Indent();
+            Write("_typeResolver = typeResolver;");
+            UnIndent(); Write("}");
+
             #region GetProperties
             Write("public IEnumerable<YamlDotNet.Serialization.IPropertyDescriptor> GetProperties(Type type, object container)");
             Write("{"); Indent();
@@ -96,7 +102,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
         {
-            Write($"new StaticPropertyDescriptor(accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
+            Write($"new StaticPropertyDescriptor(_typeResolver, accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
             foreach (var attribute in attributes)
             {
                 switch (attribute.AttributeClass?.ToDisplayString())

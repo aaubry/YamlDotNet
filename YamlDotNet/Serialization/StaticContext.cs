@@ -30,6 +30,25 @@ namespace YamlDotNet.Serialization
     public abstract class StaticContext
     {
         /// <summary>
+        /// Gets whether the type is known to the context
+        /// </summary>
+        /// <param name="type">Type to check</param>
+        /// <returns></returns>
+        public virtual bool IsKnownType(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ITypeResolver"/> to use for serialization
+        /// </summary>
+        /// <returns></returns>
+        public virtual ITypeResolver GetTypeResolver()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the factory to use for serialization and deserialization
         /// </summary>
         /// <returns></returns>
