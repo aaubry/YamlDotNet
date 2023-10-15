@@ -32,6 +32,11 @@ namespace YamlDotNet.Serialization.TypeResolvers
         {
             if (actualValue != null)
             {
+                if (actualValue.GetType().IsEnum)
+                {
+                    return staticType;
+                }
+
                 switch (actualValue.GetType().GetTypeCode())
                 {
                     case TypeCode.Boolean: return typeof(bool);
