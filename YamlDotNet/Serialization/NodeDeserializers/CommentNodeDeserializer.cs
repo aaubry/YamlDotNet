@@ -19,45 +19,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core.Tokens;
+using System;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet.Serialization.NodeDeserializers
 {
-    /// <summary>
-    /// Defines the interface for a stand-alone YAML scanner that
-    /// converts a sequence of characters into a sequence of YAML tokens.
-    /// </summary>
-    public interface IScanner
+    internal class CommentNodeDeserializer : INodeDeserializer
     {
-        /// <summary>
-        /// Gets the current position inside the input stream.
-        /// </summary>
-        /// <value>The current position.</value>
-        Mark CurrentPosition { get; }
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        {
+            value = null;
+            if (parser.Accept<Comment>(out var _))
+            {
+                if (parser.TryConsume<Comment>(out var comment))
+                {
+                    value = comment;
+                    return true;
+                }
+            }
 
-        /// <summary>
-        /// Gets the current token.
-        /// </summary>
-        Token? Current { get; }
-
-        /// <summary>
-        /// Moves to the next token and consumes the current token.
-        /// </summary>
-        bool MoveNext();
-
-        /// <summary>
-        /// Moves to the next token without consuming the current token.
-        /// </summary>
-        bool MoveNextWithoutConsuming();
-
-        /// <summary>
-        /// Consumes the current token.
-        /// </summary>
-        void ConsumeCurrent();
-
-        /// <summary>
-        /// Gets the SkipComments setting.
-        /// </summary>
-        bool SkipComments { get; }
+            return false;
+        }
     }
 }

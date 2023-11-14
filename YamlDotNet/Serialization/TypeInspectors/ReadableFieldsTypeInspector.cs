@@ -64,6 +64,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             public int Order { get; set; }
             public bool CanWrite { get { return !fieldInfo.IsInitOnly; } }
             public ScalarStyle ScalarStyle { get; set; }
+            public string? Comment { get; set; }
 
             public void Write(object target, object? value)
             {

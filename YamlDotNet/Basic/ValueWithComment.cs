@@ -19,45 +19,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core.Tokens;
-
-namespace YamlDotNet.Core
+namespace YamlDotNet.Basic
 {
-    /// <summary>
-    /// Defines the interface for a stand-alone YAML scanner that
-    /// converts a sequence of characters into a sequence of YAML tokens.
-    /// </summary>
-    public interface IScanner
+    public class ValueWithComment
     {
-        /// <summary>
-        /// Gets the current position inside the input stream.
-        /// </summary>
-        /// <value>The current position.</value>
-        Mark CurrentPosition { get; }
+        public ValueWithComment(object? value, string comment)
+        {
+            this.Value = value;
+            this.Comment = comment;
+        }
+        public object? Value { get; }
 
-        /// <summary>
-        /// Gets the current token.
-        /// </summary>
-        Token? Current { get; }
-
-        /// <summary>
-        /// Moves to the next token and consumes the current token.
-        /// </summary>
-        bool MoveNext();
-
-        /// <summary>
-        /// Moves to the next token without consuming the current token.
-        /// </summary>
-        bool MoveNextWithoutConsuming();
-
-        /// <summary>
-        /// Consumes the current token.
-        /// </summary>
-        void ConsumeCurrent();
-
-        /// <summary>
-        /// Gets the SkipComments setting.
-        /// </summary>
-        bool SkipComments { get; }
+        public string Comment { get; }
     }
 }

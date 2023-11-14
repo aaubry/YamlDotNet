@@ -55,6 +55,7 @@ namespace YamlDotNet.Core
                     {
                         pendingEvents.Enqueue(new Events.Comment(commentToken.Value, commentToken.IsInline, commentToken.Start, commentToken.End));
                         scanner.ConsumeCurrent();
+                        currentToken = scanner.Current;
                     }
                     else
                     {
@@ -87,6 +88,8 @@ namespace YamlDotNet.Core
         /// </summary>
         public ParsingEvent? Current { get; private set; }
 
+        public bool SkipComments => scanner.SkipComments;
+
         private readonly EventQueue pendingEvents = new EventQueue();
 
         /// <summary>
@@ -109,6 +112,13 @@ namespace YamlDotNet.Core
 
             Current = pendingEvents.Dequeue();
             return true;
+        }
+
+        public void SkipFollowingComments()
+        {
+            while (this.TryConsume<Events.Comment>(out var _))
+            {
+            }
         }
 
         private ParsingEvent StateMachine()

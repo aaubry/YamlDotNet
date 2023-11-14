@@ -1647,6 +1647,42 @@ y:
             Assert.Equal("The value", parsed.Value);
         }
 
+[Fact]
+        public void ChildrenWithInlineComments()
+        {
+            var input = @"# document starts with comment
+valuelist:
+   - string1  #{1st comment}
+   - string2
+# block comment
+   - string3  #{2nd comment}
+simplevalue: 12
+objectlist:
+  - att1: 12
+    att2: v1
+  - att1: 13
+    att2: v2
+  - att1: 14 #3rd comment
+    att2: v3    #4th comment
+";
+
+            var expected = @"{""valuelist"": [{""value"": ""string1"", ""comment"": ""{1st comment}""}, {""value"": ""string2"", ""comment"": """"}, {""value"": ""string3"", ""comment"": ""{2nd comment}""}], ""simplevalue"": {""value"": ""12"", ""comment"": """"}, ""objectlist"": [{""att1"": {""value"": ""12"", ""comment"": """"}, ""att2"": {""value"": ""v1"", ""comment"": """"}}, {""att1"": {""value"": ""13"", ""comment"": """"}, ""att2"": {""value"": ""v2"", ""comment"": """"}}, {""att1"": {""value"": ""14"", ""comment"": ""3rd comment""}, ""att2"": {""value"": ""v3"", ""comment"": ""4th comment""}}]}
+";
+
+            var deserializer = new DeserializerBuilder()
+                   .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                   .Build();
+            var serializer = new SerializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .JsonCompatible()
+                    .Build();
+            var parser = new Parser(new Scanner(new StringReader(input), false));
+
+            var yamlObject = deserializer.Deserialize<object>(parser);
+            var actual = serializer.Serialize(yamlObject);
+
+            Assert.Equal(expected, actual);
+        }
         public class CommentWrapper<T> : IYamlConvertible
         {
             public string Comment { get; set; }

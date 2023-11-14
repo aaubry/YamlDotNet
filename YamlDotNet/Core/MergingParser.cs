@@ -47,6 +47,8 @@ namespace YamlDotNet.Core
 
         public ParsingEvent? Current => iterator.Current?.Value;
 
+        public bool SkipComments => innerParser.SkipComments;
+
         public bool MoveNext()
         {
             if (!merged)
@@ -58,6 +60,13 @@ namespace YamlDotNet.Core
             }
 
             return iterator.MoveNext();
+        }
+
+        public void SkipFollowingComments()
+        {
+            while (this.TryConsume<Comment>(out var _))
+            {
+            }
         }
 
         private void Merge()
