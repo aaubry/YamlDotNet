@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 #endif
 using YamlDotNet.Core;
+using YamlDotNet.Core.ParsingComments;
 using YamlDotNet.Serialization.BufferedDeserialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
@@ -457,6 +458,25 @@ namespace YamlDotNet.Serialization
                     typeConverter
                 )
             );
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Deserializer" /> using the current configuration 
+        /// and processing inline comments into the object structure.
+        /// </summary>
+        public IDeserializer BuildWithCommentsDeserializer()
+        {
+            WithNodeDeserializer(new DictionaryNodeDeserializerWithComments(objectFactory.Value, duplicateKeyChecking), s => s.InsteadOf<DictionaryNodeDeserializer>());
+            WithNodeDeserializer(new CommentNodeDeserializer(), s => s.Before<ObjectNodeDeserializer>());
+
+            var serializer = new AliasValueDeserializer(
+                new NodeCommentValueDeserializer(
+                    nodeDeserializerFactories.BuildComponentList(),
+                    nodeTypeResolverFactories.BuildComponentList(),
+                    typeConverter
+                )
+            );
+            return Deserializer.FromValueDeserializer(serializer);
         }
     }
 }

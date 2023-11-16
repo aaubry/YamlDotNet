@@ -38,11 +38,18 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             this.deserializers = deserializers ?? throw new ArgumentNullException(nameof(deserializers));
             this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
+            GetNodeEvent = (IParser parser, Type type) =>
+            {
+                parser.Accept<NodeEvent>(out var nodeEvent);
+                return nodeEvent;
+            };
         }
+
+        public Func<IParser, Type, NodeEvent?> GetNodeEvent { get; set; }
 
         public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            parser.Accept<NodeEvent>(out var nodeEvent);
+            var nodeEvent = GetNodeEvent(parser, expectedType);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
             try

@@ -53,62 +53,67 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 var value = nestedObjectDeserializer(parser, tValue);
                 var valuePromise = value as IValuePromise;
 
-                if (key is IValuePromise keyPromise)
+                AddKeyValue(result, property, key, value, valuePromise);
+            }
+        }
+
+        protected void AddKeyValue(IDictionary result, MappingStart property, object? key, object? value, IValuePromise? valuePromise)
+        {
+            if (key is IValuePromise keyPromise)
+            {
+                if (valuePromise == null)
                 {
-                    if (valuePromise == null)
-                    {
-                        // Key is pending, value is known
-                        keyPromise.ValueAvailable += v => result[v!] = value!;
-                    }
-                    else
-                    {
-                        // Both key and value are pending. We need to wait until both of them become available.
-                        var hasFirstPart = false;
-
-                        keyPromise.ValueAvailable += v =>
-                        {
-                            if (hasFirstPart)
-                            {
-                                TryAssign(result, v!, value!, property);
-                            }
-                            else
-                            {
-                                key = v!;
-                                hasFirstPart = true;
-                            }
-                        };
-
-                        valuePromise.ValueAvailable += v =>
-                        {
-                            if (hasFirstPart)
-                            {
-                                TryAssign(result, key, v!, property);
-                            }
-                            else
-                            {
-                                value = v;
-                                hasFirstPart = true;
-                            }
-                        };
-                    }
+                    // Key is pending, value is known
+                    keyPromise.ValueAvailable += v => result[v!] = value!;
                 }
                 else
                 {
-                    if (key == null)
-                    {
-                        throw new ArgumentException("Empty key names are not supported yet.", "key");
-                    }
+                    // Both key and value are pending. We need to wait until both of them become available.
+                    var hasFirstPart = false;
 
-                    if (valuePromise == null)
+                    keyPromise.ValueAvailable += v =>
                     {
-                        // Happy path: both key and value are known
-                        TryAssign(result, key, value!, property);
-                    }
-                    else
+                        if (hasFirstPart)
+                        {
+                            TryAssign(result, v!, value!, property);
+                        }
+                        else
+                        {
+                            key = v!;
+                            hasFirstPart = true;
+                        }
+                    };
+
+                    valuePromise.ValueAvailable += v =>
                     {
-                        // Key is known, value is pending
-                        valuePromise.ValueAvailable += v => result[key!] = v!;
-                    }
+                        if (hasFirstPart)
+                        {
+                            TryAssign(result, key, v!, property);
+                        }
+                        else
+                        {
+                            value = v;
+                            hasFirstPart = true;
+                        }
+                    };
+                }
+            }
+            else
+            {
+                if (key == null)
+                {
+                    throw new ArgumentException("Empty key names are not supported yet.", "key");
+                }
+
+                if (valuePromise == null)
+                {
+                    // Happy path: both key and value are known
+                    TryAssign(result, key, value!, property);
+                }
+                else
+                {
+                    // Key is known, value is pending
+                    valuePromise.ValueAvailable += v => result[key!] = v!;
                 }
             }
         }
