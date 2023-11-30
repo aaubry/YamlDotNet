@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS builder
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
 RUN apt update && \
     apt install -y \
         apt-transport-https \
@@ -16,7 +16,7 @@ RUN apt install -y wget
 RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt update
-RUN apt install -y dotnet-sdk-3.1 dotnet-sdk-6.0
+RUN apt install -y dotnet-sdk-6.0
 
 FROM builder AS build
 WORKDIR /src
@@ -30,6 +30,8 @@ COPY YamlDotNet.Samples/YamlDotNet.Samples.csproj YamlDotNet.Samples/YamlDotNet.
 COPY YamlDotNet.Test/YamlDotNet.Test.csproj YamlDotNet.Test/YamlDotNet.Test.csproj
 COPY YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.csproj YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.csproj
 COPY YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj
+COPY YamlDotNet.Core7AoTCompileTest.Model/YamlDotNet.Core7AoTCompileTest.Model.csproj YamlDotNet.Core7AoTCompileTest.Model/YamlDotNet.Core7AoTCompileTest.Model.csproj
+COPY YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.fsproj YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.fsproj
 
 RUN dotnet restore YamlDotNet.sln
 
@@ -43,12 +45,13 @@ RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csp
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
 RUN dotnet build -c Release --framework net60 YamlDotNet/YamlDotNet.csproj -o /output/net60
 RUN dotnet build -c Release --framework net70 YamlDotNet/YamlDotNet.csproj -o /output/net70
+RUN dotnet build -c Release --framework net80 YamlDotNet/YamlDotNet.csproj -o /output/net80
 
 RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
 
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net80 --logger:"trx;LogFileName=/output/tests.net80.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net70 --logger:"trx;LogFileName=/output/tests.net70.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework netcoreapp3.1 --logger:"trx;LogFileName=/output/tests.netcoreapp3.1.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
 VOLUME /output
