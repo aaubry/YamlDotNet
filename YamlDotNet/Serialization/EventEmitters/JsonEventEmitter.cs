@@ -75,8 +75,8 @@ namespace YamlDotNet.Serialization.EventEmitters
                         var valueIsEnum = eventInfo.Source.Type.IsEnum();
                         if (valueIsEnum)
                         {
-                            eventInfo.RenderedValue = value.ToString()!;
-                            eventInfo.Style = ScalarStyle.DoubleQuoted;
+                            eventInfo.RenderedValue = formatter.FormatEnum(value);
+                            eventInfo.Style = formatter.PotentiallyQuoteEnums(value) ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain;
                             break;
                         }
 

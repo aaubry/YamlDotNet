@@ -73,5 +73,24 @@ namespace YamlDotNet.Serialization
         {
             return ((TimeSpan)timeSpan).ToString();
         }
+
+        /// <summary>
+        /// Converts an enum to it's string representation. By default it will be the string representation of the enum
+        /// </summary>
+        /// <returns>A string representation of the enum</returns>
+        public virtual Func<object, string> FormatEnum { get; set; } = (value) =>
+        {
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
+            return value.ToString();
+        };
+
+        /// <summary>
+        /// If this function returns true, the serializer will put quotes around the formatted enum value if necessary. Defaults to true.
+        /// </summary>
+        public virtual Func<object, bool> PotentiallyQuoteEnums { get; set; } = (_) => true;
     }
 }

@@ -2407,6 +2407,35 @@ Null: true
             Assert.Equal(1, test.OnSerializingCallCount);
         }
 
+        [Fact]
+        public void SerializeEnumAsNumber()
+        {
+            var serializer = new SerializerBuilder().WithYamlFormatter(new YamlFormatter
+            {
+                FormatEnum = (o) => ((int)o).ToString(),
+                PotentiallyQuoteEnums = (_) => false
+            }).Build();
+            var deserializer = DeserializerBuilder.Build();
+
+            var value = serializer.Serialize(TestEnumAsNumber.Test1);
+            Assert.Equal("1", value.TrimNewLines());
+            var v = deserializer.Deserialize<TestEnumAsNumber>(value);
+            Assert.Equal(TestEnumAsNumber.Test1, v);
+
+            value = serializer.Serialize(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2);
+            Assert.Equal("3", value.TrimNewLines());
+            v = deserializer.Deserialize<TestEnumAsNumber>(value);
+            Assert.Equal(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2, v);
+        }
+
+        [Flags]
+        private enum TestEnumAsNumber
+        {
+            Test1 = 1,
+            Test2 = 2
+        }
+
+
         public class TestState
         {
             public int OnSerializedCallCount { get; set; }

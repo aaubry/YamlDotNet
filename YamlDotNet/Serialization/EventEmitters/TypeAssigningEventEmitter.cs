@@ -148,9 +148,11 @@ namespace YamlDotNet.Serialization.EventEmitters
                         if (eventInfo.Source.Type.IsEnum)
                         {
                             eventInfo.Tag = FailsafeSchema.Tags.Str;
-                            eventInfo.RenderedValue = value.ToString()!;
+                            eventInfo.RenderedValue = formatter.FormatEnum(value);
 
-                            if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
+                            if (quoteNecessaryStrings &&
+                                IsSpecialStringValue(eventInfo.RenderedValue) &&
+                                formatter.PotentiallyQuoteEnums(value))
                             {
                                 suggestedStyle = ScalarStyle.DoubleQuoted;
                             }
