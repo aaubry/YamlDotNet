@@ -92,7 +92,17 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public IObjectDescriptor Read(object target)
             {
-                var propertyValue = propertyInfo.ReadValue(target);
+                object? propertyValue;
+                try
+                {
+                    propertyValue = propertyInfo.ReadValue(target);
+                }
+                catch (TargetInvocationException e)
+                {
+                    return new ObjectDescriptor(
+                        $"Exception of type {e.InnerException!.GetType().FullName} was thrown",
+                        typeof(string), typeof(string), ScalarStyle.Any);
+                }
                 var actualType = TypeOverride ?? typeResolver.Resolve(Type, propertyValue);
                 return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
             }

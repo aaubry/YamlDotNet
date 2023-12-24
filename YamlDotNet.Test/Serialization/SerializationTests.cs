@@ -1115,6 +1115,19 @@ y:
 
             serialized.Should().Contain("Value");
         }
+        
+        [Fact]
+        public void SerializationHandlesThrowingProperties()
+        {
+            var writer = new StringWriter();
+            var obj = new ThrowingPropertyExample();
+
+            Serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+
+            serialized.Should()
+                .Be("Value: Exception of type System.InvalidOperationException was thrown\r\n".NormalizeNewLines());
+        }
 
         [Fact]
         public void SerializingAGenericDictionaryShouldNotThrowTargetException()
