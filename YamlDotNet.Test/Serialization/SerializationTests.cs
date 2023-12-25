@@ -1117,16 +1117,26 @@ y:
         }
         
         [Fact]
-        public void SerializationHandlesThrowingProperties()
+        public void SerializationHandlesTargetInvocationException()
         {
+            var serializer = new SerializerBuilder().WithTargetInvocationExceptionsHandling().Build();
             var writer = new StringWriter();
             var obj = new ThrowingPropertyExample();
 
-            Serializer.Serialize(writer, obj);
+            serializer.Serialize(writer, obj);
             var serialized = writer.ToString();
 
             serialized.Should()
                 .Be("Value: Exception of type System.InvalidOperationException was thrown\r\n".NormalizeNewLines());
+        }
+        
+        [Fact]
+        public void SerializationDoesntHandleTargetInvocationExceptionByDefault()
+        {
+            var writer = new StringWriter();
+            var obj = new ThrowingPropertyExample();
+
+            Assert.Throws<InvalidOperationException>(() => Serializer.Serialize(writer, obj));
         }
 
         [Fact]
