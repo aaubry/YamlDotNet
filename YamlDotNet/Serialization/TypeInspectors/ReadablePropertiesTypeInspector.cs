@@ -34,16 +34,21 @@ namespace YamlDotNet.Serialization.TypeInspectors
     {
         private readonly ITypeResolver typeResolver;
         private readonly bool includeNonPublicProperties;
+        private readonly bool handleTargetInvocationExceptions;
 
         public ReadablePropertiesTypeInspector(ITypeResolver typeResolver)
             : this(typeResolver, false)
         {
         }
 
-        public ReadablePropertiesTypeInspector(ITypeResolver typeResolver, bool includeNonPublicProperties)
+        public ReadablePropertiesTypeInspector(
+            ITypeResolver typeResolver,
+            bool includeNonPublicProperties,
+            bool handleTargetInvocationExceptions = false)
         {
             this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
             this.includeNonPublicProperties = includeNonPublicProperties;
+            this.handleTargetInvocationExceptions = handleTargetInvocationExceptions;
         }
 
         private static bool IsValidProperty(PropertyInfo property)
@@ -57,18 +62,23 @@ namespace YamlDotNet.Serialization.TypeInspectors
             return type
                 .GetProperties(includeNonPublicProperties)
                 .Where(IsValidProperty)
-                .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, typeResolver));
+                .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, typeResolver, handleTargetInvocationExceptions));
         }
 
         private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
         {
             private readonly PropertyInfo propertyInfo;
             private readonly ITypeResolver typeResolver;
+            private readonly bool handleTargetInvocationExceptions;
 
-            public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, ITypeResolver typeResolver)
+            public ReflectionPropertyDescriptor(
+                PropertyInfo propertyInfo,
+                ITypeResolver typeResolver,
+                bool handleTargetInvocationExceptions)
             {
                 this.propertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
                 this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
+                this.handleTargetInvocationExceptions = handleTargetInvocationExceptions;
                 ScalarStyle = ScalarStyle.Any;
             }
 
@@ -93,16 +103,24 @@ namespace YamlDotNet.Serialization.TypeInspectors
             public IObjectDescriptor Read(object target)
             {
                 object? propertyValue;
-                try
+                if (handleTargetInvocationExceptions)
+                {
+                    try
+                    {
+                        propertyValue = propertyInfo.ReadValue(target);
+                    }
+                    catch (TargetInvocationException e)
+                    {
+                        return new ObjectDescriptor(
+                            $"Exception of type {e.InnerException!.GetType().FullName} was thrown",
+                            typeof(string), typeof(string), ScalarStyle.Any);
+                    }
+                }
+                else
                 {
                     propertyValue = propertyInfo.ReadValue(target);
                 }
-                catch (TargetInvocationException e)
-                {
-                    return new ObjectDescriptor(
-                        $"Exception of type {e.InnerException!.GetType().FullName} was thrown",
-                        typeof(string), typeof(string), ScalarStyle.Any);
-                }
+
                 var actualType = TypeOverride ?? typeResolver.Resolve(Type, propertyValue);
                 return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
             }
