@@ -44,6 +44,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
         /// <exception cref="ArgumentOutOfRangeException">If parser does not fit within the max depth and length specified.</exception>
         public ParserBuffer(IParser parserToBuffer, int maxDepth, int maxLength)
         {
+            SkipComments = parserToBuffer.SkipComments;
             buffer = new LinkedList<ParsingEvent>();
             buffer.AddLast(parserToBuffer.Consume<MappingStart>());
             var depth = 0;
@@ -71,6 +72,8 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
         /// </summary>
         public ParsingEvent? Current => current?.Value;
 
+        public bool SkipComments { get; }
+
         /// <summary>
         /// Moves to the next event.
         /// </summary>
@@ -87,6 +90,13 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
         public void Reset()
         {
             current = buffer.First;
+        }
+
+        public void SkipFollowingComments()
+        {
+            while (this.TryConsume<Comment>(out var _))
+            {
+            }
         }
     }
 }

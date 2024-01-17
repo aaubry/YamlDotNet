@@ -39,5 +39,15 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <returns>Returns true if there are more events available, otherwise returns false.</returns>
         bool MoveNext();
+
+        /// <summary>
+        /// Skips following comment events.
+        /// </summary>
+        void SkipFollowingComments();
+
+        /// <summary>
+        /// Gets the SkipComments value from its scanner.
+        /// </summary>
+        bool SkipComments { get; }
     }
 }

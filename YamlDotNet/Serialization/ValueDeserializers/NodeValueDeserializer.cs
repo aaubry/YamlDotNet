@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            parser.Accept<NodeEvent>(out var nodeEvent);
+            var nodeEvent = GetNodeEvent(parser, expectedType);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
 
             try
@@ -74,6 +74,24 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 nodeEvent?.End ?? Mark.Empty,
                 $"No node deserializer was able to deserialize the node into type {expectedType.AssemblyQualifiedName}"
             );
+        }
+
+        private static NodeEvent? GetNodeEvent(IParser parser, Type expectedType)
+        {
+            parser.Accept<NodeEvent>(out var nodeEvent);
+            if (nodeEvent == null
+                && !parser.SkipComments
+                && !typeof(IYamlConvertible).IsAssignableFrom(expectedType))
+            {
+                if (parser.Current is YamlDotNet.Core.Events.Comment cmt && cmt.IsInline)
+                {
+                    return nodeEvent;
+                }
+                parser.SkipFollowingComments();
+                parser.Accept<NodeEvent>(out nodeEvent);
+            }
+
+            return nodeEvent;
         }
 
         private Type GetTypeFromEvent(NodeEvent? nodeEvent, Type currentType)
