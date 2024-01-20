@@ -55,6 +55,7 @@ namespace YamlDotNet.Core
                     {
                         pendingEvents.Enqueue(new Events.Comment(commentToken.Value, commentToken.IsInline, commentToken.Start, commentToken.End));
                         scanner.ConsumeCurrent();
+                        currentToken = scanner.Current;
                     }
                     else
                     {
