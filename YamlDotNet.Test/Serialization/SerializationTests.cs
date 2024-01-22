@@ -33,6 +33,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FakeItEasy;
 using FluentAssertions;
+using FluentAssertions.Common;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -2405,6 +2406,53 @@ Null: true
 
             Assert.Equal(1, test.OnSerializedCallCount);
             Assert.Equal(1, test.OnSerializingCallCount);
+        }
+
+        [Fact]
+        public void SerializeEnumAsNumber()
+        {
+            var serializer = new SerializerBuilder().WithYamlFormatter(new YamlFormatter
+            {
+                FormatEnum = (o, namingConvention) => ((int)o).ToString(),
+                PotentiallyQuoteEnums = (_) => false
+            }).Build();
+            var deserializer = DeserializerBuilder.Build();
+
+            var value = serializer.Serialize(TestEnumAsNumber.Test1);
+            Assert.Equal("1", value.TrimNewLines());
+            var v = deserializer.Deserialize<TestEnumAsNumber>(value);
+            Assert.Equal(TestEnumAsNumber.Test1, v);
+
+            value = serializer.Serialize(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2);
+            Assert.Equal("3", value.TrimNewLines());
+            v = deserializer.Deserialize<TestEnumAsNumber>(value);
+            Assert.Equal(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2, v);
+        }
+
+        [Flags]
+        private enum TestEnumAsNumber
+        {
+            Test1 = 1,
+            Test2 = 2
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnum()
+        {
+            var serializer = new SerializerBuilder().WithEnumNamingConvention(CamelCaseNamingConvention.Instance).Build();
+            ScalarStyle style = ScalarStyle.Plain;
+            var serialized = serializer.Serialize(style);
+            Assert.Equal("plain", serialized.RemoveNewLines());
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnumWhenDeserializing()
+        {
+            var serializer = new DeserializerBuilder().WithEnumNamingConvention(UnderscoredNamingConvention.Instance).Build();
+            var yaml = "Double_Quoted";
+            ScalarStyle expected = ScalarStyle.DoubleQuoted;
+            var actual = serializer.Deserialize<ScalarStyle>(yaml);
+            Assert.Equal(expected, actual);
         }
 
         public class TestState

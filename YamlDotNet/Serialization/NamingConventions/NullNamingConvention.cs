@@ -21,6 +21,7 @@
 
 
 using System;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NamingConventions
 {
@@ -33,6 +34,11 @@ namespace YamlDotNet.Serialization.NamingConventions
         public NullNamingConvention() { }
 
         public string Apply(string value)
+        {
+            return value;
+        }
+
+        public string Reverse(string value)
         {
             return value;
         }

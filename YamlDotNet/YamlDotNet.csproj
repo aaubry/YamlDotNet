@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net70;netstandard2.0;netstandard2.1;net35;net40;net45;net47;net60</TargetFrameworks>
+    <TargetFrameworks>net80;net70;net60;netstandard2.0;netstandard2.1;net35;net40;net45;net47</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
@@ -45,6 +45,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net70'">
+    <NetStandard>true</NetStandard>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net80'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 

@@ -26,6 +26,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Schemas;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
@@ -69,8 +70,16 @@ namespace YamlDotNet.Serialization.EventEmitters
 
         private readonly ScalarStyle defaultScalarStyle = ScalarStyle.Any;
         private readonly YamlFormatter formatter;
+        private readonly INamingConvention enumNamingConvention;
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle, YamlFormatter formatter)
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter,
+            bool requireTagWhenStaticAndActualTypesAreDifferent,
+            IDictionary<Type, TagName> tagMappings,
+            bool quoteNecessaryStrings,
+            bool quoteYaml1_1Strings,
+            ScalarStyle defaultScalarStyle,
+            YamlFormatter formatter,
+            INamingConvention enumNamingConvention)
             : base(nextEmitter)
         {
             this.defaultScalarStyle = defaultScalarStyle;
@@ -86,34 +95,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 #else
             isSpecialStringValue_Regex = new Regex(specialStringValuePattern, RegexOptions.Compiled);
 #endif
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings, ScalarStyle defaultScalarStyle)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, YamlFormatter.Default)
-        {
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, ScalarStyle defaultScalarStyle)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, false, defaultScalarStyle, YamlFormatter.Default)
-        {
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, ScalarStyle.Any)
-        {
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings, quoteNecessaryStrings, false)
-        {
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
-            : base(nextEmitter)
-        {
-            this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
-            this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
-            formatter = YamlFormatter.Default;
+            this.enumNamingConvention = enumNamingConvention;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -148,9 +130,11 @@ namespace YamlDotNet.Serialization.EventEmitters
                         if (eventInfo.Source.Type.IsEnum)
                         {
                             eventInfo.Tag = FailsafeSchema.Tags.Str;
-                            eventInfo.RenderedValue = value.ToString()!;
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
 
-                            if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
+                            if (quoteNecessaryStrings &&
+                                IsSpecialStringValue(eventInfo.RenderedValue) &&
+                                formatter.PotentiallyQuoteEnums(value))
                             {
                                 suggestedStyle = ScalarStyle.DoubleQuoted;
                             }

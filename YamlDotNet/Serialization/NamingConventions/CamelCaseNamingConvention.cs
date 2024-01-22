@@ -39,6 +39,12 @@ namespace YamlDotNet.Serialization.NamingConventions
             return value.ToCamelCase();
         }
 
+        public string Reverse(string value)
+        {
+            var result = value.ToPascalCase();
+            return result;
+        }
+
 #pragma warning disable CS0618 // Type or member is obsolete
         public static readonly INamingConvention Instance = new CamelCaseNamingConvention();
 #pragma warning restore CS0618 // Type or member is obsolete

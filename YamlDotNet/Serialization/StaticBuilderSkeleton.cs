@@ -35,6 +35,7 @@ namespace YamlDotNet.Serialization
         where TBuilder : StaticBuilderSkeleton<TBuilder>
     {
         internal INamingConvention namingConvention = NullNamingConvention.Instance;
+        internal INamingConvention enumNamingConvention = NullNamingConvention.Instance;
         internal ITypeResolver typeResolver;
         internal readonly LazyComponentRegistrationList<Nothing, IYamlTypeConverter> typeConverterFactories;
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
@@ -62,6 +63,17 @@ namespace YamlDotNet.Serialization
         public TBuilder WithNamingConvention(INamingConvention namingConvention)
         {
             this.namingConvention = namingConvention ?? throw new ArgumentNullException(nameof(namingConvention));
+            return Self;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="INamingConvention"/> to use when handling enum's.
+        /// </summary>
+        /// <param name="enumNamingConvention">Naming convention to use when handling enum's</param>
+        /// <returns></returns>
+        public TBuilder WithEnumNamingConvention(INamingConvention enumNamingConvention)
+        {
+            this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
             return Self;
         }
 

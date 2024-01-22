@@ -21,8 +21,10 @@
 
 using System.Collections.Generic;
 using Xunit;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Callbacks;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Analyzers.StaticGenerator
 {
@@ -118,6 +120,25 @@ SomeDictionary:
             yaml = serializer.Serialize(test);
             Assert.Equal(1, test.OnSerializedCallCount);
             Assert.Equal(1, test.OnSerializingCallCount);
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnum()
+        {
+            var serializer = new StaticSerializerBuilder(new StaticContext()).WithEnumNamingConvention(CamelCaseNamingConvention.Instance).Build();
+            ScalarStyle style = ScalarStyle.Plain;
+            var serialized = serializer.Serialize(style);
+            Assert.Equal("plain", serialized.TrimNewLines());
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnumWhenDeserializing()
+        {
+            var serializer = new StaticDeserializerBuilder(new StaticContext()).WithEnumNamingConvention(UnderscoredNamingConvention.Instance).Build();
+            var yaml = "Double_Quoted";
+            ScalarStyle expected = ScalarStyle.DoubleQuoted;
+            var actual = serializer.Deserialize<ScalarStyle>(yaml);
+            Assert.Equal(expected, actual);
         }
 
         [YamlSerializable]

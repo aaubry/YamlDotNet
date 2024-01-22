@@ -32,10 +32,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class CollectionNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
+        private readonly INamingConvention enumNamingConvention;
 
-        public CollectionNodeDeserializer(IObjectFactory objectFactory)
+        public CollectionNodeDeserializer(IObjectFactory objectFactory, INamingConvention enumNamingConvention)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.enumNamingConvention = enumNamingConvention;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -72,12 +74,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate);
+            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate, enumNamingConvention);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate)
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, INamingConvention enumNamingConvention)
         {
             parser.Consume<SequenceStart>();
             while (!parser.TryConsume<SequenceEnd>(out var _))
@@ -90,7 +92,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (canUpdate)
                     {
                         var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
-                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem);
+                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem, enumNamingConvention);
                     }
                     else
                     {
@@ -103,7 +105,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 else
                 {
-                    result.Add(TypeConverter.ChangeType(value, tItem));
+                    result.Add(TypeConverter.ChangeType(value, tItem, enumNamingConvention));
                 }
             }
         }
