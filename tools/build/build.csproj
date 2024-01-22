@@ -2,15 +2,15 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net80</TargetFramework>
         <Platforms>AnyCPU</Platforms>
         <Nullable>Enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Bullseye" Version="4.1.1" />
-        <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-        <PackageReference Include="SimpleExec" Version="6.4.0" />
+        <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+        <PackageReference Include="SimpleExec" Version="12.0.0" />
     </ItemGroup>
 
 </Project>

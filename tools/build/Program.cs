@@ -99,8 +99,17 @@ namespace build
                     providerTargets.Add(returnType, targetMethod.Name);
                 }
 
-                var action = Expression.Lambda<Action>(actionExpression);
-                targets.Add((targetMethod.Name, action.Compile(), dependencies));
+                try
+                {
+                    var action = Expression.Lambda<Action>(actionExpression);
+                    targets.Add((targetMethod.Name, action.Compile(), dependencies));
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine("Error: " + exception);
+                    Console.WriteLine("TargetMethod: " + targetMethod.Name);
+                    throw;
+                }
             }
 
             foreach (var (name, action, dependencies) in targets)
@@ -318,11 +327,14 @@ namespace build
             Console.WriteLine($"{color}{text}{palette.Reset}");
         }
 
-        public static IEnumerable<string> ReadLines(string name, string? args = null, string? workingDirectory = null) => SimpleExec.Command
-            .Read(name, args, workingDirectory)
-            .Split('\n')
-            .Select(l => l.TrimEnd('\r'));
-
+        public static async Task<IEnumerable<string>> ReadLines(string name, string args, string? workingDirectory = null)
+        {
+            var read = await SimpleExec.Command.ReadAsync(name, args, workingDirectory ?? string.Empty);
+            var result = read.StandardOutput
+                .Split('\n')
+                .Select(l => l.TrimEnd('\r'));
+            return result;
+        }
         public static string UnIndent(string text)
         {
             var lines = text
