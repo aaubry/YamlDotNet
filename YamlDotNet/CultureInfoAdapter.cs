@@ -29,14 +29,18 @@ namespace YamlDotNet
         private readonly IFormatProvider provider;
 
         public CultureInfoAdapter(CultureInfo baseCulture, IFormatProvider provider)
-            : base(baseCulture.LCID)
+            : base(baseCulture.Name)
         {
             this.provider = provider;
         }
 
-        public override object? GetFormat(Type? formatType)
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+        public override object GetFormat(Type? formatType)
+#else
+        public override object? GetFormat(Type formatType)
+#endif
         {
-            return provider.GetFormat(formatType);
+            return provider.GetFormat(formatType)!;
         }
     }
 }

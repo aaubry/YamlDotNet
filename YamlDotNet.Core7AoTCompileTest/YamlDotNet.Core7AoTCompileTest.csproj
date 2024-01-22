@@ -8,8 +8,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="../build/common.props" />
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-AOT|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
