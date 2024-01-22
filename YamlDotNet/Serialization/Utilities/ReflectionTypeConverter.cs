@@ -20,11 +20,14 @@
 // SOFTWARE.
 
 using System;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Serialization.Utilities
 {
     public class ReflectionTypeConverter : ITypeConverter
     {
-        public object? ChangeType(object? value, Type expectedType) => TypeConverter.ChangeType(value, expectedType);
+        public object? ChangeType(object? value, Type expectedType) => ChangeType(value, expectedType, NullNamingConvention.Instance);
+        public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention) => TypeConverter.ChangeType(value, expectedType, enumNamingConvention);
+
     }
 }

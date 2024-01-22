@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ValueDeserializers
@@ -32,12 +33,17 @@ namespace YamlDotNet.Serialization.ValueDeserializers
         private readonly IList<INodeDeserializer> deserializers;
         private readonly IList<INodeTypeResolver> typeResolvers;
         private readonly ITypeConverter typeConverter;
+        private readonly INamingConvention enumNamingConvention;
 
-        public NodeValueDeserializer(IList<INodeDeserializer> deserializers, IList<INodeTypeResolver> typeResolvers, ITypeConverter typeConverter)
+        public NodeValueDeserializer(IList<INodeDeserializer> deserializers,
+            IList<INodeTypeResolver> typeResolvers,
+            ITypeConverter typeConverter,
+            INamingConvention enumNamingConvention)
         {
             this.deserializers = deserializers ?? throw new ArgumentNullException(nameof(deserializers));
             this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
+            this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
         }
 
         public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
@@ -51,7 +57,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 {
                     if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
                     {
-                        return typeConverter.ChangeType(value, expectedType);
+                        return typeConverter.ChangeType(value, expectedType, enumNamingConvention);
                     }
                 }
             }

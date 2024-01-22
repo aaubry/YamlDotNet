@@ -75,17 +75,26 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Converts an enum to it's string representation. By default it will be the string representation of the enum
+        /// Converts an enum to it's string representation.
+        /// By default it will be the string representation of the enum passed through the naming convention.
         /// </summary>
         /// <returns>A string representation of the enum</returns>
-        public virtual Func<object, string> FormatEnum { get; set; } = (value) =>
+        public virtual Func<object, INamingConvention, string> FormatEnum { get; set; } = (value, enumNamingConvention) =>
         {
+            var result = string.Empty;
+
             if (value == null)
             {
-                return string.Empty;
+                result = string.Empty;
+            }
+            else
+            {
+                result = value.ToString();
             }
 
-            return value.ToString();
+            result = enumNamingConvention.Apply(result);
+
+            return result;
         };
 
         /// <summary>

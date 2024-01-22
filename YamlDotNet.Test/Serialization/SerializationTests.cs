@@ -33,6 +33,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FakeItEasy;
 using FluentAssertions;
+using FluentAssertions.Common;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -2412,7 +2413,7 @@ Null: true
         {
             var serializer = new SerializerBuilder().WithYamlFormatter(new YamlFormatter
             {
-                FormatEnum = (o) => ((int)o).ToString(),
+                FormatEnum = (o, namingConvention) => ((int)o).ToString(),
                 PotentiallyQuoteEnums = (_) => false
             }).Build();
             var deserializer = DeserializerBuilder.Build();
@@ -2435,6 +2436,24 @@ Null: true
             Test2 = 2
         }
 
+        [Fact]
+        public void NamingConventionAppliedToEnum()
+        {
+            var serializer = new SerializerBuilder().WithEnumNamingConvention(CamelCaseNamingConvention.Instance).Build();
+            ScalarStyle style = ScalarStyle.Plain;
+            var serialized = serializer.Serialize(style);
+            Assert.Equal("plain", serialized.RemoveNewLines());
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnumWhenDeserializing()
+        {
+            var serializer = new DeserializerBuilder().WithEnumNamingConvention(UnderscoredNamingConvention.Instance).Build();
+            var yaml = "Double_Quoted";
+            ScalarStyle expected = ScalarStyle.DoubleQuoted;
+            var actual = serializer.Deserialize<ScalarStyle>(yaml);
+            Assert.Equal(expected, actual);
+        }
 
         public class TestState
         {

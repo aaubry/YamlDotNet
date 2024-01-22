@@ -25,6 +25,7 @@ using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
+using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -36,18 +37,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly bool attemptUnknownTypeDeserialization;
         private readonly ITypeConverter typeConverter;
         private readonly YamlFormatter formatter;
+        private readonly INamingConvention enumNamingConvention;
 
-        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter, YamlFormatter formatter)
+        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter, YamlFormatter formatter, INamingConvention enumNamingConvention)
         {
             this.attemptUnknownTypeDeserialization = attemptUnknownTypeDeserialization;
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
             this.formatter = formatter;
+            this.enumNamingConvention = enumNamingConvention;
         }
-
-        //public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter)
-        //    : this(attemptUnknownTypeDeserialization, typeConverter, YamlFormatter.Default)
-        //{
-        //}
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
@@ -62,7 +60,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (underlyingType.IsEnum())
             {
-                value = Enum.Parse(underlyingType, scalar.Value, true);
+                var enumName = enumNamingConvention.Reverse(scalar.Value);
+                value = Enum.Parse(underlyingType, enumName, true);
                 return true;
             }
 
@@ -124,7 +123,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        value = typeConverter.ChangeType(scalar.Value, expectedType);
+                        value = typeConverter.ChangeType(scalar.Value, expectedType, enumNamingConvention);
                     }
                     break;
             }

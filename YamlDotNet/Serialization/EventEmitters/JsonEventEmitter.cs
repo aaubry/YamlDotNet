@@ -22,22 +22,20 @@
 using System;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class JsonEventEmitter : ChainedEventEmitter
     {
         private readonly YamlFormatter formatter;
+        private readonly INamingConvention enumNamingConvention;
 
-        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter)
+        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention)
             : base(nextEmitter)
         {
             this.formatter = formatter;
-        }
-
-        public JsonEventEmitter(IEventEmitter nextEmitter)
-            : this(nextEmitter, YamlFormatter.Default)
-        {
+            this.enumNamingConvention = enumNamingConvention;
         }
 
         public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
@@ -75,7 +73,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         var valueIsEnum = eventInfo.Source.Type.IsEnum();
                         if (valueIsEnum)
                         {
-                            eventInfo.RenderedValue = formatter.FormatEnum(value);
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
                             eventInfo.Style = formatter.PotentiallyQuoteEnums(value) ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain;
                             break;
                         }

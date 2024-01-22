@@ -28,6 +28,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
+        private readonly INamingConvention enumNamingConvention;
+
+        public ArrayNodeDeserializer(INamingConvention enumNamingConvention)
+        {
+            this.enumNamingConvention = enumNamingConvention;
+        }
+
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
             if (!expectedType.IsArray)
@@ -39,7 +46,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true);
+            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention);
 
             var array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);

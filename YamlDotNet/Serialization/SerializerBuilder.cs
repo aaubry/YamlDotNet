@@ -98,7 +98,17 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, yamlFormatter) }
+                {
+                    typeof(TypeAssigningEventEmitter), inner =>
+                        new TypeAssigningEventEmitter(inner,
+                            false,
+                            tagMappings,
+                            quoteNecessaryStrings,
+                            quoteYaml1_1Strings,
+                            defaultScalarStyle,
+                            yamlFormatter,
+                            enumNamingConvention)
+                }
             };
 
             objectFactory = new DefaultObjectFactory();
@@ -282,7 +292,17 @@ namespace YamlDotNet.Serialization
                 settings,
                 objectFactory
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings, defaultScalarStyle, yamlFormatter), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+
+            WithEventEmitter(inner =>
+                new TypeAssigningEventEmitter(inner,
+                    true,
+                    tagMappings,
+                    quoteNecessaryStrings,
+                    quoteYaml1_1Strings,
+                    defaultScalarStyle,
+                    yamlFormatter,
+                    enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 
@@ -339,7 +359,7 @@ namespace YamlDotNet.Serialization
                 .WithTypeConverter(new DateOnlyConverter(doubleQuotes: true))
                 .WithTypeConverter(new TimeOnlyConverter(doubleQuotes: true))
 #endif
-                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter, enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>
