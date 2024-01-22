@@ -82,6 +82,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             INamingConvention enumNamingConvention)
             : base(nextEmitter)
         {
+            this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.defaultScalarStyle = defaultScalarStyle;
             this.formatter = formatter;
             this.tagMappings = tagMappings;

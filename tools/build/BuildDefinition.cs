@@ -135,28 +135,7 @@ namespace build
             return default;
         }
 
-        public static SuccessfulAotTests AotTest(Options options, SuccessfulBuild _)
-        {
-            var testsDir = Path.Combine(BasePath, "YamlDotNet.AotTest");
-
-            try
-            {
-                Run("docker", $"run --rm -v {testsDir}:/build -w /build aaubry/mono-aot bash ./run.sh");
-            }
-            catch (NonZeroExitCodeException ex) when (options.Host == Host.AppVeyor && ex.ExitCode == -1)
-            {
-                // Appveyor fails with exit code -1 for some reason...
-                var realExitCode = int.Parse(File.ReadAllLines(Path.Combine(testsDir, "exitcode.txt")).First(), CultureInfo.InvariantCulture);
-                if (realExitCode != 0)
-                {
-                    throw new NonZeroExitCodeException(realExitCode);
-                }
-            }
-
-            return default;
-        }
-
-        public static List<NuGetPackage> Pack(Options options, GitVersion version, SuccessfulUnitTests _, SuccessfulAotTests __)
+        public static List<NuGetPackage> Pack(Options options, GitVersion version, SuccessfulUnitTests _)
         {
             var result = new List<NuGetPackage>();
             var verbosity = options.Verbose ? "detailed" : "minimal";
@@ -550,7 +529,6 @@ namespace build
     public struct MetadataSet { }
 
     public struct SuccessfulBuild { }
-    public struct SuccessfulAotTests { }
     public struct SuccessfulUnitTests { }
 
     public class ScaffoldedRelease

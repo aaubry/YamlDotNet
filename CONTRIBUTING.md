@@ -113,7 +113,7 @@ on the build variables.
 
 Some platforms - such as IOS - forbid dynamic code generation. This prevents Just-in-Time compilation (JIT) from being used. In those cases, one can use Mono's Ahead-of-Time compilation (AOT). This results on a precompiled assembly that does not rely on JIT. There are [some limitations](http://www.mono-project.com/docs/advanced/aot/#limitation-generic-interface-instantiation) however, most of them are related to usage of generics.
 
-In order to ensure that YamlDotNet is compatible with AOT compilation, an automatic test has been created that runs on every commit. That test exercises the serializer and deserializer to help identify AOT-related problems.
+You can use the StaticSerializerBuilder and StaticDeserializerBuilder to accomplish this.
 
 ## Coding style
 

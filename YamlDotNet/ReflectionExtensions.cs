@@ -243,7 +243,7 @@ namespace YamlDotNet
             return getter;
         }
 
-        public static MethodInfo GetSetMethod(this PropertyInfo property)
+        public static MethodInfo? GetSetMethod(this PropertyInfo property)
         {
             return property.SetMethod;
         }
@@ -251,11 +251,6 @@ namespace YamlDotNet
         public static IEnumerable<Type> GetInterfaces(this Type type)
         {
             return type.GetTypeInfo().ImplementedInterfaces;
-        }
-
-        public static Exception Unwrap(this TargetInvocationException ex)
-        {
-            return ex.InnerException;
         }
 
         public static bool IsInstanceOf(this Type type, object o)

@@ -18,6 +18,7 @@ RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt update
 RUN apt install -y dotnet-sdk-6.0
+RUN apt install -y dotnet-sdk-7.0
 
 
 FROM builder AS build
@@ -26,22 +27,18 @@ ARG PACKAGE_VERSION=1.0.0
 
 COPY YamlDotNet.sln YamlDotNet.sln
 COPY YamlDotNet/YamlDotNet.csproj YamlDotNet/YamlDotNet.csproj
-COPY YamlDotNet.AotTest/YamlDotNet.AotTest.csproj YamlDotNet.AotTest/YamlDotNet.AotTest.csproj
 COPY YamlDotNet.Benchmark/YamlDotNet.Benchmark.csproj YamlDotNet.Benchmark/YamlDotNet.Benchmark.csproj
 COPY YamlDotNet.Samples/YamlDotNet.Samples.csproj YamlDotNet.Samples/YamlDotNet.Samples.csproj
 COPY YamlDotNet.Test/YamlDotNet.Test.csproj YamlDotNet.Test/YamlDotNet.Test.csproj
 COPY YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.csproj YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.csproj
 COPY YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj
 COPY YamlDotNet.Core7AoTCompileTest.Model/YamlDotNet.Core7AoTCompileTest.Model.csproj YamlDotNet.Core7AoTCompileTest.Model/YamlDotNet.Core7AoTCompileTest.Model.csproj
-COPY YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.csproj YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.csproj
+COPY YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.fsproj YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.fsproj
 
 RUN dotnet restore YamlDotNet.sln
 
 COPY . .
 
-RUN dotnet build -c Release --framework net35 YamlDotNet/YamlDotNet.csproj -o /output/net35
-RUN dotnet build -c Release --framework net40 YamlDotNet/YamlDotNet.csproj -o /output/net40
-RUN dotnet build -c Release --framework net45 YamlDotNet/YamlDotNet.csproj -o /output/net45
 RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /output/net47
 RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.0
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1

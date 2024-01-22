@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Samples", "YamlD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Test", "YamlDotNet.Test\YamlDotNet.Test.csproj", "{A9F67018-0240-4D16-A4EA-BCB780D0AF05}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.AotTest", "YamlDotNet.AotTest\YamlDotNet.AotTest.csproj", "{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB11D2D9-6E3D-45BF-8BCD-A04BCB1F8020}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -27,11 +25,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Benchmark", "Yam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Analyzers.StaticGenerator", "YamlDotNet.Analyzers.StaticGenerator\YamlDotNet.Analyzers.StaticGenerator.csproj", "{42DE4D20-AEF7-4235-9CB2-1ED0150B3D1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core7AoTCompileTest", "YamlDotNet.Core7AoTCompileTest\YamlDotNet.Core7AoTCompileTest.csproj", "{DEB5099E-D216-438B-86A7-03674F9185EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Core7AoTCompileTest", "YamlDotNet.Core7AoTCompileTest\YamlDotNet.Core7AoTCompileTest.csproj", "{DEB5099E-D216-438B-86A7-03674F9185EF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YamlDotNet.Samples.Fsharp", "YamlDotNet.Samples.Fsharp\YamlDotNet.Samples.Fsharp.fsproj", "{C047392D-6B20-47CD-9FE6-D0FA326FD262}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "YamlDotNet.Samples.Fsharp", "YamlDotNet.Samples.Fsharp\YamlDotNet.Samples.Fsharp.fsproj", "{C047392D-6B20-47CD-9FE6-D0FA326FD262}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDotNet.Core7AoTCompileTest.Model", "YamlDotNet.Core7AoTCompileTest.Model\YamlDotNet.Core7AoTCompileTest.Model.csproj", "{BFE15564-7C2C-47DA-8302-9BCB39B6864B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Core7AoTCompileTest.Model", "YamlDotNet.Core7AoTCompileTest.Model\YamlDotNet.Core7AoTCompileTest.Model.csproj", "{BFE15564-7C2C-47DA-8302-9BCB39B6864B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,10 +49,6 @@ Global
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9F67018-0240-4D16-A4EA-BCB780D0AF05}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DF989FD9-3A2C-4807-A5D3-A8E755CA6648}.Release|Any CPU.Build.0 = Release|Any CPU
 		{52D1E5F3-8337-48FC-AED5-968B51C7DAEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{52D1E5F3-8337-48FC-AED5-968B51C7DAEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52D1E5F3-8337-48FC-AED5-968B51C7DAEB}.Release|Any CPU.ActiveCfg = Release|Any CPU

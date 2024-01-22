@@ -6,6 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="../build/common.props" />
-
 </Project>
