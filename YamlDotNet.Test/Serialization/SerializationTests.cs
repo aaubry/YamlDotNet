@@ -253,7 +253,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var yamlReader = new StringReader(@"Text: >
   Some Text.
-  
+
 Value: foo");
             var result = Deserializer.Deserialize(yamlReader);
 
@@ -1203,10 +1203,10 @@ y:
         public void MergingDoesNotProduceDuplicateAnchors()
         {
             var parser = new MergingParser(Yaml.ParserForText(@"
-                anchor: &default 
+                anchor: &default
                   key1: &myValue value1
                   key2: value2
-                alias: 
+                alias:
                   <<: *default
                   key2: Overriding key2
                   key3: value3
@@ -1234,7 +1234,7 @@ y:
                   - &LEFT { x: 0, y: 2 }
                   - &BIG { r: 10 }
                   - &SMALL { r: 1 }
-                
+
                 # All the following maps are equal:
                 results:
                   - # Explicit keys
@@ -1242,16 +1242,16 @@ y:
                     y: 2
                     r: 10
                     label: center/big
-                  
+
                   - # Merge one map
                     << : *CENTER
                     r: 10
                     label: center/big
-                  
+
                   - # Merge multiple maps
                     << : [ *CENTER, *BIG ]
                     label: center/big
-                  
+
                   - # Override
                     << : [ *BIG, *LEFT, *SMALL ]
                     x: 1
@@ -1287,10 +1287,10 @@ y:
                 derived1:
                   <<: *level1
                   key: D1
-                derived2: 
+                derived2:
                   <<: *level2
                   key: D2
-                derived3: 
+                derived3:
                   <<: [ *level1, *level2 ]
                   key: D3
             "));
@@ -2169,7 +2169,7 @@ c: *anchor1");
         [Fact]
         public void ExampleFromSpecificationIsHandledCorrectlyWithLateDefine()
         {
-            var parser = new MergingParser(Yaml.ParserForText(@"               
+            var parser = new MergingParser(Yaml.ParserForText(@"
                 # All the following maps are equal:
                 results:
                   - # Explicit keys
@@ -2177,21 +2177,21 @@ c: *anchor1");
                     y: 2
                     r: 10
                     label: center/big
-                  
+
                   - # Merge one map
                     << : *CENTER
                     r: 10
                     label: center/big
-                  
+
                   - # Merge multiple maps
                     << : [ *CENTER, *BIG ]
                     label: center/big
-                  
+
                   - # Override
                     << : [ *BIG, *LEFT, *SMALL ]
                     x: 1
                     label: center/big
-                
+
                 obj:
                   - &CENTER { x: 1, y: 2 }
                   - &LEFT { x: 0, y: 2 }
