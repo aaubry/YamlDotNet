@@ -35,5 +35,6 @@ namespace YamlDotNet.Core.Events
         MappingStart,
         MappingEnd,
         Comment,
+        NewLine
     }
 }

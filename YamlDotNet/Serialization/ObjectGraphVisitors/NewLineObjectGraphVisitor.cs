@@ -19,24 +19,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace YamlDotNet.Core.Events
+using YamlDotNet.Core;
+
+namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-    /// <summary>
-    /// Callback interface for external event Visitor.
-    /// </summary>
-    public interface IParsingEventVisitor
+    internal class NewLineObjectGraphVisitor : ChainedObjectGraphVisitor
     {
-        void Visit(AnchorAlias e);
-        void Visit(StreamStart e);
-        void Visit(StreamEnd e);
-        void Visit(DocumentStart e);
-        void Visit(DocumentEnd e);
-        void Visit(Scalar e);
-        void Visit(SequenceStart e);
-        void Visit(SequenceEnd e);
-        void Visit(MappingStart e);
-        void Visit(MappingEnd e);
-        void Visit(Comment e);
-        void Visit(NewLine e);
+        public NewLineObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
+            : base(nextVisitor)
+        {
+        }
+
+        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
+        {
+            var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
+            if (yamlMember?.NewLine == true)
+            {
+                context.Emit(new Core.Events.NewLine());
+            }
+
+            return base.EnterMapping(key, value, context);
+        }
     }
 }
