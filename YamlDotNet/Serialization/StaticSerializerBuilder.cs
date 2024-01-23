@@ -59,6 +59,7 @@ namespace YamlDotNet.Serialization
         private bool quoteNecessaryStrings;
         private bool quoteYaml1_1Strings;
         private ScalarStyle defaultScalarStyle;
+        private bool handleTargetInvocationExceptions;
 
         public StaticSerializerBuilder(StaticContext context)
             : base(new DynamicTypeResolver())
@@ -114,6 +115,15 @@ namespace YamlDotNet.Serialization
         {
             quoteNecessaryStrings = true;
             this.quoteYaml1_1Strings = quoteYaml1_1Strings;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables handling TargetInvocationExceptions thrown by a property so that information about exception is serialized as string value of the property.
+        /// </summary>
+        public StaticSerializerBuilder WithTargetInvocationExceptionsHandling()
+        {
+            handleTargetInvocationExceptions = true;
             return this;
         }
 
