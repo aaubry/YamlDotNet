@@ -68,9 +68,14 @@ namespace YamlDotNet
         /// </returns>
         public static bool HasDefaultConstructor(this Type type, bool allowPrivateConstructors)
         {
-            var typeInfo = type.GetTypeInfo();
-            return typeInfo.IsValueType || typeInfo.DeclaredConstructors
-                .Any(c => (c.IsPublic || (allowPrivateConstructors && c.IsPrivate)) && !c.IsStatic && c.GetParameters().Length == 0);
+            var bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+
+            if (allowPrivateConstructors)
+            {
+                bindingFlags |= BindingFlags.NonPublic;
+            }
+
+            return type.IsValueType || type.GetConstructor(bindingFlags, null, Type.EmptyTypes, null) != null;
         }
 
         public static bool IsAssignableFrom(this Type type, Type source)
