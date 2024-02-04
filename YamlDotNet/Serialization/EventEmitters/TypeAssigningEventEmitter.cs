@@ -32,7 +32,6 @@ namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
-        private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
         private readonly IDictionary<Type, TagName> tagMappings;
         private readonly bool quoteNecessaryStrings;
         private readonly Regex? isSpecialStringValue_Regex;
@@ -73,7 +72,6 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly INamingConvention enumNamingConvention;
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter,
-            bool requireTagWhenStaticAndActualTypesAreDifferent,
             IDictionary<Type, TagName> tagMappings,
             bool quoteNecessaryStrings,
             bool quoteYaml1_1Strings,
@@ -82,7 +80,6 @@ namespace YamlDotNet.Serialization.EventEmitters
             INamingConvention enumNamingConvention)
             : base(nextEmitter)
         {
-            this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
             this.defaultScalarStyle = defaultScalarStyle;
             this.formatter = formatter;
             this.tagMappings = tagMappings;
@@ -229,16 +226,6 @@ namespace YamlDotNet.Serialization.EventEmitters
             if (tagMappings.TryGetValue(eventInfo.Source.Type, out var tag))
             {
                 eventInfo.Tag = tag;
-            }
-            else if (requireTagWhenStaticAndActualTypesAreDifferent && eventInfo.Source.Value != null && eventInfo.Source.Type != eventInfo.Source.StaticType)
-            {
-                throw new YamlException(
-                    $"Cannot serialize type '{eventInfo.Source.Type.FullName}' where a '{eventInfo.Source.StaticType.FullName}' was expected "
-                    + $"because no tag mapping has been registered for '{eventInfo.Source.Type.FullName}', "
-                    + $"which means that it won't be possible to deserialize the document.\n"
-                    + $"Register a tag mapping using the SerializerBuilder.WithTagMapping method.\n\n"
-                    + $"E.g: builder.WithTagMapping(\"!{eventInfo.Source.Type.Name}\", typeof({eventInfo.Source.Type.FullName}));"
-                );
             }
         }
 

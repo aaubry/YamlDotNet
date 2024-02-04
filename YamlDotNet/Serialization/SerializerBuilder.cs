@@ -101,7 +101,6 @@ namespace YamlDotNet.Serialization
                 {
                     typeof(TypeAssigningEventEmitter), inner =>
                         new TypeAssigningEventEmitter(inner,
-                            false,
                             tagMappings,
                             quoteNecessaryStrings,
                             quoteYaml1_1Strings,
@@ -295,7 +294,6 @@ namespace YamlDotNet.Serialization
 
             WithEventEmitter(inner =>
                 new TypeAssigningEventEmitter(inner,
-                    true,
                     tagMappings,
                     quoteNecessaryStrings,
                     quoteYaml1_1Strings,
