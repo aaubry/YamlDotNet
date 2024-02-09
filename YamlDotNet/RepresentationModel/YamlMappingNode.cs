@@ -297,7 +297,7 @@ namespace YamlDotNet.RepresentationModel
             foreach (var entry in children)
             {
                 hashCode = CombineHashCodes(hashCode, entry.Key);
-                hashCode = CombineHashCodes(hashCode, entry.Value);
+                hashCode = CombineHashCodes(hashCode, entry.Value.Start);
             }
             return hashCode;
         }
