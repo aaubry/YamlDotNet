@@ -2455,6 +2455,16 @@ Null: true
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        [Trait("motive", "issue #656")]
+        public void NestedDictionaryTypes_ShouldRoundtrip()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var yaml = serializer.Serialize(new HasNestedDictionary(), typeof(HasNestedDictionary));
+            var dct = new DeserializerBuilder().Build().Deserialize<HasNestedDictionary>(yaml);
+            Assert.Contains(new KeyValuePair<int, HasNestedDictionary.Payload>(1, new HasNestedDictionary.Payload { I = 1 }), dct.Lookups);
+        }
+
         public class TestState
         {
             public int OnSerializedCallCount { get; set; }
@@ -2544,6 +2554,16 @@ Null: true
             public void WriteYaml(IEmitter emitter, object value, Type type)
             {
                 emitter.Emit(new Scalar(((NonSerializable)value).Text));
+            }
+        }
+
+        public sealed class HasNestedDictionary
+        {
+            public Dictionary<int, Payload> Lookups { get; set; } = new Dictionary<int, Payload> { [1] = new Payload { I = 1 } };
+
+            public struct Payload
+            {
+                public int I { get; set; }
             }
         }
     }
