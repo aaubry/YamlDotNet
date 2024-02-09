@@ -2460,7 +2460,7 @@ Null: true
         public void NestedDictionaryTypes_ShouldRoundtrip()
         {
             var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
-            var yaml = serializer.Serialize(new HasNestedDictionary(), typeof(HasNestedDictionary));
+            var yaml = serializer.Serialize(new HasNestedDictionary { Lookups = { [1] = new HasNestedDictionary.Payload { I = 1 } } }, typeof(HasNestedDictionary));
             var dct = new DeserializerBuilder().Build().Deserialize<HasNestedDictionary>(yaml);
             Assert.Contains(new KeyValuePair<int, HasNestedDictionary.Payload>(1, new HasNestedDictionary.Payload { I = 1 }), dct.Lookups);
         }
@@ -2559,7 +2559,7 @@ Null: true
 
         public sealed class HasNestedDictionary
         {
-            public Dictionary<int, Payload> Lookups { get; set; } = new Dictionary<int, Payload> { [1] = new Payload { I = 1 } };
+            public Dictionary<int, Payload> Lookups { get; set; } = new Dictionary<int, Payload>();
 
             public struct Payload
             {
