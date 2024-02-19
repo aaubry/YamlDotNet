@@ -88,11 +88,11 @@ namespace YamlDotNet.Serialization.EventEmitters
                         {
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
                         }
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Decimal:
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
