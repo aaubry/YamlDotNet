@@ -83,8 +83,16 @@ namespace YamlDotNet.Serialization.EventEmitters
 
                     case TypeCode.Single:
                     case TypeCode.Double:
+                        double doubleCast = (double)value;
+                        if (double.IsInfinity(doubleCast) || double.IsNaN(doubleCast))
+                        {
+                            eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        }
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        break;
+
                     case TypeCode.Decimal:
-                        eventInfo.RenderedValue = formatter.FormatNumber(value);
+                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
