@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
@@ -52,8 +53,25 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
         /// <param name="graph">The object to serialize.</param>
+        /// <returns>A task that represents the asynchronous serialization operation</returns>
+        Task SerializeAsync(TextWriter writer, object? graph);
+
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
         /// <param name="type">The static type of the object to serialize.</param>
         void Serialize(TextWriter writer, object? graph, Type type);
+
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param>
+        /// <returns>A task that represents the asynchronous serialization operation</returns>
+        Task SerializeAsync(TextWriter writer, object? graph, Type type);
 
         /// <summary>
         /// Serializes the specified object.
@@ -67,7 +85,24 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
         /// <param name="graph">The object to serialize.</param>
+        /// <returns>A task that represents the asynchronous serialization operation</returns>
+        Task SerializeAsync(IEmitter emitter, object? graph);
+
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
         /// <param name="type">The static type of the object to serialize.</param>
         void Serialize(IEmitter emitter, object? graph, Type type);
+
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="emitter">The <see cref="IEmitter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param>
+        /// <returns>A task that represents the asynchronous serialization operation</returns>
+        Task SerializeAsync(IEmitter emitter, object? graph, Type type);
     }
 }

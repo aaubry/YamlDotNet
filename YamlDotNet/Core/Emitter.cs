@@ -25,6 +25,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
 using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
@@ -177,6 +178,15 @@ namespace YamlDotNet.Core
                     events.Dequeue();
                 }
             }
+        }
+
+        public async Task EmitAsync(ParsingEvent @event)
+        {
+            // This will require either a parallel StateMachineAsync method stack essentially
+            // duplicating all the code in this class, or deeply refactoring the StateMachine method
+            // down to the Write and WriteBreak methods to allow the state mutation to be reused
+            // between this method and Emit.
+            throw new NotImplementedException();
         }
 
         /// <summary>

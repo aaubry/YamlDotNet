@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -747,6 +749,13 @@ namespace YamlDotNet.Serialization
                 );
 
                 traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+            }
+
+            public async Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
+            {
+                // This will need to reimplement SerializeValue to call the emitter's EmitAsync
+                // method and the traversalStrategy's TraverseAsync instead.
+                throw new NotImplementedException();
             }
         }
     }

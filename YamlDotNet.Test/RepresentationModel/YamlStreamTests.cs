@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
@@ -401,6 +402,19 @@ stringWriter.ToString().NormalizeNewLines().TrimNewLines());
                 }
 
                 Assert.False(scalar.IsQuotedImplicit);
+            }
+
+            public Task EmitAsync(ParsingEvent @event)
+            {
+                try
+                {
+                    Emit(@event);
+                    return Task.CompletedTask;
+                }
+                catch (Exception ex)
+                {
+                    return Task.FromException(ex);
+                }
             }
         }
     }
