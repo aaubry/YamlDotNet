@@ -45,3 +45,4 @@ artifacts:
     name: Release-Net80
 
   - path: YamlDotNet\bin\*.nupkg
+  - path: YamlDotNet\bin\*.snupkg
