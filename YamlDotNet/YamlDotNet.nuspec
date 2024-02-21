@@ -13,6 +13,7 @@
         <icon>images/yamldotnet.png</icon>
         <repository type="git" url="https://github.com/aaubry/YamlDotNet.git" />
         <tags>yaml parser development library serialization</tags>
+        <readme>README.md</readme>
         <dependencies>
             <group targetFramework=".NETFramework4.7" />
             <group targetFramework=".NETStandard2.0" />
@@ -24,23 +25,30 @@
     </metadata>
     <files>
         <file src="bin/Release/net47/YamlDotNet.dll" target="lib/net47" />
+        <file src="bin/Release/net47/YamlDotNet.pdb" target="lib/net47" />
         <file src="bin/Release/net47/YamlDotNet.xml" target="lib/net47" />
 
         <file src="bin/Release/net6.0/YamlDotNet.dll" target="lib/net6.0" />
+        <file src="bin/Release/net6.0/YamlDotNet.pdb" target="lib/net6.0" />
         <file src="bin/Release/net6.0/YamlDotNet.xml" target="lib/net6.0" />
 
         <file src="bin/Release/net7.0/YamlDotNet.dll" target="lib/net7.0" />
+        <file src="bin/Release/net7.0/YamlDotNet.pdb" target="lib/net7.0" />
         <file src="bin/Release/net7.0/YamlDotNet.xml" target="lib/net7.0" />
 
         <file src="bin/Release/net8.0/YamlDotNet.dll" target="lib/net8.0" />
+        <file src="bin/Release/net8.0/YamlDotNet.pdb" target="lib/net8.0" />
         <file src="bin/Release/net8.0/YamlDotNet.xml" target="lib/net8.0" />
 
         <file src="bin/Release/netstandard2.0/YamlDotNet.dll" target="lib/netstandard2.0" />
+        <file src="bin/Release/netstandard2.0/YamlDotNet.pdb" target="lib/netstandard2.0" />
         <file src="bin/Release/netstandard2.0/YamlDotNet.xml" target="lib/netstandard2.0" />
 
         <file src="bin/Release/netstandard2.1/YamlDotNet.dll" target="lib/netstandard2.1" />
+        <file src="bin/Release/netstandard2.1/YamlDotNet.pdb" target="lib/netstandard2.1" />
         <file src="bin/Release/netstandard2.1/YamlDotNet.xml" target="lib/netstandard2.1" />
 
+        <file src="../README.md" target="" />
         <file src="../LICENSE.txt" target="" />
         <file src="../yamldotnet.png" target="images/" />
     </files>
