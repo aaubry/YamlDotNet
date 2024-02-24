@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -169,7 +170,10 @@ namespace YamlDotNet.Core
                 {
 
                     AnalyzeEvent(current);
-                    StateMachine(current);
+                    foreach (var val in StateMachine(current))
+                    {
+                        output.Write(val);
+                    }
                 }
                 finally
                 {
@@ -182,11 +186,27 @@ namespace YamlDotNet.Core
 
         public async Task EmitAsync(ParsingEvent @event)
         {
-            // This will require either a parallel StateMachineAsync method stack essentially
-            // duplicating all the code in this class, or deeply refactoring the StateMachine method
-            // down to the Write and WriteBreak methods to allow the state mutation to be reused
-            // between this method and Emit.
-            throw new NotImplementedException();
+            events.Enqueue(@event);
+
+            while (!NeedMoreEvents())
+            {
+                var current = events.Peek();
+                try
+                {
+
+                    AnalyzeEvent(current);
+                    foreach (var val in StateMachine(current))
+                    {
+                        await output.WriteAsync(val);
+                    }
+                }
+                finally
+                {
+                    // Only dequeue after calling state_machine because it checks how many events are in the queue.
+                    // Todo: well, move into StateMachine() then
+                    events.Dequeue();
+                }
+            }
         }
 
         /// <summary>
@@ -568,83 +588,65 @@ namespace YamlDotNet.Core
             }
         }
 
-        private void StateMachine(ParsingEvent evt)
+        private IEnumerable<string> StateMachine(ParsingEvent evt)
         {
             if (evt is Comment comment)
             {
-                EmitComment(comment);
-                return;
+                return EmitComment(comment);
             }
 
             switch (state)
             {
                 case EmitterState.StreamStart:
-                    EmitStreamStart(evt);
-                    break;
+                    return EmitStreamStart(evt);
 
                 case EmitterState.FirstDocumentStart:
-                    EmitDocumentStart(evt, true);
-                    break;
+                    return EmitDocumentStart(evt, true);
 
                 case EmitterState.DocumentStart:
-                    EmitDocumentStart(evt, false);
-                    break;
+                    return EmitDocumentStart(evt, false);
 
                 case EmitterState.DocumentContent:
-                    EmitDocumentContent(evt);
-                    break;
+                    return EmitDocumentContent(evt);
 
                 case EmitterState.DocumentEnd:
-                    EmitDocumentEnd(evt);
-                    break;
+                    return EmitDocumentEnd(evt);
 
                 case EmitterState.FlowSequenceFirstItem:
-                    EmitFlowSequenceItem(evt, true);
-                    break;
+                    return EmitFlowSequenceItem(evt, true);
 
                 case EmitterState.FlowSequenceItem:
-                    EmitFlowSequenceItem(evt, false);
-                    break;
+                    return EmitFlowSequenceItem(evt, false);
 
                 case EmitterState.FlowMappingFirstKey:
-                    EmitFlowMappingKey(evt, true);
-                    break;
+                    return EmitFlowMappingKey(evt, true);
 
                 case EmitterState.FlowMappingKey:
-                    EmitFlowMappingKey(evt, false);
-                    break;
+                    return EmitFlowMappingKey(evt, false);
 
                 case EmitterState.FlowMappingSimpleValue:
-                    EmitFlowMappingValue(evt, true);
-                    break;
+                    return EmitFlowMappingValue(evt, true);
 
                 case EmitterState.FlowMappingValue:
-                    EmitFlowMappingValue(evt, false);
-                    break;
+                    return EmitFlowMappingValue(evt, false);
 
                 case EmitterState.BlockSequenceFirstItem:
-                    EmitBlockSequenceItem(evt, true);
-                    break;
+                    return EmitBlockSequenceItem(evt, true);
 
                 case EmitterState.BlockSequenceItem:
-                    EmitBlockSequenceItem(evt, false);
-                    break;
+                    return EmitBlockSequenceItem(evt, false);
 
                 case EmitterState.BlockMappingFirstKey:
-                    EmitBlockMappingKey(evt, true);
-                    break;
+                    return EmitBlockMappingKey(evt, true);
 
                 case EmitterState.BlockMappingKey:
-                    EmitBlockMappingKey(evt, false);
-                    break;
+                    return EmitBlockMappingKey(evt, false);
 
                 case EmitterState.BlockMappingSimpleValue:
-                    EmitBlockMappingValue(evt, true);
-                    break;
+                    return EmitBlockMappingValue(evt, true);
 
                 case EmitterState.BlockMappingValue:
-                    EmitBlockMappingValue(evt, false);
-                    break;
+                    return EmitBlockMappingValue(evt, false);
 
                 case EmitterState.StreamEnd:
                     throw new YamlException("Expected nothing after STREAM-END");
@@ -654,20 +656,26 @@ namespace YamlDotNet.Core
             }
         }
 
-        private void EmitComment(Comment comment)
+        private IEnumerable<string> EmitComment(Comment comment)
         {
             // If we're in flow mode or about to enter it: Skip comments.
             if (flowLevel > 0 || state == EmitterState.FlowMappingFirstKey || state == EmitterState.FlowSequenceFirstItem)
             {
-                return;
+                yield break;
             }
 
             var lines = comment.Value.Split(newLineSeparators, StringSplitOptions.None);
 
             if (comment.IsInline)
             {
-                Write(" # ");
-                Write(string.Join(" ", lines));
+                foreach (var val in PrepareWrite(" # "))
+                {
+                    yield return val;
+                }
+                foreach (var val in PrepareWrite(string.Join(" ", lines)))
+                {
+                    yield return val;
+                }
             }
             else
             {
@@ -681,10 +689,22 @@ namespace YamlDotNet.Core
 
                 foreach (var line in lines)
                 {
-                    WriteIndent();
-                    Write("# ");
-                    Write(line);
-                    WriteBreak();
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWrite("# "))
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWrite(line))
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteBreak())
+                    {
+                        yield return val;
+                    }
                 }
 
                 if (isFirst)
@@ -699,7 +719,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Expect STREAM-START.
         /// </summary>
-        private void EmitStreamStart(ParsingEvent evt)
+        private IEnumerable<string> EmitStreamStart(ParsingEvent evt)
         {
             if (!(evt is StreamStart))
             {
@@ -712,12 +732,13 @@ namespace YamlDotNet.Core
             isIndentation = true;
 
             state = EmitterState.FirstDocumentStart;
+            return Enumerable.Empty<string>();
         }
 
         /// <summary>
         /// Expect DOCUMENT-START or STREAM-END.
         /// </summary>
-        private void EmitDocumentStart(ParsingEvent evt, bool isFirst)
+        private IEnumerable<string> EmitDocumentStart(ParsingEvent evt, bool isFirst)
         {
             if (evt is DocumentStart documentStart)
             {
@@ -730,8 +751,14 @@ namespace YamlDotNet.Core
                 if (!isFirst && !isDocumentEndWritten && (documentStart.Version != null || documentTagDirectives.Count > 0))
                 {
                     isDocumentEndWritten = false;
-                    WriteIndicator("...", true, false, false);
-                    WriteIndent();
+                    foreach (var val in PrepareWriteIndicator("...", true, false, false))
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
                 }
 
                 if (documentStart.Version != null)
@@ -740,11 +767,21 @@ namespace YamlDotNet.Core
 
                     var documentVersion = documentStart.Version.Version;
                     isImplicit = false;
-                    WriteIndicator("%YAML", true, false, false);
-                    WriteIndicator(string.Format(CultureInfo.InvariantCulture,
+                    foreach (var val in PrepareWriteIndicator("%YAML", true, false, false))
+                    {
+                        yield return val;
+                    }
+                    var result = PrepareWriteIndicator(string.Format(CultureInfo.InvariantCulture,
                         "{0}.{1}", documentVersion.Major, documentVersion.Minor),
                         true, false, false);
-                    WriteIndent();
+                    foreach (var val in result)
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
                 }
 
                 foreach (var tagDirective in documentTagDirectives)
@@ -767,10 +804,22 @@ namespace YamlDotNet.Core
 
                     foreach (var tagDirective in documentTagDirectives)
                     {
-                        WriteIndicator("%TAG", true, false, false);
-                        WriteTagHandle(tagDirective.Handle);
-                        WriteTagContent(tagDirective.Prefix, true);
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndicator("%TAG", true, false, false))
+                        {
+                            yield return val;
+                        }
+                        foreach (var val in PrepareWriteTagHandle(tagDirective.Handle))
+                        {
+                            yield return val;
+                        }
+                        foreach (var val in PrepareWriteTagContent(tagDirective.Prefix, true))
+                        {
+                            yield return val;
+                        }
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
                 }
 
@@ -781,11 +830,20 @@ namespace YamlDotNet.Core
 
                 if (!isImplicit)
                 {
-                    WriteIndent();
-                    WriteIndicator("---", true, false, false);
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteIndicator("---", true, false, false))
+                    {
+                        yield return val;
+                    }
                     if (isCanonical)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
                 }
 
@@ -847,16 +905,16 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Expect the root node.
         /// </summary>
-        private void EmitDocumentContent(ParsingEvent evt)
+        private IEnumerable<string> EmitDocumentContent(ParsingEvent evt)
         {
             states.Push(EmitterState.DocumentEnd);
-            EmitNode(evt, false, false);
+            return EmitNode(evt, false, false);
         }
 
         /// <summary>
         /// Expect a node.
         /// </summary>
-        private void EmitNode(ParsingEvent evt, bool isMapping, bool isSimpleKey)
+        private IEnumerable<string> EmitNode(ParsingEvent evt, bool isMapping, bool isSimpleKey)
         {
             isMappingContext = isMapping;
             isSimpleKeyContext = isSimpleKey;
@@ -864,20 +922,16 @@ namespace YamlDotNet.Core
             switch (evt.Type)
             {
                 case EventType.Alias:
-                    EmitAlias();
-                    break;
+                    return EmitAlias();
 
                 case EventType.Scalar:
-                    EmitScalar(evt);
-                    break;
+                    return EmitScalar(evt);
 
                 case EventType.SequenceStart:
-                    EmitSequenceStart(evt);
-                    break;
+                    return EmitSequenceStart(evt);
 
                 case EventType.MappingStart:
-                    EmitMappingStart(evt);
-                    break;
+                    return EmitMappingStart(evt);
 
                 default:
                     throw new YamlException($"Expected SCALAR, SEQUENCE-START, MAPPING-START, or ALIAS, got {evt.Type}");
@@ -887,22 +941,34 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Expect ALIAS.
         /// </summary>
-        private void EmitAlias()
+        private IEnumerable<string> EmitAlias()
         {
-            ProcessAnchor();
+            foreach (var val in ProcessAnchor())
+            {
+                yield return val;
+            }
             state = states.Pop();
         }
 
         /// <summary>
         /// Expect SCALAR.
         /// </summary>
-        private void EmitScalar(ParsingEvent evt)
+        private IEnumerable<string> EmitScalar(ParsingEvent evt)
         {
             SelectScalarStyle(evt);
-            ProcessAnchor();
-            ProcessTag();
+            foreach (var val in ProcessAnchor())
+            {
+                yield return val;
+            }
+            foreach (var val in ProcessTag())
+            {
+                yield return val;
+            }
             IncreaseIndent(true, false);
-            ProcessScalar();
+            foreach (var val in ProcessScalar())
+            {
+                yield return val;
+            }
 
             indent = indents.Pop();
             state = states.Pop();
@@ -970,29 +1036,24 @@ namespace YamlDotNet.Core
             scalarData.Style = style;
         }
 
-        private void ProcessScalar()
+        private IEnumerable<string> ProcessScalar()
         {
             switch (scalarData.Style)
             {
                 case ScalarStyle.Plain:
-                    WritePlainScalar(scalarData.Value, !isSimpleKeyContext);
-                    break;
+                    return PrepareWritePlainScalar(scalarData.Value, !isSimpleKeyContext);
 
                 case ScalarStyle.SingleQuoted:
-                    WriteSingleQuotedScalar(scalarData.Value, !isSimpleKeyContext);
-                    break;
+                    return PrepareWriteSingleQuotedScalar(scalarData.Value, !isSimpleKeyContext);
 
                 case ScalarStyle.DoubleQuoted:
-                    WriteDoubleQuotedScalar(scalarData.Value, !isSimpleKeyContext);
-                    break;
+                    return PrepareWriteDoubleQuotedScalar(scalarData.Value, !isSimpleKeyContext);
 
                 case ScalarStyle.Literal:
-                    WriteLiteralScalar(scalarData.Value);
-                    break;
+                    return PrepareWriteLiteralScalar(scalarData.Value);
 
                 case ScalarStyle.Folded:
-                    WriteFoldedScalar(scalarData.Value);
-                    break;
+                    return PrepareWriteFoldedScalar(scalarData.Value);
 
                 default:
                     throw new InvalidOperationException();
@@ -1001,11 +1062,14 @@ namespace YamlDotNet.Core
 
         #region Write scalar Methods
 
-        private void WritePlainScalar(string value, bool allowBreaks)
+        private IEnumerable<string> PrepareWritePlainScalar(string value, bool allowBreaks)
         {
             if (!isWhitespace)
             {
-                Write(' ');
+                foreach (var val in PrepareWrite(' '))
+                {
+                    yield return val;
+                }
             }
 
             var previousSpace = false;
@@ -1017,11 +1081,17 @@ namespace YamlDotNet.Core
                 {
                     if (allowBreaks && !previousSpace && column > bestWidth && index + 1 < value.Length && value[index + 1] != ' ')
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
                     else
                     {
-                        Write(character);
+                        foreach (var val in PrepareWrite(character))
+                        {
+                            yield return val;
+                        }
                     }
                     previousSpace = true;
                 }
@@ -1029,9 +1099,15 @@ namespace YamlDotNet.Core
                 {
                     if (!previousBreak && character == '\n')
                     {
-                        WriteBreak();
+                        foreach (var val in PrepareWriteBreak())
+                        {
+                            yield return val;
+                        }
                     }
-                    WriteBreak(breakCharacter);
+                    foreach (var val in PrepareWriteBreak(breakCharacter))
+                    {
+                        yield return val;
+                    }
                     isIndentation = true;
                     previousBreak = true;
                 }
@@ -1039,9 +1115,15 @@ namespace YamlDotNet.Core
                 {
                     if (previousBreak)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
-                    Write(character);
+                    foreach (var val in PrepareWrite(character))
+                    {
+                        yield return val;
+                    }
                     isIndentation = false;
                     previousSpace = false;
                     previousBreak = false;
@@ -1052,9 +1134,12 @@ namespace YamlDotNet.Core
             isIndentation = false;
         }
 
-        private void WriteSingleQuotedScalar(string value, bool allowBreaks)
+        private IEnumerable<string> PrepareWriteSingleQuotedScalar(string value, bool allowBreaks)
         {
-            WriteIndicator("'", true, false, false);
+            foreach (var val in PrepareWriteIndicator("'", true, false, false))
+            {
+                yield return val;
+            }
 
             var previousSpace = false;
             var previousBreak = false;
@@ -1067,11 +1152,17 @@ namespace YamlDotNet.Core
                     if (allowBreaks && !previousSpace && column > bestWidth && index != 0 && index + 1 < value.Length &&
                         value[index + 1] != ' ')
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
                     else
                     {
-                        Write(character);
+                        foreach (var val in PrepareWrite(character))
+                        {
+                            yield return val;
+                        }
                     }
                     previousSpace = true;
                 }
@@ -1079,9 +1170,15 @@ namespace YamlDotNet.Core
                 {
                     if (!previousBreak && character == '\n')
                     {
-                        WriteBreak();
+                        foreach (var val in PrepareWriteBreak())
+                        {
+                            yield return val;
+                        }
                     }
-                    WriteBreak(breakCharacter);
+                    foreach (var val in PrepareWriteBreak(breakCharacter))
+                    {
+                        yield return val;
+                    }
                     isIndentation = true;
                     previousBreak = true;
                 }
@@ -1089,28 +1186,43 @@ namespace YamlDotNet.Core
                 {
                     if (previousBreak)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
                     if (character == '\'')
                     {
-                        Write(character);
+                        foreach (var val in PrepareWrite(character))
+                        {
+                            yield return val;
+                        }
                     }
-                    Write(character);
+                    foreach (var val in PrepareWrite(character))
+                    {
+                        yield return val;
+                    }
                     isIndentation = false;
                     previousSpace = false;
                     previousBreak = false;
                 }
             }
 
-            WriteIndicator("'", false, false, false);
+            foreach (var val in PrepareWriteIndicator("'", false, false, false))
+            {
+                yield return val;
+            }
 
             isWhitespace = false;
             isIndentation = false;
         }
 
-        private void WriteDoubleQuotedScalar(string value, bool allowBreaks)
+        private IEnumerable<string> PrepareWriteDoubleQuotedScalar(string value, bool allowBreaks)
         {
-            WriteIndicator("\"", true, false, false);
+            foreach (var val in PrepareWriteIndicator("\"", true, false, false))
+            {
+                yield return val;
+            }
 
             var previousSpace = false;
             for (var index = 0; index < value.Length; ++index)
@@ -1118,83 +1230,143 @@ namespace YamlDotNet.Core
                 var character = value[index];
                 if (!IsPrintable(character) || IsBreak(character, out _) || character == '"' || character == '\\')
                 {
-                    Write('\\');
+                    foreach (var val in PrepareWrite('\\'))
+                    {
+                        yield return val;
+                    }
 
                     switch (character)
                     {
                         case '\0':
-                            Write('0');
+                            foreach (var val in PrepareWrite('0'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x7':
-                            Write('a');
+                            foreach (var val in PrepareWrite('a'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x8':
-                            Write('b');
+                            foreach (var val in PrepareWrite('b'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x9':
-                            Write('t');
+                            foreach (var val in PrepareWrite('t'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\xA':
-                            Write('n');
+                            foreach (var val in PrepareWrite('n'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\xB':
-                            Write('v');
+                            foreach (var val in PrepareWrite('v'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\xC':
-                            Write('f');
+                            foreach (var val in PrepareWrite('f'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\xD':
-                            Write('r');
+                            foreach (var val in PrepareWrite('r'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x1B':
-                            Write('e');
+                            foreach (var val in PrepareWrite('e'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x22':
-                            Write('"');
+                            foreach (var val in PrepareWrite('"'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x5C':
-                            Write('\\');
+                            foreach (var val in PrepareWrite('\\'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x85':
-                            Write('N');
+                            foreach (var val in PrepareWrite('N'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\xA0':
-                            Write('_');
+                            foreach (var val in PrepareWrite('_'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x2028':
-                            Write('L');
+                            foreach (var val in PrepareWrite('L'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         case '\x2029':
-                            Write('P');
+                            foreach (var val in PrepareWrite('P'))
+                            {
+                                yield return val;
+                            }
                             break;
 
                         default:
                             var code = (ushort)character;
                             if (code <= 0xFF)
                             {
-                                Write('x');
-                                Write(code.ToString("X02", CultureInfo.InvariantCulture));
+                                foreach (var val in PrepareWrite('x'))
+                                {
+                                    yield return val;
+                                }
+                                foreach (var val in PrepareWrite(code.ToString("X02", CultureInfo.InvariantCulture)))
+                                {
+                                    yield return val;
+                                }
                             }
                             else if (IsHighSurrogate(character))
                             {
                                 if (index + 1 < value.Length && IsLowSurrogate(value[index + 1]))
                                 {
-                                    Write('U');
-                                    Write(char.ConvertToUtf32(character, value[index + 1]).ToString("X08", CultureInfo.InvariantCulture));
+                                    foreach (var val in PrepareWrite('U'))
+                                    {
+                                        yield return val;
+                                    }
+                                    foreach (var val in PrepareWrite(char.ConvertToUtf32(character, value[index + 1]).ToString("X08", CultureInfo.InvariantCulture)))
+                                    {
+                                        yield return val;
+                                    }
                                     index++;
                                 }
                                 else
@@ -1204,8 +1376,14 @@ namespace YamlDotNet.Core
                             }
                             else
                             {
-                                Write('u');
-                                Write(code.ToString("X04", CultureInfo.InvariantCulture));
+                                foreach (var val in PrepareWrite('u'))
+                                {
+                                    yield return val;
+                                }
+                                foreach (var val in PrepareWrite(code.ToString("X04", CultureInfo.InvariantCulture)))
+                                {
+                                    yield return val;
+                                }
                             }
                             break;
                     }
@@ -1215,38 +1393,62 @@ namespace YamlDotNet.Core
                 {
                     if (allowBreaks && !previousSpace && column > bestWidth && index > 0 && index + 1 < value.Length)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                         if (value[index + 1] == ' ')
                         {
-                            Write('\\');
+                            foreach (var val in PrepareWrite('\\'))
+                            {
+                                yield return val;
+                            }
                         }
                     }
                     else
                     {
-                        Write(character);
+                        foreach (var val in PrepareWrite(character))
+                        {
+                            yield return val;
+                        }
                     }
                     previousSpace = true;
                 }
                 else
                 {
-                    Write(character);
+                    foreach (var val in PrepareWrite(character))
+                    {
+                        yield return val;
+                    }
                     previousSpace = false;
                 }
             }
 
-            WriteIndicator("\"", false, false, false);
+            foreach (var val in PrepareWriteIndicator("\"", false, false, false))
+            {
+                yield return val;
+            }
 
             isWhitespace = false;
             isIndentation = false;
         }
 
-        private void WriteLiteralScalar(string value)
+        private IEnumerable<string> PrepareWriteLiteralScalar(string value)
         {
             var previousBreak = true;
 
-            WriteIndicator("|", true, false, false);
-            WriteBlockScalarHints(value);
-            WriteBreak();
+            foreach (var val in PrepareWriteIndicator("|", true, false, false))
+            {
+                yield return val;
+            }
+            foreach (var val in PrepareWriteBlockScalarHints(value))
+            {
+                yield return val;
+            }
+            foreach (var val in PrepareWriteBreak())
+            {
+                yield return val;
+            }
 
             isIndentation = true;
             isWhitespace = true;
@@ -1261,7 +1463,10 @@ namespace YamlDotNet.Core
 
                 if (IsBreak(character, out var breakCharacter))
                 {
-                    WriteBreak(breakCharacter);
+                    foreach (var val in PrepareWriteBreak(breakCharacter))
+                    {
+                        yield return val;
+                    }
                     isIndentation = true;
                     previousBreak = true;
                 }
@@ -1269,23 +1474,38 @@ namespace YamlDotNet.Core
                 {
                     if (previousBreak)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
-                    Write(character);
+                    foreach (var val in PrepareWrite(character))
+                    {
+                        yield return val;
+                    }
                     isIndentation = false;
                     previousBreak = false;
                 }
             }
         }
 
-        private void WriteFoldedScalar(string value)
+        private IEnumerable<string> PrepareWriteFoldedScalar(string value)
         {
             var previousBreak = true;
             var leadingSpaces = true;
 
-            WriteIndicator(">", true, false, false);
-            WriteBlockScalarHints(value);
-            WriteBreak();
+            foreach (var val in PrepareWriteIndicator(">", true, false, false))
+            {
+                yield return val;
+            }
+            foreach (var val in PrepareWriteBlockScalarHints(value))
+            {
+                yield return val;
+            }
+            foreach (var val in PrepareWriteBreak())
+            {
+                yield return val;
+            }
 
             isIndentation = true;
             isWhitespace = true;
@@ -1309,11 +1529,17 @@ namespace YamlDotNet.Core
                         }
                         if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k], out _)))
                         {
-                            WriteBreak();
+                            foreach (var val in PrepareWriteBreak())
+                            {
+                                yield return val;
+                            }
                         }
                     }
 
-                    WriteBreak(breakCharacter);
+                    foreach (var val in PrepareWriteBreak(breakCharacter))
+                    {
+                        yield return val;
+                    }
                     isIndentation = true;
                     previousBreak = true;
                 }
@@ -1321,16 +1547,25 @@ namespace YamlDotNet.Core
                 {
                     if (previousBreak)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                         leadingSpaces = IsBlank(character);
                     }
                     if (!previousBreak && character == ' ' && i + 1 < value.Length && value[i + 1] != ' ' && column > bestWidth)
                     {
-                        WriteIndent();
+                        foreach (var val in PrepareWriteIndent())
+                        {
+                            yield return val;
+                        }
                     }
                     else
                     {
-                        Write(character);
+                        foreach (var val in PrepareWrite(character))
+                        {
+                            yield return val;
+                        }
                     }
                     isIndentation = false;
                     previousBreak = false;
@@ -1397,10 +1632,16 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Expect SEQUENCE-START.
         /// </summary>
-        private void EmitSequenceStart(ParsingEvent evt)
+        private IEnumerable<string> EmitSequenceStart(ParsingEvent evt)
         {
-            ProcessAnchor();
-            ProcessTag();
+            foreach (var val in ProcessAnchor())
+            {
+                yield return val;
+            }
+            foreach (var val in ProcessTag())
+            {
+                yield return val;
+            }
 
             var sequenceStart = (SequenceStart)evt;
 
@@ -1417,10 +1658,16 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Expect MAPPING-START.
         /// </summary>
-        private void EmitMappingStart(ParsingEvent evt)
+        private IEnumerable<string> EmitMappingStart(ParsingEvent evt)
         {
-            ProcessAnchor();
-            ProcessTag();
+            foreach (var val in ProcessAnchor())
+            {
+                yield return val;
+            }
+            foreach (var val in ProcessTag())
+            {
+                yield return val;
+            }
 
             var mappingStart = (MappingStart)evt;
 
@@ -1434,50 +1681,82 @@ namespace YamlDotNet.Core
             }
         }
 
-        private void ProcessAnchor()
+        private IEnumerable<string> ProcessAnchor()
         {
-            if (!anchorData.Anchor.IsEmpty && !skipAnchorName)
+            if (anchorData.Anchor.IsEmpty || skipAnchorName)
             {
-                WriteIndicator(anchorData.IsAlias ? "*" : "&", true, false, false);
-                WriteAnchor(anchorData.Anchor);
+                yield break;
+            }
+
+            foreach (var val in PrepareWriteIndicator(anchorData.IsAlias ? "*" : "&", true, false, false))
+            {
+                yield return val;
+            }
+            foreach (var val in PrepareWriteAnchor(anchorData.Anchor))
+            {
+                yield return val;
             }
         }
 
-        private void ProcessTag()
+        private IEnumerable<string> ProcessTag()
         {
             if (tagData.Handle == null && tagData.Suffix == null)
             {
-                return;
+                yield break;
             }
 
             if (tagData.Handle != null)
             {
-                WriteTagHandle(tagData.Handle);
+                foreach (var val in PrepareWriteTagHandle(tagData.Handle))
+                {
+                    yield return val;
+                }
                 if (tagData.Suffix != null)
                 {
-                    WriteTagContent(tagData.Suffix, false);
+                    foreach (var val in PrepareWriteTagContent(tagData.Suffix, false))
+                    {
+                        yield return val;
+                    }
                 }
             }
             else
             {
-                WriteIndicator("!<", true, false, false);
-                WriteTagContent(tagData.Suffix!, false);
-                WriteIndicator(">", false, false, false);
+                foreach (var val in PrepareWriteIndicator("!<", true, false, false))
+                {
+                    yield return val;
+                }
+                foreach (var val in PrepareWriteTagContent(tagData.Suffix!, false))
+                {
+                    yield return val;
+                }
+                foreach (var val in PrepareWriteIndicator(">", false, false, false))
+                {
+                    yield return val;
+                }
             }
         }
 
         /// <summary>
         /// Expect DOCUMENT-END.
         /// </summary>
-        private void EmitDocumentEnd(ParsingEvent evt)
+        private IEnumerable<string> EmitDocumentEnd(ParsingEvent evt)
         {
             if (evt is DocumentEnd documentEnd)
             {
-                WriteIndent();
+                foreach (var val in PrepareWriteIndent())
+                {
+                    yield return val;
+                }
                 if (!documentEnd.IsImplicit)
                 {
-                    WriteIndicator("...", true, false, false);
-                    WriteIndent();
+                    foreach (var val in PrepareWriteIndicator("...", true, false, false))
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
                     isDocumentEndWritten = true;
                 }
 
@@ -1494,11 +1773,14 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Expect a flow item node.
         /// </summary>
-        private void EmitFlowSequenceItem(ParsingEvent evt, bool isFirst)
+        private IEnumerable<string> EmitFlowSequenceItem(ParsingEvent evt, bool isFirst)
         {
             if (isFirst)
             {
-                WriteIndicator("[", true, true, false);
+                foreach (var val in PrepareWriteIndicator("[", true, true, false))
+                {
+                    yield return val;
+                }
                 IncreaseIndent(true, false);
                 ++flowLevel;
             }
@@ -1509,37 +1791,58 @@ namespace YamlDotNet.Core
                 indent = indents.Pop();
                 if (isCanonical && !isFirst)
                 {
-                    WriteIndicator(",", false, false, false);
-                    WriteIndent();
+                    foreach (var val in PrepareWriteIndicator(",", false, false, false))
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
                 }
-                WriteIndicator("]", false, false, false);
+                foreach (var val in PrepareWriteIndicator("]", false, false, false))
+                {
+                    yield return val;
+                }
                 state = states.Pop();
-                return;
+                yield break;
             }
 
             if (!isFirst)
             {
-                WriteIndicator(",", false, false, false);
+                foreach (var val in PrepareWriteIndicator(",", false, false, false))
+                {
+                    yield return val;
+                }
             }
 
             if (isCanonical || column > bestWidth)
             {
-                WriteIndent();
+                foreach (var val in PrepareWriteIndent())
+                {
+                    yield return val;
+                }
             }
 
             states.Push(EmitterState.FlowSequenceItem);
 
-            EmitNode(evt, false, false);
+            foreach (var val in EmitNode(evt, false, false))
+            {
+                yield return val;
+            }
         }
 
         /// <summary>
         /// Expect a flow key node.
         /// </summary>
-        private void EmitFlowMappingKey(ParsingEvent evt, bool isFirst)
+        private IEnumerable<string> EmitFlowMappingKey(ParsingEvent evt, bool isFirst)
         {
             if (isFirst)
             {
-                WriteIndicator("{", true, true, false);
+                foreach (var val in PrepareWriteIndicator("{", true, true, false))
+                {
+                    yield return val;
+                }
                 IncreaseIndent(true, false);
                 ++flowLevel;
             }
@@ -1550,61 +1853,97 @@ namespace YamlDotNet.Core
                 indent = indents.Pop();
                 if (isCanonical && !isFirst)
                 {
-                    WriteIndicator(",", false, false, false);
-                    WriteIndent();
+                    foreach (var val in PrepareWriteIndicator(",", false, false, false))
+                    {
+                        yield return val;
+                    }
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
                 }
-                WriteIndicator("}", false, false, false);
+                foreach (var val in PrepareWriteIndicator("}", false, false, false))
+                {
+                    yield return val;
+                }
                 state = states.Pop();
-                return;
+                yield break;
             }
 
             if (!isFirst)
             {
-                WriteIndicator(",", false, false, false);
+                foreach (var val in PrepareWriteIndicator(",", false, false, false))
+                {
+                    yield return val;
+                }
             }
             if (isCanonical || column > bestWidth)
             {
-                WriteIndent();
+                foreach (var val in PrepareWriteIndent())
+                {
+                    yield return val;
+                }
             }
 
             if (!isCanonical && CheckSimpleKey())
             {
                 states.Push(EmitterState.FlowMappingSimpleValue);
-                EmitNode(evt, true, true);
+                foreach (var val in EmitNode(evt, true, true))
+                {
+                    yield return val;
+                }
             }
             else
             {
-                WriteIndicator("?", true, false, false);
+                foreach (var val in PrepareWriteIndicator("?", true, false, false))
+                {
+                    yield return val;
+                }
                 states.Push(EmitterState.FlowMappingValue);
-                EmitNode(evt, true, false);
+                foreach (var val in EmitNode(evt, true, false))
+                {
+                    yield return val;
+                }
             }
         }
 
         /// <summary>
         /// Expect a flow value node.
         /// </summary>
-        private void EmitFlowMappingValue(ParsingEvent evt, bool isSimple)
+        private IEnumerable<string> EmitFlowMappingValue(ParsingEvent evt, bool isSimple)
         {
             if (isSimple)
             {
-                WriteIndicator(":", false, false, false);
+                foreach (var val in PrepareWriteIndicator(":", false, false, false))
+                {
+                    yield return val;
+                }
             }
             else
             {
                 if (isCanonical || column > bestWidth)
                 {
-                    WriteIndent();
+                    foreach (var val in PrepareWriteIndent())
+                    {
+                        yield return val;
+                    }
                 }
-                WriteIndicator(":", true, false, false);
+                foreach (var val in PrepareWriteIndicator(":", true, false, false))
+                {
+                    yield return val;
+                }
             }
             states.Push(EmitterState.FlowMappingKey);
-            EmitNode(evt, true, false);
+            foreach (var val in EmitNode(evt, true, false))
+            {
+                yield return val;
+            }
         }
 
         /// <summary>
         /// Expect a block item node.
         /// </summary>
-        private void EmitBlockSequenceItem(ParsingEvent evt, bool isFirst)
+        private IEnumerable<string> EmitBlockSequenceItem(ParsingEvent evt, bool isFirst)
         {
             if (isFirst)
             {
@@ -1615,20 +1954,29 @@ namespace YamlDotNet.Core
             {
                 indent = indents.Pop();
                 state = states.Pop();
-                return;
+                yield break;
             }
 
-            WriteIndent();
-            WriteIndicator("-", true, false, true);
+            foreach (var val in PrepareWriteIndent())
+            {
+                yield return val;
+            }
+            foreach (var val in PrepareWriteIndicator("-", true, false, true))
+            {
+                yield return val;
+            }
             states.Push(EmitterState.BlockSequenceItem);
 
-            EmitNode(evt, false, false);
+            foreach (var val in EmitNode(evt, false, false))
+            {
+                yield return val;
+            }
         }
 
         /// <summary>
         /// Expect a block key node.
         /// </summary>
-        private void EmitBlockMappingKey(ParsingEvent evt, bool isFirst)
+        private IEnumerable<string> EmitBlockMappingKey(ParsingEvent evt, bool isFirst)
         {
             if (isFirst)
             {
@@ -1639,37 +1987,61 @@ namespace YamlDotNet.Core
             {
                 indent = indents.Pop();
                 state = states.Pop();
-                return;
+                yield break;
             }
 
-            WriteIndent();
+            foreach (var val in PrepareWriteIndent())
+            {
+                yield return val;
+            }
 
             if (CheckSimpleKey())
             {
                 states.Push(EmitterState.BlockMappingSimpleValue);
-                EmitNode(evt, true, true);
-                WriteIndicator(":", false, false, false);
+                foreach (var val in EmitNode(evt, true, true))
+                {
+                    yield return val;
+                }
+                foreach (var val in PrepareWriteIndicator(":", false, false, false))
+                {
+                    yield return val;
+                }
             }
             else
             {
-                WriteIndicator("?", true, false, true);
+                foreach (var val in PrepareWriteIndicator("?", true, false, true))
+                {
+                    yield return val;
+                }
                 states.Push(EmitterState.BlockMappingValue);
-                EmitNode(evt, true, false);
+                foreach (var val in EmitNode(evt, true, false))
+                {
+                    yield return val;
+                }
             }
         }
 
         /// <summary>
         /// Expect a block value node.
         /// </summary>
-        private void EmitBlockMappingValue(ParsingEvent evt, bool isSimple)
+        private IEnumerable<string> EmitBlockMappingValue(ParsingEvent evt, bool isSimple)
         {
             if (!isSimple)
             {
-                WriteIndent();
-                WriteIndicator(":", true, false, true);
+                foreach (var val in PrepareWriteIndent())
+                {
+                    yield return val;
+                }
+                foreach (var val in PrepareWriteIndicator(":", true, false, true))
+                {
+                    yield return val;
+                }
             }
             states.Push(EmitterState.BlockMappingKey);
-            EmitNode(evt, true, false);
+            foreach (var val in EmitNode(evt, true, false))
+            {
+                yield return val;
+            }
         }
 
         private void IncreaseIndent(bool isFlow, bool isIndentless)
@@ -1799,16 +2171,19 @@ namespace YamlDotNet.Core
         }
         #endregion
 
-        #region Write Methods
+        #region Write Preparation Methods
 
-        private void WriteBlockScalarHints(string value)
+        private IEnumerable<string> PrepareWriteBlockScalarHints(string value)
         {
             var analyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
 
             if (analyzer.IsSpace() || analyzer.IsBreak())
             {
                 var indentHint = bestIndent.ToString(CultureInfo.InvariantCulture);
-                WriteIndicator(indentHint, false, false, false);
+                foreach (var val in PrepareWriteIndicator(indentHint, false, false, false))
+                {
+                    yield return val;
+                }
             }
 
             string? chompHint = null;
@@ -1823,24 +2198,33 @@ namespace YamlDotNet.Core
 
             if (chompHint != null)
             {
-                WriteIndicator(chompHint, false, false, false);
+                foreach (var val in PrepareWriteIndicator(chompHint, false, false, false))
+                {
+                    yield return val;
+                }
             }
         }
 
-        private void WriteIndicator(string indicator, bool needWhitespace, bool whitespace, bool indentation)
+        private IEnumerable<string> PrepareWriteIndicator(string indicator, bool needWhitespace, bool whitespace, bool indentation)
         {
             if (needWhitespace && !isWhitespace)
             {
-                Write(' ');
+                foreach (var val in PrepareWrite(' '))
+                {
+                    yield return val;
+                }
             }
 
-            Write(indicator);
+            foreach (var val in PrepareWrite(indicator))
+            {
+                yield return val;
+            }
 
             isWhitespace = whitespace;
             isIndentation &= indentation;
         }
 
-        private void WriteIndent()
+        private IEnumerable<string> PrepareWriteIndent()
         {
             var currentIndent = Math.Max(indent, 0);
 
@@ -1850,47 +2234,68 @@ namespace YamlDotNet.Core
 
             if (isBreakRequired)
             {
-                WriteBreak();
+                foreach (var val in PrepareWriteBreak())
+                {
+                    yield return val;
+                }
             }
 
             while (column < currentIndent)
             {
-                Write(' ');
+                foreach (var val in PrepareWrite(' '))
+                {
+                    yield return val;
+                }
             }
 
             isWhitespace = true;
             isIndentation = true;
         }
 
-        private void WriteAnchor(AnchorName value)
+        private IEnumerable<string> PrepareWriteAnchor(AnchorName value)
         {
-            Write(value.Value);
+            foreach (var val in PrepareWrite(value.Value))
+            {
+                yield return val;
+            }
 
             isWhitespace = false;
             isIndentation = false;
         }
 
-        private void WriteTagHandle(string value)
+        private IEnumerable<string> PrepareWriteTagHandle(string value)
         {
             if (!isWhitespace)
             {
-                Write(' ');
+                foreach (var val in PrepareWrite(' '))
+                {
+                    yield return val;
+                }
             }
 
-            Write(value);
+            foreach (var val in PrepareWrite(value))
+            {
+                yield return val;
+            }
 
             isWhitespace = false;
             isIndentation = false;
         }
 
-        private void WriteTagContent(string value, bool needsWhitespace)
+        private IEnumerable<string> PrepareWriteTagContent(string value, bool needsWhitespace)
         {
             if (needsWhitespace && !isWhitespace)
             {
-                Write(' ');
+                foreach (var val in PrepareWrite(' '))
+                {
+                    yield return val;
+                }
             }
 
-            Write(UrlEncode(value));
+            foreach (var val in PrepareWrite(UrlEncode(value)))
+            {
+                yield return val;
+            }
 
             isWhitespace = false;
             isIndentation = false;
@@ -1910,27 +2315,27 @@ namespace YamlDotNet.Core
             });
         }
 
-        private void Write(char value)
+        private IEnumerable<string> PrepareWrite(char value)
         {
-            output.Write(value);
+            yield return value.ToString();
             ++column;
         }
 
-        private void Write(string value)
+        private IEnumerable<string> PrepareWrite(string value)
         {
-            output.Write(value);
+            yield return value;
             column += value.Length;
         }
 
-        private void WriteBreak(char breakCharacter = '\n')
+        private IEnumerable<string> PrepareWriteBreak(char breakCharacter = '\n')
         {
             if (breakCharacter == '\n')
             {
-                output.Write(newLine);
+                yield return newLine;
             }
             else
             {
-                output.Write(breakCharacter);
+                yield return breakCharacter.ToString();
             }
             column = 0;
         }
