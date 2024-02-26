@@ -2438,7 +2438,6 @@ Null: true
 
             var s = "\t, something";
             var yaml = serializer.Serialize(s);
-            Console.WriteLine(yaml);
             var deserializer = new DeserializerBuilder().Build();
             var value = deserializer.Deserialize(yaml);
             Assert.Equal(s, value);
@@ -2453,7 +2452,6 @@ Null: true
 
             var s = " , something";
             var yaml = serializer.Serialize(s);
-            Console.WriteLine(yaml);
             var deserializer = new DeserializerBuilder().Build();
             var value = deserializer.Deserialize(yaml);
             Assert.Equal(s, value);
