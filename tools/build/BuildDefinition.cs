@@ -66,7 +66,7 @@ namespace build
                 };
                 jsonOptions.Converters.Add(new AutoNumberToStringConverter());
 
-                version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions);
+                version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions)!;
 
                 // Workaround to prevent issues with some consumers of the NuGet API that build
                 // links manually instead of following the links that come in the response.
@@ -290,7 +290,7 @@ namespace build
 
             var release = await releaseResponse.EnsureSuccessStatusCode().Content.ReadAsAsync<GitHubApiModels.Release>();
 
-            var linkedIssues = Regex.Matches(release.body, @"#(\d+)").Select(m => m.Groups[1].Value);
+            var linkedIssues = Regex.Matches(release.body ?? string.Empty, @"#(\d+)").Select(m => m.Groups[1].Value);
             WriteVerbose($"Found the following issues / pull requests: {string.Join(",", linkedIssues)}");
 
             foreach (var issueNumber in linkedIssues)
@@ -342,12 +342,12 @@ namespace build
 
             const string ns = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";
 
-            var testDefinitions = report.Root
+            var testDefinitions = report.Root!
                 .Element(XName.Get("TestDefinitions", ns))!
                 .Elements(XName.Get("UnitTest", ns))
                 .Select(e =>
                 {
-                    var testMethod = e.Element(XName.Get("TestMethod", ns));
+                    var testMethod = e.Element(XName.Get("TestMethod", ns))!;
 
                     var sampleClassName = testMethod.Attribute("className")!.Value;
                     var sampleMethodName = testMethod.Attribute("name")!.Value;

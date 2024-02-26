@@ -2429,6 +2429,36 @@ Null: true
             Assert.Equal(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2, v);
         }
 
+        [Fact]
+        public void TabsGetQuotedWhenQuoteNecessaryStringsIsOn()
+        {
+            var serializer = new SerializerBuilder()
+                .WithQuotingNecessaryStrings()
+                .Build();
+
+            var s = "\t, something";
+            var yaml = serializer.Serialize(s);
+            Console.WriteLine(yaml);
+            var deserializer = new DeserializerBuilder().Build();
+            var value = deserializer.Deserialize(yaml);
+            Assert.Equal(s, value);
+        }
+
+        [Fact]
+        public void SpacesGetQuotedWhenQuoteNecessaryStringsIsOn()
+        {
+            var serializer = new SerializerBuilder()
+                .WithQuotingNecessaryStrings()
+                .Build();
+
+            var s = " , something";
+            var yaml = serializer.Serialize(s);
+            Console.WriteLine(yaml);
+            var deserializer = new DeserializerBuilder().Build();
+            var value = deserializer.Deserialize(yaml);
+            Assert.Equal(s, value);
+        }
+
         [Flags]
         private enum TestEnumAsNumber
         {

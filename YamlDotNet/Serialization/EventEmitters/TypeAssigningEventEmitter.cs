@@ -45,6 +45,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?" // float number
                 + @"|[-+]?(\.inf|\.Inf|\.INF)"
                 + @"|\.nan|\.NaN|\.NAN"
+                + @"|\s.*"
             + @")$";
 
         /// <summary>
