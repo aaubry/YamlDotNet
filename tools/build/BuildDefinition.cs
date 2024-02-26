@@ -125,7 +125,7 @@ namespace build
         public static Task<SuccessfulBuild> Build(Options options, MetadataSet _)
         {
             var verbosity = options.Verbose ? "detailed" : "minimal";
-            Run("dotnet", $"build YamlDotNet.sln --configuration Release --verbosity {verbosity}", BasePath);
+            Run("dotnet", $"build YamlDotNet.sln --configuration Release --verbosity {verbosity} -p:ContinuousIntegrationBuild=true", BasePath);
 
             return Task.FromResult(new SuccessfulBuild());
         }
@@ -143,14 +143,14 @@ namespace build
             var result = new List<NuGetPackage>();
             var verbosity = options.Verbose ? "detailed" : "minimal";
             var buildDir = Path.Combine(BasePath, "YamlDotNet");
-            Run("nuget", $"pack YamlDotNet.nuspec -Version {version.NuGetVersion} -OutputDirectory bin", buildDir);
+            Run("nuget", $"pack YamlDotNet.nuspec -Version {version.NuGetVersion} -OutputDirectory bin -Symbols -SymbolPackageFormat snupkg", buildDir);
             var packagePath = Path.Combine(buildDir, "bin", $"YamlDotNet.{version.NuGetVersion}.nupkg");
             result.Add(new NuGetPackage(packagePath, "YamlDotNet"));
 
             if (PushSerializer)
             {
                 buildDir = Path.Combine(BasePath, "YamlDotNet.Analyzers.StaticGenerator");
-                Run("nuget", $"pack YamlDotNet.Analyzers.StaticGenerator.nuspec -Version {version.NuGetVersion} -OutputDirectory bin", buildDir);
+                Run("nuget", $"pack YamlDotNet.Analyzers.StaticGenerator.nuspec -Version {version.NuGetVersion} -OutputDirectory bin -Symbols -SymbolPackageFormat snupkg", buildDir);
                 packagePath = Path.Combine(buildDir, "bin", $"YamlDotNet.Analyzers.StaticGenerator.{version.NuGetVersion}.nupkg");
                 result.Add(new NuGetPackage(packagePath, "YamlDotNet.Analyzers.StaticGenerator"));
             }
