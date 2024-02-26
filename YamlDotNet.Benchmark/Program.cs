@@ -1,4 +1,11 @@
-﻿using BenchmarkDotNet.Running;
-using YamlDotNet.Benchmark;
+﻿using YamlDotNet.Serialization;
 
-BenchmarkSwitcher.FromAssembly(typeof(YamlStreamBenchmark).Assembly).Run(args);
+var serializer = new SerializerBuilder()
+    .WithQuotingNecessaryStrings()
+    .Build();
+
+var s = "\t, something";
+var yaml = serializer.Serialize(s);
+Console.WriteLine(yaml);
+var deserializer = new DeserializerBuilder().Build();
+var value = deserializer.Deserialize(yaml);
