@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
@@ -27,5 +28,7 @@ namespace YamlDotNet.Serialization
     public interface IValueSerializer
     {
         void SerializeValue(IEmitter emitter, object? value, Type? type);
+
+        Task SerializeValueAsync(IEmitter emitter, object? value, Type? type);
     }
 }

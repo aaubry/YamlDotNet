@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -733,25 +735,46 @@ namespace YamlDotNet.Serialization
 
             public void SerializeValue(IEmitter emitter, object? value, Type? type)
             {
+                var graph = CreateObjectDescriptor(value, type);
+                var emittingVisitor = PrepareEmitterVisitor(emitter, graph);
+
+                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+            }
+
+            public async Task SerializeValueAsync(IEmitter emitter, object? value, Type? type)
+            {
+                var graph = CreateObjectDescriptor(value, type);
+                var emittingVisitor = PrepareEmitterVisitor(emitter, graph);
+
+                await traversalStrategy.TraverseAsync(graph, emittingVisitor, emitter);
+            }
+
+            private IObjectDescriptor CreateObjectDescriptor(object? value, Type? type)
+            {
                 var actualType = type ?? (value != null ? value.GetType() : typeof(object));
                 var staticType = type ?? typeof(object);
 
-                var graph = new ObjectDescriptor(value, actualType, staticType);
+                return new ObjectDescriptor(value, actualType, staticType);
+            }
 
+            private IObjectGraphVisitor<IEmitter> PrepareEmitterVisitor(IEmitter emitter, IObjectDescriptor graph)
+            {
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
                 {
                     traversalStrategy.Traverse(graph, visitor, default);
                 }
 
+                // TODO: this needs to be refactored to allow an async delegate, since all emitters in the chain should be async if this is used asynchronously
                 void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
 
                 var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
                     new EmittingObjectGraphVisitor(eventEmitter),
+                    // TODO: the signiture of this probably needs to be modified so that async emitters in the chain can be handled correctly
                     inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, NestedObjectSerializer)
                 );
 
-                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+                return emittingVisitor;
             }
         }
     }

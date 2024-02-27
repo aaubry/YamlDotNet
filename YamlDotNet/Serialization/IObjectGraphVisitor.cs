@@ -26,6 +26,9 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Defined the interface of a type that can be notified during an object graph traversal.
     /// </summary>
+
+    // This will need to be updated to include Async versions of methods due to use in
+    // IObjectGraphTraversalStrategy and its implementations
     public interface IObjectGraphVisitor<TContext>
     {
         /// <summary>

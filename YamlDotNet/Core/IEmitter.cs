@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Threading.Tasks;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core
@@ -32,5 +33,7 @@ namespace YamlDotNet.Core
         /// Emits an event.
         /// </summary>
         void Emit(ParsingEvent @event);
+
+        Task EmitAsync(ParsingEvent @event);
     }
 }
