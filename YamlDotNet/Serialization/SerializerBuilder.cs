@@ -62,6 +62,7 @@ namespace YamlDotNet.Serialization
         private ScalarStyle defaultScalarStyle = ScalarStyle.Any;
         private bool quoteNecessaryStrings;
         private bool quoteYaml1_1Strings;
+        private bool handleTargetInvocationExceptions;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -126,6 +127,15 @@ namespace YamlDotNet.Serialization
         {
             quoteNecessaryStrings = true;
             this.quoteYaml1_1Strings = quoteYaml1_1Strings;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables handling TargetInvocationExceptions thrown by a property so that information about exception is serialized as string value of the property.
+        /// </summary>
+        public SerializerBuilder WithTargetInvocationExceptionsHandling()
+        {
+            handleTargetInvocationExceptions = true;
             return this;
         }
 
@@ -695,7 +705,7 @@ namespace YamlDotNet.Serialization
 
         internal ITypeInspector BuildTypeInspector()
         {
-            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
+            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties, handleTargetInvocationExceptions);
 
             if (!ignoreFields)
             {

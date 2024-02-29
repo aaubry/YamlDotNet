@@ -41,6 +41,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Callbacks;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Test.Analyzers.StaticGenerator;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -1115,6 +1116,45 @@ y:
             var serialized = writer.ToString();
 
             serialized.Should().Contain("Value");
+        }
+        
+        [Fact]
+        public void SerializationHandlesTargetInvocationException()
+        {
+            var serializer = new SerializerBuilder().WithTargetInvocationExceptionsHandling().Build();
+            var writer = new StringWriter();
+            var obj = new ThrowingPropertyExample();
+
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+
+            serialized.Should()
+                .Be("Value: Exception of type System.InvalidOperationException was thrown\r\n".NormalizeNewLines());
+        }
+        
+        [Fact] 
+        public void StaticSerializationHandlesTargetInvocationException()
+        {
+            var serializer = new StaticSerializerBuilder(new Analyzers.StaticGenerator.StaticContext())
+                .WithTargetInvocationExceptionsHandling()
+                .Build();
+            var writer = new StringWriter();
+            var obj = new ThrowingPropertyExample();
+
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+
+            serialized.Should()
+                .Be("Value: Exception of type System.InvalidOperationException was thrown\r\n".NormalizeNewLines());
+        }
+        
+        [Fact]
+        public void SerializationDoesntHandleTargetInvocationExceptionByDefault()
+        {
+            var writer = new StringWriter();
+            var obj = new ThrowingPropertyExample();
+
+            Assert.Throws<TargetInvocationException>(() => Serializer.Serialize(writer, obj));
         }
 
         [Fact]
