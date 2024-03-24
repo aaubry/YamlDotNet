@@ -43,11 +43,6 @@ namespace YamlDotNet
             return type.GetTypeInfo().IsGenericType;
         }
 
-        public static bool IsGenericTypeDefinition(this Type type)
-        {
-            return type.GetTypeInfo().IsGenericTypeDefinition;
-        }
-
         public static bool IsInterface(this Type type)
         {
             return type.GetTypeInfo().IsInterface;
@@ -177,12 +172,6 @@ namespace YamlDotNet
             return type.GetRuntimeProperty(name);
         }
 
-        public static FieldInfo? GetPublicStaticField(this Type type, string name)
-        {
-            return type.GetRuntimeField(name);
-        }
-
-
         private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod).IsStatic;
         private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && (property.GetMethod ?? property.SetMethod).IsPublic;
 
@@ -210,13 +199,6 @@ namespace YamlDotNet
                 .Where(m => m.IsPublic && m.IsStatic);
         }
 
-        public static MethodInfo GetPrivateStaticMethod(this Type type, string name)
-        {
-            return type.GetRuntimeMethods()
-                .FirstOrDefault(m => !m.IsPublic && m.IsStatic && m.Name.Equals(name))
-                ?? throw new MissingMethodException($"Expected to find a method named '{name}' in '{type.FullName}'.");
-        }
-
         public static MethodInfo? GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
         {
             return type.GetRuntimeMethods()
@@ -230,27 +212,6 @@ namespace YamlDotNet
                     }
                     return false;
                 });
-        }
-
-        public static MethodInfo? GetPublicInstanceMethod(this Type type, string name)
-        {
-            return type.GetRuntimeMethods()
-                .FirstOrDefault(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name));
-        }
-
-        public static MethodInfo? GetGetMethod(this PropertyInfo property, bool nonPublic)
-        {
-            var getter = property.GetMethod;
-            if (!nonPublic && !getter.IsPublic)
-            {
-                getter = null;
-            }
-            return getter;
-        }
-
-        public static MethodInfo? GetSetMethod(this PropertyInfo property)
-        {
-            return property.SetMethod;
         }
 
         public static IEnumerable<Type> GetInterfaces(this Type type)

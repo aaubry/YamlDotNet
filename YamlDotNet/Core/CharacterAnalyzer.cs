@@ -57,11 +57,6 @@ namespace YamlDotNet.Core
                 character == '-';
         }
 
-        public bool IsAscii(int offset = 0)
-        {
-            return Buffer.Peek(offset) <= '\x7F';
-        }
-
         public bool IsPrintable(int offset = 0)
         {
             var character = Buffer.Peek(offset);
