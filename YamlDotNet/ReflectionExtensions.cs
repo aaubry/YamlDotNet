@@ -78,16 +78,6 @@ namespace YamlDotNet
             return type.IsValueType || type.GetConstructor(bindingFlags, null, Type.EmptyTypes, null) != null;
         }
 
-        public static bool IsAssignableFrom(this Type type, Type source)
-        {
-            return type.IsAssignableFrom(source.GetTypeInfo());
-        }
-
-        public static bool IsAssignableFrom(this Type type, TypeInfo source)
-        {
-            return type.GetTypeInfo().IsAssignableFrom(source);
-        }
-
         public static TypeCode GetTypeCode(this Type type)
         {
             var isEnum = type.IsEnum();
@@ -164,21 +154,7 @@ namespace YamlDotNet
 
         public static bool IsDbNull(this object value)
         {
-            return value?.GetType()?.FullName == "System.DBNull";
-        }
-
-        public static Type[] GetGenericArguments(this Type type)
-        {
-            return type.GetTypeInfo().GenericTypeArguments;
-        }
-
-        public static PropertyInfo? GetPublicProperty(
-#if NET6_0_OR_GREATER
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
-#endif
-            this Type type, string name)
-        {
-            return type.GetRuntimeProperty(name);
+            return value.GetType().FullName == "System.DBNull";
         }
 
         private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod).IsStatic;
