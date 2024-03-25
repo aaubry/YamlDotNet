@@ -22,7 +22,6 @@
 using System;
 using System.Collections;
 using YamlDotNet.Core;
-using YamlDotNet.Serialization.ObjectFactories;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {

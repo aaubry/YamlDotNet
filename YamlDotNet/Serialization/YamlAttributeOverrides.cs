@@ -83,7 +83,11 @@ namespace YamlDotNet.Serialization
             /// Checks whether this mapping matches the specified type, and returns a value indicating the match priority.
             /// </summary>
             /// <returns>The priority of the match. Higher values have more priority. Zero indicates no match.</returns>
-            public int Matches(Type matchType)
+            public int Matches(
+#if NET6_0_OR_GREATER
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+                Type matchType)
             {
                 var currentPriority = 0;
                 var currentType = matchType;
@@ -109,7 +113,11 @@ namespace YamlDotNet.Serialization
         private readonly Dictionary<AttributeKey, List<AttributeMapping>> overrides = new Dictionary<AttributeKey, List<AttributeMapping>>();
 
         [return: MaybeNull]
-        public T GetAttribute<T>(Type type, string member) where T : Attribute
+        public T GetAttribute<T>(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+            Type type, string member) where T : Attribute
         {
             if (overrides.TryGetValue(new AttributeKey(typeof(T), member), out var mappings))
             {

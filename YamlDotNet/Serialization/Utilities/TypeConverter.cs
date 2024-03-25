@@ -27,6 +27,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YamlDotNet.Serialization.Utilities
 {
@@ -42,6 +43,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="value">The value to convert.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
         /// <returns></returns>
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         public static T ChangeType<T>(object? value, INamingConvention enumNamingConvention)
         {
             return (T)ChangeType(value, typeof(T), enumNamingConvention)!; // This cast should always be valid
@@ -55,6 +59,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="provider">The provider.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
         /// <returns></returns>
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         public static T ChangeType<T>(object? value, IFormatProvider provider, INamingConvention enumNamingConvention)
         {
             return (T)ChangeType(value, typeof(T), provider, enumNamingConvention)!; // This cast should always be valid
@@ -68,6 +75,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="culture">The culture.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
         /// <returns></returns>
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         public static T ChangeType<T>(object? value, CultureInfo culture, INamingConvention enumNamingConvention)
         {
             return (T)ChangeType(value, typeof(T), culture, enumNamingConvention)!; // This cast should always be valid
@@ -80,6 +90,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
         /// <returns></returns>
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         public static object? ChangeType(object? value, Type destinationType, INamingConvention enumNamingConvention)
         {
             return ChangeType(value, destinationType, CultureInfo.InvariantCulture, enumNamingConvention);
@@ -93,6 +106,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="provider">The format provider.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
         /// <returns></returns>
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         public static object? ChangeType(object? value, Type destinationType, IFormatProvider provider, INamingConvention enumNamingConvention)
         {
             return ChangeType(value, destinationType, new CultureInfoAdapter(CultureInfo.CurrentCulture, provider), enumNamingConvention);
@@ -106,6 +122,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="culture">The culture.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
         /// <returns></returns>
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         public static object? ChangeType(object? value, Type destinationType, CultureInfo culture, INamingConvention enumNamingConvention)
         {
             // Handle null and DBNull
@@ -262,8 +281,16 @@ namespace YamlDotNet.Serialization.Utilities
 #if NET20 || NET35 || NET45
         [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.LinkDemand, Name = "FullTrust")]
 #endif
-        public static void RegisterTypeConverter<TConvertible, TConverter>()
-            where TConverter : System.ComponentModel.TypeConverter
+        public static void RegisterTypeConverter<
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+        TConvertible,
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+        TConverter>()
+        where TConverter : System.ComponentModel.TypeConverter
         {
             var alreadyRegistered = TypeDescriptor.GetAttributes(typeof(TConvertible))
                 .OfType<TypeConverterAttribute>()

@@ -21,12 +21,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace YamlDotNet.Serialization.Utilities
 {
     internal static class ReflectionUtility
     {
-        public static Type? GetImplementedGenericInterface(Type type, Type genericInterfaceType)
+        public static Type? GetImplementedGenericInterface(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+            Type type, Type genericInterfaceType)
         {
             foreach (var interfacetype in GetImplementedInterfaces(type))
             {
@@ -38,7 +43,11 @@ namespace YamlDotNet.Serialization.Utilities
             return null;
         }
 
-        public static IEnumerable<Type> GetImplementedInterfaces(Type type)
+        public static IEnumerable<Type> GetImplementedInterfaces(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+            Type type)
         {
             if (type.IsInterface())
             {

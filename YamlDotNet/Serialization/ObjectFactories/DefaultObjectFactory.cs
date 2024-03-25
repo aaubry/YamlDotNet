@@ -22,6 +22,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using YamlDotNet.Serialization.Callbacks;
@@ -143,7 +144,11 @@ namespace YamlDotNet.Serialization.ObjectFactories
             }
         }
 
-        private MethodInfo[] GetStateMethods(Type attributeType, Type valueType)
+        private MethodInfo[] GetStateMethods(Type attributeType,
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+#endif
+            Type valueType)
         {
             var stateDictionary = _stateMethods[attributeType];
 

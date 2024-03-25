@@ -18,6 +18,7 @@
 
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
+    <IsTrimmable>true</IsTrimmable>
 
     <NetStandard>false</NetStandard>
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
@@ -38,14 +39,17 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net60'">
     <NetStandard>true</NetStandard>
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net70'">
     <NetStandard>true</NetStandard>
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net80'">
     <NetStandard>true</NetStandard>
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

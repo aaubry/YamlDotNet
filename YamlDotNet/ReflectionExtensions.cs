@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -43,11 +44,6 @@ namespace YamlDotNet
             return type.GetTypeInfo().IsGenericType;
         }
 
-        public static bool IsGenericTypeDefinition(this Type type)
-        {
-            return type.GetTypeInfo().IsGenericTypeDefinition;
-        }
-
         public static bool IsInterface(this Type type)
         {
             return type.GetTypeInfo().IsInterface;
@@ -66,7 +62,11 @@ namespace YamlDotNet
         /// <returns>
         ///     <c>true</c> if the type has a default constructor; otherwise, <c>false</c>.
         /// </returns>
-        public static bool HasDefaultConstructor(this Type type, bool allowPrivateConstructors)
+        public static bool HasDefaultConstructor(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            this Type type, bool allowPrivateConstructors)
         {
             var bindingFlags = BindingFlags.Instance | BindingFlags.Public;
 
@@ -76,16 +76,6 @@ namespace YamlDotNet
             }
 
             return type.IsValueType || type.GetConstructor(bindingFlags, null, Type.EmptyTypes, null) != null;
-        }
-
-        public static bool IsAssignableFrom(this Type type, Type source)
-        {
-            return type.IsAssignableFrom(source.GetTypeInfo());
-        }
-
-        public static bool IsAssignableFrom(this Type type, TypeInfo source)
-        {
-            return type.GetTypeInfo().IsAssignableFrom(source);
         }
 
         public static TypeCode GetTypeCode(this Type type)
@@ -164,60 +154,65 @@ namespace YamlDotNet
 
         public static bool IsDbNull(this object value)
         {
-            return value?.GetType()?.FullName == "System.DBNull";
+            return value.GetType().FullName == "System.DBNull";
         }
-
-        public static Type[] GetGenericArguments(this Type type)
-        {
-            return type.GetTypeInfo().GenericTypeArguments;
-        }
-
-        public static PropertyInfo? GetPublicProperty(this Type type, string name)
-        {
-            return type.GetRuntimeProperty(name);
-        }
-
-        public static FieldInfo? GetPublicStaticField(this Type type, string name)
-        {
-            return type.GetRuntimeField(name);
-        }
-
 
         private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod).IsStatic;
         private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && (property.GetMethod ?? property.SetMethod).IsPublic;
 
-        public static IEnumerable<PropertyInfo> GetProperties(this Type type, bool includeNonPublic)
+        public static IEnumerable<PropertyInfo> GetProperties(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces |
+                                        DynamicallyAccessedMemberTypes.PublicProperties |
+                                        DynamicallyAccessedMemberTypes.NonPublicProperties)]
+#endif
+            this Type type, bool includeNonPublic)
         {
             var predicate = includeNonPublic ? IsInstance : IsInstancePublic;
 
             return type.IsInterface()
                 ? (new Type[] { type })
                     .Concat(type.GetInterfaces())
-                    .SelectMany(i => i.GetRuntimeProperties().Where(predicate))
+                    .SelectMany((
+#if NET6_0_OR_GREATER
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+#endif
+                i) => i.GetRuntimeProperties().Where(predicate))
                 : type.GetRuntimeProperties().Where(predicate);
         }
 
-        public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type) => GetProperties(type, false);
+        public static IEnumerable<PropertyInfo> GetPublicProperties(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces |
+                                        DynamicallyAccessedMemberTypes.PublicProperties |
+                                        DynamicallyAccessedMemberTypes.NonPublicProperties)]
+#endif
+            this Type type) => GetProperties(type, false);
 
-        public static IEnumerable<FieldInfo> GetPublicFields(this Type type)
+        public static IEnumerable<FieldInfo> GetPublicFields(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+            this Type type)
         {
             return type.GetRuntimeFields().Where(f => !f.IsStatic && f.IsPublic);
         }
 
-        public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
+        public static IEnumerable<MethodInfo> GetPublicStaticMethods(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+#endif
+            this Type type)
         {
             return type.GetRuntimeMethods()
                 .Where(m => m.IsPublic && m.IsStatic);
         }
 
-        public static MethodInfo GetPrivateStaticMethod(this Type type, string name)
-        {
-            return type.GetRuntimeMethods()
-                .FirstOrDefault(m => !m.IsPublic && m.IsStatic && m.Name.Equals(name))
-                ?? throw new MissingMethodException($"Expected to find a method named '{name}' in '{type.FullName}'.");
-        }
-
-        public static MethodInfo? GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
+        public static MethodInfo? GetPublicStaticMethod(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+#endif
+            this Type type, string name, params Type[] parameterTypes)
         {
             return type.GetRuntimeMethods()
                 .FirstOrDefault(m =>
@@ -232,54 +227,9 @@ namespace YamlDotNet
                 });
         }
 
-        public static MethodInfo? GetPublicInstanceMethod(this Type type, string name)
-        {
-            return type.GetRuntimeMethods()
-                .FirstOrDefault(m => m.IsPublic && !m.IsStatic && m.Name.Equals(name));
-        }
-
-        public static MethodInfo? GetGetMethod(this PropertyInfo property, bool nonPublic)
-        {
-            var getter = property.GetMethod;
-            if (!nonPublic && !getter.IsPublic)
-            {
-                getter = null;
-            }
-            return getter;
-        }
-
-        public static MethodInfo? GetSetMethod(this PropertyInfo property)
-        {
-            return property.SetMethod;
-        }
-
-        public static IEnumerable<Type> GetInterfaces(this Type type)
-        {
-            return type.GetTypeInfo().ImplementedInterfaces;
-        }
-
-        public static bool IsInstanceOf(this Type type, object o)
-        {
-            return o.GetType() == type || o.GetType().GetTypeInfo().IsSubclassOf(type);
-        }
-
         public static Attribute[] GetAllCustomAttributes<TAttribute>(this PropertyInfo member)
         {
-            // IMemberInfo.GetCustomAttributes ignores it's "inherit" parameter for properties,
-            // and the suggested replacement (Attribute.GetCustomAttributes) is not available
-            // on netstandard1.3
-            var result = new List<Attribute>();
-            var type = member.DeclaringType;
-
-            while (type != null)
-            {
-                type.GetPublicProperty(member.Name);
-                result.AddRange(member.GetCustomAttributes(typeof(TAttribute)));
-
-                type = type.BaseType();
-            }
-
-            return result.ToArray();
+            return Attribute.GetCustomAttributes(member, typeof(TAttribute), true);
         }
     }
 }

@@ -21,6 +21,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
@@ -33,7 +34,11 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
         {
         }
 
-        private static object? GetDefault(Type type)
+        private static object? GetDefault(
+#if NET6_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            Type type)
         {
             return type.IsValueType() ? Activator.CreateInstance(type) : null;
         }

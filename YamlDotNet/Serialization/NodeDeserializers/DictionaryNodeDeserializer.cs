@@ -23,7 +23,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
