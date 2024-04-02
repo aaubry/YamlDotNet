@@ -148,17 +148,13 @@ namespace YamlDotNet.Serialization.ObjectFactories
         {
             var stateDictionary = _stateMethods[attributeType];
 
-            if (stateDictionary.TryGetValue(valueType, out var methods))
+            return stateDictionary.GetOrAdd(valueType, type =>
             {
-                return methods;
-            }
-
-            methods = valueType.GetMethods(BindingFlags.Public |
-                                          BindingFlags.Instance |
-                                          BindingFlags.NonPublic);
-            methods = methods.Where(x => x.GetCustomAttributes(attributeType, true).Any()).ToArray();
-            stateDictionary.TryAdd(valueType, methods);
-            return methods;
+                var methods = type.GetMethods(BindingFlags.Public |
+                                              BindingFlags.Instance |
+                                              BindingFlags.NonPublic);
+                return methods.Where(x => x.GetCustomAttributes(attributeType, true).Any()).ToArray();
+            });
         }
     }
 }
