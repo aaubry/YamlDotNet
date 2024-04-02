@@ -20,8 +20,10 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
@@ -342,6 +344,45 @@ name: Jake
 
             Assert.Equal(1, test.OnDeserializedCallCount);
             Assert.Equal(1, test.OnDeserializingCallCount);
+        }
+        
+        [Fact]
+        public void DeserializeConcurrently()
+        {
+            var exceptions = new ConcurrentStack<Exception>();
+            var threadCount = 100;
+            var threads = new List<Thread>();
+            var control = new SemaphoreSlim(0, threadCount);
+
+            var yaml = "Test: Hi";
+            var deserializer = new DeserializerBuilder().Build();
+            
+            for (var i = 0; i < threadCount; i++)
+            {
+                threads.Add(new Thread(Deserialize));
+            }
+
+            threads.ForEach(t => t.Start());
+            control.Release(threadCount);
+            threads.ForEach(t => t.Join());
+
+            Assert.Empty(exceptions);
+            return;
+
+            void Deserialize()
+            {
+                control.Wait();
+
+                try
+                {
+                    var result = deserializer.Deserialize<TestState>(yaml);
+                    result.Test.Should().Be("Hi");
+                }
+                catch (Exception e)
+                {
+                    exceptions.Push(e.InnerException ?? e);
+                }
+            }
         }
 
         public class TestState

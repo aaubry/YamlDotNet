@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -33,12 +34,12 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class DefaultObjectFactory : ObjectFactoryBase
     {
-        private readonly Dictionary<Type, Dictionary<Type, MethodInfo[]>> _stateMethods = new Dictionary<Type, Dictionary<Type, MethodInfo[]>>
+        private readonly Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>> _stateMethods = new Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>>
         {
-            { typeof(OnDeserializedAttribute), new Dictionary<Type, MethodInfo[]>() },
-            { typeof(OnDeserializingAttribute), new Dictionary<Type, MethodInfo[]>() },
-            { typeof(OnSerializedAttribute), new Dictionary<Type, MethodInfo[]>() },
-            { typeof(OnSerializingAttribute), new Dictionary<Type, MethodInfo[]>() },
+            { typeof(OnDeserializedAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
+            { typeof(OnDeserializingAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
+            { typeof(OnSerializedAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
+            { typeof(OnSerializingAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
         };
 
         private readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
@@ -156,7 +157,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
                                           BindingFlags.Instance |
                                           BindingFlags.NonPublic);
             methods = methods.Where(x => x.GetCustomAttributes(attributeType, true).Any()).ToArray();
-            stateDictionary[valueType] = methods;
+            stateDictionary.TryAdd(valueType, methods);
             return methods;
         }
     }
