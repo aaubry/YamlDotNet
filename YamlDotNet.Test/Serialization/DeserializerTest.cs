@@ -350,37 +350,52 @@ name: Jake
         public void DeserializeConcurrently()
         {
             var exceptions = new ConcurrentStack<Exception>();
-            var threadCount = 100;
-            var threads = new List<Thread>();
-            var control = new SemaphoreSlim(0, threadCount);
+            var runCount = 10;
 
-            var yaml = "Test: Hi";
-            var deserializer = new DeserializerBuilder().Build();
-            
-            for (var i = 0; i < threadCount; i++)
+            for (var i = 0; i < runCount; i++)
             {
-                threads.Add(new Thread(Deserialize));
+                // Failures don't occur consistently - running repeatedly increases the chances
+                RunTest();
             }
-
-            threads.ForEach(t => t.Start());
-            control.Release(threadCount);
-            threads.ForEach(t => t.Join());
-
+            
             Assert.Empty(exceptions);
-            return;
 
-            void Deserialize()
+            void RunTest()
             {
-                control.Wait();
+                var threadCount = 100;
+                var threads = new List<Thread>();
+                var control = new SemaphoreSlim(0, threadCount);
 
-                try
+                var yaml = "Test: Hi";
+                var deserializer = new DeserializerBuilder().Build();
+
+                for (var i = 0; i < threadCount; i++)
                 {
-                    var result = deserializer.Deserialize<TestState>(yaml);
-                    result.Test.Should().Be("Hi");
+                    threads.Add(new Thread(Deserialize));
                 }
-                catch (Exception e)
+
+                threads.ForEach(t => t.Start());
+                // Each thread will wait for the semaphore before proceeding.
+                // Release them all simultaneously to maximise concurrency
+                control.Release(threadCount);
+                threads.ForEach(t => t.Join());
+
+                Assert.Empty(exceptions);
+                return;
+
+                void Deserialize()
                 {
-                    exceptions.Push(e.InnerException ?? e);
+                    control.Wait();
+
+                    try
+                    {
+                        var result = deserializer.Deserialize<TestState>(yaml);
+                        result.Test.Should().Be("Hi");
+                    }
+                    catch (Exception e)
+                    {
+                        exceptions.Push(e.InnerException ?? e);
+                    }
                 }
             }
         }

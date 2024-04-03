@@ -2414,36 +2414,48 @@ Null: true
         public void SerializeConcurrently()
         {
             var exceptions = new ConcurrentStack<Exception>();
-            var threadCount = 100;
-            var threads = new List<Thread>();
-            var control = new SemaphoreSlim(0, threadCount);
+            var runCount = 10;
 
-            var serializer = new SerializerBuilder().Build();
-            
-            for (var i = 0; i < threadCount; i++)
+            for (var i = 0; i < runCount; i++)
             {
-                threads.Add(new Thread(Serialize));
+                // Failures don't occur consistently - running repeatedly increases the chances
+                RunTest();
             }
-
-            threads.ForEach(t => t.Start());
-            control.Release(threadCount);
-            threads.ForEach(t => t.Join());
-
+            
             Assert.Empty(exceptions);
-            return;
 
-            void Serialize()
+            void RunTest()
             {
-                control.Wait();
+                var threadCount = 100;
+                var threads = new List<Thread>();
+                var control = new SemaphoreSlim(0, threadCount);
 
-                try
+                var serializer = new SerializerBuilder().Build();
+            
+                for (var i = 0; i < threadCount; i++)
                 {
-                    var test = new TestState();
-                    serializer.Serialize(test);
+                    threads.Add(new Thread(Serialize));
                 }
-                catch (Exception e)
+
+                threads.ForEach(t => t.Start());
+                // Each thread will wait for the semaphore before proceeding.
+                // Release them all simultaneously to try to maximise concurrency
+                control.Release(threadCount);
+                threads.ForEach(t => t.Join());
+                
+                void Serialize()
                 {
-                    exceptions.Push(e.InnerException ?? e);
+                    control.Wait();
+
+                    try
+                    {
+                        var test = new TestState();
+                        serializer.Serialize(test);
+                    }
+                    catch (Exception e)
+                    {
+                        exceptions.Push(e.InnerException ?? e);
+                    }
                 }
             }
         }
