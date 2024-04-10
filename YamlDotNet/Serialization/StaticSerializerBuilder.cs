@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -123,6 +124,21 @@ namespace YamlDotNet.Serialization
         {
             quoteNecessaryStrings = true;
             this.quoteYaml1_1Strings = quoteYaml1_1Strings;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables handling an exception thrown by a property so that information about exception is serialized as string value of the property.
+        /// </summary>
+        /// <param name="exceptionHandler">
+        /// A function that takes the caught exception, the object and the name of the object's property (from which the exception was thrown).
+        /// The string returned from the function is written instead of the property value by the serializer.
+        /// </param>
+        public StaticSerializerBuilder WithExceptionHandler(Func<Exception, object, string, string> exceptionHandler)
+        {
+            typeInspectorFactories.Add(
+                typeof(ExceptionHandlerInspector),
+                inner => new ExceptionHandlerInspector(inner, exceptionHandler));
             return this;
         }
 

@@ -41,6 +41,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Callbacks;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Test.Analyzers.StaticGenerator;
 
 namespace YamlDotNet.Test.Serialization
 {
@@ -1115,6 +1116,34 @@ y:
             var serialized = writer.ToString();
 
             serialized.Should().Contain("Value");
+        }
+
+        [Fact]
+        public void SerializationHandlesException()
+        {
+            var obj = new ThrowingPropertyExample();
+            var serializer = new SerializerBuilder()
+                    .WithExceptionHandler((e, o, p) =>
+                        $"Exception of type {e.GetType().FullName} was thrown in property {p} " +
+                        "of " + (ReferenceEquals(o, obj) ? "expected" : "unexpected") + " object")
+                .Build();
+            var writer = new StringWriter();
+
+            serializer.Serialize(writer, obj);
+            var serialized = writer.ToString();
+
+            serialized.Should().Be(
+                "Value: Exception of type System.InvalidOperationException was thrown in property Value of expected object\r\n"
+                    .NormalizeNewLines());
+        }
+
+        [Fact]
+        public void SerializationDoesntHandleExceptionByDefault()
+        {
+            var writer = new StringWriter();
+            var obj = new ThrowingPropertyExample();
+
+            Assert.Throws<TargetInvocationException>(() => Serializer.Serialize(writer, obj));
         }
 
         [Fact]

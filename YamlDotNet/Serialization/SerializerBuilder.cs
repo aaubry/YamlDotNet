@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -62,6 +63,7 @@ namespace YamlDotNet.Serialization
         private ScalarStyle defaultScalarStyle = ScalarStyle.Any;
         private bool quoteNecessaryStrings;
         private bool quoteYaml1_1Strings;
+        private Func<Exception, object, string, string>? exceptionHandler;
 
         public SerializerBuilder()
             : base(new DynamicTypeResolver())
@@ -126,6 +128,19 @@ namespace YamlDotNet.Serialization
         {
             quoteNecessaryStrings = true;
             this.quoteYaml1_1Strings = quoteYaml1_1Strings;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables handling an exception thrown by a property so that information about exception is serialized as string value of the property.
+        /// </summary>
+        /// <param name="exceptionHandler">
+        /// A function that takes the caught exception, the object and the name of the object's property (from which the exception was thrown).
+        /// The string returned from the function is written instead of the property value by the serializer.
+        /// </param>
+        public SerializerBuilder WithExceptionHandler(Func<Exception, object, string, string> exceptionHandler)
+        {
+            this.exceptionHandler = exceptionHandler;
             return this;
         }
 
@@ -695,7 +710,8 @@ namespace YamlDotNet.Serialization
 
         internal ITypeInspector BuildTypeInspector()
         {
-            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
+            ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(
+                typeResolver, includeNonPublicProperties, exceptionHandler);
 
             if (!ignoreFields)
             {

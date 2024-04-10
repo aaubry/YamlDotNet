@@ -478,6 +478,11 @@ namespace YamlDotNet.Test.Serialization
         public string Value { get; set; }
     }
 
+    public class ThrowingPropertyExample
+    {
+        public string Value => throw new InvalidOperationException();
+    }
+
     public class CustomGenericDictionary : IDictionary<string, string>
     {
         private readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
