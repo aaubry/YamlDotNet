@@ -26,14 +26,14 @@
         <file src="bin/Release/net47/YamlDotNet.dll" target="lib/net47" />
         <file src="bin/Release/net47/YamlDotNet.xml" target="lib/net47" />
 
-        <file src="bin/Release/net60/YamlDotNet.dll" target="lib/net6.0" />
-        <file src="bin/Release/net60/YamlDotNet.xml" target="lib/net6.0" />
+        <file src="bin/Release/net6.0/YamlDotNet.dll" target="lib/net6.0" />
+        <file src="bin/Release/net6.0/YamlDotNet.xml" target="lib/net6.0" />
 
-        <file src="bin/Release/net70/YamlDotNet.dll" target="lib/net7.0" />
-        <file src="bin/Release/net70/YamlDotNet.xml" target="lib/net7.0" />
+        <file src="bin/Release/net7.0/YamlDotNet.dll" target="lib/net7.0" />
+        <file src="bin/Release/net7.0/YamlDotNet.xml" target="lib/net7.0" />
 
-        <file src="bin/Release/net80/YamlDotNet.dll" target="lib/net8.0" />
-        <file src="bin/Release/net80/YamlDotNet.xml" target="lib/net8.0" />
+        <file src="bin/Release/net8.0/YamlDotNet.dll" target="lib/net8.0" />
+        <file src="bin/Release/net8.0/YamlDotNet.xml" target="lib/net8.0" />
 
         <file src="bin/Release/netstandard2.0/YamlDotNet.dll" target="lib/netstandard2.0" />
         <file src="bin/Release/netstandard2.0/YamlDotNet.xml" target="lib/netstandard2.0" />

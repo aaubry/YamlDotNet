@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net80;net70;net60;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
@@ -23,7 +23,7 @@
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp3.1'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <!-- Since the BCL is not yet annotated in other platforms, disable the nullable warnings when compiling for those -->
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
@@ -36,15 +36,15 @@
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net60'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net70'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net80'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
@@ -66,7 +66,7 @@
   <PropertyGroup Condition="'$(NetStandard)' == 'false'">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup Condition="'$(NetStandard)' == 'false'">

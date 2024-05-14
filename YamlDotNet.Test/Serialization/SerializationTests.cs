@@ -1538,7 +1538,7 @@ y:
                         new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("float.26.67", 26.67F, "26.67"),
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET
                         new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("float.MinValue", float.MinValue, float.MinValue.ToString("G", CultureInfo.InvariantCulture)),
