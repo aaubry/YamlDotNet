@@ -22,6 +22,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
@@ -79,6 +80,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
+#if NET6_0_OR_GREATER
+        [RequiresUnreferencedCode("<TODO>")]
+#endif
         internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, INamingConvention enumNamingConvention)
         {
             parser.Consume<SequenceStart>();
