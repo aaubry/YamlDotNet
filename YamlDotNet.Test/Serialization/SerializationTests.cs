@@ -33,10 +33,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FakeItEasy;
 using FluentAssertions;
+using FluentAssertions.Common;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Callbacks;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.ObjectFactories;
 
@@ -251,7 +253,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var yamlReader = new StringReader(@"Text: >
   Some Text.
-  
+
 Value: foo");
             var result = Deserializer.Deserialize(yamlReader);
 
@@ -1019,6 +1021,28 @@ y:
         }
 
         [Fact]
+        public void SerializationRespectsDefaultScalarStyle()
+        {
+            var writer = new StringWriter();
+            var obj = new MixedFormatScalarStyleExample(new string[] { "01", "0.1", "myString" });
+
+            var serializer = new SerializerBuilder().WithDefaultScalarStyle(ScalarStyle.SingleQuoted).Build();
+
+            serializer.Serialize(writer, obj);
+
+            var yaml = writer.ToString();
+
+            var expected = Yaml.Text(@"
+                Data:
+                - '01'
+                - '0.1'
+                - 'myString'
+            ");
+
+            Assert.Equal(expected.NormalizeNewLines(), yaml.NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
         public void SerializationDerivedAttributeOverride()
         {
             var writer = new StringWriter();
@@ -1179,10 +1203,10 @@ y:
         public void MergingDoesNotProduceDuplicateAnchors()
         {
             var parser = new MergingParser(Yaml.ParserForText(@"
-                anchor: &default 
+                anchor: &default
                   key1: &myValue value1
                   key2: value2
-                alias: 
+                alias:
                   <<: *default
                   key2: Overriding key2
                   key3: value3
@@ -1210,7 +1234,7 @@ y:
                   - &LEFT { x: 0, y: 2 }
                   - &BIG { r: 10 }
                   - &SMALL { r: 1 }
-                
+
                 # All the following maps are equal:
                 results:
                   - # Explicit keys
@@ -1218,16 +1242,16 @@ y:
                     y: 2
                     r: 10
                     label: center/big
-                  
+
                   - # Merge one map
                     << : *CENTER
                     r: 10
                     label: center/big
-                  
+
                   - # Merge multiple maps
                     << : [ *CENTER, *BIG ]
                     label: center/big
-                  
+
                   - # Override
                     << : [ *BIG, *LEFT, *SMALL ]
                     x: 1
@@ -1263,10 +1287,10 @@ y:
                 derived1:
                   <<: *level1
                   key: D1
-                derived2: 
+                derived2:
                   <<: *level2
                   key: D2
-                derived3: 
+                derived3:
                   <<: [ *level1, *level2 ]
                   key: D3
             "));
@@ -2145,7 +2169,7 @@ c: *anchor1");
         [Fact]
         public void ExampleFromSpecificationIsHandledCorrectlyWithLateDefine()
         {
-            var parser = new MergingParser(Yaml.ParserForText(@"               
+            var parser = new MergingParser(Yaml.ParserForText(@"
                 # All the following maps are equal:
                 results:
                   - # Explicit keys
@@ -2153,21 +2177,21 @@ c: *anchor1");
                     y: 2
                     r: 10
                     label: center/big
-                  
+
                   - # Merge one map
                     << : *CENTER
                     r: 10
                     label: center/big
-                  
+
                   - # Merge multiple maps
                     << : [ *CENTER, *BIG ]
                     label: center/big
-                  
+
                   - # Override
                     << : [ *BIG, *LEFT, *SMALL ]
                     x: 1
                     label: center/big
-                
+
                 obj:
                   - &CENTER { x: 1, y: 2 }
                   - &LEFT { x: 0, y: 2 }
@@ -2373,6 +2397,116 @@ Null: true
             result.Should().Be($"True: {Environment.NewLine}False: hello{Environment.NewLine}Null: true{Environment.NewLine}");
         }
 
+        [Fact]
+        public void SerializeStateMethodsGetCalledOnce()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var test = new TestState();
+            serializer.Serialize(test);
+
+            Assert.Equal(1, test.OnSerializedCallCount);
+            Assert.Equal(1, test.OnSerializingCallCount);
+        }
+
+        [Fact]
+        public void SerializeEnumAsNumber()
+        {
+            var serializer = new SerializerBuilder().WithYamlFormatter(new YamlFormatter
+            {
+                FormatEnum = (o, namingConvention) => ((int)o).ToString(),
+                PotentiallyQuoteEnums = (_) => false
+            }).Build();
+            var deserializer = DeserializerBuilder.Build();
+
+            var value = serializer.Serialize(TestEnumAsNumber.Test1);
+            Assert.Equal("1", value.TrimNewLines());
+            var v = deserializer.Deserialize<TestEnumAsNumber>(value);
+            Assert.Equal(TestEnumAsNumber.Test1, v);
+
+            value = serializer.Serialize(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2);
+            Assert.Equal("3", value.TrimNewLines());
+            v = deserializer.Deserialize<TestEnumAsNumber>(value);
+            Assert.Equal(TestEnumAsNumber.Test1 | TestEnumAsNumber.Test2, v);
+        }
+
+        [Fact]
+        public void TabsGetQuotedWhenQuoteNecessaryStringsIsOn()
+        {
+            var serializer = new SerializerBuilder()
+                .WithQuotingNecessaryStrings()
+                .Build();
+
+            var s = "\t, something";
+            var yaml = serializer.Serialize(s);
+            var deserializer = new DeserializerBuilder().Build();
+            var value = deserializer.Deserialize(yaml);
+            Assert.Equal(s, value);
+        }
+
+        [Fact]
+        public void SpacesGetQuotedWhenQuoteNecessaryStringsIsOn()
+        {
+            var serializer = new SerializerBuilder()
+                .WithQuotingNecessaryStrings()
+                .Build();
+
+            var s = " , something";
+            var yaml = serializer.Serialize(s);
+            var deserializer = new DeserializerBuilder().Build();
+            var value = deserializer.Deserialize(yaml);
+            Assert.Equal(s, value);
+        }
+
+        [Flags]
+        private enum TestEnumAsNumber
+        {
+            Test1 = 1,
+            Test2 = 2
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnum()
+        {
+            var serializer = new SerializerBuilder().WithEnumNamingConvention(CamelCaseNamingConvention.Instance).Build();
+            ScalarStyle style = ScalarStyle.Plain;
+            var serialized = serializer.Serialize(style);
+            Assert.Equal("plain", serialized.RemoveNewLines());
+        }
+
+        [Fact]
+        public void NamingConventionAppliedToEnumWhenDeserializing()
+        {
+            var serializer = new DeserializerBuilder().WithEnumNamingConvention(UnderscoredNamingConvention.Instance).Build();
+            var yaml = "Double_Quoted";
+            ScalarStyle expected = ScalarStyle.DoubleQuoted;
+            var actual = serializer.Deserialize<ScalarStyle>(yaml);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        [Trait("motive", "issue #656")]
+        public void NestedDictionaryTypes_ShouldRoundtrip()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var yaml = serializer.Serialize(new HasNestedDictionary { Lookups = { [1] = new HasNestedDictionary.Payload { I = 1 } } }, typeof(HasNestedDictionary));
+            var dct = new DeserializerBuilder().Build().Deserialize<HasNestedDictionary>(yaml);
+            Assert.Contains(new KeyValuePair<int, HasNestedDictionary.Payload>(1, new HasNestedDictionary.Payload { I = 1 }), dct.Lookups);
+        }
+
+        public class TestState
+        {
+            public int OnSerializedCallCount { get; set; }
+            public int OnSerializingCallCount { get; set; }
+
+            public string Test { get; set; } = string.Empty;
+
+            [OnSerialized]
+            public void Serialized() => OnSerializedCallCount++;
+
+            [OnSerializing]
+            public void Serializing() => OnSerializingCallCount++;
+        }
+
         public class ReservedWordsTestClass<TNullType>
         {
             public string True { get; set; }
@@ -2448,6 +2582,16 @@ Null: true
             public void WriteYaml(IEmitter emitter, object value, Type type)
             {
                 emitter.Emit(new Scalar(((NonSerializable)value).Text));
+            }
+        }
+
+        public sealed class HasNestedDictionary
+        {
+            public Dictionary<int, Payload> Lookups { get; set; } = new Dictionary<int, Payload>();
+
+            public struct Payload
+            {
+                public int I { get; set; }
             }
         }
     }

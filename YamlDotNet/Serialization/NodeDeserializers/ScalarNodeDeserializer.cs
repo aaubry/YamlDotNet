@@ -25,6 +25,7 @@ using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
+using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -35,11 +36,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private const string BooleanFalsePattern = "^(false|n|no|off)$";
         private readonly bool attemptUnknownTypeDeserialization;
         private readonly ITypeConverter typeConverter;
+        private readonly YamlFormatter formatter;
+        private readonly INamingConvention enumNamingConvention;
 
-        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter)
+        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter, YamlFormatter formatter, INamingConvention enumNamingConvention)
         {
             this.attemptUnknownTypeDeserialization = attemptUnknownTypeDeserialization;
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
+            this.formatter = formatter;
+            this.enumNamingConvention = enumNamingConvention;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -55,7 +60,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (underlyingType.IsEnum())
             {
-                value = Enum.Parse(underlyingType, scalar.Value, true);
+                var enumName = enumNamingConvention.Reverse(scalar.Value);
+                value = Enum.Parse(underlyingType, enumName, true);
                 return true;
             }
 
@@ -78,15 +84,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     break;
 
                 case TypeCode.Single:
-                    value = float.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    value = float.Parse(scalar.Value, formatter.NumberFormat);
                     break;
 
                 case TypeCode.Double:
-                    value = double.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    value = double.Parse(scalar.Value, formatter.NumberFormat);
                     break;
 
                 case TypeCode.Decimal:
-                    value = decimal.Parse(scalar.Value, YamlFormatter.NumberFormat);
+                    value = decimal.Parse(scalar.Value, formatter.NumberFormat);
                     break;
 
                 case TypeCode.String:
@@ -117,7 +123,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        value = typeConverter.ChangeType(scalar.Value, expectedType);
+                        value = typeConverter.ChangeType(scalar.Value, expectedType, enumNamingConvention);
                     }
                     break;
             }
@@ -144,7 +150,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return result;
         }
 
-        private static object DeserializeIntegerHelper(TypeCode typeCode, string value)
+        private object DeserializeIntegerHelper(TypeCode typeCode, string value)
         {
             using var numberBuilderStringBuilder = StringBuilderPool.Rent();
             var numberBuilder = numberBuilderStringBuilder.Builder;
@@ -223,7 +229,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         break;
 
                     case 16:
-                        result = ulong.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, YamlFormatter.NumberFormat);
+                        result = ulong.Parse(numberBuilder.ToString(), NumberStyles.HexNumber, formatter.NumberFormat);
                         break;
 
                     case 10:
@@ -308,7 +314,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
         }
 
-        private static object? AttemptUnknownTypeDeserialization(Scalar value)
+        private object? AttemptUnknownTypeDeserialization(Scalar value)
         {
             if (value.Style == ScalarStyle.SingleQuoted ||
                 value.Style == ScalarStyle.DoubleQuoted ||
@@ -364,13 +370,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else if (Regex.IsMatch(v, @"[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?")) //regular number
                     {
-                        if (TryAndSwallow(() => byte.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => short.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => int.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => long.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => ulong.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => float.Parse(v), out result)) { }
-                        else if (TryAndSwallow(() => double.Parse(v), out result)) { }
+                        if (TryAndSwallow(() => byte.Parse(v, formatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => short.Parse(v, formatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => int.Parse(v, formatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => long.Parse(v, formatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => ulong.Parse(v, formatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => float.Parse(v, formatter.NumberFormat), out result)) { }
+                        else if (TryAndSwallow(() => double.Parse(v, formatter.NumberFormat), out result)) { }
                         else
                         {
                             //we couldn't parse it, default to string, It's probably too big

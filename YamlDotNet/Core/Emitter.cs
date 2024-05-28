@@ -1638,6 +1638,7 @@ namespace YamlDotNet.Core
             {
                 states.Push(EmitterState.BlockMappingSimpleValue);
                 EmitNode(evt, true, true);
+                WriteIndicator(":", false, false, false);
             }
             else
             {
@@ -1652,11 +1653,7 @@ namespace YamlDotNet.Core
         /// </summary>
         private void EmitBlockMappingValue(ParsingEvent evt, bool isSimple)
         {
-            if (isSimple)
-            {
-                WriteIndicator(":", false, false, false);
-            }
-            else
+            if (!isSimple)
             {
                 WriteIndent();
                 WriteIndicator(":", true, false, true);

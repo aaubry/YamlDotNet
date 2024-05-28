@@ -8,7 +8,7 @@
         <description>Roslyn Code Generator that will generate a static context for use with YamlDotNet to support ahead-of-time and library trimming.</description>
         <summary>Static context generator for YamlDotNet.</summary>
         <language>en-US</language>
-        <license type="file">LICENSE.txt</license>
+        <license type="expression">MIT</license>
         <projectUrl>https://github.com/aaubry/YamlDotNet/wiki</projectUrl>
         <iconUrl>http://aaubry.net/images/yamldotnet.png</iconUrl>
         <icon>images/yamldotnet.png</icon>

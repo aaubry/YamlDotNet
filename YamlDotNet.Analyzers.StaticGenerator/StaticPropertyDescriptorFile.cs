@@ -34,6 +34,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
             Write("class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
             Write("{"); Indent();
+            Write("private readonly YamlDotNet.Serialization.ITypeResolver _typeResolver;");
             Write("private YamlDotNet.Serialization.IObjectAccessor _accessor;");
             Write("private readonly Attribute[] _attributes;");
             Write("public string Name { get; }");
@@ -52,14 +53,17 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             UnIndent(); Write("}");
             Write("public YamlDotNet.Serialization.IObjectDescriptor Read(object target)");
             Write("{"); Indent();
-            Write("return new YamlDotNet.Serialization.ObjectDescriptor(_accessor.Read(Name, target), Type, Type, this.ScalarStyle);");
+            Write("var propertyValue = _accessor.Read(Name, target);");
+            Write("var actualType = _typeResolver.Resolve(Type, propertyValue);");
+            Write("return new YamlDotNet.Serialization.ObjectDescriptor(propertyValue, actualType, Type, this.ScalarStyle);");
             UnIndent(); Write("}");
             Write("public void Write(object target, object value)");
             Write("{"); Indent();
             Write("_accessor.Set(Name, target, value);");
             UnIndent(); Write("}");
-            Write("public StaticPropertyDescriptor(YamlDotNet.Serialization.IObjectAccessor accessor, string name, bool canWrite, Type type, Attribute[] attributes)");
+            Write("public StaticPropertyDescriptor(YamlDotNet.Serialization.ITypeResolver typeResolver, YamlDotNet.Serialization.IObjectAccessor accessor, string name, bool canWrite, Type type, Attribute[] attributes)");
             Write("{"); Indent();
+            Write("this._typeResolver = typeResolver;");
             Write("this._accessor = accessor;");
             Write("this._attributes = attributes;");
             Write("this.Name = name;");

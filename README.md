@@ -30,14 +30,6 @@ The library has now been successfully used in multiple projects and is considere
 * .NET 6.0
 * .NET 7.0
 * .NET Framework 4.7
-* .NET Framework 4.5
-* Unity Subset v3.5
-
-The following runtimes are also supported, with a few features missing:
-
-* .NET Framework 3.5
-
-The library is compatible with mono's [Ahead-of-Time compilation](https://www.mono-project.com/docs/advanced/aot/) (AOT), and should work correctly on platforms that depend on it, such as Unity.
 
 ## Quick start
 
@@ -147,3 +139,8 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## Release notes
 
 Please see the Releases at https://github.com/aaubry/YamlDotNet/releases
+
+## Sponsorships
+A big shout out to all of our sponsors
+
+[![AWS](Sponsors/aws-logo-small.png)](https://www.github.com/aws)

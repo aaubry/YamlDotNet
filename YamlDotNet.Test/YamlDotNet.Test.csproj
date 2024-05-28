@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net70;net60;net47;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net80;net70;net60;net47</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
 	  <LangVersion>8.0</LangVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
-
-  <Import Project="../build/common.props" />
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.2" />

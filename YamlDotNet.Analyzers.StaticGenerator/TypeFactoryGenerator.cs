@@ -21,7 +21,6 @@
 
 using System;
 using System.Text;
-using System.Xml;
 using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
@@ -97,6 +96,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                 new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
                 new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                new StaticTypeResolverFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
                 new StaticPropertyDescriptorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
                 new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
                 new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);

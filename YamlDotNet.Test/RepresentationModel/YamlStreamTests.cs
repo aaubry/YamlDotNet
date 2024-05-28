@@ -27,7 +27,9 @@ using System.Text;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization.Schemas;
 
 namespace YamlDotNet.Test.RepresentationModel
 {
@@ -105,6 +107,63 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.Equal("another scalar", ((YamlScalarNode)sequence.Children[1]).Value);
             Assert.Equal("a scalar", ((YamlScalarNode)sequence.Children[2]).Value);
             Assert.Same(sequence.Children[0], sequence.Children[2]);
+        }
+
+        [Theory]
+        [InlineData("B: !!null ", "", ScalarStyle.Plain, false)]
+        [InlineData("B: ", "", ScalarStyle.Plain, true)]
+        [InlineData("B: abc", "abc", ScalarStyle.Plain, true)]
+        [InlineData("B: ~", "~", ScalarStyle.Plain, true)]
+        [InlineData("B: Null", "Null", ScalarStyle.Plain, true)]
+        [InlineData("B: ''", "", ScalarStyle.SingleQuoted, true)]
+        [InlineData("B: 'Null'", "Null", ScalarStyle.SingleQuoted, true)]
+        public void ImplicitNullRoundtrips(string yaml, string value, ScalarStyle style, bool implicitPlain)
+        {
+            //load
+            var stream = new YamlStream();
+            stream.Load(new StringReader(yaml));
+            var mapping = (YamlMappingNode)stream.Documents[0].RootNode;
+            var map = mapping.Children[0];
+
+            var yamlValue = (YamlScalarNode)map.Value;
+            Assert.Equal(value, yamlValue.Value);
+
+            var emitter = new RoundTripNullTestEmitter(implicitPlain, style);
+            yamlValue.Emit(emitter, null);
+
+            var stringWriter = new StringWriter();
+            new YamlStream(stream.Documents).Save(stringWriter);
+            Assert.Equal($@"{yaml}
+...".NormalizeNewLines(),
+stringWriter.ToString().NormalizeNewLines().TrimNewLines());
+        }
+
+        [Fact]
+        public void EmptyScalarsAreEmptySingleQuoted()
+        {
+            var stringWriter = new StringWriter();
+            var rootNode = new YamlMappingNode();
+            rootNode.Children.Add(new YamlScalarNode("test"), new YamlScalarNode(""));
+            var document = new YamlDocument(rootNode);
+            var yamlStream = new YamlStream(document);
+            yamlStream.Save(stringWriter);
+            var actual = stringWriter.ToString().NormalizeNewLines();
+            var expected = "test: ''\r\n...\r\n".NormalizeNewLines();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NullScalarsAreEmptyPlain()
+        {
+            var stringWriter = new StringWriter();
+            var rootNode = new YamlMappingNode();
+            rootNode.Children.Add(new YamlScalarNode("test"), new YamlScalarNode(null));
+            var document = new YamlDocument(rootNode);
+            var yamlStream = new YamlStream(document);
+            yamlStream.Save(stringWriter);
+            var actual = stringWriter.ToString().NormalizeNewLines();
+            var expected = "test: \r\n...\r\n".NormalizeNewLines();
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -316,6 +375,37 @@ namespace YamlDotNet.Test.RepresentationModel
             MappingStart,
             MappingEnd,
             Scalar,
+        }
+
+        private class RoundTripNullTestEmitter : IEmitter
+        {
+            private readonly bool enforceImplicit;
+            private readonly ScalarStyle style;
+
+            public RoundTripNullTestEmitter(bool enforceImplicit, ScalarStyle style)
+            {
+                this.enforceImplicit = enforceImplicit;
+                this.style = style;
+            }
+
+            public void Emit(ParsingEvent @event)
+            {
+                Assert.Equal(EventType.Scalar, @event.Type);
+                Assert.IsType<Scalar>(@event);
+                var scalar = (Scalar)@event;
+
+                Assert.Equal(style, scalar.Style);
+                if (enforceImplicit)
+                {
+                    Assert.True(scalar.IsPlainImplicit);
+                }
+                else
+                {
+                    Assert.False(scalar.IsPlainImplicit);
+                }
+
+                Assert.False(scalar.IsQuotedImplicit);
+            }
         }
     }
 }

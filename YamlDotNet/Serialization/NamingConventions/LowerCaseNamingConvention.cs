@@ -36,6 +36,19 @@ namespace YamlDotNet.Serialization.NamingConventions
             return value.ToCamelCase().ToLower();
         }
 
+        public string Reverse(string value)
+        {
+            // lower case values don't have any context as to what should be upper or not. So we only do the first character
+            if (string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            var result = char.ToUpperInvariant(value[0]) + value.Substring(1);
+            return result;
+
+        }
+
         public static readonly INamingConvention Instance = new LowerCaseNamingConvention();
     }
 }

@@ -60,5 +60,29 @@ namespace YamlDotNet.Serialization
         /// <param name="type"></param>
         /// <returns></returns>
         Type GetValueType(Type type);
+
+        /// <summary>
+        /// Executes the methods on the object that has the <seealso cref="Callbacks.OnDeserializingAttribute"/> attribute
+        /// </summary>
+        /// <param name="value"></param>
+        void ExecuteOnDeserializing(object value);
+
+        /// <summary>
+        /// Executes the methods on the object that has the <seealso cref="Callbacks.OnDeserializedAttribute"/> attribute
+        /// </summary>
+        /// <param name="value"></param>
+        void ExecuteOnDeserialized(object value);
+
+        /// <summary>
+        /// Executes the methods on the object that has the <seealso cref="Callbacks.OnSerializingAttribute"/> attribute
+        /// </summary>
+        /// <param name="value"></param>
+        void ExecuteOnSerializing(object value);
+
+        /// <summary>
+        /// Executes the methods on the object that has the <seealso cref="Callbacks.OnSerializedAttribute"/> attribute
+        /// </summary>
+        /// <param name="value"></param>
+        void ExecuteOnSerialized(object value);
     }
 }

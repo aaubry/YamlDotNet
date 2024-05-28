@@ -63,16 +63,6 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Serializes the specified object.
-        /// </summary>
-        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
-        /// <param name="graph">The object to serialize.</param>
-        public void Serialize(TextWriter writer, object? graph)
-        {
-            Serialize(new Emitter(writer, emitterSettings), graph);
-        }
-
-        /// <summary>
         /// Serializes the specified object into a string.
         /// </summary>
         /// <param name="graph">The object to serialize.</param>
@@ -81,6 +71,28 @@ namespace YamlDotNet.Serialization
             using var buffer = new StringWriter();
             Serialize(buffer, graph);
             return buffer.ToString();
+        }
+
+        /// <summary>
+        /// Serializes the specified object into a string.
+        /// </summary>
+        /// <param name="graph">The object to serialize.</param>
+        /// <param name="type">The static type of the object to serialize.</param> 
+        public string Serialize(object? graph, Type type)
+        {
+            using var buffer = new StringWriter();
+            Serialize(buffer, graph, type);
+            return buffer.ToString();
+        }
+
+        /// <summary>
+        /// Serializes the specified object.
+        /// </summary>
+        /// <param name="writer">The <see cref="TextWriter" /> where to serialize the object.</param>
+        /// <param name="graph">The object to serialize.</param>
+        public void Serialize(TextWriter writer, object? graph)
+        {
+            Serialize(new Emitter(writer, emitterSettings), graph);
         }
 
         /// <summary>

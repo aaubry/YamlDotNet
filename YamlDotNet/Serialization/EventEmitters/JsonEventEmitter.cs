@@ -22,14 +22,20 @@
 using System;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class JsonEventEmitter : ChainedEventEmitter
     {
-        public JsonEventEmitter(IEventEmitter nextEmitter)
+        private readonly YamlFormatter formatter;
+        private readonly INamingConvention enumNamingConvention;
+
+        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention)
             : base(nextEmitter)
         {
+            this.formatter = formatter;
+            this.enumNamingConvention = enumNamingConvention;
         }
 
         public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
@@ -53,7 +59,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
+                        eventInfo.RenderedValue = formatter.FormatBoolean(value);
                         break;
 
                     case TypeCode.Byte:
@@ -67,18 +73,18 @@ namespace YamlDotNet.Serialization.EventEmitters
                         var valueIsEnum = eventInfo.Source.Type.IsEnum();
                         if (valueIsEnum)
                         {
-                            eventInfo.RenderedValue = value.ToString()!;
-                            eventInfo.Style = ScalarStyle.DoubleQuoted;
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
+                            eventInfo.Style = formatter.PotentiallyQuoteEnums(value) ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain;
                             break;
                         }
 
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.Single:
                     case TypeCode.Double:
                     case TypeCode.Decimal:
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
@@ -88,7 +94,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         break;
 
                     case TypeCode.DateTime:
-                        eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
+                        eventInfo.RenderedValue = formatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
@@ -98,7 +104,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     default:
                         if (eventInfo.Source.Type == typeof(TimeSpan))
                         {
-                            eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(value);
+                            eventInfo.RenderedValue = formatter.FormatTimeSpan(value);
                             break;
                         }
 

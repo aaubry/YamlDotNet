@@ -479,7 +479,7 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('\''))
             {
-                FetchFlowScalar(true);
+                FetchQuotedScalar(true);
                 return;
             }
 
@@ -487,7 +487,7 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('"'))
             {
-                FetchFlowScalar(false);
+                FetchQuotedScalar(false);
                 return;
             }
 
@@ -1770,7 +1770,7 @@ namespace YamlDotNet.Core
         /// Produce the SCALAR(...,single-quoted) or SCALAR(...,double-quoted) tokens.
         /// </summary>
 
-        private void FetchFlowScalar(bool isSingleQuoted)
+        private void FetchQuotedScalar(bool isSingleQuoted)
         {
             // A plain scalar could be a simple key.
 
@@ -1782,12 +1782,13 @@ namespace YamlDotNet.Core
 
             // Indicates the adjacent flow scalar that a prior flow scalar has been fetched.
 
-            flowScalarFetched = true;
+            flowScalarFetched = flowLevel > 0;
 
             // Create the SCALAR token and append it to the queue.
+            var scalar = ScanFlowScalar(isSingleQuoted);
 
-            tokens.Enqueue(ScanFlowScalar(isSingleQuoted));
-
+            tokens.Enqueue(scalar);
+            lastScalar = scalar;
             // Check if there is a comment subsequently after double-quoted scalar without space.
 
             if (!isSingleQuoted && analyzer.Check('#'))
@@ -1801,7 +1802,7 @@ namespace YamlDotNet.Core
         /// Scan a quoted scalar.
         /// </summary>
 
-        private Token ScanFlowScalar(bool isSingleQuoted)
+        private Scalar ScanFlowScalar(bool isSingleQuoted)
         {
             // Eat the left quote.
 
@@ -1936,19 +1937,68 @@ namespace YamlDotNet.Core
 
                             // Check the value and write the character.
 
-                            if ((character >= 0xD800 && character <= 0xDFFF) || character > 0x10FFFF)
+                            //check for utf-8 surrogate pair
+                            if (character >= 0xD800 && character <= 0xDFFF)
+                            {
+                                for (var k = 0; k < codeLength; ++k)
+                                {
+                                    Skip();
+                                }
+
+                                if (analyzer.Peek(0) == '\\' &&
+                                    (analyzer.Peek(1) == 'u' || analyzer.Peek(1) == 'U'))
+                                {
+                                    Skip(); //escape character
+                                    if (analyzer.Peek(0) == 'u')
+                                    {
+                                        codeLength = 4;
+                                    }
+                                    else
+                                    {
+                                        codeLength = 8;
+                                    }
+                                    Skip(); //escape code
+
+                                    var lowSurrogate = 0;
+
+                                    // Scan the character value.
+                                    for (var k = 0; k < codeLength; ++k)
+                                    {
+                                        if (!analyzer.IsHex(0))
+                                        {
+                                            throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, did not find expected hexadecimal number.");
+                                        }
+                                        lowSurrogate = ((lowSurrogate << 4) + analyzer.AsHex(k));
+                                    }
+
+                                    for (var k = 0; k < codeLength; ++k)
+                                    {
+                                        Skip();
+                                    }
+
+                                    character = char.ConvertToUtf32((char)character, (char)lowSurrogate);
+                                }
+                                else
+                                {
+                                    throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found invalid Unicode surrogates.");
+                                }
+                            }
+                            else if (character > 0x10FFFF)
                             {
                                 throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, found invalid Unicode character escape code.");
                             }
+                            else
+                            {
+                                // Advance the pointer.
+
+                                for (var k = 0; k < codeLength; ++k)
+                                {
+                                    Skip();
+                                }
+
+                            }
 
                             value.Append(char.ConvertFromUtf32(character));
-
-                            // Advance the pointer.
-
-                            for (var k = 0; k < codeLength; ++k)
-                            {
-                                Skip();
-                            }
                         }
                     }
                     else
@@ -2405,7 +2455,11 @@ namespace YamlDotNet.Core
 
             if (head != null && head.Length > 1)
             {
+#if NETFRAMEWORK || NETSTANDARD2_0
                 tag.Append(head.Substring(1));
+#else
+                tag.Append(head.AsSpan()[1..]);
+#endif
             }
 
             // Scan the tag.

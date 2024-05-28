@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
+      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
+      <Name>YamlDotNet</Name>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="DeserializeObjectGraph.fs" />
+  </ItemGroup>
+
+</Project>

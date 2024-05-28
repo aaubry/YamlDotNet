@@ -24,10 +24,25 @@ using System;
 namespace YamlDotNet.Serialization
 {
     /// <summary>
-    /// Put this attribute on classes that you want the static analyzer to detect and use.
+    /// Put this attribute either on serializable types or on the <see cref="StaticContext"/> that you want
+    /// the static analyzer to detect and use.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public sealed class YamlSerializableAttribute : Attribute
     {
+        /// <summary>
+        /// Use this constructor if the attribute is placed on a serializable class.
+        /// </summary>
+        public YamlSerializableAttribute()
+        {
+        }
+
+        /// <summary>
+        /// Use this constructor if the attribute is placed on the <see cref="StaticContext"/>.
+        /// </summary>
+        /// <param name="serializableType">The type for which to include static code generation.</param>
+        public YamlSerializableAttribute(Type serializableType)
+        {
+        }
     }
 }

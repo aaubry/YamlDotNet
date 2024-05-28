@@ -21,12 +21,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.Callbacks;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Test.Serialization
@@ -279,7 +279,7 @@ b: &number 1
         public void DeserializeScalarEdgeCases(IConvertible value, Type type)
         {
             var deserializer = new DeserializerBuilder().Build();
-            var result = deserializer.Deserialize(value.ToString(), type);
+            var result = deserializer.Deserialize(value.ToString(YamlFormatter.Default.NumberFormat), type);
 
             result.Should().Be(value);
         }
@@ -332,41 +332,30 @@ name: Jake
             act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
             act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
-        
+
         [Fact]
-        public void MergingParserWithMergeObjectWithSequence_ShouldNotThrowException()
+        public void SerializeStateMethodsGetCalledOnce()
         {
-            var yaml = @"
-base_level: &base 
-  tenant: 
-  - a1
-Level1: &Level1
-    <<: [*base]
-Level2: &Level2
-    <<: *Level1
-";
-            var mergingParserFailed = new MergingParser(new Parser(new StringReader(yaml)));
+            var yaml = "Test: Hi";
             var deserializer = new DeserializerBuilder().Build();
-            Action act = () => deserializer.Deserialize(mergingParserFailed);
-            act.ShouldNotThrow<Exception>();
+            var test = deserializer.Deserialize<TestState>(yaml);
+
+            Assert.Equal(1, test.OnDeserializedCallCount);
+            Assert.Equal(1, test.OnDeserializingCallCount);
         }
-        
-        [Fact]
-        public void MergingParserWithNestedSequence_ShouldNotThrowException()
+
+        public class TestState
         {
-            var yaml = @"
-base_level: &base {}
-Level1: &Level1
-    <<: [*base]
-Level2: &Level2
-    <<: [*Level1]
-Level3:
-    <<: *Level2
-";
-            var mergingParserFailed = new MergingParser(new Parser(new StringReader(yaml)));
-            var deserializer = new DeserializerBuilder().Build();
-            Action act = () => deserializer.Deserialize(mergingParserFailed);
-            act.ShouldNotThrow<Exception>();
+            public int OnDeserializedCallCount { get; set; }
+            public int OnDeserializingCallCount { get; set; }
+
+            public string Test { get; set; } = string.Empty;
+
+            [OnDeserialized]
+            public void Deserialized() => OnDeserializedCallCount++;
+
+            [OnDeserializing]
+            public void Deserializing() => OnDeserializingCallCount++;
         }
 
         public class Test

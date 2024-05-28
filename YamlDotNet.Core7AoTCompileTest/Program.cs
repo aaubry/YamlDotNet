@@ -18,19 +18,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8618 // Possible null reference argument.
+#pragma warning disable CS8602 // Possible null reference argument.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
+using YamlDotNet.Core7AoTCompileTest.Model;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NodeDeserializers;
+using YamlDotNet.Serialization.Callbacks;
 
-string yaml = $@"MyBool: true
+string yaml = string.Create(CultureInfo.InvariantCulture, $@"MyBool: true
 hi: 1
 MyChar: h
 MyDateTime: {DateTime.Now}
@@ -60,13 +61,26 @@ MyArray:
 MyDictionary:
   x: y
   a: b
+MyDictionaryOfArrays:
+  a:
+  - a
+  - b
+  b:
+  - c
+  - d
 MyList:
 - a
 - b
 Inherited:
   Inherited: hello
   NotInherited: world
-";
+External:
+  Text: hello
+SomeObject: a
+SomeDictionary:
+  a: 1
+  b: 2
+");
 
 var input = new StringReader(yaml);
 
@@ -92,6 +106,7 @@ Console.WriteLine("MyUInt32: <{0}>", x.MyUInt32);
 Console.WriteLine("MyUInt64: <{0}>", x.MyUInt64);
 Console.WriteLine("Inner == null: <{0}>", x.Inner == null);
 Console.WriteLine("Inner.Text: <{0}>", x.Inner?.Text);
+Console.WriteLine("External.Text: <{0}>", x.External?.Text);
 foreach (var inner in x.InnerArray)
 {
     Console.WriteLine("InnerArray.Text: <{0}>", inner.Text);
@@ -110,6 +125,15 @@ if (x.MyDictionary != null)
     foreach (var kvp in x.MyDictionary)
     {
         Console.WriteLine("MyDictionary[{0}] = <{1}>", kvp.Key, kvp.Value);
+    }
+}
+
+Console.WriteLine("MyDictionaryOfArrays == null: <{0}>", x.MyDictionaryOfArrays == null);
+if (x.MyDictionaryOfArrays != null)
+{
+    foreach (var kvp in x.MyDictionaryOfArrays)
+    {
+        Console.WriteLine("MyDictionaryOfArrays[{0}] = <{1}>", kvp.Key, string.Join(',', kvp.Value));
     }
 }
 
@@ -187,8 +211,12 @@ public class PrimitiveTypes
     public Inner[]? InnerArray { get; set; }
     public MyArray? MyArray { get; set; }
     public Dictionary<string, string>? MyDictionary { get; set; }
+    public Dictionary<string, string[]>? MyDictionaryOfArrays { get; set; }
     public List<string>? MyList { get; set; }
     public Inherited Inherited { get; set; }
+    public ExternalModel External { get; set; }
+    public object SomeObject { get; set; }
+    public object SomeDictionary { get; set; }
 }
 
 public class InheritedBase
@@ -200,6 +228,32 @@ public class InheritedBase
 public class Inherited : InheritedBase
 {
     public string NotInherited { get; set; }
+
+
+    [OnSerializing]
+    public void Serializing()
+    {
+        Console.WriteLine("Serializing");
+    }
+
+    [OnSerialized]
+    public void Serialized()
+    {
+        Console.WriteLine("Serialized");
+    }
+
+    [OnDeserialized]
+    public void Deserialized()
+    {
+        Console.WriteLine("Deserialized");
+    }
+
+    [OnDeserializing]
+    public void Deserializing()
+    {
+        Console.WriteLine("Deserializing");
+    }
+
 }
 
 public enum MyTestEnum
@@ -208,3 +262,6 @@ public enum MyTestEnum
     Z = 1,
 }
 
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8618 // Possible null reference argument.
+#pragma warning restore CS8602 // Possible null reference argument.

@@ -90,11 +90,11 @@ namespace YamlDotNet.Test
         {
             var lines = yamlText
                 .Split('\n')
-                .Select(l => l.TrimEnd('\r', '\n'))
-                .SkipWhile(l => l.Trim(' ', '\t').Length == 0)
+                .Select(l => l.TrimEnd())
+                .SkipWhile(l => l.Length == 0)
                 .ToList();
 
-            while (lines.Count > 0 && lines[lines.Count - 1].Trim(' ', '\t').Length == 0)
+            while (lines.Count > 0 && lines[lines.Count - 1].Length == 0)
             {
                 lines.RemoveAt(lines.Count - 1);
             }
@@ -107,8 +107,15 @@ namespace YamlDotNet.Test
                     throw new ArgumentException("Invalid indentation");
                 }
 
+                var indentation = indent.Groups[1].Length;
                 lines = lines
-                    .Select(l => l.Substring(indent.Groups[1].Length))
+                    .Select((l, num) => l.Length == 0 ?
+                        // Blank lines don't need to be indented.
+                        string.Empty :
+                        l.TakeWhile(c => c == ' ' || c == '\t').Count() < indentation ?
+                            // However, other lines must be indented at least as much as the first line.
+                            throw new ArgumentException($"Incorrectly indented line '{l}', #{num}.", nameof(yamlText)) :
+                            l.Substring(indentation))
                     .ToList();
             }
 

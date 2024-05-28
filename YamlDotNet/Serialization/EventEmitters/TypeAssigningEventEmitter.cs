@@ -21,15 +21,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Schemas;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
     public sealed class TypeAssigningEventEmitter : ChainedEventEmitter
     {
-        private readonly bool requireTagWhenStaticAndActualTypesAreDifferent;
         private readonly IDictionary<Type, TagName> tagMappings;
         private readonly bool quoteNecessaryStrings;
         private readonly Regex? isSpecialStringValue_Regex;
@@ -43,6 +45,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 + @"|[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?" // float number
                 + @"|[-+]?(\.inf|\.Inf|\.INF)"
                 + @"|\.nan|\.NaN|\.NAN"
+                + @"|\s.*"
             + @")$";
 
         /// <summary>
@@ -65,9 +68,22 @@ namespace YamlDotNet.Serialization.EventEmitters
                 + @"|\.(nan|NaN|NAN)"
             + @")$";
 
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings, bool quoteYaml1_1Strings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
+        private readonly ScalarStyle defaultScalarStyle = ScalarStyle.Any;
+        private readonly YamlFormatter formatter;
+        private readonly INamingConvention enumNamingConvention;
+
+        public TypeAssigningEventEmitter(IEventEmitter nextEmitter,
+            IDictionary<Type, TagName> tagMappings,
+            bool quoteNecessaryStrings,
+            bool quoteYaml1_1Strings,
+            ScalarStyle defaultScalarStyle,
+            YamlFormatter formatter,
+            INamingConvention enumNamingConvention)
+            : base(nextEmitter)
         {
+            this.defaultScalarStyle = defaultScalarStyle;
+            this.formatter = formatter;
+            this.tagMappings = tagMappings;
             this.quoteNecessaryStrings = quoteNecessaryStrings;
 
             var specialStringValuePattern = quoteYaml1_1Strings
@@ -78,25 +94,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 #else
             isSpecialStringValue_Regex = new Regex(specialStringValuePattern, RegexOptions.Compiled);
 #endif
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings, bool quoteNecessaryStrings)
-            : this(nextEmitter, requireTagWhenStaticAndActualTypesAreDifferent, tagMappings)
-        {
-            this.quoteNecessaryStrings = quoteNecessaryStrings;
-
-#if NET40
-            isSpecialStringValue_Regex = new Regex(SpecialStrings_Pattern);
-#else
-            isSpecialStringValue_Regex = new Regex(SpecialStrings_Pattern, RegexOptions.Compiled);
-#endif
-        }
-
-        public TypeAssigningEventEmitter(IEventEmitter nextEmitter, bool requireTagWhenStaticAndActualTypesAreDifferent, IDictionary<Type, TagName> tagMappings)
-            : base(nextEmitter)
-        {
-            this.requireTagWhenStaticAndActualTypesAreDifferent = requireTagWhenStaticAndActualTypesAreDifferent;
-            this.tagMappings = tagMappings ?? throw new ArgumentNullException(nameof(tagMappings));
+            this.enumNamingConvention = enumNamingConvention;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -116,7 +114,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                 {
                     case TypeCode.Boolean:
                         eventInfo.Tag = JsonSchema.Tags.Bool;
-                        eventInfo.RenderedValue = YamlFormatter.FormatBoolean(value);
+                        eventInfo.RenderedValue = formatter.FormatBoolean(value);
                         break;
 
                     case TypeCode.Byte:
@@ -131,37 +129,39 @@ namespace YamlDotNet.Serialization.EventEmitters
                         if (eventInfo.Source.Type.IsEnum)
                         {
                             eventInfo.Tag = FailsafeSchema.Tags.Str;
-                            eventInfo.RenderedValue = value.ToString()!;
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
 
-                            if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
+                            if (quoteNecessaryStrings &&
+                                IsSpecialStringValue(eventInfo.RenderedValue) &&
+                                formatter.PotentiallyQuoteEnums(value))
                             {
                                 suggestedStyle = ScalarStyle.DoubleQuoted;
                             }
                             else
                             {
-                                suggestedStyle = ScalarStyle.Any;
+                                suggestedStyle = defaultScalarStyle;
                             }
                         }
                         else
                         {
                             eventInfo.Tag = JsonSchema.Tags.Int;
-                            eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                            eventInfo.RenderedValue = formatter.FormatNumber(value);
                         }
                         break;
 
                     case TypeCode.Single:
                         eventInfo.Tag = JsonSchema.Tags.Float;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)value);
+                        eventInfo.RenderedValue = formatter.FormatNumber((float)value);
                         break;
 
                     case TypeCode.Double:
                         eventInfo.Tag = JsonSchema.Tags.Float;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)value);
+                        eventInfo.RenderedValue = formatter.FormatNumber((double)value);
                         break;
 
                     case TypeCode.Decimal:
                         eventInfo.Tag = JsonSchema.Tags.Float;
-                        eventInfo.RenderedValue = YamlFormatter.FormatNumber(value);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:
@@ -175,14 +175,14 @@ namespace YamlDotNet.Serialization.EventEmitters
                         }
                         else
                         {
-                            suggestedStyle = ScalarStyle.Any;
+                            suggestedStyle = defaultScalarStyle;
                         }
 
                         break;
 
                     case TypeCode.DateTime:
                         eventInfo.Tag = DefaultSchema.Tags.Timestamp;
-                        eventInfo.RenderedValue = YamlFormatter.FormatDateTime(value);
+                        eventInfo.RenderedValue = formatter.FormatDateTime(value);
                         break;
 
                     case TypeCode.Empty:
@@ -193,7 +193,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     default:
                         if (eventInfo.Source.Type == typeof(TimeSpan))
                         {
-                            eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(value);
+                            eventInfo.RenderedValue = formatter.FormatTimeSpan(value);
                             break;
                         }
 
@@ -227,16 +227,6 @@ namespace YamlDotNet.Serialization.EventEmitters
             if (tagMappings.TryGetValue(eventInfo.Source.Type, out var tag))
             {
                 eventInfo.Tag = tag;
-            }
-            else if (requireTagWhenStaticAndActualTypesAreDifferent && eventInfo.Source.Value != null && eventInfo.Source.Type != eventInfo.Source.StaticType)
-            {
-                throw new YamlException(
-                    $"Cannot serialize type '{eventInfo.Source.Type.FullName}' where a '{eventInfo.Source.StaticType.FullName}' was expected "
-                    + $"because no tag mapping has been registered for '{eventInfo.Source.Type.FullName}', "
-                    + $"which means that it won't be possible to deserialize the document.\n"
-                    + $"Register a tag mapping using the SerializerBuilder.WithTagMapping method.\n\n"
-                    + $"E.g: builder.WithTagMapping(\"!{eventInfo.Source.Type.Name}\", typeof({eventInfo.Source.Type.FullName}));"
-                );
             }
         }
 

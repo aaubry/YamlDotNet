@@ -140,8 +140,7 @@ namespace YamlDotNet.Core
             var current = node;
             while (current != null)
             {
-                if (current.Value is SequenceEnd &&
-                    current.Value.Start.Line >= sequenceStart.Value.Start.Line)
+                if (current.Value is SequenceEnd)
                 {
                     events.MarkDeleted(current);
                     return true;
@@ -160,7 +159,7 @@ namespace YamlDotNet.Core
             var cloner = new ParsingEventCloner();
             var nesting = 0;
 
-            return events.FromAnchor(anchor)
+            return events.FromAnchor(anchor).Where(e => !this.events.IsDeleted(e))
                 .Select(e => e.Value)
                 .TakeWhile(e => (nesting += e.NestingIncrease) >= 0)
                 .Select(e => cloner.Clone(e));
@@ -196,6 +195,11 @@ namespace YamlDotNet.Core
             public void MarkDeleted(LinkedListNode<ParsingEvent> node)
             {
                 deleted.Add(node);
+            }
+
+            public bool IsDeleted(LinkedListNode<ParsingEvent> node)
+            {
+                return deleted.Contains(node);
             }
 
             public void CleanMarked()

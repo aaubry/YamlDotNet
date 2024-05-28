@@ -35,14 +35,21 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly bool ignoreUnmatched;
         private readonly bool duplicateKeyChecking;
         private readonly ITypeConverter typeConverter;
+        private readonly INamingConvention enumNamingConvention;
 
-        public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, bool duplicateKeyChecking, ITypeConverter typeConverter)
+        public ObjectNodeDeserializer(IObjectFactory objectFactory,
+            ITypeInspector typeDescriptor,
+            bool ignoreUnmatched,
+            bool duplicateKeyChecking,
+            ITypeConverter typeConverter,
+            INamingConvention enumNamingConvention)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
             this.ignoreUnmatched = ignoreUnmatched;
             this.duplicateKeyChecking = duplicateKeyChecking;
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
+            this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -57,6 +64,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
             value = objectFactory.Create(implementationType);
+            objectFactory.ExecuteOnDeserializing(value);
+
             var consumedProperties = new HashSet<string>(StringComparer.Ordinal);
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
@@ -80,13 +89,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         var valueRef = value;
                         propertyValuePromise.ValueAvailable += v =>
                         {
-                            var convertedValue = typeConverter.ChangeType(v, property.Type);
+                            var convertedValue = typeConverter.ChangeType(v, property.Type, enumNamingConvention);
                             property.Write(valueRef, convertedValue);
                         };
                     }
                     else
                     {
-                        var convertedValue = typeConverter.ChangeType(propertyValue, property.Type);
+                        var convertedValue = typeConverter.ChangeType(propertyValue, property.Type, enumNamingConvention);
                         property.Write(value, convertedValue);
                     }
                 }
@@ -104,6 +113,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
             }
 
+            objectFactory.ExecuteOnDeserialized(value);
             return true;
         }
     }

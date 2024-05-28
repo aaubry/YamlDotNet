@@ -59,6 +59,7 @@ namespace YamlDotNet.Serialization
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;
         private DefaultValuesHandling defaultValuesHandlingConfiguration = DefaultValuesHandling.Preserve;
+        private ScalarStyle defaultScalarStyle = ScalarStyle.Any;
         private bool quoteNecessaryStrings;
         private bool quoteYaml1_1Strings;
 
@@ -97,7 +98,16 @@ namespace YamlDotNet.Serialization
 
             eventEmitterFactories = new LazyComponentRegistrationList<IEventEmitter, IEventEmitter>
             {
-                { typeof(TypeAssigningEventEmitter), inner => new TypeAssigningEventEmitter(inner, false, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings) }
+                {
+                    typeof(TypeAssigningEventEmitter), inner =>
+                        new TypeAssigningEventEmitter(inner,
+                            tagMappings,
+                            quoteNecessaryStrings,
+                            quoteYaml1_1Strings,
+                            defaultScalarStyle,
+                            yamlFormatter,
+                            enumNamingConvention)
+                }
             };
 
             objectFactory = new DefaultObjectFactory();
@@ -116,6 +126,15 @@ namespace YamlDotNet.Serialization
         {
             quoteNecessaryStrings = true;
             this.quoteYaml1_1Strings = quoteYaml1_1Strings;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the default quoting style for scalar values. The default value is <see cref="ScalarStyle.Any"/>
+        /// </summary>
+        public SerializerBuilder WithDefaultScalarStyle(ScalarStyle style)
+        {
+            this.defaultScalarStyle = style;
             return this;
         }
 
@@ -272,7 +291,16 @@ namespace YamlDotNet.Serialization
                 settings,
                 objectFactory
             );
-            WithEventEmitter(inner => new TypeAssigningEventEmitter(inner, true, tagMappings, quoteNecessaryStrings, quoteYaml1_1Strings), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+
+            WithEventEmitter(inner =>
+                new TypeAssigningEventEmitter(inner,
+                    tagMappings,
+                    quoteNecessaryStrings,
+                    quoteYaml1_1Strings,
+                    defaultScalarStyle,
+                    yamlFormatter,
+                    enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
 
@@ -304,7 +332,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <remarks>
         /// If more control is needed, create a class that extends from ChainedObjectGraphVisitor and override its EnterMapping methods.
-        /// Then register it as follows: 
+        /// Then register it as follows:
         /// WithEmissionPhaseObjectGraphVisitor(args => new MyDefaultHandlingStrategy(args.InnerVisitor));
         /// </remarks>
         public SerializerBuilder ConfigureDefaultValuesHandling(DefaultValuesHandling configuration)
@@ -325,7 +353,11 @@ namespace YamlDotNet.Serialization
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
                 .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
-                .WithEventEmitter(inner => new JsonEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+#if NET6_0_OR_GREATER
+                .WithTypeConverter(new DateOnlyConverter(doubleQuotes: true))
+                .WithTypeConverter(new TimeOnlyConverter(doubleQuotes: true))
+#endif
+                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter, enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>
@@ -363,6 +395,22 @@ namespace YamlDotNet.Serialization
         /// before actually emitting it. This allows a visitor to collect information about the graph that
         /// can be used later by another visitor registered in the emission phase.
         /// </remarks>
+        /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector.</param>
+        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(Func<IEnumerable<IYamlTypeConverter>, TObjectGraphVisitor> objectGraphVisitorFactory)
+            where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
+        {
+            return WithPreProcessingPhaseObjectGraphVisitor(objectGraphVisitorFactory, w => w.OnTop());
+        }
+
+        /// <summary>
+        /// Registers an additional <see cref="IObjectGraphVisitor{Nothing}" /> to be used by the serializer
+        /// before emitting an object graph.
+        /// </summary>
+        /// <remarks>
+        /// Registering a visitor in the pre-processing phase enables to traverse the object graph once
+        /// before actually emitting it. This allows a visitor to collect information about the graph that
+        /// can be used later by another visitor registered in the emission phase.
+        /// </remarks>
         /// <param name="objectGraphVisitor">The type inspector.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
         public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
@@ -385,6 +433,7 @@ namespace YamlDotNet.Serialization
             return this;
         }
 
+
         /// <summary>
         /// Registers an additional <see cref="IObjectGraphVisitor{Nothing}" /> to be used by the serializer
         /// before emitting an object graph.
@@ -394,7 +443,38 @@ namespace YamlDotNet.Serialization
         /// before actually emitting it. This allows a visitor to collect information about the graph that
         /// can be used later by another visitor registered in the emission phase.
         /// </remarks>
-        /// <param name="objectGraphVisitorFactory">A factory that creates the <see cref="IObjectGraphVisitor{Nothing}" /> based on a previously registered <see cref="IObjectGraphVisitor{Nothing}" />.</param>
+        /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
+        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+            Func<IEnumerable<IYamlTypeConverter>, TObjectGraphVisitor> objectGraphVisitorFactory,
+            Action<IRegistrationLocationSelectionSyntax<IObjectGraphVisitor<Nothing>>> where
+        )
+            where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
+        {
+            if (objectGraphVisitorFactory == null)
+            {
+                throw new ArgumentNullException(nameof(objectGraphVisitorFactory));
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException(nameof(where));
+            }
+
+            where(preProcessingPhaseObjectGraphVisitorFactories.CreateRegistrationLocationSelector(typeof(TObjectGraphVisitor), typeConverters => objectGraphVisitorFactory(typeConverters)));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an additional <see cref="IObjectGraphVisitor{Nothing}" /> to be used by the serializer
+        /// before emitting an object graph.
+        /// </summary>
+        /// <remarks>
+        /// Registering a visitor in the pre-processing phase enables to traverse the object graph once
+        /// before actually emitting it. This allows a visitor to collect information about the graph that
+        /// can be used later by another visitor registered in the emission phase.
+        /// </remarks>
+        /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector based on a previously registered <see cref="IObjectGraphVisitor{Nothing}" />.</param>
         /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
         public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
             WrapperFactory<IObjectGraphVisitor<Nothing>, TObjectGraphVisitor> objectGraphVisitorFactory,
@@ -413,6 +493,37 @@ namespace YamlDotNet.Serialization
             }
 
             where(preProcessingPhaseObjectGraphVisitorFactories.CreateTrackingRegistrationLocationSelector(typeof(TObjectGraphVisitor), (wrapped, _) => objectGraphVisitorFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an additional <see cref="IObjectGraphVisitor{Nothing}" /> to be used by the serializer
+        /// before emitting an object graph.
+        /// </summary>
+        /// <remarks>
+        /// Registering a visitor in the pre-processing phase enables to traverse the object graph once
+        /// before actually emitting it. This allows a visitor to collect information about the graph that
+        /// can be used later by another visitor registered in the emission phase.
+        /// </remarks>
+        /// <param name="objectGraphVisitorFactory">A function that instantiates the type inspector based on a previously registered <see cref="IObjectGraphVisitor{Nothing}" />.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IObjectGraphVisitor{Nothing}" /></param>
+        public SerializerBuilder WithPreProcessingPhaseObjectGraphVisitor<TObjectGraphVisitor>(
+            WrapperFactory<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>, TObjectGraphVisitor> objectGraphVisitorFactory,
+            Action<ITrackingRegistrationLocationSelectionSyntax<IObjectGraphVisitor<Nothing>>> where
+        )
+            where TObjectGraphVisitor : IObjectGraphVisitor<Nothing>
+        {
+            if (objectGraphVisitorFactory == null)
+            {
+                throw new ArgumentNullException(nameof(objectGraphVisitorFactory));
+            }
+
+            if (where == null)
+            {
+                throw new ArgumentNullException(nameof(where));
+            }
+
+            where(preProcessingPhaseObjectGraphVisitorFactories.CreateTrackingRegistrationLocationSelector(typeof(TObjectGraphVisitor), (wrapped, typeConverters) => objectGraphVisitorFactory(wrapped, typeConverters)));
             return this;
         }
 

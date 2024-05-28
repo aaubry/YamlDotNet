@@ -29,11 +29,13 @@ namespace YamlDotNet.Serialization
     {
         T Deserialize<T>(string input);
         T Deserialize<T>(TextReader input);
+        T Deserialize<T>(IParser parser);
+
+        object? Deserialize(string input);
         object? Deserialize(TextReader input);
+        object? Deserialize(IParser parser);
         object? Deserialize(string input, Type type);
         object? Deserialize(TextReader input, Type type);
-        T Deserialize<T>(IParser parser);
-        object? Deserialize(IParser parser);
 
         /// <summary>
         /// Deserializes an object of the specified type.

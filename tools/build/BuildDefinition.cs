@@ -24,7 +24,7 @@ namespace build
 {
     public static class BuildDefinition
     {
-        public static GitVersion ResolveVersion(Options options, PreviousReleases releases)
+        public static async Task<GitVersion> ResolveVersion(Options options, PreviousReleases releases)
         {
             GitVersion version;
             if (ForcedVersion != null)
@@ -36,9 +36,10 @@ namespace build
                 string versionJson;
                 try
                 {
-                    versionJson = Read("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
+                    var result = await ReadAsync("dotnet", $"gitversion /nofetch{(options.Verbose ? " /diag" : "")}", BasePath);
+                    versionJson = result.StandardOutput;
                 }
-                catch (NonZeroExitCodeException)
+                catch (ExitCodeException)
                 {
                     Run("dotnet", "gitversion /nofetch /diag", BasePath);
                     throw;
@@ -65,7 +66,7 @@ namespace build
                 };
                 jsonOptions.Converters.Add(new AutoNumberToStringConverter());
 
-                version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions);
+                version = JsonSerializer.Deserialize<GitVersion>(versionJson, jsonOptions)!;
 
                 // Workaround to prevent issues with some consumers of the NuGet API that build
                 // links manually instead of following the links that come in the response.
@@ -90,7 +91,7 @@ namespace build
             return version;
         }
 
-        public static void SetBuildVersion(Options options, GitVersion version)
+        public static Task SetBuildVersion(Options options, GitVersion version)
         {
             switch (options.Host)
             {
@@ -99,9 +100,11 @@ namespace build
                     Run("appveyor", $"UpdateBuild -Version {version.NuGetVersion}.{buildNumber}");
                     break;
             }
+
+            return Task.CompletedTask;
         }
 
-        public static MetadataSet SetMetadata(GitVersion version)
+        public static Task<MetadataSet> SetMetadata(GitVersion version)
         {
             var templatePath = Path.Combine(BasePath, "YamlDotNet", "Properties", "AssemblyInfo.template");
             WriteVerbose($"Using template {templatePath}");
@@ -116,47 +119,26 @@ namespace build
             WriteVerbose($"Writing metadata to {asssemblyInfoPath}");
             File.WriteAllText(asssemblyInfoPath, assemblyInfo);
 
-            return default;
+            return Task.FromResult(new MetadataSet());
         }
 
-        public static SuccessfulBuild Build(Options options, MetadataSet _)
+        public static Task<SuccessfulBuild> Build(Options options, MetadataSet _)
         {
             var verbosity = options.Verbose ? "detailed" : "minimal";
             Run("dotnet", $"build YamlDotNet.sln --configuration Release --verbosity {verbosity}", BasePath);
 
-            return default;
+            return Task.FromResult(new SuccessfulBuild());
         }
 
-        public static SuccessfulUnitTests UnitTest(Options options, SuccessfulBuild _)
+        public static Task<SuccessfulUnitTests> UnitTest(Options options, SuccessfulBuild _)
         {
             var verbosity = options.Verbose ? "detailed" : "minimal";
             Run("dotnet", $"test YamlDotNet.Test.csproj --no-build --configuration Release --verbosity {verbosity}", Path.Combine(BasePath, "YamlDotNet.Test"));
 
-            return default;
+            return Task.FromResult(new SuccessfulUnitTests());
         }
 
-        public static SuccessfulAotTests AotTest(Options options, SuccessfulBuild _)
-        {
-            var testsDir = Path.Combine(BasePath, "YamlDotNet.AotTest");
-
-            try
-            {
-                Run("docker", $"run --rm -v {testsDir}:/build -w /build aaubry/mono-aot bash ./run.sh");
-            }
-            catch (NonZeroExitCodeException ex) when (options.Host == Host.AppVeyor && ex.ExitCode == -1)
-            {
-                // Appveyor fails with exit code -1 for some reason...
-                var realExitCode = int.Parse(File.ReadAllLines(Path.Combine(testsDir, "exitcode.txt")).First(), CultureInfo.InvariantCulture);
-                if (realExitCode != 0)
-                {
-                    throw new NonZeroExitCodeException(realExitCode);
-                }
-            }
-
-            return default;
-        }
-
-        public static List<NuGetPackage> Pack(Options options, GitVersion version, SuccessfulUnitTests _, SuccessfulAotTests __)
+        public static Task<List<NuGetPackage>> Pack(Options options, GitVersion version, SuccessfulUnitTests _)
         {
             var result = new List<NuGetPackage>();
             var verbosity = options.Verbose ? "detailed" : "minimal";
@@ -173,10 +155,10 @@ namespace build
                 result.Add(new NuGetPackage(packagePath, "YamlDotNet.Analyzers.StaticGenerator"));
             }
 
-            return result;
+            return Task.FromResult(result);
         }
 
-        public static void Publish(Options options, GitVersion version, List<NuGetPackage> packages)
+        public static Task Publish(Options options, GitVersion version, List<NuGetPackage> packages)
         {
             var apiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
             if (string.IsNullOrEmpty(apiKey))
@@ -208,6 +190,8 @@ namespace build
                     }
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         public static async Task TweetRelease(GitVersion version)
@@ -230,7 +214,7 @@ namespace build
             WriteVerbose(result);
         }
 
-        public static ScaffoldedRelease ScaffoldReleaseNotes(GitVersion version, PreviousReleases releases)
+        public static async Task<ScaffoldedRelease> ScaffoldReleaseNotes(GitVersion version, PreviousReleases releases)
         {
             if (version.IsPreRelease)
             {
@@ -241,7 +225,7 @@ namespace build
 
             // Get the git log to scaffold the release notes
             string? currentHash = null;
-            var commits = ReadLines("git", $"rev-list v{previousVersion}..HEAD --first-parent --reverse --pretty=tformat:%B")
+            var commits = (await ReadLines("git", $"rev-list v{previousVersion}..HEAD --first-parent --reverse --pretty=tformat:%B"))
                 .Select(l =>
                 {
                     var match = Regex.Match(l, "^commit (?<hash>[a-f0-9]+)$");
@@ -306,7 +290,7 @@ namespace build
 
             var release = await releaseResponse.EnsureSuccessStatusCode().Content.ReadAsAsync<GitHubApiModels.Release>();
 
-            var linkedIssues = Regex.Matches(release.body, @"#(\d+)").Select(m => m.Groups[1].Value);
+            var linkedIssues = Regex.Matches(release.body ?? string.Empty, @"#(\d+)").Select(m => m.Groups[1].Value);
             WriteVerbose($"Found the following issues / pull requests: {string.Join(",", linkedIssues)}");
 
             foreach (var issueNumber in linkedIssues)
@@ -325,10 +309,10 @@ namespace build
             }
         }
 
-        public static PreviousReleases DiscoverPreviousReleases()
+        public static async Task<PreviousReleases> DiscoverPreviousReleases()
         {
             // Find previous release
-            var releases = ReadLines("git", "tag --list --merged origin/master --format=\"%(refname:short)\" v*")
+            var releases = (await ReadLines("git", "tag --list --merged origin/master --format=\"%(refname:short)\" v*"))
                 .Select(tag => Regex.Match(tag.TrimEnd('\r'), @"^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)$"))
                 .Where(m => m.Success)
                 .Select(match => new Version(
@@ -346,7 +330,7 @@ namespace build
             return previousReleases;
         }
 
-        public static void Document(Options options)
+        public static Task Document(Options options)
         {
             var samplesProjectDir = Path.Combine(BasePath, "YamlDotNet.Samples");
             var samplesOutputDir = Path.Combine(BasePath, "..", "YamlDotNet.wiki");
@@ -358,17 +342,17 @@ namespace build
 
             const string ns = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";
 
-            var testDefinitions = report.Root
-                .Element(XName.Get("TestDefinitions", ns))
+            var testDefinitions = report.Root!
+                .Element(XName.Get("TestDefinitions", ns))!
                 .Elements(XName.Get("UnitTest", ns))
                 .Select(e =>
                 {
-                    var testMethod = e.Element(XName.Get("TestMethod", ns));
+                    var testMethod = e.Element(XName.Get("TestMethod", ns))!;
 
-                    var sampleClassName = testMethod.Attribute("className").Value;
-                    var sampleMethodName = testMethod.Attribute("name").Value;
+                    var sampleClassName = testMethod.Attribute("className")!.Value;
+                    var sampleMethodName = testMethod.Attribute("name")!.Value;
 
-                    var testMethodAssembly = Assembly.LoadFrom(testMethod.Attribute("codeBase").Value);
+                    var testMethodAssembly = Assembly.LoadFrom(testMethod.Attribute("codeBase")!.Value);
 
                     var sampleClass = testMethodAssembly
                         .GetType(sampleClassName, true)!;
@@ -385,8 +369,8 @@ namespace build
 
                     return new
                     {
-                        Id = e.Attribute("id").Value,
-                        Name = e.Attribute("name").Value,
+                        Id = e.Attribute("id")!.Value,
+                        Name = e.Attribute("name")!.Value,
                         Description = description,
                         Code = File.ReadAllText(Path.Combine(samplesProjectDir, $"{sampleClass.Name}.cs")),
                         FileName = $"Samples.{sampleClass.Name}.md",
@@ -394,11 +378,11 @@ namespace build
                 });
 
             var testResults = report.Root
-                .Element(XName.Get("Results", ns))
+                .Element(XName.Get("Results", ns))!
                 .Elements(XName.Get("UnitTestResult", ns))
                 .Select(e => new
                 {
-                    TestId = e.Attribute("testId").Value,
+                    TestId = e.Attribute("testId")!.Value,
                     Output = e
                         .Element(XName.Get("Output", ns))
                         ?.Element(XName.Get("StdOut", ns))
@@ -456,6 +440,7 @@ namespace build
 
 * [Building Custom Formatters for .Net Core (Yaml Formatters)](http://www.fiyazhasan.me/building-custom-formatters-for-net-core-yaml-formatters/) by @FiyazBinHasan
 ");
+            return Task.CompletedTask;
         }
 
         private static string GitHubRepository
@@ -550,7 +535,6 @@ namespace build
     public struct MetadataSet { }
 
     public struct SuccessfulBuild { }
-    public struct SuccessfulAotTests { }
     public struct SuccessfulUnitTests { }
 
     public class ScaffoldedRelease

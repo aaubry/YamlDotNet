@@ -69,13 +69,7 @@ namespace YamlDotNet.Test.Core
             return EnumerationOf(parser).ToList();
         }
 
-        private IEnumerable<ParsingEvent> EnumerationOf(IParser parser)
-        {
-            while (parser.MoveNext())
-            {
-                yield return parser.Current;
-            }
-        }
+
 
         [Fact]
         public void PlainScalarCanBeFollowedByImplicitDocument()
@@ -294,6 +288,28 @@ namespace YamlDotNet.Test.Core
                 .And.Contain("first # The first value")
                 .And.Contain("second # The second value")
                 .And.Contain("# Bottom comment");
+        }
+
+        [Fact]
+        public void CommentsBetweenMappingKeyAndValueAreEmittedCorrectly()
+        {
+            var events = MappingWith(
+                Scalar("key").ImplicitPlain,
+                InlineComment("inline comment"),
+                StandaloneComment("standalone comment"),
+                BlockSequenceStart,
+                Scalar("value").ImplicitPlain,
+                SequenceEnd
+            );
+
+            var yaml = EmittedTextFrom(StreamedDocumentWith(events));
+
+            yaml.Should()
+                .Contain(Lines(
+                    "key: # inline comment",
+                    "# standalone comment",
+                    "  - value"
+                ));
         }
 
         [Fact]

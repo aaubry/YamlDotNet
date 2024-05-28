@@ -6,7 +6,7 @@ test: off
 
 environment:
   NUGET_API_KEY:
-    secure: gKVampJvSdHxl1/L1+IjpG/TDnR7flhj6ZmwtDqd9a4M+pWJ8VJ78xv/yDarc4iC
+    secure: deduMBW7Ca8K0ISm/1S9wmf8I8Fd5rEIg3BTA93F0/HkA2NRyH1EOjHI10feAOYk
   GITHUB_TOKEN:
     secure: ulVa56sjSUcOy/08/Qn88LsGVfndWBizu5gRdVTvsGu/ju1fKUe8XCZPvUvypvWH
   TWITTER_CONSUMER_API_KEY:
@@ -32,22 +32,16 @@ artifacts:
   - path: YamlDotNet\bin\Release\netstandard2.1
     name: Release-NetStandard-2.1
 
-  - path: YamlDotNet\bin\Release\net45
-    name: Release-Net45
-
   - path: YamlDotNet\bin\Release\net47
     name: Release-Net47
-
-  - path: YamlDotNet\bin\Release\net35
-    name: Release-Net35
-
-  - path: YamlDotNet\bin\Release\net40
-    name: Release-UnitySubset-v35
 
   - path: YamlDotNet\bin\Release\net60
     name: Release-Net60
 
   - path: YamlDotNet\bin\Release\net70
     name: Release-Net70
+
+  - path: YamlDotNet\bin\Release\net80
+    name: Release-Net80
 
   - path: YamlDotNet\bin\*.nupkg

@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.IO;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -101,6 +102,135 @@ InnerValue:
             Assert.IsType<InvalidOperationException>(exception.InnerException);
             Assert.IsType<MissingMethodException>(exception.InnerException.InnerException);
         }
+
+        [Fact]
+        public void InternalConstructors()
+        {
+            Test(() => new TestClassInternal("test"), true);
+            Test(() => new TestClassInternal("test"), false);
+        }
+
+        [Fact]
+        public void PrivateConstructors()
+        {
+            Test(() => new TestClassPrivate("test"), true);
+            Test(() => new TestClassPrivate("test"), false);
+        }
+
+        [Fact]
+        public void ProtectedConstructors()
+        {
+            Test(() => new TestClassProtected("test"), true);
+            Test(() => new TestClassProtected("test"), false);
+        }
+
+        [Fact]
+        public void PublicConstructors()
+        {
+            Test(() => new TestClassPublic("test"), true);
+            Test(() => new TestClassPublic("test"), false);
+        }
+
+        void Test<T>(Func<T> constructor, bool ensureRoundTrip)
+        {
+            var testClass = constructor();
+            var serializerBuilder = new SerializerBuilder()
+                .EnablePrivateConstructors()
+                .IncludeNonPublicProperties();
+
+            if (ensureRoundTrip)
+            {
+                serializerBuilder = serializerBuilder.EnsureRoundtrip();
+            }
+            var serializer = serializerBuilder.Build();
+
+            var deserializer = new DeserializerBuilder()
+                .EnablePrivateConstructors()
+                .IncludeNonPublicProperties()
+                .Build();
+
+            var stringWriter = new StringWriter();
+            serializer.Serialize(stringWriter, testClass);
+            var o = deserializer.Deserialize<T>(stringWriter.ToString());
+        }
+
+        public class TestClassInternal
+        {
+            internal TestClassInternal()
+            {
+            }
+
+            public TestClassInternal(string value)
+            {
+                Value = value;
+            }
+
+            public string Value { get; private set; }
+
+            public override string ToString()
+            {
+                return Value;
+            }
+        }
+
+        public class TestClassPublic
+        {
+            public TestClassPublic()
+            {
+            }
+
+            public TestClassPublic(string value)
+            {
+                Value = value;
+            }
+
+            public string Value { get; private set; }
+
+            public override string ToString()
+            {
+                return Value;
+            }
+        }
+
+        public class TestClassPrivate
+        {
+            public TestClassPrivate()
+            {
+            }
+
+            public TestClassPrivate(string value)
+            {
+                Value = value;
+            }
+
+            public string Value { get; private set; }
+
+            public override string ToString()
+            {
+                return Value;
+            }
+        }
+
+        public class TestClassProtected
+        {
+            public TestClassProtected()
+            {
+            }
+
+            public TestClassProtected(string value)
+            {
+                Value = value;
+            }
+
+            public string Value { get; private set; }
+
+            public override string ToString()
+            {
+                return Value;
+            }
+        }
+
+
         private class Outer
         {
             public string Value { get; set; }
