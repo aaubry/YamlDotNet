@@ -47,22 +47,26 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.Equal(YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
         }
 
-        [Fact]
-        public void AccessingAllNodesOnInfinitelyRecursiveDocumentThrows()
+        [Theory]
+        [InlineData("&a [*a]")]
+        [InlineData("?\n  key: &id1\n    recursion: *id1\n: foo")]
+        public void AccessingAllNodesOnInfinitelyRecursiveDocumentThrows(string yaml)
         {
             var stream = new YamlStream();
-            stream.Load(Yaml.ParserForText("&a [*a]"));
+            stream.Load(Yaml.ParserForText(yaml));
 
             var accessAllNodes = new Action(() => stream.Documents.Single().AllNodes.ToList());
 
             accessAllNodes.ShouldThrow<MaximumRecursionLevelReachedException>("because the document is infinitely recursive.");
         }
 
-        [Fact]
-        public void InfinitelyRecursiveNodeToStringSucceeds()
+        [Theory]
+        [InlineData("&a [*a]")]
+        [InlineData("?\n  key: &id1\n    recursion: *id1\n: foo")]
+        public void InfinitelyRecursiveNodeToStringSucceeds(string yaml)
         {
             var stream = new YamlStream();
-            stream.Load(Yaml.ParserForText("&a [*a]"));
+            stream.Load(Yaml.ParserForText(yaml));
 
             var toString = stream.Documents.Single().RootNode.ToString();
 
