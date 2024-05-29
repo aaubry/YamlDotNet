@@ -40,15 +40,15 @@ COPY . .
 RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /output/net47
 RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.0
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
-RUN dotnet build -c Release --framework net60 YamlDotNet/YamlDotNet.csproj -o /output/net60
-RUN dotnet build -c Release --framework net70 YamlDotNet/YamlDotNet.csproj -o /output/net70
-RUN dotnet build -c Release --framework net80 YamlDotNet/YamlDotNet.csproj -o /output/net80
+RUN dotnet build -c Release --framework net6.0 YamlDotNet/YamlDotNet.csproj -o /output/net6.0
+RUN dotnet build -c Release --framework net7.0 YamlDotNet/YamlDotNet.csproj -o /output/net7.0
+RUN dotnet build -c Release --framework net8.0 YamlDotNet/YamlDotNet.csproj -o /output/net8.0
 
 RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
 
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net80 --logger:"trx;LogFileName=/output/tests.net80.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net70 --logger:"trx;LogFileName=/output/tests.net70.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net60 --logger:"trx;LogFileName=/output/tests.net60.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net8.0 --logger:"trx;LogFileName=/output/tests-net8.0.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net7.0 --logger:"trx;LogFileName=/output/tests-net7.0.trx" --logger:"console;Verbosity=detailed"
+RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net6.0 --logger:"trx;LogFileName=/output/tests-net6.0.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
 VOLUME /output
