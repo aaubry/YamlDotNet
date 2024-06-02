@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,12 +19,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
-namespace YamlDotNet.Serialization
+namespace YamlDotNet
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class YamlStaticContextAttribute : Attribute
+    internal static class DictionaryExtensions
     {
+#if NETSTANDARD2_0 || NETFRAMEWORK
+        public static bool TryAdd<T, V>(this System.Collections.Generic.Dictionary<T, V> dictionary, T key, V value)
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                return false;
+            }
+
+            dictionary.Add(key, value);
+            return true;
+        }
+#endif
     }
 }

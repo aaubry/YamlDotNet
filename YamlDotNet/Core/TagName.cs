@@ -25,7 +25,7 @@ namespace YamlDotNet.Core
 {
     public readonly struct TagName : IEquatable<TagName>
     {
-        public static readonly TagName Empty = default;
+        public static readonly TagName Empty;
 
         private readonly string? value;
 

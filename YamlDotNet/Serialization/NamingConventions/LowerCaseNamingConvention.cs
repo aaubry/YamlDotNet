@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Globalization;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NamingConventions
@@ -33,7 +34,7 @@ namespace YamlDotNet.Serialization.NamingConventions
 
         public string Apply(string value)
         {
-            return value.ToCamelCase().ToLower();
+            return value.ToCamelCase().ToLower(CultureInfo.InvariantCulture);
         }
 
         public string Reverse(string value)

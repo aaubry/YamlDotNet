@@ -173,7 +173,7 @@ namespace YamlDotNet.Helpers
 
             public void Clear() => throw new NotSupportedException();
 
-            public bool Contains(TKey item) => orderedDictionary.dictionary.Keys.Contains(item);
+            public bool Contains(TKey item) => orderedDictionary.dictionary.ContainsKey(item);
 
             public KeyCollection(OrderedDictionary<TKey, TValue> orderedDictionary)
             {
@@ -208,7 +208,7 @@ namespace YamlDotNet.Helpers
 
             public void Clear() => throw new NotSupportedException();
 
-            public bool Contains(TValue item) => orderedDictionary.dictionary.Values.Contains(item);
+            public bool Contains(TValue item) => orderedDictionary.dictionary.ContainsValue(item);
 
             public ValueCollection(OrderedDictionary<TKey, TValue> orderedDictionary)
             {

@@ -155,7 +155,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
             methods = valueType.GetMethods(BindingFlags.Public |
                                           BindingFlags.Instance |
                                           BindingFlags.NonPublic);
-            methods = methods.Where(x => x.GetCustomAttributes(attributeType, true).Any()).ToArray();
+            methods = methods.Where(x => x.GetCustomAttributes(attributeType, true).Length > 0).ToArray();
             stateDictionary[valueType] = methods;
             return methods;
         }

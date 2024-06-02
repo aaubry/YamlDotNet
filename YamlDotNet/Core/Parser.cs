@@ -204,7 +204,7 @@ namespace YamlDotNet.Core
         /// stream   ::= STREAM-START implicit_document? explicit_document* STREAM-END
         ///              ************
         /// </summary>
-        private ParsingEvent ParseStreamStart()
+        private Events.StreamStart ParseStreamStart()
         {
             var current = GetCurrentToken();
 
@@ -419,7 +419,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Generate an empty scalar event.
         /// </summary>
-        private static ParsingEvent ProcessEmptyScalar(in Mark position)
+        private static Events.Scalar ProcessEmptyScalar(in Mark position)
         {
             return new Events.Scalar(AnchorName.Empty, TagName.Empty, string.Empty, ScalarStyle.Plain, true, false, position, position);
         }
@@ -634,7 +634,7 @@ namespace YamlDotNet.Core
         ///                                                                *************
         /// </summary>
 
-        private ParsingEvent ParseDocumentEnd()
+        private Events.DocumentEnd ParseDocumentEnd()
         {
             var current = GetCurrentToken() ?? throw new SemanticErrorException("Reached the end of the stream while parsing a document end");
 
@@ -956,7 +956,7 @@ namespace YamlDotNet.Core
         /// flow_sequence_entry  ::= flow_node | KEY flow_node? (VALUE flow_node?)?
         ///                                                                      *
         /// </summary>
-        private ParsingEvent ParseFlowSequenceEntryMappingEnd()
+        private Events.MappingEnd ParseFlowSequenceEntryMappingEnd()
         {
             state = ParserState.FlowSequenceEntry;
             var current = GetCurrentToken();

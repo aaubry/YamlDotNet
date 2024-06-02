@@ -122,5 +122,35 @@ namespace YamlDotNet.Core
             }
             return cmp;
         }
+
+        public static bool operator ==(Mark left, Mark right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Mark left, Mark right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator <(Mark left, Mark right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator <=(Mark left, Mark right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >(Mark left, Mark right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator >=(Mark left, Mark right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
     }
 }

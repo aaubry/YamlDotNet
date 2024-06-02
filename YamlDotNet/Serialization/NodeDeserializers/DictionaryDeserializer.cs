@@ -96,7 +96,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 {
                     if (key == null)
                     {
-                        throw new ArgumentException("Empty key names are not supported yet.", "key");
+                        throw new ArgumentException("Empty key names are not supported yet.", nameof(tKey));
                     }
 
                     if (valuePromise == null)

@@ -159,7 +159,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                             // Note that if it contains null, the condition above already took care of it
                             Traverse(
                                 "Value",
-                                new ObjectDescriptor(value.Value, nullableUnderlyingType, value.Type, value.ScalarStyle), 
+                                new ObjectDescriptor(value.Value, nullableUnderlyingType, value.Type, value.ScalarStyle),
                                 visitor,
                                 context,
                                 path
@@ -278,7 +278,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
         }
 
-        private IObjectDescriptor GetObjectDescriptor(object? value, Type staticType)
+        private ObjectDescriptor GetObjectDescriptor(object? value, Type staticType)
         {
             return new ObjectDescriptor(value, typeResolver.Resolve(staticType, value), staticType);
         }
