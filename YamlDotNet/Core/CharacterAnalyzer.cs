@@ -161,7 +161,7 @@ namespace YamlDotNet.Core
             Debug.Assert(expectedCharacters.Length > 1, "Use Check(char, int) instead.");
 
             var character = Buffer.Peek(offset);
-            return expectedCharacters.IndexOf(character) != -1;
+            return expectedCharacters.Contains(character);
         }
     }
 }

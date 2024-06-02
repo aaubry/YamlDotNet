@@ -42,9 +42,9 @@ namespace YamlDotNet.Helpers
 #if NETSTANDARD2_0 || NETFRAMEWORK
         public static TValue GetOrAdd<TKey, TValue, TArg>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TArg, TValue> valueFactory, TArg arg)
         {
-            if (dictionary == null) { throw new ArgumentNullException("dictionary"); }
-            if (key == null) { throw new ArgumentNullException("key"); }
-            if (valueFactory == null) { throw new ArgumentNullException("valueFactory"); }
+            if (dictionary == null) { throw new ArgumentNullException(nameof(dictionary)); }
+            if (key == null) { throw new ArgumentNullException(nameof(key)); }
+            if (valueFactory == null) { throw new ArgumentNullException(nameof(valueFactory)); }
 
             while (true)
             {

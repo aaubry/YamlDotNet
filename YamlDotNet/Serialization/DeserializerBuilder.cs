@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 #endif
 using YamlDotNet.Core;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.BufferedDeserialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
@@ -435,13 +436,9 @@ namespace YamlDotNet.Serialization
                 throw new InvalidOperationException($"The type '{concreteType.Name}' does not implement interface '{interfaceType.Name}'.");
             }
 
-            if (typeMappings.ContainsKey(interfaceType))
+            if (!typeMappings.TryAdd(interfaceType, concreteType))
             {
                 typeMappings[interfaceType] = concreteType;
-            }
-            else
-            {
-                typeMappings.Add(interfaceType, concreteType);
             }
 
             return this;

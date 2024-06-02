@@ -24,14 +24,15 @@ using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Converters;
 using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.TypeInspectors;
 
 namespace YamlDotNet.Serialization
 {
     /// <summary>
     /// Common implementation of <see cref="SerializerBuilder" /> and <see cref="DeserializerBuilder" />.
     /// </summary>
+#pragma warning disable CA1708 // Identifiers should differ by more than case
     public abstract class BuilderSkeleton<TBuilder>
+#pragma warning restore CA1708
         where TBuilder : BuilderSkeleton<TBuilder>
     {
         internal INamingConvention namingConvention = NullNamingConvention.Instance;
@@ -41,7 +42,7 @@ namespace YamlDotNet.Serialization
         internal readonly LazyComponentRegistrationList<Nothing, IYamlTypeConverter> typeConverterFactories;
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
         internal bool ignoreFields;
-        internal bool includeNonPublicProperties = false;
+        internal bool includeNonPublicProperties;
         internal Settings settings;
         internal YamlFormatter yamlFormatter = YamlFormatter.Default;
 

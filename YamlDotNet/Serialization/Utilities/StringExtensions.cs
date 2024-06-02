@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Serialization.Utilities
@@ -70,7 +71,7 @@ namespace YamlDotNet.Serialization.Utilities
         public static string FromCamelCase(this string str, string separator)
         {
             // Ensure first letter is always lowercase
-            str = char.ToLower(str[0]) + str.Substring(1);
+            str = char.ToLower(str[0], CultureInfo.InvariantCulture) + str.Substring(1);
 
             str = Regex.Replace(str.ToCamelCase(), "(?<char>[A-Z])", match => separator + match.Groups["char"].Value.ToLowerInvariant());
             return str;

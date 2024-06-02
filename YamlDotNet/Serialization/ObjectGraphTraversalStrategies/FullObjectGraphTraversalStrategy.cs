@@ -282,7 +282,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
         }
 
-        private IObjectDescriptor GetObjectDescriptor(object? value, Type staticType)
+        private ObjectDescriptor GetObjectDescriptor(object? value, Type staticType)
         {
             return new ObjectDescriptor(value, typeResolver.Resolve(staticType, value), staticType);
         }

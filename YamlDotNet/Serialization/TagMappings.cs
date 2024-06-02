@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public sealed class TagMappings
     {
-        private readonly IDictionary<string, Type> mappings;
+        private readonly Dictionary<string, Type> mappings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TagMappings"/> class.
