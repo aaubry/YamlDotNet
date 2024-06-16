@@ -12,7 +12,7 @@ TestResults
 *.orig
 Help/*
 release/*
-/_ReSharper.*
+_ReSharper.*
 *.pidb
 *.userprefs
 packages
