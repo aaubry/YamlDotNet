@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net47</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <LangVersion>8.0</LangVersion>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DeserializerTests.fs" />
+    <Compile Include="SerializerTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj" />
+    <ProjectReference Include="..\YamlDotNet.Analyzers.StaticGenerator\YamlDotNet.Analyzers.StaticGenerator.csproj" />
+  </ItemGroup>
+</Project>
