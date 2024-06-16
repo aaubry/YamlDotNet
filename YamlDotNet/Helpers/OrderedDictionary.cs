@@ -24,6 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace YamlDotNet.Helpers
@@ -80,12 +81,49 @@ namespace YamlDotNet.Helpers
             this.comparer = comparer;
         }
 
-        public void Add(TKey key, TValue value) => Add(new KeyValuePair<TKey, TValue>(key, value));
-
         public void Add(KeyValuePair<TKey, TValue> item)
         {
-            dictionary.Add(item.Key, item.Value);
-            list.Add(item);
+            if (!TryAdd(item))
+            {
+                ThrowDuplicateKeyException(item.Key);
+            }
+        }
+
+        public void Add(TKey key, TValue value)
+        {
+            if (!TryAdd(key, value))
+            {
+                ThrowDuplicateKeyException(key);
+            }
+        }
+
+        private static void ThrowDuplicateKeyException(TKey key)
+        {
+            throw new ArgumentException($"An item with the same key {key} has already been added.");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryAdd(TKey key, TValue value)
+        {
+            if (dictionary.TryAdd(key, value))
+            {
+                list.Add(new KeyValuePair<TKey, TValue>(key, value));
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryAdd(KeyValuePair<TKey, TValue> item)
+        {
+            if (dictionary.TryAdd(item.Key, item.Value))
+            {
+                list.Add(item);
+                return true;
+            }
+
+            return false;
         }
 
         public void Clear()

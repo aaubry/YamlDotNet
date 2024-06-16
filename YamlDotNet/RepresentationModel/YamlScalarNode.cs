@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -75,28 +76,28 @@ namespace YamlDotNet.RepresentationModel
             Load(parser, state);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Load(IParser parser, DocumentLoadingState state)
         {
             var scalar = parser.Consume<Scalar>();
 
             Load(scalar, state);
 
-            if (scalar.Style == ScalarStyle.Plain &&
-                Tag.IsEmpty &&
-                (scalar.Value == string.Empty ||
-                 scalar.Value.Equals("null", StringComparison.InvariantCulture) ||
-                 scalar.Value.Equals("Null", StringComparison.InvariantCulture) ||
-                 scalar.Value.Equals("NULL", StringComparison.InvariantCulture) ||
-                 scalar.Value == "~"))
+            var value = scalar.Value;
+            if (scalar.Style == ScalarStyle.Plain && Tag.IsEmpty)
             {
-                // we have an implicit null value without a tag stating it, fake it out
-                _forceImplicitPlain = true;
-
-                // for backwards compatability we won't be setting the Value property
-                // to null
+                _forceImplicitPlain = value.Length switch
+                {
+                    // we have an implicit null value without a tag stating it, fake it out
+                    0 => true,
+                    1 => value == "~",
+                    4 => value == "null" || value == "Null" || value == "NULL",
+                    // for backwards compatability we won't be setting the Value property to null
+                    _ => false
+                };
             }
 
-            _value = scalar.Value;
+            _value = value;
             Style = scalar.Style;
         }
 
