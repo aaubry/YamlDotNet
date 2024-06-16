@@ -39,8 +39,10 @@ namespace YamlDotNet.Serialization.Schemas
         {
             public static readonly TagName Null = new TagName("tag:yaml.org,2002:null");
             public static readonly TagName Bool = new TagName("tag:yaml.org,2002:bool");
+#pragma warning disable CA1720 // Identifier contains type name
             public static readonly TagName Int = new TagName("tag:yaml.org,2002:int");
             public static readonly TagName Float = new TagName("tag:yaml.org,2002:float");
+#pragma warning restore CA1720
         }
     }
 

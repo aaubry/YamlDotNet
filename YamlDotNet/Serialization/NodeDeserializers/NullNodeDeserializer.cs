@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return false;
         }
 
-        private bool NodeIsNull(NodeEvent nodeEvent)
+        private static bool NodeIsNull(NodeEvent nodeEvent)
         {
             // http://yaml.org/type/null.html
 

@@ -31,8 +31,8 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     internal class DocumentLoadingState
     {
-        private readonly IDictionary<AnchorName, YamlNode> anchors = new Dictionary<AnchorName, YamlNode>();
-        private readonly IList<YamlNode> nodesWithUnresolvedAliases = new List<YamlNode>();
+        private readonly Dictionary<AnchorName, YamlNode> anchors = new Dictionary<AnchorName, YamlNode>();
+        private readonly List<YamlNode> nodesWithUnresolvedAliases = new List<YamlNode>();
 
         /// <summary>
         /// Adds the specified node to the anchor list.
@@ -45,14 +45,7 @@ namespace YamlDotNet.RepresentationModel
                 throw new ArgumentException("The specified node does not have an anchor");
             }
 
-            if (anchors.ContainsKey(node.Anchor))
-            {
-                anchors[node.Anchor] = node;
-            }
-            else
-            {
-                anchors.Add(node.Anchor, node);
-            }
+            anchors[node.Anchor] = node;
         }
 
         /// <summary>

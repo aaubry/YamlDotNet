@@ -127,7 +127,7 @@ namespace YamlDotNet.Serialization.Utilities
             if (destinationType.IsGenericType())
             {
                 var genericTypeDefinition = destinationType.GetGenericTypeDefinition();
-                if (genericTypeDefinition == typeof(Nullable<>) || FsharpHelper.IsOptionType(genericTypeDefinition)) 
+                if (genericTypeDefinition == typeof(Nullable<>) || FsharpHelper.IsOptionType(genericTypeDefinition))
                 {
                     var innerType = destinationType.GetGenericArguments()[0];
                     var convertedValue = ChangeType(value, innerType, culture, enumNamingConvention);
@@ -239,7 +239,8 @@ namespace YamlDotNet.Serialization.Utilities
             // Handle TimeSpan
             if (destinationType == typeof(TimeSpan))
             {
-                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture, enumNamingConvention)!);
+                var type = (string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture, enumNamingConvention);
+                return TimeSpan.Parse(type!, CultureInfo.InvariantCulture);
             }
 
             // Default to the Convert class

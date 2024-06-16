@@ -36,7 +36,7 @@ namespace YamlDotNet.RepresentationModel
     [DebuggerDisplay("{Value}")]
     public sealed class YamlScalarNode : YamlNode, IYamlConvertible
     {
-        private bool _forceImplicitPlain = false;
+        private bool _forceImplicitPlain;
         private string? _value;
 
         /// <summary>

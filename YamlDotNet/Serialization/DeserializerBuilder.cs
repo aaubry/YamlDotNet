@@ -394,13 +394,9 @@ namespace YamlDotNet.Serialization
                 throw new InvalidOperationException($"The type '{concreteType.Name}' does not implement interface '{interfaceType.Name}'.");
             }
 
-            if (typeMappings.ContainsKey(interfaceType))
+            if (!typeMappings.TryAdd(interfaceType, concreteType))
             {
                 typeMappings[interfaceType] = concreteType;
-            }
-            else
-            {
-                typeMappings.Add(interfaceType, concreteType);
             }
 
             return this;

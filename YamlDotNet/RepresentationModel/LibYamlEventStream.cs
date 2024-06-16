@@ -117,7 +117,7 @@ namespace YamlDotNet.RepresentationModel
             }
         }
 
-        private void WriteAnchorAndTag(TextWriter textWriter, NodeEvent nodeEvent)
+        private static void WriteAnchorAndTag(TextWriter textWriter, NodeEvent nodeEvent)
         {
             if (!nodeEvent.Anchor.IsEmpty)
             {

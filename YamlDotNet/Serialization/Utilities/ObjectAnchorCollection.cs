@@ -27,8 +27,8 @@ namespace YamlDotNet.Serialization.Utilities
 {
     internal sealed class ObjectAnchorCollection
     {
-        private readonly IDictionary<string, object> objectsByAnchor = new Dictionary<string, object>();
-        private readonly IDictionary<object, string> anchorsByObject = new Dictionary<object, string>();
+        private readonly Dictionary<string, object> objectsByAnchor = new Dictionary<string, object>();
+        private readonly Dictionary<object, string> anchorsByObject = new Dictionary<object, string>();
 
         /// <summary>
         /// Adds the specified anchor.

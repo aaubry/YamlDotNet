@@ -25,6 +25,8 @@
     <DebugSymbols>true</DebugSymbols>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
@@ -95,4 +97,18 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <PropertyGroup Label="Code Analysis">
+    <AnalysisLevel>latest-Recommended</AnalysisLevel>
+    <NoWarn>$(NoWarn);CA1051</NoWarn>  <!-- Do not declare visible instance fields -->
+    <NoWarn>$(NoWarn);CA1309</NoWarn>  <!-- Use ordinal string comparison -->
+    <NoWarn>$(NoWarn);CA1716</NoWarn>  <!-- Identifiers should not match keywords -->
+    <NoWarn>$(NoWarn);CA1510</NoWarn>  <!-- Use ArgumentNullException.ThrowIfNull -->
+    <NoWarn>$(NoWarn);CA1711</NoWarn>  <!-- Identifiers should not have incorrect suffix -->
+    <NoWarn>$(NoWarn);CA1200</NoWarn>  <!-- Avoid using cref tags with a prefix -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>  <!-- Underscores in variables -->
+    <NoWarn>$(NoWarn);CA1725</NoWarn>  <!-- Parameter names should match base declaration and other partial definitions -->
+    <NoWarn>$(NoWarn);CS1061;CA1016</NoWarn>  <!-- Mark assemblies with assembly version -->
+  </PropertyGroup>
+
 </Project>

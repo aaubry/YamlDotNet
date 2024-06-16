@@ -117,7 +117,7 @@ namespace YamlDotNet.Core
             return false;
         }
 
-        private bool IsMergeToken(LinkedListNode<ParsingEvent> node)
+        private static bool IsMergeToken(LinkedListNode<ParsingEvent> node)
         {
             return node.Value is Scalar merge && merge.Value == "<<";
         }
@@ -220,7 +220,7 @@ namespace YamlDotNet.Core
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            private IEnumerable<LinkedListNode<ParsingEvent>> Enumerate(LinkedListNode<ParsingEvent>? node)
+            private static IEnumerable<LinkedListNode<ParsingEvent>> Enumerate(LinkedListNode<ParsingEvent>? node)
             {
                 while (node != null)
                 {

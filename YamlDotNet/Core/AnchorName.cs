@@ -26,7 +26,7 @@ namespace YamlDotNet.Core
 {
     public struct AnchorName : IEquatable<AnchorName>
     {
-        public static readonly AnchorName Empty = default;
+        public static readonly AnchorName Empty;
 
         // https://yaml.org/spec/1.2/spec.html#id2785586
         private static readonly Regex AnchorPattern = new Regex(@"^[^\[\]\{\},]+$", StandardRegexOptions.Compiled);

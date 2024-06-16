@@ -43,7 +43,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// If true, write the output in canonical form.
         /// </summary>
-        public bool IsCanonical { get; } = false;
+        public bool IsCanonical { get; }
 
         /// <summary>
         /// If true, write output without anchor names.
@@ -61,7 +61,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Indent sequences. The default is to not indent.
         /// </summary>
-        public bool IndentSequences { get; } = false;
+        public bool IndentSequences { get; }
 
         public static readonly EmitterSettings Default = new EmitterSettings();
 

@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization
         internal ITypeResolver typeResolver;
         internal readonly LazyComponentRegistrationList<Nothing, IYamlTypeConverter> typeConverterFactories;
         internal readonly LazyComponentRegistrationList<ITypeInspector, ITypeInspector> typeInspectorFactories;
-        internal bool includeNonPublicProperties = false;
+        internal bool includeNonPublicProperties;
         internal Settings settings;
         internal YamlFormatter yamlFormatter = YamlFormatter.Default;
 
