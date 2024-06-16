@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+
+    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
+    <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
+
+    <LangVersion>12.0</LangVersion>
+
+  </PropertyGroup>
+
+</Project>
