@@ -4,13 +4,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <LangVersion></LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
-      <Name>YamlDotNet</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
