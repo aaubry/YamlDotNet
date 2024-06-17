@@ -104,7 +104,8 @@ namespace YamlDotNet.Serialization
                         duplicateKeyChecking,
                         typeConverter,
                         enumNamingConvention)
-                }
+                },
+                { typeof(FsharpListNodeDeserializer), _ => new FsharpListNodeDeserializer(enumNamingConvention) },
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>

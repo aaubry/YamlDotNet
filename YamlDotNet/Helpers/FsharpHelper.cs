@@ -5,14 +5,14 @@ namespace YamlDotNet.Helpers
 {
     public static class FsharpHelper
     {
-        private static bool IsFsharp(Type t)
+        private static bool IsFsharpCore(Type t)
         {
             return t.Namespace == "Microsoft.FSharp.Core";
         }
 
         public static bool IsOptionType(Type t)
         {
-            return IsFsharp(t) && t.Name == "FSharpOption`1";
+            return IsFsharpCore(t) && t.Name == "FSharpOption`1";
         }
 
         public static Type? GetOptionUnderlyingType(Type t)
@@ -33,6 +33,28 @@ namespace YamlDotNet.Helpers
             }
 
             return objectDescriptor.Type.GetProperty("Value").GetValue(objectDescriptor.Value);
+        }
+
+        public static bool IsFsharpListType(Type t)
+        {
+            return t.Namespace == "Microsoft.FSharp.Collections" && t.Name == "FSharpList`1";
+        }
+
+        public static object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr)
+        {
+            if (!IsFsharpListType(t))
+            {
+                return null;
+            }
+
+            var fsharpList =
+                t.Assembly
+                .GetType("Microsoft.FSharp.Collections.ListModule")
+                .GetMethod("OfArray")
+                .MakeGenericMethod(itemsType)
+                .Invoke(null, new[] { arr });
+
+            return fsharpList;
         }
     }
 }
