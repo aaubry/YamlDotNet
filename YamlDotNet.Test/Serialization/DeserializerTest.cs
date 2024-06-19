@@ -111,6 +111,36 @@ cars:
         }
 
         [Fact]
+        public void Deserialize_YamlWithCircularReferenceInArray_ReturnsModel()
+        {
+            var yaml = @"
+sessions:
+- &s001_FunWithLetters
+  name: Fun With Letters
+  greeter: &a001_Jill
+    name: Jill
+    sessions:
+    - *s001_FunWithLetters
+attendees:
+- *a001_Jill
+";
+
+            var sut = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            var conference = sut.Deserialize<Conference>(yaml);
+            var jill = conference.Attendees.Single(a => a.Name == "Jill");
+            var session = conference.Sessions.Single(s => s.Name == "Fun With Letters");
+
+            jill.Should().NotBeNull();
+            jill.Sessions.ShouldBeEquivalentTo(new[] { session });
+
+            session.Should().NotBeNull();
+            session.Greeter.Should().Be(jill);
+        }
+
+        [Fact]
         public void SetterOnlySetsWithoutException()
         {
             var yaml = @"
@@ -408,6 +438,26 @@ name: Jake
             string EngineType { get; }
 
             string DriveType { get; }
+        }
+
+        public class Conference
+        {
+            public Session[] Sessions { get; private set; }
+
+            public Attendee[] Attendees { get; private set; }
+        }
+        public class Attendee
+        {
+            public string Name { get; private set; }
+
+            public Session[] Sessions { get; private set; }
+        }
+
+        public class Session
+        {
+            public string Name { get; private set; }
+
+            public Attendee Greeter { get; private set; }
         }
     }
 }
