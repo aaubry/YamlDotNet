@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
@@ -60,6 +61,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
         void IObjectGraphTraversalStrategy.Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context)
         {
             Traverse("<root>", graph, visitor, context, new Stack<ObjectPathSegment>(maxRecursion));
+        }
+
+        public async Task TraverseAsync<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context)
+        {
+            throw new NotImplementedException();
         }
 
         protected struct ObjectPathSegment

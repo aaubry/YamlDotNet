@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.Utilities;
@@ -77,9 +78,19 @@ namespace YamlDotNet.Serialization
             return Deserialize<T>(new Parser(input));
         }
 
+        public async Task<T> DeserializeAsync<T>(TextReader input)
+        {
+            return await DeserializeAsync<T>(new Parser(input));
+        }
+
         public T Deserialize<T>(IParser parser)
         {
             return (T)Deserialize(parser, typeof(T))!; // We really want an exception if we are trying to deserialize null into a non-nullable type
+        }
+
+        public async Task<T> DeserializeAsync<T>(IParser parser)
+        {
+            return (T)(await DeserializeAsync(parser, typeof(T)))!;
         }
 
         public object? Deserialize(string input)
@@ -92,9 +103,19 @@ namespace YamlDotNet.Serialization
             return Deserialize(input, typeof(object));
         }
 
+        public async Task<object?> DeserializeAsync(TextReader input)
+        {
+            return await DeserializeAsync(input, typeof(object));
+        }
+
         public object? Deserialize(IParser parser)
         {
             return Deserialize(parser, typeof(object));
+        }
+
+        public async Task<object?> DeserializeAsync(IParser parser)
+        {
+            return await DeserializeAsync(parser, typeof(object));
         }
 
         public object? Deserialize(string input, Type type)
@@ -106,6 +127,11 @@ namespace YamlDotNet.Serialization
         public object? Deserialize(TextReader input, Type type)
         {
             return Deserialize(new Parser(input), type);
+        }
+
+        public async Task<object?> DeserializeAsync(TextReader input, Type type)
+        {
+            return await DeserializeAsync(new Parser(input), type);
         }
 
         /// <summary>
@@ -149,6 +175,17 @@ namespace YamlDotNet.Serialization
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Deserializes an object of the specified type.
+        /// </summary>
+        /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>
+        /// <param name="type">The static type of the object to deserialize.</param>
+        /// <returns>A task that contains the deserialized object on success.</returns>
+        public async Task<object?> DeserializeAsync(IParser parser, Type type)
+        {
+            throw new NotImplementedException();
         }
     }
 }

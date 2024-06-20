@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -95,6 +96,11 @@ namespace YamlDotNet.Serialization
             Serialize(new Emitter(writer, emitterSettings), graph);
         }
 
+        public async Task SerializeAsync(TextWriter writer, object? graph)
+        {
+            await SerializeAsync(new Emitter(writer, emitterSettings), graph);
+        }
+
         /// <summary>
         /// Serializes the specified object.
         /// </summary>
@@ -104,6 +110,11 @@ namespace YamlDotNet.Serialization
         public void Serialize(TextWriter writer, object? graph, Type type)
         {
             Serialize(new Emitter(writer, emitterSettings), graph, type);
+        }
+
+        public async Task SerializeAsync(TextWriter writer, object? graph, Type type)
+        {
+            await SerializeAsync(new Emitter(writer, emitterSettings), graph, type);
         }
 
         /// <summary>
@@ -119,6 +130,16 @@ namespace YamlDotNet.Serialization
             }
 
             EmitDocument(emitter, graph, null);
+        }
+
+        public async Task SerializeAsync(IEmitter emitter, object? graph)
+        {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException(nameof(emitter));
+            }
+
+            await EmitDocumentAsync(emitter, graph, null);
         }
 
         /// <summary>
@@ -142,6 +163,21 @@ namespace YamlDotNet.Serialization
             EmitDocument(emitter, graph, type);
         }
 
+        public async Task SerializeAsync(IEmitter emitter, object? graph, Type type)
+        {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException(nameof(emitter));
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            await EmitDocumentAsync(emitter, graph, type);
+        }
+
         private void EmitDocument(IEmitter emitter, object? graph, Type? type)
         {
             emitter.Emit(new StreamStart());
@@ -151,6 +187,17 @@ namespace YamlDotNet.Serialization
 
             emitter.Emit(new DocumentEnd(true));
             emitter.Emit(new StreamEnd());
+        }
+
+        private async Task EmitDocumentAsync(IEmitter emitter, object? graph, Type? type)
+        {
+            await emitter.EmitAsync(new StreamStart());
+            await emitter.EmitAsync(new DocumentStart());
+
+            await valueSerializer.SerializeValueAsync(emitter, graph, type);
+
+            await emitter.EmitAsync(new DocumentEnd(true));
+            await emitter.EmitAsync(new StreamEnd());
         }
     }
 }
