@@ -29,8 +29,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticTypeInspectorFile : File
     {
+        private readonly GeneratorExecutionContext context;
+
         public StaticTypeInspectorFile(Action<string, bool> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
         {
+            this.context = context;
         }
 
         public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
@@ -102,6 +105,8 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
         {
+            var allowNulls = type.NullableAnnotation.HasFlag(NullableAnnotation.Annotated) && context.Compilation.Options.NullableContextOptions.AnnotationsEnabled();
+
             Write($"new StaticPropertyDescriptor(_typeResolver, accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
             foreach (var attribute in attributes)
             {
@@ -145,7 +150,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         break;
                 }
             }
-            Write($"}}){finalChar}");
+            Write($"}}, {allowNulls.ToString().ToLower()}){finalChar}");
 
         }
     }

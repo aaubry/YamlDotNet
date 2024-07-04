@@ -60,6 +60,7 @@ namespace YamlDotNet.Serialization
         private bool ignoreUnmatched;
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
+        private bool enforceNullability;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -103,7 +104,8 @@ namespace YamlDotNet.Serialization
                         ignoreUnmatched,
                         duplicateKeyChecking,
                         typeConverter,
-                        enumNamingConvention)
+                        enumNamingConvention,
+                        enforceNullability)
                 }
             };
 
@@ -330,6 +332,16 @@ namespace YamlDotNet.Serialization
             }
 
             where(nodeTypeResolverFactories.CreateTrackingRegistrationLocationSelector(typeof(TNodeTypeResolver), (wrapped, _) => nodeTypeResolverFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
+        /// Enforce whether null values can be set on non-nullable properties and fields.
+        /// </summary>
+        /// <returns>This deserializer builder.</returns>
+        public DeserializerBuilder WithEnforceNullability()
+        {
+            enforceNullability = true;
             return this;
         }
 

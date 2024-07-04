@@ -68,6 +68,8 @@ namespace YamlDotNet.Serialization
 
             public string Name { get { return baseDescriptor.Name; } }
 
+            public bool AllowNulls { get => baseDescriptor.AllowNulls; }
+
             public bool CanWrite { get { return baseDescriptor.CanWrite; } }
 
             public Type Type { get { return baseDescriptor.Type; } }

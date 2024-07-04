@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -270,16 +271,56 @@ namespace YamlDotNet
             // on netstandard1.3
             var result = new List<Attribute>();
             var type = member.DeclaringType;
+            var name = member.Name;
 
             while (type != null)
             {
-                type.GetPublicProperty(member.Name);
-                result.AddRange(member.GetCustomAttributes(typeof(TAttribute)));
+                var property = type.GetPublicProperty(name);
+
+                if (property != null)
+                {
+                    result.AddRange(property.GetCustomAttributes(typeof(TAttribute)));
+                }
 
                 type = type.BaseType();
             }
 
             return result.ToArray();
+        }
+        private static readonly ConcurrentDictionary<Type, bool> typesHaveNullContext = new ConcurrentDictionary<Type, bool>();
+        public static bool AcceptsNull(this MemberInfo member)
+        {
+            var result = true; //default to allowing nulls, this will be set to false if there is a null context on the type
+#if NET8_0_OR_GREATER
+            var typeHasNullContext = typesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
+            {
+                var attributes = t.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
+                return (attributes?.Length ?? 0) > 0;
+            });
+
+            if (typeHasNullContext)
+            {
+                // we have a nullable context on that type, only allow null if the NullableAttribute is on the member.
+                var memberAttributes = member.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableAttribute), true);
+                result = (memberAttributes?.Length ?? 0) > 0;
+            }
+
+            return result;
+#else
+            var typeHasNullContext = typesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
+            {
+                var attributes = t.GetCustomAttributes(true);
+                return attributes.Any(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableContextAttribute");
+            });
+
+            if (typeHasNullContext)
+            {
+                var memberAttributes = member.GetCustomAttributes(true);
+                result = memberAttributes.Any(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableAttribute");
+            }
+
+            return result;
+#endif
         }
     }
 }

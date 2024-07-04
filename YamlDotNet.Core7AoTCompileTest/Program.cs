@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using YamlDotNet.Core;
 using YamlDotNet.Core7AoTCompileTest.Model;
 using YamlDotNet.Serialization;
@@ -171,6 +172,31 @@ Console.WriteLine("Length: <{0}>", o.Length);
 Console.WriteLine("Items[0]: <{0}>", string.Join(',', o[0].myArray));
 Console.WriteLine("Items[1]: <{0}>", string.Join(',', o[1].myArray));
 
+deserializer = new StaticDeserializerBuilder(aotContext).WithEnforceNullability().Build();
+yaml = "Nullable: null";
+var nullable = deserializer.Deserialize<NullableTestClass>(yaml);
+Console.WriteLine("Nullable Value (should be empty): <{0}>", nullable.Nullable);
+yaml = "NotNullable: test";
+nullable = deserializer.Deserialize<NullableTestClass>(yaml);
+Console.WriteLine("NotNullable Value (should be test): <{0}>", nullable.NotNullable);
+try
+{
+    yaml = "NotNullable: null";
+    nullable = deserializer.Deserialize<NullableTestClass>(yaml);
+    throw new Exception("NotNullable should not be allowed to be set to null.");
+}
+catch (YamlException exception)
+{
+    if (exception.InnerException is NullReferenceException)
+    {
+        Console.WriteLine("Exception thrown while setting non nullable value to null, as it should.");
+    }
+    else
+    {
+        throw new Exception("NotNullable should not be allowed to be set to null.");
+    }
+}
+
 [YamlSerializable]
 public class MyArray
 {
@@ -181,6 +207,13 @@ public class MyArray
 public class Inner
 {
     public string? Text { get; set; }
+}
+
+[YamlSerializable]
+public class NullableTestClass
+{
+    public string? Nullable { get; set; }
+    public string NotNullable { get; set; }
 }
 
 [YamlSerializable]

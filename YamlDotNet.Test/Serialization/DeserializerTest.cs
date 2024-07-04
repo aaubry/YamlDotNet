@@ -334,6 +334,38 @@ name: Jake
         }
 
         [Fact]
+        public void EnforceNulalbleTypesWhenNullThrowsException()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
+            var yaml = @"
+Test: null
+";
+            try
+            {
+                var o = deserializer.Deserialize<NonNullableClass>(yaml);
+            }
+            catch (YamlException e)
+            {
+                if (e.InnerException is NullReferenceException)
+                {
+                    return;
+                }
+            }
+
+            throw new Exception("Non nullable property was set to null.");
+        }
+
+        [Fact]
+        public void EnforceNullableTypesWhenNotNullDoesNotThrowException()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
+            var yaml = @"
+Test: test 123
+";
+            var o = deserializer.Deserialize<NonNullableClass>(yaml);
+        }
+
+        [Fact]
         public void SerializeStateMethodsGetCalledOnce()
         {
             var yaml = "Test: Hi";
@@ -343,6 +375,13 @@ name: Jake
             Assert.Equal(1, test.OnDeserializedCallCount);
             Assert.Equal(1, test.OnDeserializingCallCount);
         }
+
+#nullable enable
+        public class NonNullableClass
+        {
+            public string Test { get; set; } = "Some default value";
+        }
+#nullable disable
 
         public class TestState
         {

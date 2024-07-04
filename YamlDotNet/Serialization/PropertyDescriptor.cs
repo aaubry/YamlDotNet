@@ -27,11 +27,18 @@ namespace YamlDotNet.Serialization
     public sealed class PropertyDescriptor : IPropertyDescriptor
     {
         private readonly IPropertyDescriptor baseDescriptor;
-
         public PropertyDescriptor(IPropertyDescriptor baseDescriptor)
         {
             this.baseDescriptor = baseDescriptor;
             Name = baseDescriptor.Name;
+        }
+
+        public bool AllowNulls
+        {
+            get
+            {
+                return baseDescriptor.AllowNulls;
+            }
         }
 
         public string Name { get; set; }

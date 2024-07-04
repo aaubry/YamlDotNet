@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net70</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <PublishAot>true</PublishAot>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <Nullable>enable</Nullable>
@@ -20,9 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YamlDotNet.Analyzers.StaticGenerator\YamlDotNet.Analyzers.StaticGenerator.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\YamlDotNet.Analyzers.StaticGenerator\YamlDotNet.Analyzers.StaticGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\YamlDotNet.Core7AoTCompileTest.Model\YamlDotNet.Core7AoTCompileTest.Model.csproj" />
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj" />
   </ItemGroup>

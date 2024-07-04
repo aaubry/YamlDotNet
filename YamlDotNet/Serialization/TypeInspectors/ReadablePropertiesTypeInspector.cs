@@ -75,6 +75,8 @@ namespace YamlDotNet.Serialization.TypeInspectors
             public string Name => propertyInfo.Name;
             public Type Type => propertyInfo.PropertyType;
             public Type? TypeOverride { get; set; }
+            public bool AllowNulls { get => propertyInfo.AcceptsNull(); }
+
             public int Order { get; set; }
             public bool CanWrite => propertyInfo.CanWrite;
             public ScalarStyle ScalarStyle { get; set; }

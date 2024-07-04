@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -36,13 +38,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly bool duplicateKeyChecking;
         private readonly ITypeConverter typeConverter;
         private readonly INamingConvention enumNamingConvention;
+        private readonly bool enforceNullability;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory,
             ITypeInspector typeDescriptor,
             bool ignoreUnmatched,
             bool duplicateKeyChecking,
             ITypeConverter typeConverter,
-            INamingConvention enumNamingConvention)
+            INamingConvention enumNamingConvention,
+            bool enforceNullability)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
@@ -50,6 +54,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.duplicateKeyChecking = duplicateKeyChecking;
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
             this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
+            this.enforceNullability = enforceNullability;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -59,7 +64,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 value = null;
                 return false;
             }
-
             // Strip off the nullable type, if present. This is needed for nullable structs.
             var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
@@ -90,12 +94,18 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         propertyValuePromise.ValueAvailable += v =>
                         {
                             var convertedValue = typeConverter.ChangeType(v, property.Type, enumNamingConvention);
+
+                            NullCheck(convertedValue, property, propertyName);
+
                             property.Write(valueRef, convertedValue);
                         };
                     }
                     else
                     {
                         var convertedValue = typeConverter.ChangeType(propertyValue, property.Type, enumNamingConvention);
+
+                        NullCheck(convertedValue, property, propertyName);
+
                         property.Write(value, convertedValue);
                     }
                 }
@@ -115,6 +125,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             objectFactory.ExecuteOnDeserialized(value);
             return true;
+        }
+
+        public void NullCheck(object value, IPropertyDescriptor property, Scalar propertyName)
+        {
+            if (enforceNullability &&
+                value == null &&
+                !property.AllowNulls)
+            {
+                throw new YamlException(propertyName.Start, propertyName.End, "Strict nullability enforcement error.", new NullReferenceException("Yaml value is null when target property requires non null values."));
+            }
         }
     }
 }

@@ -61,6 +61,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             public string Name { get { return fieldInfo.Name; } }
             public Type Type { get { return fieldInfo.FieldType; } }
             public Type? TypeOverride { get; set; }
+            public bool AllowNulls { get => fieldInfo.AcceptsNull(); }
             public int Order { get; set; }
             public bool CanWrite { get { return !fieldInfo.IsInitOnly; } }
             public ScalarStyle ScalarStyle { get; set; }

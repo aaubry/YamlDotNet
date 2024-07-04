@@ -56,6 +56,7 @@ namespace YamlDotNet.Serialization
         private bool ignoreUnmatched;
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
+        private bool enforceNullability;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -91,7 +92,14 @@ namespace YamlDotNet.Serialization
                 { typeof(StaticArrayNodeDeserializer), _ => new StaticArrayNodeDeserializer(factory) },
                 { typeof(StaticDictionaryNodeDeserializer), _ => new StaticDictionaryNodeDeserializer(factory, duplicateKeyChecking) },
                 { typeof(StaticCollectionNodeDeserializer), _ => new StaticCollectionNodeDeserializer(factory) },
-                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(factory, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking, typeConverter, enumNamingConvention) },
+                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(factory,
+                    BuildTypeInspector(),
+                    ignoreUnmatched,
+                    duplicateKeyChecking,
+                    typeConverter,
+                    enumNamingConvention,
+                    enforceNullability)
+                },
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
@@ -180,6 +188,16 @@ namespace YamlDotNet.Serialization
             }
 
             where(nodeDeserializerFactories.CreateTrackingRegistrationLocationSelector(typeof(TNodeDeserializer), (wrapped, _) => nodeDeserializerFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
+        /// Enforce whether null values can be set on non-nullable properties and fields.
+        /// </summary>
+        /// <returns>This static deserializer builder.</returns>
+        public StaticDeserializerBuilder WithEnforceNullability()
+        {
+            enforceNullability = true;
             return this;
         }
 
