@@ -34,9 +34,9 @@ namespace YamlDotNet.Core
 
         public bool IsRequired { get; }
         public int TokenNumber { get; }
-        public int Index => cursor.Index;
-        public int Line => cursor.Line;
-        public int LineOffset => cursor.LineOffset;
+        public long Index => cursor.Index;
+        public long Line => cursor.Line;
+        public long LineOffset => cursor.LineOffset;
 
         public Mark Mark => cursor.Mark();
 

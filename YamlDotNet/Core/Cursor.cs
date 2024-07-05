@@ -26,9 +26,9 @@ namespace YamlDotNet.Core
     [DebuggerStepThrough]
     public sealed class Cursor
     {
-        public int Index { get; private set; }
-        public int Line { get; private set; }
-        public int LineOffset { get; private set; }
+        public long Index { get; private set; }
+        public long Line { get; private set; }
+        public long LineOffset { get; private set; }
 
         public Cursor()
         {

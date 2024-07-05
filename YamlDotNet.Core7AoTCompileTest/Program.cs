@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 using YamlDotNet.Core7AoTCompileTest.Model;
 using YamlDotNet.Serialization;

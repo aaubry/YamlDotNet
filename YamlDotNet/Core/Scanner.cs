@@ -58,7 +58,7 @@ namespace YamlDotNet.Core
             { 'P', '\x2029' }
         };
 
-        private readonly Stack<int> indents = new Stack<int>();
+        private readonly Stack<long> indents = new Stack<long>();
         private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
         private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
         private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
@@ -67,10 +67,10 @@ namespace YamlDotNet.Core
         private bool streamStartProduced;
         private bool streamEndProduced;
         private bool plainScalarFollowedByComment;
-        private int flowSequenceStartLine;
+        private long flowSequenceStartLine;
         private bool flowCollectionFetched = false;
         private bool startFlowCollectionFetched = false;
-        private int indent = -1;
+        private long indent = -1;
         private bool flowScalarFetched;
         private bool simpleKeyAllowed;
         private int flowLevel;
@@ -696,7 +696,7 @@ namespace YamlDotNet.Core
         /// the BLOCK-END token.
         /// </summary>
 
-        private void UnrollIndent(int column)
+        private void UnrollIndent(long column)
         {
             // In the flow context, do nothing.
 
@@ -1220,7 +1220,7 @@ namespace YamlDotNet.Core
         /// the current column is greater than the indentation level.  In this case,
         /// append or insert the specified token into the token queue.
         /// </summary>
-        private void RollIndent(int column, int number, bool isSequence, Mark position)
+        private void RollIndent(long column, int number, bool isSequence, Mark position)
         {
             // In the flow context, do nothing.
 
@@ -1492,7 +1492,7 @@ namespace YamlDotNet.Core
 
             var chomping = 0;
             var increment = 0;
-            var currentIndent = 0;
+            var currentIndent = (long)0;
             var leadingBlank = false;
             bool? isFirstLine = null;
 
@@ -1683,10 +1683,10 @@ namespace YamlDotNet.Core
         /// indentation level if needed.
         /// </summary>
 
-        private int ScanBlockScalarBreaks(int currentIndent, StringBuilder breaks, bool isLiteral, ref Mark end, ref bool? isFirstLine)
+        private long ScanBlockScalarBreaks(long currentIndent, StringBuilder breaks, bool isLiteral, ref Mark end, ref bool? isFirstLine)
         {
-            var maxIndent = 0;
-            var indentOfFirstLine = -1;
+            var maxIndent = (long)0;
+            var indentOfFirstLine = (long)-1;
 
             end = cursor.Mark();
 
