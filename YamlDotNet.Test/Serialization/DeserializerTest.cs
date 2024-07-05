@@ -376,12 +376,30 @@ Test: test 123
             Assert.Equal(1, test.OnDeserializingCallCount);
         }
 
+        [Fact]
+        public void WithCaseInsensitivePropertyMatching_IgnoreCase()
+        {
+            var yaml = @"PrOpErTy: Value
+fIeLd: Value
+";
+            var deserializer = new DeserializerBuilder().WithCaseInsensitivePropertyMatching().Build();
+            var test = deserializer.Deserialize<CaseInsensitiveTest>(yaml);
+            Assert.Equal("Value", test.Property);
+            Assert.Equal("Value", test.Field);
+        }
+
 #nullable enable
         public class NonNullableClass
         {
             public string Test { get; set; } = "Some default value";
         }
 #nullable disable
+
+        public class CaseInsensitiveTest
+        {
+            public string Property { get; set; }
+            public string Field;
+        }
 
         public class TestState
         {

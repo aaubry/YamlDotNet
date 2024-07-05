@@ -57,6 +57,7 @@ namespace YamlDotNet.Serialization
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
         private bool enforceNullability;
+        private bool caseInsensitivePropertyMatching;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -98,7 +99,8 @@ namespace YamlDotNet.Serialization
                     duplicateKeyChecking,
                     typeConverter,
                     enumNamingConvention,
-                    enforceNullability)
+                    enforceNullability,
+                    caseInsensitivePropertyMatching)
                 },
             };
 
@@ -188,6 +190,16 @@ namespace YamlDotNet.Serialization
             }
 
             where(nodeDeserializerFactories.CreateTrackingRegistrationLocationSelector(typeof(TNodeDeserializer), (wrapped, _) => nodeDeserializerFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore case when matching property names.
+        /// </summary>
+        /// <returns></returns>
+        public StaticDeserializerBuilder WithCaseInsensitivePropertyMatching()
+        {
+            caseInsensitivePropertyMatching = true;
             return this;
         }
 

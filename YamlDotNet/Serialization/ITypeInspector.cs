@@ -48,7 +48,8 @@ namespace YamlDotNet.Serialization
         /// Determines if an exception or null should be returned if <paramref name="name"/> can't be
         /// found in <paramref name="type"/>
         /// </param>
+        /// <param name="caseInsensitivePropertyMatching">If true use case-insitivity when choosing the property or field.</param>
         /// <returns></returns>
-        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched);
+        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched, bool caseInsensitivePropertyMatching);
     }
 }

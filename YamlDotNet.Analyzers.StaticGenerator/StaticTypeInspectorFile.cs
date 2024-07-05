@@ -74,7 +74,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             #endregion
 
             #region GetProperty
-            Write("public YamlDotNet.Serialization.IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)");
+            Write("public YamlDotNet.Serialization.IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched, bool caseInsensitivePropertyMatching)");
             Write("{"); Indent();
             foreach (var o in classSyntaxReceiver.Classes)
             {
@@ -92,6 +92,21 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                     Write($"if (name == \"{property.Name}\") return ", false);
                     WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';');
                 }
+                Write("if (caseInsensitivePropertyMatching)");
+                Write("{"); Indent();
+                foreach (var field in classObject.FieldSymbols)
+                {
+                    Write($"if (name.Equals(\"{field.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
+                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';');
+                }
+                foreach (var property in classObject.PropertySymbols)
+                {
+                    Write($"if (name.Equals(\"{property.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';');
+                }
+
+                UnIndent(); Write("}");
+
                 UnIndent(); Write("}");
 
             }

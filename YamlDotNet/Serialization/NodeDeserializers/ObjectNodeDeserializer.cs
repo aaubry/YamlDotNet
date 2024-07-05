@@ -39,6 +39,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly ITypeConverter typeConverter;
         private readonly INamingConvention enumNamingConvention;
         private readonly bool enforceNullability;
+        private readonly bool caseInsensitivePropertyMatching;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory,
             ITypeInspector typeDescriptor,
@@ -46,7 +47,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             bool duplicateKeyChecking,
             ITypeConverter typeConverter,
             INamingConvention enumNamingConvention,
-            bool enforceNullability)
+            bool enforceNullability,
+            bool caseInsensitivePropertyMatching)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
@@ -55,6 +57,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
             this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
             this.enforceNullability = enforceNullability;
+            this.caseInsensitivePropertyMatching = caseInsensitivePropertyMatching;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -80,7 +83,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 try
                 {
-                    var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched);
+                    var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched, caseInsensitivePropertyMatching);
                     if (property == null)
                     {
                         parser.SkipThisAndNestedEvents();
