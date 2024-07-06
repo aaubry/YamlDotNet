@@ -59,6 +59,16 @@ namespace YamlDotNet
             return type.GetTypeInfo().IsEnum;
         }
 
+        public static bool IsRequired(this MemberInfo member)
+        {
+#if NET8_0_OR_GREATER
+            var result = member.GetCustomAttributes<System.Runtime.CompilerServices.RequiredMemberAttribute>().Any();
+#else
+            var result = member.GetCustomAttributes(true).Any(x => x.GetType().FullName == "System.Runtime.CompilerServices.RequiredMemberAttribute");
+#endif
+            return result;
+        }
+
         /// <summary>
         /// Determines whether the specified type has a default constructor.
         /// </summary>

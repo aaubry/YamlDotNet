@@ -74,6 +74,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             }
 
             public string Name => propertyInfo.Name;
+            public bool Required { get => propertyInfo.IsRequired(); }
             public Type Type => propertyInfo.PropertyType;
             public Type? TypeOverride { get; set; }
             public bool AllowNulls { get => propertyInfo.AcceptsNull(); }

@@ -40,6 +40,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly INamingConvention enumNamingConvention;
         private readonly bool enforceNullability;
         private readonly bool caseInsensitivePropertyMatching;
+        private readonly bool enforceRequiredProperties;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory,
             ITypeInspector typeDescriptor,
@@ -48,7 +49,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             ITypeConverter typeConverter,
             INamingConvention enumNamingConvention,
             bool enforceNullability,
-            bool caseInsensitivePropertyMatching)
+            bool caseInsensitivePropertyMatching,
+            bool enforceRequiredProperties)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
@@ -58,6 +60,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
             this.enforceNullability = enforceNullability;
             this.caseInsensitivePropertyMatching = caseInsensitivePropertyMatching;
+            this.enforceRequiredProperties = enforceRequiredProperties;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -74,6 +77,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             objectFactory.ExecuteOnDeserializing(value);
 
             var consumedProperties = new HashSet<string>(StringComparer.Ordinal);
+            var consumedObjectProperties = new HashSet<string>(StringComparer.Ordinal);
+            var mark = Mark.Empty;
+
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
@@ -89,6 +95,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         parser.SkipThisAndNestedEvents();
                         continue;
                     }
+                    consumedObjectProperties.Add(property.Name);
 
                     var propertyValue = nestedObjectDeserializer(parser, property.Type);
                     if (propertyValue is IValuePromise propertyValuePromise)
@@ -123,6 +130,28 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 catch (Exception ex)
                 {
                     throw new YamlException(propertyName.Start, propertyName.End, "Exception during deserialization", ex);
+                }
+                mark = propertyName.End;
+            }
+
+            if (enforceRequiredProperties)
+            {
+                //TODO: Get properties marked as required on the object
+                //TODO: Compare those properties agains the consumedObjectProperties, throw if any are missing.
+                var properties = typeDescriptor.GetProperties(implementationType, value);
+                var missingPropertyNames = new List<string>();
+                foreach (var property in properties)
+                {
+                    if (property.Required && !consumedObjectProperties.Contains(property.Name))
+                    {
+                        missingPropertyNames.Add(property.Name);
+                    }
+                }
+
+                if (missingPropertyNames.Count > 0)
+                {
+                    var propertyNames = string.Join(",", missingPropertyNames);
+                    throw new YamlException(mark, mark, $"Missing properties, '{propertyNames}' in source yaml.");
                 }
             }
 

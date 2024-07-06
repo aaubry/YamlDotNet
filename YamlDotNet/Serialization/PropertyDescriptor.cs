@@ -43,6 +43,8 @@ namespace YamlDotNet.Serialization
 
         public string Name { get; set; }
 
+        public bool Required { get => baseDescriptor.Required; }
+
         public Type Type { get { return baseDescriptor.Type; } }
 
         public Type? TypeOverride

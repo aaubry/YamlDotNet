@@ -59,6 +59,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             }
 
             public string Name { get { return fieldInfo.Name; } }
+            public bool Required { get => fieldInfo.IsRequired(); }
             public Type Type { get { return fieldInfo.FieldType; } }
             public Type? TypeOverride { get; set; }
             public bool AllowNulls { get => fieldInfo.AcceptsNull(); }

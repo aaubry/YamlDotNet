@@ -33,6 +33,7 @@ namespace YamlDotNet.Serialization
         Type? TypeOverride { get; set; }
         int Order { get; set; }
         ScalarStyle ScalarStyle { get; set; }
+        bool Required { get; }
 
         T? GetCustomAttribute<T>() where T : Attribute;
 

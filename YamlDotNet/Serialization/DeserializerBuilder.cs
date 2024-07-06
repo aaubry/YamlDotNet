@@ -62,6 +62,7 @@ namespace YamlDotNet.Serialization
         private bool attemptUnknownTypeDeserialization;
         private bool enforceNullability;
         private bool caseInsensitivePropertyMatching;
+        private bool enforceRequiredProperties;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -107,7 +108,8 @@ namespace YamlDotNet.Serialization
                         typeConverter,
                         enumNamingConvention,
                         enforceNullability,
-                        caseInsensitivePropertyMatching)
+                        caseInsensitivePropertyMatching,
+                        enforceRequiredProperties)
                 }
             };
 
@@ -354,6 +356,15 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder WithEnforceNullability()
         {
             enforceNullability = true;
+            return this;
+        }
+        /// <summary>
+        /// Require that all members with the 'required' keyword be set by YAML.
+        /// </summary>
+        /// <returns></returns>
+        public DeserializerBuilder WithEnforceRequiredMembers()
+        {
+            enforceRequiredProperties = true;
             return this;
         }
 

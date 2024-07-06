@@ -388,6 +388,47 @@ fIeLd: Value
             Assert.Equal("Value", test.Field);
         }
 
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void WithRequiredMemberSet_ThrowsWhenFieldNotSet()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = "Property: test";
+            Assert.Throws<YamlException>(() =>
+            {
+                deserializer.Deserialize<RequiredMemberClass>(yaml);
+            });
+        }
+
+        [Fact]
+        public void WithRequiredMemberSet_ThrowsWhenPropertyNotSet()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = "Field: test";
+            Assert.Throws<YamlException>(() =>
+            {
+                deserializer.Deserialize<RequiredMemberClass>(yaml);
+            });
+        }
+
+        [Fact]
+        public void WithRequiredMemberSet_DoesNotThrow()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = @"Field: test-field
+Property: test-property";
+            var actual = deserializer.Deserialize<RequiredMemberClass>(yaml);
+            Assert.Equal("test-field", actual.Field);
+            Assert.Equal("test-property", actual.Property);
+        }
+
+        public class RequiredMemberClass
+        {
+            public required string Field = string.Empty;
+            public required string Property { get; set; } = string.Empty;
+        }
+#endif
+
 #nullable enable
         public class NonNullableClass
         {

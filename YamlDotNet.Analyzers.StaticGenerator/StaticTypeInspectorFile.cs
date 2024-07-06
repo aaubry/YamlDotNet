@@ -60,11 +60,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 Write("{"); Indent();
                 foreach (var field in classObject.FieldSymbols)
                 {
-                    WritePropertyDescriptor(field.Name, field.Type, !field.IsReadOnly, field.GetAttributes(), ',');
+                    WritePropertyDescriptor(field.Name, field.Type, !field.IsReadOnly, field.GetAttributes(), field.IsRequired, ',');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ',');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ',');
                 }
                 UnIndent(); Write("};");
                 UnIndent(); Write("}");
@@ -85,24 +85,24 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 foreach (var field in classObject.FieldSymbols)
                 {
                     Write($"if (name == \"{field.Name}\") return ");
-                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';');
+                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), field.IsRequired, ';');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
                     Write($"if (name == \"{property.Name}\") return ", false);
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ';');
                 }
                 Write("if (caseInsensitivePropertyMatching)");
                 Write("{"); Indent();
                 foreach (var field in classObject.FieldSymbols)
                 {
                     Write($"if (name.Equals(\"{field.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
-                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';');
+                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), field.IsRequired, ';');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
                     Write($"if (name.Equals(\"{property.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ';');
                 }
 
                 UnIndent(); Write("}");
@@ -118,7 +118,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             UnIndent(); Write("}");
         }
 
-        private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
+        private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, bool isRequired, char finalChar)
         {
             var allowNulls = type.NullableAnnotation.HasFlag(NullableAnnotation.Annotated) && context.Compilation.Options.NullableContextOptions.AnnotationsEnabled();
 
@@ -165,7 +165,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         break;
                 }
             }
-            Write($"}}, {allowNulls.ToString().ToLower()}){finalChar}");
+            Write($"}}, {allowNulls.ToString().ToLower()}, {isRequired.ToString().ToLower()}){finalChar}");
 
         }
     }

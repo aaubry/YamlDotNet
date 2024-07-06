@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -100,7 +102,8 @@ namespace YamlDotNet.Serialization
                     typeConverter,
                     enumNamingConvention,
                     enforceNullability,
-                    caseInsensitivePropertyMatching)
+                    caseInsensitivePropertyMatching,
+                    false) // the static builder doesn't support required attributes, yet.
                 },
             };
 
