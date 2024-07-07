@@ -429,6 +429,26 @@ Property: test-property";
         }
 #endif
 
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void EnumDeserializationUsesEnumMemberAttribute()
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yaml = "goodbye";
+            var actual = deserializer.Deserialize<EnumMemberedEnum>(yaml);
+            Assert.Equal(EnumMemberedEnum.Hello, actual);
+        }
+
+        public enum EnumMemberedEnum
+        {
+            No = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
+            Hello = 1
+
+        }
+#endif
+
 #nullable enable
         public class NonNullableClass
         {

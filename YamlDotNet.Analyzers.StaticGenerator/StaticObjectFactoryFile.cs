@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Json;
 using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
@@ -33,14 +32,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
             Write($"class StaticObjectFactory : YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory");
             Write("{"); Indent();
 
             Write("public override object Create(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes.Where(c => !c.Value.IsArray))
+            foreach (var o in syntaxReceiver.Classes.Where(c => !c.Value.IsArray))
             {
                 var classObject = o.Value;
                 if (o.Value.IsListOverride)
@@ -71,7 +70,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override Array CreateArray(Type type, int count)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsArray)
@@ -88,7 +87,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override bool IsDictionary(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsDictionary || classObject.IsDictionaryOverride)
@@ -108,7 +107,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override bool IsArray(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsArray)
@@ -126,7 +125,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override bool IsList(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsList || classObject.IsListOverride)
@@ -147,7 +146,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override Type GetKeyType(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsDictionary || classObject.IsDictionaryOverride)
@@ -176,7 +175,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override Type GetValueType(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (!(classObject.IsList || classObject.IsDictionary || classObject.IsDictionaryOverride || classObject.IsArray || classObject.IsListOverride))
@@ -202,7 +201,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
 
             //always support array, list, dictionary and Ienumerables of all types
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
@@ -214,20 +213,20 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return typeof(object);");
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnSerializing", (c) => c.OnSerializingMethods);
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnSerialized", (c) => c.OnSerializedMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnSerializing", (c) => c.OnSerializingMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnSerialized", (c) => c.OnSerializedMethods);
             UnIndent(); Write("}");
         }
 
-        private void WriteExecuteMethod(ClassSyntaxReceiver classSyntaxReceiver, string methodName, Func<ClassObject, IEnumerable<IMethodSymbol>> selector)
+        private void WriteExecuteMethod(SerializableSyntaxReceiver syntaxReceiver, string methodName, Func<ClassObject, IEnumerable<IMethodSymbol>> selector)
         {
             Write($"public override void {methodName}(object value)");
             Write("{"); Indent();
             Write("if (value == null) return;");
             Write("var type = value.GetType();");
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 var methods = selector(classObject);

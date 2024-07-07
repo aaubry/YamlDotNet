@@ -52,6 +52,6 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             _unindent();
         }
 
-        public abstract void Write(ClassSyntaxReceiver classSyntaxReceiver);
+        public abstract void Write(SerializableSyntaxReceiver classSyntaxReceiver);
     }
 }

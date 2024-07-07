@@ -189,6 +189,34 @@ SomeDictionary:
             Assert.Equal("d", dictionary["c"]);
         }
 
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void EnumDeserializationUsesEnumMemberAttribute()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = "goodbye";
+            var actual = deserializer.Deserialize<EnumMemberedEnum>(yaml);
+            Assert.Equal(EnumMemberedEnum.Hello, actual);
+        }
+
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttribute()
+        {
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            var actual = serializer.Serialize(EnumMemberedEnum.Hello);
+            Assert.Equal("goodbye", actual.TrimNewLines());
+        }
+
+        [YamlSerializable]
+        public enum EnumMemberedEnum
+        {
+            No = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
+            Hello = 1
+        }
+#endif
+
         private void ExecuteListOverrideTest<TClass>() where TClass : InterfaceLists
         {
             var yaml = @"Test:

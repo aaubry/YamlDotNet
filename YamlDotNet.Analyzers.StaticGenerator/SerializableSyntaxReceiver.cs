@@ -27,15 +27,24 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
 {
-    public class ClassSyntaxReceiver : ISyntaxContextReceiver
+    public class SerializableSyntaxReceiver : ISyntaxContextReceiver
     {
         public List<string> Log { get; } = new();
         public Dictionary<string, ClassObject> Classes { get; } = new Dictionary<string, ClassObject>();
+        public Dictionary<ITypeSymbol, List<EnumMappings>> EnumMappings { get; } = new Dictionary<ITypeSymbol, List<EnumMappings>>(SymbolEqualityComparer.Default);
         public INamedTypeSymbol? YamlStaticContextType { get; set; }
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
-            if (context.Node is ClassDeclarationSyntax classDeclarationSyntax)
+            if (context.Node is EnumDeclarationSyntax enumDeclarationSyntax)
+            {
+                var enumSymbol = context.SemanticModel.GetDeclaredSymbol(enumDeclarationSyntax)!;
+                if (enumSymbol.GetAttributes().Any(attribute => attribute.AttributeClass?.ToDisplayString() == "YamlDotNet.Serialization.YamlSerializableAttribute"))
+                {
+                    HandleEnum(enumSymbol);
+                }
+            }
+            else if (context.Node is ClassDeclarationSyntax classDeclarationSyntax)
             {
                 var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)!;
                 if (classSymbol.GetAttributes().Any())
@@ -53,7 +62,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                         foreach (var type in types.OfType<INamedTypeSymbol>())
                         {
-                            AddSerializableClass(type);
+                            if (type.TypeKind == TypeKind.Class)
+                            {
+                                AddSerializableClass(type);
+                            }
                         }
                     }
 
@@ -98,6 +110,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         {
                             classObject.PropertySymbols.Add(propertySymbol);
                             CheckForSupportedGeneric(propertySymbol.Type);
+                            HandleEnum(propertySymbol.Type);
                         }
                     }
                     else if (member is IFieldSymbol fieldSymbol)
@@ -106,6 +119,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         {
                             classObject.FieldSymbols.Add(fieldSymbol);
                             CheckForSupportedGeneric(fieldSymbol.Type);
+                            HandleEnum(fieldSymbol.Type);
                         }
                     }
                     else if (member is IMethodSymbol methodSymbol)
@@ -177,6 +191,31 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             {
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isDictionaryOverride: true));
                 CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[1]);
+            }
+        }
+
+        private void HandleEnum(ITypeSymbol type)
+        {
+            if (type.TypeKind == TypeKind.Enum)
+            {
+                var enumMembers = type.GetMembers();
+                var mappings = new List<EnumMappings>();
+                foreach (var member in enumMembers)
+                {
+                    if (member.Kind == SymbolKind.Field)
+                    {
+                        var enumMember = member.GetAttributes().FirstOrDefault(x => x.AttributeClass!.ToDisplayString() == "System.Runtime.Serialization.EnumMemberAttribute");
+                        var memberName = member.Name!;
+                        var memberValue = memberName;
+                        if (enumMember != null)
+                        {
+                            var argument = enumMember.NamedArguments.FirstOrDefault(x => x.Key == "Value");
+                            memberValue = (string)argument.Value.Value!;
+                        }
+                        mappings.Add(new EnumMappings(type, memberName, memberValue));
+                    }
+                }
+                this.EnumMappings[type] = mappings;
             }
         }
     }

@@ -29,10 +29,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
 
-        public ArrayNodeDeserializer(INamingConvention enumNamingConvention)
+        public ArrayNodeDeserializer(INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
             this.enumNamingConvention = enumNamingConvention;
+            this.typeInspector = typeInspector;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -46,7 +48,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention);
+            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention, typeInspector);
 
             var array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);

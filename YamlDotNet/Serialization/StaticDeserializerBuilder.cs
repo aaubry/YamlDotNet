@@ -91,7 +91,7 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(factory) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
-                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, yamlFormatter, enumNamingConvention) },
+                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, BuildTypeInspector(), yamlFormatter, enumNamingConvention) },
                 { typeof(StaticArrayNodeDeserializer), _ => new StaticArrayNodeDeserializer(factory) },
                 { typeof(StaticDictionaryNodeDeserializer), _ => new StaticDictionaryNodeDeserializer(factory, duplicateKeyChecking) },
                 { typeof(StaticCollectionNodeDeserializer), _ => new StaticCollectionNodeDeserializer(factory) },
@@ -447,7 +447,8 @@ namespace YamlDotNet.Serialization
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
-                    enumNamingConvention
+                    enumNamingConvention,
+                    BuildTypeInspector()
                 )
             );
         }

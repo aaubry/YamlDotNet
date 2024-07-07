@@ -95,10 +95,10 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory.Value) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
-                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, yamlFormatter, enumNamingConvention) },
-                { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer(enumNamingConvention) },
+                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, BuildTypeInspector(), yamlFormatter, enumNamingConvention) },
+                { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer(enumNamingConvention, BuildTypeInspector()) },
                 { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, duplicateKeyChecking) },
-                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value, enumNamingConvention) },
+                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value, enumNamingConvention, BuildTypeInspector()) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
                 {
                     typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value,
@@ -497,7 +497,8 @@ namespace YamlDotNet.Serialization
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
-                    enumNamingConvention
+                    enumNamingConvention,
+                    BuildTypeInspector()
                 )
             );
         }

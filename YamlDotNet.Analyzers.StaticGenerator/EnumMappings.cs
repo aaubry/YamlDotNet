@@ -19,30 +19,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
+using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Serialization
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
-    /// <summary>
-    /// Put this attribute either on serializable types or on the <see cref="StaticContext"/> that you want
-    /// the static analyzer to detect and use.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, Inherited = false, AllowMultiple = true)]
-    public sealed class YamlSerializableAttribute : Attribute
+    public class EnumMappings
     {
-        /// <summary>
-        /// Use this constructor if the attribute is placed on a serializable class.
-        /// </summary>
-        public YamlSerializableAttribute()
-        {
-        }
+        public ITypeSymbol Type { get; set; }
+        public string ActualName { get; set; }
+        public string EnumMemberValue { get; set; }
 
-        /// <summary>
-        /// Use this constructor if the attribute is placed on the <see cref="StaticContext"/>.
-        /// </summary>
-        /// <param name="serializableType">The type for which to include static code generation.</param>
-        public YamlSerializableAttribute(Type serializableType)
+        public EnumMappings(ITypeSymbol type, string actualName, string enumMemberValue)
         {
+            ActualName = actualName;
+            EnumMemberValue = enumMemberValue;
+            Type = type;
         }
     }
 }

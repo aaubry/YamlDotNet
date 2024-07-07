@@ -32,7 +32,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public void Execute(GeneratorExecutionContext context)
         {
-            if (!(context.SyntaxContextReceiver is ClassSyntaxReceiver receiver))
+            if (!(context.SyntaxContextReceiver is SerializableSyntaxReceiver receiver))
             {
                 return;
             }
@@ -54,11 +54,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            var classSyntaxReceiver = new ClassSyntaxReceiver();
-            context.RegisterForSyntaxNotifications(() => classSyntaxReceiver);
+            var syntaxReceiver = new SerializableSyntaxReceiver();
+            context.RegisterForSyntaxNotifications(() => syntaxReceiver);
         }
 
-        private string GenerateSource(ClassSyntaxReceiver classSyntaxReceiver)
+        private string GenerateSource(SerializableSyntaxReceiver syntaxReceiver)
         {
             var result = new StringBuilder();
             var indentation = 0;
@@ -89,17 +89,17 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 write("using System;", true);
                 write("using System.Collections.Generic;", true);
 
-                var namespaceName = classSyntaxReceiver.YamlStaticContextType?.ContainingNamespace.ContainingNamespace;
+                var namespaceName = syntaxReceiver.YamlStaticContextType?.ContainingNamespace.ContainingNamespace;
 
-                write($"namespace {classSyntaxReceiver.YamlStaticContextType?.GetNamespace() ?? "YamlDotNet.Static"}", true);
+                write($"namespace {syntaxReceiver.YamlStaticContextType?.GetNamespace() ?? "YamlDotNet.Static"}", true);
                 write("{", true); indent();
 
-                new StaticContextFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-                new StaticObjectFactoryFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-                new StaticTypeResolverFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-                new StaticPropertyDescriptorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-                new StaticTypeInspectorFile(write, indent, unindent, _context).Write(classSyntaxReceiver);
-                new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(classSyntaxReceiver);
+                new StaticContextFile(write, indent, unindent, _context).Write(syntaxReceiver);
+                new StaticObjectFactoryFile(write, indent, unindent, _context).Write(syntaxReceiver);
+                new StaticTypeResolverFile(write, indent, unindent, _context).Write(syntaxReceiver);
+                new StaticPropertyDescriptorFile(write, indent, unindent, _context).Write(syntaxReceiver);
+                new StaticTypeInspectorFile(write, indent, unindent, _context).Write(syntaxReceiver);
+                new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(syntaxReceiver);
 
                 unindent(); write("}", true);
             }

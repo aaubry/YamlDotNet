@@ -30,7 +30,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
             Write($"class StaticTypeResolver : YamlDotNet.Serialization.TypeResolvers.StaticTypeResolver");
             Write("{"); Indent();

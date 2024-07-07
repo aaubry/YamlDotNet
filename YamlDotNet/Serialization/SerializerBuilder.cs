@@ -106,7 +106,8 @@ namespace YamlDotNet.Serialization
                             quoteYaml1_1Strings,
                             defaultScalarStyle,
                             yamlFormatter,
-                            enumNamingConvention)
+                            enumNamingConvention,
+                            BuildTypeInspector())
                 }
             };
 
@@ -299,7 +300,8 @@ namespace YamlDotNet.Serialization
                     quoteYaml1_1Strings,
                     defaultScalarStyle,
                     yamlFormatter,
-                    enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                    enumNamingConvention,
+                    BuildTypeInspector()), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
 
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
@@ -357,7 +359,7 @@ namespace YamlDotNet.Serialization
                 .WithTypeConverter(new DateOnlyConverter(doubleQuotes: true))
                 .WithTypeConverter(new TimeOnlyConverter(doubleQuotes: true))
 #endif
-                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter, enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter, enumNamingConvention, BuildTypeInspector()), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>

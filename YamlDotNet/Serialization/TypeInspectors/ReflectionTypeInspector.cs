@@ -22,29 +22,51 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace YamlDotNet.Serialization.TypeInspectors
 {
-    /// <summary>
-    /// Returns the properties of a type that are both readable and writable.
-    /// </summary>
-    public sealed class ReadableAndWritablePropertiesTypeInspector : TypeInspectorSkeleton
+    public abstract class ReflectionTypeInspector : TypeInspectorSkeleton
     {
-        private readonly ITypeInspector innerTypeDescriptor;
-
-        public ReadableAndWritablePropertiesTypeInspector(ITypeInspector innerTypeDescriptor)
+        public override string GetEnumName(Type enumType, string name)
         {
-            this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+            foreach (var enumMember in enumType.GetMembers())
+            {
+                var attribute = enumMember.GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute?.Value == name)
+                {
+                    return enumMember.Name;
+                }
+            }
+#endif
+            return name;
+        }
+        public override string GetEnumValue(object enumValue)
+        {
+            if (enumValue == null)
+            {
+                return string.Empty;
+            }
+
+            var result = enumValue.ToString();
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+            var type = enumValue.GetType();
+            var enumMembers = type.GetMember(result);
+            if (enumMembers.Length > 0)
+            {
+                var attribute = enumMembers[0].GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute != null)
+                {
+                    result = attribute.Value;
+                }
+            }
+#endif
+            return result!;
         }
 
-        public override string GetEnumName(Type enumType, string name) => innerTypeDescriptor.GetEnumName(enumType, name);
-
-        public override string GetEnumValue(object enumValue) => this.innerTypeDescriptor.GetEnumValue(enumValue);
-
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
-        {
-            return innerTypeDescriptor.GetProperties(type, container)
-                .Where(p => p.CanWrite);
-        }
     }
 }

@@ -1487,6 +1487,22 @@ y:
             Assert.Equal(expected, result);
         }
 
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttribute()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var actual = serializer.Serialize(EnumMemberedEnum.Hello);
+            Assert.Equal("goodbye", actual.TrimNewLines());
+        }
+
+        public enum EnumMemberedEnum
+        {
+            [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
+            Hello = 1
+        }
+#endif
+
         public enum TestEnum
         {
             True,
@@ -2413,7 +2429,7 @@ Null: true
         {
             var serializer = new SerializerBuilder().WithYamlFormatter(new YamlFormatter
             {
-                FormatEnum = (o, namingConvention) => ((int)o).ToString(),
+                FormatEnum = (o, typeInspector, namingConvention) => ((int)o).ToString(),
                 PotentiallyQuoteEnums = (_) => false
             }).Build();
             var deserializer = DeserializerBuilder.Build();

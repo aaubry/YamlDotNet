@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class ObjectNodeDeserializer : INodeDeserializer
     {
         private readonly IObjectFactory objectFactory;
-        private readonly ITypeInspector typeDescriptor;
+        private readonly ITypeInspector typeInspector;
         private readonly bool ignoreUnmatched;
         private readonly bool duplicateKeyChecking;
         private readonly ITypeConverter typeConverter;
@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly bool enforceRequiredProperties;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory,
-            ITypeInspector typeDescriptor,
+            ITypeInspector typeInspector,
             bool ignoreUnmatched,
             bool duplicateKeyChecking,
             ITypeConverter typeConverter,
@@ -53,7 +53,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             bool enforceRequiredProperties)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
-            this.typeDescriptor = typeDescriptor ?? throw new ArgumentNullException(nameof(typeDescriptor));
+            this.typeInspector = typeInspector ?? throw new ArgumentNullException(nameof(ObjectNodeDeserializer.typeInspector));
             this.ignoreUnmatched = ignoreUnmatched;
             this.duplicateKeyChecking = duplicateKeyChecking;
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 try
                 {
-                    var property = typeDescriptor.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched, caseInsensitivePropertyMatching);
+                    var property = typeInspector.GetProperty(implementationType, null, propertyName.Value, ignoreUnmatched, caseInsensitivePropertyMatching);
                     if (property == null)
                     {
                         parser.SkipThisAndNestedEvents();
@@ -103,7 +103,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         var valueRef = value;
                         propertyValuePromise.ValueAvailable += v =>
                         {
-                            var convertedValue = typeConverter.ChangeType(v, property.Type, enumNamingConvention);
+                            var convertedValue = typeConverter.ChangeType(v, property.Type, enumNamingConvention, typeInspector);
 
                             NullCheck(convertedValue, property, propertyName);
 
@@ -112,7 +112,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        var convertedValue = typeConverter.ChangeType(propertyValue, property.Type, enumNamingConvention);
+                        var convertedValue = typeConverter.ChangeType(propertyValue, property.Type, enumNamingConvention, typeInspector);
 
                         NullCheck(convertedValue, property, propertyName);
 
@@ -138,7 +138,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             {
                 //TODO: Get properties marked as required on the object
                 //TODO: Compare those properties agains the consumedObjectProperties, throw if any are missing.
-                var properties = typeDescriptor.GetProperties(implementationType, value);
+                var properties = typeInspector.GetProperties(implementationType, value);
                 var missingPropertyNames = new List<string>();
                 foreach (var property in properties)
                 {

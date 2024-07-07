@@ -40,6 +40,10 @@ namespace YamlDotNet.Serialization.TypeInspectors
             this.namingConvention = namingConvention ?? throw new ArgumentNullException(nameof(namingConvention));
         }
 
+        public override string GetEnumName(Type enumType, string name) => this.innerTypeDescriptor.GetEnumName(enumType, name);
+
+        public override string GetEnumValue(object enumValue) => this.innerTypeDescriptor.GetEnumValue(enumValue);
+
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return innerTypeDescriptor.GetProperties(type, container)

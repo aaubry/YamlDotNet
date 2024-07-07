@@ -79,7 +79,7 @@ namespace YamlDotNet.Serialization
         /// By default it will be the string representation of the enum passed through the naming convention.
         /// </summary>
         /// <returns>A string representation of the enum</returns>
-        public virtual Func<object, INamingConvention, string> FormatEnum { get; set; } = (value, enumNamingConvention) =>
+        public virtual Func<object, ITypeInspector, INamingConvention, string> FormatEnum { get; set; } = (value, typeInspector, enumNamingConvention) =>
         {
             var result = string.Empty;
 
@@ -89,8 +89,9 @@ namespace YamlDotNet.Serialization
             }
             else
             {
-                result = value.ToString();
+                result = typeInspector.GetEnumValue(value);
             }
+
 
             result = enumNamingConvention.Apply(result);
 

@@ -36,13 +36,19 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private const string BooleanFalsePattern = "^(false|n|no|off)$";
         private readonly bool attemptUnknownTypeDeserialization;
         private readonly ITypeConverter typeConverter;
+        private readonly ITypeInspector typeInspector;
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;
 
-        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization, ITypeConverter typeConverter, YamlFormatter formatter, INamingConvention enumNamingConvention)
+        public ScalarNodeDeserializer(bool attemptUnknownTypeDeserialization,
+            ITypeConverter typeConverter,
+            ITypeInspector typeInspector,
+            YamlFormatter formatter,
+            INamingConvention enumNamingConvention)
         {
             this.attemptUnknownTypeDeserialization = attemptUnknownTypeDeserialization;
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
+            this.typeInspector = typeInspector;
             this.formatter = formatter;
             this.enumNamingConvention = enumNamingConvention;
         }
@@ -61,6 +67,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             if (underlyingType.IsEnum())
             {
                 var enumName = enumNamingConvention.Reverse(scalar.Value);
+
+                enumName = typeInspector.GetEnumName(underlyingType, enumName);
+
                 value = Enum.Parse(underlyingType, enumName, true);
                 return true;
             }
@@ -123,7 +132,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        value = typeConverter.ChangeType(scalar.Value, expectedType, enumNamingConvention);
+                        value = typeConverter.ChangeType(scalar.Value, expectedType, enumNamingConvention, typeInspector);
                     }
                     break;
             }

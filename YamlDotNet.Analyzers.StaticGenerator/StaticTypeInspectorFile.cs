@@ -36,7 +36,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             this.context = context;
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
             Write("public class StaticTypeInspector : YamlDotNet.Serialization.ITypeInspector");
             Write("{"); Indent();
@@ -50,7 +50,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             #region GetProperties
             Write("public IEnumerable<YamlDotNet.Serialization.IPropertyDescriptor> GetProperties(Type type, object container)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
@@ -76,7 +76,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             #region GetProperty
             Write("public YamlDotNet.Serialization.IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched, bool caseInsensitivePropertyMatching)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
@@ -114,6 +114,45 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("throw new ArgumentOutOfRangeException(\"Field or property not valid: \" + name);");
             UnIndent(); Write("}");
             #endregion
+
+            Write("public string GetEnumName(Type type, string name)");
+            Write("{"); Indent();
+            var prefix = string.Empty;
+            foreach (var map in syntaxReceiver.EnumMappings)
+            {
+                Write($"{prefix}if (type == typeof({map.Key.GetFullName()}))");
+                Write("{"); Indent();
+
+                foreach (var mapping in map.Value)
+                {
+                    Write($"if (name == \"{mapping.EnumMemberValue.Replace("\"", "\\\"")}\") return \"{mapping.ActualName}\";");
+                }
+
+                UnIndent(); Write("}");
+                prefix = "else ";
+            }
+            Write("return name;");
+            UnIndent(); Write("}");
+
+            prefix = string.Empty;
+            Write("public string GetEnumValue(object value)");
+            Write("{"); Indent();
+            Write("var type = value.GetType();");
+            foreach (var map in syntaxReceiver.EnumMappings)
+            {
+                Write($"{prefix}if (type == typeof({map.Key.GetFullName()}))");
+                Write("{"); Indent();
+
+                foreach (var mapping in map.Value)
+                {
+                    Write($"if (({mapping.Type.GetFullName()})value == {mapping.Type.GetFullName()}.{mapping.ActualName}) return  \"{mapping.EnumMemberValue.Replace("\"", "\\\"")}\";");
+                }
+
+                UnIndent(); Write("}");
+                prefix = "else ";
+            }
+            Write("return value.ToString();");
+            UnIndent(); Write("}");
 
             UnIndent(); Write("}");
         }

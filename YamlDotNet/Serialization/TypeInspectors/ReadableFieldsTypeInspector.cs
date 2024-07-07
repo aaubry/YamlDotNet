@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Returns the properties and fields of a type that are readable.
     /// </summary>
-    public sealed class ReadableFieldsTypeInspector : TypeInspectorSkeleton
+    public sealed class ReadableFieldsTypeInspector : ReflectionTypeInspector
     {
         private readonly ITypeResolver typeResolver;
 

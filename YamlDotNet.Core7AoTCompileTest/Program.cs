@@ -215,6 +215,11 @@ catch (YamlException exception)
     }
 }
 
+Console.WriteLine("The next line should say goodbye");
+Console.WriteLine(serializer.Serialize(EnumMemberedEnum.Hello));
+Console.WriteLine("The next line should say hello");
+Console.WriteLine(deserializer.Deserialize<EnumMemberedEnum>("goodbye"));
+
 [YamlSerializable]
 public class MyArray
 {
@@ -313,6 +318,15 @@ public enum MyTestEnum
 {
     Y = 0,
     Z = 1,
+}
+
+[YamlSerializable]
+public enum EnumMemberedEnum
+{
+    No = 0,
+
+    [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
+    Hello = 1
 }
 
 #pragma warning restore CS8604 // Possible null reference argument.

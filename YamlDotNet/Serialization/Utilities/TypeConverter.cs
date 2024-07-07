@@ -41,36 +41,11 @@ namespace YamlDotNet.Serialization.Utilities
         /// <typeparam name="T">The type to which the value is to be converted.</typeparam>
         /// <param name="value">The value to convert.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
+        /// <param name="typeInspector">The type inspector to use when getting information about a type.</param>
         /// <returns></returns>
-        public static T ChangeType<T>(object? value, INamingConvention enumNamingConvention)
+        public static T ChangeType<T>(object? value, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
-            return (T)ChangeType(value, typeof(T), enumNamingConvention)!; // This cast should always be valid
-        }
-
-        /// <summary>
-        /// Converts the specified value.
-        /// </summary>
-        /// <typeparam name="T">The type to which the value is to be converted.</typeparam>
-        /// <param name="value">The value to convert.</param>
-        /// <param name="provider">The provider.</param>
-        /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
-        /// <returns></returns>
-        public static T ChangeType<T>(object? value, IFormatProvider provider, INamingConvention enumNamingConvention)
-        {
-            return (T)ChangeType(value, typeof(T), provider, enumNamingConvention)!; // This cast should always be valid
-        }
-
-        /// <summary>
-        /// Converts the specified value.
-        /// </summary>
-        /// <typeparam name="T">The type to which the value is to be converted.</typeparam>
-        /// <param name="value">The value to convert.</param>
-        /// <param name="culture">The culture.</param>
-        /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
-        /// <returns></returns>
-        public static T ChangeType<T>(object? value, CultureInfo culture, INamingConvention enumNamingConvention)
-        {
-            return (T)ChangeType(value, typeof(T), culture, enumNamingConvention)!; // This cast should always be valid
+            return (T)ChangeType(value, typeof(T), enumNamingConvention, typeInspector)!; // This cast should always be valid
         }
 
         /// <summary>
@@ -79,10 +54,11 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="value">The value to convert.</param>
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
+        /// <param name="typeInspector">The type inspector to use when getting information about a type.</param>
         /// <returns></returns>
-        public static object? ChangeType(object? value, Type destinationType, INamingConvention enumNamingConvention)
+        public static object? ChangeType(object? value, Type destinationType, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
-            return ChangeType(value, destinationType, CultureInfo.InvariantCulture, enumNamingConvention);
+            return ChangeType(value, destinationType, CultureInfo.InvariantCulture, enumNamingConvention, typeInspector);
         }
 
         /// <summary>
@@ -92,10 +68,11 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <param name="provider">The format provider.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
+        /// <param name="typeInspector">The type inspector to use when getting information about a type.</param>
         /// <returns></returns>
-        public static object? ChangeType(object? value, Type destinationType, IFormatProvider provider, INamingConvention enumNamingConvention)
+        public static object? ChangeType(object? value, Type destinationType, IFormatProvider provider, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
-            return ChangeType(value, destinationType, new CultureInfoAdapter(CultureInfo.CurrentCulture, provider), enumNamingConvention);
+            return ChangeType(value, destinationType, new CultureInfoAdapter(CultureInfo.CurrentCulture, provider), enumNamingConvention, typeInspector);
         }
 
         /// <summary>
@@ -105,8 +82,9 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="destinationType">The type to which the value is to be converted.</param>
         /// <param name="culture">The culture.</param>
         /// <param name="enumNamingConvention">Naming convention to apply to enums.</param>
+        /// <param name="typeInspector">The type inspector to use when getting information about a type.</param>
         /// <returns></returns>
-        public static object? ChangeType(object? value, Type destinationType, CultureInfo culture, INamingConvention enumNamingConvention)
+        public static object? ChangeType(object? value, Type destinationType, CultureInfo culture, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
             // Handle null and DBNull
             if (value == null || value.IsDbNull())
@@ -129,7 +107,7 @@ namespace YamlDotNet.Serialization.Utilities
                 if (genericTypeDefinition == typeof(Nullable<>))
                 {
                     var innerType = destinationType.GetGenericArguments()[0];
-                    var convertedValue = ChangeType(value, innerType, culture, enumNamingConvention);
+                    var convertedValue = ChangeType(value, innerType, culture, enumNamingConvention, typeInspector);
                     return Activator.CreateInstance(destinationType, convertedValue);
                 }
             }
@@ -142,6 +120,7 @@ namespace YamlDotNet.Serialization.Utilities
                 if (value is string valueText)
                 {
                     valueText = enumNamingConvention.Reverse(valueText);
+                    valueText = typeInspector.GetEnumName(destinationType, valueText);
                     result = Enum.Parse(destinationType, valueText, true);
                 }
 
@@ -238,7 +217,7 @@ namespace YamlDotNet.Serialization.Utilities
             // Handle TimeSpan
             if (destinationType == typeof(TimeSpan))
             {
-                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture, enumNamingConvention)!);
+                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture, enumNamingConvention, typeInspector)!);
             }
 
             // Default to the Convert class

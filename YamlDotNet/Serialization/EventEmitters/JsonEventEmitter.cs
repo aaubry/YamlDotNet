@@ -30,12 +30,14 @@ namespace YamlDotNet.Serialization.EventEmitters
     {
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
 
-        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention)
+        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
             : base(nextEmitter)
         {
             this.formatter = formatter;
             this.enumNamingConvention = enumNamingConvention;
+            this.typeInspector = typeInspector;
         }
 
         public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
@@ -73,7 +75,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         var valueIsEnum = eventInfo.Source.Type.IsEnum();
                         if (valueIsEnum)
                         {
-                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, typeInspector, enumNamingConvention);
                             eventInfo.Style = formatter.PotentiallyQuoteEnums(value) ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain;
                             break;
                         }

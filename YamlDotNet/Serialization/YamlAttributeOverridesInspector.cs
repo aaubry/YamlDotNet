@@ -31,7 +31,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Applies the Yaml attribute overrides to another <see cref="ITypeInspector"/>.
     /// </summary>
-    public sealed class YamlAttributeOverridesInspector : TypeInspectorSkeleton
+    public sealed class YamlAttributeOverridesInspector : ReflectionTypeInspector
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly YamlAttributeOverrides overrides;

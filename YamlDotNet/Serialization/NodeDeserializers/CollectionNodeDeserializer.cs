@@ -33,11 +33,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     {
         private readonly IObjectFactory objectFactory;
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
 
-        public CollectionNodeDeserializer(IObjectFactory objectFactory, INamingConvention enumNamingConvention)
+        public CollectionNodeDeserializer(IObjectFactory objectFactory, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.enumNamingConvention = enumNamingConvention;
+            this.typeInspector = typeInspector;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
@@ -74,12 +76,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate, enumNamingConvention);
+            DeserializeHelper(itemType, parser, nestedObjectDeserializer, list!, canUpdate, enumNamingConvention, typeInspector);
 
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, INamingConvention enumNamingConvention)
+        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
             parser.Consume<SequenceStart>();
             while (!parser.TryConsume<SequenceEnd>(out var _))
@@ -92,7 +94,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (canUpdate)
                     {
                         var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
-                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem, enumNamingConvention);
+                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem, enumNamingConvention, typeInspector);
                     }
                     else
                     {
@@ -105,7 +107,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 }
                 else
                 {
-                    result.Add(TypeConverter.ChangeType(value, tItem, enumNamingConvention));
+                    result.Add(TypeConverter.ChangeType(value, tItem, enumNamingConvention, typeInspector));
                 }
             }
         }

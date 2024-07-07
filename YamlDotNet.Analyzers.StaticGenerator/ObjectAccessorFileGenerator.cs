@@ -32,9 +32,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"class {classObject.SanitizedClassName}_{classObject.GuidSuffix} : YamlDotNet.Serialization.IObjectAccessor");

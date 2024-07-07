@@ -23,12 +23,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace YamlDotNet.Serialization.TypeInspectors
 {
     public abstract class TypeInspectorSkeleton : ITypeInspector
     {
+        public abstract string GetEnumName(Type enumType, string name);
+
+        public abstract string GetEnumValue(object enumValue);
+
         public abstract IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container);
 
         public IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched, bool caseInsensitivePropertyMatching)
