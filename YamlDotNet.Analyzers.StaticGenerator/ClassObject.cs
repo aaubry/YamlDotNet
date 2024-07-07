@@ -32,7 +32,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         public string GuidSuffix { get; }
         public bool IsArray { get; }
         public bool IsDictionary { get; }
+        public bool IsDictionaryOverride { get; }
         public bool IsList { get; }
+        public bool IsListOverride { get; }
         public ITypeSymbol ModuleSymbol { get; }
         public List<IMethodSymbol> OnDeserializedMethods { get; }
         public List<IMethodSymbol> OnDeserializingMethods { get; }
@@ -41,7 +43,13 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         public List<IPropertySymbol> PropertySymbols { get; }
         public string SanitizedClassName { get; }
 
-        public ClassObject(string sanitizedClassName, ITypeSymbol moduleSymbol, bool isDictionary = false, bool isList = false, bool isArray = false)
+        public ClassObject(string sanitizedClassName,
+            ITypeSymbol moduleSymbol,
+            bool isDictionary = false,
+            bool isList = false,
+            bool isArray = false,
+            bool isListOverride = false,
+            bool isDictionaryOverride = false)
         {
             FieldSymbols = new List<IFieldSymbol>();
             PropertySymbols = new List<IPropertySymbol>();
@@ -50,12 +58,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             IsDictionary = isDictionary;
             IsList = isList;
             IsArray = isArray;
+            IsListOverride = isListOverride;
             ModuleSymbol = moduleSymbol;
             OnDeserializedMethods = new List<IMethodSymbol>();
             OnDeserializingMethods = new List<IMethodSymbol>();
             OnSerializedMethods = new List<IMethodSymbol>();
             OnSerializingMethods = new List<IMethodSymbol>();
             SanitizedClassName = sanitizedClassName;
+            IsDictionaryOverride = isDictionaryOverride;
         }
     }
 }

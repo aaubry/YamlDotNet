@@ -163,6 +163,21 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isList: true));
                 CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[0]);
             }
+            // Overrides for lists
+            else if (typeName.StartsWith("System.Collections.Generic.ICollection") ||
+                typeName.StartsWith("System.Collections.Generic.IEnumerable") ||
+                typeName.StartsWith("System.Collections.Generic.IList") ||
+                typeName.StartsWith("System.Collections.Generic.IReadOnlyCollection") ||
+                typeName.StartsWith("System.Collections.Generic.IReadOnlyList"))
+            {
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isListOverride: true));
+                CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[0]);
+            }
+            else if (typeName.StartsWith("System.Collections.Generic.IReadOnlyDictionary"))
+            {
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isDictionaryOverride: true));
+                CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[1]);
+            }
         }
     }
 }

@@ -78,6 +78,12 @@ Inherited:
   NotInherited: world
 External:
   Text: hello
+SomeCollectionStrings:
+- test
+- value
+SomeEnumerableStrings:
+- test
+- value
 SomeObject: a
 SomeDictionary:
   a: 1
@@ -150,7 +156,17 @@ if (x.MyList != null)
 Console.WriteLine("Inherited == null: <{0}>", x.Inherited == null);
 Console.WriteLine("Inherited.Inherited: <{0}>", x.Inherited?.Inherited);
 Console.WriteLine("Inherited.NotInherited: <{0}>", x.Inherited?.NotInherited);
-
+Console.WriteLine("SomeEnumerableStrings:");
+foreach (var s in x.SomeEnumerableStrings)
+{
+    Console.WriteLine("  {0}", s);
+}
+Console.ReadLine();
+Console.WriteLine("SomeCollectionStrings:");
+foreach (var s in x.SomeCollectionStrings)
+{
+    Console.WriteLine("  {0}", s);
+}
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
@@ -159,6 +175,7 @@ var serializer = new StaticSerializerBuilder(aotContext)
 
 var output = serializer.Serialize(x);
 Console.WriteLine(output);
+Console.WriteLine("============== Done with the primary object");
 
 yaml = @"- myArray:
   - 1
@@ -249,6 +266,8 @@ public class PrimitiveTypes
     public List<string>? MyList { get; set; }
     public Inherited Inherited { get; set; }
     public ExternalModel External { get; set; }
+    public IEnumerable<string> SomeEnumerableStrings { get; set; }
+    public ICollection<string> SomeCollectionStrings { get; set; }
     public object SomeObject { get; set; }
     public object SomeDictionary { get; set; }
 }

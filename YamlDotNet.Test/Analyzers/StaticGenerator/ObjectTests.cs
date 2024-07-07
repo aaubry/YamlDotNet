@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 using YamlDotNet.Core;
@@ -107,6 +108,36 @@ SomeDictionary:
         }
 
         [Fact]
+        public void EnumerablesAreTreatedAsLists() => ExecuteListOverrideTest<EnumerableClass>();
+
+        [Fact]
+        public void CollectionsAreTreatedAsLists() => ExecuteListOverrideTest<CollectionClass>();
+
+        [Fact]
+        public void IListsAreTreatedAsLists() => ExecuteListOverrideTest<ListClass>();
+
+        [Fact]
+        public void ReadOnlyCollectionsAreTreatedAsLists() => ExecuteListOverrideTest<ReadOnlyCollectionClass>();
+
+        [Fact]
+        public void ReadOnlyListsAreTreatedAsLists() => ExecuteListOverrideTest<ReadOnlyListClass>();
+
+        [Fact]
+        public void IListAreTreatedAsLists()
+        {
+            var yaml = @"Test:
+- value1
+- value2
+";
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var actual = deserializer.Deserialize<CollectionClass>(yaml);
+            Assert.NotNull(actual);
+            Assert.IsType<List<string>>(actual.Test);
+            Assert.Equal("value1", ((List<string>)actual.Test)[0]);
+            Assert.Equal("value2", ((List<string>)actual.Test)[1]);
+        }
+
+        [Fact]
         public void CallbacksAreExecuted()
         {
             var yaml = "Test: Hi";
@@ -139,6 +170,37 @@ SomeDictionary:
             ScalarStyle expected = ScalarStyle.DoubleQuoted;
             var actual = serializer.Deserialize<ScalarStyle>(yaml);
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReadOnlyDictionariesAreTreatedAsDictionaries()
+        {
+            var yaml = @"Test:
+  a: b
+  c: d
+";
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var actual = deserializer.Deserialize<ReadOnlyDictionaryClass>(yaml);
+            Assert.NotNull(actual);
+            Assert.IsType<Dictionary<string, string>>(actual.Test);
+            var dictionary = (Dictionary<string, string>)actual.Test;
+            Assert.Equal(2, dictionary.Count);
+            Assert.Equal("b", dictionary["a"]);
+            Assert.Equal("d", dictionary["c"]);
+        }
+
+        private void ExecuteListOverrideTest<TClass>() where TClass : InterfaceLists
+        {
+            var yaml = @"Test:
+- value1
+- value2
+";
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var actual = deserializer.Deserialize<TClass>(yaml);
+            Assert.NotNull(actual);
+            Assert.IsType<List<string>>(actual.TestValue);
+            Assert.Equal("value1", ((List<string>)actual.TestValue)[0]);
+            Assert.Equal("value2", ((List<string>)actual.TestValue)[1]);
         }
 
         [YamlSerializable]
@@ -206,5 +268,56 @@ SomeDictionary:
     {
         public string Prop1 { get; set; }
         public int Prop2 { get; set; }
+    }
+
+    [YamlSerializable]
+    public class EnumerableClass : InterfaceLists<IEnumerable<string>>
+    {
+        public IEnumerable<string> Test { get; set; }
+        public object TestValue => Test;
+    }
+
+    [YamlSerializable]
+    public class CollectionClass : InterfaceLists<ICollection<string>>
+    {
+        public ICollection<string> Test { get; set; }
+        public object TestValue => Test;
+    }
+
+    [YamlSerializable]
+    public class ListClass : InterfaceLists<IList<string>>
+    {
+        public IList<string> Test { get; set; }
+        public object TestValue => Test;
+    }
+
+    [YamlSerializable]
+    public class ReadOnlyCollectionClass : InterfaceLists<IReadOnlyCollection<string>>
+    {
+        public IReadOnlyCollection<string> Test { get; set; }
+        public object TestValue => Test;
+    }
+
+    [YamlSerializable]
+    public class ReadOnlyListClass : InterfaceLists<IReadOnlyList<string>>
+    {
+        public IReadOnlyList<string> Test { get; set; }
+        public object TestValue => Test;
+    }
+
+    [YamlSerializable]
+    public class ReadOnlyDictionaryClass
+    {
+        public IReadOnlyDictionary<string, string> Test { get; set; }
+    }
+
+    public interface InterfaceLists<TType> : InterfaceLists where TType : IEnumerable
+    {
+        TType Test { get; set; }
+    }
+
+    public interface InterfaceLists
+    {
+        object TestValue { get; }
     }
 }
