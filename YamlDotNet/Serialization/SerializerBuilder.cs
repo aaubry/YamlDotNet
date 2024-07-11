@@ -354,7 +354,7 @@ namespace YamlDotNet.Serialization
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
-                .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
+                .WithTypeConverter(new DateTime8601Converter(ScalarStyle.DoubleQuoted))
 #if NET6_0_OR_GREATER
                 .WithTypeConverter(new DateOnlyConverter(doubleQuotes: true))
                 .WithTypeConverter(new TimeOnlyConverter(doubleQuotes: true))
