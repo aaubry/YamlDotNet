@@ -109,7 +109,8 @@ namespace YamlDotNet.Serialization
                         enumNamingConvention,
                         enforceNullability,
                         caseInsensitivePropertyMatching,
-                        enforceRequiredProperties)
+                        enforceRequiredProperties,
+                        BuildTypeConverters())
                 }
             };
 

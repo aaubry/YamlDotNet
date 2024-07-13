@@ -33,9 +33,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.nextVisitor = nextVisitor;
         }
 
-        public virtual bool Enter(IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
+        public virtual bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
-            return nextVisitor.Enter(value, context, serializer);
+            return nextVisitor.Enter(propertyDescriptor, value, context, serializer);
         }
 
         public virtual bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)

@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.eventEmitter = eventEmitter;
         }
 
-        bool IObjectGraphVisitor<IEmitter>.Enter(IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
+        bool IObjectGraphVisitor<IEmitter>.Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             return true;
         }

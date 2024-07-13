@@ -35,8 +35,9 @@ namespace YamlDotNet.Serialization
         /// <param name="value">The value that is about to be entered.</param>
         /// <param name="context">The context that this implementation depend on.</param>
         /// <param name="serializer">A serializer that can be used to serialize complex objects.</param>
+        /// <param name="propertyDescriptor">The descriptor for the property that the value belongs to.</param>
         /// <returns>If the value is to be entered, returns true; otherwise returns false;</returns>
-        bool Enter(IObjectDescriptor value, TContext context, ObjectSerializer serializer);
+        bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, TContext context, ObjectSerializer serializer);
 
         /// <summary>
         /// Indicates whether the specified mapping should be entered. This allows the visitor to

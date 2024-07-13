@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 : Enumerable.Empty<IYamlTypeConverter>();
         }
 
-        bool IObjectGraphVisitor<Nothing>.Enter(IObjectDescriptor value, Nothing context, ObjectSerializer serializer)
+        bool IObjectGraphVisitor<Nothing>.Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, Nothing context, ObjectSerializer serializer)
         {
             var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
             if (typeConverter != null)

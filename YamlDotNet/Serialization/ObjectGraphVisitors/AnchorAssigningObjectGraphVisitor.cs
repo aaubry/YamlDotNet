@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.aliasProvider = aliasProvider;
         }
 
-        public override bool Enter(IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
+        public override bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             if (value.Value != null)
             {
@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                     return aliasEventInfo.NeedsExpansion;
                 }
             }
-            return base.Enter(value, context, serializer);
+            return base.Enter(propertyDescriptor, value, context, serializer);
         }
 
         public override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context, ObjectSerializer serializer)

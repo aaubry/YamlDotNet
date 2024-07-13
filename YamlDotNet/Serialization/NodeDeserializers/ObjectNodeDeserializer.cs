@@ -41,6 +41,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly bool enforceNullability;
         private readonly bool caseInsensitivePropertyMatching;
         private readonly bool enforceRequiredProperties;
+        private readonly IEnumerable<IYamlTypeConverter> typeConverters;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory,
             ITypeInspector typeInspector,
@@ -50,7 +51,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             INamingConvention enumNamingConvention,
             bool enforceNullability,
             bool caseInsensitivePropertyMatching,
-            bool enforceRequiredProperties)
+            bool enforceRequiredProperties,
+            IEnumerable<IYamlTypeConverter> typeConverters)
         {
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
             this.typeInspector = typeInspector ?? throw new ArgumentNullException(nameof(ObjectNodeDeserializer.typeInspector));
@@ -61,6 +63,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.enforceNullability = enforceNullability;
             this.caseInsensitivePropertyMatching = caseInsensitivePropertyMatching;
             this.enforceRequiredProperties = enforceRequiredProperties;
+            this.typeConverters = typeConverters;
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
@@ -97,7 +100,17 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     consumedObjectProperties.Add(property.Name);
 
-                    var propertyValue = nestedObjectDeserializer(parser, property.Type);
+                    object? propertyValue;
+                    if (property.ConverterType != null)
+                    {
+                        var typeConverter = typeConverters.Single(x => x.GetType() == property.ConverterType)!;
+                        propertyValue = typeConverter.ReadYaml(parser, property.Type, rootDeserializer);
+                    }
+                    else
+                    {
+                        propertyValue = nestedObjectDeserializer(parser, property.Type);
+                    }
+
                     if (propertyValue is IValuePromise propertyValuePromise)
                     {
                         var valueRef = value;

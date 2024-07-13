@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -160,12 +161,15 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, bool isRequired, char finalChar)
         {
             var allowNulls = type.NullableAnnotation.HasFlag(NullableAnnotation.Annotated) && context.Compilation.Options.NullableContextOptions.AnnotationsEnabled();
-
+            AttributeData? yamlConverterAttribute = null;
             Write($"new StaticPropertyDescriptor(_typeResolver, accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
             foreach (var attribute in attributes)
             {
                 switch (attribute.AttributeClass?.ToDisplayString())
                 {
+                    case "YamlDotNet.Serialization.YamlConverterAttribute()":
+                        yamlConverterAttribute = attribute;
+                        break;
                     case "YamlDotNet.Serialization.YamlIgnore":
                         Write("new YamlDotNet.Serialization.YamlIgnoreAttribute(),");
                         break;
@@ -204,8 +208,18 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         break;
                 }
             }
-            Write($"}}, {allowNulls.ToString().ToLower()}, {isRequired.ToString().ToLower()}){finalChar}");
-
+            Write($"}}, {allowNulls.ToString().ToLower()}, {isRequired.ToString().ToLower()}, ", false);
+            if (yamlConverterAttribute == null)
+            {
+                Write("null", false);
+            }
+            else
+            {
+                var argument = yamlConverterAttribute.ConstructorArguments[0];
+                var converterType = (Type)argument.Value!;
+                Write($"typeof({converterType.FullName})", false);
+            }
+            Write($"){finalChar}"); //TODO: replace null with the class for the typeconverter.
         }
     }
 }

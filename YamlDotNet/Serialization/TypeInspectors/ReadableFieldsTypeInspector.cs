@@ -55,12 +55,20 @@ namespace YamlDotNet.Serialization.TypeInspectors
             {
                 this.fieldInfo = fieldInfo;
                 this.typeResolver = typeResolver;
+
+                var converterAttribute = fieldInfo.GetCustomAttribute<YamlConverterAttribute>();
+                if (converterAttribute != null)
+                {
+                    ConverterType = converterAttribute.ConverterType;
+                }
+
                 ScalarStyle = ScalarStyle.Any;
             }
 
             public string Name { get { return fieldInfo.Name; } }
             public bool Required { get => fieldInfo.IsRequired(); }
             public Type Type { get { return fieldInfo.FieldType; } }
+            public Type? ConverterType { get; }
             public Type? TypeOverride { get; set; }
             public bool AllowNulls { get => fieldInfo.AcceptsNull(); }
             public int Order { get; set; }

@@ -20,25 +20,17 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization
 {
-    public interface IPropertyDescriptor
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public class YamlConverterAttribute : Attribute
     {
-        string Name { get; }
-        bool AllowNulls { get; }
-        bool CanWrite { get; }
-        Type Type { get; }
-        Type? TypeOverride { get; set; }
-        int Order { get; set; }
-        ScalarStyle ScalarStyle { get; set; }
-        bool Required { get; }
-        Type? ConverterType { get; }
+        public Type ConverterType { get; }
 
-        T? GetCustomAttribute<T>() where T : Attribute;
-
-        IObjectDescriptor Read(object target);
-        void Write(object target, object? value);
+        public YamlConverterAttribute(Type converterType)
+        {
+            ConverterType = converterType;
+        }
     }
 }

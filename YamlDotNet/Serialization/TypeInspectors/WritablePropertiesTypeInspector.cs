@@ -71,12 +71,18 @@ namespace YamlDotNet.Serialization.TypeInspectors
                 this.propertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
                 this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
                 ScalarStyle = ScalarStyle.Any;
+                var converterAttribute = propertyInfo.GetCustomAttribute<YamlConverterAttribute>();
+                if (converterAttribute != null)
+                {
+                    ConverterType = converterAttribute.ConverterType;
+                }
             }
 
             public string Name => propertyInfo.Name;
             public bool Required { get => propertyInfo.IsRequired(); }
             public Type Type => propertyInfo.PropertyType;
             public Type? TypeOverride { get; set; }
+            public Type? ConverterType { get; set; }
             public bool AllowNulls { get => propertyInfo.AcceptsNull(); }
             public int Order { get; set; }
             public bool CanWrite => propertyInfo.CanWrite;

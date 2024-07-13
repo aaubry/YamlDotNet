@@ -103,7 +103,8 @@ namespace YamlDotNet.Serialization
                     enumNamingConvention,
                     enforceNullability,
                     caseInsensitivePropertyMatching,
-                    false) // the static builder doesn't support required attributes, yet.
+                    false, // the static builder doesn't support required attributes
+                    BuildTypeConverters())
                 },
             };
 

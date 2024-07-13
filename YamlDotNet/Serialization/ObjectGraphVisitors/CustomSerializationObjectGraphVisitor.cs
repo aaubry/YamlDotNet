@@ -41,8 +41,16 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.nestedObjectSerializer = nestedObjectSerializer;
         }
 
-        public override bool Enter(IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
+        public override bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
+            //propertydescriptor will be null on the root graph object
+            if (propertyDescriptor?.ConverterType != null)
+            {
+                var converter = typeConverters.Single(x => x.GetType() == propertyDescriptor.ConverterType);
+                converter.WriteYaml(context, value.Value, value.Type, serializer);
+                return false;
+            }
+
             var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
             if (typeConverter != null)
             {
@@ -64,7 +72,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             }
 #pragma warning restore
 
-            return base.Enter(value, context, serializer);
+            return base.Enter(propertyDescriptor, value, context, serializer);
         }
     }
 }

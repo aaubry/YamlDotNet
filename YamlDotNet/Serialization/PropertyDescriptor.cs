@@ -53,6 +53,8 @@ namespace YamlDotNet.Serialization
             set { baseDescriptor.TypeOverride = value; }
         }
 
+        public Type? ConverterType => baseDescriptor.ConverterType;
+
         public int Order { get; set; }
 
         public ScalarStyle ScalarStyle
