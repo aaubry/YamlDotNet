@@ -43,9 +43,9 @@ namespace YamlDotNet.Samples
                 this.nodeDeserializer = nodeDeserializer;
             }
 
-            public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+            public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value, ObjectDeserializer rootDeserializer)
             {
-                if (nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
+                if (nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value, rootDeserializer))
                 {
                     var context = new ValidationContext(value, null, null);
                     Validator.ValidateObject(value, context, true);

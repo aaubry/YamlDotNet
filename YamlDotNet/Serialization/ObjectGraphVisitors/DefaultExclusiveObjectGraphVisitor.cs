@@ -38,13 +38,13 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             return type.IsValueType() ? Activator.CreateInstance(type) : null;
         }
 
-        public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
+        public override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             return !Equals(value.Value, GetDefault(value.Type))
-                   && base.EnterMapping(key, value, context);
+                   && base.EnterMapping(key, value, context, serializer);
         }
 
-        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
+        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             var defaultValueAttribute = key.GetCustomAttribute<DefaultValueAttribute>();
             var defaultValue = defaultValueAttribute != null
@@ -52,7 +52,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 : GetDefault(key.Type);
 
             return !Equals(value.Value, defaultValue)
-                   && base.EnterMapping(key, value, context);
+                   && base.EnterMapping(key, value, context, serializer);
         }
     }
 }

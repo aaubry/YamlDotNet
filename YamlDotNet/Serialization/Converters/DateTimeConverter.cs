@@ -69,9 +69,10 @@ namespace YamlDotNet.Serialization.Converters
         /// </summary>
         /// <param name="parser"><see cref="IParser"/> instance.</param>
         /// <param name="type"><see cref="Type"/> to convert.</param>
+        /// <param name="rootDeserializer">The deserializer to use to deserialize complex types.</param>
         /// <returns>Returns the <see cref="DateTime"/> instance converted.</returns>
         /// <remarks>On deserializing, all formats in the list are used for conversion.</remarks>
-        public object ReadYaml(IParser parser, Type type)
+        public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
             var style = this.kind == DateTimeKind.Local ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal;
@@ -87,8 +88,9 @@ namespace YamlDotNet.Serialization.Converters
         /// <param name="emitter"><see cref="IEmitter"/> instance.</param>
         /// <param name="value">Value to write.</param>
         /// <param name="type"><see cref="Type"/> to convert.</param>
+        /// <param name="serializer">A serializer to serializer complext objects.</param>
         /// <remarks>On serializing, the first format in the list is used.</remarks>
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
             var dt = (DateTime)value!;
             var adjusted = this.kind == DateTimeKind.Local ? dt.ToLocalTime() : dt.ToUniversalTime();

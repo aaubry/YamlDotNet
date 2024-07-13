@@ -39,7 +39,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 : Enumerable.Empty<IYamlTypeConverter>();
         }
 
-        bool IObjectGraphVisitor<Nothing>.Enter(IObjectDescriptor value, Nothing context)
+        bool IObjectGraphVisitor<Nothing>.Enter(IObjectDescriptor value, Nothing context, ObjectSerializer serializer)
         {
             var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
             if (typeConverter != null)
@@ -59,51 +59,51 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             }
 #pragma warning restore
 
-            return Enter(value);
+            return Enter(value, serializer);
         }
 
-        bool IObjectGraphVisitor<Nothing>.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, Nothing context)
+        bool IObjectGraphVisitor<Nothing>.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, Nothing context, ObjectSerializer serializer)
         {
-            return EnterMapping(key, value);
+            return EnterMapping(key, value, serializer);
         }
 
-        bool IObjectGraphVisitor<Nothing>.EnterMapping(IObjectDescriptor key, IObjectDescriptor value, Nothing context)
+        bool IObjectGraphVisitor<Nothing>.EnterMapping(IObjectDescriptor key, IObjectDescriptor value, Nothing context, ObjectSerializer serializer)
         {
-            return EnterMapping(key, value);
+            return EnterMapping(key, value, serializer);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitMappingEnd(IObjectDescriptor mapping, Nothing context)
+        void IObjectGraphVisitor<Nothing>.VisitMappingEnd(IObjectDescriptor mapping, Nothing context, ObjectSerializer serializer)
         {
-            VisitMappingEnd(mapping);
+            VisitMappingEnd(mapping, serializer);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, Nothing context)
+        void IObjectGraphVisitor<Nothing>.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, Nothing context, ObjectSerializer serializer)
         {
-            VisitMappingStart(mapping, keyType, valueType);
+            VisitMappingStart(mapping, keyType, valueType, serializer);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitScalar(IObjectDescriptor scalar, Nothing context)
+        void IObjectGraphVisitor<Nothing>.VisitScalar(IObjectDescriptor scalar, Nothing context, ObjectSerializer serializer)
         {
-            VisitScalar(scalar);
+            VisitScalar(scalar, serializer);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitSequenceEnd(IObjectDescriptor sequence, Nothing context)
+        void IObjectGraphVisitor<Nothing>.VisitSequenceEnd(IObjectDescriptor sequence, Nothing context, ObjectSerializer serializer)
         {
-            VisitSequenceEnd(sequence);
+            VisitSequenceEnd(sequence, serializer);
         }
 
-        void IObjectGraphVisitor<Nothing>.VisitSequenceStart(IObjectDescriptor sequence, Type elementType, Nothing context)
+        void IObjectGraphVisitor<Nothing>.VisitSequenceStart(IObjectDescriptor sequence, Type elementType, Nothing context, ObjectSerializer serializer)
         {
-            VisitSequenceStart(sequence, elementType);
+            VisitSequenceStart(sequence, elementType, serializer);
         }
 
-        protected abstract bool Enter(IObjectDescriptor value);
-        protected abstract bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value);
-        protected abstract bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value);
-        protected abstract void VisitMappingEnd(IObjectDescriptor mapping);
-        protected abstract void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType);
-        protected abstract void VisitScalar(IObjectDescriptor scalar);
-        protected abstract void VisitSequenceEnd(IObjectDescriptor sequence);
-        protected abstract void VisitSequenceStart(IObjectDescriptor sequence, Type elementType);
+        protected abstract bool Enter(IObjectDescriptor value, ObjectSerializer serializer);
+        protected abstract bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, ObjectSerializer serializer);
+        protected abstract bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, ObjectSerializer serializer);
+        protected abstract void VisitMappingEnd(IObjectDescriptor mapping, ObjectSerializer serializer);
+        protected abstract void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, ObjectSerializer serializer);
+        protected abstract void VisitScalar(IObjectDescriptor scalar, ObjectSerializer serializer);
+        protected abstract void VisitSequenceEnd(IObjectDescriptor sequence, ObjectSerializer serializer);
+        protected abstract void VisitSequenceStart(IObjectDescriptor sequence, Type elementType, ObjectSerializer serializer);
     }
 }

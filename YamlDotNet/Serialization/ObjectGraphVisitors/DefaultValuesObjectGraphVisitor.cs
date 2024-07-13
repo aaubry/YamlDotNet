@@ -40,7 +40,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         private object? GetDefault(Type type) => factory.CreatePrimitive(type);
 
-        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
+        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             var configuration = handling;
             var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
@@ -84,7 +84,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 }
             }
 
-            return base.EnterMapping(key, value, context);
+            return base.EnterMapping(key, value, context, serializer);
         }
     }
 }

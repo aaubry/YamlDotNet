@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
             if (converter == null)
@@ -44,7 +44,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            value = converter.ReadYaml(parser, expectedType);
+            value = converter.ReadYaml(parser, expectedType, rootDeserializer);
             return true;
         }
     }

@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.typeInspector = typeInspector;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             IList? list;
             var canUpdate = true;

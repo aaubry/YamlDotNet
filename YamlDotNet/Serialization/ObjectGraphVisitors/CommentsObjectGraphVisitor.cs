@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
         {
         }
 
-        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
+        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
             if (yamlMember?.Description != null)
@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 context.Emit(new Core.Events.Comment(yamlMember.Description, false));
             }
 
-            return base.EnterMapping(key, value, context);
+            return base.EnterMapping(key, value, context, serializer);
         }
     }
 }

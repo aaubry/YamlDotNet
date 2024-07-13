@@ -63,7 +63,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.enforceRequiredProperties = enforceRequiredProperties;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             if (!parser.TryConsume<MappingStart>(out var mapping))
             {

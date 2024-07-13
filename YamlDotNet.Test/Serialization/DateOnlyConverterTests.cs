@@ -73,7 +73,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateOnlyConverter();
 
-            Action action = () => { converter.ReadYaml(parser, typeof(DateOnly)); };
+            Action action = () => { converter.ReadYaml(parser, typeof(DateOnly), null); };
 
             action.ShouldThrow<FormatException>();
         }
@@ -96,7 +96,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateOnlyConverter();
 
-            var result = converter.ReadYaml(parser, typeof(DateOnly));
+            var result = converter.ReadYaml(parser, typeof(DateOnly), null);
 
             result.Should().BeOfType<DateOnly>();
             ((DateOnly)result).Year.Should().Be(year);
@@ -123,7 +123,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateOnlyConverter(formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(DateOnly));
+            var result = converter.ReadYaml(parser, typeof(DateOnly), null);
 
             result.Should().BeOfType<DateOnly>();
             ((DateOnly)result).Year.Should().Be(year);
@@ -151,7 +151,7 @@ namespace YamlDotNet.Test.Serialization
             var culture = new CultureInfo("ko-KR"); // Sample specific culture
             var converter = new DateOnlyConverter(provider: culture, formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(DateOnly));
+            var result = converter.ReadYaml(parser, typeof(DateOnly), null);
 
             result.Should().BeOfType<DateOnly>();
             ((DateOnly)result).Year.Should().Be(year);
@@ -183,7 +183,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(DateOnly));
+            var result = converter.ReadYaml(parser, typeof(DateOnly), null);
 
             result.Should().Be(expected);
         }
@@ -235,7 +235,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(DateOnly));
+            var result = converter.ReadYaml(parser, typeof(DateOnly), null);
 
             result.Should().Be(expected);
         }

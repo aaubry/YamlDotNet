@@ -304,14 +304,14 @@ namespace YamlDotNet.Test.Serialization
             return type == typeof(MissingDefaultCtor);
         }
 
-        public object ReadYaml(IParser parser, Type type)
+        public object ReadYaml(IParser parser, Type type, ObjectDeserializer deserializer)
         {
             var value = ((Scalar)parser.Current).Value;
             parser.MoveNext();
             return new MissingDefaultCtor(value);
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object value, Type type, ObjectSerializer serializer)
         {
             emitter.Emit(new Scalar(((MissingDefaultCtor)value).Value));
         }

@@ -1785,12 +1785,12 @@ c:  *anchor1");
                 return typeof(MethodInfo).IsAssignableFrom(type);
             }
 
-            public object ReadYaml(IParser parser, Type type)
+            public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void WriteYaml(IEmitter emitter, object value, Type type)
+            public void WriteYaml(IEmitter emitter, object value, Type type, ObjectSerializer serializer)
             {
                 var method = (MethodInfo)value;
                 emitter.Emit(new Scalar(string.Format("{0}.{1}", method.DeclaringType.FullName, method.Name)));
@@ -2579,13 +2579,13 @@ Null: true
                 return typeof(NonSerializable).IsAssignableFrom(type);
             }
 
-            public object ReadYaml(IParser parser, Type type)
+            public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
             {
                 var scalar = parser.Consume<Scalar>();
                 return new NonSerializable { Text = scalar.Value };
             }
 
-            public void WriteYaml(IEmitter emitter, object value, Type type)
+            public void WriteYaml(IEmitter emitter, object value, Type type, ObjectSerializer serializer)
             {
                 emitter.Emit(new Scalar(((NonSerializable)value).Text));
             }

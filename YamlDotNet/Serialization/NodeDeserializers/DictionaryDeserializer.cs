@@ -44,7 +44,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             result[key] = value!;
         }
 
-        protected virtual void Deserialize(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result)
+        protected virtual void Deserialize(Type tKey, Type tValue, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IDictionary result, ObjectDeserializer rootDeserializer)
         {
             var property = parser.Consume<MappingStart>();
             while (!parser.TryConsume<MappingEnd>(out var _))

@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             if (!factory.IsArray(expectedType))
             {

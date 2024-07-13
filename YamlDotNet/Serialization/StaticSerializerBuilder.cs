@@ -735,20 +735,21 @@ namespace YamlDotNet.Serialization
 
                 var graph = new ObjectDescriptor(value, actualType, staticType);
 
+                void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
+
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
                 {
-                    traversalStrategy.Traverse(graph, visitor, default);
+                    traversalStrategy.Traverse(graph, visitor, default, NestedObjectSerializer);
                 }
 
-                void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
 
                 var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
                     new EmittingObjectGraphVisitor(eventEmitter),
                     inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, NestedObjectSerializer)
                 );
 
-                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+                traversalStrategy.Traverse(graph, emittingVisitor, emitter, NestedObjectSerializer);
             }
         }
     }

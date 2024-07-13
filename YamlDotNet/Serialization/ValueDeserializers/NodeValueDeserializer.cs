@@ -53,12 +53,15 @@ namespace YamlDotNet.Serialization.ValueDeserializers
         {
             parser.Accept<NodeEvent>(out var nodeEvent);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
+            var rootDeserializer = new ObjectDeserializer(x => DeserializeValue(parser, x, state, nestedObjectDeserializer));
 
             try
             {
                 foreach (var deserializer in deserializers)
                 {
-                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
+
+                    var result = deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value, rootDeserializer);
+                    if (result)
                     {
                         return typeConverter.ChangeType(value, expectedType, enumNamingConvention, typeInspector);
                     }

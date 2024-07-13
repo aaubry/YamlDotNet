@@ -737,14 +737,9 @@ namespace YamlDotNet.Serialization
             {
                 var actualType = type ?? (value != null ? value.GetType() : typeof(object));
                 var staticType = type ?? typeof(object);
-
                 var graph = new ObjectDescriptor(value, actualType, staticType);
 
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
-                foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
-                {
-                    traversalStrategy.Traverse(graph, visitor, default);
-                }
 
                 void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
 
@@ -753,7 +748,12 @@ namespace YamlDotNet.Serialization
                     inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, NestedObjectSerializer)
                 );
 
-                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+                foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
+                {
+                    traversalStrategy.Traverse(graph, visitor, default, NestedObjectSerializer);
+                }
+
+                traversalStrategy.Traverse(graph, emittingVisitor, emitter, NestedObjectSerializer);
             }
         }
     }

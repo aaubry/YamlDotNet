@@ -56,7 +56,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             this.maxLengthToBuffer = maxLengthToBuffer;
         }
 
-        public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             if (!reader.Accept<MappingStart>(out var mapping))
             {
@@ -107,7 +107,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
             buffer.Reset();
             foreach (var deserializer in innerDeserializers)
             {
-                if (deserializer.Deserialize(buffer, actualType, nestedObjectDeserializer, out value))
+                if (deserializer.Deserialize(buffer, actualType, nestedObjectDeserializer, out value, rootDeserializer))
                 {
                     return true;
                 }
