@@ -38,9 +38,6 @@ artifacts:
   - path: YamlDotNet\bin\Release\net6.0
     name: Release-Net60
 
-  - path: YamlDotNet\bin\Release\net7.0
-    name: Release-Net70
-
   - path: YamlDotNet\bin\Release\net8.0
     name: Release-Net80
 
