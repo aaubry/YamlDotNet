@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,27 +19,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using BenchmarkDotNet.Attributes;
-using YamlDotNet.RepresentationModel;
-
-namespace YamlDotNet.Benchmark;
-
-[MemoryDiagnoser]
-public class YamlStreamBenchmark
+namespace YamlDotNet.Helpers
 {
-    private string yamlString = "";
-
-    [GlobalSetup]
-    public void Setup()
+    internal static class DictionaryExtensions
     {
-        using var reader = new StreamReader(File.OpenRead("Resources/saltern.yml"));
-        yamlString = reader.ReadToEnd();
+#if NETSTANDARD2_0 || NETFRAMEWORK
+    public static bool TryAdd<T, V>(this System.Collections.Generic.Dictionary<T, V> dictionary, T key, V value)
+    {
+        if (dictionary.ContainsKey(key))
+        {
+            return false;
+        }
+
+        dictionary.Add(key, value);
+        return true;
     }
-
-    [Benchmark]
-    public void LoadLarge()
-    {
-        var yamlStream = new YamlStream();
-        yamlStream.Load(new StringReader(yamlString));
+#endif
     }
 }
