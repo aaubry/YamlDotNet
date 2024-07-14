@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization
     /// Put this attribute either on serializable types or on the <see cref="StaticContext"/> that you want
     /// the static analyzer to detect and use.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, Inherited = false, AllowMultiple = true)]
     public sealed class YamlSerializableAttribute : Attribute
     {
         /// <summary>

@@ -64,7 +64,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeOffsetConverter(CultureInfo.InvariantCulture);
 
-            Action action = () => { converter.ReadYaml(parser, typeof(DateTimeOffset)); };
+            Action action = () => { converter.ReadYaml(parser, typeof(DateTimeOffset), null); };
 
             action.ShouldThrow<FormatException>();
         }
@@ -77,7 +77,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(yaml));
             var converter = new DateTimeOffsetConverter(CultureInfo.InvariantCulture);
-            var actual = converter.ReadYaml(parser, typeof(DateTimeOffset));
+            var actual = converter.ReadYaml(parser, typeof(DateTimeOffset), null);
             Assert.Equal(_expected, actual);
         }
 
@@ -96,8 +96,8 @@ namespace YamlDotNet.Test.Serialization
                 "O",
                 "MM/dd/yyyy HH:mm:ss zzz");
 
-            converter.ReadYaml(parser, typeof(DateTimeOffset));
-            var actual = converter.ReadYaml(parser, typeof(DateTimeOffset));
+            converter.ReadYaml(parser, typeof(DateTimeOffset), null);
+            var actual = converter.ReadYaml(parser, typeof(DateTimeOffset), null);
             Assert.Equal(_expected, actual);
         }
 

@@ -38,6 +38,10 @@ namespace YamlDotNet.Serialization
             this.innerTypeDescriptor = innerTypeDescriptor;
         }
 
+        public override string GetEnumName(Type enumType, string name) => innerTypeDescriptor.GetEnumName(enumType, name);
+
+        public override string GetEnumValue(object enumValue) => innerTypeDescriptor.GetEnumValue(enumValue);
+
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return innerTypeDescriptor.GetProperties(type, container)

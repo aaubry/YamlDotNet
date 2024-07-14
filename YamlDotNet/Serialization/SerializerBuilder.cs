@@ -106,7 +106,8 @@ namespace YamlDotNet.Serialization
                             quoteYaml1_1Strings,
                             defaultScalarStyle,
                             yamlFormatter,
-                            enumNamingConvention)
+                            enumNamingConvention,
+                            BuildTypeInspector())
                 }
             };
 
@@ -157,10 +158,14 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
         public SerializerBuilder WithEventEmitter<TEventEmitter>(Func<IEventEmitter, TEventEmitter> eventEmitterFactory)
-            where TEventEmitter : IEventEmitter
-        {
-            return WithEventEmitter(eventEmitterFactory, w => w.OnTop());
-        }
+            where TEventEmitter : IEventEmitter => WithEventEmitter(eventEmitterFactory, w => w.OnTop());
+
+        /// <summary>
+        /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
+        /// </summary>
+        /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
+        public SerializerBuilder WithEventEmitter<TEventEmitter>(Func<IEventEmitter, ITypeInspector, TEventEmitter> eventEmitterFactory)
+            where TEventEmitter : IEventEmitter => WithEventEmitter(eventEmitterFactory, w => w.OnTop());
 
         /// <summary>
         /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
@@ -169,6 +174,16 @@ namespace YamlDotNet.Serialization
         /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
         public SerializerBuilder WithEventEmitter<TEventEmitter>(
             Func<IEventEmitter, TEventEmitter> eventEmitterFactory,
+            Action<IRegistrationLocationSelectionSyntax<IEventEmitter>> where
+        ) where TEventEmitter : IEventEmitter => WithEventEmitter((IEventEmitter e, ITypeInspector _) => eventEmitterFactory(e), where);
+
+        /// <summary>
+        /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
+        /// </summary>
+        /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
+        public SerializerBuilder WithEventEmitter<TEventEmitter>(
+            Func<IEventEmitter, ITypeInspector, TEventEmitter> eventEmitterFactory,
             Action<IRegistrationLocationSelectionSyntax<IEventEmitter>> where
         )
             where TEventEmitter : IEventEmitter
@@ -183,9 +198,10 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(where));
             }
 
-            where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner)));
+            where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner, BuildTypeInspector())));
             return Self;
         }
+
 
         /// <summary>
         /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
@@ -299,7 +315,8 @@ namespace YamlDotNet.Serialization
                     quoteYaml1_1Strings,
                     defaultScalarStyle,
                     yamlFormatter,
-                    enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                    enumNamingConvention,
+                    BuildTypeInspector()), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
 
             return WithTypeInspector(inner => new ReadableAndWritablePropertiesTypeInspector(inner), loc => loc.OnBottom());
         }
@@ -352,12 +369,12 @@ namespace YamlDotNet.Serialization
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())
-                .WithTypeConverter(new DateTimeConverter(doubleQuotes: true))
+                .WithTypeConverter(new DateTime8601Converter(ScalarStyle.DoubleQuoted))
 #if NET6_0_OR_GREATER
                 .WithTypeConverter(new DateOnlyConverter(doubleQuotes: true))
                 .WithTypeConverter(new TimeOnlyConverter(doubleQuotes: true))
 #endif
-                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter, enumNamingConvention), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
+                .WithEventEmitter(inner => new JsonEventEmitter(inner, yamlFormatter, enumNamingConvention, BuildTypeInspector()), loc => loc.InsteadOf<TypeAssigningEventEmitter>());
         }
 
         /// <summary>
@@ -693,7 +710,11 @@ namespace YamlDotNet.Serialization
             );
         }
 
-        internal ITypeInspector BuildTypeInspector()
+        /// <summary>
+        /// Builds the type inspector used by various classes to get information about types and their members.
+        /// </summary>
+        /// <returns></returns>
+        public ITypeInspector BuildTypeInspector()
         {
             ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
 
@@ -735,14 +756,9 @@ namespace YamlDotNet.Serialization
             {
                 var actualType = type ?? (value != null ? value.GetType() : typeof(object));
                 var staticType = type ?? typeof(object);
-
                 var graph = new ObjectDescriptor(value, actualType, staticType);
 
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
-                foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
-                {
-                    traversalStrategy.Traverse(graph, visitor, default);
-                }
 
                 void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
 
@@ -751,7 +767,12 @@ namespace YamlDotNet.Serialization
                     inner => new EmissionPhaseObjectGraphVisitorArgs(inner, eventEmitter, preProcessingPhaseObjectGraphVisitors, typeConverters, NestedObjectSerializer)
                 );
 
-                traversalStrategy.Traverse(graph, emittingVisitor, emitter);
+                foreach (var visitor in preProcessingPhaseObjectGraphVisitors)
+                {
+                    traversalStrategy.Traverse(graph, visitor, default, NestedObjectSerializer);
+                }
+
+                traversalStrategy.Traverse(graph, emittingVisitor, emitter, NestedObjectSerializer);
             }
         }
     }

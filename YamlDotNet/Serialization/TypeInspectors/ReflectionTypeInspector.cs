@@ -22,31 +22,51 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Core;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace YamlDotNet.Serialization.NodeDeserializers
+namespace YamlDotNet.Serialization.TypeInspectors
 {
-    public sealed class TypeConverterNodeDeserializer : INodeDeserializer
+    public abstract class ReflectionTypeInspector : TypeInspectorSkeleton
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
-
-        public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
+        public override string GetEnumName(Type enumType, string name)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
-        }
-
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
-        {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+            foreach (var enumMember in enumType.GetMembers())
             {
-                value = null;
-                return false;
+                var attribute = enumMember.GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute?.Value == name)
+                {
+                    return enumMember.Name;
+                }
+            }
+#endif
+            return name;
+        }
+        public override string GetEnumValue(object enumValue)
+        {
+            if (enumValue == null)
+            {
+                return string.Empty;
             }
 
-            value = converter.ReadYaml(parser, expectedType, rootDeserializer);
-            return true;
+            var result = enumValue.ToString();
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+            var type = enumValue.GetType();
+            var enumMembers = type.GetMember(result);
+            if (enumMembers.Length > 0)
+            {
+                var attribute = enumMembers[0].GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute != null)
+                {
+                    result = attribute.Value;
+                }
+            }
+#endif
+            return result!;
         }
+
     }
 }
-

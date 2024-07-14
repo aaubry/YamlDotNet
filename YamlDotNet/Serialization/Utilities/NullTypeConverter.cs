@@ -25,6 +25,6 @@ namespace YamlDotNet.Serialization.Utilities
 {
     public class NullTypeConverter : ITypeConverter
     {
-        public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention) => value;
+        public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention, ITypeInspector typeInspector) => value;
     }
 }

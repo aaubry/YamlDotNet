@@ -37,19 +37,19 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Gets / sets the absolute offset in the file
         /// </summary>
-        public int Index { get; }
+        public long Index { get; }
 
         /// <summary>
         /// Gets / sets the number of the line
         /// </summary>
-        public int Line { get; }
+        public long Line { get; }
 
         /// <summary>
         /// Gets / sets the index of the column
         /// </summary>
-        public int Column { get; }
+        public long Column { get; }
 
-        public Mark(int index, int line, int column)
+        public Mark(long index, long line, long column)
         {
             if (index < 0)
             {

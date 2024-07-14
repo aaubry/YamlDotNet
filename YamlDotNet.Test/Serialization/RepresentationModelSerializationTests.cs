@@ -105,7 +105,7 @@ namespace YamlDotNet.Test.Serialization
             return type == typeof(byte[]);
         }
 
-        public object ReadYaml(IParser parser, Type type)
+        public object ReadYaml(IParser parser, Type type, ObjectDeserializer deserializer)
         {
             var scalar = (YamlDotNet.Core.Events.Scalar)parser.Current;
             var bytes = Convert.FromBase64String(scalar.Value);
@@ -113,7 +113,7 @@ namespace YamlDotNet.Test.Serialization
             return bytes;
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object value, Type type, ObjectSerializer serializer)
         {
             var bytes = (byte[])value;
             emitter.Emit(new YamlDotNet.Core.Events.Scalar(

@@ -57,9 +57,9 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
-        void IObjectGraphTraversalStrategy.Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context)
+        void IObjectGraphTraversalStrategy.Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context, ObjectSerializer serializer)
         {
-            Traverse("<root>", graph, visitor, context, new Stack<ObjectPathSegment>(maxRecursion));
+            Traverse(null, "<root>", graph, visitor, context, new Stack<ObjectPathSegment>(maxRecursion), serializer);
         }
 
         protected struct ObjectPathSegment
@@ -74,7 +74,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
         }
 
-        protected virtual void Traverse<TContext>(object name, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
+        protected virtual void Traverse<TContext>(IPropertyDescriptor? propertyDescriptor, object name, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             if (path.Count >= maxRecursion)
             {
@@ -105,7 +105,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
 
 
-            if (!visitor.Enter(value, context))
+            if (!visitor.Enter(propertyDescriptor, value, context, serializer))
             {
                 return;
             }
@@ -131,7 +131,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                     case TypeCode.String:
                     case TypeCode.Char:
                     case TypeCode.DateTime:
-                        visitor.VisitScalar(value, context);
+                        visitor.VisitScalar(value, context, serializer);
                         break;
 
                     case TypeCode.Empty:
@@ -140,12 +140,12 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                     default:
                         if (value.IsDbNull())
                         {
-                            visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
+                            visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context, serializer);
                         }
 
                         if (value.Value == null || value.Type == typeof(TimeSpan))
                         {
-                            visitor.VisitScalar(value, context);
+                            visitor.VisitScalar(value, context, serializer);
                             break;
                         }
 
@@ -158,26 +158,30 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                             // This is a nullable type, recursively handle it with its underlying type.
                             // Note that if it contains null, the condition above already took care of it
                             Traverse(
+                                propertyDescriptor,
                                 "Value",
-                                new ObjectDescriptor(value.Value, nullableUnderlyingType, value.Type, value.ScalarStyle), 
+                                new ObjectDescriptor(value.Value, nullableUnderlyingType, value.Type, value.ScalarStyle),
                                 visitor,
                                 context,
-                                path
+                                path,
+                                serializer
                             );
                         }
                         else if (optionUnderlyingType != null && optionValue != null)
                         {
                             Traverse(
+                                propertyDescriptor,
                                 "Value",
                                 new ObjectDescriptor(FsharpHelper.GetValue(value), optionUnderlyingType, value.Type, value.ScalarStyle),
                                 visitor,
                                 context,
-                                path
+                                path,
+                                serializer
                             );
                         }
                         else
                         {
-                            TraverseObject(value, visitor, context, path);
+                            TraverseObject(propertyDescriptor, value, visitor, context, path, serializer);
                         }
                         break;
                 }
@@ -188,32 +192,32 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
         }
 
-        protected virtual void TraverseObject<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
+        protected virtual void TraverseObject<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             if (typeof(IDictionary).IsAssignableFrom(value.Type))
             {
-                TraverseDictionary(value, visitor, typeof(object), typeof(object), context, path);
+                TraverseDictionary(propertyDescriptor, value, visitor, typeof(object), typeof(object), context, path, serializer);
                 return;
             }
 
             if (objectFactory.GetDictionary(value, out var adaptedDictionary, out var genericArguments))
             {
-                TraverseDictionary(new ObjectDescriptor(adaptedDictionary, value.Type, value.StaticType, value.ScalarStyle), visitor, genericArguments[0], genericArguments[1], context, path);
+                TraverseDictionary(propertyDescriptor, new ObjectDescriptor(adaptedDictionary, value.Type, value.StaticType, value.ScalarStyle), visitor, genericArguments[0], genericArguments[1], context, path, serializer);
                 return;
             }
 
             if (typeof(IEnumerable).IsAssignableFrom(value.Type))
             {
-                TraverseList(value, visitor, context, path);
+                TraverseList(propertyDescriptor, value, visitor, context, path, serializer);
                 return;
             }
 
-            TraverseProperties(value, visitor, context, path);
+            TraverseProperties(value, visitor, context, path, serializer);
         }
 
-        protected virtual void TraverseDictionary<TContext>(IObjectDescriptor dictionary, IObjectGraphVisitor<TContext> visitor, Type keyType, Type valueType, TContext context, Stack<ObjectPathSegment> path)
+        protected virtual void TraverseDictionary<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor dictionary, IObjectGraphVisitor<TContext> visitor, Type keyType, Type valueType, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
-            visitor.VisitMappingStart(dictionary, keyType, valueType, context);
+            visitor.VisitMappingStart(dictionary, keyType, valueType, context, serializer);
 
             var isDynamic = dictionary.Type.FullName!.Equals("System.Dynamic.ExpandoObject");
             foreach (DictionaryEntry? entry in (IDictionary)dictionary.NonNullValue())
@@ -223,54 +227,54 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                 var key = GetObjectDescriptor(keyValue, keyType);
                 var value = GetObjectDescriptor(entryValue.Value, valueType);
 
-                if (visitor.EnterMapping(key, value, context))
+                if (visitor.EnterMapping(key, value, context, serializer))
                 {
-                    Traverse(keyValue, key, visitor, context, path);
-                    Traverse(keyValue, value, visitor, context, path);
+                    Traverse(propertyDescriptor, keyValue, key, visitor, context, path, serializer);
+                    Traverse(propertyDescriptor, keyValue, value, visitor, context, path, serializer);
                 }
             }
 
-            visitor.VisitMappingEnd(dictionary, context);
+            visitor.VisitMappingEnd(dictionary, context, serializer);
         }
 
-        private void TraverseList<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
+        private void TraverseList<TContext>(IPropertyDescriptor propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             var itemType = objectFactory.GetValueType(value.Type);
 
-            visitor.VisitSequenceStart(value, itemType, context);
+            visitor.VisitSequenceStart(value, itemType, context, serializer);
 
             var index = 0;
 
             foreach (var item in (IEnumerable)value.NonNullValue())
             {
-                Traverse(index, GetObjectDescriptor(item, itemType), visitor, context, path);
+                Traverse(propertyDescriptor, index, GetObjectDescriptor(item, itemType), visitor, context, path, serializer);
                 ++index;
             }
 
-            visitor.VisitSequenceEnd(value, context);
+            visitor.VisitSequenceEnd(value, context, serializer);
         }
 
-        protected virtual void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
+        protected virtual void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             if (context.GetType() != typeof(Nothing))
             {
                 objectFactory.ExecuteOnSerializing(value.Value);
             }
 
-            visitor.VisitMappingStart(value, typeof(string), typeof(object), context);
+            visitor.VisitMappingStart(value, typeof(string), typeof(object), context, serializer);
 
             var source = value.NonNullValue();
             foreach (var propertyDescriptor in typeDescriptor.GetProperties(value.Type, source))
             {
                 var propertyValue = propertyDescriptor.Read(source);
-                if (visitor.EnterMapping(propertyDescriptor, propertyValue, context))
+                if (visitor.EnterMapping(propertyDescriptor, propertyValue, context, serializer))
                 {
-                    Traverse(propertyDescriptor.Name, new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string), ScalarStyle.Plain), visitor, context, path);
-                    Traverse(propertyDescriptor.Name, propertyValue, visitor, context, path);
+                    Traverse(null, propertyDescriptor.Name, new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string), ScalarStyle.Plain), visitor, context, path, serializer);
+                    Traverse(propertyDescriptor, propertyDescriptor.Name, propertyValue, visitor, context, path, serializer);
                 }
             }
 
-            visitor.VisitMappingEnd(value, context);
+            visitor.VisitMappingEnd(value, context, serializer);
 
             if (context.GetType() != typeof(Nothing))
             {

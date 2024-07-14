@@ -21,6 +21,8 @@
 
 using Xunit;
 using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.TypeInspectors;
+using YamlDotNet.Serialization.TypeResolvers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Test.Serialization
@@ -61,7 +63,9 @@ namespace YamlDotNet.Test.Serialization
         public void Implicit_conversion_operator_is_used()
         {
             var data = new ImplicitConversionIntWrapper(2);
-            var actual = TypeConverter.ChangeType<int>(data, NullNamingConvention.Instance);
+            var typeResolver = new DynamicTypeResolver();
+            var typeInspector = new WritablePropertiesTypeInspector(typeResolver);
+            var actual = TypeConverter.ChangeType<int>(data, NullNamingConvention.Instance, typeInspector);
             Assert.Equal(data.value, actual);
         }
 
@@ -69,7 +73,9 @@ namespace YamlDotNet.Test.Serialization
         public void Explicit_conversion_operator_is_used()
         {
             var data = new ExplicitConversionIntWrapper(2);
-            var actual = TypeConverter.ChangeType<int>(data, NullNamingConvention.Instance);
+            var typeResolver = new DynamicTypeResolver();
+            var typeInspector = new WritablePropertiesTypeInspector(typeResolver);
+            var actual = TypeConverter.ChangeType<int>(data, NullNamingConvention.Instance, typeInspector);
             Assert.Equal(data.value, actual);
         }
     }

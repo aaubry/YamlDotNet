@@ -34,30 +34,36 @@ namespace YamlDotNet.Serialization.ValueDeserializers
         private readonly IList<INodeTypeResolver> typeResolvers;
         private readonly ITypeConverter typeConverter;
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
 
         public NodeValueDeserializer(IList<INodeDeserializer> deserializers,
             IList<INodeTypeResolver> typeResolvers,
             ITypeConverter typeConverter,
-            INamingConvention enumNamingConvention)
+            INamingConvention enumNamingConvention,
+            ITypeInspector typeInspector)
         {
             this.deserializers = deserializers ?? throw new ArgumentNullException(nameof(deserializers));
             this.typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
             this.typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
             this.enumNamingConvention = enumNamingConvention ?? throw new ArgumentNullException(nameof(enumNamingConvention));
+            this.typeInspector = typeInspector;
         }
 
         public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
             parser.Accept<NodeEvent>(out var nodeEvent);
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
+            var rootDeserializer = new ObjectDeserializer(x => DeserializeValue(parser, x, state, nestedObjectDeserializer));
 
             try
             {
                 foreach (var deserializer in deserializers)
                 {
-                    if (deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value))
+
+                    var result = deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value, rootDeserializer);
+                    if (result)
                     {
-                        return typeConverter.ChangeType(value, expectedType, enumNamingConvention);
+                        return typeConverter.ChangeType(value, expectedType, enumNamingConvention, typeInspector);
                     }
                 }
             }

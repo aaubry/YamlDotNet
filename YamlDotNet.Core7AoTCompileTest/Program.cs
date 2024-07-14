@@ -26,6 +26,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using YamlDotNet.Core;
 using YamlDotNet.Core7AoTCompileTest.Model;
 using YamlDotNet.Serialization;
@@ -76,6 +78,12 @@ Inherited:
   NotInherited: world
 External:
   Text: hello
+SomeCollectionStrings:
+- test
+- value
+SomeEnumerableStrings:
+- test
+- value
 SomeObject: a
 SomeDictionary:
   a: 1
@@ -148,7 +156,17 @@ if (x.MyList != null)
 Console.WriteLine("Inherited == null: <{0}>", x.Inherited == null);
 Console.WriteLine("Inherited.Inherited: <{0}>", x.Inherited?.Inherited);
 Console.WriteLine("Inherited.NotInherited: <{0}>", x.Inherited?.NotInherited);
-
+Console.WriteLine("SomeEnumerableStrings:");
+foreach (var s in x.SomeEnumerableStrings)
+{
+    Console.WriteLine("  {0}", s);
+}
+Console.ReadLine();
+Console.WriteLine("SomeCollectionStrings:");
+foreach (var s in x.SomeCollectionStrings)
+{
+    Console.WriteLine("  {0}", s);
+}
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
@@ -157,6 +175,7 @@ var serializer = new StaticSerializerBuilder(aotContext)
 
 var output = serializer.Serialize(x);
 Console.WriteLine(output);
+Console.WriteLine("============== Done with the primary object");
 
 yaml = @"- myArray:
   - 1
@@ -171,6 +190,36 @@ Console.WriteLine("Length: <{0}>", o.Length);
 Console.WriteLine("Items[0]: <{0}>", string.Join(',', o[0].myArray));
 Console.WriteLine("Items[1]: <{0}>", string.Join(',', o[1].myArray));
 
+deserializer = new StaticDeserializerBuilder(aotContext).WithEnforceNullability().Build();
+yaml = "Nullable: null";
+var nullable = deserializer.Deserialize<NullableTestClass>(yaml);
+Console.WriteLine("Nullable Value (should be empty): <{0}>", nullable.Nullable);
+yaml = "NotNullable: test";
+nullable = deserializer.Deserialize<NullableTestClass>(yaml);
+Console.WriteLine("NotNullable Value (should be test): <{0}>", nullable.NotNullable);
+try
+{
+    yaml = "NotNullable: null";
+    nullable = deserializer.Deserialize<NullableTestClass>(yaml);
+    throw new Exception("NotNullable should not be allowed to be set to null.");
+}
+catch (YamlException exception)
+{
+    if (exception.InnerException is NullReferenceException)
+    {
+        Console.WriteLine("Exception thrown while setting non nullable value to null, as it should.");
+    }
+    else
+    {
+        throw new Exception("NotNullable should not be allowed to be set to null.");
+    }
+}
+
+Console.WriteLine("The next line should say goodbye");
+Console.WriteLine(serializer.Serialize(EnumMemberedEnum.Hello));
+Console.WriteLine("The next line should say hello");
+Console.WriteLine(deserializer.Deserialize<EnumMemberedEnum>("goodbye"));
+
 [YamlSerializable]
 public class MyArray
 {
@@ -181,6 +230,13 @@ public class MyArray
 public class Inner
 {
     public string? Text { get; set; }
+}
+
+[YamlSerializable]
+public class NullableTestClass
+{
+    public string? Nullable { get; set; }
+    public string NotNullable { get; set; }
 }
 
 [YamlSerializable]
@@ -215,6 +271,8 @@ public class PrimitiveTypes
     public List<string>? MyList { get; set; }
     public Inherited Inherited { get; set; }
     public ExternalModel External { get; set; }
+    public IEnumerable<string> SomeEnumerableStrings { get; set; }
+    public ICollection<string> SomeCollectionStrings { get; set; }
     public object SomeObject { get; set; }
     public object SomeDictionary { get; set; }
 }
@@ -260,6 +318,15 @@ public enum MyTestEnum
 {
     Y = 0,
     Z = 1,
+}
+
+[YamlSerializable]
+public enum EnumMemberedEnum
+{
+    No = 0,
+
+    [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
+    Hello = 1
 }
 
 #pragma warning restore CS8604 // Possible null reference argument.

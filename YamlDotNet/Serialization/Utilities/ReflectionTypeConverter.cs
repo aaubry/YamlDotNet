@@ -26,8 +26,8 @@ namespace YamlDotNet.Serialization.Utilities
 {
     public class ReflectionTypeConverter : ITypeConverter
     {
-        public object? ChangeType(object? value, Type expectedType) => ChangeType(value, expectedType, NullNamingConvention.Instance);
-        public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention) => TypeConverter.ChangeType(value, expectedType, enumNamingConvention);
+        public object? ChangeType(object? value, Type expectedType, ITypeInspector typeInspector) => ChangeType(value, expectedType, NullNamingConvention.Instance, typeInspector);
+        public object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention, ITypeInspector typeInspector) => TypeConverter.ChangeType(value, expectedType, enumNamingConvention, typeInspector);
 
     }
 }

@@ -31,7 +31,8 @@ namespace YamlDotNet.Serialization.Utilities
         /// <param name="value"></param>
         /// <param name="expectedType"></param>
         /// <param name="enumNamingConvention">Naming convention to use on enums in the type converter.</param>
+        /// <param name="typeInspector">The type inspector to use when getting information about a type.</param>
         /// <returns></returns>
-        object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention);
+        object? ChangeType(object? value, Type expectedType, INamingConvention enumNamingConvention, ITypeInspector typeInspector);
     }
 }

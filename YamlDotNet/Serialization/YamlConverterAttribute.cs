@@ -19,26 +19,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core;
+using System;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace YamlDotNet.Serialization
 {
-    public sealed class CommentsObjectGraphVisitor : ChainedObjectGraphVisitor
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public sealed class YamlConverterAttribute : Attribute
     {
-        public CommentsObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
-            : base(nextVisitor)
-        {
-        }
+        public Type ConverterType { get; }
 
-        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
+        public YamlConverterAttribute(Type converterType)
         {
-            var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
-            if (yamlMember?.Description != null)
-            {
-                context.Emit(new Core.Events.Comment(yamlMember.Description, false));
-            }
-
-            return base.EnterMapping(key, value, context, serializer);
+            ConverterType = converterType;
         }
     }
 }

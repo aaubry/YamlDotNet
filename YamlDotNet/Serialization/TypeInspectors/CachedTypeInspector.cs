@@ -33,10 +33,25 @@ namespace YamlDotNet.Serialization.TypeInspectors
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
+        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, string>> enumNameCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, string>>();
+        private readonly ConcurrentDictionary<object, string> enumValueCache = new ConcurrentDictionary<object, string>();
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
             this.innerTypeDescriptor = innerTypeDescriptor ?? throw new ArgumentNullException(nameof(innerTypeDescriptor));
+        }
+
+        public override string GetEnumName(Type enumType, string name)
+        {
+            var cache = enumNameCache.GetOrAdd(enumType, _ => new ConcurrentDictionary<string, string>());
+            var result = cache.GetOrAdd(name, _ => innerTypeDescriptor.GetEnumName(enumType, name));
+            return result;
+        }
+
+        public override string GetEnumValue(object enumValue)
+        {
+            var result = enumValueCache.GetOrAdd(enumValue, _ => this.innerTypeDescriptor.GetEnumValue(enumValue));
+            return result;
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)

@@ -1,10 +1,10 @@
 module DeserializerTests
 
 open System
+open System.Linq
 open Xunit
 open YamlDotNet.Serialization
 open YamlDotNet.Serialization.NamingConventions
-open FsUnit.Xunit
 open System.ComponentModel
 
 [<CLIMutable>]
@@ -45,13 +45,12 @@ cars:
                 .Build()
 
     let person = sut.Deserialize<Person>(yaml)
-    person.Name |> should equal "Jack"
-    person.Cars |> should haveLength 2
-    person.Cars[0].Name |> should equal "Mercedes"
-    person.Cars[0].Nickname |> should equal (Some "Jessy")
-    person.Cars[1].Name |> should equal "Honda"
-    person.Cars[1].Nickname |> should equal None
-
+    Assert.Equal("Jack", person.Name)
+    Assert.Equal(2, person.Cars.Length)
+    Assert.Equal("Mercedes", person.Cars[0].Name)
+    Assert.Equal(Some "Jessy", person.Cars[0].Nickname)// |> should equal (Some "Jessy")
+    Assert.Equal("Honda", person.Cars[1].Name)
+    Assert.Equal(None, person.Cars[1].Nickname)
 
 [<Fact>]
 let Deserialize_YamlWithObjectOptions() =
@@ -72,19 +71,19 @@ cars:
                 .Build()
 
     let person = sut.Deserialize<Person>(yaml)
-    person.Name |> should equal "Jack"
-    person.Cars |> should haveLength 2
+    Assert.Equal("Jack", person.Name)
+    Assert.Equal(2, person.Cars.Length)
     
-    person.Cars[0].Name |> should equal "Mercedes"
-    person.Cars[0].Spec |> should not' (be null)
-    person.Cars[0].Spec |> Option.isSome |> should equal true
-    person.Cars[0].Spec.Value.EngineType |> should equal "V6"
-    person.Cars[0].Spec.Value.DriveType |> should equal "AWD"
+    Assert.Equal("Mercedes", person.Cars[0].Name)
+    Assert.NotNull(person.Cars[0].Spec)
+    Assert.True(person.Cars[0].Spec |> Option.isSome)
+    Assert.Equal("V6", person.Cars[0].Spec.Value.EngineType)
+    Assert.Equal("AWD", person.Cars[0].Spec.Value.DriveType)
     
-    person.Cars[1].Name |> should equal "Honda"
-    person.Cars[1].Spec |> should be null
-    person.Cars[1].Spec |> should equal None
-    person.Cars[1].Nickname |> should equal None
+    Assert.Equal("Honda", person.Cars[1].Name)
+    Assert.Null(person.Cars[1].Spec)
+    Assert.Equal(None, person.Cars[1].Spec)
+    Assert.Equal(None, person.Cars[1].Nickname)
 
 
 [<CLIMutable>]
@@ -111,8 +110,12 @@ numbers:
                 .Build()
 
     let person = sut.Deserialize<TestSeq>(yaml)
-    person.name |> should equal jackTheDriver.name
-    person.numbers |> should equalSeq jackTheDriver.numbers
+    Assert.Equal(jackTheDriver.name, person.name)
+    let numbers = person.numbers.ToArray()
+    Assert.Equal(3, numbers.Length)
+    Assert.Equal(12, numbers[0])
+    Assert.Equal(2, numbers[1])
+    Assert.Equal(2, numbers[2])
 
 [<CLIMutable>]
 type TestList = {
@@ -138,7 +141,12 @@ numbers:
                 .Build()
 
     let person = sut.Deserialize<TestList>(yaml)
-    person |> should equal jackTheDriver
+    Assert.Equal(jackTheDriver.name, person.name)
+    let numbers = person.numbers.ToArray()
+    Assert.Equal(3, numbers.Length)
+    Assert.Equal(12, numbers[0])
+    Assert.Equal(2, numbers[1])
+    Assert.Equal(2, numbers[2])
 
 
 [<CLIMutable>]
@@ -165,4 +173,9 @@ numbers:
                 .Build()
 
     let person = sut.Deserialize<TestArray>(yaml)
-    person |> should equal jackTheDriver
+    Assert.Equal(jackTheDriver.name, person.name)
+    let numbers = person.numbers.ToArray()
+    Assert.Equal(3, numbers.Length)
+    Assert.Equal(12, numbers[0])
+    Assert.Equal(2, numbers[1])
+    Assert.Equal(2, numbers[2])

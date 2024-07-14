@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.TypeInspectors;
 
@@ -30,7 +31,7 @@ namespace YamlDotNet.Serialization
     /// <summary>
     /// Applies the Yaml attribute overrides to another <see cref="ITypeInspector"/>.
     /// </summary>
-    public sealed class YamlAttributeOverridesInspector : TypeInspectorSkeleton
+    public sealed class YamlAttributeOverridesInspector : ReflectionTypeInspector
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly YamlAttributeOverrides overrides;
@@ -67,6 +68,8 @@ namespace YamlDotNet.Serialization
             }
 
             public string Name { get { return baseDescriptor.Name; } }
+            public bool Required { get => baseDescriptor.Required; }
+            public bool AllowNulls { get => baseDescriptor.AllowNulls; }
 
             public bool CanWrite { get { return baseDescriptor.CanWrite; } }
 
@@ -77,6 +80,8 @@ namespace YamlDotNet.Serialization
                 get { return baseDescriptor.TypeOverride; }
                 set { baseDescriptor.TypeOverride = value; }
             }
+
+            public Type? ConverterType => baseDescriptor.ConverterType;
 
             public int Order
             {

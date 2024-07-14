@@ -44,14 +44,14 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             this.settings = settings;
         }
 
-        protected override void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path)
+        protected override void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             if (!value.Type.HasDefaultConstructor(settings.AllowPrivateConstructors) && !converters.Any(c => c.Accepts(value.Type)))
             {
                 throw new InvalidOperationException($"Type '{value.Type}' cannot be deserialized because it does not have a default constructor or a type converter.");
             }
 
-            base.TraverseProperties(value, visitor, context, path);
+            base.TraverseProperties(value, visitor, context, path, serializer);
         }
     }
 }

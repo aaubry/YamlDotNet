@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
@@ -40,12 +41,20 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.nestedObjectSerializer = nestedObjectSerializer;
         }
 
-        public override bool Enter(IObjectDescriptor value, IEmitter context)
+        public override bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
+            //propertydescriptor will be null on the root graph object
+            if (propertyDescriptor?.ConverterType != null)
+            {
+                var converter = typeConverters.Single(x => x.GetType() == propertyDescriptor.ConverterType);
+                converter.WriteYaml(context, value.Value, value.Type, serializer);
+                return false;
+            }
+
             var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
             if (typeConverter != null)
             {
-                typeConverter.WriteYaml(context, value.Value, value.Type);
+                typeConverter.WriteYaml(context, value.Value, value.Type, serializer);
                 return false;
             }
 
@@ -63,7 +72,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             }
 #pragma warning restore
 
-            return base.Enter(value, context);
+            return base.Enter(propertyDescriptor, value, context, serializer);
         }
     }
 }

@@ -111,36 +111,6 @@ cars:
         }
 
         [Fact]
-        public void Deserialize_YamlWithCircularReferenceInArray_ReturnsModel()
-        {
-            var yaml = @"
-sessions:
-- &s001_FunWithLetters
-  name: Fun With Letters
-  greeter: &a001_Jill
-    name: Jill
-    sessions:
-    - *s001_FunWithLetters
-attendees:
-- *a001_Jill
-";
-
-            var sut = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            var conference = sut.Deserialize<Conference>(yaml);
-            var jill = conference.Attendees.Single(a => a.Name == "Jill");
-            var session = conference.Sessions.Single(s => s.Name == "Fun With Letters");
-
-            jill.Should().NotBeNull();
-            jill.Sessions.ShouldBeEquivalentTo(new[] { session });
-
-            session.Should().NotBeNull();
-            session.Greeter.Should().Be(jill);
-        }
-
-        [Fact]
         public void SetterOnlySetsWithoutException()
         {
             var yaml = @"
@@ -364,6 +334,38 @@ name: Jake
         }
 
         [Fact]
+        public void EnforceNulalbleTypesWhenNullThrowsException()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
+            var yaml = @"
+Test: null
+";
+            try
+            {
+                var o = deserializer.Deserialize<NonNullableClass>(yaml);
+            }
+            catch (YamlException e)
+            {
+                if (e.InnerException is NullReferenceException)
+                {
+                    return;
+                }
+            }
+
+            throw new Exception("Non nullable property was set to null.");
+        }
+
+        [Fact]
+        public void EnforceNullableTypesWhenNotNullDoesNotThrowException()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
+            var yaml = @"
+Test: test 123
+";
+            var o = deserializer.Deserialize<NonNullableClass>(yaml);
+        }
+
+        [Fact]
         public void SerializeStateMethodsGetCalledOnce()
         {
             var yaml = "Test: Hi";
@@ -372,6 +374,92 @@ name: Jake
 
             Assert.Equal(1, test.OnDeserializedCallCount);
             Assert.Equal(1, test.OnDeserializingCallCount);
+        }
+
+        [Fact]
+        public void WithCaseInsensitivePropertyMatching_IgnoreCase()
+        {
+            var yaml = @"PrOpErTy: Value
+fIeLd: Value
+";
+            var deserializer = new DeserializerBuilder().WithCaseInsensitivePropertyMatching().Build();
+            var test = deserializer.Deserialize<CaseInsensitiveTest>(yaml);
+            Assert.Equal("Value", test.Property);
+            Assert.Equal("Value", test.Field);
+        }
+
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void WithRequiredMemberSet_ThrowsWhenFieldNotSet()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = "Property: test";
+            Assert.Throws<YamlException>(() =>
+            {
+                deserializer.Deserialize<RequiredMemberClass>(yaml);
+            });
+        }
+
+        [Fact]
+        public void WithRequiredMemberSet_ThrowsWhenPropertyNotSet()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = "Field: test";
+            Assert.Throws<YamlException>(() =>
+            {
+                deserializer.Deserialize<RequiredMemberClass>(yaml);
+            });
+        }
+
+        [Fact]
+        public void WithRequiredMemberSet_DoesNotThrow()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = @"Field: test-field
+Property: test-property";
+            var actual = deserializer.Deserialize<RequiredMemberClass>(yaml);
+            Assert.Equal("test-field", actual.Field);
+            Assert.Equal("test-property", actual.Property);
+        }
+
+        public class RequiredMemberClass
+        {
+            public required string Field = string.Empty;
+            public required string Property { get; set; } = string.Empty;
+        }
+#endif
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void EnumDeserializationUsesEnumMemberAttribute()
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var yaml = "goodbye";
+            var actual = deserializer.Deserialize<EnumMemberedEnum>(yaml);
+            Assert.Equal(EnumMemberedEnum.Hello, actual);
+        }
+
+        public enum EnumMemberedEnum
+        {
+            No = 0,
+
+            [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
+            Hello = 1
+
+        }
+#endif
+
+#nullable enable
+        public class NonNullableClass
+        {
+            public string Test { get; set; } = "Some default value";
+        }
+#nullable disable
+
+        public class CaseInsensitiveTest
+        {
+            public string Property { get; set; }
+            public string Field;
         }
 
         public class TestState

@@ -29,13 +29,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
     public sealed class ArrayNodeDeserializer : INodeDeserializer
     {
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
 
-        public ArrayNodeDeserializer(INamingConvention enumNamingConvention)
+        public ArrayNodeDeserializer(INamingConvention enumNamingConvention, ITypeInspector typeInspector)
         {
             this.enumNamingConvention = enumNamingConvention;
+            this.typeInspector = typeInspector;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             if (!expectedType.IsArray)
             {
@@ -47,7 +49,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             var items = new ArrayList();
             Array? array = null;
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention, PromiseResolvedHandler);
+            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention, typeInspector, PromiseResolvedHandler);
 
             array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);
@@ -62,7 +64,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     throw new InvalidOperationException("Destination array is still null");
                 }
 
-                array.SetValue(TypeConverter.ChangeType(value, itemType, enumNamingConvention), index);
+                array.SetValue(TypeConverter.ChangeType(value, itemType, enumNamingConvention, typeInspector), index);
             }
         }
 

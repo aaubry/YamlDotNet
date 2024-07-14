@@ -72,7 +72,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter();
 
-            Action action = () => { converter.ReadYaml(parser, typeof(DateTime)); };
+            Action action = () => { converter.ReadYaml(parser, typeof(DateTime), null); };
 
             action.ShouldThrow<FormatException>();
         }
@@ -98,7 +98,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter();
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
@@ -131,7 +131,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter(DateTimeKind.Unspecified);
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
@@ -164,7 +164,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter(DateTimeKind.Local);
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Local);
@@ -196,7 +196,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter(formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
@@ -229,7 +229,7 @@ namespace YamlDotNet.Test.Serialization
             var culture = new CultureInfo("ko-KR"); // Sample specific culture
             var converter = new DateTimeConverter(provider: culture, formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
@@ -261,7 +261,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter(DateTimeKind.Unspecified, formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Utc);
@@ -293,7 +293,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new DateTimeConverter(DateTimeKind.Local, formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().BeOfType<DateTime>();
             ((DateTime)result).Kind.Should().Be(DateTimeKind.Local);
@@ -335,7 +335,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().Be(expected);
         }
@@ -398,7 +398,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().Be(expected);
         }
@@ -432,7 +432,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().Be(expected);
         }
@@ -466,7 +466,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(DateTime));
+            var result = converter.ReadYaml(parser, typeof(DateTime), null);
 
             result.Should().Be(expected);
         }
@@ -563,16 +563,6 @@ namespace YamlDotNet.Test.Serialization
             var serialised = serialiser.Serialize(obj);
 
             serialised.Should().ContainEquivalentOf($"datetime: {formatted}");
-        }
-
-        [Fact]
-        public void JsonCompatible_EncaseDateTimesInDoubleQuotes()
-        {
-            var serializer = new SerializerBuilder().JsonCompatible().Build();
-            var testObject = new TestObject { DateTime = new DateTime(2023, 01, 14, 0, 1, 2, DateTimeKind.Utc) };
-            var actual = serializer.Serialize(testObject);
-
-            actual.TrimNewLines().Should().ContainEquivalentOf("{\"DateTime\": \"01/14/2023 00:01:02\"}");
         }
     }
 

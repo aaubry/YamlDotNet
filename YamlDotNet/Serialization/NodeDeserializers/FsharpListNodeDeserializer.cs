@@ -30,14 +30,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class FsharpListNodeDeserializer : INodeDeserializer
     {
+        private readonly ITypeInspector typeInspector;
         private readonly INamingConvention enumNamingConvention;
 
-        public FsharpListNodeDeserializer(INamingConvention enumNamingConvention)
+        public FsharpListNodeDeserializer(ITypeInspector typeInspector, INamingConvention enumNamingConvention)
         {
+            this.typeInspector = typeInspector;
             this.enumNamingConvention = enumNamingConvention;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
             if (!FsharpHelper.IsFsharpListType(expectedType))
             {
@@ -49,7 +51,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var collectionType = expectedType.GetGenericTypeDefinition().MakeGenericType(itemsType);
 
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemsType, parser, nestedObjectDeserializer, items, true, enumNamingConvention);
+            CollectionNodeDeserializer.DeserializeHelper(itemsType, parser, nestedObjectDeserializer, items, true, enumNamingConvention, typeInspector);
 
             var array = Array.CreateInstance(itemsType, items.Count);
             items.CopyTo(array, 0);

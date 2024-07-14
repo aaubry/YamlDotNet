@@ -32,17 +32,33 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
             Write($"class StaticObjectFactory : YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory");
             Write("{"); Indent();
 
             Write("public override object Create(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes.Where(c => !c.Value.IsArray))
+            foreach (var o in syntaxReceiver.Classes.Where(c => !c.Value.IsArray))
             {
                 var classObject = o.Value;
-                Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}();");
+                if (o.Value.IsListOverride)
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetNamespace()}.{classObject.ModuleSymbol.Name}<{((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName().Replace("?", string.Empty)}>)) return new System.Collections.Generic.List<{((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName().Replace("?", string.Empty)}>();");
+                }
+                else if (o.Value.IsDictionaryOverride)
+                {
+                    var keyType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName().Replace("?", string.Empty);
+                    var valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[1].GetFullName().Replace("?", string.Empty);
+                    //Write("/* this is a dictionary override: ");
+                    //Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new System.Collections.Dictionary<{keyType}, {valueType}>();");
+                    //Write("*/");
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new System.Collections.Generic.Dictionary<{keyType}, {valueType}>();");
+                }
+                else
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}();");
+                }
                 //always support a list and dictionary of the type
                 Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return new System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>();");
                 Write($"if (type == typeof(System.Collections.Generic.Dictionary<string, {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return new System.Collections.Generic.Dictionary<string, {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>();");
@@ -54,7 +70,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override Array CreateArray(Type type, int count)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsArray)
@@ -71,10 +87,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override bool IsDictionary(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (classObject.IsDictionary)
+                if (classObject.IsDictionary || classObject.IsDictionaryOverride)
                 {
                     Write($"if (type == typeof({o.Value.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
                 }
@@ -91,7 +107,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override bool IsArray(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 if (classObject.IsArray)
@@ -109,10 +125,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override bool IsList(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (classObject.IsList)
+                if (classObject.IsList || classObject.IsListOverride)
                 {
                     Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
                 }
@@ -120,6 +136,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 {
                     //always support a list of the type
                     Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
+
+                    //we'll make ienumerables lists.
+                    Write($"if (type == typeof(System.Collections.Generic.IEnumerable<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
                 }
             }
             Write("return false;");
@@ -127,10 +146,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override Type GetKeyType(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (classObject.IsDictionary)
+                if (classObject.IsDictionary || classObject.IsDictionaryOverride)
                 {
                     var keyType = "object";
                     var type = (INamedTypeSymbol)classObject.ModuleSymbol;
@@ -142,7 +161,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                     Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return typeof({keyType});");
                 }
-                else if (!classObject.IsArray && !classObject.IsList)
+                else if (!classObject.IsArray && !classObject.IsList && !classObject.IsListOverride)
                 {
                     //always support a dictionary of the type
                     Write($"if (type == typeof(System.Collections.Generic.Dictionary<string, {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
@@ -156,20 +175,20 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override Type GetValueType(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (!(classObject.IsList || classObject.IsDictionary || classObject.IsArray))
+                if (!(classObject.IsList || classObject.IsDictionary || classObject.IsDictionaryOverride || classObject.IsArray || classObject.IsListOverride))
                 {
                     continue;
                 }
 
                 string valueType;
-                if (classObject.IsDictionary)
+                if (classObject.IsDictionary || classObject.IsDictionaryOverride)
                 {
                     valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[1].GetFullName().Replace("?", string.Empty);
                 }
-                else if (classObject.IsList)
+                else if (classObject.IsList || classObject.IsListOverride)
                 {
                     valueType = ((INamedTypeSymbol)classObject.ModuleSymbol).TypeArguments[0].GetFullName().Replace("?", string.Empty);
                 }
@@ -181,11 +200,12 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return typeof({valueType});");
             }
 
-            //always support array, list and dictionary of all types
-            foreach (var o in classSyntaxReceiver.Classes)
+            //always support array, list, dictionary and Ienumerables of all types
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
+                Write($"if (type == typeof(System.Collections.Generic.IEnumerable<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
                 Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
                 Write($"if (type == typeof(System.Collections.Generic.Dictionary<string, {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)});");
             }
@@ -193,20 +213,20 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return typeof(object);");
             Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
             UnIndent(); Write("}");
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnSerializing", (c) => c.OnSerializingMethods);
-            WriteExecuteMethod(classSyntaxReceiver, "ExecuteOnSerialized", (c) => c.OnSerializedMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnSerializing", (c) => c.OnSerializingMethods);
+            WriteExecuteMethod(syntaxReceiver, "ExecuteOnSerialized", (c) => c.OnSerializedMethods);
             UnIndent(); Write("}");
         }
 
-        private void WriteExecuteMethod(ClassSyntaxReceiver classSyntaxReceiver, string methodName, Func<ClassObject, IEnumerable<IMethodSymbol>> selector)
+        private void WriteExecuteMethod(SerializableSyntaxReceiver syntaxReceiver, string methodName, Func<ClassObject, IEnumerable<IMethodSymbol>> selector)
         {
             Write($"public override void {methodName}(object value)");
             Write("{"); Indent();
             Write("if (value == null) return;");
             Write("var type = value.GetType();");
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 var methods = selector(classObject);

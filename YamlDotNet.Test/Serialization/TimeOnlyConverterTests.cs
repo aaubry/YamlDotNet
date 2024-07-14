@@ -73,7 +73,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new TimeOnlyConverter();
 
-            Action action = () => { converter.ReadYaml(parser, typeof(TimeOnly)); };
+            Action action = () => { converter.ReadYaml(parser, typeof(TimeOnly), null); };
 
             action.ShouldThrow<FormatException>();
         }
@@ -96,7 +96,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new TimeOnlyConverter();
 
-            var result = converter.ReadYaml(parser, typeof(TimeOnly));
+            var result = converter.ReadYaml(parser, typeof(TimeOnly), null);
 
             result.Should().BeOfType<TimeOnly>();
             ((TimeOnly)result).Hour.Should().Be(hour);
@@ -123,7 +123,7 @@ namespace YamlDotNet.Test.Serialization
 
             var converter = new TimeOnlyConverter(formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(TimeOnly));
+            var result = converter.ReadYaml(parser, typeof(TimeOnly), null);
 
             result.Should().BeOfType<TimeOnly>();
             ((TimeOnly)result).Hour.Should().Be(6);
@@ -151,7 +151,7 @@ namespace YamlDotNet.Test.Serialization
             var culture = new CultureInfo("ko-KR"); // Sample specific culture
             var converter = new TimeOnlyConverter(provider: culture, formats: new[] { format1, format2 });
 
-            var result = converter.ReadYaml(parser, typeof(TimeOnly));
+            var result = converter.ReadYaml(parser, typeof(TimeOnly), null);
 
             result.Should().BeOfType<TimeOnly>();
             ((TimeOnly)result).Hour.Should().Be(6);
@@ -179,7 +179,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(TimeOnly));
+            var result = converter.ReadYaml(parser, typeof(TimeOnly), null);
 
             result.Should().Be(expected);
         }
@@ -223,7 +223,7 @@ namespace YamlDotNet.Test.Serialization
             var parser = A.Fake<IParser>();
             A.CallTo(() => parser.Current).ReturnsLazily(() => new Scalar(value));
 
-            var result = converter.ReadYaml(parser, typeof(TimeOnly));
+            var result = converter.ReadYaml(parser, typeof(TimeOnly), null);
 
             result.Should().Be(expected);
         }

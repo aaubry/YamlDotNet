@@ -30,14 +30,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
-            Write($"public partial class {classSyntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
+            Write($"public partial class {syntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
             Write("{"); Indent();
             Write("private readonly YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory _objectFactory;");
             Write("private readonly YamlDotNet.Serialization.ITypeResolver _typeResolver;");
             Write("private readonly YamlDotNet.Serialization.ITypeInspector _typeInspector;");
-            Write($"public {classSyntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"}()");
+            Write($"public {syntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"}()");
             Write("{"); Indent();
             Write("_objectFactory = new StaticObjectFactory();");
             Write("_typeResolver = new StaticTypeResolver(this);");
@@ -48,26 +48,19 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("public override YamlDotNet.Serialization.ITypeResolver GetTypeResolver() => _typeResolver;");
             Write("public override bool IsKnownType(Type type)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (classObject.IsArray)
-                {
-                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
-                }
-                else if (classObject.IsList)
-                {
-                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
-                }
-                else if (classObject.IsDictionary)
+                if (classObject.IsArray || classObject.IsList || classObject.IsDictionary || classObject.IsDictionaryOverride || classObject.IsListOverride)
                 {
                     Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
                 }
                 else
                 {
                     Write($"if (type == typeof({o.Value.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return true;");
-                    //always support a array, list and dictionary of the type
+                    //always support an array, ienumerable<T>, list and dictionary of the type
                     Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return true;");
+                    Write($"if (type == typeof(System.Collections.Generic.IEnumerable<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
                     Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
                     Write($"if (type == typeof(System.Collections.Generic.Dictionary<string, {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return true;");
                 }

@@ -42,6 +42,45 @@ namespace YamlDotNet.Serialization.TypeInspectors
             this.typeInspectors = typeInspectors?.ToList() ?? throw new ArgumentNullException(nameof(typeInspectors));
         }
 
+        public override string GetEnumName(Type enumType, string name)
+        {
+            foreach (var inspector in typeInspectors)
+            {
+                try
+                {
+                    return inspector.GetEnumName(enumType, name);
+                }
+                catch
+                {
+                    //inner inspectors throw when they can't handle the type so we swallow it
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(enumType) + "," + nameof(name), "Name not found on enum type");
+        }
+
+        public override string GetEnumValue(object enumValue)
+        {
+            if (enumValue == null)
+            {
+                throw new ArgumentNullException(nameof(enumValue));
+            }
+
+            foreach (var inspector in typeInspectors)
+            {
+                try
+                {
+                    return inspector.GetEnumValue(enumValue);
+                }
+                catch
+                {
+                    //inner inspectors throw when they can't handle the type so we swallow it
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(enumValue), $"Value not found for ({enumValue})");
+        }
+
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             return typeInspectors

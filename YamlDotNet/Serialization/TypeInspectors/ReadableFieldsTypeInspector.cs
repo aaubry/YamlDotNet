@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Returns the properties and fields of a type that are readable.
     /// </summary>
-    public sealed class ReadableFieldsTypeInspector : TypeInspectorSkeleton
+    public sealed class ReadableFieldsTypeInspector : ReflectionTypeInspector
     {
         private readonly ITypeResolver typeResolver;
 
@@ -55,12 +55,22 @@ namespace YamlDotNet.Serialization.TypeInspectors
             {
                 this.fieldInfo = fieldInfo;
                 this.typeResolver = typeResolver;
+
+                var converterAttribute = fieldInfo.GetCustomAttribute<YamlConverterAttribute>();
+                if (converterAttribute != null)
+                {
+                    ConverterType = converterAttribute.ConverterType;
+                }
+
                 ScalarStyle = ScalarStyle.Any;
             }
 
             public string Name { get { return fieldInfo.Name; } }
+            public bool Required { get => fieldInfo.IsRequired(); }
             public Type Type { get { return fieldInfo.FieldType; } }
+            public Type? ConverterType { get; }
             public Type? TypeOverride { get; set; }
+            public bool AllowNulls { get => fieldInfo.AcceptsNull(); }
             public int Order { get; set; }
             public bool CanWrite { get { return !fieldInfo.IsInitOnly; } }
             public ScalarStyle ScalarStyle { get; set; }

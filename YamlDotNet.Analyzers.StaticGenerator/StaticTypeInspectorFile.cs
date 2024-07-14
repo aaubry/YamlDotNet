@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -29,11 +30,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class StaticTypeInspectorFile : File
     {
+        private readonly GeneratorExecutionContext context;
+
         public StaticTypeInspectorFile(Action<string, bool> Write, Action indent, Action unindent, GeneratorExecutionContext context) : base(Write, indent, unindent, context)
         {
+            this.context = context;
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
             Write("public class StaticTypeInspector : YamlDotNet.Serialization.ITypeInspector");
             Write("{"); Indent();
@@ -47,7 +51,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             #region GetProperties
             Write("public IEnumerable<YamlDotNet.Serialization.IPropertyDescriptor> GetProperties(Type type, object container)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
@@ -57,11 +61,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 Write("{"); Indent();
                 foreach (var field in classObject.FieldSymbols)
                 {
-                    WritePropertyDescriptor(field.Name, field.Type, !field.IsReadOnly, field.GetAttributes(), ',');
+                    WritePropertyDescriptor(field.Name, field.Type, !field.IsReadOnly, field.GetAttributes(), field.IsRequired, ',');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ',');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ',');
                 }
                 UnIndent(); Write("};");
                 UnIndent(); Write("}");
@@ -71,9 +75,9 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             #endregion
 
             #region GetProperty
-            Write("public YamlDotNet.Serialization.IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched)");
+            Write("public YamlDotNet.Serialization.IPropertyDescriptor GetProperty(Type type, object container, string name, bool ignoreUnmatched, bool caseInsensitivePropertyMatching)");
             Write("{"); Indent();
-            foreach (var o in classSyntaxReceiver.Classes)
+            foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
                 Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
@@ -82,13 +86,28 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 foreach (var field in classObject.FieldSymbols)
                 {
                     Write($"if (name == \"{field.Name}\") return ");
-                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), ';');
+                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), field.IsRequired, ';');
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
                     Write($"if (name == \"{property.Name}\") return ", false);
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), ';');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ';');
                 }
+                Write("if (caseInsensitivePropertyMatching)");
+                Write("{"); Indent();
+                foreach (var field in classObject.FieldSymbols)
+                {
+                    Write($"if (name.Equals(\"{field.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
+                    WritePropertyDescriptor(field.Name, field.Type, field.IsReadOnly, field.GetAttributes(), field.IsRequired, ';');
+                }
+                foreach (var property in classObject.PropertySymbols)
+                {
+                    Write($"if (name.Equals(\"{property.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ';');
+                }
+
+                UnIndent(); Write("}");
+
                 UnIndent(); Write("}");
 
             }
@@ -97,16 +116,60 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             UnIndent(); Write("}");
             #endregion
 
+            Write("public string GetEnumName(Type type, string name)");
+            Write("{"); Indent();
+            var prefix = string.Empty;
+            foreach (var map in syntaxReceiver.EnumMappings)
+            {
+                Write($"{prefix}if (type == typeof({map.Key.GetFullName()}))");
+                Write("{"); Indent();
+
+                foreach (var mapping in map.Value)
+                {
+                    Write($"if (name == \"{mapping.EnumMemberValue.Replace("\"", "\\\"")}\") return \"{mapping.ActualName}\";");
+                }
+
+                UnIndent(); Write("}");
+                prefix = "else ";
+            }
+            Write("return name;");
+            UnIndent(); Write("}");
+
+            prefix = string.Empty;
+            Write("public string GetEnumValue(object value)");
+            Write("{"); Indent();
+            Write("var type = value.GetType();");
+            foreach (var map in syntaxReceiver.EnumMappings)
+            {
+                Write($"{prefix}if (type == typeof({map.Key.GetFullName()}))");
+                Write("{"); Indent();
+
+                foreach (var mapping in map.Value)
+                {
+                    Write($"if (({mapping.Type.GetFullName()})value == {mapping.Type.GetFullName()}.{mapping.ActualName}) return  \"{mapping.EnumMemberValue.Replace("\"", "\\\"")}\";");
+                }
+
+                UnIndent(); Write("}");
+                prefix = "else ";
+            }
+            Write("return value.ToString();");
+            UnIndent(); Write("}");
+
             UnIndent(); Write("}");
         }
 
-        private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, char finalChar)
+        private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, bool isRequired, char finalChar)
         {
+            var allowNulls = type.NullableAnnotation.HasFlag(NullableAnnotation.Annotated) && context.Compilation.Options.NullableContextOptions.AnnotationsEnabled();
+            AttributeData? yamlConverterAttribute = null;
             Write($"new StaticPropertyDescriptor(_typeResolver, accessor, \"{name}\", {(!isReadonly).ToString().ToLower()}, typeof({type.GetFullName().Replace("?", string.Empty)}), new Attribute[] {{");
             foreach (var attribute in attributes)
             {
                 switch (attribute.AttributeClass?.ToDisplayString())
                 {
+                    case "YamlDotNet.Serialization.YamlConverterAttribute()":
+                        yamlConverterAttribute = attribute;
+                        break;
                     case "YamlDotNet.Serialization.YamlIgnore":
                         Write("new YamlDotNet.Serialization.YamlIgnoreAttribute(),");
                         break;
@@ -145,8 +208,18 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         break;
                 }
             }
-            Write($"}}){finalChar}");
-
+            Write($"}}, {allowNulls.ToString().ToLower()}, {isRequired.ToString().ToLower()}, ", false);
+            if (yamlConverterAttribute == null)
+            {
+                Write("null", false);
+            }
+            else
+            {
+                var argument = yamlConverterAttribute.ConstructorArguments[0];
+                var converterType = (Type)argument.Value!;
+                Write($"typeof({converterType.FullName})", false);
+            }
+            Write($"){finalChar}"); //TODO: replace null with the class for the typeconverter.
         }
     }
 }

@@ -4,8 +4,8 @@ open System
 open Xunit
 open YamlDotNet.Serialization
 open YamlDotNet.Serialization.NamingConventions
-open FsUnit.Xunit
 open YamlDotNet.Core
+open YamlDotNet.Fsharp.Test
 
 [<CLIMutable>]
 type Spec = {
@@ -65,8 +65,7 @@ cars:
                 .Build()
 
     let person = sut.Serialize(jackTheDriver)
-    person |> should equal yaml
-
+    Assert.Equal(yaml.Clean(), person.Clean())
 
 [<Fact>]
 let Serialize_YamlWithScalarOptions_OmitNull() =
@@ -102,8 +101,7 @@ cars:
                 .Build()
 
     let person = sut.Serialize(jackTheDriver)
-    person |> should equal yaml
-
+    Assert.Equal(yaml.Clean(), person.Clean())
 
 [<Fact>]
 let Serialize_YamlWithObjectOptions_OmitNull() =
@@ -144,7 +142,7 @@ cars:
                 .Build()
 
     let person = sut.Serialize(jackTheDriver)
-    person |> should equal yaml
+    Assert.Equal(yaml.Clean(), person.Clean())
 
 [<CLIMutable>]
 type TestSeq = {
@@ -171,8 +169,7 @@ numbers:
                 .Build()
 
     let person = sut.Serialize(jackTheDriver)
-    person |> should equal yaml
-
+    Assert.Equal(yaml.Clean(), person.Clean())
 
 [<CLIMutable>]
 type TestList = {
@@ -199,7 +196,7 @@ numbers:
                 .Build()
 
     let person = sut.Serialize(jackTheDriver)
-    person |> should equal yaml
+    Assert.Equal(yaml.Clean(), person.Clean())
 
 [<CLIMutable>]
 type TestArray = {
@@ -226,4 +223,4 @@ numbers:
                 .Build()
 
     let person = sut.Serialize(jackTheDriver)
-    person |> should equal yaml
+    Assert.Equal(yaml.Clean(), person.Clean())

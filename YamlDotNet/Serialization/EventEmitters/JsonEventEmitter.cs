@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.NamingConventions;
@@ -30,12 +31,15 @@ namespace YamlDotNet.Serialization.EventEmitters
     {
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
+        private static readonly Regex numericRegex = new Regex(@"^-?\d+\.?\d+$", RegexOptions.Compiled);
 
-        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention)
+        public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
             : base(nextEmitter)
         {
             this.formatter = formatter;
             this.enumNamingConvention = enumNamingConvention;
+            this.typeInspector = typeInspector;
         }
 
         public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
@@ -73,7 +77,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         var valueIsEnum = eventInfo.Source.Type.IsEnum();
                         if (valueIsEnum)
                         {
-                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, typeInspector, enumNamingConvention);
                             eventInfo.Style = formatter.PotentiallyQuoteEnums(value) ? ScalarStyle.DoubleQuoted : ScalarStyle.Plain;
                             break;
                         }
@@ -85,6 +89,12 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.Double:
                     case TypeCode.Decimal:
                         eventInfo.RenderedValue = formatter.FormatNumber(value);
+
+                        if (!numericRegex.IsMatch(eventInfo.RenderedValue))
+                        {
+                            eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        }
+
                         break;
 
                     case TypeCode.String:

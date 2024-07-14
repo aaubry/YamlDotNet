@@ -19,26 +19,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core;
+using Microsoft.CodeAnalysis;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace YamlDotNet.Analyzers.StaticGenerator
 {
-    public sealed class CommentsObjectGraphVisitor : ChainedObjectGraphVisitor
+    public class EnumMappings
     {
-        public CommentsObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
-            : base(nextVisitor)
-        {
-        }
+        public ITypeSymbol Type { get; set; }
+        public string ActualName { get; set; }
+        public string EnumMemberValue { get; set; }
 
-        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
+        public EnumMappings(ITypeSymbol type, string actualName, string enumMemberValue)
         {
-            var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
-            if (yamlMember?.Description != null)
-            {
-                context.Emit(new Core.Events.Comment(yamlMember.Description, false));
-            }
-
-            return base.EnterMapping(key, value, context, serializer);
+            ActualName = actualName;
+            EnumMemberValue = enumMemberValue;
+            Type = type;
         }
     }
 }

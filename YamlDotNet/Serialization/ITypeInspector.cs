@@ -48,7 +48,23 @@ namespace YamlDotNet.Serialization
         /// Determines if an exception or null should be returned if <paramref name="name"/> can't be
         /// found in <paramref name="type"/>
         /// </param>
+        /// <param name="caseInsensitivePropertyMatching">If true use case-insitivity when choosing the property or field.</param>
         /// <returns></returns>
-        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched);
+        IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched, bool caseInsensitivePropertyMatching);
+
+        /// <summary>
+        /// Returns the actual name from the EnumMember attribute
+        /// </summary>
+        /// <param name="enumType">The type of the enum.</param>
+        /// <param name="name">The name to lookup.</param>
+        /// <returns>The actual name of the enum value.</returns>
+        string GetEnumName(Type enumType, string name);
+
+        /// <summary>
+        /// Return the value of the enum
+        /// </summary>
+        /// <param name="enumValue"></param>
+        /// <returns></returns>
+        string GetEnumValue(object enumValue);
     }
 }

@@ -30,7 +30,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
         {
         }
 
-        public override void Write(ClassSyntaxReceiver classSyntaxReceiver)
+        public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
             Write("class StaticPropertyDescriptor : YamlDotNet.Serialization.IPropertyDescriptor");
             Write("{"); Indent();
@@ -40,7 +40,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("public string Name { get; }");
             Write("public bool CanWrite { get; }");
             Write("public Type Type { get; }");
+            Write("public Type ConverterType { get; }");
             Write("public Type TypeOverride { get; set; }");
+            Write("public bool AllowNulls { get; set; }");
+            Write("public bool Required { get; }");
             Write("public int Order { get; set; }");
             Write("public YamlDotNet.Core.ScalarStyle ScalarStyle { get; set; }");
             Write("public T GetCustomAttribute<T>() where T : Attribute");
@@ -61,7 +64,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("{"); Indent();
             Write("_accessor.Set(Name, target, value);");
             UnIndent(); Write("}");
-            Write("public StaticPropertyDescriptor(YamlDotNet.Serialization.ITypeResolver typeResolver, YamlDotNet.Serialization.IObjectAccessor accessor, string name, bool canWrite, Type type, Attribute[] attributes)");
+            Write("public StaticPropertyDescriptor(YamlDotNet.Serialization.ITypeResolver typeResolver, YamlDotNet.Serialization.IObjectAccessor accessor, string name, bool canWrite, Type type, Attribute[] attributes, bool allowNulls, bool isRequired, Type converterType)");
             Write("{"); Indent();
             Write("this._typeResolver = typeResolver;");
             Write("this._accessor = accessor;");
@@ -69,7 +72,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("this.Name = name;");
             Write("this.CanWrite = canWrite;");
             Write("this.Type = type;");
+            Write("this.ConverterType = converterType;");
             Write("this.ScalarStyle = YamlDotNet.Core.ScalarStyle.Any;");
+            Write("this.AllowNulls = allowNulls;");
+            Write("this.Required = isRequired;");
             UnIndent(); Write("}");
             UnIndent(); Write("}");
         }

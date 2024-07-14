@@ -19,26 +19,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using YamlDotNet.Core;
+using System.IO.Compression;
+using System.Text;
+using BenchmarkDotNet.Attributes;
+using FastSerialization;
+using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
 
-namespace YamlDotNet.Serialization.ObjectGraphVisitors
+namespace YamlDotNet.Benchmark;
+
+[MemoryDiagnoser]
+public class BigFileBenchmark
 {
-    public sealed class CommentsObjectGraphVisitor : ChainedObjectGraphVisitor
+    private string yamlString = "";
+
+    [GlobalSetup]
+    public void Setup()
     {
-        public CommentsObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor)
-            : base(nextVisitor)
+        var stringBuilder = new StringBuilder();
+        //100mb
+        while (stringBuilder.Length < 1000 * 1000 * 100)
         {
+            stringBuilder.AppendLine("- test");
         }
+        yamlString = stringBuilder.ToString();
+    }
 
-        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
-        {
-            var yamlMember = key.GetCustomAttribute<YamlMemberAttribute>();
-            if (yamlMember?.Description != null)
-            {
-                context.Emit(new Core.Events.Comment(yamlMember.Description, false));
-            }
-
-            return base.EnterMapping(key, value, context, serializer);
-        }
+    [Benchmark]
+    public void LoadLarge()
+    {
+        var deserializer = new DeserializerBuilder().Build();
+        var result = deserializer.Deserialize<List<string>>(yamlString);
     }
 }

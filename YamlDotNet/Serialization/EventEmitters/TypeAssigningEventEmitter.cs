@@ -71,6 +71,7 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly ScalarStyle defaultScalarStyle = ScalarStyle.Any;
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;
+        private readonly ITypeInspector typeInspector;
 
         public TypeAssigningEventEmitter(IEventEmitter nextEmitter,
             IDictionary<Type, TagName> tagMappings,
@@ -78,7 +79,8 @@ namespace YamlDotNet.Serialization.EventEmitters
             bool quoteYaml1_1Strings,
             ScalarStyle defaultScalarStyle,
             YamlFormatter formatter,
-            INamingConvention enumNamingConvention)
+            INamingConvention enumNamingConvention,
+            ITypeInspector typeInspector)
             : base(nextEmitter)
         {
             this.defaultScalarStyle = defaultScalarStyle;
@@ -95,6 +97,7 @@ namespace YamlDotNet.Serialization.EventEmitters
             isSpecialStringValue_Regex = new Regex(specialStringValuePattern, RegexOptions.Compiled);
 #endif
             this.enumNamingConvention = enumNamingConvention;
+            this.typeInspector = typeInspector;
         }
 
         public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -129,7 +132,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         if (eventInfo.Source.Type.IsEnum)
                         {
                             eventInfo.Tag = FailsafeSchema.Tags.Str;
-                            eventInfo.RenderedValue = formatter.FormatEnum(value, enumNamingConvention);
+                            eventInfo.RenderedValue = formatter.FormatEnum(value, typeInspector, enumNamingConvention);
 
                             if (quoteNecessaryStrings &&
                                 IsSpecialStringValue(eventInfo.RenderedValue) &&

@@ -60,6 +60,9 @@ namespace YamlDotNet.Serialization
         private bool ignoreUnmatched;
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
+        private bool enforceNullability;
+        private bool caseInsensitivePropertyMatching;
+        private bool enforceRequiredProperties;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -92,10 +95,10 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(objectFactory.Value) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
-                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, yamlFormatter, enumNamingConvention) },
-                { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer(enumNamingConvention) },
+                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, BuildTypeInspector(), yamlFormatter, enumNamingConvention) },
+                { typeof(ArrayNodeDeserializer), _ => new ArrayNodeDeserializer(enumNamingConvention, BuildTypeInspector()) },
                 { typeof(DictionaryNodeDeserializer), _ => new DictionaryNodeDeserializer(objectFactory.Value, duplicateKeyChecking) },
-                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value, enumNamingConvention) },
+                { typeof(CollectionNodeDeserializer), _ => new CollectionNodeDeserializer(objectFactory.Value, enumNamingConvention, BuildTypeInspector()) },
                 { typeof(EnumerableNodeDeserializer), _ => new EnumerableNodeDeserializer() },
                 {
                     typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(objectFactory.Value,
@@ -103,9 +106,13 @@ namespace YamlDotNet.Serialization
                         ignoreUnmatched,
                         duplicateKeyChecking,
                         typeConverter,
-                        enumNamingConvention)
+                        enumNamingConvention,
+                        enforceNullability,
+                        caseInsensitivePropertyMatching,
+                        enforceRequiredProperties,
+                        BuildTypeConverters())
                 },
-                { typeof(FsharpListNodeDeserializer), _ => new FsharpListNodeDeserializer(enumNamingConvention) },
+                { typeof(FsharpListNodeDeserializer), _ => new FsharpListNodeDeserializer(BuildTypeInspector(), enumNamingConvention) },
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
@@ -123,7 +130,11 @@ namespace YamlDotNet.Serialization
 
         protected override DeserializerBuilder Self { get { return this; } }
 
-        internal ITypeInspector BuildTypeInspector()
+        /// <summary>
+        /// Builds the type inspector used by various classes to get information about types and their members.
+        /// </summary>
+        /// <returns></returns>
+        public ITypeInspector BuildTypeInspector()
         {
             ITypeInspector innerInspector = new WritablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
 
@@ -335,6 +346,35 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Ignore case when matching property names.
+        /// </summary>
+        /// <returns></returns>
+        public DeserializerBuilder WithCaseInsensitivePropertyMatching()
+        {
+            caseInsensitivePropertyMatching = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Enforce whether null values can be set on non-nullable properties and fields.
+        /// </summary>
+        /// <returns>This deserializer builder.</returns>
+        public DeserializerBuilder WithEnforceNullability()
+        {
+            enforceNullability = true;
+            return this;
+        }
+        /// <summary>
+        /// Require that all members with the 'required' keyword be set by YAML.
+        /// </summary>
+        /// <returns></returns>
+        public DeserializerBuilder WithEnforceRequiredMembers()
+        {
+            enforceRequiredProperties = true;
+            return this;
+        }
+
+        /// <summary>
         /// Unregisters an existing <see cref="INodeTypeResolver" /> of type <typeparam name="TNodeTypeResolver" />.
         /// </summary>
         public DeserializerBuilder WithoutNodeTypeResolver<TNodeTypeResolver>()
@@ -463,7 +503,8 @@ namespace YamlDotNet.Serialization
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
-                    enumNamingConvention
+                    enumNamingConvention,
+                    BuildTypeInspector()
                 )
             );
         }

@@ -19,37 +19,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#if NET6_0_OR_GREATER
 using System;
 using System.Globalization;
-using System.Linq;
-
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization.Converters
 {
     /// <summary>
-    /// This represents the YAML converter entity for <see cref="TimeOnly"/>.
+    /// This represents the YAML converter entity for <see cref="DateTime"/> using the ISO-8601 standard format.
     /// </summary>
-    public class TimeOnlyConverter : IYamlTypeConverter
+    public class DateTime8601Converter : IYamlTypeConverter
     {
         private readonly IFormatProvider provider;
-        private readonly bool doubleQuotes;
-        private readonly string[] formats;
+        private readonly ScalarStyle scalarStyle;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TimeOnlyConverter"/> class.
+        /// Initializes a new instance of the <see cref="DateTime8601Converter"/> class using the default any scalar style.
         /// </summary>
-        /// <param name="provider"><see cref="IFormatProvider"/> instance. Default value is <see cref="CultureInfo.InvariantCulture"/>.</param>
-        /// <param name="doubleQuotes">If true, will use double quotes when writing the value to the stream.</param>
-        /// <param name="formats">List of date/time formats for parsing. Default value is "<c>T</c>".</param>
-        /// <remarks>On deserializing, all formats in the list are used for conversion, while on serializing, the first format in the list is used.</remarks>
-        public TimeOnlyConverter(IFormatProvider? provider = null, bool doubleQuotes = false, params string[] formats)
+        public DateTime8601Converter()
+            : this(ScalarStyle.Any)
         {
-            this.provider = provider ?? CultureInfo.InvariantCulture;
-            this.doubleQuotes = doubleQuotes;
-            this.formats = formats.DefaultIfEmpty("T").ToArray();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DateTime8601Converter"/> class.
+        /// </summary>
+        public DateTime8601Converter(ScalarStyle scalarStyle)
+        {
+            this.provider = CultureInfo.InvariantCulture;
+            this.scalarStyle = scalarStyle;
         }
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace YamlDotNet.Serialization.Converters
         /// <returns>Returns <c>True</c>, if the current converter supports; otherwise returns <c>False</c>.</returns>
         public bool Accepts(Type type)
         {
-            return type == typeof(TimeOnly);
+            return type == typeof(DateTime);
         }
 
         /// <summary>
@@ -68,14 +67,14 @@ namespace YamlDotNet.Serialization.Converters
         /// <param name="parser"><see cref="IParser"/> instance.</param>
         /// <param name="type"><see cref="Type"/> to convert.</param>
         /// <param name="rootDeserializer">The deserializer to use to deserialize complex types.</param>
-        /// <returns>Returns the <see cref="TimeOnly"/> instance converted.</returns>
+        /// <returns>Returns the <see cref="DateTime"/> instance converted.</returns>
         /// <remarks>On deserializing, all formats in the list are used for conversion.</remarks>
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            var result = DateTime.ParseExact(value, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-            var timeOnly = TimeOnly.ParseExact(value, this.formats, this.provider);
-            return timeOnly;
+            return result;
         }
 
         /// <summary>
@@ -88,11 +87,9 @@ namespace YamlDotNet.Serialization.Converters
         /// <remarks>On serializing, the first format in the list is used.</remarks>
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var timeOnly = (TimeOnly)value!;
-            var formatted = timeOnly.ToString(this.formats.First(), this.provider); // Always take the first format of the list.
+            var formatted = ((DateTime)value!).ToString("O", CultureInfo.InvariantCulture);
 
-            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, doubleQuotes ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
+            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, scalarStyle, true, false));
         }
     }
 }
-#endif

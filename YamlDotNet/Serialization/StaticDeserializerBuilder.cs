@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -56,6 +58,8 @@ namespace YamlDotNet.Serialization
         private bool ignoreUnmatched;
         private bool duplicateKeyChecking;
         private bool attemptUnknownTypeDeserialization;
+        private bool enforceNullability;
+        private bool caseInsensitivePropertyMatching;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -87,11 +91,21 @@ namespace YamlDotNet.Serialization
                 { typeof(YamlSerializableNodeDeserializer), _ => new YamlSerializableNodeDeserializer(factory) },
                 { typeof(TypeConverterNodeDeserializer), _ => new TypeConverterNodeDeserializer(BuildTypeConverters()) },
                 { typeof(NullNodeDeserializer), _ => new NullNodeDeserializer() },
-                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, yamlFormatter, enumNamingConvention) },
+                { typeof(ScalarNodeDeserializer), _ => new ScalarNodeDeserializer(attemptUnknownTypeDeserialization, typeConverter, BuildTypeInspector(), yamlFormatter, enumNamingConvention) },
                 { typeof(StaticArrayNodeDeserializer), _ => new StaticArrayNodeDeserializer(factory) },
                 { typeof(StaticDictionaryNodeDeserializer), _ => new StaticDictionaryNodeDeserializer(factory, duplicateKeyChecking) },
                 { typeof(StaticCollectionNodeDeserializer), _ => new StaticCollectionNodeDeserializer(factory) },
-                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(factory, BuildTypeInspector(), ignoreUnmatched, duplicateKeyChecking, typeConverter, enumNamingConvention) },
+                { typeof(ObjectNodeDeserializer), _ => new ObjectNodeDeserializer(factory,
+                    BuildTypeInspector(),
+                    ignoreUnmatched,
+                    duplicateKeyChecking,
+                    typeConverter,
+                    enumNamingConvention,
+                    enforceNullability,
+                    caseInsensitivePropertyMatching,
+                    false, // the static builder doesn't support required attributes
+                    BuildTypeConverters())
+                },
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>
@@ -109,7 +123,11 @@ namespace YamlDotNet.Serialization
 
         protected override StaticDeserializerBuilder Self { get { return this; } }
 
-        internal ITypeInspector BuildTypeInspector()
+        /// <summary>
+        /// Builds the type inspector used by various classes to get information about types and their members.
+        /// </summary>
+        /// <returns></returns>
+        public ITypeInspector BuildTypeInspector()
         {
             ITypeInspector innerInspector = context.GetTypeInspector();
 
@@ -180,6 +198,26 @@ namespace YamlDotNet.Serialization
             }
 
             where(nodeDeserializerFactories.CreateTrackingRegistrationLocationSelector(typeof(TNodeDeserializer), (wrapped, _) => nodeDeserializerFactory(wrapped)));
+            return this;
+        }
+
+        /// <summary>
+        /// Ignore case when matching property names.
+        /// </summary>
+        /// <returns></returns>
+        public StaticDeserializerBuilder WithCaseInsensitivePropertyMatching()
+        {
+            caseInsensitivePropertyMatching = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Enforce whether null values can be set on non-nullable properties and fields.
+        /// </summary>
+        /// <returns>This static deserializer builder.</returns>
+        public StaticDeserializerBuilder WithEnforceNullability()
+        {
+            enforceNullability = true;
             return this;
         }
 
@@ -414,7 +452,8 @@ namespace YamlDotNet.Serialization
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
-                    enumNamingConvention
+                    enumNamingConvention,
+                    BuildTypeInspector()
                 )
             );
         }

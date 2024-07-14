@@ -41,7 +41,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
         {
         }
 
-        protected override bool Enter(IObjectDescriptor value)
+        protected override bool Enter(IObjectDescriptor value, ObjectSerializer serializer)
         {
             if (value.Value != null && assignments.TryGetValue(value.Value, out var assignment))
             {
@@ -56,34 +56,34 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             return true;
         }
 
-        protected override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
+        protected override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value, ObjectSerializer serializer)
         {
             return true;
         }
 
-        protected override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+        protected override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, ObjectSerializer serializer)
         {
             return true;
         }
 
-        protected override void VisitScalar(IObjectDescriptor scalar)
+        protected override void VisitScalar(IObjectDescriptor scalar, ObjectSerializer serializer)
         {
             // Do not assign anchors to scalars
         }
 
-        protected override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+        protected override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, ObjectSerializer serializer)
         {
             VisitObject(mapping);
         }
 
-        protected override void VisitMappingEnd(IObjectDescriptor mapping) { }
+        protected override void VisitMappingEnd(IObjectDescriptor mapping, ObjectSerializer serializer) { }
 
-        protected override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+        protected override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType, ObjectSerializer serializer)
         {
             VisitObject(sequence);
         }
 
-        protected override void VisitSequenceEnd(IObjectDescriptor sequence) { }
+        protected override void VisitSequenceEnd(IObjectDescriptor sequence, ObjectSerializer serializer) { }
 
         private void VisitObject(IObjectDescriptor value)
         {

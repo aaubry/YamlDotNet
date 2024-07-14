@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             this.aliasProvider = aliasProvider;
         }
 
-        public override bool Enter(IObjectDescriptor value, IEmitter context)
+        public override bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
         {
             if (value.Value != null)
             {
@@ -50,22 +50,22 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                     return aliasEventInfo.NeedsExpansion;
                 }
             }
-            return base.Enter(value, context);
+            return base.Enter(propertyDescriptor, value, context, serializer);
         }
 
-        public override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context)
+        public override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context, ObjectSerializer serializer)
         {
             var anchor = aliasProvider.GetAlias(mapping.NonNullValue());
             eventEmitter.Emit(new MappingStartEventInfo(mapping) { Anchor = anchor }, context);
         }
 
-        public override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType, IEmitter context)
+        public override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType, IEmitter context, ObjectSerializer serializer)
         {
             var anchor = aliasProvider.GetAlias(sequence.NonNullValue());
             eventEmitter.Emit(new SequenceStartEventInfo(sequence) { Anchor = anchor }, context);
         }
 
-        public override void VisitScalar(IObjectDescriptor scalar, IEmitter context)
+        public override void VisitScalar(IObjectDescriptor scalar, IEmitter context, ObjectSerializer serializer)
         {
             var scalarInfo = new ScalarEventInfo(scalar);
             if (scalar.Value != null)
