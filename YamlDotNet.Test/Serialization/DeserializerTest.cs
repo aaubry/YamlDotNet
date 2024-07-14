@@ -527,8 +527,6 @@ Property: test-property";
 
             string DriveType { get; }
         }
-<<<<<<< HEAD
-=======
 
         public class Conference
         {
@@ -549,6 +547,5 @@ Property: test-property";
 
             public Attendee Greeter { get; private set; }
         }
->>>>>>> 760472fd76aaa7c359336e7dc17b268fe010f4bd
     }
 }
