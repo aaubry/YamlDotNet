@@ -1,6 +1,7 @@
 module DeserializerTests
 
 open System
+open System.Linq
 open Xunit
 open YamlDotNet.Serialization
 open YamlDotNet.Serialization.NamingConventions
@@ -83,3 +84,98 @@ cars:
     Assert.Null(person.Cars[1].Spec)
     Assert.Equal(None, person.Cars[1].Spec)
     Assert.Equal(None, person.Cars[1].Nickname)
+
+
+[<CLIMutable>]
+type TestSeq = {
+  name: string
+  numbers: int seq
+}
+
+[<Fact>]
+let Deserialize_YamlSeq() =
+    let jackTheDriver = {
+        name = "Jack"
+        numbers = seq { 12; 2; 2 }
+    }
+
+    let yaml = """name: Jack
+numbers:
+- 12
+- 2
+- 2
+"""
+    let sut = DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build()
+
+    let person = sut.Deserialize<TestSeq>(yaml)
+    Assert.Equal(jackTheDriver.name, person.name)
+    let numbers = person.numbers.ToArray()
+    Assert.Equal(3, numbers.Length)
+    Assert.Equal(12, numbers[0])
+    Assert.Equal(2, numbers[1])
+    Assert.Equal(2, numbers[2])
+
+[<CLIMutable>]
+type TestList = {
+  name: string
+  numbers: int list
+}
+
+[<Fact>]
+let Deserialize_YamlList() =
+    let jackTheDriver = {
+        name = "Jack"
+        numbers = [ 12; 2; 2 ]
+    }
+
+    let yaml = """name: Jack
+numbers:
+- 12
+- 2
+- 2
+"""
+    let sut = DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build()
+
+    let person = sut.Deserialize<TestList>(yaml)
+    Assert.Equal(jackTheDriver.name, person.name)
+    let numbers = person.numbers.ToArray()
+    Assert.Equal(3, numbers.Length)
+    Assert.Equal(12, numbers[0])
+    Assert.Equal(2, numbers[1])
+    Assert.Equal(2, numbers[2])
+
+
+[<CLIMutable>]
+type TestArray = {
+  name: string
+  numbers: int array
+}
+
+[<Fact>]
+let Deserialize_YamlArray() =
+    let jackTheDriver = {
+        name = "Jack"
+        numbers = [| 12; 2; 2 |]
+    }
+
+    let yaml = """name: Jack
+numbers:
+- 12
+- 2
+- 2
+"""
+    let sut = DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build()
+
+    let person = sut.Deserialize<TestArray>(yaml)
+    Assert.Equal(jackTheDriver.name, person.name)
+    let numbers = person.numbers.ToArray()
+    Assert.Equal(3, numbers.Length)
+    Assert.Equal(12, numbers[0])
+    Assert.Equal(2, numbers[1])
+    Assert.Equal(2, numbers[2])

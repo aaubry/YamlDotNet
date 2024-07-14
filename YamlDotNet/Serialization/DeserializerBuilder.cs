@@ -111,7 +111,8 @@ namespace YamlDotNet.Serialization
                         caseInsensitivePropertyMatching,
                         enforceRequiredProperties,
                         BuildTypeConverters())
-                }
+                },
+                { typeof(FsharpListNodeDeserializer), _ => new FsharpListNodeDeserializer(BuildTypeInspector(), enumNamingConvention) },
             };
 
             nodeTypeResolverFactories = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>

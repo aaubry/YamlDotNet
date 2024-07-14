@@ -22,7 +22,7 @@
 using System;
 using System.Collections;
 using YamlDotNet.Core;
-using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
@@ -48,13 +48,24 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
             var items = new ArrayList();
-            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention, typeInspector);
+            Array? array = null;
+            CollectionNodeDeserializer.DeserializeHelper(itemType, parser, nestedObjectDeserializer, items, true, enumNamingConvention, typeInspector, PromiseResolvedHandler);
 
-            var array = Array.CreateInstance(itemType, items.Count);
+            array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);
 
             value = array;
             return true;
+
+            void PromiseResolvedHandler(int index, object? value)
+            {
+                if (array == null)
+                {
+                    throw new InvalidOperationException("Destination array is still null");
+                }
+
+                array.SetValue(TypeConverter.ChangeType(value, itemType, enumNamingConvention, typeInspector), index);
+            }
         }
 
         private sealed class ArrayList : IList

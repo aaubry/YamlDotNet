@@ -527,5 +527,28 @@ Property: test-property";
 
             string DriveType { get; }
         }
+<<<<<<< HEAD
+=======
+
+        public class Conference
+        {
+            public Session[] Sessions { get; private set; }
+
+            public Attendee[] Attendees { get; private set; }
+        }
+        public class Attendee
+        {
+            public string Name { get; private set; }
+
+            public Session[] Sessions { get; private set; }
+        }
+
+        public class Session
+        {
+            public string Name { get; private set; }
+
+            public Attendee Greeter { get; private set; }
+        }
+>>>>>>> 760472fd76aaa7c359336e7dc17b268fe010f4bd
     }
 }

@@ -81,7 +81,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        internal static void DeserializeHelper(Type tItem, IParser parser, Func<IParser, Type, object?> nestedObjectDeserializer, IList result, bool canUpdate, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
+        internal static void DeserializeHelper(Type tItem,
+            IParser parser,
+            Func<IParser, Type, object?> nestedObjectDeserializer,
+            IList result,
+            bool canUpdate,
+            INamingConvention enumNamingConvention,
+            ITypeInspector typeInspector,
+            Action<int, object?>? promiseResolvedHandler = null)
         {
             parser.Consume<SequenceStart>();
             while (!parser.TryConsume<SequenceEnd>(out var _))
@@ -94,7 +101,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     if (canUpdate)
                     {
                         var index = result.Add(tItem.IsValueType() ? Activator.CreateInstance(tItem) : null);
-                        promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem, enumNamingConvention, typeInspector);
+
+                        if (promiseResolvedHandler != null)
+                        {
+                            promise.ValueAvailable += v => promiseResolvedHandler(index, v);
+                        }
+                        else
+                        {
+                            promise.ValueAvailable += v => result[index] = TypeConverter.ChangeType(v, tItem, enumNamingConvention, typeInspector);
+                        }
                     }
                     else
                     {
