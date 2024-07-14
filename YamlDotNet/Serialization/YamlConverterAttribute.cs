@@ -24,7 +24,7 @@ using System;
 namespace YamlDotNet.Serialization
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class YamlConverterAttribute : Attribute
+    public sealed class YamlConverterAttribute : Attribute
     {
         public Type ConverterType { get; }
 
