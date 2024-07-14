@@ -130,7 +130,11 @@ namespace YamlDotNet.Serialization
 
         protected override DeserializerBuilder Self { get { return this; } }
 
-        internal ITypeInspector BuildTypeInspector()
+        /// <summary>
+        /// Builds the type inspector used by various classes to get information about types and their members.
+        /// </summary>
+        /// <returns></returns>
+        public ITypeInspector BuildTypeInspector()
         {
             ITypeInspector innerInspector = new WritablePropertiesTypeInspector(typeResolver, includeNonPublicProperties);
 

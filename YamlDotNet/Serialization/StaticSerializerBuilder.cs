@@ -164,10 +164,14 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
         public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(Func<IEventEmitter, TEventEmitter> eventEmitterFactory)
-            where TEventEmitter : IEventEmitter
-        {
-            return WithEventEmitter(eventEmitterFactory, w => w.OnTop());
-        }
+            where TEventEmitter : IEventEmitter => WithEventEmitter(eventEmitterFactory, w => w.OnTop());
+
+        /// <summary>
+        /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
+        /// </summary>
+        /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
+        public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(Func<IEventEmitter, ITypeInspector, TEventEmitter> eventEmitterFactory)
+            where TEventEmitter : IEventEmitter => WithEventEmitter(eventEmitterFactory, w => w.OnTop());
 
         /// <summary>
         /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
@@ -176,6 +180,16 @@ namespace YamlDotNet.Serialization
         /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
         public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(
             Func<IEventEmitter, TEventEmitter> eventEmitterFactory,
+            Action<IRegistrationLocationSelectionSyntax<IEventEmitter>> where
+        ) where TEventEmitter : IEventEmitter => WithEventEmitter((IEventEmitter e, ITypeInspector _) => eventEmitterFactory(e), where);
+
+        /// <summary>
+        /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
+        /// </summary>
+        /// <param name="eventEmitterFactory">A function that instantiates the event emitter.</param>
+        /// <param name="where">Configures the location where to insert the <see cref="IEventEmitter" /></param>
+        public StaticSerializerBuilder WithEventEmitter<TEventEmitter>(
+            Func<IEventEmitter, ITypeInspector, TEventEmitter> eventEmitterFactory,
             Action<IRegistrationLocationSelectionSyntax<IEventEmitter>> where
         )
             where TEventEmitter : IEventEmitter
@@ -190,9 +204,10 @@ namespace YamlDotNet.Serialization
                 throw new ArgumentNullException(nameof(where));
             }
 
-            where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner)));
+            where(eventEmitterFactories.CreateRegistrationLocationSelector(typeof(TEventEmitter), inner => eventEmitterFactory(inner, BuildTypeInspector())));
             return Self;
         }
+
 
         /// <summary>
         /// Registers an additional <see cref="IEventEmitter" /> to be used by the serializer.
@@ -218,6 +233,7 @@ namespace YamlDotNet.Serialization
             where(eventEmitterFactories.CreateTrackingRegistrationLocationSelector(typeof(TEventEmitter), (wrapped, inner) => eventEmitterFactory(wrapped, inner)));
             return Self;
         }
+
 
         /// <summary>
         /// Unregisters an existing <see cref="IEventEmitter" /> of type <typeparam name="TEventEmitter" />.
@@ -698,7 +714,11 @@ namespace YamlDotNet.Serialization
             );
         }
 
-        internal ITypeInspector BuildTypeInspector()
+        /// <summary>
+        /// Builds the type inspector used by various classes to get information about types and their members.
+        /// </summary>
+        /// <returns></returns>
+        public ITypeInspector BuildTypeInspector()
         {
             var typeInspector = context.GetTypeInspector();
 
