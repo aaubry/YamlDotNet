@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net80;net70;net60;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
     <Configurations>Debug;Release</Configurations>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
@@ -21,9 +21,13 @@
 
     <NetStandard>false</NetStandard>
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
+
+    <DebugSymbols>true</DebugSymbols>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp3.1'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <!-- Since the BCL is not yet annotated in other platforms, disable the nullable warnings when compiling for those -->
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
@@ -36,19 +40,20 @@
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net60'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net70'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net80'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <NetStandard>true</NetStandard>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="README.md" />
     <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
   </ItemGroup>
 
@@ -58,37 +63,28 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetStandard)' == 'false'">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
   <ItemGroup Condition="'$(NetStandard)' == 'false'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(NetStandard)' == 'true'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters">
-      <Version>4.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.ComponentModel.TypeConverter">
-      <Version>4.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Diagnostics.Debug">
-      <Version>4.3.0</Version>
-    </PackageReference>
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
   </ItemGroup>
 
   <Target Name="Info" BeforeTargets="CoreCompile">
-    <PropertyGroup>
-      <Empty></Empty>
-    </PropertyGroup>
     <Message Importance="high" Text=" " Condition="'$(RealTargetFramework)' != ''" />
     <Message Importance="high" Text="==== Building $(RealTargetFramework) $(Empty.PadRight($([MSBuild]::Subtract(100, $(RealTargetFramework.Length))), '='))" Condition="'$(RealTargetFramework)' != ''" />
   </Target>

@@ -61,8 +61,10 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
-            // Strip off the nullable type, if present
-            var underlyingType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
+            // Strip off the nullable & fsharp option type, if present
+            var underlyingType = Nullable.GetUnderlyingType(expectedType)
+                ?? FsharpHelper.GetOptionUnderlyingType(expectedType)
+                ?? expectedType;
 
             if (underlyingType.IsEnum())
             {

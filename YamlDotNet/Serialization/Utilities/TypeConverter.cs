@@ -27,6 +27,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.ComponentModel;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Serialization.Utilities
 {
@@ -100,11 +101,11 @@ namespace YamlDotNet.Serialization.Utilities
                 return value;
             }
 
-            // Nullable types get a special treatment
+            // Nullable & fsharp option types get a special treatment
             if (destinationType.IsGenericType())
             {
                 var genericTypeDefinition = destinationType.GetGenericTypeDefinition();
-                if (genericTypeDefinition == typeof(Nullable<>))
+                if (genericTypeDefinition == typeof(Nullable<>) || FsharpHelper.IsOptionType(genericTypeDefinition)) 
                 {
                     var innerType = destinationType.GetGenericArguments()[0];
                     var convertedValue = ChangeType(value, innerType, culture, enumNamingConvention, typeInspector);

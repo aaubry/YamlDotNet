@@ -1554,7 +1554,7 @@ y:
                         new FloatTestCase("float.Epsilon", float.Epsilon, float.Epsilon.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("float.26.67", 26.67F, "26.67"),
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET
                         new FloatTestCase("double.MinValue", double.MinValue, double.MinValue.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("double.MaxValue", double.MaxValue, double.MaxValue.ToString("G", CultureInfo.InvariantCulture)),
                         new FloatTestCase("float.MinValue", float.MinValue, float.MinValue.ToString("G", CultureInfo.InvariantCulture)),
@@ -2499,6 +2499,16 @@ Null: true
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        [Trait("motive", "issue #656")]
+        public void NestedDictionaryTypes_ShouldRoundtrip()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var yaml = serializer.Serialize(new HasNestedDictionary { Lookups = { [1] = new HasNestedDictionary.Payload { I = 1 } } }, typeof(HasNestedDictionary));
+            var dct = new DeserializerBuilder().Build().Deserialize<HasNestedDictionary>(yaml);
+            Assert.Contains(new KeyValuePair<int, HasNestedDictionary.Payload>(1, new HasNestedDictionary.Payload { I = 1 }), dct.Lookups);
+        }
+
         public class TestState
         {
             public int OnSerializedCallCount { get; set; }
@@ -2588,6 +2598,16 @@ Null: true
             public void WriteYaml(IEmitter emitter, object value, Type type, ObjectSerializer serializer)
             {
                 emitter.Emit(new Scalar(((NonSerializable)value).Text));
+            }
+        }
+
+        public sealed class HasNestedDictionary
+        {
+            public Dictionary<int, Payload> Lookups { get; set; } = new Dictionary<int, Payload>();
+
+            public struct Payload
+            {
+                public int I { get; set; }
             }
         }
     }

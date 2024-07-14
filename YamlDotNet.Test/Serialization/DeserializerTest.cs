@@ -265,7 +265,7 @@ b: &number 1
                 yield return new object[] { decimal.MaxValue, typeof(decimal) };
                 yield return new object[] { char.MaxValue, typeof(char) };
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET
                 yield return new object[] { float.MinValue, typeof(float) };
                 yield return new object[] { float.MaxValue, typeof(float) };
                 yield return new object[] { double.MinValue, typeof(double) };

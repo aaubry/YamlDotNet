@@ -31,6 +31,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "YamlDotNet.Samples.Fsharp",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YamlDotNet.Core7AoTCompileTest.Model", "YamlDotNet.Core7AoTCompileTest.Model\YamlDotNet.Core7AoTCompileTest.Model.csproj", "{BFE15564-7C2C-47DA-8302-9BCB39B6864B}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YamlDotNet.Fsharp.Test", "YamlDotNet.Fsharp.Test\YamlDotNet.Fsharp.Test.fsproj", "{294EFEB3-4DC2-4105-ADE7-E429F5522419}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{BFE15564-7C2C-47DA-8302-9BCB39B6864B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFE15564-7C2C-47DA-8302-9BCB39B6864B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFE15564-7C2C-47DA-8302-9BCB39B6864B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{294EFEB3-4DC2-4105-ADE7-E429F5522419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{294EFEB3-4DC2-4105-ADE7-E429F5522419}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{294EFEB3-4DC2-4105-ADE7-E429F5522419}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{294EFEB3-4DC2-4105-ADE7-E429F5522419}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

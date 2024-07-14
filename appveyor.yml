@@ -35,13 +35,14 @@ artifacts:
   - path: YamlDotNet\bin\Release\net47
     name: Release-Net47
 
-  - path: YamlDotNet\bin\Release\net60
+  - path: YamlDotNet\bin\Release\net6.0
     name: Release-Net60
 
-  - path: YamlDotNet\bin\Release\net70
+  - path: YamlDotNet\bin\Release\net7.0
     name: Release-Net70
 
-  - path: YamlDotNet\bin\Release\net80
+  - path: YamlDotNet\bin\Release\net8.0
     name: Release-Net80
 
   - path: YamlDotNet\bin\*.nupkg
+  - path: YamlDotNet\bin\*.snupkg

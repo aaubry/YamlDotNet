@@ -26,6 +26,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
@@ -73,8 +74,11 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 value = null;
                 return false;
             }
-            // Strip off the nullable type, if present. This is needed for nullable structs.
-            var implementationType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
+
+            // Strip off the nullable & fsharp option type, if present. This is needed for nullable structs.
+            var implementationType = Nullable.GetUnderlyingType(expectedType)
+                ?? FsharpHelper.GetOptionUnderlyingType(expectedType)
+                ?? expectedType;
 
             value = objectFactory.Create(implementationType);
             objectFactory.ExecuteOnDeserializing(value);
