@@ -146,7 +146,84 @@ cars:
     let person = sut.Serialize(jackTheDriver)
     person |> should equal yaml
 
-type TestOmit = {
+[<CLIMutable>]
+type TestSeq = {
   name: string
-  plop: int option
+  numbers: int seq
 }
+
+[<Fact>]
+let Serialize_YamlSeq() =
+    let jackTheDriver = {
+        name = "Jack"
+        numbers = [ 12; 2; 2 ]
+    }
+
+    let yaml = """name: Jack
+numbers:
+- 12
+- 2
+- 2
+"""
+    let sut = SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .Build()
+
+    let person = sut.Serialize(jackTheDriver)
+    person |> should equal yaml
+
+
+[<CLIMutable>]
+type TestList = {
+  name: string
+  numbers: int list
+}
+
+[<Fact>]
+let Serialize_YamlList() =
+    let jackTheDriver = {
+        name = "Jack"
+        numbers = [ 12; 2; 2 ]
+    }
+
+    let yaml = """name: Jack
+numbers:
+- 12
+- 2
+- 2
+"""
+    let sut = SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .Build()
+
+    let person = sut.Serialize(jackTheDriver)
+    person |> should equal yaml
+
+[<CLIMutable>]
+type TestArray = {
+  name: string
+  numbers: int array
+}
+
+[<Fact>]
+let Serialize_YamlArray() =
+    let jackTheDriver = {
+        name = "Jack"
+        numbers = [| 12; 2; 2 |]
+    }
+
+    let yaml = """name: Jack
+numbers:
+- 12
+- 2
+- 2
+"""
+    let sut = SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .Build()
+
+    let person = sut.Serialize(jackTheDriver)
+    person |> should equal yaml
