@@ -105,7 +105,7 @@ namespace YamlDotNet.Serialization.Utilities
             if (destinationType.IsGenericType())
             {
                 var genericTypeDefinition = destinationType.GetGenericTypeDefinition();
-                if (genericTypeDefinition == typeof(Nullable<>) || FsharpHelper.IsOptionType(genericTypeDefinition)) 
+                if (genericTypeDefinition == typeof(Nullable<>) || FsharpHelper.IsOptionType(genericTypeDefinition))
                 {
                     var innerType = destinationType.GetGenericArguments()[0];
                     var convertedValue = ChangeType(value, innerType, culture, enumNamingConvention, typeInspector);

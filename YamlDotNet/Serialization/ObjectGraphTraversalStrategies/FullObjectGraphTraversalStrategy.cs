@@ -158,8 +158,9 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                             // This is a nullable type, recursively handle it with its underlying type.
                             // Note that if it contains null, the condition above already took care of it
                             Traverse(
+                                propertyDescriptor,
                                 "Value",
-                                new ObjectDescriptor(value.Value, nullableUnderlyingType, value.Type, value.ScalarStyle), 
+                                new ObjectDescriptor(value.Value, nullableUnderlyingType, value.Type, value.ScalarStyle),
                                 visitor,
                                 context,
                                 path,
@@ -169,6 +170,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                         else if (optionUnderlyingType != null && optionValue != null)
                         {
                             Traverse(
+                                propertyDescriptor,
                                 "Value",
                                 new ObjectDescriptor(FsharpHelper.GetValue(value), optionUnderlyingType, value.Type, value.ScalarStyle),
                                 visitor,

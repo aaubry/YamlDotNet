@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
 
     <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
@@ -15,6 +15,7 @@
     <NoWarn>1591;1574</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <WarningsAsErrors>true</WarningsAsErrors>
 
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
