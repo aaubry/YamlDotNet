@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -31,6 +32,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Common;
@@ -2422,6 +2424,56 @@ Null: true
 
             Assert.Equal(1, test.OnSerializedCallCount);
             Assert.Equal(1, test.OnSerializingCallCount);
+        }
+        
+        [Fact]
+        public void SerializeConcurrently()
+        {
+            var exceptions = new ConcurrentStack<Exception>();
+            var runCount = 10;
+
+            for (var i = 0; i < runCount; i++)
+            {
+                // Failures don't occur consistently - running repeatedly increases the chances
+                RunTest();
+            }
+            
+            Assert.Empty(exceptions);
+
+            void RunTest()
+            {
+                var threadCount = 100;
+                var threads = new List<Thread>();
+                var control = new SemaphoreSlim(0, threadCount);
+
+                var serializer = new SerializerBuilder().Build();
+            
+                for (var i = 0; i < threadCount; i++)
+                {
+                    threads.Add(new Thread(Serialize));
+                }
+
+                threads.ForEach(t => t.Start());
+                // Each thread will wait for the semaphore before proceeding.
+                // Release them all simultaneously to try to maximise concurrency
+                control.Release(threadCount);
+                threads.ForEach(t => t.Join());
+                
+                void Serialize()
+                {
+                    control.Wait();
+
+                    try
+                    {
+                        var test = new TestState();
+                        serializer.Serialize(test);
+                    }
+                    catch (Exception e)
+                    {
+                        exceptions.Push(e.InnerException ?? e);
+                    }
+                }
+            }
         }
 
         [Fact]
