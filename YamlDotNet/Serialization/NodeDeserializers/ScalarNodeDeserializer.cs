@@ -355,24 +355,16 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 default:
                     if (Regex.IsMatch(v, "0x[0-9a-fA-F]+")) //base16 number
                     {
-                        if (TryAndSwallow(() => Convert.ToByte(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt16(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt32(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt64(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToUInt64(v, 16), out result)) { }
+                        if (TryAndSwallow(() => Convert.ToUInt64(v, 16), out result)) { }
                         else
                         {
                             //we couldn't parse it, default to a string. It's probably to big.
                             result = v;
                         }
                     }
-                    else if (Regex.IsMatch(v, "0o[0-9a-fA-F]+")) //base8 number
+                    else if (Regex.IsMatch(v, "0o[0-7]+")) //base8 number
                     {
-                        if (TryAndSwallow(() => Convert.ToByte(v, 8), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt16(v, 8), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt32(v, 8), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt64(v, 8), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToUInt64(v, 8), out result)) { }
+                        if (TryAndSwallow(() => Convert.ToUInt64(v.Substring(2), 8), out result)) { }
                         else
                         {
                             //we couldn't parse it, default to a string. It's probably to big.

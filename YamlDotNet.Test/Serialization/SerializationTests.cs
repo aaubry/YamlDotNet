@@ -164,6 +164,34 @@ namespace YamlDotNet.Test.Serialization
             result.Should().Be(77744246530L);
         }
 
+        [Fact]
+        public void DeserializeScalarBase16FromUnknown()
+        {
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build();
+
+            var expected = "0x8000";
+
+            var result = deserializer.Deserialize<object>(new StringReader(expected));
+
+            result.Should().Be((ulong)32768);
+        }
+
+        [Fact]
+        public void DeserializeScalarBase8FromUnknown()
+        {
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build();
+
+            var expected = "0o100000";
+
+            var result = deserializer.Deserialize<object>(new StringReader(expected));
+
+            result.Should().Be((ulong)32768);
+        }
+
         [Theory]
         [InlineData(EnumExample.One)]
         [InlineData(EnumExample.One | EnumExample.Two)]
