@@ -174,9 +174,7 @@ namespace YamlDotNet.Test.Serialization
                 .WithAttemptingUnquotedStringTypeDeserialization()
                 .Build();
 
-            var expected = yaml;
-
-            var result = deserializer.Deserialize<object>(new StringReader(expected));
+            var result = deserializer.Deserialize<object>(new StringReader(yaml));
 
             result.Should().Be(value);
         }
@@ -191,9 +189,7 @@ namespace YamlDotNet.Test.Serialization
                 .WithAttemptingUnquotedStringTypeDeserialization()
                 .Build();
 
-            var expected = yaml;
-
-            var result = deserializer.Deserialize<object>(new StringReader(expected));
+            var result = deserializer.Deserialize<object>(new StringReader(yaml));
 
             result.Should().Be(value);
         }
