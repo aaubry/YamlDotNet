@@ -164,32 +164,38 @@ namespace YamlDotNet.Test.Serialization
             result.Should().Be(77744246530L);
         }
 
-        [Fact]
-        public void DeserializeScalarBase16FromUnknown()
+        [Theory]
+        [InlineData("0o0", 0)]
+        [InlineData("0x8000", 32768)]
+        [InlineData("0xFFFFFFFFFFFFFFFF", 18_446_744_073_709_551_615)]
+        public void DeserializeScalarBase16FromUnknown(string yaml, ulong value)
         {
             IDeserializer deserializer = new DeserializerBuilder()
                 .WithAttemptingUnquotedStringTypeDeserialization()
                 .Build();
 
-            var expected = "0x8000";
+            var expected = yaml;
 
             var result = deserializer.Deserialize<object>(new StringReader(expected));
 
-            result.Should().Be((ulong)32768);
+            result.Should().Be(value);
         }
 
-        [Fact]
-        public void DeserializeScalarBase8FromUnknown()
+        [Theory]
+        [InlineData("0o0", 0)]
+        [InlineData("0o100000", 32768)]
+        [InlineData("0o1777777777777777777777", 18_446_744_073_709_551_615)]
+        public void DeserializeScalarBase8FromUnknown(string yaml, ulong value)
         {
             IDeserializer deserializer = new DeserializerBuilder()
                 .WithAttemptingUnquotedStringTypeDeserialization()
                 .Build();
 
-            var expected = "0o100000";
+            var expected = yaml;
 
             var result = deserializer.Deserialize<object>(new StringReader(expected));
 
-            result.Should().Be((ulong)32768);
+            result.Should().Be(value);
         }
 
         [Theory]
