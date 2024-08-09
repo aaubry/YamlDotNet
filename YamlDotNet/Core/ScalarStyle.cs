@@ -55,5 +55,9 @@ namespace YamlDotNet.Core
         /// The folded scalar style.
         /// </summary>
         Folded,
+        /// <summary>
+        ///  Forced plain scalar, regardless.
+        /// </summary>
+        ForcePlain
     }
 }
