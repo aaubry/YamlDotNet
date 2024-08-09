@@ -957,6 +957,11 @@ namespace YamlDotNet.Core
                 }
             }
 
+            if (style == ScalarStyle.ForcePlain)
+            {
+                style = ScalarStyle.Plain;
+            }
+
             scalarData.Style = style;
         }
 
