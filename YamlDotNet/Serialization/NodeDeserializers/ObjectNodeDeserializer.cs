@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private readonly bool enforceNullability;
         private readonly bool caseInsensitivePropertyMatching;
         private readonly bool enforceRequiredProperties;
-        private readonly IEnumerable<IYamlTypeConverter> typeConverters;
+        private readonly TypeConverterCache typeConverters;
 
         public ObjectNodeDeserializer(IObjectFactory objectFactory,
             ITypeInspector typeInspector,
@@ -64,7 +64,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             this.enforceNullability = enforceNullability;
             this.caseInsensitivePropertyMatching = caseInsensitivePropertyMatching;
             this.enforceRequiredProperties = enforceRequiredProperties;
-            this.typeConverters = typeConverters;
+            this.typeConverters = new TypeConverterCache(typeConverters);
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
@@ -107,7 +107,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     object? propertyValue;
                     if (property.ConverterType != null)
                     {
-                        var typeConverter = typeConverters.Single(x => x.GetType() == property.ConverterType)!;
+                        var typeConverter = typeConverters.GetConverterByType(property.ConverterType);
                         propertyValue = typeConverter.ReadYaml(parser, property.Type, rootDeserializer);
                     }
                     else
