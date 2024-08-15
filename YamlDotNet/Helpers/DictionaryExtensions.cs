@@ -19,6 +19,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
+using System.Collections.Concurrent;
+
 namespace YamlDotNet.Helpers
 {
     internal static class DictionaryExtensions
@@ -33,6 +36,29 @@ namespace YamlDotNet.Helpers
 
             dictionary.Add(key, value);
             return true;
+        }
+#endif
+
+#if NETSTANDARD2_0 || NETFRAMEWORK
+        public static TValue GetOrAdd<TKey, TValue, TArg>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TArg, TValue> valueFactory, TArg arg)
+        {
+            if (dictionary == null) { throw new ArgumentNullException("dictionary"); }
+            if (key == null) { throw new ArgumentNullException("key"); }
+            if (valueFactory == null) { throw new ArgumentNullException("valueFactory"); }
+
+            while (true)
+            {
+                if (dictionary.TryGetValue(key, out var value))
+                {
+                    return value;
+                }
+
+                value = valueFactory(key, arg);
+                if (dictionary.TryAdd(key, value))
+                {
+                    return value;
+                }
+            }
         }
 #endif
     }

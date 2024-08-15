@@ -23,6 +23,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Serialization.TypeInspectors
 {
@@ -44,19 +45,34 @@ namespace YamlDotNet.Serialization.TypeInspectors
         public override string GetEnumName(Type enumType, string name)
         {
             var cache = enumNameCache.GetOrAdd(enumType, _ => new ConcurrentDictionary<string, string>());
-            var result = cache.GetOrAdd(name, _ => innerTypeDescriptor.GetEnumName(enumType, name));
+            var result = cache.GetOrAdd(name, static (n, context) =>
+            {
+                var (et, typeDescriptor) = context;
+                return typeDescriptor.GetEnumName(et, n);
+            },
+            (enumType, innerTypeDescriptor));
             return result;
         }
 
         public override string GetEnumValue(object enumValue)
         {
-            var result = enumValueCache.GetOrAdd(enumValue, _ => this.innerTypeDescriptor.GetEnumValue(enumValue));
+            var result = enumValueCache.GetOrAdd(enumValue, static (_, context) =>
+            {
+                var (ev, typeDescriptor) = context;
+                return typeDescriptor.GetEnumValue(ev);
+            },
+            (enumValue, innerTypeDescriptor));
             return result;
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
-            return cache.GetOrAdd(type, t => innerTypeDescriptor.GetProperties(t, container).ToList());
+            return cache.GetOrAdd(type, static (t, context) =>
+            {
+                var (c, typeDescriptor) = context;
+                return typeDescriptor.GetProperties(t, c).ToList();
+            },
+            (container, innerTypeDescriptor));
         }
     }
 }
