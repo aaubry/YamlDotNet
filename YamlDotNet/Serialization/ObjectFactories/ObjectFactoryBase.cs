@@ -55,7 +55,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
         public virtual bool GetDictionary(IObjectDescriptor descriptor, out IDictionary? dictionary, out Type[]? genericArguments)
         {
-            var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(descriptor.Type, typeof(IDictionary<,>));
+            var genericDictionaryType = descriptor.Type.GetImplementationOfOpenGenericInterface(typeof(IDictionary<,>));
             if (genericDictionaryType != null)
             {
                 genericArguments = genericDictionaryType.GetGenericArguments();
@@ -70,7 +70,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
         public virtual Type GetValueType(Type type)
         {
-            var enumerableType = ReflectionUtility.GetImplementedGenericInterface(type, typeof(IEnumerable<>));
+            var enumerableType = type.GetImplementationOfOpenGenericInterface(typeof(IEnumerable<>));
             var itemType = enumerableType != null ? enumerableType.GetGenericArguments()[0] : typeof(object);
             return itemType;
         }

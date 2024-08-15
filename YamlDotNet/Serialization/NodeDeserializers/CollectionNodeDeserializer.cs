@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             IList? list;
             var canUpdate = true;
             Type itemType;
-            var genericCollectionType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(ICollection<>));
+            var genericCollectionType = expectedType.GetImplementationOfOpenGenericInterface((typeof(ICollection<>)));
             if (genericCollectionType != null)
             {
                 var genericArguments = genericCollectionType.GetGenericArguments();
@@ -58,7 +58,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 if (list == null)
                 {
                     // Uncommon case where a type implements IList<T> but not IList
-                    var genericListType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IList<>));
+                    var genericListType = expectedType.GetImplementationOfOpenGenericInterface(typeof(IList<>));
                     canUpdate = genericListType != null;
                     list = (IList?)Activator.CreateInstance(typeof(GenericCollectionToNonGenericAdapter<>).MakeGenericType(itemType), value);
                 }
