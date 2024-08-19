@@ -24,6 +24,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Core.ObjectPool;
 using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.Utilities;

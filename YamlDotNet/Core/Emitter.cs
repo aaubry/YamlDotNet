@@ -26,7 +26,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Helpers;
+using YamlDotNet.Core.ObjectPool;
 using ParsingEvent = YamlDotNet.Core.Events.ParsingEvent;
 using TagDirective = YamlDotNet.Core.Tokens.TagDirective;
 using VersionDirective = YamlDotNet.Core.Tokens.VersionDirective;
@@ -312,7 +312,8 @@ namespace YamlDotNet.Core
                 blockIndicators = true;
             }
 
-            var buffer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
+            using var slab = StringLookAheadBufferPool.Rent(value);
+            var buffer = new CharacterAnalyzer<StringLookAheadBuffer>(slab.Buffer);
             var preceededByWhitespace = true;
             var followedByWhitespace = buffer.IsWhiteBreakOrZero(1);
 
@@ -1793,7 +1794,8 @@ namespace YamlDotNet.Core
 
         private void WriteBlockScalarHints(string value)
         {
-            var analyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
+            using var slab = StringLookAheadBufferPool.Rent(value);
+            var analyzer = new CharacterAnalyzer<StringLookAheadBuffer>(slab.Buffer);
 
             if (analyzer.IsSpace() || analyzer.IsBreak())
             {

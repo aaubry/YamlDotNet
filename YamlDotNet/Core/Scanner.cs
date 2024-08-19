@@ -24,8 +24,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using YamlDotNet.Core.ObjectPool;
 using YamlDotNet.Core.Tokens;
-using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {

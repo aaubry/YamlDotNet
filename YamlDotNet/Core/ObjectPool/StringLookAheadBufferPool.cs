@@ -20,46 +20,47 @@
 // SOFTWARE.
 
 using System;
-using YamlDotNet.Core.ObjectPool;
+using System.Diagnostics;
+using YamlDotNet.Core;
 
-namespace YamlDotNet.Core
+namespace YamlDotNet.Core.ObjectPool
 {
-    internal sealed class StringLookAheadBuffer : ILookAheadBuffer, IResettable
+    /// <summary>
+    /// Pooling of <see cref="StringLookAheadBuffer"/> instances.
+    /// </summary>
+    internal static class StringLookAheadBufferPool
     {
-        public string Value { get; set; } = string.Empty;
+        private static readonly ObjectPool<StringLookAheadBuffer> Pool = ObjectPool.Create(new DefaultPooledObjectPolicy<StringLookAheadBuffer>());
 
-        public int Position { get; private set; }
-
-        public int Length => Value.Length;
-
-        public bool EndOfInput => IsOutside(Position);
-
-        public char Peek(int offset)
+        public static BufferWrapper Rent(string value)
         {
-            var index = Position + offset;
-            return IsOutside(index) ? '\0' : Value[index];
+            var buffer = Pool.Get();
+            Debug.Assert(buffer.Length == 0);
+
+            buffer.Value = value;
+            return new BufferWrapper(buffer, Pool);
         }
 
-        private bool IsOutside(int index)
+        internal readonly struct BufferWrapper : IDisposable
         {
-            return index >= Value.Length;
-        }
+            public readonly StringLookAheadBuffer Buffer;
+            private readonly ObjectPool<StringLookAheadBuffer> pool;
 
-        public void Skip(int length)
-        {
-            if (length < 0)
+            public BufferWrapper(StringLookAheadBuffer buffer, ObjectPool<StringLookAheadBuffer> pool)
             {
-                throw new ArgumentOutOfRangeException(nameof(length), "The length must be positive.");
+                Buffer = buffer;
+                this.pool = pool;
             }
-            Position += length;
-        }
 
-        public bool TryReset()
-        {
-            Position = 0;
-            Value = string.Empty;
+            public override string ToString()
+            {
+                return Buffer.ToString()!;
+            }
 
-            return true;
+            public void Dispose()
+            {
+                pool.Return(Buffer);
+            }
         }
     }
 }
