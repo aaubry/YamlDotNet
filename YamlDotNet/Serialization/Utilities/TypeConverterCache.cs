@@ -34,11 +34,13 @@ namespace YamlDotNet.Serialization.Utilities
         private readonly IYamlTypeConverter[] typeConverters;
         private readonly Dictionary<Type, (bool HasMatch, IYamlTypeConverter TypeConverter)> cache = new();
 
-        public TypeConverterCache(IEnumerable<IYamlTypeConverter>? typeConverters)
+        public TypeConverterCache(IEnumerable<IYamlTypeConverter>? typeConverters) : this(typeConverters?.ToArray() ?? Array.Empty<IYamlTypeConverter>())
         {
-            this.typeConverters = typeConverters != null
-                ? typeConverters.ToArray()
-                : Array.Empty<IYamlTypeConverter>();
+        }
+
+        public TypeConverterCache(IYamlTypeConverter[] typeConverters)
+        {
+            this.typeConverters = typeConverters;
         }
 
         /// <summary>
