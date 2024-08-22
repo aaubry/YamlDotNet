@@ -16,7 +16,21 @@
 
     <NetStandard>false</NetStandard>
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
+  </PropertyGroup>
 
+  <PropertyGroup Label="Package Properties">
+    <PackageId>YamlDotNet</PackageId>
+    <Authors>Antoine Aubry</Authors>
+    <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
+    <PackageSummary>This package contains the YAML parser and serializer.</PackageSummary>
+    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
+    <PackageIcon>images/yamldotnet.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>yaml parser development library serialization</PackageTags>
+    <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
+    <PublishRepository>true</PublishRepository>
     <DebugSymbols>true</DebugSymbols>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -27,29 +41,33 @@
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net47'">
+    <IsNetFramework>true</IsNetFramework>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <NetStandard>true</NetStandard>
+    <IsNetStandard>true</IsNetStandard>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <NetStandard>true</NetStandard>
+    <IsNetStandard>true</IsNetStandard>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <NetStandard>true</NetStandard>
+    <IsNetCore>true</IsNetCore>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <NetStandard>true</NetStandard>
+    <IsNetCore>true</IsNetCore>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <NetStandard>true</NetStandard>
+    <IsNetCore>true</IsNetCore>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="README.md" />
-    <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+    <None Include="../yamldotnet.png" Pack="true" PackagePath="images/yamldotnet.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,20 +78,20 @@
     <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(NetStandard)' == 'false'">
+  <!--<PropertyGroup Condition="'$(IsNetStandard)' == 'false'">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-  </PropertyGroup>
+  </PropertyGroup>-->
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(NetStandard)' == 'false'">
+  <ItemGroup Condition="'$(IsNetFramework)' == 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(NetStandard)' == 'true'">
+  <ItemGroup Condition="'$(IsNetFramework)' == 'true'">
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
