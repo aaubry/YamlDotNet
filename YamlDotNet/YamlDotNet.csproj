@@ -41,30 +41,6 @@
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net47'">
-    <IsNetFramework>true</IsNetFramework>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <IsNetStandard>true</IsNetStandard>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <IsNetStandard>true</IsNetStandard>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <IsNetCore>true</IsNetCore>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <IsNetCore>true</IsNetCore>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <IsNetCore>true</IsNetCore>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="README.md" />
     <None Include="../yamldotnet.png" Pack="true" PackagePath="images/yamldotnet.png" />
@@ -78,24 +54,9 @@
     <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
   </PropertyGroup>
 
-  <!--<PropertyGroup Condition="'$(IsNetStandard)' == 'false'">
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-  </PropertyGroup>-->
-
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(IsNetFramework)' == 'true'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(IsNetFramework)' == 'true'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
-  </ItemGroup>
 
   <Target Name="Info" BeforeTargets="CoreCompile">
     <Message Importance="high" Text=" " Condition="'$(RealTargetFramework)' != ''" />
