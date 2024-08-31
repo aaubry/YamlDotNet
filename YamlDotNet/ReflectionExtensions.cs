@@ -279,34 +279,9 @@ namespace YamlDotNet
 
         public static Attribute[] GetAllCustomAttributes<TAttribute>(this PropertyInfo member)
         {
-            // IMemberInfo.GetCustomAttributes ignores it's "inherit" parameter for properties,
-            // and the suggested replacement (Attribute.GetCustomAttributes) is not available
-            // on netstandard1.3
-            var result = new List<Attribute>();
-            var type = member.DeclaringType;
-            var name = member.Name;
-
-            while (type != null)
-            {
-                var property = type.GetPublicProperty(name);
-
-                if (property != null)
-                {
-                    result.AddRange(property.GetCustomAttributes(typeof(TAttribute)));
-
-                    if ((property.GetGetMethod()?.IsHideBySig == true)
-                        || (property.GetSetMethod()?.IsHideBySig == true))
-                    {
-                        // Don't continue up the hierarchy.
-                        break;
-                    }
-                }
-
-                type = type.BaseType();
-            }
-
-            return result.ToArray();
+            return Attribute.GetCustomAttributes(member, typeof(TAttribute), inherit: true);
         }
+
         private static readonly ConcurrentDictionary<Type, bool> typesHaveNullContext = new ConcurrentDictionary<Type, bool>();
         public static bool AcceptsNull(this MemberInfo member)
         {
