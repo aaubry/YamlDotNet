@@ -5,3 +5,4 @@ branches:
   master:
     commit-message-incrementing: MergeMessageOnly
     increment: None
+    regex: "^master$"
