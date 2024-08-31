@@ -185,7 +185,10 @@ namespace YamlDotNet
 
         public static PropertyInfo? GetPublicProperty(this Type type, string name)
         {
-            return type.GetRuntimeProperty(name);
+            // In the case of property hiding, get the most-derived implementation.
+            return type
+                .GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+                .FirstOrDefault(p => p.Name == name);
         }
 
         public static FieldInfo? GetPublicStaticField(this Type type, string name)
@@ -290,6 +293,13 @@ namespace YamlDotNet
                 if (property != null)
                 {
                     result.AddRange(property.GetCustomAttributes(typeof(TAttribute)));
+
+                    if ((property.GetGetMethod()?.IsHideBySig == true)
+                        || (property.GetSetMethod()?.IsHideBySig == true))
+                    {
+                        // Don't continue up the hierarchy.
+                        break;
+                    }
                 }
 
                 type = type.BaseType();
