@@ -1,4 +1,4 @@
-mode: Mainline
+mode: ContinuousDelivery
 increment: None
 commit-message-incrementing: MergeMessageOnly
 branches:
