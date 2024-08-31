@@ -4,7 +4,7 @@
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion></LangVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>

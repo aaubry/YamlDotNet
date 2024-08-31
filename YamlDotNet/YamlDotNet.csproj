@@ -3,11 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net6.0;netstandard2.0;netstandard2.1;net47</TargetFrameworks>
 
-    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
-    <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
     <Configurations>Debug;Release</Configurations>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -17,7 +12,6 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <WarningsAsErrors>true</WarningsAsErrors>
 
-    <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
 
     <NetStandard>false</NetStandard>

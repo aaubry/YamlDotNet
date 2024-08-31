@@ -15,9 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YamlDotNet.Test\YamlDotNet.Test.csproj" />
-    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
-      <Name>YamlDotNet</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj" />
   </ItemGroup>
 </Project>
