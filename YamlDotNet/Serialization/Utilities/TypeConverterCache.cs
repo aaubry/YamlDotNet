@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace YamlDotNet.Serialization.Utilities
     internal sealed class TypeConverterCache
     {
         private readonly IYamlTypeConverter[] typeConverters;
-        private readonly Dictionary<Type, (bool HasMatch, IYamlTypeConverter TypeConverter)> cache = new();
+        private readonly ConcurrentDictionary<Type, (bool HasMatch, IYamlTypeConverter? TypeConverter)> cache = new();
 
         public TypeConverterCache(IEnumerable<IYamlTypeConverter>? typeConverters) : this(typeConverters?.ToArray() ?? Array.Empty<IYamlTypeConverter>())
         {
@@ -51,18 +52,15 @@ namespace YamlDotNet.Serialization.Utilities
         /// <returns><see langword="true"/> if a type converter was found; <see langword="false"/> otherwise.</returns>
         public bool TryGetConverterForType(Type type, [NotNullWhen(true)] out IYamlTypeConverter? typeConverter)
         {
-            if (cache.TryGetValue(type, out var result))
+            var result = cache.GetOrAdd(type, (t) =>
             {
-                typeConverter = result.TypeConverter;
-                return result.HasMatch;
-            }
+                var converter = LookupTypeConverter(type);
+                var found = converter != null;
+                return (found, converter);
+            });
 
-            typeConverter = LookupTypeConverter(type);
-
-            var found = typeConverter is not null;
-            cache[type] = (found, typeConverter!);
-
-            return found;
+            typeConverter = result.TypeConverter;
+            return result.HasMatch;
         }
 
         /// <summary>
