@@ -117,8 +117,8 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <param name="input">The input.</param>
         /// <param name="skipComments">Indicates whether comments should be ignored</param>
-        public Scanner(TextReader input, bool skipComments = true):
-            this(input, skipComments, 1024)
+        public Scanner(TextReader input, bool skipComments = true)
+            : this(input, skipComments, 1024)
         {
         }
 
