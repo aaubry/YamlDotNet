@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YamlDotNet.Helpers;
+using YamlDotNet.Core.ObjectPool;
 using YamlDotNet.Serialization;
 using static YamlDotNet.Core.HashCode;
 

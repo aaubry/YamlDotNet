@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Core.ObjectPool;
 using YamlDotNet.Helpers;
 using YamlDotNet.Serialization;
 using static YamlDotNet.Core.HashCode;

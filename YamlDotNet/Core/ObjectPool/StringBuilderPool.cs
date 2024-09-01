@@ -23,7 +23,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-namespace YamlDotNet.Helpers
+namespace YamlDotNet.Core.ObjectPool
 {
     /// <summary>
     /// Pooling of StringBuilder instances.
@@ -31,16 +31,15 @@ namespace YamlDotNet.Helpers
     [DebuggerStepThrough]
     internal static class StringBuilderPool
     {
-        private static readonly ConcurrentObjectPool<StringBuilder> Pool;
-
-        static StringBuilderPool()
+        private static readonly ObjectPool<StringBuilder> Pool = ObjectPool.Create(new StringBuilderPooledObjectPolicy
         {
-            Pool = new ConcurrentObjectPool<StringBuilder>(() => new StringBuilder());
-        }
+            InitialCapacity = 16,
+            MaximumRetainedCapacity = 1024
+        });
 
         public static BuilderWrapper Rent()
         {
-            var builder = Pool.Allocate();
+            var builder = Pool.Get();
             Debug.Assert(builder.Length == 0);
             return new BuilderWrapper(builder, Pool);
         }
@@ -48,12 +47,12 @@ namespace YamlDotNet.Helpers
         internal readonly struct BuilderWrapper : IDisposable
         {
             public readonly StringBuilder Builder;
-            private readonly ConcurrentObjectPool<StringBuilder> _pool;
+            private readonly ObjectPool<StringBuilder> pool;
 
-            public BuilderWrapper(StringBuilder builder, ConcurrentObjectPool<StringBuilder> pool)
+            public BuilderWrapper(StringBuilder builder, ObjectPool<StringBuilder> pool)
             {
                 Builder = builder;
-                _pool = pool;
+                this.pool = pool;
             }
 
             public override string ToString()
@@ -63,14 +62,7 @@ namespace YamlDotNet.Helpers
 
             public void Dispose()
             {
-                var builder = Builder;
-
-                // do not store builders that are too large.
-                if (builder.Capacity <= 1024)
-                {
-                    builder.Length = 0;
-                    _pool.Free(builder);
-                }
+                pool.Return(Builder);
             }
         }
     }

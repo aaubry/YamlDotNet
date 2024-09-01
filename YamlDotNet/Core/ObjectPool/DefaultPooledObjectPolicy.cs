@@ -19,45 +19,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using YamlDotNet.Core.ObjectPool;
 
-namespace YamlDotNet.Core
+// Adapted from https://github.com/dotnet/aspnetcore/blob/2f1db20456007c9515068a35a65afdf99af70bc6/src/ObjectPool/src/DefaultObjectPool.cs which is
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace YamlDotNet.Core.ObjectPool
 {
-    internal sealed class StringLookAheadBuffer : ILookAheadBuffer, IResettable
+    /// <summary>
+    /// Default implementation for <see cref="PooledObjectPolicy{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of object which is being pooled.</typeparam>
+    internal class DefaultPooledObjectPolicy<T> : IPooledObjectPolicy<T> where T : class, new()
     {
-        public string Value { get; set; } = string.Empty;
-
-        public int Position { get; private set; }
-
-        public int Length => Value.Length;
-
-        public bool EndOfInput => IsOutside(Position);
-
-        public char Peek(int offset)
+        /// <inheritdoc />
+        public T Create()
         {
-            var index = Position + offset;
-            return IsOutside(index) ? '\0' : Value[index];
+            return new T();
         }
 
-        private bool IsOutside(int index)
+        /// <inheritdoc />
+        public bool Return(T obj)
         {
-            return index >= Value.Length;
-        }
-
-        public void Skip(int length)
-        {
-            if (length < 0)
+            if (obj is IResettable resettable)
             {
-                throw new ArgumentOutOfRangeException(nameof(length), "The length must be positive.");
+                return resettable.TryReset();
             }
-            Position += length;
-        }
-
-        public bool TryReset()
-        {
-            Position = 0;
-            Value = string.Empty;
 
             return true;
         }
