@@ -311,6 +311,23 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void SupportRealyLongStrings()
+        {
+            var longKey = string.Concat(Enumerable.Repeat("x", 1500));
+            var yamlString = $"{longKey}: value";
+            var scanner = new Scanner(new StringReader(yamlString), true, 1500);
+            AssertSequenceOfTokensFrom(scanner,
+                StreamStart,
+                BlockMappingStart,
+                Key,
+                PlainScalar(longKey),
+                Value,
+                PlainScalar("value"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
         public void CommentsAreReturnedWhenRequested()
         {
             AssertSequenceOfTokensFrom(new Scanner(Yaml.ReaderForText(@"

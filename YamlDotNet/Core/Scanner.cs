@@ -79,6 +79,7 @@ namespace YamlDotNet.Core
         private Token? previous;
         private Anchor? previousAnchor;
         private Scalar? lastScalar = null;
+        private readonly int maxKeySize;
 
         private bool IsDocumentStart() =>
             !analyzer.EndOfInput &&
@@ -116,11 +117,23 @@ namespace YamlDotNet.Core
         /// </summary>
         /// <param name="input">The input.</param>
         /// <param name="skipComments">Indicates whether comments should be ignored</param>
-        public Scanner(TextReader input, bool skipComments = true)
+        public Scanner(TextReader input, bool skipComments = true):
+            this(input, skipComments, 1024)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Scanner"/> class.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="skipComments">Indicates whether comments should be ignored</param>
+        /// <param name="maxKeySize">Override the default of 1024 characters for the max key size</param>
+        public Scanner(TextReader input, bool skipComments, int maxKeySize)
         {
             analyzer = new CharacterAnalyzer<LookAheadBuffer>(new LookAheadBuffer(input, 1024));
             cursor = new Cursor();
             SkipComments = skipComments;
+            this.maxKeySize = maxKeySize;
         }
 
         /// <summary>
@@ -265,7 +278,7 @@ namespace YamlDotNet.Core
                 //  - is shorter than 1024 characters.
 
 
-                if (key.IsPossible && (key.Line < cursor.Line || key.Index + 1024 < cursor.Index))
+                if (key.IsPossible && (key.Line < cursor.Line || key.Index + maxKeySize < cursor.Index))
                 {
 
                     // Check if the potential simple key to be removed is required.
