@@ -23,22 +23,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public sealed class TypeConverterNodeDeserializer : INodeDeserializer
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
+        private readonly TypeConverterCache converters;
 
         public TypeConverterNodeDeserializer(IEnumerable<IYamlTypeConverter> converters)
         {
-            this.converters = converters ?? throw new ArgumentNullException(nameof(converters));
+            this.converters = new TypeConverterCache(converters);
         }
 
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
-            var converter = converters.FirstOrDefault(c => c.Accepts(expectedType));
-            if (converter == null)
+            if (!converters.TryGetConverterForType(expectedType, out var converter))
             {
                 value = null;
                 return false;

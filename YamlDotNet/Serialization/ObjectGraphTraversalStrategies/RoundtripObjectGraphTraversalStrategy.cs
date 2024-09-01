@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Helpers;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 {
@@ -33,20 +34,20 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
     /// </summary>
     public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
     {
-        private readonly IEnumerable<IYamlTypeConverter> converters;
+        private readonly TypeConverterCache converters;
         private readonly Settings settings;
 
         public RoundtripObjectGraphTraversalStrategy(IEnumerable<IYamlTypeConverter> converters, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion,
             INamingConvention namingConvention, Settings settings, IObjectFactory factory)
             : base(typeDescriptor, typeResolver, maxRecursion, namingConvention, factory)
         {
-            this.converters = converters;
+            this.converters = new TypeConverterCache(converters);
             this.settings = settings;
         }
 
         protected override void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
-            if (!value.Type.HasDefaultConstructor(settings.AllowPrivateConstructors) && !converters.Any(c => c.Accepts(value.Type)))
+            if (!value.Type.HasDefaultConstructor(settings.AllowPrivateConstructors) && !converters.TryGetConverterForType(value.Type, out _))
             {
                 throw new InvalidOperationException($"Type '{value.Type}' cannot be deserialized because it does not have a default constructor or a type converter.");
             }

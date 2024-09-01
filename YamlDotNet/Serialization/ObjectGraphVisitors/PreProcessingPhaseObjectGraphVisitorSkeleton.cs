@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
@@ -30,19 +31,20 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     /// </summary>
     public abstract class PreProcessingPhaseObjectGraphVisitorSkeleton : IObjectGraphVisitor<Nothing>
     {
-        protected readonly IEnumerable<IYamlTypeConverter> typeConverters;
+        protected readonly IEnumerable<IYamlTypeConverter> typeConverters; // This is kept for backwards compatibility for subclasses. Use typeConverterCache instead.
+        private readonly TypeConverterCache typeConverterCache;
 
         public PreProcessingPhaseObjectGraphVisitorSkeleton(IEnumerable<IYamlTypeConverter> typeConverters)
         {
-            this.typeConverters = typeConverters != null
-                ? typeConverters.ToList()
-                : Enumerable.Empty<IYamlTypeConverter>();
+            var tcs = typeConverters?.ToArray() ?? Array.Empty<IYamlTypeConverter>();
+
+            this.typeConverters = tcs;
+            this.typeConverterCache = new TypeConverterCache(tcs);
         }
 
         bool IObjectGraphVisitor<Nothing>.Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, Nothing context, ObjectSerializer serializer)
         {
-            var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
-            if (typeConverter != null)
+            if (typeConverterCache.TryGetConverterForType(value.Type, out _))
             {
                 return false;
             }

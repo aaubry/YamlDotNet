@@ -23,21 +23,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
+using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
     public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
     {
-        private readonly IEnumerable<IYamlTypeConverter> typeConverters;
+        private readonly TypeConverterCache typeConverters;
         private readonly ObjectSerializer nestedObjectSerializer;
 
         public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
             : base(nextVisitor)
         {
-            this.typeConverters = typeConverters != null
-                ? typeConverters.ToList()
-                : Enumerable.Empty<IYamlTypeConverter>();
-
+            this.typeConverters = new TypeConverterCache(typeConverters);
             this.nestedObjectSerializer = nestedObjectSerializer;
         }
 
@@ -46,13 +44,12 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             //propertydescriptor will be null on the root graph object
             if (propertyDescriptor?.ConverterType != null)
             {
-                var converter = typeConverters.Single(x => x.GetType() == propertyDescriptor.ConverterType);
+                var converter = typeConverters.GetConverterByType(propertyDescriptor.ConverterType);
                 converter.WriteYaml(context, value.Value, value.Type, serializer);
                 return false;
             }
 
-            var typeConverter = typeConverters.FirstOrDefault(t => t.Accepts(value.Type));
-            if (typeConverter != null)
+            if (typeConverters.TryGetConverterForType(value.Type, out var typeConverter))
             {
                 typeConverter.WriteYaml(context, value.Value, value.Type, serializer);
                 return false;
