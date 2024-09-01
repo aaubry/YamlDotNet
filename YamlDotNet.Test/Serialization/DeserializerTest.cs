@@ -377,7 +377,7 @@ Test: test 123
             Assert.Equal(1, test.OnDeserializedCallCount);
             Assert.Equal(1, test.OnDeserializingCallCount);
         }
-        
+
         [Fact]
         public void DeserializeConcurrently()
         {
@@ -389,7 +389,7 @@ Test: test 123
                 // Failures don't occur consistently - running repeatedly increases the chances
                 RunTest();
             }
-            
+
             Assert.Empty(exceptions);
 
             void RunTest()
@@ -442,6 +442,27 @@ fIeLd: Value
             var test = deserializer.Deserialize<CaseInsensitiveTest>(yaml);
             Assert.Equal("Value", test.Property);
             Assert.Equal("Value", test.Field);
+        }
+
+        [Fact]
+        public void PrivateMembersExposeYamlMemberAttribute()
+        {
+            var yaml = "key: value";
+
+            var result = new DeserializerBuilder()
+                .IncludeNonPublicProperties()
+                .Build()
+                .Deserialize<PrivateYamlMemberTest>(yaml);
+
+            Assert.Equal("value", result.PublicValue);
+        }
+
+        class PrivateYamlMemberTest
+        {
+            [YamlMember(Alias = "key")]
+            private string YamlValue { get; set; } = null!;
+
+            public string PublicValue => YamlValue;
         }
 
 #if NET8_0_OR_GREATER
