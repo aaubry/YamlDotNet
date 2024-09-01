@@ -575,9 +575,8 @@ namespace YamlDotNet.Core
                     }
 
                     // Read next token to ensure the error case spec test 'T833':
-                    // "Flow mapping missing a separating comma".
 
-                    if (state == ParserState.FlowMappingKey && scanner.MoveNextWithoutConsuming())
+                    if (state == ParserState.FlowMappingKey && !(scanner.Current is FlowMappingEnd) && scanner.MoveNextWithoutConsuming())
                     {
                         currentToken = scanner.Current;
                         if (currentToken != null && !(currentToken is FlowEntry) && !(currentToken is FlowMappingEnd))

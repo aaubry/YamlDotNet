@@ -87,6 +87,11 @@ namespace YamlDotNet.Test.Core
             return new ScalarBuilder(text, ScalarStyle.Plain);
         }
 
+        protected ScalarBuilder PlainScalar(string text, AnchorName anchor)
+        {
+            return new ScalarBuilder(text, ScalarStyle.Plain, anchor);
+        }
+
         protected ScalarBuilder SingleQuotedScalar(string text)
         {
             return new ScalarBuilder(text, ScalarStyle.SingleQuoted);
@@ -159,11 +164,18 @@ namespace YamlDotNet.Test.Core
 
         protected class ScalarBuilder
         {
+            private readonly AnchorName anchor = AnchorName.Empty;
             private readonly string text;
             private readonly ScalarStyle style;
             private string tag;
             private bool plainImplicit;
             private bool quotedImplicit;
+
+            public ScalarBuilder(string text, ScalarStyle style, AnchorName anchor)
+                : this(text, style)
+            {
+                this.anchor = anchor;
+            }
 
             public ScalarBuilder(string text, ScalarStyle style)
             {
@@ -202,7 +214,7 @@ namespace YamlDotNet.Test.Core
 
             public static implicit operator Scalar(ScalarBuilder builder)
             {
-                return new Scalar(AnchorName.Empty,
+                return new Scalar(builder.anchor,
                     builder.tag,
                     builder.text,
                     builder.style,

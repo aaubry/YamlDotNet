@@ -455,5 +455,19 @@ namespace YamlDotNet.Test.Core
                 DocumentEnd(Implicit),
                 StreamEnd);
         }
+
+        [Fact]
+        public void SingleElementeWithAnchorInlineMapping()
+        {
+            AssertSequenceOfEventsFrom(Yaml.ParserForText(@"{ key: &value value }"),
+                StreamStart,
+                DocumentStart(Implicit),
+                FlowMappingStart,
+                PlainScalar("key"),
+                PlainScalar("value", "value"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
     }
 }
