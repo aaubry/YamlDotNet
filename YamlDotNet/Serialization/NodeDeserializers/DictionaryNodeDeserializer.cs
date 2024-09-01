@@ -43,7 +43,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         {
             IDictionary? dictionary;
             Type keyType, valueType;
-            var genericDictionaryType = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IDictionary<,>));
+            var genericDictionaryType = expectedType.GetImplementationOfOpenGenericInterface(typeof(IDictionary<,>));
             if (genericDictionaryType != null)
             {
                 var genericArguments = genericDictionaryType.GetGenericArguments();

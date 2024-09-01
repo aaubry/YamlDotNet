@@ -49,6 +49,29 @@ namespace YamlDotNet
             return type.GetTypeInfo().IsGenericTypeDefinition;
         }
 
+        public static Type? GetImplementationOfOpenGenericInterface(this Type type, Type openGenericType)
+        {
+            if (!openGenericType.IsGenericType || !openGenericType.IsInterface)
+            {
+                // Note we can likely relax this constraint to also allow for matching other types
+                throw new ArgumentException("The type must be a generic type definition and an interface", nameof(openGenericType));
+            }
+
+            // First check if the type itself is the open generic type
+            if (IsGenericDefinitionOfType(type, openGenericType))
+            {
+                return type;
+            }
+
+            // Then check the interfaces
+            return type.FindInterfaces(static (t, context) => IsGenericDefinitionOfType(t, context), openGenericType).FirstOrDefault();
+
+            static bool IsGenericDefinitionOfType(Type t, object? context)
+            {
+                return t.IsGenericType && t.GetGenericTypeDefinition() == (Type)context;
+            }
+        }
+
         public static bool IsInterface(this Type type)
         {
             return type.GetTypeInfo().IsInterface;

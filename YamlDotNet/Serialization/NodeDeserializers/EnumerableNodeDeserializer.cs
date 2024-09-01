@@ -38,7 +38,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             }
             else
             {
-                var iEnumerable = ReflectionUtility.GetImplementedGenericInterface(expectedType, typeof(IEnumerable<>));
+                var iEnumerable = expectedType.GetImplementationOfOpenGenericInterface(typeof(IEnumerable<>));
                 if (iEnumerable != expectedType)
                 {
                     value = null;
