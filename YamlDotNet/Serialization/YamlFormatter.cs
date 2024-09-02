@@ -59,17 +59,23 @@ namespace YamlDotNet.Serialization
             return number.ToString("G", NumberFormat);
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public string FormatBoolean(object boolean)
+#pragma warning restore CA1822
         {
             return boolean.Equals(true) ? "true" : "false";
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public string FormatDateTime(object dateTime)
+#pragma warning restore CA1822
         {
             return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public string FormatTimeSpan(object timeSpan)
+#pragma warning restore CA1822
         {
             return ((TimeSpan)timeSpan).ToString();
         }

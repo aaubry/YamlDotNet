@@ -39,7 +39,7 @@ namespace YamlDotNet.Core
         private int readPtr;
         private int writePtr;
         private int mask;
-        private int count = 0;
+        private int count;
 
         public InsertionQueue(int initialCapacity = DefaultInitialCapacity)
         {

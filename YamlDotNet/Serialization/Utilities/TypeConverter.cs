@@ -218,7 +218,7 @@ namespace YamlDotNet.Serialization.Utilities
             // Handle TimeSpan
             if (destinationType == typeof(TimeSpan))
             {
-                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture, enumNamingConvention, typeInspector)!);
+                return TimeSpan.Parse((string)ChangeType(value, typeof(string), CultureInfo.InvariantCulture, enumNamingConvention, typeInspector)!, CultureInfo.InvariantCulture);
             }
 
             // Default to the Convert class

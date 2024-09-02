@@ -90,4 +90,30 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <PropertyGroup Label="Code Analysis">
+    <AnalysisLevel>latest-Recommended</AnalysisLevel>
+    <NoWarn>$(NoWarn);CA1051</NoWarn>  <!-- Do not declare visible instance fields -->
+    <NoWarn>$(NoWarn);CA1309</NoWarn>  <!-- Use ordinal string comparison -->
+    <NoWarn>$(NoWarn);CA1716</NoWarn>  <!-- Identifiers should not match keywords -->
+    <NoWarn>$(NoWarn);CA1510</NoWarn>  <!-- Use ArgumentNullException.ThrowIfNull -->
+    <NoWarn>$(NoWarn);CA1711</NoWarn>  <!-- Identifiers should not have incorrect suffix -->
+    <NoWarn>$(NoWarn);CA1200</NoWarn>  <!-- Avoid using cref tags with a prefix -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>  <!-- Underscores in variables -->
+    <NoWarn>$(NoWarn);CA1725</NoWarn>  <!-- Parameter names should match base declaration and other partial definitions -->
+    <NoWarn>$(NoWarn);CS1061;CA1016</NoWarn>  <!-- Mark assemblies with assembly version -->
+
+    <NoWarn>$(NoWarn);IDE0028</NoWarn>  <!-- Collection initialization can be simplified  -->
+    <NoWarn>$(NoWarn);IDE0045</NoWarn>  <!-- 'if' statement can be simplified -->
+    <NoWarn>$(NoWarn);IDE0046</NoWarn>  <!-- 'if' statement can be simplified -->
+    <NoWarn>$(NoWarn);IDE0047</NoWarn>  <!-- Parentheses can be removed -->
+    <NoWarn>$(NoWarn);IDE0078</NoWarn>  <!-- Use pattern matching  -->
+    <NoWarn>$(NoWarn);IDE0083</NoWarn>  <!-- Use pattern matching  -->
+    <NoWarn>$(NoWarn);IDE0090</NoWarn>  <!-- 'new' expression can be simplified  -->
+    <NoWarn>$(NoWarn);IDE0110</NoWarn>  <!-- Discard can be removed  -->
+    <NoWarn>$(NoWarn);IDE0251</NoWarn>  <!-- Member can be made 'readonly' -->
+    <NoWarn>$(NoWarn);IDE0290</NoWarn>  <!-- Use primary constructor -->
+    <NoWarn>$(NoWarn);IDE0300</NoWarn>  <!-- Collection initialization can be simplified  -->
+  </PropertyGroup>
+
 </Project>

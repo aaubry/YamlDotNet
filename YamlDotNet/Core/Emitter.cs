@@ -538,7 +538,7 @@ namespace YamlDotNet.Core
             }
         }
 
-        private bool IsUnicode(Encoding encoding)
+        private static bool IsUnicode(Encoding encoding)
         {
             return encoding is UTF8Encoding ||
                    encoding is UnicodeEncoding ||
@@ -727,7 +727,7 @@ namespace YamlDotNet.Core
 
                 if (documentStart.Version != null)
                 {
-                    AnalyzeVersionDirective(documentStart.Version);
+                    Emitter.AnalyzeVersionDirective(documentStart.Version);
 
                     var documentVersion = documentStart.Version.Version;
                     isImplicit = false;
@@ -793,7 +793,7 @@ namespace YamlDotNet.Core
             }
         }
 
-        private TagDirectiveCollection NonDefaultTagsAmong(IEnumerable<TagDirective>? tagCollection)
+        private static TagDirectiveCollection NonDefaultTagsAmong(IEnumerable<TagDirective>? tagCollection)
         {
             var directives = new TagDirectiveCollection();
             if (tagCollection == null)
@@ -812,7 +812,7 @@ namespace YamlDotNet.Core
             return directives;
         }
 
-        private void AnalyzeVersionDirective(VersionDirective versionDirective)
+        private static void AnalyzeVersionDirective(VersionDirective versionDirective)
         {
             if (versionDirective.Version.Major != Constants.MajorVersion || versionDirective.Version.Minor > Constants.MinorVersion)
             {
@@ -1720,7 +1720,7 @@ namespace YamlDotNet.Core
             switch (events.Peek().Type)
             {
                 case EventType.Alias:
-                    length = AnchorNameLength(anchorData.Anchor);
+                    length = Emitter.AnchorNameLength(anchorData.Anchor);
                     break;
 
                 case EventType.Scalar:
@@ -1730,7 +1730,7 @@ namespace YamlDotNet.Core
                     }
 
                     length =
-                        AnchorNameLength(anchorData.Anchor) +
+                        Emitter.AnchorNameLength(anchorData.Anchor) +
                             SafeStringLength(tagData.Handle) +
                             SafeStringLength(tagData.Suffix) +
                             SafeStringLength(scalarData.Value);
@@ -1742,7 +1742,7 @@ namespace YamlDotNet.Core
                         return false;
                     }
                     length =
-                        AnchorNameLength(anchorData.Anchor) +
+                        Emitter.AnchorNameLength(anchorData.Anchor) +
                             SafeStringLength(tagData.Handle) +
                             SafeStringLength(tagData.Suffix);
                     break;
@@ -1753,7 +1753,7 @@ namespace YamlDotNet.Core
                         return false;
                     }
                     length =
-                        AnchorNameLength(anchorData.Anchor) +
+                        Emitter.AnchorNameLength(anchorData.Anchor) +
                             SafeStringLength(tagData.Handle) +
                             SafeStringLength(tagData.Suffix);
                     break;
@@ -1765,14 +1765,14 @@ namespace YamlDotNet.Core
             return length <= maxSimpleKeyLength;
         }
 
-        private int AnchorNameLength(AnchorName value)
+        private static int AnchorNameLength(AnchorName value)
         {
             return value.IsEmpty ? 0 : value.Value.Length;
         }
 
-        private int SafeStringLength(string? value)
+        private static int SafeStringLength(string? value)
         {
-            return value == null ? 0 : value.Length;
+            return value?.Length ?? 0;
         }
 
         private bool CheckEmptySequence() => CheckEmptyStructure<SequenceStart, SequenceEnd>();
@@ -1901,7 +1901,7 @@ namespace YamlDotNet.Core
                 var buffer = bufferBuilder.Builder;
                 foreach (var toEncode in Encoding.UTF8.GetBytes(match.Value))
                 {
-                    buffer.AppendFormat("%{0:X02}", toEncode);
+                    buffer.AppendFormat(CultureInfo.InvariantCulture, "%{0:X02}", toEncode);
                 }
                 return buffer.ToString();
             });

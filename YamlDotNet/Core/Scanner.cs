@@ -68,8 +68,8 @@ namespace YamlDotNet.Core
         private bool streamEndProduced;
         private bool plainScalarFollowedByComment;
         private long flowSequenceStartLine;
-        private bool flowCollectionFetched = false;
-        private bool startFlowCollectionFetched = false;
+        private bool flowCollectionFetched;
+        private bool startFlowCollectionFetched;
         private long indent = -1;
         private bool flowScalarFetched;
         private bool simpleKeyAllowed;
@@ -78,7 +78,7 @@ namespace YamlDotNet.Core
         private bool tokenAvailable;
         private Token? previous;
         private Anchor? previousAnchor;
-        private Scalar? lastScalar = null;
+        private Scalar? lastScalar;
         private readonly int maxKeySize;
 
         private bool IsDocumentStart() =>
@@ -1295,7 +1295,9 @@ namespace YamlDotNet.Core
             tokens.Enqueue(ScanAnchor(isAlias));
         }
 
+#pragma warning disable CA1859
         private Token ScanAnchor(bool isAlias)
+#pragma warning restore CA1859
         {
             // Eat the indicator character.
 
@@ -1382,8 +1384,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Scan a TAG token.
         /// </summary>
-
-        Token ScanTag()
+        private Tag ScanTag()
         {
             var start = cursor.Mark();
 
@@ -1491,8 +1492,7 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Scan a block scalar.
         /// </summary>
-
-        Token ScanBlockScalar(bool isLiteral)
+        private Scalar ScanBlockScalar(bool isLiteral)
         {
             using var valueBuilder = StringBuilderPool.Rent();
             var value = valueBuilder.Builder;
@@ -1642,13 +1642,13 @@ namespace YamlDotNet.Core
                 }
                 else
                 {
-                    value.Append(leadingBreak.ToString());
+                    value.Append(leadingBreak);
                     leadingBreak.Length = 0;
                 }
 
                 // Append the remaining line breaks.
 
-                value.Append(trailingBreaks.ToString());
+                value.Append(trailingBreaks);
                 trailingBreaks.Length = 0;
 
                 // Is it a leading whitespace?
@@ -2077,20 +2077,20 @@ namespace YamlDotNet.Core
                         }
                         else
                         {
-                            value.Append(trailingBreaks.ToString());
+                            value.Append(trailingBreaks);
                         }
                     }
                     else
                     {
-                        value.Append(leadingBreak.ToString());
-                        value.Append(trailingBreaks.ToString());
+                        value.Append(leadingBreak);
+                        value.Append(trailingBreaks);
                     }
                     leadingBreak.Length = 0;
                     trailingBreaks.Length = 0;
                 }
                 else
                 {
-                    value.Append(whitespaces.ToString());
+                    value.Append(whitespaces);
                     whitespaces.Length = 0;
                 }
             }
@@ -2233,7 +2233,7 @@ namespace YamlDotNet.Core
                     }
                     if (flowLevel > 0 && cursor.LineOffset < currentIndent)
                     {
-                        throw new Exception();
+                        throw new InvalidOperationException();
                     }
                     // Copy the character.
 
@@ -2395,7 +2395,7 @@ namespace YamlDotNet.Core
         ///      %YAML   1.1     # a comment \n
         ///           ^^^^^^
         /// </summary>
-        private Token ScanVersionDirectiveValue(in Mark start)
+        private VersionDirective ScanVersionDirectiveValue(in Mark start)
         {
             SkipWhitespaces();
 
@@ -2426,7 +2426,7 @@ namespace YamlDotNet.Core
         ///      %TAG    !yaml!  tag:yaml.org,2002:  \n
         ///          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         /// </summary>
-        private Token ScanTagDirectiveValue(in Mark start)
+        private TagDirective ScanTagDirectiveValue(in Mark start)
         {
             SkipWhitespaces();
 
@@ -2512,7 +2512,7 @@ namespace YamlDotNet.Core
             }
 
             var result = tag.ToString();
-            if (result.EndsWith(","))
+            if (result.EndsWith(','))
             {
                 throw new SyntaxErrorException(cursor.Mark(), cursor.Mark(), "Unexpected comma at end of tag");
             }
@@ -2520,7 +2520,7 @@ namespace YamlDotNet.Core
             return result;
         }
 
-        private static readonly byte[] EmptyBytes = new byte[0];
+        private static readonly byte[] EmptyBytes = Array.Empty<byte>();
 
         /// <summary>
         /// Decode an URI-escape sequence corresponding to a single UTF-8 character.

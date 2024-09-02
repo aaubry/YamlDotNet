@@ -1,4 +1,4 @@
-﻿// This file is part of YamlDotNet - A .NET library for YAML.
+// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,12 +19,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-
-namespace YamlDotNet.Serialization
+namespace YamlDotNet
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class YamlStaticContextAttribute : Attribute
+    internal static class Polyfills
     {
+#if NETFRAMEWORK || NETSTANDARD2_0
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        internal static bool Contains(this string source, char c) => source.IndexOf(c) != -1;
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        internal static bool EndsWith(this string source, char c) => source.Length > 0 && source[source.Length - 1] == c;
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        internal static bool StartsWith(this string source, char c) => source.Length > 0 && source[0] == c;
+#endif
     }
 }

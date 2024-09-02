@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Core.ObjectPool;
@@ -413,7 +414,7 @@ namespace YamlDotNet.RepresentationModel
                     var value = property.GetValue(mapping, null);
                     if (!(value is YamlNode valueNode))
                     {
-                        var valueAsString = Convert.ToString(value);
+                        var valueAsString = Convert.ToString(value, CultureInfo.InvariantCulture);
                         valueNode = valueAsString ?? string.Empty;
                     }
                     result.Add(property.Name, valueNode);

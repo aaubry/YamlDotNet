@@ -182,7 +182,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 value == null &&
                 !property.AllowNulls)
             {
+#pragma warning disable CA2201 // Do not raise reserved exception types
                 throw new YamlException(propertyName.Start, propertyName.End, "Strict nullability enforcement error.", new NullReferenceException("Yaml value is null when target property requires non null values."));
+#pragma warning restore CA2201
             }
         }
     }
