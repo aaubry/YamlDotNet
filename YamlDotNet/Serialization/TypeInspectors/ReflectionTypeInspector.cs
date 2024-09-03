@@ -59,7 +59,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             if (enumMembers.Length > 0)
             {
                 var attribute = enumMembers[0].GetCustomAttribute<EnumMemberAttribute>();
-                if (attribute != null)
+                if (!string.IsNullOrWhiteSpace(attribute?.Value))
                 {
                     result = attribute.Value;
                 }

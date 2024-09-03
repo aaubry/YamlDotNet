@@ -1498,10 +1498,32 @@ y:
             Assert.Equal("goodbye", actual.TrimNewLines());
         }
 
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttributeWithEmptyValue()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var actual = serializer.Serialize(EnumMemberedEnum.EmptyValue);
+            Assert.Equal("EmptyValue", actual.TrimNewLines());
+        }
+
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttributeWithNullValue()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var actual = serializer.Serialize(EnumMemberedEnum.NullValue);
+            Assert.Equal("NullValue", actual.TrimNewLines());
+        }
+
         public enum EnumMemberedEnum
         {
             [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
-            Hello = 1
+            Hello = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = "")]
+            EmptyValue = 2,
+
+            [System.Runtime.Serialization.EnumMember()]
+            NullValue = 3
         }
 #endif
 

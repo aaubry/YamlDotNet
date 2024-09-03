@@ -202,11 +202,45 @@ SomeDictionary:
         }
 
         [Fact]
+        public void EnumDeserializedUsesEnumNameWhenMemberIsEmpty()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = "EmptyValue";
+            var actual = deserializer.Deserialize<EnumMemberedEnum>(yaml);
+            Assert.Equal(EnumMemberedEnum.EmptyValue, actual);
+        }
+
+        [Fact]
+        public void EnumDeserializedUsesEnumNameWhenMemberIsNull()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = "NullValue";
+            var actual = deserializer.Deserialize<EnumMemberedEnum>(yaml);
+            Assert.Equal(EnumMemberedEnum.NullValue, actual);
+        }
+
+        [Fact]
         public void EnumSerializationUsesEnumMemberAttribute()
         {
             var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
             var actual = serializer.Serialize(EnumMemberedEnum.Hello);
             Assert.Equal("goodbye", actual.TrimNewLines());
+        }
+
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttributeWithEmptyValue()
+        {
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            var actual = serializer.Serialize(EnumMemberedEnum.EmptyValue);
+            Assert.Equal("EmptyValue", actual.TrimNewLines());
+        }
+
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttributeWithNullValue()
+        {
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            var actual = serializer.Serialize(EnumMemberedEnum.NullValue);
+            Assert.Equal("NullValue", actual.TrimNewLines());
         }
 
         [YamlSerializable]
@@ -215,7 +249,13 @@ SomeDictionary:
             No = 0,
 
             [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
-            Hello = 1
+            Hello = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = "")]
+            EmptyValue = 2,
+
+            [System.Runtime.Serialization.EnumMember()]
+            NullValue = 3
         }
 #endif
         [Fact]

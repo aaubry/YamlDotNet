@@ -210,7 +210,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         if (enumMember != null)
                         {
                             var argument = enumMember.NamedArguments.FirstOrDefault(x => x.Key == "Value");
-                            memberValue = (string)argument.Value.Value!;
+                            if (!string.IsNullOrWhiteSpace(argument.Value.Value as string))
+                            {
+                                memberValue = (string)argument.Value.Value!;
+                            }
                         }
                         mappings.Add(new EnumMappings(type, memberName, memberValue));
                     }
