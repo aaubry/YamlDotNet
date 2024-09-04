@@ -2,7 +2,7 @@
 
   <PropertyGroup Label="Package properties">
     <Authors>Antoine Aubry</Authors>
-    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet/wiki</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
