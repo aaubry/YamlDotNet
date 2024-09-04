@@ -26,7 +26,7 @@ namespace YamlDotNet.Helpers
 {
     internal static class DictionaryExtensions
     {
-#if NETSTANDARD2_0 || NETFRAMEWORK
+#if NETSTANDARD || NETFRAMEWORK
         public static bool TryAdd<T, V>(this System.Collections.Generic.Dictionary<T, V> dictionary, T key, V value)
         {
             if (dictionary.ContainsKey(key))
@@ -39,7 +39,7 @@ namespace YamlDotNet.Helpers
         }
 #endif
 
-#if NETSTANDARD2_0 || NETFRAMEWORK
+#if NETSTANDARD || NETFRAMEWORK
         public static TValue GetOrAdd<TKey, TValue, TArg>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TArg, TValue> valueFactory, TArg arg)
         {
             if (dictionary == null) { throw new ArgumentNullException(nameof(dictionary)); }
