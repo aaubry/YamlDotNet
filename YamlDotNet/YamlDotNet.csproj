@@ -11,26 +11,16 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <WarningsAsErrors>true</WarningsAsErrors>
-
     <Nullable>enable</Nullable>
-
     <NetStandard>false</NetStandard>
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Label="Package Properties">
     <PackageId>YamlDotNet</PackageId>
-    <Authors>Antoine Aubry</Authors>
     <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
-    <PackageSummary>This package contains the YAML parser and serializer.</PackageSummary>
-    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright (c) Antoine Aubry and contributors</Copyright>
     <PackageIcon>images/yamldotnet.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>yaml parser development library serialization</PackageTags>
-    <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
-    <PublishRepository>true</PublishRepository>
     <DebugSymbols>true</DebugSymbols>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

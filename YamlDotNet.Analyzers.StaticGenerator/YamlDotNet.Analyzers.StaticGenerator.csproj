@@ -2,22 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <IncludeBuildOutput>false</IncludeBuildOutput><!-- Don't place the output assembly in the package's lib/ folder -->
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking><!-- Don't add the TargetFramework as a package dependency -->
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Label="Package Properties">
     <PackageId>YamlDotNet.Analyzers.StaticGenerator</PackageId>
     <Authors>YamlDotNet Contributors</Authors>
     <Description>Roslyn Code Generator that will generate a static context for use with YamlDotNet to support ahead-of-time and library trimming.</Description>
-    <PackageSummary>Static context generator for YamlDotNet.</PackageSummary>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/aaubry/YamlDotNet/wiki</PackageProjectUrl>
     <PackageIcon>images/yamldotnet.png</PackageIcon>
-    <PackageTags>yaml parser development library serialization</PackageTags>
-    <RepositoryUrl>https://github.com/aaubry/YamlDotNet</RepositoryUrl>
-    <PublishRepository>true</PublishRepository>
   </PropertyGroup>
 
   <ItemGroup Label="Package Contents">
