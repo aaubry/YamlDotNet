@@ -27,6 +27,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace YamlDotNet.Serialization
 {
+#pragma warning disable IDE0055 // Fix formatting
     /// <summary>
     /// Common implementation of <see cref="SerializerBuilder" /> and <see cref="DeserializerBuilder" />.
     /// </summary>
@@ -35,6 +36,7 @@ namespace YamlDotNet.Serialization
 #pragma warning restore CA1708
         where TBuilder : BuilderSkeleton<TBuilder>
     {
+#pragma warning restore IDE0055
         internal INamingConvention namingConvention = NullNamingConvention.Instance;
         internal INamingConvention enumNamingConvention = NullNamingConvention.Instance;
         internal ITypeResolver typeResolver;

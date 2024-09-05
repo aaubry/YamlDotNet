@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#pragma warning disable IDE0055
 #if !UNITY
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -42,3 +43,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyInformationalVersion("<%assemblyInformationalVersion%>")]
 
 #endif
+#pragma warning restore IDE0055

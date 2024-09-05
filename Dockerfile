@@ -17,7 +17,6 @@ RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt update
 RUN apt install -y dotnet-sdk-6.0
-RUN apt install -y dotnet-sdk-7.0
 
 FROM builder AS build
 WORKDIR /src
@@ -32,6 +31,7 @@ COPY YamlDotNet.Analyzers.StaticGenerator/YamlDotNet.Analyzers.StaticGenerator.c
 COPY YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj YamlDotNet.Core7AoTCompileTest/YamlDotNet.Core7AoTCompileTest.csproj
 COPY YamlDotNet.Core7AoTCompileTest.Model/YamlDotNet.Core7AoTCompileTest.Model.csproj YamlDotNet.Core7AoTCompileTest.Model/YamlDotNet.Core7AoTCompileTest.Model.csproj
 COPY YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.fsproj YamlDotNet.Samples.Fsharp/YamlDotNet.Samples.Fsharp.fsproj
+COPY YamlDotNet.Fsharp.Test/YamlDotNet.Fsharp.Test.fsproj YamlDotNet.Fsharp.Test/YamlDotNet.Fsharp.Test.fsproj
 
 RUN dotnet restore YamlDotNet.sln
 
@@ -41,13 +41,11 @@ RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /o
 RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.0
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
 RUN dotnet build -c Release --framework net6.0 YamlDotNet/YamlDotNet.csproj -o /output/net6.0
-RUN dotnet build -c Release --framework net7.0 YamlDotNet/YamlDotNet.csproj -o /output/net7.0
 RUN dotnet build -c Release --framework net8.0 YamlDotNet/YamlDotNet.csproj -o /output/net8.0
 
 RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
 
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net8.0 --logger:"trx;LogFileName=/output/tests-net8.0.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net7.0 --logger:"trx;LogFileName=/output/tests-net7.0.trx" --logger:"console;Verbosity=detailed"
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net6.0 --logger:"trx;LogFileName=/output/tests-net6.0.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
