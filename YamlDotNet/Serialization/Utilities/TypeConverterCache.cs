@@ -24,6 +24,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Serialization.Utilities
 {
@@ -52,12 +53,7 @@ namespace YamlDotNet.Serialization.Utilities
         /// <returns><see langword="true"/> if a type converter was found; <see langword="false"/> otherwise.</returns>
         public bool TryGetConverterForType(Type type, [NotNullWhen(true)] out IYamlTypeConverter? typeConverter)
         {
-            var result = cache.GetOrAdd(type, (t) =>
-            {
-                var converter = LookupTypeConverter(type);
-                var found = converter != null;
-                return (found, converter);
-            });
+            var result = cache.GetOrAdd(type, static (t, tc) => LookupTypeConverter(t, tc), typeConverters);
 
             typeConverter = result.TypeConverter;
             return result.HasMatch;
@@ -87,18 +83,18 @@ namespace YamlDotNet.Serialization.Utilities
             throw new ArgumentException($"{nameof(IYamlTypeConverter)} of type {converter.FullName} not found", nameof(converter));
         }
 
-        private IYamlTypeConverter? LookupTypeConverter(Type type)
+        private static (bool HasMatch, IYamlTypeConverter? TypeConverter) LookupTypeConverter(Type type, IYamlTypeConverter[] typeConverters)
         {
             // Intentially avoids LINQ as this is on a hot path
             foreach (var typeConverter in typeConverters)
             {
                 if (typeConverter.Accepts(type))
                 {
-                    return typeConverter;
+                    return (true, typeConverter);
                 }
             }
 
-            return null;
+            return (false, null);
         }
     }
 }
