@@ -761,7 +761,10 @@ namespace YamlDotNet.Serialization
 
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
 
-                void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
+                void NestedObjectSerializer(object? v, Type? t)
+                {
+                    SerializeValue(emitter, v, t);
+                }
 
                 var emittingVisitor = emissionPhaseObjectGraphVisitorFactories.BuildComponentChain(
                     new EmittingObjectGraphVisitor(eventEmitter),

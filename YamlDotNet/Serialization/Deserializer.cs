@@ -84,17 +84,17 @@ namespace YamlDotNet.Serialization
 
         public object? Deserialize(string input)
         {
-            return Deserialize(input, typeof(object));
+            return Deserialize<object>(input);
         }
 
         public object? Deserialize(TextReader input)
         {
-            return Deserialize(input, typeof(object));
+            return Deserialize<object>(input);
         }
 
         public object? Deserialize(IParser parser)
         {
-            return Deserialize(parser, typeof(object));
+            return Deserialize<object>(parser);
         }
 
         public object? Deserialize(string input, Type type)

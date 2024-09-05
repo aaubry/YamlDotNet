@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;
         private readonly ITypeInspector typeInspector;
-        private static readonly Regex numericRegex = new Regex(@"^-?\d+\.?\d+$", RegexOptions.Compiled);
+        private static readonly Regex NumericRegex = new Regex(@"^-?\d+\.?\d+$", RegexOptions.Compiled);
 
         public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
             : base(nextEmitter)
@@ -90,7 +90,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.Decimal:
                         eventInfo.RenderedValue = formatter.FormatNumber(value);
 
-                        if (!numericRegex.IsMatch(eventInfo.RenderedValue))
+                        if (!NumericRegex.IsMatch(eventInfo.RenderedValue))
                         {
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
                         }

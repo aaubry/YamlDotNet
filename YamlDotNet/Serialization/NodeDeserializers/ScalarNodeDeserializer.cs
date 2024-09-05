@@ -142,7 +142,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        private static object DeserializeBooleanHelper(string value)
+        private static bool DeserializeBooleanHelper(string value)
         {
             bool result;
 

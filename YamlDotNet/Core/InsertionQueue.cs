@@ -39,7 +39,9 @@ namespace YamlDotNet.Core
         private int readPtr;
         private int writePtr;
         private int mask;
+#pragma warning disable IDE0032
         private int count;
+#pragma warning restore IDE0032
 
         public InsertionQueue(int initialCapacity = DefaultInitialCapacity)
         {

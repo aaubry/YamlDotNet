@@ -170,7 +170,7 @@ namespace YamlDotNet.Core
         /// otherwise returns false.</returns>
         public static bool TryFindMappingEntry(this IParser parser, Func<Scalar, bool> selector, [MaybeNullWhen(false)] out Scalar? key, [MaybeNullWhen(false)] out ParsingEvent? value)
         {
-            if (parser.TryConsume<MappingStart>(out var _start))
+            if (parser.TryConsume<MappingStart>(out _))
             {
                 while (parser.Current != null)
                 {

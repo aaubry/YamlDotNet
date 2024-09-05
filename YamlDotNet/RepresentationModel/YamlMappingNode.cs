@@ -196,19 +196,13 @@ namespace YamlDotNet.RepresentationModel
             {
                 if (entry.Key is YamlAliasNode)
                 {
-                    if (keysToUpdate == null)
-                    {
-                        keysToUpdate = new Dictionary<YamlNode, YamlNode>();
-                    }
+                    keysToUpdate ??= new Dictionary<YamlNode, YamlNode>();
                     // TODO: The representation model should be redesigned, because here the anchor could be null but that would be invalid YAML
                     keysToUpdate.Add(entry.Key, state.GetNode(entry.Key.Anchor!, entry.Key.Start, entry.Key.End));
                 }
                 if (entry.Value is YamlAliasNode)
                 {
-                    if (valuesToUpdate == null)
-                    {
-                        valuesToUpdate = new Dictionary<YamlNode, YamlNode>();
-                    }
+                    valuesToUpdate ??= new Dictionary<YamlNode, YamlNode>();
                     // TODO: The representation model should be redesigned, because here the anchor could be null but that would be invalid YAML
                     valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor!, entry.Value.Start, entry.Value.End));
                 }

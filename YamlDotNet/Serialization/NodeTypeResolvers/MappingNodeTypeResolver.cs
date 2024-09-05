@@ -27,7 +27,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 {
     public class MappingNodeTypeResolver : INodeTypeResolver
     {
-        private readonly IDictionary<Type, Type> _mappings;
+        private readonly IDictionary<Type, Type> mappings;
 
         public MappingNodeTypeResolver(IDictionary<Type, Type> mappings)
         {
@@ -44,12 +44,12 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
                 }
             }
 
-            _mappings = mappings;
+            this.mappings = mappings;
         }
 
         public bool Resolve(NodeEvent? nodeEvent, ref Type currentType)
         {
-            if (_mappings.TryGetValue(currentType, out var concreteType))
+            if (mappings.TryGetValue(currentType, out var concreteType))
             {
                 currentType = concreteType;
                 return true;

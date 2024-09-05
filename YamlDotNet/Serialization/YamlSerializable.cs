@@ -41,7 +41,9 @@ namespace YamlDotNet.Serialization
         /// Use this constructor if the attribute is placed on the <see cref="StaticContext"/>.
         /// </summary>
         /// <param name="serializableType">The type for which to include static code generation.</param>
+#pragma warning disable IDE0060
         public YamlSerializableAttribute(Type serializableType)
+#pragma warning restore IDE0060
         {
         }
     }

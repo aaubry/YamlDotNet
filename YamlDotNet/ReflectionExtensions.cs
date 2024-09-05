@@ -305,12 +305,13 @@ namespace YamlDotNet
             return Attribute.GetCustomAttributes(member, typeof(TAttribute), inherit: true);
         }
 
-        private static readonly ConcurrentDictionary<Type, bool> typesHaveNullContext = new ConcurrentDictionary<Type, bool>();
+        private static readonly ConcurrentDictionary<Type, bool> TypesHaveNullContext = new();
+
         public static bool AcceptsNull(this MemberInfo member)
         {
             var result = true; //default to allowing nulls, this will be set to false if there is a null context on the type
 #if NET8_0_OR_GREATER
-            var typeHasNullContext = typesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
+            var typeHasNullContext = TypesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
             {
                 var attributes = t.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
                 return (attributes?.Length ?? 0) > 0;
@@ -325,7 +326,7 @@ namespace YamlDotNet
 
             return result;
 #else
-            var typeHasNullContext = typesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
+            var typeHasNullContext = TypesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
             {
                 var attributes = t.GetCustomAttributes(true);
                 return attributes.Any(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableContextAttribute");
