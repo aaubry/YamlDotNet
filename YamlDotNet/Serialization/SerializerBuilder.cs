@@ -37,7 +37,7 @@ using YamlDotNet.Serialization.TypeResolvers;
 
 namespace YamlDotNet.Serialization
 {
-
+#pragma warning disable IDE0055 // Fix formatting
     /// <summary>
     /// Creates and configures instances of <see cref="Serializer" />.
     /// This class is used to customize the behavior of <see cref="Serializer" />. Use the relevant methods
@@ -50,6 +50,7 @@ namespace YamlDotNet.Serialization
 #endif
     public sealed class SerializerBuilder : BuilderSkeleton<SerializerBuilder>
     {
+#pragma warning restore IDE0055
         private ObjectGraphTraversalStrategyFactory objectGraphTraversalStrategyFactory;
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;

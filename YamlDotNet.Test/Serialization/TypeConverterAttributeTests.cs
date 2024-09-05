@@ -58,7 +58,7 @@ namespace YamlDotNet.Test.Serialization
             };
             var actual = serializer.Serialize(o).NormalizeNewLines().TrimNewLines();
             var expected = @"Value:
-  abc: def";
+  abc: def".NormalizeNewLines().TrimNewLines();
             Assert.Equal(expected, actual);
         }
 
