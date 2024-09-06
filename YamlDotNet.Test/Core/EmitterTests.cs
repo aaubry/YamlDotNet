@@ -443,6 +443,15 @@ namespace YamlDotNet.Test.Core
             yaml.Should().NotContain("\"");
         }
 
+        [Theory]
+        [InlineData(@"\hello world")]
+        public void LeadingBackslashIsNotQuotedUnlessNecessary(string input)
+        {
+            var events = StreamOf(DocumentWith(new Scalar(input)));
+            var yaml = EmittedTextFrom(events);
+            yaml.Should().NotContain("\'");
+        }
+
         private string Lines(params string[] lines)
         {
             return string.Join(Environment.NewLine, lines);
