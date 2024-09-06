@@ -445,7 +445,7 @@ namespace YamlDotNet.Test.Core
 
         [Theory]
         [InlineData(@"\hello world")]
-        public void LeadingBackslashIsNotQuotedUnlessNecessary(string input)
+        public void LeadingBackslashIsNotQuoted(string input)
         {
             var events = StreamOf(DocumentWith(new Scalar(input)));
             var yaml = EmittedTextFrom(events);
