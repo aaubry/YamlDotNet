@@ -450,6 +450,7 @@ namespace YamlDotNet.Test.Core
             var events = StreamOf(DocumentWith(new Scalar(input)));
             var yaml = EmittedTextFrom(events);
             yaml.Should().NotContain("\'");
+            yaml.Should().NotContain("\"");
         }
 
         private string Lines(params string[] lines)
