@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="all" />
+    <PackageReference Include="Nullable" PrivateAssets="all" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -52,13 +52,6 @@
     <Message Importance="high" Text=" " Condition="'$(RealTargetFramework)' != ''" />
     <Message Importance="high" Text="==== Building $(RealTargetFramework) $(Empty.PadRight($([MSBuild]::Subtract(100, $(RealTargetFramework.Length))), '='))" Condition="'$(RealTargetFramework)' != ''" />
   </Target>
-
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 
   <PropertyGroup Label="Code Analysis">
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
