@@ -41,7 +41,7 @@ namespace YamlDotNet.Core
         private static readonly Regex UriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
-        private static readonly string[] newLineSeparators = new[] { "\r\n", "\r", "\n" };
+        private static readonly string[] NewLineSeparators = ["\r\n", "\r", "\n"];
 
         private readonly TextWriter output;
         private readonly bool outputUsesUnicodeEncoding;
@@ -653,7 +653,7 @@ namespace YamlDotNet.Core
                 return;
             }
 
-            var lines = comment.Value.Split(newLineSeparators, StringSplitOptions.None);
+            var lines = comment.Value.Split(NewLineSeparators, StringSplitOptions.None);
 
             if (comment.IsInline)
             {

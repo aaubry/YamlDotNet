@@ -23,6 +23,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using YamlDotNet.Helpers;
 using HashCode = YamlDotNet.Core.HashCode;
 
 namespace YamlDotNet.Serialization
@@ -32,7 +34,7 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public sealed partial class YamlAttributeOverrides
     {
-        private struct AttributeKey
+        private readonly struct AttributeKey
         {
             public readonly Type AttributeType;
             public readonly string PropertyName;
@@ -177,13 +179,9 @@ namespace YamlDotNet.Serialization
     }
 }
 
-#if !NET20
 namespace YamlDotNet.Serialization
 {
-    using System.Linq.Expressions;
-    using YamlDotNet.Helpers;
-
-    partial class YamlAttributeOverrides
+    public partial class YamlAttributeOverrides
     {
         /// <summary>
         /// Adds a Member Attribute Override
@@ -195,4 +193,3 @@ namespace YamlDotNet.Serialization
         }
     }
 }
-#endif

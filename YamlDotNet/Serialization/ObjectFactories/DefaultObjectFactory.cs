@@ -34,7 +34,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// </summary>
     public sealed class DefaultObjectFactory : ObjectFactoryBase
     {
-        private readonly Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>> _stateMethods = new Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>>
+        private readonly Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>> stateMethods = new()
         {
             { typeof(OnDeserializedAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
             { typeof(OnDeserializingAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
@@ -42,7 +42,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(OnSerializingAttribute), new ConcurrentDictionary<Type, MethodInfo[]>() },
         };
 
-        private readonly Dictionary<Type, Type> DefaultGenericInterfaceImplementations = new Dictionary<Type, Type>
+        private readonly Dictionary<Type, Type> defaultGenericInterfaceImplementations = new()
         {
             { typeof(IEnumerable<>), typeof(List<>) },
             { typeof(ICollection<>), typeof(List<>) },
@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
             { typeof(IDictionary<,>), typeof(Dictionary<,>) }
         };
 
-        private readonly Dictionary<Type, Type> DefaultNonGenericInterfaceImplementations = new Dictionary<Type, Type>
+        private readonly Dictionary<Type, Type> defaultNonGenericInterfaceImplementations = new()
         {
             { typeof(IEnumerable), typeof(List<object>) },
             { typeof(ICollection), typeof(List<object>) },
@@ -79,7 +79,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
                     throw new InvalidOperationException($"Type '{pair.Value}' does not implement type '{pair.Key}'.");
                 }
 
-                DefaultNonGenericInterfaceImplementations.Add(pair.Key, pair.Value);
+                defaultNonGenericInterfaceImplementations.Add(pair.Key, pair.Value);
             }
 
             this.settings = settings;
@@ -91,14 +91,14 @@ namespace YamlDotNet.Serialization.ObjectFactories
             {
                 if (type.IsGenericType())
                 {
-                    if (DefaultGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
+                    if (defaultGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var implementationType))
                     {
                         type = implementationType.MakeGenericType(type.GetGenericArguments());
                     }
                 }
                 else
                 {
-                    if (DefaultNonGenericInterfaceImplementations.TryGetValue(type, out var implementationType))
+                    if (defaultNonGenericInterfaceImplementations.TryGetValue(type, out var implementationType))
                     {
                         type = implementationType;
                     }
@@ -146,7 +146,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
         private MethodInfo[] GetStateMethods(Type attributeType, Type valueType)
         {
-            var stateDictionary = _stateMethods[attributeType];
+            var stateDictionary = stateMethods[attributeType];
 
 
             return stateDictionary.GetOrAdd(valueType, type =>

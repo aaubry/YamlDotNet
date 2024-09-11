@@ -37,8 +37,8 @@ namespace YamlDotNet.RepresentationModel
     [DebuggerDisplay("{Value}")]
     public sealed class YamlScalarNode : YamlNode, IYamlConvertible
     {
-        private bool _forceImplicitPlain;
-        private string? _value;
+        private bool forceImplicitPlain;
+        private string? value;
 
         /// <summary>
         /// Gets or sets the value of the node.
@@ -46,19 +46,19 @@ namespace YamlDotNet.RepresentationModel
         /// <value>The value.</value>
         public string? Value
         {
-            get => _value;
+            get => value;
             set
             {
                 if (value == null)
                 {
-                    _forceImplicitPlain = true;
+                    forceImplicitPlain = true;
                 }
                 else
                 {
-                    _forceImplicitPlain = false;
+                    forceImplicitPlain = false;
                 }
 
-                _value = value;
+                this.value = value;
             }
         }
 
@@ -86,7 +86,7 @@ namespace YamlDotNet.RepresentationModel
             var value = scalar.Value;
             if (scalar.Style == ScalarStyle.Plain && Tag.IsEmpty)
             {
-                _forceImplicitPlain = value.Length switch
+                forceImplicitPlain = value.Length switch
                 {
                     // we have an implicit null value without a tag stating it, fake it out
                     0 => true,
@@ -97,7 +97,7 @@ namespace YamlDotNet.RepresentationModel
                 };
             }
 
-            _value = value;
+            this.value = value;
             Style = scalar.Style;
         }
 
@@ -136,7 +136,7 @@ namespace YamlDotNet.RepresentationModel
             var tag = Tag;
             var implicitPlain = tag.IsEmpty;
 
-            if (_forceImplicitPlain &&
+            if (forceImplicitPlain &&
                 Style == ScalarStyle.Plain &&
                 (Value == null || Value == ""))
             {

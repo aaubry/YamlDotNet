@@ -162,7 +162,7 @@ namespace YamlDotNet.Core
             return events.FromAnchor(anchor).Where(e => !this.events.IsDeleted(e))
                 .Select(e => e.Value)
                 .TakeWhile(e => (nesting += e.NestingIncrease) >= 0)
-                .Select(e => cloner.Clone(e));
+                .Select(cloner.Clone);
         }
 
         private sealed class ParsingEventCollection : IEnumerable<LinkedListNode<ParsingEvent>>

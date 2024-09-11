@@ -27,26 +27,26 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
     public class StaticDictionaryNodeDeserializer : DictionaryDeserializer, INodeDeserializer
     {
-        private readonly ObjectFactories.StaticObjectFactory _objectFactory;
+        private readonly ObjectFactories.StaticObjectFactory objectFactory;
 
         public StaticDictionaryNodeDeserializer(ObjectFactories.StaticObjectFactory objectFactory, bool duplicateKeyChecking)
             : base(duplicateKeyChecking)
         {
-            _objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+            this.objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
         }
 
         public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value, ObjectDeserializer rootDeserializer)
         {
-            if (_objectFactory.IsDictionary(expectedType))
+            if (objectFactory.IsDictionary(expectedType))
             {
-                var result = _objectFactory.Create(expectedType) as IDictionary;
+                var result = objectFactory.Create(expectedType) as IDictionary;
                 if (result == null)
                 {
                     value = null;
                     return false;
                 }
-                var keyType = _objectFactory.GetKeyType(expectedType);
-                var valueType = _objectFactory.GetValueType(expectedType);
+                var keyType = objectFactory.GetKeyType(expectedType);
+                var valueType = objectFactory.GetValueType(expectedType);
 
                 value = result;
                 base.Deserialize(keyType, valueType, reader, nestedObjectDeserializer, result, rootDeserializer);

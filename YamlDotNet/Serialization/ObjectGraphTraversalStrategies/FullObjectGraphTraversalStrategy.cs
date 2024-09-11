@@ -62,7 +62,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             Traverse(null, "<root>", graph, visitor, context, new Stack<ObjectPathSegment>(maxRecursion), serializer);
         }
 
-        protected struct ObjectPathSegment
+        protected readonly struct ObjectPathSegment
         {
             public readonly object Name;
             public readonly IObjectDescriptor Value;

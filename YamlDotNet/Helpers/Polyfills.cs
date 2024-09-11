@@ -19,7 +19,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#pragma warning disable IDE0130
 namespace YamlDotNet
+#pragma warning restore IDE0130
 {
     internal static class Polyfills
     {

@@ -755,7 +755,10 @@ namespace YamlDotNet.Serialization
 
                 var graph = new ObjectDescriptor(value, actualType, staticType);
 
-                void NestedObjectSerializer(object? v, Type? t) => SerializeValue(emitter, v, t);
+                void NestedObjectSerializer(object? v, Type? t)
+                {
+                    SerializeValue(emitter, v, t);
+                }
 
                 var preProcessingPhaseObjectGraphVisitors = preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(typeConverters);
                 foreach (var visitor in preProcessingPhaseObjectGraphVisitors)

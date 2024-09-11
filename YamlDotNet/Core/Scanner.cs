@@ -67,7 +67,6 @@ namespace YamlDotNet.Core
         private bool streamStartProduced;
         private bool streamEndProduced;
         private bool plainScalarFollowedByComment;
-        private long flowSequenceStartLine;
         private bool flowCollectionFetched;
         private bool startFlowCollectionFetched;
         private long indent = -1;
@@ -933,7 +932,6 @@ namespace YamlDotNet.Core
             if (isSequenceToken)
             {
                 token = new FlowSequenceStart(start, start);
-                flowSequenceStartLine = token.Start.Line;
             }
             else
             {
@@ -2520,7 +2518,7 @@ namespace YamlDotNet.Core
             return result;
         }
 
-        private static readonly byte[] EmptyBytes = Array.Empty<byte>();
+        private static readonly byte[] EmptyBytes = [];
 
         /// <summary>
         /// Decode an URI-escape sequence corresponding to a single UTF-8 character.

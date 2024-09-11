@@ -23,9 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 using YamlDotNet.Helpers;
-using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.NodeDeserializers
 {
@@ -53,11 +51,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 value = objectFactory.Create(expectedType);
 
                 dictionary = value as IDictionary;
-                if (dictionary == null)
-                {
-                    // Uncommon case where a type implements IDictionary<TKey, TValue> but not IDictionary
-                    dictionary = (IDictionary?)Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(keyType, valueType), value);
-                }
+
+                // Uncommon case where a type implements IDictionary<TKey, TValue> but not IDictionary
+                dictionary ??= (IDictionary?)Activator.CreateInstance(typeof(GenericDictionaryToNonGenericAdapter<,>).MakeGenericType(keyType, valueType), value);
             }
             else if (typeof(IDictionary).IsAssignableFrom(expectedType))
             {

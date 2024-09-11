@@ -31,7 +31,6 @@ namespace YamlDotNet.Serialization.Converters
     /// </summary>
     public class DateTime8601Converter : IYamlTypeConverter
     {
-        private readonly IFormatProvider provider;
         private readonly ScalarStyle scalarStyle;
 
         /// <summary>
@@ -47,7 +46,6 @@ namespace YamlDotNet.Serialization.Converters
         /// </summary>
         public DateTime8601Converter(ScalarStyle scalarStyle)
         {
-            this.provider = CultureInfo.InvariantCulture;
             this.scalarStyle = scalarStyle;
         }
 

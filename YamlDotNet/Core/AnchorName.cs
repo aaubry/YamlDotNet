@@ -24,7 +24,7 @@ using System.Text.RegularExpressions;
 
 namespace YamlDotNet.Core
 {
-    public struct AnchorName : IEquatable<AnchorName>
+    public readonly struct AnchorName : IEquatable<AnchorName>
     {
         public static readonly AnchorName Empty;
 
