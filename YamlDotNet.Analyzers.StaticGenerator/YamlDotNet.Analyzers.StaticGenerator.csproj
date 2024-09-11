@@ -3,7 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <IncludeBuildOutput>false</IncludeBuildOutput><!-- Don't place the output assembly in the package's lib/ folder -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking><!-- Don't add the TargetFramework as a package dependency -->
   </PropertyGroup>
+
+  <PropertyGroup Label="Package Properties">
+    <PackageId>YamlDotNet.Analyzers.StaticGenerator</PackageId>
+    <Authors>YamlDotNet Contributors</Authors>
+    <Description>Roslyn Code Generator that will generate a static context for use with YamlDotNet to support ahead-of-time and library trimming.</Description>
+    <PackageIcon>images/yamldotnet.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup Label="Package Contents">
+    <None Include="../yamldotnet.png" Pack="true" PackagePath="images/yamldotnet.png" />
+    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />

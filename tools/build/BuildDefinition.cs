@@ -143,14 +143,14 @@ namespace build
             var result = new List<NuGetPackage>();
             var verbosity = options.Verbose ? "detailed" : "minimal";
             var buildDir = Path.Combine(BasePath, "YamlDotNet");
-            Run("nuget", $"pack YamlDotNet.nuspec -Version {version.NuGetVersion} -OutputDirectory bin -Symbols -SymbolPackageFormat snupkg", buildDir);
+            Run("dotnet", $"pack --no-build -p:PackageVersion={version.NuGetVersion} -p:ContinuousIntegrationBuild=true --output bin", buildDir);
             var packagePath = Path.Combine(buildDir, "bin", $"YamlDotNet.{version.NuGetVersion}.nupkg");
             result.Add(new NuGetPackage(packagePath, "YamlDotNet"));
 
             if (PushSerializer)
             {
                 buildDir = Path.Combine(BasePath, "YamlDotNet.Analyzers.StaticGenerator");
-                Run("nuget", $"pack YamlDotNet.Analyzers.StaticGenerator.nuspec -Version {version.NuGetVersion} -OutputDirectory bin -Symbols -SymbolPackageFormat snupkg", buildDir);
+                Run("dotnet", $"pack --no-build -p:PackageVersion={version.NuGetVersion} -p:ContinuousIntegrationBuild=true --output bin", buildDir);
                 packagePath = Path.Combine(buildDir, "bin", $"YamlDotNet.Analyzers.StaticGenerator.{version.NuGetVersion}.nupkg");
                 result.Add(new NuGetPackage(packagePath, "YamlDotNet.Analyzers.StaticGenerator"));
             }

@@ -11,12 +11,16 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <WarningsAsErrors>true</WarningsAsErrors>
-
     <Nullable>enable</Nullable>
-
     <NetStandard>false</NetStandard>
     <RealTargetFramework>$(TargetFramework)</RealTargetFramework>
+  </PropertyGroup>
 
+  <PropertyGroup Label="Package Properties">
+    <PackageId>YamlDotNet</PackageId>
+    <Description>YamlDotNet is a .NET library for YAML. YamlDotNet provides low level parsing and emitting of YAML as well as a high level object model similar to XmlDocument. A serialization library is also included that allows to read and write objects from and to YAML streams.</Description>
+    <PackageIcon>images/yamldotnet.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <DebugSymbols>true</DebugSymbols>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -27,29 +31,9 @@
     <NoWarn>1591;1574;8600;8602;8604</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <NetStandard>true</NetStandard>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <NetStandard>true</NetStandard>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <NetStandard>true</NetStandard>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <NetStandard>true</NetStandard>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <NetStandard>true</NetStandard>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="README.md" />
-    <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+    <None Include="../yamldotnet.png" Pack="true" PackagePath="images/yamldotnet.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,24 +44,9 @@
     <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(NetStandard)' == 'false'">
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(NetStandard)' == 'false'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(NetStandard)' == 'true'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
-  </ItemGroup>
 
   <Target Name="Info" BeforeTargets="CoreCompile">
     <Message Importance="high" Text=" " Condition="'$(RealTargetFramework)' != ''" />
