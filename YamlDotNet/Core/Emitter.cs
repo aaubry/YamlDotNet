@@ -340,7 +340,7 @@ namespace YamlDotNet.Core
             {
                 if (isFirst)
                 {
-                    if (buffer.Check(@"#,[]{}&*!|>\""%@`'"))
+                    if (buffer.Check(@"#,[]{}&*!|>""%@`'"))
                     {
                         flowIndicators = true;
                         blockIndicators = true;
