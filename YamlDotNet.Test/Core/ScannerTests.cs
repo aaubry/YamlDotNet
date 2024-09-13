@@ -367,7 +367,7 @@ namespace YamlDotNet.Test.Core
                 }
             }
 
-            Assert.True(false, "Did not find a comment");
+            Assert.Fail("Did not find a comment");
         }
 
         [Fact]
@@ -463,7 +463,7 @@ namespace YamlDotNet.Test.Core
         [Fact]
         public void Keys_can_start_with_colons_in_nested_block()
         {
-           AssertSequenceOfTokensFrom(Yaml.ScannerForText("root:\n  :first: 1\n  :second: 2"),
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("root:\n  :first: 1\n  :second: 2"),
                 StreamStart,
                 BlockMappingStart,
                 Key,
@@ -484,9 +484,9 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
-        public void Keys_can_start_with_colons_after_quoted_values() 
+        public void Keys_can_start_with_colons_after_quoted_values()
         {
-           AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: '1'\n:second: 2"),
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText(":first: '1'\n:second: 2"),
                 StreamStart,
                 BlockMappingStart,
                 Key,
@@ -502,9 +502,9 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
-        public void Keys_can_start_with_colons_after_single_quoted_values_in_nested_block() 
+        public void Keys_can_start_with_colons_after_single_quoted_values_in_nested_block()
         {
-           AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: 'world'\n  :goodbye: world"),
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: 'world'\n  :goodbye: world"),
                 StreamStart,
                 BlockMappingStart,
                 Key,
@@ -525,26 +525,26 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
-        public void Keys_can_start_with_colons_after_double_quoted_values_in_nested_block() 
+        public void Keys_can_start_with_colons_after_double_quoted_values_in_nested_block()
         {
-           AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: \"world\"\n  :goodbye: world"),
-                StreamStart,
-                BlockMappingStart,
-                Key,
-                PlainScalar("xyz"),
-                Value,
-                BlockMappingStart,
-                Key,
-                PlainScalar(":hello"),
-                Value,
-                DoubleQuotedScalar("world"),
-                Key,
-                PlainScalar(":goodbye"),
-                Value,
-                PlainScalar("world"),
-                BlockEnd,
-                BlockEnd,
-                StreamEnd);
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  :hello: \"world\"\n  :goodbye: world"),
+                 StreamStart,
+                 BlockMappingStart,
+                 Key,
+                 PlainScalar("xyz"),
+                 Value,
+                 BlockMappingStart,
+                 Key,
+                 PlainScalar(":hello"),
+                 Value,
+                 DoubleQuotedScalar("world"),
+                 Key,
+                 PlainScalar(":goodbye"),
+                 Value,
+                 PlainScalar("world"),
+                 BlockEnd,
+                 BlockEnd,
+                 StreamEnd);
         }
 
         [Fact]

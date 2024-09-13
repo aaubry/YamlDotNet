@@ -24,6 +24,7 @@ type Address =
       State: string }
 
 [<CLIMutable>]
+[<NoComparison>]
 type Order =
     { Receipt: string
       Date: DateTime

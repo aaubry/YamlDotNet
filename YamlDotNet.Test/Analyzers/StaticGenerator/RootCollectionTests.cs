@@ -80,7 +80,7 @@ a: hello
 b: world
 ";
 
-            var actual = (IDictionary<object, object>) deserializer.Deserialize<object>(yaml);
+            var actual = (IDictionary<object, object>)deserializer.Deserialize<object>(yaml);
             Assert.Equal("hello", actual["a"]);
             Assert.Equal("world", actual["b"]);
         }
@@ -96,9 +96,9 @@ b:
  Test: world
 ";
 
-            var actual = (IDictionary<object, object>) deserializer.Deserialize<object>(yaml);
-            Assert.Equal("hello", ((IDictionary<object,object>)actual["a"])["Test"]);
-            Assert.Equal("world", ((IDictionary<object,object>)actual["b"])["Test"]);
+            var actual = (IDictionary<object, object>)deserializer.Deserialize<object>(yaml);
+            Assert.Equal("hello", ((IDictionary<object, object>)actual["a"])["Test"]);
+            Assert.Equal("world", ((IDictionary<object, object>)actual["b"])["Test"]);
         }
     }
     [YamlSerializable]

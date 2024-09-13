@@ -36,7 +36,7 @@ namespace YamlDotNet.Test.Serialization
 
             public object Value => this.value;
 
-            [YamlIgnore] 
+            [YamlIgnore]
             public object SetOnly { set => this.value = value; }
 
             [YamlIgnore]

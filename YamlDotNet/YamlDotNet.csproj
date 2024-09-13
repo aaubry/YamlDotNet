@@ -44,10 +44,6 @@
     <DefineConstants>$(DefineConstants);RELEASE;TRACE;SIGNED</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
   <Target Name="Info" BeforeTargets="CoreCompile">
     <Message Importance="high" Text=" " Condition="'$(RealTargetFramework)' != ''" />
     <Message Importance="high" Text="==== Building $(RealTargetFramework) $(Empty.PadRight($([MSBuild]::Subtract(100, $(RealTargetFramework.Length))), '='))" Condition="'$(RealTargetFramework)' != ''" />

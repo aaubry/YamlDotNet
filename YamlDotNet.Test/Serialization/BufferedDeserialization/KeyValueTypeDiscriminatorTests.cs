@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -37,7 +37,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -45,7 +46,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "Namespace", typeof(KubernetesNamespace) },
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 40)
                 .Build();
@@ -59,7 +60,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -67,7 +69,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "Namespace", typeof(KubernetesNamespace) },
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 40)
                 .Build();
@@ -76,13 +78,14 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             resources[0].Should().BeOfType<KubernetesNamespace>();
             resources[1].Should().BeOfType<KubernetesService>();
         }
-        
+
         [Fact]
         public void KeyValueTypeDiscriminator_WithObjectBaseType_Single()
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<object>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -90,7 +93,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "Namespace", typeof(KubernetesNamespace) },
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 40)
                 .Build();
@@ -104,7 +107,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<object>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -112,7 +116,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "Namespace", typeof(KubernetesNamespace) },
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 30)
                 .Build();
@@ -127,7 +131,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<IKubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -135,7 +140,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "Namespace", typeof(KubernetesNamespace) },
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 40)
                 .Build();
@@ -149,7 +154,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<IKubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -157,7 +163,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "Namespace", typeof(KubernetesNamespace) },
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 30)
                 .Build();
@@ -172,7 +178,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddKeyValueTypeDiscriminator<KubernetesResource>(
                         "kind",
                         new Dictionary<string, Type>()
@@ -185,11 +192,11 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                         {
                             { "Service", typeof(KubernetesService) }
                         });
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 40)
                 .Build();
-            
+
             var resources = bufferedDeserializer.Deserialize<List<KubernetesResource>>(ListOfKubernetesYaml);
             resources[0].Should().BeOfType<KubernetesNamespace>();
             resources[1].Should().BeOfType<KubernetesService>();

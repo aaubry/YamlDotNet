@@ -41,7 +41,7 @@ namespace YamlDotNet.Test.RepresentationModel
             var stream = new YamlStream();
             stream.Load(Yaml.ReaderFrom("02-scalar-in-imp-doc.yaml"));
 
-            Assert.Equal(1, stream.Documents.Count);
+            Assert.Single(stream.Documents);
             Assert.IsType<YamlScalarNode>(stream.Documents[0].RootNode);
             Assert.Equal("a scalar", ((YamlScalarNode)stream.Documents[0].RootNode).Value);
             Assert.Equal(YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
@@ -79,7 +79,7 @@ namespace YamlDotNet.Test.RepresentationModel
             var stream = new YamlStream();
             stream.Load(Yaml.ReaderFrom("backwards-alias.yaml"));
 
-            Assert.Equal(1, stream.Documents.Count);
+            Assert.Single(stream.Documents);
             Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
             var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
@@ -97,7 +97,7 @@ namespace YamlDotNet.Test.RepresentationModel
             var stream = new YamlStream();
             stream.Load(Yaml.ReaderFrom("forward-alias.yaml"));
 
-            Assert.Equal(1, stream.Documents.Count);
+            Assert.Single(stream.Documents);
             Assert.IsType<YamlSequenceNode>(stream.Documents[0].RootNode);
 
             var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
