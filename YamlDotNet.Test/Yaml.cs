@@ -108,6 +108,7 @@ namespace YamlDotNet.Test
                 }
 
                 var indentation = indent.Groups[1].Length;
+#pragma warning disable IDE0055 // Bug in Linux where IDE0055 is failing on the comments in the inline if statements
                 lines = lines
                     .Select((l, num) => l.Length == 0 ?
                         // Blank lines don't need to be indented.
@@ -116,6 +117,7 @@ namespace YamlDotNet.Test
                             // However, other lines must be indented at least as much as the first line.
                             throw new ArgumentException($"Incorrectly indented line '{l}', #{num}.", nameof(yamlText)) :
                             l.Substring(indentation))
+#pragma warning restore IDE0055
                     .ToList();
             }
 
