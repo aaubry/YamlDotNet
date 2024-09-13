@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -37,7 +37,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddUniqueKeyTypeDiscriminator<ICharacter>(
                         new Dictionary<string, Type>()
                         {
@@ -45,7 +46,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "avgDailyMeows", typeof(Cat) }
                         }
                     );
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 10)
                 .Build();
@@ -60,7 +61,8 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
                     options.AddUniqueKeyTypeDiscriminator<object>(
                         new Dictionary<string, Type>()
                         {
@@ -68,7 +70,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
                             { "avgDailyMeows", typeof(Cat) }
                         }
                     );
-                    },
+                },
                     maxDepth: 3,
                     maxLength: 10)
                 .Build();

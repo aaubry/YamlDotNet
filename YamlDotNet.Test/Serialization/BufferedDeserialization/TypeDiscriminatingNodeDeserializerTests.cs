@@ -1,4 +1,4 @@
-// This file is part of YamlDotNet - A .NET library for YAML.
+﻿// This file is part of YamlDotNet - A .NET library for YAML.
 // Copyright (c) Antoine Aubry and contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -37,9 +37,10 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
-                        options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
-                    },
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
+                    options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
+                },
                     maxDepth: 2,
                     maxLength: 40)
                 .Build();
@@ -51,15 +52,16 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
               .WithInnerException<ArgumentOutOfRangeException>()
               .Where(e => e.InnerException.Message.Contains("Parser buffer exceeded max depth"));
         }
-        
+
         [Fact]
         public void TypeDiscriminatingNodeDeserializer_ThrowsWhen_MaxLengthExceeded()
         {
             var bufferedDeserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeDiscriminatingNodeDeserializer(options => {
-                        options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
-                    },
+                .WithTypeDiscriminatingNodeDeserializer(options =>
+                {
+                    options.AddKeyValueTypeDiscriminator<object>("kind", new Dictionary<string, Type>());
+                },
                     maxDepth: 3,
                     maxLength: 20)
                 .Build();

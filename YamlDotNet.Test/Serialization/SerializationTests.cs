@@ -2447,7 +2447,7 @@ Null: true
             Assert.Equal(1, test.OnSerializedCallCount);
             Assert.Equal(1, test.OnSerializingCallCount);
         }
-        
+
         [Fact]
         public void SerializeConcurrently()
         {
@@ -2459,7 +2459,7 @@ Null: true
                 // Failures don't occur consistently - running repeatedly increases the chances
                 RunTest();
             }
-            
+
             Assert.Empty(exceptions);
 
             void RunTest()
@@ -2469,7 +2469,7 @@ Null: true
                 var control = new SemaphoreSlim(0, threadCount);
 
                 var serializer = new SerializerBuilder().Build();
-            
+
                 for (var i = 0; i < threadCount; i++)
                 {
                     threads.Add(new Thread(Serialize));
@@ -2480,7 +2480,7 @@ Null: true
                 // Release them all simultaneously to try to maximise concurrency
                 control.Release(threadCount);
                 threads.ForEach(t => t.Join());
-                
+
                 void Serialize()
                 {
                     control.Wait();

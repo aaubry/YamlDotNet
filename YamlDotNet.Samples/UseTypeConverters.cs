@@ -33,7 +33,7 @@ namespace YamlDotNet.Samples
 {
     public class UseTypeConverters
     {
-        ITestOutputHelper output;
+        private readonly ITestOutputHelper output;
 
         public UseTypeConverters(ITestOutputHelper output)
         {

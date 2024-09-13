@@ -9,6 +9,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="FakeItEasy" Version="6.2.1" />
     <PackageVersion Include="FluentAssertions" Version="4.19.2" />
+    <PackageVersion Include="FSharp.Core" Version="8.0.400" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />

@@ -10,7 +10,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <WarningLevel>9999</WarningLevel>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <LangVersion>12.0</LangVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="$(Configuration) == 'Release'" Label="Code style enforcement">
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
 </Project>
