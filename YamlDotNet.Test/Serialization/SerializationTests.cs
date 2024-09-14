@@ -35,7 +35,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using FakeItEasy;
 using FluentAssertions;
-using FluentAssertions.Common;
 using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -107,7 +106,7 @@ namespace YamlDotNet.Test.Serialization
         {
             Action action = () => Deserializer.Deserialize<bool>(UsingReaderFor("not-a-boolean"));
 
-            action.ShouldThrow<YamlException>().WithInnerException<FormatException>();
+            action.Should().Throw<YamlException>().WithInnerException<FormatException>();
         }
 
         [Fact]
@@ -217,7 +216,7 @@ namespace YamlDotNet.Test.Serialization
 
             Action action = () => SerializerBuilder.EnsureRoundtrip().Build().Serialize(new StringWriter(), obj, typeof(CircularReference));
 
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
         }
 
         [Fact]
@@ -225,7 +224,7 @@ namespace YamlDotNet.Test.Serialization
         {
             Action action = () => Deserializer.Deserialize<object>(UsingReaderFor("%Y"));
 
-            action.ShouldThrow<SyntaxErrorException>()
+            action.Should().Throw<SyntaxErrorException>()
                 .WithMessage("While scanning a directive, found unexpected end of stream.");
         }
 
@@ -234,7 +233,7 @@ namespace YamlDotNet.Test.Serialization
         {
             Action action = () => Deserializer.Deserialize<object>(UsingReaderFor("%Y "));
 
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
         }
 
         [Fact]
@@ -247,7 +246,7 @@ namespace YamlDotNet.Test.Serialization
 
             result.Should().BeOfType<Point>().And
                 .Subject.As<Point>()
-                .ShouldBeEquivalentTo(new { X = 10, Y = 20 }, o => o.ExcludingMissingMembers());
+                .Should().BeEquivalentTo(new { X = 10, Y = 20 }, o => o.ExcludingMissingMembers());
         }
 
         [Fact]
@@ -365,7 +364,7 @@ Value: foo");
 
             Action action = () => Deserializer.Deserialize<Example>(UsingReaderFor(text));
 
-            action.ShouldThrow<AnchorNotFoundException>();
+            action.Should().Throw<AnchorNotFoundException>();
         }
 
         [Fact]
@@ -384,7 +383,7 @@ Value: foo");
                     .Build()
             );
 
-            result.ShouldBeEquivalentTo(obj);
+            result.Should().BeEquivalentTo(obj);
         }
 
         [Fact]
@@ -403,7 +402,7 @@ Value: foo");
                     .Build()
             );
 
-            result.ShouldBeEquivalentTo(obj);
+            result.Should().BeEquivalentTo(obj);
         }
 
         [Fact]
@@ -508,7 +507,7 @@ Value: foo");
 
             result.SomeScalar.Should().Be("Hello");
             result.RegularBase.Should().BeOfType<Derived>().And
-                .Subject.As<Derived>().ShouldBeEquivalentTo(new { ChildProp = "bar" }, o => o.ExcludingMissingMembers());
+                .Subject.As<Derived>().Should().BeEquivalentTo(new { ChildProp = "bar" }, o => o.ExcludingMissingMembers());
         }
 
         [Fact]
@@ -532,7 +531,7 @@ Value: foo");
             );
 
             result.BaseWithSerializeAs.Should().BeOfType<Base>().And
-                .Subject.As<Base>().ShouldBeEquivalentTo(new { ParentProp = "foo" }, o => o.ExcludingMissingMembers());
+                .Subject.As<Base>().Should().BeEquivalentTo(new { ParentProp = "foo" }, o => o.ExcludingMissingMembers());
         }
 
         [Fact]
@@ -553,7 +552,7 @@ Value: foo");
             var result = DoRoundtripFromObjectTo<InterfaceExample>(obj);
 
             result.Derived.Should().BeOfType<Derived>().And
-                .Subject.As<IDerived>().ShouldBeEquivalentTo(new { BaseProperty = "foo", DerivedProperty = "bar" }, o => o.ExcludingMissingMembers());
+                .Subject.As<IDerived>().Should().BeEquivalentTo(new { BaseProperty = "foo", DerivedProperty = "bar" }, o => o.ExcludingMissingMembers());
         }
 
         [Fact]
@@ -603,8 +602,7 @@ Value: foo");
 
             var result = Deserializer.Deserialize(stream);
 
-            result.Should().BeAssignableTo<IList>().And
-                .Subject.As<IList>().Should().Equal(new[] { "one", "two", "three" });
+            result.Should().BeEquivalentTo(new[] { "one", "two", "three" });
         }
 
         [Fact]
@@ -705,7 +703,7 @@ Value: foo");
 
             var result = Deserializer.Deserialize<List<Dictionary<string, string>>>(stream);
 
-            result.ShouldBeEquivalentTo(new[] {
+            result.Should().BeEquivalentTo(new[] {
                 new Dictionary<string, string> {
                     { "connection", "conn1" },
                     { "path", "path1" }
@@ -730,8 +728,8 @@ Value: foo");
             var one = Deserializer.Deserialize<Simple>(reader);
             var two = Deserializer.Deserialize<Simple>(reader);
 
-            one.ShouldBeEquivalentTo(new { aaa = "111" });
-            two.ShouldBeEquivalentTo(new { aaa = "222" });
+            one.Should().BeEquivalentTo(new { aaa = "111" });
+            two.Should().BeEquivalentTo(new { aaa = "222" });
         }
 
         [Fact]
@@ -752,9 +750,9 @@ Value: foo");
             var three = Deserializer.Deserialize<Simple>(reader);
 
             reader.Accept<StreamEnd>(out var _).Should().BeTrue("reader should have reached StreamEnd");
-            one.ShouldBeEquivalentTo(new { aaa = "111" });
-            two.ShouldBeEquivalentTo(new { aaa = "222" });
-            three.ShouldBeEquivalentTo(new { aaa = "333" });
+            one.Should().BeEquivalentTo(new { aaa = "111" });
+            two.Should().BeEquivalentTo(new { aaa = "222" });
+            three.Should().BeEquivalentTo(new { aaa = "333" });
         }
 
         [Fact]
@@ -1128,7 +1126,7 @@ y:
 
             Action action = () => Serializer.Serialize(new StringWriter(), obj);
 
-            action.ShouldNotThrow<TargetException>();
+            action.Should().NotThrow<TargetException>();
         }
 
         [Fact]
@@ -2027,7 +2025,7 @@ a: *anchor1
 b: &anchor1 test0
 c: *anchor1");
 
-            action.ShouldThrow<AnchorNotFoundException>();
+            action.Should().Throw<AnchorNotFoundException>();
         }
 
         [Fact]
@@ -2560,7 +2558,7 @@ Null: true
             var serializer = new SerializerBuilder().WithEnumNamingConvention(CamelCaseNamingConvention.Instance).Build();
             ScalarStyle style = ScalarStyle.Plain;
             var serialized = serializer.Serialize(style);
-            Assert.Equal("plain", serialized.RemoveNewLines());
+            Assert.Equal("plain", serialized.Replace("\r\n", "").Replace("\n", ""));
         }
 
         [Fact]

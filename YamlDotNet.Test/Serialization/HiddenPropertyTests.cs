@@ -94,7 +94,7 @@ getAndSet: getAndSet
                 .Build();
 
             Action action = () => { d.Deserialize<DuplicatePropertyDerived<string>>(yaml); };
-            action.ShouldThrow<YamlException>();
+            action.Should().Throw<YamlException>();
         }
     }
 }

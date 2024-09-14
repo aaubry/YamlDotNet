@@ -29,7 +29,6 @@ using Xunit;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization.Schemas;
 
 namespace YamlDotNet.Test.RepresentationModel
 {
@@ -57,7 +56,7 @@ namespace YamlDotNet.Test.RepresentationModel
 
             var accessAllNodes = new Action(() => stream.Documents.Single().AllNodes.ToList());
 
-            accessAllNodes.ShouldThrow<MaximumRecursionLevelReachedException>("because the document is infinitely recursive.");
+            accessAllNodes.Should().Throw<MaximumRecursionLevelReachedException>("because the document is infinitely recursive.");
         }
 
         [Theory]

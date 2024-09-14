@@ -301,14 +301,14 @@ name: Jake
                 .Build();
 
             Action act = () => sut.Deserialize<Person>(yaml);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys with concrete class");
+            act.Should().Throw<YamlException>("Because there are duplicate name keys with concrete class");
             act = () => sut.Deserialize<IDictionary<object, object>>(yaml);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys with dictionary");
+            act.Should().Throw<YamlException>("Because there are duplicate name keys with dictionary");
 
             var stream = Yaml.ReaderFrom("backreference.yaml");
             var parser = new MergingParser(new Parser(stream));
             act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
-            act.ShouldThrow<YamlException>("Because there are duplicate name keys with merging parser");
+            act.Should().Throw<YamlException>("Because there are duplicate name keys with merging parser");
         }
 
         [Fact]
@@ -325,14 +325,14 @@ name: Jake
                 .Build();
 
             Action act = () => sut.Deserialize<Person>(yaml);
-            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
+            act.Should().NotThrow<YamlException>("Because duplicate key checking is not enabled");
             act = () => sut.Deserialize<IDictionary<object, object>>(yaml);
-            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
+            act.Should().NotThrow<YamlException>("Because duplicate key checking is not enabled");
 
             var stream = Yaml.ReaderFrom("backreference.yaml");
             var parser = new MergingParser(new Parser(stream));
             act = () => sut.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
-            act.ShouldNotThrow<YamlException>("Because duplicate key checking is not enabled");
+            act.Should().NotThrow<YamlException>("Because duplicate key checking is not enabled");
         }
 
         [Fact]
