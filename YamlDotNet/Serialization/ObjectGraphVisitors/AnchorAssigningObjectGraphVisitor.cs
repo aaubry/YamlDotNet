@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     {
         private readonly IEventEmitter eventEmitter;
         private readonly IAliasProvider aliasProvider;
-        private readonly HashSet<AnchorName> emittedAliases = new HashSet<AnchorName>();
+        private readonly HashSet<AnchorName> emittedAliases = [];
 
         public AnchorAssigningObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEventEmitter eventEmitter, IAliasProvider aliasProvider)
             : base(nextVisitor)

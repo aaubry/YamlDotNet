@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public TagMappings()
         {
-            mappings = new Dictionary<string, Type>();
+            mappings = [];
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             public AnchorName Anchor;
         }
 
-        private readonly Dictionary<object, AnchorAssignment> assignments = new Dictionary<object, AnchorAssignment>();
+        private readonly Dictionary<object, AnchorAssignment> assignments = [];
         private uint nextId;
 
         public AnchorAssigner(IEnumerable<IYamlTypeConverter> typeConverters)
