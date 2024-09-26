@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization.ObjectFactories
     /// <summary>
     /// Creates objects using Activator.CreateInstance.
     /// </summary>
-    public sealed class DefaultObjectFactory : ObjectFactoryBase
+    public class DefaultObjectFactory : ObjectFactoryBase
     {
         private readonly Dictionary<Type, ConcurrentDictionary<Type, MethodInfo[]>> stateMethods = new()
         {
