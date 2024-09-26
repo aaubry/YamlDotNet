@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Returns the properties of a type that are writable.
     /// </summary>
-    public sealed class WritablePropertiesTypeInspector : ReflectionTypeInspector
+    public class WritablePropertiesTypeInspector : ReflectionTypeInspector
     {
         private readonly ITypeResolver typeResolver;
         private readonly bool includeNonPublicProperties;
@@ -61,7 +61,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
                 .ToArray();
         }
 
-        private sealed class ReflectionPropertyDescriptor : IPropertyDescriptor
+        protected class ReflectionPropertyDescriptor : IPropertyDescriptor
         {
             private readonly PropertyInfo propertyInfo;
             private readonly ITypeResolver typeResolver;

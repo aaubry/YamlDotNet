@@ -1500,8 +1500,8 @@ y:
         public void EnumSerializationUsesEnumMemberAttributeWithEmptyValue()
         {
             var serializer = new SerializerBuilder().Build();
-            var actual = serializer.Serialize(EnumMemberedEnum.EmptyValue);
-            Assert.Equal("EmptyValue", actual.TrimNewLines());
+            var actual = serializer.Serialize(new { Test = EnumMemberedEnum.EmptyValue });
+            Assert.Equal("Test: ''", actual.TrimNewLines());
         }
 
         [Fact]

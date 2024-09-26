@@ -28,7 +28,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Aggregates the results from multiple <see cref="ITypeInspector" /> into a single one.
     /// </summary>
-    public sealed class CompositeTypeInspector : TypeInspectorSkeleton
+    public class CompositeTypeInspector : TypeInspectorSkeleton
     {
         private readonly IEnumerable<ITypeInspector> typeInspectors;
 

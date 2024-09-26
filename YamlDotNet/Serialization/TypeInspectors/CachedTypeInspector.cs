@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Wraps another <see cref="ITypeInspector"/> and applies caching.
     /// </summary>
-    public sealed class CachedTypeInspector : TypeInspectorSkeleton
+    public class CachedTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
