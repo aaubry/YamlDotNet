@@ -36,7 +36,7 @@ namespace YamlDotNet.RepresentationModel
     [DebuggerDisplay("Count = {children.Count}")]
     public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IYamlConvertible
     {
-        private readonly List<YamlNode> children = new List<YamlNode>();
+        private readonly List<YamlNode> children = [];
 
         /// <summary>
         /// Gets the collection of child nodes.

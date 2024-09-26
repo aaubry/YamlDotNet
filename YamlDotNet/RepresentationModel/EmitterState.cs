@@ -33,6 +33,6 @@ namespace YamlDotNet.RepresentationModel
         /// Gets the already emitted anchors.
         /// </summary>
         /// <value>The emitted anchors.</value>
-        public HashSet<AnchorName> EmittedAnchors { get; } = new HashSet<AnchorName>();
+        public HashSet<AnchorName> EmittedAnchors { get; } = [];
     }
 }

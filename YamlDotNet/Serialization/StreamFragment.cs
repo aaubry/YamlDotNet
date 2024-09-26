@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public sealed class StreamFragment : IYamlConvertible
     {
-        private readonly List<ParsingEvent> events = new List<ParsingEvent>();
+        private readonly List<ParsingEvent> events = [];
 
         /// <summary>
         /// Gets or sets the events.

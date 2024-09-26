@@ -108,7 +108,7 @@ namespace YamlDotNet.Serialization
             }
         }
 
-        private readonly Dictionary<AttributeKey, List<AttributeMapping>> overrides = new Dictionary<AttributeKey, List<AttributeMapping>>();
+        private readonly Dictionary<AttributeKey, List<AttributeMapping>> overrides = [];
 
         [return: MaybeNull]
         public T GetAttribute<T>(Type type, string member) where T : Attribute
@@ -150,7 +150,7 @@ namespace YamlDotNet.Serialization
             var attributeKey = new AttributeKey(attribute.GetType(), member);
             if (!overrides.TryGetValue(attributeKey, out var mappings))
             {
-                mappings = new List<AttributeMapping>();
+                mappings = [];
                 overrides.Add(attributeKey, mappings);
             }
             else if (mappings.Contains(mapping))

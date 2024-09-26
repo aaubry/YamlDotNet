@@ -76,7 +76,7 @@ namespace YamlDotNet.Helpers
 
         public OrderedDictionary(IEqualityComparer<TKey> comparer)
         {
-            list = new List<KeyValuePair<TKey, TValue>>();
+            list = [];
             dictionary = new Dictionary<TKey, TValue>(comparer);
             this.comparer = comparer;
         }
@@ -192,7 +192,7 @@ namespace YamlDotNet.Helpers
         internal void OnDeserializedMethod(StreamingContext context)
         {
             // Reconstruct the dictionary from the serialized list
-            dictionary = new Dictionary<TKey, TValue>();
+            dictionary = [];
             foreach (var kvp in list)
             {
                 dictionary[kvp.Key] = kvp.Value;

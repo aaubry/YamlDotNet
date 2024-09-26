@@ -56,7 +56,7 @@ namespace YamlDotNet.Core
         private readonly Stack<EmitterState> states = new Stack<EmitterState>();
         private readonly Queue<ParsingEvent> events = new Queue<ParsingEvent>();
         private readonly Stack<int> indents = new Stack<int>();
-        private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
+        private readonly TagDirectiveCollection tagDirectives = [];
         private int indent;
         private int flowLevel;
         private bool isMappingContext;

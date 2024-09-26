@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization
                 { typeof(GuidConverter), _ => new GuidConverter(false) },
             };
 
-            typeInspectorFactories = new LazyComponentRegistrationList<ITypeInspector, ITypeInspector>();
+            typeInspectorFactories = [];
             this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
             settings = new Settings();
         }
