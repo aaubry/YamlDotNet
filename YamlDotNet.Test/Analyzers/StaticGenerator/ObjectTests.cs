@@ -231,7 +231,7 @@ SomeDictionary:
         public void EnumSerializationUsesEnumMemberAttributeWithEmptyValue()
         {
             var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
-            var actual = serializer.Serialize(new { Test = EnumMemberedEnum.EmptyValue });
+            var actual = serializer.Serialize(new EnumMemberedEnumHarness { Test = EnumMemberedEnum.EmptyValue });
             Assert.Equal("Test: ''", actual.TrimNewLines());
         }
 
@@ -241,6 +241,12 @@ SomeDictionary:
             var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
             var actual = serializer.Serialize(EnumMemberedEnum.NullValue);
             Assert.Equal("NullValue", actual.TrimNewLines());
+        }
+
+        [YamlSerializable]
+        public class EnumMemberedEnumHarness
+        {
+            public EnumMemberedEnum Test { get; set; }
         }
 
         [YamlSerializable]
