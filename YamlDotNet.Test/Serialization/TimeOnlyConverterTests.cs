@@ -75,7 +75,7 @@ namespace YamlDotNet.Test.Serialization
 
             Action action = () => { converter.ReadYaml(parser, typeof(TimeOnly), null); };
 
-            action.ShouldThrow<FormatException>();
+            action.Should().Throw<FormatException>();
         }
 
         /// <summary>

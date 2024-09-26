@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
@@ -47,10 +46,10 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
 
             Action act = () => bufferedDeserializer.Deserialize<object>(KubernetesServiceYaml);
             act
-              .ShouldThrow<YamlException>()
+              .Should().Throw<YamlException>()
               .WithMessage("Failed to buffer yaml node")
               .WithInnerException<ArgumentOutOfRangeException>()
-              .Where(e => e.InnerException.Message.Contains("Parser buffer exceeded max depth"));
+              .WithMessage("Parser buffer exceeded max depth*");
         }
 
         [Fact]
@@ -68,10 +67,10 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
 
             Action act = () => bufferedDeserializer.Deserialize<object>(KubernetesServiceYaml);
             act
-              .ShouldThrow<YamlException>()
+              .Should().Throw<YamlException>()
               .WithMessage("Failed to buffer yaml node")
               .WithInnerException<ArgumentOutOfRangeException>()
-              .Where(e => e.InnerException.Message.Contains("Parser buffer exceeded max length"));
+              .WithMessage("Parser buffer exceeded max length*");
         }
 
         public const string KubernetesServiceYaml = @"

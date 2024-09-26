@@ -36,7 +36,7 @@ namespace YamlDotNet.Core
     public class Parser : IParser
     {
         private readonly Stack<ParserState> states = new Stack<ParserState>();
-        private readonly TagDirectiveCollection tagDirectives = new TagDirectiveCollection();
+        private readonly TagDirectiveCollection tagDirectives = [];
         private ParserState state;
 
         private readonly IScanner scanner;

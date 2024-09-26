@@ -55,7 +55,7 @@ namespace YamlDotNet.Serialization
         private readonly LazyComponentRegistrationList<IEnumerable<IYamlTypeConverter>, IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>> emissionPhaseObjectGraphVisitorFactories;
         private readonly LazyComponentRegistrationList<IEventEmitter, IEventEmitter> eventEmitterFactories;
-        private readonly Dictionary<Type, TagName> tagMappings = new Dictionary<Type, TagName>();
+        private readonly Dictionary<Type, TagName> tagMappings = [];
         private readonly IObjectFactory objectFactory;
         private int maximumRecursion = 50;
         private EmitterSettings emitterSettings = EmitterSettings.Default;

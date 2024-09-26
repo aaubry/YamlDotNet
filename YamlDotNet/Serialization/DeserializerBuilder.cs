@@ -71,7 +71,7 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder()
             : base(new StaticTypeResolver())
         {
-            typeMappings = new Dictionary<Type, Type>();
+            typeMappings = [];
             objectFactory = new Lazy<IObjectFactory>(() => new DefaultObjectFactory(typeMappings, settings), true);
 
             tagMappings = new Dictionary<TagName, Type>

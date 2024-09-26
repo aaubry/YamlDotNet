@@ -110,7 +110,7 @@ theOtherThing:";
 #endif
             Action act = () => Yaml.Text(BadlyIndentedLines);
 
-            act.ShouldThrowExactly<ArgumentException>().WithMessage(expectedMessage);
+            act.Should().ThrowExactly<ArgumentException>().WithMessage(expectedMessage);
         }
     }
 }
