@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// Wraps another <see cref="ITypeInspector"/> and applies a
     /// naming convention to the names of the properties.
     /// </summary>
-    public sealed class NamingConventionTypeInspector : TypeInspectorSkeleton
+    public class NamingConventionTypeInspector : TypeInspectorSkeleton
     {
         private readonly ITypeInspector innerTypeDescriptor;
         private readonly INamingConvention namingConvention;
