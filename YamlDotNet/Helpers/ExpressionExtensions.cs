@@ -37,17 +37,11 @@ namespace YamlDotNet.Helpers
         /// </summary>
         public static PropertyInfo AsProperty(this LambdaExpression propertyAccessor)
         {
-            var property = TryGetMemberExpression<PropertyInfo>(propertyAccessor);
-            if (property == null)
-            {
-                throw new ArgumentException("Expected a lambda expression in the form: x => x.SomeProperty", nameof(propertyAccessor));
-            }
-
+            var property = TryGetMemberExpression<PropertyInfo>(propertyAccessor) ?? throw new ArgumentException("Expected a lambda expression in the form: x => x.SomeProperty", nameof(propertyAccessor));
             return property;
         }
 
-        [return: MaybeNull]
-        private static TMemberInfo TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
+        private static TMemberInfo? TryGetMemberExpression<TMemberInfo>(LambdaExpression lambdaExpression)
             where TMemberInfo : MemberInfo
         {
             if (lambdaExpression.Parameters.Count != 1)
