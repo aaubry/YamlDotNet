@@ -267,7 +267,7 @@ namespace YamlDotNet.Test.Core
 
             Action action = () => queue.Dequeue();
 
-            action.ShouldThrow<InvalidOperationException>();
+            action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -279,7 +279,7 @@ namespace YamlDotNet.Test.Core
             queue.Dequeue();
             Action action = () => queue.Dequeue();
 
-            action.ShouldThrow<InvalidOperationException>();
+            action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -314,7 +314,7 @@ namespace YamlDotNet.Test.Core
             PerformTimes(2, queue.Dequeue);
             Action action = () => queue.Dequeue();
 
-            action.ShouldThrow<InvalidOperationException>();
+            action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]

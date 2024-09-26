@@ -50,7 +50,7 @@ namespace YamlDotNet.Test.Serialization
 
             var deserializer = new Deserializer();
             Action action = () => deserializer.Deserialize<Person>(result);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
 
             var lines = SplitByLines(result);
 
@@ -69,7 +69,7 @@ namespace YamlDotNet.Test.Serialization
 
             var deserializer = new Deserializer();
             Action action = () => deserializer.Deserialize<MultilineComment>(result);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
 
             var lines = SplitByLines(result);
 
@@ -86,7 +86,7 @@ namespace YamlDotNet.Test.Serialization
         {
             var serializer = new Serializer();
             Action action = () => serializer.Serialize(new NullComment());
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
         }
         #endregion
 
@@ -102,7 +102,7 @@ namespace YamlDotNet.Test.Serialization
 
             var deserializer = new Deserializer();
             Action action = () => deserializer.Deserialize<Person[]>(result);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
 
             var lines = SplitByLines(result);
             var indent = GetIndent(1);
@@ -128,7 +128,7 @@ namespace YamlDotNet.Test.Serialization
 
             var deserializer = new Deserializer();
             Action action = () => deserializer.Deserialize<Garage>(result);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
 
             var lines = SplitByLines(result);
             var indent1 = GetIndent(1);
@@ -159,7 +159,7 @@ namespace YamlDotNet.Test.Serialization
 
             var deserializer = new Deserializer();
             Action action = () => deserializer.Deserialize<Garage>(result);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
 
             var lines = SplitByLines(result);
             var indent1 = GetIndent(1);
@@ -195,7 +195,7 @@ namespace YamlDotNet.Test.Serialization
 
             var deserializer = new Deserializer();
             Action action = () => deserializer.Deserialize<Garage>(result);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
 
             var lines = SplitByLines(result);
             var indent1 = GetIndent(1);

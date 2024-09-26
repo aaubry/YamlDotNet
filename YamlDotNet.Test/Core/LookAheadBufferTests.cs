@@ -206,7 +206,7 @@ namespace YamlDotNet.Test.Core
             buffer.Peek(3);
             Action action = () => buffer.Skip(5);
 
-            action.ShouldThrow<ArgumentOutOfRangeException>();
+            action.Should().Throw<ArgumentOutOfRangeException>();
         }
 
         private static LookAheadBuffer CreateBuffer(TextReader reader, int capacity)
