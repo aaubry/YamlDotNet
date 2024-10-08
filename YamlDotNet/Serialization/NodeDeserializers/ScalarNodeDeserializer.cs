@@ -382,13 +382,30 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else if (Regex.IsMatch(v, @"[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?")) //regular number
                     {
-                        if (TryAndSwallow(() => byte.Parse(v, formatter.NumberFormat), out result)) { }
-                        else if (TryAndSwallow(() => short.Parse(v, formatter.NumberFormat), out result)) { }
-                        else if (TryAndSwallow(() => int.Parse(v, formatter.NumberFormat), out result)) { }
-                        else if (TryAndSwallow(() => long.Parse(v, formatter.NumberFormat), out result)) { }
-                        else if (TryAndSwallow(() => ulong.Parse(v, formatter.NumberFormat), out result)) { }
-                        else if (TryAndSwallow(() => float.Parse(v, formatter.NumberFormat), out result)) { }
-                        else if (TryAndSwallow(() => double.Parse(v, formatter.NumberFormat), out result)) { }
+#pragma warning disable format
+                        if      ( byte.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var byteValue  )) { result = byteValue;  }
+                        else if (short.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var shortValue )) { result = shortValue; }
+                        else if (  int.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var intValue   )) { result = intValue;   }
+                        else if ( long.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var longValue  )) { result = longValue;  }
+                        else if (ulong.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var ulongValue )) { result = ulongValue; }
+#if NETFRAMEWORK
+                        else if ( float.TryParse(v, NumberStyles.Float | NumberStyles.AllowThousands, formatter.NumberFormat, out var floatValue)) { result = floatValue; }
+                        else if (double.TryParse(v, NumberStyles.Float | NumberStyles.AllowThousands, formatter.NumberFormat, out var doubleValue)) { result = doubleValue; }
+#else
+                        else if (double.TryParse(v, NumberStyles.Float | NumberStyles.AllowThousands, formatter.NumberFormat, out var doubleValue))
+                        {
+                            var floatValue = (float)doubleValue;
+                            if (!float.IsNaN(floatValue) && !float.IsInfinity(floatValue)) // .NET 6 or later support float.IsNormal
+                            {
+                                result = floatValue;
+                            }
+                            else
+                            {
+                                result = doubleValue;
+                            }
+                        }
+#endif
+#pragma warning restore format
                         else
                         {
                             //we couldn't parse it, default to string, It's probably too big
