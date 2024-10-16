@@ -911,6 +911,55 @@ y:
             result.MyString.Should().BeNull();
         }
 
+        [Fact]
+        public void SerializationOfNumericsAsJsonRountTrip()
+        {
+            var serializer = new SerializerBuilder().JsonCompatible().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var data = new
+            {
+                FloatValue1 = float.MinValue,
+                FloatValue2 = float.MaxValue,
+                FloatValue3 = float.NaN,
+                FloatValue4 = float.PositiveInfinity,
+                FloatValue5 = float.NegativeInfinity,
+                FloatValue6 = 0.0f,
+                DoubleValue1 = double.MinValue,
+                DoubleValue2 = double.MaxValue,
+                DoubleValue3 = double.NaN,
+                DoubleValue4 = double.PositiveInfinity,
+                DoubleValue5 = double.NegativeInfinity,
+                DoubleValue6 = 3.0d,
+                DecimalValue1 = decimal.MinValue,
+                DecimalValue2 = decimal.MaxValue,
+                DecimalValue3 = 1.234567890d,
+            };
+
+            var json = serializer.Serialize(data);
+
+#if NETFRAMEWORK
+            json.Should().Contain("\"FloatValue3\": \"NaN\"");
+            json.Should().Contain("\"FloatValue4\": \"Infinity\"");
+            json.Should().Contain("\"FloatValue5\": \"-Infinity\"");
+
+            json.Should().Contain("\"DoubleValue3\": \"NaN\"");
+            json.Should().Contain("\"DoubleValue4\": \"Infinity\"");
+            json.Should().Contain("\"DoubleValue5\": \"-Infinity\"");
+#else
+            // Run JSON roundtrip with System.Text.Json and Newtonsoft.Json
+            var systemTextJson = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(json, new System.Text.Json.JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals }).ToString();
+            var newtonsoftJson = Newtonsoft.Json.JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JToken>(json).ToString(Newtonsoft.Json.Formatting.None);
+
+            // Deserialize JSON  with YamlDotNet
+            var systemTextJsonResult = deserializer.Deserialize<Dictionary<string, object>>(systemTextJson);
+            var newtonsoftJsonResult = deserializer.Deserialize<Dictionary<string, object>>(newtonsoftJson);
+
+            // Assert
+            systemTextJsonResult.Should().BeEquivalentTo(newtonsoftJsonResult);
+#endif
+        }
+
         [Theory]
         [InlineData(typeof(SByteEnum))]
         [InlineData(typeof(ByteEnum))]

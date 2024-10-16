@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -32,7 +33,6 @@ namespace YamlDotNet.Serialization.EventEmitters
         private readonly YamlFormatter formatter;
         private readonly INamingConvention enumNamingConvention;
         private readonly ITypeInspector typeInspector;
-        private static readonly Regex NumericRegex = new Regex(@"^-?\d+\.?\d+$", RegexOptions.Compiled);
 
         public JsonEventEmitter(IEventEmitter nextEmitter, YamlFormatter formatter, INamingConvention enumNamingConvention, ITypeInspector typeInspector)
             : base(nextEmitter)
@@ -86,15 +86,27 @@ namespace YamlDotNet.Serialization.EventEmitters
                         break;
 
                     case TypeCode.Single:
-                    case TypeCode.Double:
-                    case TypeCode.Decimal:
-                        eventInfo.RenderedValue = formatter.FormatNumber(value);
-
-                        if (!NumericRegex.IsMatch(eventInfo.RenderedValue))
+                        var floatValue = (float)value;
+                        eventInfo.RenderedValue = floatValue.ToString("G", CultureInfo.InvariantCulture);
+                        if (float.IsNaN(floatValue) || float.IsInfinity(floatValue))
                         {
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
                         }
 
+                        break;
+
+                    case TypeCode.Double:
+                        var doubleValue = (double)value;
+                        eventInfo.RenderedValue = doubleValue.ToString("G", CultureInfo.InvariantCulture);
+                        if (double.IsNaN(doubleValue) || double.IsInfinity(doubleValue))
+                        {
+                            eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        }
+                        break;
+
+                    case TypeCode.Decimal:
+                        var decimalValue = (decimal)value;
+                        eventInfo.RenderedValue = decimalValue.ToString(CultureInfo.InvariantCulture);
                         break;
 
                     case TypeCode.String:
