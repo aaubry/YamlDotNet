@@ -74,7 +74,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
         }
 
-        protected virtual void Traverse<TContext>(IPropertyDescriptor? propertyDescriptor, object name, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        protected virtual void Traverse<TContext>(IPropertyDescriptor? propertyDescriptor, object name, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer) where TContext : notnull
         {
             if (path.Count >= maxRecursion)
             {
@@ -192,7 +192,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
         }
 
-        protected virtual void TraverseObject<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        protected virtual void TraverseObject<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer) where TContext : notnull
         {
             if (typeof(IDictionary).IsAssignableFrom(value.Type))
             {
@@ -201,6 +201,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             }
 
             if (objectFactory.GetDictionary(value, out var adaptedDictionary, out var genericArguments))
+            if (genericArguments != null)
             {
                 TraverseDictionary(propertyDescriptor, new ObjectDescriptor(adaptedDictionary, value.Type, value.StaticType, value.ScalarStyle), visitor, genericArguments[0], genericArguments[1], context, path, serializer);
                 return;
@@ -215,7 +216,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             TraverseProperties(value, visitor, context, path, serializer);
         }
 
-        protected virtual void TraverseDictionary<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor dictionary, IObjectGraphVisitor<TContext> visitor, Type keyType, Type valueType, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        protected virtual void TraverseDictionary<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor dictionary, IObjectGraphVisitor<TContext> visitor, Type keyType, Type valueType, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer) where TContext : notnull
         {
             visitor.VisitMappingStart(dictionary, keyType, valueType, context, serializer);
 
@@ -237,7 +238,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             visitor.VisitMappingEnd(dictionary, context, serializer);
         }
 
-        private void TraverseList<TContext>(IPropertyDescriptor propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        private void TraverseList<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer) where TContext : notnull
         {
             var itemType = objectFactory.GetValueType(value.Type);
 
@@ -254,7 +255,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             visitor.VisitSequenceEnd(value, context, serializer);
         }
 
-        protected virtual void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        protected virtual void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer) where TContext : notnull
         {
             if (context.GetType() != typeof(Nothing))
             {

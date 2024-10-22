@@ -68,7 +68,7 @@ namespace YamlDotNet
 
             static bool IsGenericDefinitionOfType(Type t, object? context)
             {
-                return t.IsGenericType && t.GetGenericTypeDefinition() == (Type)context;
+                return t.IsGenericType && context is Type type && t.GetGenericTypeDefinition() == type;
             }
         }
 

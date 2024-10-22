@@ -126,8 +126,8 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
         public abstract void ExecuteOnDeserialized(object value);
 
-        public abstract void ExecuteOnSerializing(object value);
+        public abstract void ExecuteOnSerializing(object? value);
 
-        public abstract void ExecuteOnSerialized(object value);
+        public abstract void ExecuteOnSerialized(object? value);
     }
 }

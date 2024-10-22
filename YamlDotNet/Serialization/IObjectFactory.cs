@@ -77,12 +77,12 @@ namespace YamlDotNet.Serialization
         /// Executes the methods on the object that has the <seealso cref="Callbacks.OnSerializingAttribute"/> attribute
         /// </summary>
         /// <param name="value"></param>
-        void ExecuteOnSerializing(object value);
+        void ExecuteOnSerializing(object? value);
 
         /// <summary>
         /// Executes the methods on the object that has the <seealso cref="Callbacks.OnSerializedAttribute"/> attribute
         /// </summary>
         /// <param name="value"></param>
-        void ExecuteOnSerialized(object value);
+        void ExecuteOnSerialized(object? value);
     }
 }

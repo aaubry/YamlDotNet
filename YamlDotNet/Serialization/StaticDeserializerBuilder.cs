@@ -85,6 +85,8 @@ namespace YamlDotNet.Serialization
             typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
 
+            typeConverter = new NullTypeConverter();
+
             nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
                 { typeof(YamlConvertibleNodeDeserializer), _ => new YamlConvertibleNodeDeserializer(factory) },
@@ -117,8 +119,6 @@ namespace YamlDotNet.Serialization
                 { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
-
-            typeConverter = new NullTypeConverter();
         }
 
         protected override StaticDeserializerBuilder Self { get { return this; } }
