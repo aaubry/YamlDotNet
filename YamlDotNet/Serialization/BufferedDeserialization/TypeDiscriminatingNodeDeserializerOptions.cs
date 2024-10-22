@@ -30,7 +30,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization
 {
     public class TypeDiscriminatingNodeDeserializerOptions : ITypeDiscriminatingNodeDeserializerOptions
     {
-        internal readonly List<ITypeDiscriminator> discriminators = [];
+        internal readonly List<ITypeDiscriminator> discriminators = new ();
 
         /// <summary>
         /// Adds an <see cref="ITypeDiscriminator" /> to be checked by the TypeDiscriminatingNodeDeserializer.

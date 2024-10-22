@@ -41,7 +41,7 @@ namespace YamlDotNet.Core
         private static readonly Regex UriReplacer = new Regex(@"[^0-9A-Za-z_\-;?@=$~\\\)\]/:&+,\.\*\(\[!]",
             StandardRegexOptions.Compiled | RegexOptions.Singleline);
 
-        private static readonly string[] NewLineSeparators = ["\r\n", "\r", "\n"];
+        private static readonly string[] NewLineSeparators = new []{"\r\n", "\r", "\n"};
 
         private readonly TextWriter output;
         private readonly bool outputUsesUnicodeEncoding;
@@ -56,7 +56,7 @@ namespace YamlDotNet.Core
         private readonly Stack<EmitterState> states = new Stack<EmitterState>();
         private readonly Queue<ParsingEvent> events = new Queue<ParsingEvent>();
         private readonly Stack<int> indents = new Stack<int>();
-        private readonly TagDirectiveCollection tagDirectives = [];
+        private readonly TagDirectiveCollection tagDirectives = new ();
         private int indent;
         private int flowLevel;
         private bool isMappingContext;

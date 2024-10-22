@@ -31,7 +31,7 @@ namespace YamlDotNet.Serialization.Utilities
     /// </summary>
     public sealed class SerializerState : IDisposable
     {
-        private readonly Dictionary<Type, object> items = [];
+        private readonly Dictionary<Type, object> items = new ();
 
         public T Get<T>()
             where T : class, new()

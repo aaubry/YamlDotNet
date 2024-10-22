@@ -28,7 +28,7 @@ namespace YamlDotNet.Serialization
 {
     internal sealed class LazyComponentRegistrationList<TArgument, TComponent> : IEnumerable<Func<TArgument, TComponent>>
     {
-        private readonly List<LazyComponentRegistration> entries = [];
+        private readonly List<LazyComponentRegistration> entries = new ();
 
         public LazyComponentRegistrationList<TArgument, TComponent> Clone()
         {

@@ -90,11 +90,11 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         private class AnchorAssigningVisitor : YamlVisitorBase
         {
-            private readonly HashSet<AnchorName> existingAnchors = [];
+            private readonly HashSet<AnchorName> existingAnchors = new ();
             /// <summary>
             /// Key: Node, Value: IsDuplicate
             /// </summary>
-            private readonly Dictionary<YamlNode, bool> visitedNodes = [];
+            private readonly Dictionary<YamlNode, bool> visitedNodes = new ();
 
             public void AssignAnchors(YamlDocument document)
             {

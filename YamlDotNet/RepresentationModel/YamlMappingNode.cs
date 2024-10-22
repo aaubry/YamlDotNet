@@ -36,7 +36,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly OrderedDictionary<YamlNode, YamlNode> children = [];
+        private readonly OrderedDictionary<YamlNode, YamlNode> children = new();
 
         /// <summary>
         /// Gets the children of the current node.
@@ -196,13 +196,13 @@ namespace YamlDotNet.RepresentationModel
             {
                 if (entry.Key is YamlAliasNode)
                 {
-                    keysToUpdate ??= [];
+                    keysToUpdate ??= new ();
                     // TODO: The representation model should be redesigned, because here the anchor could be null but that would be invalid YAML
                     keysToUpdate.Add(entry.Key, state.GetNode(entry.Key.Anchor!, entry.Key.Start, entry.Key.End));
                 }
                 if (entry.Value is YamlAliasNode)
                 {
-                    valuesToUpdate ??= [];
+                    valuesToUpdate ??= new ();
                     // TODO: The representation model should be redesigned, because here the anchor could be null but that would be invalid YAML
                     valuesToUpdate.Add(entry.Key, state.GetNode(entry.Value.Anchor!, entry.Value.Start, entry.Value.End));
                 }

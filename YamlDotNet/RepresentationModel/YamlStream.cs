@@ -31,7 +31,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     public class YamlStream : IEnumerable<YamlDocument>
     {
-        private readonly List<YamlDocument> documents = [];
+        private readonly List<YamlDocument> documents = new ();
 
         /// <summary>
         /// Gets the documents inside the stream.
