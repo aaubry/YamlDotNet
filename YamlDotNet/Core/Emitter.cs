@@ -66,6 +66,7 @@ namespace YamlDotNet.Core
         private bool isWhitespace;
         private bool isIndentation;
         private readonly bool forceIndentLess;
+        private readonly bool useUtf16SurrogatePair;
         private readonly string newLine;
 
         private bool isDocumentEndWritten;
@@ -148,6 +149,7 @@ namespace YamlDotNet.Core
             this.maxSimpleKeyLength = settings.MaxSimpleKeyLength;
             this.skipAnchorName = settings.SkipAnchorName;
             this.forceIndentLess = !settings.IndentSequences;
+            this.useUtf16SurrogatePair = settings.UseUtf16SurrogatePairs;
             this.newLine = settings.NewLine;
 
             this.output = output;
@@ -1189,8 +1191,20 @@ namespace YamlDotNet.Core
                             {
                                 if (index + 1 < value.Length && IsLowSurrogate(value[index + 1]))
                                 {
-                                    Write('U');
-                                    Write(char.ConvertToUtf32(character, value[index + 1]).ToString("X08", CultureInfo.InvariantCulture));
+                                    if (useUtf16SurrogatePair)
+                                    {
+                                        Write('u');
+                                        Write(code.ToString("X04", CultureInfo.InvariantCulture));
+                                        Write('\\');
+                                        Write('u');
+                                        Write(((ushort)value[index + 1]).ToString("X04", CultureInfo.InvariantCulture));
+                                    }
+                                    else
+                                    {
+                                        Write('U');
+                                        Write(char.ConvertToUtf32(character, value[index + 1]).ToString("X08", CultureInfo.InvariantCulture));
+                                    }
+
                                     index++;
                                 }
                                 else

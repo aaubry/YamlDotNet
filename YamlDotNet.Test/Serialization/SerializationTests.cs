@@ -887,6 +887,15 @@ y:
         }
 
         [Fact]
+        public void SerializationOfUtf32WorksInJson()
+        {
+            var obj = new { TestProperty = "Sea life \U0001F99E" };
+
+            SerializerBuilder.JsonCompatible().Build().Serialize(obj).Trim().Should()
+                .Be(@"{""TestProperty"": ""Sea life \uD83E\uDD9E""}");
+        }
+
+        [Fact]
         // Todo: this is actually roundtrip
         public void DeserializationOfDefaultsWorkInJson()
         {
