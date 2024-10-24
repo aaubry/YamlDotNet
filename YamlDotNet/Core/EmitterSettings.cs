@@ -78,7 +78,7 @@ namespace YamlDotNet.Core
         {
         }
 
-        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false, bool useUtf16SurrogatePairs = false, string? newLine = null)
+        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false, string? newLine = null, bool useUtf16SurrogatePairs = false)
         {
             if (bestIndent < 2 || bestIndent > 9)
             {
@@ -101,8 +101,8 @@ namespace YamlDotNet.Core
             MaxSimpleKeyLength = maxSimpleKeyLength;
             SkipAnchorName = skipAnchorName;
             IndentSequences = indentSequences;
-            UseUtf16SurrogatePairs = useUtf16SurrogatePairs;
             NewLine = newLine ?? Environment.NewLine;
+            UseUtf16SurrogatePairs = useUtf16SurrogatePairs;
         }
 
         public EmitterSettings WithBestIndent(int bestIndent)
@@ -114,8 +114,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                UseUtf16SurrogatePairs,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -128,8 +128,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                UseUtf16SurrogatePairs,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -142,8 +142,8 @@ namespace YamlDotNet.Core
                 maxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                UseUtf16SurrogatePairs,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -156,8 +156,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                UseUtf16SurrogatePairs,
-                newLine
+                newLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -181,8 +181,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 true,
                 IndentSequences,
-                UseUtf16SurrogatePairs,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -195,8 +195,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 true,
-                UseUtf16SurrogatePairs,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -209,8 +209,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                true,
-                NewLine
+                NewLine,
+                true
             );
         }
     }
