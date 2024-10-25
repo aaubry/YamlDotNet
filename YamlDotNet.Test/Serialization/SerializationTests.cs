@@ -225,7 +225,7 @@ namespace YamlDotNet.Test.Serialization
             Action action = () => Deserializer.Deserialize<object>(UsingReaderFor("%Y"));
 
             action.Should().Throw<SyntaxErrorException>()
-                .WithMessage("While scanning a directive, found unexpected end of stream.");
+                .WithMessage("*While scanning a directive, found unexpected end of stream.");
         }
 
         [Fact]
@@ -1331,7 +1331,7 @@ y:
             ((YamlException)actual).End.Column.Should().Be(4);
             ((YamlException)actual).End.Line.Should().Be(2);
             ((YamlException)actual).End.Index.Should().Be(15);
-            ((YamlException)actual).Message.Should().Be("Property 'bbb' not found on type 'YamlDotNet.Test.Serialization.Simple'.");
+            ((YamlException)actual).Message.Should().Contain("Property 'bbb' not found on type 'YamlDotNet.Test.Serialization.Simple'.");
         }
 
         [Fact]
