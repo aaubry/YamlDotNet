@@ -68,10 +68,10 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        /// <param name="message">The message.</param>
+        /// <param name="reason">The message.</param>
         /// <param name="inner">The inner.</param>
-        public YamlException(string message, Exception inner)
-            : this(Mark.Empty, Mark.Empty, message, inner)
+        public YamlException(string reason, Exception inner)
+            : this(Mark.Empty, Mark.Empty, reason, inner)
         {
         }
 
