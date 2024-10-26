@@ -394,7 +394,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         else if (double.TryParse(v, NumberStyles.Float, formatter.NumberFormat, out var doubleValue))
                         {
                             var floatValue = (float)doubleValue;
-                            if (!float.IsNaN(floatValue) && !float.IsInfinity(floatValue)) // .NET 6 or later support float.IsNormal
+                            if (!float.IsNaN(floatValue) && !float.IsInfinity(floatValue))
                             {
                                 result = floatValue;
                             }
