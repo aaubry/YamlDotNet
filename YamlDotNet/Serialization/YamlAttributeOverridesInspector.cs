@@ -81,7 +81,8 @@ namespace YamlDotNet.Serialization
                 set { baseDescriptor.TypeOverride = value; }
             }
 
-            public Type? ConverterType => baseDescriptor.ConverterType;
+            public Type? ConverterType =>
+                GetCustomAttribute<YamlConverterAttribute>()?.ConverterType ?? baseDescriptor.ConverterType;
 
             public int Order
             {

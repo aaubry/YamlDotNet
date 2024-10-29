@@ -30,6 +30,45 @@ namespace YamlDotNet.Test.Serialization
     public class TypeConverterAttributeTests
     {
         [Fact]
+        public void TestConverterInAttributeOverride_Deserializes()
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttributeOverride<OuterClassWithoutAttribute>(
+                    c => c.Value,
+                    new YamlConverterAttribute(typeof(AttributedTypeConverter)))
+                .WithTypeConverter(new AttributedTypeConverter())
+                .Build();
+            var yaml = @"Value:
+  abc: def";
+            var actual = deserializer.Deserialize<OuterClassWithoutAttribute>(yaml);
+            Assert.Equal("abc", actual.Value.Key);
+            Assert.Equal("def", actual.Value.Value);
+        }
+
+        [Fact]
+        public void TestConverterInAttributeOverride_Serializes()
+        {
+            var serializer = new SerializerBuilder()
+                .WithAttributeOverride<OuterClassWithoutAttribute>(
+                    c => c.Value,
+                    new YamlConverterAttribute(typeof(AttributedTypeConverter)))
+                .WithTypeConverter(new AttributedTypeConverter())
+                .Build();
+            var o = new OuterClassWithoutAttribute
+            {
+                Value = new ValueClass
+                {
+                    Key = "abc",
+                    Value = "def"
+                }
+            };
+            var actual = serializer.Serialize(o).NormalizeNewLines().TrimNewLines();
+            var expected = @"Value:
+  abc: def".NormalizeNewLines().TrimNewLines();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void TestConverterOnAttribute_Deserializes()
         {
             var deserializer = new DeserializerBuilder().WithTypeConverter(new AttributedTypeConverter()).Build();
@@ -91,6 +130,11 @@ namespace YamlDotNet.Test.Serialization
         public class OuterClass
         {
             [YamlConverter(typeof(AttributedTypeConverter))]
+            public ValueClass Value { get; set; }
+        }
+
+        public class OuterClassWithoutAttribute
+        {
             public ValueClass Value { get; set; }
         }
 
