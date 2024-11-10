@@ -221,6 +221,44 @@ b: &number 1
         }
 
         [Theory]
+        [InlineData(System.Byte.MinValue)]
+        [InlineData(System.Byte.MaxValue)]
+        [InlineData(System.Int16.MinValue)]
+        [InlineData(System.Int16.MaxValue)]
+        [InlineData(System.Int32.MinValue)]
+        [InlineData(System.Int32.MaxValue)]
+        [InlineData(System.Int64.MinValue)]
+        [InlineData(System.Int64.MaxValue)]
+        [InlineData(System.UInt64.MaxValue)]
+        [InlineData(System.Single.MinValue)]
+        [InlineData(System.Single.MaxValue)]
+        [InlineData(System.Double.MinValue)]
+        [InlineData(System.Double.MaxValue)]
+        public void UnquotedStringTypeDeserialization_RegularNumbers(object expected)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var yaml = $"Value: {expected}";
+
+#if NETFRAMEWORK
+            // It needs explicitly specifying maximum precision for value roundtrip. 
+            if (expected is float floatValue)
+            {
+                yaml = $"Value: {floatValue:G9}";
+            }
+            if (expected is double doubleValue)
+            {
+                yaml = $"Value: {doubleValue:G17}";
+            }
+#endif
+
+            var resultDict = deserializer.Deserialize<IDictionary<string, object>>(yaml);
+            Assert.True(resultDict.ContainsKey("Value"));
+            Assert.Equal(expected, resultDict["Value"]);
+        }
+
+        [Theory]
         [InlineData(".nan", System.Single.NaN)]
         [InlineData(".NaN", System.Single.NaN)]
         [InlineData(".NAN", System.Single.NaN)]
