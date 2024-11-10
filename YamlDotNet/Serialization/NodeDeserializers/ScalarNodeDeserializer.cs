@@ -356,6 +356,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 default:
                     if (Regex.IsMatch(v, "^0x[0-9a-fA-F]+$")) //base16 number
                     {
+                        v = v.Substring(2);
                         if (byte.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var byteValue)) { result = byteValue; }
                         else if (short.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var shortValue)) { result = shortValue; }
                         else if (int.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var intValue)) { result = intValue; }
