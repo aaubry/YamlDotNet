@@ -47,7 +47,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             Action act = () => bufferedDeserializer.Deserialize<object>(KubernetesServiceYaml);
             act
               .Should().Throw<YamlException>()
-              .WithMessage("Failed to buffer yaml node")
+              .WithMessage("*Failed to buffer yaml node")
               .WithInnerException<ArgumentOutOfRangeException>()
               .WithMessage("Parser buffer exceeded max depth*");
         }
@@ -68,7 +68,7 @@ namespace YamlDotNet.Test.Serialization.BufferedDeserialization
             Action act = () => bufferedDeserializer.Deserialize<object>(KubernetesServiceYaml);
             act
               .Should().Throw<YamlException>()
-              .WithMessage("Failed to buffer yaml node")
+              .WithMessage("*Failed to buffer yaml node")
               .WithInnerException<ArgumentOutOfRangeException>()
               .WithMessage("Parser buffer exceeded max length*");
         }

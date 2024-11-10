@@ -29,35 +29,35 @@ namespace YamlDotNet.Test.Core
     public class YamlExceptionTests
     {
         [Fact]
-        public void VerifyToStringWithEmptyMarks()
+        public void VerifyMessageWithEmptyMarks()
         {
             var exception = new YamlException(Mark.Empty, Mark.Empty, "Test exception message");
-            exception.ToString().Should().Be("(Line: 1, Col: 1, Idx: 0) - (Line: 1, Col: 1, Idx: 0): Test exception message");
-            exception.Message.Should().Be("Test exception message");
+            exception.Message.Should().Be("(Line: 1, Col: 1, Idx: 0) - (Line: 1, Col: 1, Idx: 0): Test exception message");
+            exception.Reason.Should().Be("Test exception message");
         }
 
         [Fact]
-        public void VerifyToStringWithNonEmptyMarks()
+        public void VerifyMessageWithNonEmptyMarks()
         {
             var exception = new YamlException(new Mark(1, 1, 1), new Mark(10, 10, 10), "Test exception message");
-            exception.ToString().Should().Be("(Line: 1, Col: 1, Idx: 1) - (Line: 10, Col: 10, Idx: 10): Test exception message");
-            exception.Message.Should().Be("Test exception message");
+            exception.Message.Should().Be("(Line: 1, Col: 1, Idx: 1) - (Line: 10, Col: 10, Idx: 10): Test exception message");
+            exception.Reason.Should().Be("Test exception message");
         }
 
         [Fact]
-        public void VerifyToStringWithInnerExceptionAndMarks()
+        public void VerifyMessageWithInnerExceptionAndMarks()
         {
             var exception = new YamlException(new Mark(1, 1, 1), new Mark(10, 10, 10), "Test exception message", new InvalidOperationException("Test inner exception"));
-            exception.ToString().Should().Be("(Line: 1, Col: 1, Idx: 1) - (Line: 10, Col: 10, Idx: 10): Test exception message");
-            exception.Message.Should().Be("Test exception message");
+            exception.Message.Should().Be("(Line: 1, Col: 1, Idx: 1) - (Line: 10, Col: 10, Idx: 10): Test exception message");
+            exception.Reason.Should().Be("Test exception message");
         }
 
         [Fact]
-        public void VerifyToStringWithInnerException()
+        public void VerifyMessageWithInnerException()
         {
             var exception = new YamlException("Test exception message", new InvalidOperationException("Test inner exception"));
-            exception.ToString().Should().Be("(Line: 1, Col: 1, Idx: 0) - (Line: 1, Col: 1, Idx: 0): Test exception message");
-            exception.Message.Should().Be("Test exception message");
+            exception.Message.Should().Be("(Line: 1, Col: 1, Idx: 0) - (Line: 1, Col: 1, Idx: 0): Test exception message");
+            exception.Reason.Should().Be("Test exception message");
         }
     }
 }
