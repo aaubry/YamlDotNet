@@ -370,7 +370,8 @@ namespace YamlDotNet.Serialization
         {
             this.emitterSettings = this.emitterSettings
                                        .WithMaxSimpleKeyLength(int.MaxValue)
-                                       .WithoutAnchorName();
+                                       .WithoutAnchorName()
+                                       .WithUtf16SurrogatePairs();
 
             return this
                 .WithTypeConverter(new GuidConverter(true), w => w.InsteadOf<GuidConverter>())

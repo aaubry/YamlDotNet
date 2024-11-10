@@ -63,13 +63,22 @@ namespace YamlDotNet.Core
         /// </summary>
         public bool IndentSequences { get; }
 
+        /// <summary>
+        /// If true, then 4-byte UTF-32 characters are broken into two 2-byte code-points.
+        /// </summary>
+        /// <remarks>
+        /// This ensures compatibility with JSON format, as it does not allow '\Uxxxxxxxxx'
+        /// and instead expects two escaped 2-byte character '\uxxxx\uxxxx'.
+        /// </remarks>
+        public bool UseUtf16SurrogatePairs { get; }
+
         public static readonly EmitterSettings Default = new EmitterSettings();
 
         public EmitterSettings()
         {
         }
 
-        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false, string? newLine = null)
+        public EmitterSettings(int bestIndent, int bestWidth, bool isCanonical, int maxSimpleKeyLength, bool skipAnchorName = false, bool indentSequences = false, string? newLine = null, bool useUtf16SurrogatePairs = false)
         {
             if (bestIndent < 2 || bestIndent > 9)
             {
@@ -93,6 +102,7 @@ namespace YamlDotNet.Core
             SkipAnchorName = skipAnchorName;
             IndentSequences = indentSequences;
             NewLine = newLine ?? Environment.NewLine;
+            UseUtf16SurrogatePairs = useUtf16SurrogatePairs;
         }
 
         public EmitterSettings WithBestIndent(int bestIndent)
@@ -104,7 +114,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -117,7 +128,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -130,7 +142,8 @@ namespace YamlDotNet.Core
                 maxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -143,7 +156,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 IndentSequences,
-                newLine
+                newLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -167,7 +181,8 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 true,
                 IndentSequences,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
             );
         }
 
@@ -180,7 +195,22 @@ namespace YamlDotNet.Core
                 MaxSimpleKeyLength,
                 SkipAnchorName,
                 true,
-                NewLine
+                NewLine,
+                UseUtf16SurrogatePairs
+            );
+        }
+
+        public EmitterSettings WithUtf16SurrogatePairs()
+        {
+            return new EmitterSettings(
+                BestIndent,
+                BestWidth,
+                IsCanonical,
+                MaxSimpleKeyLength,
+                SkipAnchorName,
+                IndentSequences,
+                NewLine,
+                true
             );
         }
     }
