@@ -28,11 +28,11 @@ namespace YamlDotNet.Core
     /// </summary>
     public static class Constants
     {
-        public static readonly TagDirective[] DefaultTagDirectives =
-        [
+        public static readonly TagDirective[] DefaultTagDirectives = new []
+        {
             new TagDirective("!", "!"),
             new TagDirective("!!", "tag:yaml.org,2002:")
-        ];
+        };
 
         public const int MajorVersion = 1;
         public const int MinorVersion = 3;

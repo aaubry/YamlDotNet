@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.Utilities
         private readonly IYamlTypeConverter[] typeConverters;
         private readonly ConcurrentDictionary<Type, (bool HasMatch, IYamlTypeConverter? TypeConverter)> cache = new();
 
-        public TypeConverterCache(IEnumerable<IYamlTypeConverter>? typeConverters) : this(typeConverters?.ToArray() ?? [])
+        public TypeConverterCache(IEnumerable<IYamlTypeConverter>? typeConverters) : this(typeConverters?.ToArray() ?? new IYamlTypeConverter[]{})
         {
         }
 

@@ -122,13 +122,13 @@ namespace YamlDotNet.Serialization.ObjectFactories
         public override void ExecuteOnDeserializing(object value) =>
             ExecuteState(typeof(OnDeserializingAttribute), value);
 
-        public override void ExecuteOnSerialized(object value) =>
+        public override void ExecuteOnSerialized(object? value) =>
             ExecuteState(typeof(OnSerializedAttribute), value);
 
-        public override void ExecuteOnSerializing(object value) =>
+        public override void ExecuteOnSerializing(object? value) =>
             ExecuteState(typeof(OnSerializingAttribute), value);
 
-        private void ExecuteState(Type attributeType, object value)
+        private void ExecuteState(Type attributeType, object? value)
         {
             if (value == null)
             {

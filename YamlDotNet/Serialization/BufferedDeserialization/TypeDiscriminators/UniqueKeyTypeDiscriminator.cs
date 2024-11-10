@@ -76,6 +76,7 @@ namespace YamlDotNet.Serialization.BufferedDeserialization.TypeDiscriminators
                 scalar => this.typeMapping.ContainsKey(scalar.Value),
                 out var key,
                 out var _))
+            if (key != null) // Sorry, Unity's compiler didn't figure this one out on its own. Yes this statement shouldn't ever be false.
             {
                 suggestedType = this.typeMapping[key.Value];
                 return true;

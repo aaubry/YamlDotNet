@@ -2518,7 +2518,7 @@ namespace YamlDotNet.Core
             return result;
         }
 
-        private static readonly byte[] EmptyBytes = [];
+        private static readonly byte[] EmptyBytes = new byte[]{};
 
         /// <summary>
         /// Decode an URI-escape sequence corresponding to a single UTF-8 character.

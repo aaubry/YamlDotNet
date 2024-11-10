@@ -71,7 +71,7 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder()
             : base(new StaticTypeResolver())
         {
-            typeMappings = [];
+            typeMappings = new ();
             objectFactory = new Lazy<IObjectFactory>(() => new DefaultObjectFactory(typeMappings, settings), true);
 
             tagMappings = new Dictionary<TagName, Type>
@@ -89,6 +89,8 @@ namespace YamlDotNet.Serialization
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
             typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner));
+
+            typeConverter = new ReflectionTypeConverter();
 
             nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
@@ -125,8 +127,6 @@ namespace YamlDotNet.Serialization
                 { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
-
-            typeConverter = new ReflectionTypeConverter();
         }
 
         protected override DeserializerBuilder Self { get { return this; } }

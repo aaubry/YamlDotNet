@@ -36,7 +36,7 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 
         public PreProcessingPhaseObjectGraphVisitorSkeleton(IEnumerable<IYamlTypeConverter> typeConverters)
         {
-            var tcs = typeConverters?.ToArray() ?? [];
+            var tcs = typeConverters?.ToArray() ?? new IYamlTypeConverter[]{};
 
             this.typeConverters = tcs;
             this.typeConverterCache = new TypeConverterCache(tcs);

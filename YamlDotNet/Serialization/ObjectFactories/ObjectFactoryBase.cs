@@ -44,12 +44,12 @@ namespace YamlDotNet.Serialization.ObjectFactories
         }
 
         /// <inheritdoc />
-        public virtual void ExecuteOnSerialized(object value)
+        public virtual void ExecuteOnSerialized(object? value)
         {
         }
 
         /// <inheritdoc />
-        public virtual void ExecuteOnSerializing(object value)
+        public virtual void ExecuteOnSerializing(object? value)
         {
         }
 

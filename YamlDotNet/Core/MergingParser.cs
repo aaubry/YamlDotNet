@@ -173,9 +173,9 @@ namespace YamlDotNet.Core
 
             public ParsingEventCollection()
             {
-                events = [];
-                deleted = [];
-                references = [];
+                events = new ();
+                deleted = new ();
+                references = new ();
             }
 
             public void AddAfter(LinkedListNode<ParsingEvent> node, IEnumerable<ParsingEvent> items)

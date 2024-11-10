@@ -33,6 +33,6 @@ namespace YamlDotNet.Serialization
         /// <param name="visitor">An <see cref="IObjectGraphVisitor{TContext}"/> that is to be notified during the traversal.</param>
         /// <param name="context">A <typeparamref name="TContext" /> that will be passed to the <paramref name="visitor" />.</param>
         /// <param name="serializer">The serializer to use to serialize complex objects.</param>
-        void Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context, ObjectSerializer serializer);
+        void Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context, ObjectSerializer serializer) where TContext : notnull;
     }
 }

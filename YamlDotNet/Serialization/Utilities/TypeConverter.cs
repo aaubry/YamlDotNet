@@ -180,7 +180,7 @@ namespace YamlDotNet.Serialization.Utilities
                         {
                             try
                             {
-                                return method.Invoke(null, [value]);
+                                return method.Invoke(null, new []{value});
                             }
                             catch (TargetInvocationException ex)
                             {
@@ -200,14 +200,14 @@ namespace YamlDotNet.Serialization.Utilities
                     var parseMethod = destinationType.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider));
                     if (parseMethod != null)
                     {
-                        return parseMethod.Invoke(null, [value, culture]);
+                        return parseMethod.Invoke(null, new []{value, culture});
                     }
 
                     // Try with - public static T Parse(string)
                     parseMethod = destinationType.GetPublicStaticMethod("Parse", typeof(string));
                     if (parseMethod != null)
                     {
-                        return parseMethod.Invoke(null, [value]);
+                        return parseMethod.Invoke(null, new []{value});
                     }
                 }
                 catch (TargetInvocationException ex)
