@@ -354,20 +354,20 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 case "FALSE":
                     return false;
                 default:
-                    if (Regex.IsMatch(v, "0x[0-9a-fA-F]+")) //base16 number
+                    if (Regex.IsMatch(v, "^0x[0-9a-fA-F]+$")) //base16 number
                     {
-                        if (TryAndSwallow(() => Convert.ToByte(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt16(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt32(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToInt64(v, 16), out result)) { }
-                        else if (TryAndSwallow(() => Convert.ToUInt64(v, 16), out result)) { }
+                        if (byte.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var byteValue)) { result = byteValue; }
+                        else if (short.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var shortValue)) { result = shortValue; }
+                        else if (int.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var intValue)) { result = intValue; }
+                        else if (long.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var longValue)) { result = longValue; }
+                        else if (ulong.TryParse(v, NumberStyles.AllowHexSpecifier, formatter.NumberFormat, out var ulongValue)) { result = ulongValue; }
                         else
                         {
                             //we couldn't parse it, default to a string. It's probably to big.
                             result = v;
                         }
                     }
-                    else if (Regex.IsMatch(v, "0o[0-9a-fA-F]+")) //base8 number
+                    else if (Regex.IsMatch(v, "^0o[0-9a-fA-F]+$")) //base8 number
                     {
                         if (TryAndSwallow(() => Convert.ToByte(v, 8), out result)) { }
                         else if (TryAndSwallow(() => Convert.ToInt16(v, 8), out result)) { }
@@ -380,7 +380,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                             result = v;
                         }
                     }
-                    else if (Regex.IsMatch(v, @"[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?")) //regular number
+                    else if (Regex.IsMatch(v, @"^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$")) //regular number
                     {
                         if (byte.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var byteValue)) { result = byteValue; }
                         else if (short.TryParse(v, NumberStyles.Integer, formatter.NumberFormat, out var shortValue)) { result = shortValue; }
