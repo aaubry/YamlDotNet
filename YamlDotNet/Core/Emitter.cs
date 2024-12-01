@@ -1618,7 +1618,7 @@ namespace YamlDotNet.Core
         {
             if (isFirst)
             {
-                IncreaseIndent(false, (isMappingContext && !isIndentation));
+                IncreaseIndent(false, isMappingContext && !isIndentation);
             }
 
             if (evt is SequenceEnd)
