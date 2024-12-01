@@ -37,6 +37,7 @@ using YamlDotNet.Serialization.TypeInspectors;
 using YamlDotNet.Serialization.TypeResolvers;
 using YamlDotNet.Serialization.Utilities;
 using YamlDotNet.Serialization.ValueDeserializers;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Serialization
 {

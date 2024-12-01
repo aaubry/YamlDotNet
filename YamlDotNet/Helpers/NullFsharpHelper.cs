@@ -24,18 +24,19 @@ using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Helpers
 {
-    public static class FsharpHelper
+    /// <summary>
+    /// Empty implementation of the fsharphelper to allow trimming of csharp applications.
+    /// </summary>
+    public class NullFsharpHelper : IFsharpHelper
     {
-        public static IFsharpHelper? Instance { get; set; }
+        public object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr) => null;
 
-        public static bool IsOptionType(Type t) => Instance?.IsOptionType(t) ?? false;
+        public Type? GetOptionUnderlyingType(Type t) => null;
 
-        public static Type? GetOptionUnderlyingType(Type t) => Instance?.GetOptionUnderlyingType(t);
+        public object? GetValue(IObjectDescriptor objectDescriptor) => null;
 
-        public static object? GetValue(IObjectDescriptor objectDescriptor) => Instance?.GetValue(objectDescriptor);
+        public bool IsFsharpListType(Type t) => false;
 
-        public static bool IsFsharpListType(Type t) => Instance?.IsFsharpListType(t) ?? false;
-
-        public static object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr) => Instance?.CreateFsharpListFromArray(t, itemsType, arr);
+        public bool IsOptionType(Type t) => false;
     }
 }

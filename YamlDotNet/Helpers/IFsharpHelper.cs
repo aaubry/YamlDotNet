@@ -24,18 +24,12 @@ using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Helpers
 {
-    public static class FsharpHelper
+    public interface IFsharpHelper
     {
-        public static IFsharpHelper? Instance { get; set; }
-
-        public static bool IsOptionType(Type t) => Instance?.IsOptionType(t) ?? false;
-
-        public static Type? GetOptionUnderlyingType(Type t) => Instance?.GetOptionUnderlyingType(t);
-
-        public static object? GetValue(IObjectDescriptor objectDescriptor) => Instance?.GetValue(objectDescriptor);
-
-        public static bool IsFsharpListType(Type t) => Instance?.IsFsharpListType(t) ?? false;
-
-        public static object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr) => Instance?.CreateFsharpListFromArray(t, itemsType, arr);
+        bool IsOptionType(Type t);
+        Type? GetOptionUnderlyingType(Type t);
+        object? GetValue(IObjectDescriptor objectDescriptor);
+        bool IsFsharpListType(Type t);
+        object? CreateFsharpListFromArray(Type t, Type itemsType, Array arr);
     }
 }
