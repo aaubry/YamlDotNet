@@ -259,6 +259,27 @@ b: &number 1
         }
 
         [Theory]
+        [InlineData(System.Byte.MinValue)]
+        [InlineData(System.Byte.MaxValue)]
+        [InlineData(System.Int16.MinValue)]
+        [InlineData(System.Int16.MaxValue)]
+        [InlineData(System.Int32.MinValue)]
+        [InlineData(System.Int32.MaxValue)]
+        [InlineData(System.Int64.MinValue)]
+        [InlineData(System.Int64.MaxValue)]
+        public void UnquotedStringTypeDeserialization_HexNumbers(object expected)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var yaml = $"Value: 0x{expected:X2}";
+
+            var resultDict = deserializer.Deserialize<IDictionary<string, object>>(yaml);
+            Assert.True(resultDict.ContainsKey("Value"));
+            Assert.Equal(expected, resultDict["Value"]);
+        }
+
+        [Theory]
         [InlineData(".nan", System.Single.NaN)]
         [InlineData(".NaN", System.Single.NaN)]
         [InlineData(".NAN", System.Single.NaN)]
