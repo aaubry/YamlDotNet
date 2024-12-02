@@ -30,81 +30,17 @@ namespace YamlDotNet.Serialization.TypeInspectors
     /// <summary>
     /// Returns the properties of a type that are writable.
     /// </summary>
-    public class WritablePropertiesTypeInspector : ReflectionTypeInspector
+    public class WritablePropertiesTypeInspector(ITypeResolver typeResolver, bool includeNonPublicProperties) : PropertiesTypeInspector(typeResolver, includeNonPublicProperties)
     {
-        private readonly ITypeResolver typeResolver;
-        private readonly bool includeNonPublicProperties;
-
         public WritablePropertiesTypeInspector(ITypeResolver typeResolver)
             : this(typeResolver, false)
         {
         }
 
-        public WritablePropertiesTypeInspector(ITypeResolver typeResolver, bool includeNonPublicProperties)
-        {
-            this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
-            this.includeNonPublicProperties = includeNonPublicProperties;
-        }
-
-        private static bool IsValidProperty(PropertyInfo property)
+        protected override bool IsValidProperty(PropertyInfo property)
         {
             return property.CanWrite
                 && property.GetSetMethod(true)!.GetParameters().Length == 1;
-        }
-
-        public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
-        {
-            return type
-                .GetProperties(includeNonPublicProperties)
-                .Where(IsValidProperty)
-                .Select(p => (IPropertyDescriptor)new ReflectionPropertyDescriptor(p, typeResolver))
-                .ToArray();
-        }
-
-        protected class ReflectionPropertyDescriptor : IPropertyDescriptor
-        {
-            private readonly PropertyInfo propertyInfo;
-            private readonly ITypeResolver typeResolver;
-
-            public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, ITypeResolver typeResolver)
-            {
-                this.propertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
-                this.typeResolver = typeResolver ?? throw new ArgumentNullException(nameof(typeResolver));
-                ScalarStyle = ScalarStyle.Any;
-                var converterAttribute = propertyInfo.GetCustomAttribute<YamlConverterAttribute>();
-                if (converterAttribute != null)
-                {
-                    ConverterType = converterAttribute.ConverterType;
-                }
-            }
-
-            public string Name => propertyInfo.Name;
-            public bool Required { get => propertyInfo.IsRequired(); }
-            public Type Type => propertyInfo.PropertyType;
-            public Type? TypeOverride { get; set; }
-            public Type? ConverterType { get; set; }
-            public bool AllowNulls { get => propertyInfo.AcceptsNull(); }
-            public int Order { get; set; }
-            public bool CanWrite => propertyInfo.CanWrite;
-            public ScalarStyle ScalarStyle { get; set; }
-
-            public void Write(object target, object? value)
-            {
-                propertyInfo.SetValue(target, value, null);
-            }
-
-            public T? GetCustomAttribute<T>() where T : Attribute
-            {
-                var attributes = propertyInfo.GetAllCustomAttributes<T>();
-                return (T?)attributes.FirstOrDefault();
-            }
-
-            public IObjectDescriptor Read(object target)
-            {
-                var propertyValue = propertyInfo.ReadValue(target);
-                var actualType = TypeOverride ?? typeResolver.Resolve(Type, propertyValue);
-                return new ObjectDescriptor(propertyValue, actualType, Type, ScalarStyle);
-            }
         }
     }
 }
