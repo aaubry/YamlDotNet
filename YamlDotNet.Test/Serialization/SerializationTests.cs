@@ -166,6 +166,36 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Theory]
+        [InlineData("0o0", 0)]
+        [InlineData("0x8000", 32768)]
+        [InlineData("0xFFFFFFFFFFFFFFFF", 18_446_744_073_709_551_615)]
+        public void DeserializeScalarBase16FromUnknown(string yaml, ulong value)
+        {
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build();
+
+            var result = deserializer.Deserialize<object>(new StringReader(yaml));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData("0o0", 0)]
+        [InlineData("0o100000", 32768)]
+        [InlineData("0o1777777777777777777777", 18_446_744_073_709_551_615)]
+        public void DeserializeScalarBase8FromUnknown(string yaml, ulong value)
+        {
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build();
+
+            var result = deserializer.Deserialize<object>(new StringReader(yaml));
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
         [InlineData(EnumExample.One)]
         [InlineData(EnumExample.One | EnumExample.Two)]
         public void RoundtripEnums(EnumExample value)
