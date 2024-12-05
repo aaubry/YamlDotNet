@@ -45,10 +45,12 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 var typeName = classObject.FullName.Replace("?", string.Empty);
                 if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
-                    if (classObject.ModuleSymbol.TypeKind is TypeKind.Struct) {
+                    if (classObject.ModuleSymbol.TypeKind is TypeKind.Struct)
+                    {
                         Write($"ref var v = ref System.Runtime.CompilerServices.Unsafe.Unbox<{typeName}>(target);");
                     }
-                    else {
+                    else
+                    {
                         Write($"var v = ({typeName})target;");
                     }
                     Write("switch (propertyName)");
