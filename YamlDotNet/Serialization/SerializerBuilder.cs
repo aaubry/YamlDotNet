@@ -688,10 +688,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public ISerializer Build()
         {
-            if (FsharpHelper.Instance == null)
-            {
-                FsharpHelper.Instance = new DefaultFsharpHelper();
-            }
+            FsharpHelper.Instance ??= new DefaultFsharpHelper();
 
             return Serializer.FromValueSerializer(BuildValueSerializer(), emitterSettings);
         }
