@@ -355,8 +355,7 @@ public struct MyTestStruct
     public float X;
     public float Y;
     public MyTestNestedStruct Nested;
-    
-    
+
     [OnSerializing]
     public void Serializing()
     {
