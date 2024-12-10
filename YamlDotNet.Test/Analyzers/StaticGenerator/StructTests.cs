@@ -304,15 +304,12 @@ NestedListProperty:
         public ulong U64;
         public string Str;
         public char C;
-
         [YamlMember(Alias = "Hello", Description = "A Description", ScalarStyle = YamlDotNet.Core.ScalarStyle.DoubleQuoted)]
         public string Member;
-
         [YamlIgnore]
         public string Ignored;
 
         public RegularNestedStructProperty NestedPropertyStruct;
-
         public RegularNestedStruct NestedField;
         public List<RegularNestedStruct> NestedListField;
         public RegularNestedStruct NestedProperty { get; set; }
@@ -339,10 +336,8 @@ NestedListProperty:
         public ulong U64;
         public string Str;
         public char C;
-
         [YamlMember(Alias = "Hello", Description = "A Description", ScalarStyle = YamlDotNet.Core.ScalarStyle.DoubleQuoted)]
         public string Member;
-
         [YamlIgnore]
         public string Ignored;
         
@@ -367,10 +362,8 @@ NestedListProperty:
         public ulong U64 { get; set; }
         public string Str { get; set; }
         public char C { get; set; }
-
         [YamlMember(Alias = "Hello", Description = "A Description", ScalarStyle = YamlDotNet.Core.ScalarStyle.DoubleQuoted)]
         public string Member { get; set; }
-
         [YamlIgnore]
         public string Ignored { get; set; }
         
