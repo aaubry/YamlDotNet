@@ -353,6 +353,7 @@ public enum EnumMemberedEnum
 public struct MyTestStruct
 {
     public float X;
+    
     public float Y;
 
     public MyTestNestedStruct Nested;
@@ -386,6 +387,7 @@ public struct MyTestStruct
 public struct MyTestNestedStruct
 {
     public float X;
+    
     public float Y;
 }
 

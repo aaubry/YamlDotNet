@@ -308,7 +308,8 @@ NestedListProperty:
         [YamlMember(Alias = "Hello", Description = "A Description", ScalarStyle = YamlDotNet.Core.ScalarStyle.DoubleQuoted)]
         public string Member;
 
-        [YamlIgnore] public string Ignored;
+        [YamlIgnore]
+        public string Ignored;
 
         public RegularNestedStructProperty NestedPropertyStruct;
 
@@ -342,7 +343,8 @@ NestedListProperty:
         [YamlMember(Alias = "Hello", Description = "A Description", ScalarStyle = YamlDotNet.Core.ScalarStyle.DoubleQuoted)]
         public string Member;
 
-        [YamlIgnore] public string Ignored;
+        [YamlIgnore]
+        public string Ignored;
         
         public RegularNestedStruct()
         {
@@ -369,7 +371,8 @@ NestedListProperty:
         [YamlMember(Alias = "Hello", Description = "A Description", ScalarStyle = YamlDotNet.Core.ScalarStyle.DoubleQuoted)]
         public string Member { get; set; }
 
-        [YamlIgnore] public string Ignored { get; set; }
+        [YamlIgnore]
+        public string Ignored { get; set; }
         
         public RegularNestedStructProperty()
         {
