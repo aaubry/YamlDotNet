@@ -308,13 +308,13 @@ NestedListProperty:
         public string Member;
         [YamlIgnore]
         public string Ignored;
-
         public RegularNestedStructProperty NestedPropertyStruct;
         public RegularNestedStruct NestedField;
         public List<RegularNestedStruct> NestedListField;
         public RegularNestedStruct NestedProperty { get; set; }
         public List<RegularNestedStruct> NestedListProperty { get; set; }
 
+        
         public RegularStruct()
         {
             Ignored = "";
@@ -341,6 +341,7 @@ NestedListProperty:
         [YamlIgnore]
         public string Ignored;
         
+        
         public RegularNestedStruct()
         {
             Ignored = "";
@@ -366,6 +367,7 @@ NestedListProperty:
         public string Member { get; set; }
         [YamlIgnore]
         public string Ignored { get; set; }
+        
         
         public RegularNestedStructProperty()
         {
