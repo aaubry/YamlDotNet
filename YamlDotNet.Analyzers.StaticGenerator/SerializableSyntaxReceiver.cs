@@ -44,7 +44,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                     HandleEnum(enumSymbol);
                 }
             }
-            else if (context.Node is ClassDeclarationSyntax classDeclarationSyntax)
+            else if (context.Node is BaseTypeDeclarationSyntax classDeclarationSyntax)
             {
                 var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)!;
                 if (classSymbol.GetAttributes().Any())
@@ -62,7 +62,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                         foreach (var type in types.OfType<INamedTypeSymbol>())
                         {
-                            if (type.TypeKind == TypeKind.Class)
+                            if (type.TypeKind is TypeKind.Class or TypeKind.Struct)
                             {
                                 AddSerializableClass(type);
                             }

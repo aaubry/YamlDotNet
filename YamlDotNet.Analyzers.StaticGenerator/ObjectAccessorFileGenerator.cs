@@ -42,9 +42,17 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                 Write("public void Set(string propertyName, object target, object value)");
                 Write("{"); Indent();
+                var typeName = classObject.FullName.Replace("?", string.Empty);
                 if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
-                    Write($"var v = ({classObject.FullName.Replace("?", string.Empty)})target;");
+                    if (classObject.ModuleSymbol.TypeKind is TypeKind.Struct)
+                    {
+                        Write($"ref var v = ref System.Runtime.CompilerServices.Unsafe.Unbox<{typeName}>(target);");
+                    }
+                    else
+                    {
+                        Write($"var v = ({typeName})target;");
+                    }
                     Write("switch (propertyName)");
                     Write("{"); Indent();
                     foreach (var field in classObject.FieldSymbols)
@@ -68,7 +76,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                 Write("public object Read(string propertyName, object target)");
                 Write("{"); Indent();
-                Write($"var v = ({classObject.FullName.Replace("?", string.Empty)})target;");
+                Write($"var v = ({typeName})target;");
                 if (classObject.FieldSymbols.Count > 0 || classObject.PropertySymbols.Count > 0)
                 {
                     Write("switch (propertyName)");
