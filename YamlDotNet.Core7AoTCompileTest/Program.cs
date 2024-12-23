@@ -88,6 +88,18 @@ SomeObject: a
 SomeDictionary:
   a: 1
   b: 2
+StructField:
+  X: 1
+  Y: 2
+  Nested:
+    X: 3
+    Y: 4
+StructProperty:
+  X: 5
+  Y: 6
+  Nested:
+    X: 7
+    Y: 8
 ");
 
 var input = new StringReader(yaml);
@@ -167,6 +179,12 @@ foreach (var s in x.SomeCollectionStrings)
 {
     Console.WriteLine("  {0}", s);
 }
+Console.WriteLine("Structs:");
+Console.WriteLine("  StructField: <{0},{1}>", x.StructField.X, x.StructField.Y);
+Console.WriteLine("    Nested: <{0},{1}>", x.StructField.Nested.X, x.StructField.Nested.Y);
+Console.WriteLine("  StructProperty: <{0},{1}>", x.StructProperty.X, x.StructProperty.Y);
+Console.WriteLine("    Nested: <{0},{1}>", x.StructProperty.Nested.X, x.StructProperty.Nested.Y);
+
 Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
@@ -275,6 +293,8 @@ public class PrimitiveTypes
     public ICollection<string> SomeCollectionStrings { get; set; }
     public object SomeObject { get; set; }
     public object SomeDictionary { get; set; }
+    public MyTestStruct StructField;
+    public MyTestStruct StructProperty { get; set; }
 }
 
 public class InheritedBase
@@ -327,6 +347,45 @@ public enum EnumMemberedEnum
 
     [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
     Hello = 1
+}
+
+[YamlSerializable]
+public struct MyTestStruct
+{
+    public float X;
+    public float Y;
+    public MyTestNestedStruct Nested;
+
+    [OnSerializing]
+    public void Serializing()
+    {
+        Console.WriteLine("MyTestStruct: Serializing");
+    }
+
+    [OnSerialized]
+    public void Serialized()
+    {
+        Console.WriteLine("MyTestStruct: Serialized");
+    }
+
+    [OnDeserialized]
+    public void Deserialized()
+    {
+        Console.WriteLine("MyTestStruct: Deserialized");
+    }
+
+    [OnDeserializing]
+    public void Deserializing()
+    {
+        Console.WriteLine("MyTestStruct: Deserializing");
+    }
+}
+
+[YamlSerializable]
+public struct MyTestNestedStruct
+{
+    public float X;
+    public float Y;
 }
 
 #pragma warning restore CS8604 // Possible null reference argument.
