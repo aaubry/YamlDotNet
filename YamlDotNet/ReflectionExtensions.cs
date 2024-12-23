@@ -309,35 +309,32 @@ namespace YamlDotNet
 
         public static bool AcceptsNull(this MemberInfo member)
         {
-            var result = true; //default to allowing nulls, this will be set to false if there is a null context on the type
 #if NET8_0_OR_GREATER
-            var typeHasNullContext = TypesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
-            {
-                var attributes = t.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
-                return (attributes?.Length ?? 0) > 0;
-            });
+            var classAttributes = member.DeclaringType.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
+            var defaultFlag = classAttributes.OfType<System.Runtime.CompilerServices.NullableContextAttribute>().FirstOrDefault()?.Flag ?? 0;
 
-            if (typeHasNullContext)
-            {
-                // we have a nullable context on that type, only allow null if the NullableAttribute is on the member.
-                var memberAttributes = member.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableAttribute), true);
-                result = (memberAttributes?.Length ?? 0) > 0;
-            }
+            // we have a nullable context on that type, only allow null if the NullableAttribute is on the member.
+            var memberAttributes = member.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableAttribute), true);
+            var nullableFlag = memberAttributes.OfType<System.Runtime.CompilerServices.NullableAttribute>().FirstOrDefault()?.NullableFlags.Any(flag => flag == 2);
+            var result = nullableFlag ?? defaultFlag == 2;
 
             return result;
 #else
-            var typeHasNullContext = TypesHaveNullContext.GetOrAdd(member.DeclaringType, (Type t) =>
+            var classAttributes = member.DeclaringType.GetCustomAttributes(true);
+            var classAttribute = classAttributes.FirstOrDefault(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableContextAttribute");
+            var defaultFlag = 0;
+            if (classAttribute != null)
             {
-                var attributes = t.GetCustomAttributes(true);
-                return attributes.Any(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableContextAttribute");
-            });
-
-            if (typeHasNullContext)
-            {
-                var memberAttributes = member.GetCustomAttributes(true);
-                result = memberAttributes.Any(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableAttribute");
+                var classAttributeType = classAttribute.GetType();
+                var classProperty = classAttributeType.GetProperty("Flag")!;
+                defaultFlag = (byte)classProperty.GetValue(classAttribute)!;
             }
-
+            var memberAttributes = member.GetCustomAttributes(true);
+            var memberAttribute = memberAttributes.FirstOrDefault(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableAttribute");
+            var memberAttributeType = memberAttribute?.GetType();
+            var memberProperty = memberAttributeType?.GetProperty("NullableFlags")!;
+            var flags = (byte[])memberProperty.GetValue(memberAttribute)!;
+            var result = flags.Any(x => x == 2) || defaultFlag == 2;
             return result;
 #endif
         }
