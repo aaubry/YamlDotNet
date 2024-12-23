@@ -395,7 +395,55 @@ name: Jake
         }
 
         [Fact]
-        public void EnforceNulalbleTypesWhenNullThrowsException()
+        public void EnforceNullableWhenClassIsDefaultNullableThrows()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
+            var yaml = @"
+TestString: null
+TestBool: null
+TestBool1: null
+";
+            try
+            {
+                var test = deserializer.Deserialize<NullableDefaultClass>(yaml);
+            }
+            catch (YamlException e)
+            {
+                if (e.InnerException is NullReferenceException)
+                {
+                    return;
+                }
+            }
+
+            throw new Exception("Non nullable property was set to null.");
+        }
+
+        [Fact]
+        public void EnforceNullableWhenClassIsNotDefaultNullableThrows()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
+            var yaml = @"
+TestString: null
+TestBool: null
+TestBool1: null
+";
+            try
+            {
+                var test = deserializer.Deserialize<NullableNotDefaultClass>(yaml);
+            }
+            catch (YamlException e)
+            {
+                if (e.InnerException is NullReferenceException)
+                {
+                    return;
+                }
+            }
+
+            throw new Exception("Non nullable property was set to null.");
+        }
+
+        [Fact]
+        public void EnforceNullableTypesWhenNullThrowsException()
         {
             var deserializer = new DeserializerBuilder().WithEnforceNullability().Build();
             var yaml = @"
@@ -610,6 +658,20 @@ Property: test-property";
 #endif
 
 #nullable enable
+        public class NullableDefaultClass
+        {
+            public string? TestString { get; set; }
+            public string? TestBool { get; set; }
+            public string TestBool1 { get; set; } = "";
+        }
+
+        public class NullableNotDefaultClass
+        {
+            public string? TestString { get; set; }
+            public string TestBool { get; set; } = "";
+            public string TestBool1 { get; set; } = "";
+        }
+
         public class NonNullableClass
         {
             public string Test { get; set; } = "Some default value";
