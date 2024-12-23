@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -327,6 +328,35 @@ Value: foo");
                 .Serialize(list);
 
             result.Should().Be(expectedResult);
+        }
+
+
+        /// <summary>
+        /// Tests the serialization of a dictionary containing a list of strings using IndentedTextWriter.
+        /// </summary>
+        [Fact]
+        public void SerializeWithTabs()
+        {
+            var tabString = " ";
+            using var writer = new StringWriter();
+            using var indentedTextWriter = new IndentedTextWriter(writer, tabString) { Indent = 2 };
+
+            //create a dictionary with a list of strings to test the tabbed serialization
+            var items = new List<string> { "item 1", "item 2" };
+            var list = new Dictionary<string, List<string>> { { "key", items } };
+
+            SerializerBuilder
+                .Build()
+                .Serialize(indentedTextWriter, list);
+
+            //split serialized output into lines
+            var lines = indentedTextWriter.InnerWriter.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            //expected indentation
+            var indent = string.Join(string.Empty, Enumerable.Repeat(tabString, indentedTextWriter.Indent).ToList());
+
+            //check that the serialized lines (excluding the first and last) start with the expected indentation
+            lines.Skip(1).Take(lines.Length - 2).Where(element => element.StartsWith(indent)).Should().HaveCount(items.Count);
         }
 
         [Fact]

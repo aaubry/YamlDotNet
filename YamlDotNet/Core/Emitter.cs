@@ -67,7 +67,6 @@ namespace YamlDotNet.Core
         private bool isIndentation;
         private readonly bool forceIndentLess;
         private readonly bool useUtf16SurrogatePair;
-        private readonly string newLine;
 
         private bool isDocumentEndWritten;
 
@@ -150,9 +149,9 @@ namespace YamlDotNet.Core
             this.skipAnchorName = settings.SkipAnchorName;
             this.forceIndentLess = !settings.IndentSequences;
             this.useUtf16SurrogatePair = settings.UseUtf16SurrogatePairs;
-            this.newLine = settings.NewLine;
 
             this.output = output;
+            this.output.NewLine = settings.NewLine;
             this.outputUsesUnicodeEncoding = IsUnicode(output.Encoding);
         }
 
@@ -1937,7 +1936,7 @@ namespace YamlDotNet.Core
         {
             if (breakCharacter == '\n')
             {
-                output.Write(newLine);
+                output.WriteLine();
             }
             else
             {
