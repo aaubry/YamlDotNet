@@ -33,10 +33,10 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: Install dotnet 7.0
+    - name: Install dotnet 8.0
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
 
     - name: Install GitVersion.Tool
       run: dotnet tool install --global GitVersion.Tool
