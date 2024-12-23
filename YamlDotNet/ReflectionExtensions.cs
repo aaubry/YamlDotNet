@@ -305,8 +305,6 @@ namespace YamlDotNet
             return Attribute.GetCustomAttributes(member, typeof(TAttribute), inherit: true);
         }
 
-        private static readonly ConcurrentDictionary<Type, bool> TypesHaveNullContext = new();
-
         public static bool AcceptsNull(this MemberInfo member)
         {
 #if NET8_0_OR_GREATER
