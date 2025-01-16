@@ -1943,7 +1943,7 @@ namespace YamlDotNet.Core
                                 {
                                     throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, did not find expected hexadecimal number.");
                                 }
-                                character = ((character << 4) + analyzer.AsHex(k));
+                                character = (character << 4) + analyzer.AsHex(k);
                             }
 
                             // Check the value and write the character.
@@ -1979,7 +1979,7 @@ namespace YamlDotNet.Core
                                         {
                                             throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a quoted scalar, did not find expected hexadecimal number.");
                                         }
-                                        lowSurrogate = ((lowSurrogate << 4) + analyzer.AsHex(k));
+                                        lowSurrogate = (lowSurrogate << 4) + analyzer.AsHex(k);
                                     }
 
                                     for (var k = 0; k < codeLength; ++k)
@@ -2693,7 +2693,7 @@ namespace YamlDotNet.Core
             // level.
 
 
-            var isRequired = (flowLevel == 0 && indent == cursor.LineOffset);
+            var isRequired = flowLevel == 0 && indent == cursor.LineOffset;
 
 
             // A simple key is required only when it is the first token in the current
