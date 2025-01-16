@@ -89,10 +89,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 write("using System;", true);
                 write("using System.Collections.Generic;", true);
 
-                var namespaceName = syntaxReceiver.YamlStaticContextType?.ContainingNamespace.ContainingNamespace;
+                var namespaceName = syntaxReceiver.YamlStaticContextType?.ContainingNamespace?.Name;
+                var isGlobalNamespace = string.IsNullOrEmpty(namespaceName);
 
-                write($"namespace {syntaxReceiver.YamlStaticContextType?.GetNamespace() ?? "YamlDotNet.Static"}", true);
-                write("{", true); indent();
+                if (!isGlobalNamespace)
+                {
+                    write($"namespace {namespaceName}", true);
+                    write("{", true); indent();
+                }
 
                 new StaticContextFile(write, indent, unindent, _context).Write(syntaxReceiver);
                 new StaticObjectFactoryFile(write, indent, unindent, _context).Write(syntaxReceiver);
@@ -101,7 +105,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 new StaticTypeInspectorFile(write, indent, unindent, _context).Write(syntaxReceiver);
                 new ObjectAccessorFileGenerator(write, indent, unindent, _context).Write(syntaxReceiver);
 
-                unindent(); write("}", true);
+                if (!isGlobalNamespace)
+                {
+                    unindent(); write("}", true);
+                }
             }
             catch (Exception exception)
             {
