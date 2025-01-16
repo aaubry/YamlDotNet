@@ -39,45 +39,48 @@ namespace YamlDotNet.Core
         public Mark End { get; }
 
         /// <summary>
+        /// Gets the reason that originated the exception.
+        /// </summary>
+        public string Reason { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        /// <param name="message">The message.</param>
-        public YamlException(string message)
-            : this(Mark.Empty, Mark.Empty, message)
+        /// <param name="reason">The message.</param>
+        public YamlException(string reason)
+            : this(Mark.Empty, Mark.Empty, reason)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        public YamlException(in Mark start, in Mark end, string message)
-            : this(start, end, message, null)
+        public YamlException(in Mark start, in Mark end, string reason)
+            : this(start, end, reason, null)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        public YamlException(in Mark start, in Mark end, string message, Exception? innerException)
-            : base(message, innerException)
+        public YamlException(in Mark start, in Mark end, string reason, Exception? innerException)
+            : base(null, innerException)
         {
             Start = start;
             End = end;
+            Reason = reason;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlException"/> class.
         /// </summary>
-        /// <param name="message">The message.</param>
+        /// <param name="reason">The message.</param>
         /// <param name="inner">The inner.</param>
-        public YamlException(string message, Exception inner)
-            : this(Mark.Empty, Mark.Empty, message, inner)
+        public YamlException(string reason, Exception inner)
+            : this(Mark.Empty, Mark.Empty, reason, inner)
         {
         }
 
-        public override string ToString()
-        {
-            return $"({Start}) - ({End}): {Message}";
-        }
+        public override string Message => $"({Start}) - ({End}): {Reason}";
     }
 }
