@@ -383,6 +383,7 @@ namespace YamlDotNet.Test.Serialization
         public Point MyPoint { get; set; }
         public int? MyNullableWithValue { get; set; }
         public int? MyNullableWithoutValue { get; set; }
+        public Type MyType { get; set; }
 
         public Example()
         {
@@ -393,6 +394,7 @@ namespace YamlDotNet.Test.Serialization
             MyTimeSpan = TimeSpan.FromHours(1);
             MyPoint = new Point(100, 200);
             MyNullableWithValue = 8;
+            MyType = typeof(string);
         }
     }
 
