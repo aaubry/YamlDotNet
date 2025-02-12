@@ -951,6 +951,14 @@ y:
         }
 
         [Fact]
+        public void CanSerializeNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new Example { MyType = null });
+            yaml.Should().Contain($"MyType: {Environment.NewLine}");
+        }
+
+        [Fact]
         public void SerializationOfNumericsAsJsonRountTrip()
         {
             var serializer = new SerializerBuilder().JsonCompatible().Build();
