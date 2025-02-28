@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Core;
@@ -37,43 +38,33 @@ public class AnchorAliasNestedSequenceTest
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .WithTypeConverter(FilterCollectionConverter.Instance)
             .Build();
         var executors = deserializer.Deserialize<List<Executor>>(Document);
         executors[0].Filters.Count.Should().Be(2);
         executors[1].Filters.Count.Should().Be(3);
+        foreach (var (x, y) in executors[0].Filters.Zip(executors[1].Filters, (x, y) => (x, y)))
+        {
+            ReferenceEquals(x, y).Should().BeFalse();
+        }
     }
 
-    public class FilterCollectionConverter : IYamlTypeConverter
+    public class FilterCollection : List<Filter>, IYamlConvertible
     {
-        public static IYamlTypeConverter Instance { get; } = new FilterCollectionConverter();
-
-        public bool Accepts(Type type)
+        public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
         {
-            return type == typeof(List<Filter>);
-        }
-
-        public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
-        {
-            var result = new List<Filter>();
             parser.Consume<SequenceStart>();
             while (!parser.TryConsume<SequenceEnd>(out _))
             {
-                if (parser.TryConsume<SequenceStart>(out _))
+                if (parser.Accept<AnchorAlias>(out _))
                 {
-                    while (!parser.TryConsume<SequenceEnd>(out _))
-                    {
-                        result.Add((Filter)rootDeserializer.Invoke(typeof(Filter))!);
-                    }
+                    AddRange((List<Filter>)nestedObjectDeserializer.Invoke(typeof(List<Filter>))!);
                 }
 
-                result.Add((Filter)rootDeserializer.Invoke(typeof(Filter))!);
+                Add((Filter)nestedObjectDeserializer.Invoke(typeof(Filter))!);
             }
-
-            return result;
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type, ObjectSerializer serializer)
+        public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
         {
             throw new NotImplementedException();
         }
@@ -96,7 +87,7 @@ public class AnchorAliasNestedSequenceTest
     public class Executor
     {
         public string Name { get; set; }
-        public List<Filter> Filters { get; set; }
+        public FilterCollection Filters { get; set; }
     }
 
     public class Filter

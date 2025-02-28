@@ -21,8 +21,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization.BufferedDeserialization;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ValueDeserializers
@@ -36,11 +38,11 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             this.innerDeserializer = innerDeserializer ?? throw new ArgumentNullException(nameof(innerDeserializer));
         }
 
-        private sealed class AliasState : Dictionary<AnchorName, ValuePromise>, IPostDeserializationCallback
+        private sealed class AliasState : Dictionary<AnchorName, IValuePromise>, IPostDeserializationCallback
         {
             public void OnDeserialization()
             {
-                foreach (var promise in Values)
+                foreach (var promise in Values.OfType<ValuePromise>())
                 {
                     if (!promise.HasValue)
                     {
@@ -48,6 +50,26 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                         throw new AnchorNotFoundException(alias.Start, alias.End, $"Anchor '{alias.Value}' not found");
                     }
                 }
+            }
+        }
+
+        private sealed class BufferPromise : IValuePromise
+        {
+            public event Action<object?>? ValueAvailable;
+
+            private readonly ParserAnchorBuffer buffer;
+
+            public BufferPromise(ParserAnchorBuffer buffer)
+            {
+                this.buffer = buffer;
+            }
+
+            public object? DeserializerValue(IValueDeserializer innerDeserializer, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+            {
+                buffer.Reset();
+                var value = innerDeserializer.DeserializeValue(buffer, expectedType, state, nestedObjectDeserializer);
+                ValueAvailable?.Invoke(value);
+                return value;
             }
         }
 
@@ -80,6 +102,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                     {
                         throw new InvalidOperationException("Value not set");
                     }
+
                     return value;
                 }
                 set
@@ -88,6 +111,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                     {
                         throw new InvalidOperationException("Value already set");
                     }
+
                     HasValue = true;
                     this.value = value;
 
@@ -98,7 +122,6 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         public object? DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
         {
-            object? value;
             if (parser.TryConsume<AnchorAlias>(out var alias))
             {
                 var aliasState = state.Get<AliasState>();
@@ -107,41 +130,63 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                     throw new AnchorNotFoundException(alias.Start, alias.End, $"Alias ${alias.Value} cannot precede anchor declaration");
                 }
 
-                return valuePromise.HasValue ? valuePromise.Value : valuePromise;
+                return valuePromise switch
+                {
+                    BufferPromise buffered => buffered.DeserializerValue(innerDeserializer, expectedType, state, nestedObjectDeserializer),
+                    ValuePromise cached => cached.HasValue ? cached.Value : cached,
+                    _ => throw new InvalidCastException("Unknown anchor implementation")
+                };
             }
 
-            var anchor = AnchorName.Empty;
-            if (parser.Accept<NodeEvent>(out var nodeEvent) && !nodeEvent.Anchor.IsEmpty)
+            if (!parser.Accept<NodeEvent>(out var nodeEvent) || nodeEvent.Anchor.IsEmpty)
             {
-                anchor = nodeEvent.Anchor;
+                return innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
+            }
+
+            var anchor = nodeEvent.Anchor;
+            var start = parser.Current!.Start;
+            ParserAnchorBuffer buffer;
+            try
+            {
+                buffer = new ParserAnchorBuffer(anchor, parser);
+            }
+            catch (Exception exception)
+            {
+                throw new YamlException(start, parser.Current.End, "Failed to buffer yaml node", exception);
+            }
+
+            if (buffer.IsCycling)
+            {
                 var aliasState = state.Get<AliasState>();
                 if (!aliasState.ContainsKey(anchor))
                 {
                     aliasState[anchor] = new ValuePromise(new AnchorAlias(anchor));
                 }
-            }
 
-            value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
-
-            if (!anchor.IsEmpty)
-            {
-                var aliasState = state.Get<AliasState>();
+                var value = innerDeserializer.DeserializeValue(buffer, expectedType, state, nestedObjectDeserializer);
 
                 if (!aliasState.TryGetValue(anchor, out var valuePromise))
                 {
                     aliasState.Add(anchor, new ValuePromise(value));
                 }
-                else if (!valuePromise.HasValue)
+                else if (valuePromise is ValuePromise { HasValue: false } cached)
                 {
-                    valuePromise.Value = value;
+                    cached.Value = value;
                 }
                 else
                 {
                     aliasState[anchor] = new ValuePromise(value);
                 }
-            }
 
-            return value;
+                return value;
+            }
+            else
+            {
+                var aliasState = state.Get<AliasState>();
+                var buffered = new BufferPromise(buffer);
+                aliasState[anchor] = buffered;
+                return buffered.DeserializerValue(innerDeserializer, expectedType, state, nestedObjectDeserializer);
+            }
         }
     }
 }
