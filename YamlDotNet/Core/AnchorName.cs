@@ -39,12 +39,17 @@ namespace YamlDotNet.Core
 
         public AnchorName(string value)
         {
-            this.value = value ?? throw new ArgumentNullException(nameof(value));
+            if (value != null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
 
             if (!AnchorPattern.IsMatch(value))
             {
                 throw new ArgumentException($"Anchor cannot be empty or contain disallowed characters: []{{}},\nThe value was '{value}'.", nameof(value));
             }
+            
+            this.value = string.Intern(value);
         }
 
         public override string ToString() => value ?? "[empty]";

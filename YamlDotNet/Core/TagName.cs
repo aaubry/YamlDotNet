@@ -39,7 +39,7 @@ namespace YamlDotNet.Core
 
         public TagName(string value)
         {
-            this.value = value ?? throw new ArgumentNullException(nameof(value));
+            this.value = string.Intern(value);
 
             if (value.Length == 0)
             {

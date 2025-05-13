@@ -79,7 +79,7 @@ namespace YamlDotNet.Core.Events
         public Scalar(AnchorName anchor, TagName tag, string value, ScalarStyle style, bool isPlainImplicit, bool isQuotedImplicit, Mark start, Mark end, bool isKey = false)
             : base(anchor, tag, start, end)
         {
-            this.Value = value;
+            this.Value = (isKey || value.Length < 40) ? string.Intern(value) : value;
             this.Style = style;
             this.IsPlainImplicit = isPlainImplicit;
             this.IsQuotedImplicit = isQuotedImplicit;
