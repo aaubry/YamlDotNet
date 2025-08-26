@@ -75,8 +75,8 @@ namespace YamlDotNet.Helpers
             var fsharpList =
                 t.Assembly
                 .GetType("Microsoft.FSharp.Collections.ListModule")
-                .GetMethod("OfArray")
-                .MakeGenericMethod(itemsType)
+                ?.GetMethod("OfArray")
+                ?.MakeGenericMethod(itemsType)
                 .Invoke(null, [arr]);
 
             return fsharpList;
