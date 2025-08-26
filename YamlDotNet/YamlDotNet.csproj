@@ -28,7 +28,7 @@
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <!-- Since the BCL is not yet annotated in other platforms, disable the nullable warnings when compiling for those -->
-    <NoWarn>$(NoWarn);CS8600;CS8602;CS8604</NoWarn>
+    <NoWarn>$(NoWarn);CS8602;CS8604</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
