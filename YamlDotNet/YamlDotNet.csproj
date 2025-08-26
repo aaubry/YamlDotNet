@@ -7,7 +7,7 @@
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <DocumentationFile>bin\$(Configuration)\YamlDotNet.xml</DocumentationFile>
-    <NoWarn>1591;1574</NoWarn>
+    <NoWarn>CS1591;CS1574</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <WarningsAsErrors>true</WarningsAsErrors>
@@ -28,7 +28,7 @@
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <!-- Since the BCL is not yet annotated in other platforms, disable the nullable warnings when compiling for those -->
-    <NoWarn>1591;1574;8600;8602;8604</NoWarn>
+    <NoWarn>CS1591;CS1574;CS8600;CS8602;CS8604</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
