@@ -57,7 +57,7 @@ namespace YamlDotNet.Helpers
                 return null;
             }
 
-            return objectDescriptor.Type.GetProperty("Value").GetValue(objectDescriptor.Value);
+            return objectDescriptor.Type.GetProperty("Value")?.GetValue(objectDescriptor.Value);
         }
 
         public bool IsFsharpListType(Type t)
