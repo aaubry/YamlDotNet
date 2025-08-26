@@ -66,7 +66,7 @@ namespace YamlDotNet
             // Then check the interfaces
             return type.FindInterfaces(static (t, context) => IsGenericDefinitionOfType(t, context), openGenericType).FirstOrDefault();
 
-            static bool IsGenericDefinitionOfType(Type t, object? context)
+            static bool IsGenericDefinitionOfType(Type t, object context)
             {
                 return t.IsGenericType && t.GetGenericTypeDefinition() == (Type)context;
             }
