@@ -278,7 +278,7 @@ namespace YamlDotNet
         public static MethodInfo? GetGetMethod(this PropertyInfo property, bool nonPublic)
         {
             var getter = property.GetMethod;
-            if (!nonPublic && !getter.IsPublic)
+            if (!nonPublic && getter != null && !getter.IsPublic)
             {
                 getter = null;
             }
