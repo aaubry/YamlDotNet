@@ -308,7 +308,7 @@ namespace YamlDotNet
         public static bool AcceptsNull(this MemberInfo member)
         {
 #if NET8_0_OR_GREATER
-            var classAttributes = member.DeclaringType.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
+            var classAttributes = member.DeclaringType?.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
             var defaultFlag = classAttributes.OfType<System.Runtime.CompilerServices.NullableContextAttribute>().FirstOrDefault()?.Flag ?? 0;
 
             // we have a nullable context on that type, only allow null if the NullableAttribute is on the member.
@@ -318,7 +318,7 @@ namespace YamlDotNet
 
             return result;
 #else
-            var classAttributes = member.DeclaringType.GetCustomAttributes(true);
+            var classAttributes = member.DeclaringType?.GetCustomAttributes(true);
             var classAttribute = classAttributes.FirstOrDefault(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableContextAttribute");
             var defaultFlag = 0;
             if (classAttribute != null)
