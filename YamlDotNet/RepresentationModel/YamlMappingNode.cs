@@ -303,7 +303,7 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
         {
-            level.Increment();
+            level.Increment(Start, End);
             yield return this;
             foreach (var child in children)
             {
