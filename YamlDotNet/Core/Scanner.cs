@@ -77,7 +77,6 @@ namespace YamlDotNet.Core
         private bool tokenAvailable;
         private Token? previous;
         private Anchor? previousAnchor;
-        private Scalar? lastScalar;
         private readonly int maxKeySize;
 
         private bool IsDocumentStart() =>
@@ -325,7 +324,6 @@ namespace YamlDotNet.Core
 
             if (analyzer.Buffer.EndOfInput)
             {
-                lastScalar = null;
                 FetchStreamEnd();
             }
 
@@ -333,7 +331,6 @@ namespace YamlDotNet.Core
 
             if (cursor.LineOffset == 0 && analyzer.Check('%'))
             {
-                lastScalar = null;
                 FetchDirective();
                 return;
             }
@@ -342,7 +339,6 @@ namespace YamlDotNet.Core
 
             if (IsDocumentStart())
             {
-                lastScalar = null;
                 FetchDocumentIndicator(true);
                 return;
             }
@@ -351,7 +347,6 @@ namespace YamlDotNet.Core
 
             if (IsDocumentEnd())
             {
-                lastScalar = null;
                 FetchDocumentIndicator(false);
                 return;
             }
@@ -360,7 +355,6 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('['))
             {
-                lastScalar = null;
                 FetchFlowCollectionStart(true);
                 return;
             }
@@ -369,7 +363,6 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('{'))
             {
-                lastScalar = null;
                 FetchFlowCollectionStart(false);
                 return;
             }
@@ -378,7 +371,6 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check(']'))
             {
-                lastScalar = null;
                 FetchFlowCollectionEnd(true);
                 return;
             }
@@ -387,7 +379,6 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check('}'))
             {
-                lastScalar = null;
                 FetchFlowCollectionEnd(false);
                 return;
             }
@@ -396,7 +387,6 @@ namespace YamlDotNet.Core
 
             if (analyzer.Check(','))
             {
-                lastScalar = null;
                 FetchFlowEntry();
                 return;
             }
@@ -436,12 +426,6 @@ namespace YamlDotNet.Core
             {
                 if (analyzer.IsWhiteBreakOrZero(1) || analyzer.Check(',', 1) || flowScalarFetched || flowCollectionFetched || startFlowCollectionFetched)
                 {
-                    if (lastScalar != null)
-                    {
-                        lastScalar.IsKey = true;
-                        lastScalar = null;
-                    }
-
                     FetchValue();
                     return;
                 }
@@ -1799,7 +1783,6 @@ namespace YamlDotNet.Core
             var scalar = ScanFlowScalar(isSingleQuoted);
 
             tokens.Enqueue(scalar);
-            lastScalar = scalar;
             // Check if there is a comment subsequently after double-quoted scalar without space.
 
             if (!isSingleQuoted && analyzer.Check('#'))
@@ -2117,7 +2100,6 @@ namespace YamlDotNet.Core
             // Create the SCALAR token and append it to the queue.
             var isMultiline = false;
             var scalar = ScanPlainScalar(ref isMultiline);
-            lastScalar = scalar;
             if (isMultiline && analyzer.Check(':') && flowLevel == 0 && indent < cursor.LineOffset)
             {
                 tokens.Enqueue(new Error("While scanning a multiline plain scalar, found invalid mapping.", cursor.Mark(), cursor.Mark()));
