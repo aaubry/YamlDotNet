@@ -452,7 +452,7 @@ namespace YamlDotNet.Core
         /// flow_content         ::= flow_collection | SCALAR
         ///                                            ******
         /// </summary>
-        private ParsingEvent ParseNode(bool isBlock, bool isIndentlessSequence)
+        private ParsingEvent ParseNode(bool isBlock, bool isIndentlessSequence, bool isKey = false)
         {
             if (GetCurrentToken() is Error errorToken)
             {
@@ -559,7 +559,7 @@ namespace YamlDotNet.Core
                     state = states.Pop();
                     Skip();
 
-                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End, scalar.IsKey);
+                    ParsingEvent evt = new Events.Scalar(anchorName, tagName, scalar.Value, scalar.Style, isPlainImplicit, isQuotedImplicit, start, scalar.End, isKey);
 
                     // Read next token to ensure the error case spec test 'CXX2':
                     // "Mapping with anchor on document start line".
@@ -766,7 +766,7 @@ namespace YamlDotNet.Core
                 if (!(current is Key || current is Value || current is BlockEnd))
                 {
                     states.Push(ParserState.BlockMappingValue);
-                    return ParseNode(true, true);
+                    return ParseNode(true, true, isKey: true);
                 }
                 else
                 {
@@ -1007,7 +1007,7 @@ namespace YamlDotNet.Core
                     if (!(current is Value || current is FlowEntry || current is FlowMappingEnd))
                     {
                         states.Push(ParserState.FlowMappingValue);
-                        return ParseNode(false, false);
+                        return ParseNode(false, false, isKey: true);
                     }
                     else
                     {
@@ -1018,12 +1018,12 @@ namespace YamlDotNet.Core
                 else if (current is Scalar)
                 {
                     states.Push(ParserState.FlowMappingValue);
-                    return ParseNode(false, false);
+                    return ParseNode(false, false, isKey: true);
                 }
                 else if (!(current is FlowMappingEnd))
                 {
                     states.Push(ParserState.FlowMappingEmptyValue);
-                    return ParseNode(false, false);
+                    return ParseNode(false, false, isKey: true);
                 }
             }
 

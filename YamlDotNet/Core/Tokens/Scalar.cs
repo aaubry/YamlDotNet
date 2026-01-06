@@ -30,11 +30,6 @@ namespace YamlDotNet.Core.Tokens
     public sealed class Scalar : Token
     {
         /// <summary>
-        /// Gets or sets whether this scalar is a key
-        /// </summary>
-        public bool IsKey { get; set; }
-
-        /// <summary>
         /// Gets the value.
         /// </summary>
         /// <value>The value.</value>
