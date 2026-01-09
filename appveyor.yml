@@ -21,7 +21,9 @@ environment:
 
 install:
   - cmd: git submodule update --init
-  - cmd: dotnet tool install --global GitVersion.Tool --version 6.5.1
+  - cmd: |
+      dotnet tool install --global GitVersion.Tool --version 6.5.1
+      dotnet tool restore GitVersion.Tool
 
 build_script:
   - cmd: .\build.cmd --appveyor
