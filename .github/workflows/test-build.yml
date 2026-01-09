@@ -24,7 +24,9 @@ jobs:
         ref: ${{ github.event.inputs.ref }}
 
     - name: Install GitVersion.Tool
-      run: dotnet tool install --global GitVersion.Tool
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 6.5.1
+        dotnet tool restore
 
     - name: Build
       env:

@@ -2,9 +2,11 @@ version: 0.0.{build}
 
 image: Visual Studio 2022
 
-test: off
+test: false
 
 environment:
+  # Required by GitVersion.Tool to avoid moving/normalizing HEAD in the CI clone,
+  # which can otherwise cause incorrect version calculations in AppVeyor builds.
   IGNORE_NORMALISATION_GIT_HEAD_MOVE: "1"
   NUGET_API_KEY:
     secure: IqF+zcEvCdvPlKDJs34AyfG24p990HSJ2Tdh9ml1v57bzVLYgHSRvcNoW/daApfi
@@ -23,7 +25,7 @@ install:
   - cmd: git submodule update --init
   - cmd: |
       dotnet tool install --global GitVersion.Tool --version 6.5.1
-      dotnet tool restore GitVersion.Tool
+      dotnet tool restore
 
 build_script:
   - cmd: .\build.cmd --appveyor
