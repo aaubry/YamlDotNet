@@ -5,6 +5,7 @@ image: Visual Studio 2022
 test: off
 
 environment:
+  IGNORE_NORMALISATION_GIT_HEAD_MOVE: "1"
   NUGET_API_KEY:
     secure: IqF+zcEvCdvPlKDJs34AyfG24p990HSJ2Tdh9ml1v57bzVLYgHSRvcNoW/daApfi
   GITHUB_TOKEN:
@@ -20,7 +21,7 @@ environment:
 
 install:
   - cmd: git submodule update --init
-  - cmd: dotnet tool install --global GitVersion.Tool
+  - cmd: dotnet tool install --global GitVersion.Tool --version 6.5.1
 
 build_script:
   - cmd: .\build.cmd --appveyor
