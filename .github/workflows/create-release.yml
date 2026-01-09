@@ -39,7 +39,9 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Install GitVersion.Tool
-      run: dotnet tool install --global GitVersion.Tool
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 6.5.1
+        dotnet tool restore
 
     - name: Create draft release
       env:
