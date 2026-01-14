@@ -176,7 +176,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        public void NullCheck(object value, IPropertyDescriptor property, Scalar propertyName)
+        public void NullCheck(object? value, IPropertyDescriptor property, Scalar propertyName)
         {
             if (enforceNullability &&
                 value == null &&
