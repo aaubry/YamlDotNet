@@ -36,9 +36,15 @@ namespace YamlDotNet.Serialization.Utilities
         public T Get<T>()
             where T : class, new()
         {
+            return Get(static () => new T());
+        }
+
+        public T Get<T>(Func<T> factory)
+            where T : class
+        {
             if (!items.TryGetValue(typeof(T), out var value))
             {
-                value = new T();
+                value = factory();
                 items.Add(typeof(T), value);
             }
             return (T)value;
