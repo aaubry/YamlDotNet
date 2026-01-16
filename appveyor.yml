@@ -9,7 +9,7 @@ environment:
   # which can otherwise cause incorrect version calculations in AppVeyor builds.
   IGNORE_NORMALISATION_GIT_HEAD_MOVE: "1"
   NUGET_API_KEY:
-    secure: IqF+zcEvCdvPlKDJs34AyfG24p990HSJ2Tdh9ml1v57bzVLYgHSRvcNoW/daApfi
+    secure: 04W5fV6ITDiUyvVpQDAVFB1/jsSt1ORIeqYitigD3Hin2fm/boMNROmewVSVE+S0
   GITHUB_TOKEN:
     secure: ulVa56sjSUcOy/08/Qn88LsGVfndWBizu5gRdVTvsGu/ju1fKUe8XCZPvUvypvWH
   TWITTER_CONSUMER_API_KEY:
@@ -48,3 +48,4 @@ artifacts:
 
   - path: YamlDotNet\bin\*.nupkg
   - path: YamlDotNet\bin\*.snupkg
+
