@@ -237,7 +237,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             visitor.VisitMappingEnd(dictionary, context, serializer);
         }
 
-        private void TraverseList<TContext>(IPropertyDescriptor propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        private void TraverseList<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             var itemType = objectFactory.GetValueType(value.Type);
 
