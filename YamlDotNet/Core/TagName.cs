@@ -39,12 +39,17 @@ namespace YamlDotNet.Core
 
         public TagName(string value)
         {
-            this.value = value ?? throw new ArgumentNullException(nameof(value));
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
 
             if (value.Length == 0)
             {
                 throw new ArgumentException("Tag value must not be empty.", nameof(value));
             }
+
+            this.value = string.Intern(value);
 
             if (IsGlobal && !Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute))
             {
