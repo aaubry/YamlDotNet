@@ -903,6 +903,18 @@ namespace YamlDotNet.Core
             state = states.Pop();
             evt = new Events.SequenceEnd(current?.Start ?? Mark.Empty, current?.End ?? Mark.Empty);
             Skip();
+
+            // Read next token to ensure the error case spec test 'C2SP':
+            // "Flow Mapping Key on two lines".
+            if (scanner.MoveNextWithoutConsuming())
+            {
+                currentToken = scanner.Current;
+                if (currentToken is Error errorToken && errorToken.Start.Index > current.End.Index)
+                {
+                    throw new SemanticErrorException(errorToken.Start, errorToken.End, errorToken.Value);
+                }
+            }
+
             return evt;
         }
 

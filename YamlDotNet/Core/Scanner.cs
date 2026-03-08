@@ -339,6 +339,7 @@ namespace YamlDotNet.Core
 
             if (IsDocumentStart())
             {
+                plainScalarFollowedByComment = false;
                 FetchDocumentIndicator(true);
                 return;
             }
@@ -347,6 +348,7 @@ namespace YamlDotNet.Core
 
             if (IsDocumentEnd())
             {
+                plainScalarFollowedByComment = false;
                 FetchDocumentIndicator(false);
                 return;
             }
