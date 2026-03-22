@@ -442,15 +442,20 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IValueDeserializer BuildValueDeserializer()
         {
-            return new AliasValueDeserializer(
-                new NodeValueDeserializer(
+            var valueDeserializer = new NodeValueDeserializer(
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
                     enumNamingConvention,
                     BuildTypeInspector()
-                )
-            );
+                );
+
+            if (maximumRecursion != null)
+            {
+                valueDeserializer = new MaximumRecursionValueDeserializer(valueDeserializer, maximumRecursion.Value);
+            }
+
+            return new AliasValueDeserializer(valueDeserializer);
         }
 
         /// <summary>
