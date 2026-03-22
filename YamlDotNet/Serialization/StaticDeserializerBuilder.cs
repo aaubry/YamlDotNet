@@ -442,7 +442,7 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IValueDeserializer BuildValueDeserializer()
         {
-            var valueDeserializer = new NodeValueDeserializer(
+            IValueDeserializer valueDeserializer = new NodeValueDeserializer(
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
