@@ -452,23 +452,23 @@ namespace YamlDotNet.Serialization
                 )
             );
         }
-    }
 
-    /// <summary>
-    /// Sets the maximum recursion that is allowed while deserializing.
-    /// </summary>
-    /// <remarks>
-    /// Setting this limit is strongly recommended when parsing untrusted input since
-    /// deeply nested objects will lead to a stack overflow.
-    /// </remarks>
-    public StaticDeserializerBuilder WithMaximumRecursion(int maximumRecursion)
-    {
-        if (maximumRecursion <= 0)
+        /// <summary>
+        /// Sets the maximum recursion that is allowed while deserializing.
+        /// </summary>
+        /// <remarks>
+        /// Setting this limit is strongly recommended when parsing untrusted input since
+        /// deeply nested objects will lead to a stack overflow.
+        /// </remarks>
+        public StaticDeserializerBuilder WithMaximumRecursion(int maximumRecursion)
         {
-            throw new ArgumentOutOfRangeException(nameof(maximumRecursion), $"The maximum recursion specified ({maximumRecursion}) is invalid. It should be a positive integer.");
-        }
+            if (maximumRecursion <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumRecursion), $"The maximum recursion specified ({maximumRecursion}) is invalid. It should be a positive integer.");
+            }
 
-        this.maximumRecursion = maximumRecursion;
-        return this;
+            this.maximumRecursion = maximumRecursion;
+            return this;
+        }
     }
 }
