@@ -82,7 +82,7 @@ namespace YamlDotNet.Core
 
         public override string ToString()
         {
-            return $"({Start}) - ({End}): {Message}";
+            return $"({Start}) - ({End}): {base.ToString()}";
         }
     }
 }
