@@ -71,5 +71,20 @@ namespace YamlDotNet.Test.Core
             toString.Should().Contain("System.InvalidOperationException: Test inner exception");
             exception.Message.Should().Be("Test exception message");
         }
+
+        [Fact]
+        public void VerifyToStringIncludesStackTrace()
+        {
+            try
+            {
+                throw new YamlException("Test exception message");
+            }
+            catch (YamlException e)
+            {
+                var toString = e.ToString();
+                // Currently this will fail if we expect stack trace
+                toString.Should().Contain(nameof(VerifyToStringIncludesStackTrace));
+            }
+        }
     }
 }
