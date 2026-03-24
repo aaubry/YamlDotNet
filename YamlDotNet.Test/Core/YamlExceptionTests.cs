@@ -29,6 +29,14 @@ namespace YamlDotNet.Test.Core
     public class YamlExceptionTests
     {
         [Fact]
+        public void VerifyToMessageWithEmptyMarks()
+        {
+            var exception = new YamlException(Mark.Empty, Mark.Empty, "Test exception message");
+            exception.ToMessage().Should().Be("(Line: 1, Col: 1, Idx: 0) - (Line: 1, Col: 1, Idx: 0): Test exception message");
+            exception.Message.Should().Be("Test exception message");
+        }
+
+        [Fact]
         public void VerifyToStringWithEmptyMarks()
         {
             var exception = new YamlException(Mark.Empty, Mark.Empty, "Test exception message");
