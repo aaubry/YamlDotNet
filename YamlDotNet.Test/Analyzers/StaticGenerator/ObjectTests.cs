@@ -399,6 +399,16 @@ prop2:
             Assert.Equal("value2", ((List<string>)actual.TestValue)[1]);
         }
 
+        [Fact]
+        public void UnregisteredTypeThrowsDescriptiveException()
+        {
+            var context = new StaticContext();
+            var factory = context.GetFactory();
+            var ex = Assert.Throws<InvalidOperationException>(() => factory.Create(typeof(UnregisteredType)));
+            Assert.Contains("is not registered in the YamlDotNet static context", ex.Message);
+            Assert.Contains("YamlSerializable", ex.Message);
+        }
+
         [YamlSerializable]
         public class TestState
         {
@@ -515,5 +525,11 @@ prop2:
     public interface InterfaceLists
     {
         object TestValue { get; }
+    }
+
+    // Not decorated with [YamlSerializable] — intentionally unregistered
+    public class UnregisteredType
+    {
+        public string Value { get; set; }
     }
 }
