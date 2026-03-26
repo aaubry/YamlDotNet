@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.NamingConventions;
@@ -85,20 +86,28 @@ namespace YamlDotNet.Serialization.EventEmitters
 
                     case TypeCode.Single:
                         var floatValue = (float)value;
-                        eventInfo.RenderedValue = formatter.FormatNumber(floatValue);
                         if (float.IsNaN(floatValue) || float.IsInfinity(floatValue))
                         {
+                            eventInfo.RenderedValue = floatValue.ToString(CultureInfo.InvariantCulture);
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        }
+                        else
+                        {
+                            eventInfo.RenderedValue = formatter.FormatNumber(floatValue);
                         }
 
                         break;
 
                     case TypeCode.Double:
                         var doubleValue = (double)value;
-                        eventInfo.RenderedValue = formatter.FormatNumber(doubleValue);
                         if (double.IsNaN(doubleValue) || double.IsInfinity(doubleValue))
                         {
+                            eventInfo.RenderedValue = doubleValue.ToString(CultureInfo.InvariantCulture);
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        }
+                        else
+                        {
+                            eventInfo.RenderedValue = formatter.FormatNumber(doubleValue);
                         }
                         break;
 
