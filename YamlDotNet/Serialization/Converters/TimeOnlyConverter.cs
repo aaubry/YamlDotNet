@@ -59,7 +59,7 @@ namespace YamlDotNet.Serialization.Converters
         /// <returns>Returns <c>True</c>, if the current converter supports; otherwise returns <c>False</c>.</returns>
         public bool Accepts(Type type)
         {
-            return type == typeof(TimeOnly);
+            return type == typeof(TimeOnly) || type == typeof(TimeOnly?);
         }
 
         /// <summary>
@@ -73,6 +73,10 @@ namespace YamlDotNet.Serialization.Converters
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null!;
+            }
 
             var timeOnly = TimeOnly.ParseExact(value, this.formats, this.provider);
             return timeOnly;
@@ -88,7 +92,12 @@ namespace YamlDotNet.Serialization.Converters
         /// <remarks>On serializing, the first format in the list is used.</remarks>
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var timeOnly = (TimeOnly)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
+                return;
+            }
+            var timeOnly = (TimeOnly)value;
             var formatted = timeOnly.ToString(this.formats.First(), this.provider); // Always take the first format of the list.
 
             emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, doubleQuotes ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));

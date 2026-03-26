@@ -66,7 +66,7 @@ namespace YamlDotNet.Serialization.Converters
         /// <returns>Returns <c>True</c>, if the current converter supports; otherwise returns <c>False</c>.</returns>
         public bool Accepts(Type type)
         {
-            return type == typeof(DateTimeOffset);
+            return type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?);
         }
 
         /// <summary>
@@ -80,6 +80,10 @@ namespace YamlDotNet.Serialization.Converters
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null!;
+            }
             var result = DateTimeOffset.ParseExact(value, formats, provider, dateStyle);
 
             return result;
@@ -95,7 +99,12 @@ namespace YamlDotNet.Serialization.Converters
         /// <remarks>On serializing, the first format in the list is used.</remarks>
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var dt = (DateTimeOffset)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
+                return;
+            }
+            var dt = (DateTimeOffset)value;
             var formatted = dt.ToString(formats.First(), this.provider); // Always take the first format of the list.
 
             emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, style, true, false));

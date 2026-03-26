@@ -45,12 +45,21 @@ namespace YamlDotNet.Serialization.Converters
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null!;
+            }
             return new Uri(value, UriKind.RelativeOrAbsolute);
         }
 
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var uri = (Uri)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
+                return;
+            }
+            var uri = (Uri)value;
             emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, uri.OriginalString, jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }

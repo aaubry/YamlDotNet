@@ -41,18 +41,27 @@ namespace YamlDotNet.Serialization.Converters
 
         public bool Accepts(Type type)
         {
-            return type == typeof(TimeSpan);
+            return type == typeof(TimeSpan) || type == typeof(TimeSpan?);
         }
 
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null!;
+            }
             return TimeSpan.Parse(value, CultureInfo.InvariantCulture);
         }
 
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var timeSpan = (TimeSpan)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
+                return;
+            }
+            var timeSpan = (TimeSpan)value;
             var formatted = timeSpan.ToString("c", CultureInfo.InvariantCulture);
             emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
