@@ -20,8 +20,6 @@
 // SOFTWARE.
 
 using System;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.NamingConventions;
@@ -87,7 +85,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
                     case TypeCode.Single:
                         var floatValue = (float)value;
-                        eventInfo.RenderedValue = floatValue.ToString("G", CultureInfo.InvariantCulture);
+                        eventInfo.RenderedValue = formatter.FormatNumber(floatValue);
                         if (float.IsNaN(floatValue) || float.IsInfinity(floatValue))
                         {
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
@@ -97,7 +95,7 @@ namespace YamlDotNet.Serialization.EventEmitters
 
                     case TypeCode.Double:
                         var doubleValue = (double)value;
-                        eventInfo.RenderedValue = doubleValue.ToString("G", CultureInfo.InvariantCulture);
+                        eventInfo.RenderedValue = formatter.FormatNumber(doubleValue);
                         if (double.IsNaN(doubleValue) || double.IsInfinity(doubleValue))
                         {
                             eventInfo.Style = ScalarStyle.DoubleQuoted;
@@ -105,8 +103,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                         break;
 
                     case TypeCode.Decimal:
-                        var decimalValue = (decimal)value;
-                        eventInfo.RenderedValue = decimalValue.ToString(CultureInfo.InvariantCulture);
+                        eventInfo.RenderedValue = formatter.FormatNumber(value);
                         break;
 
                     case TypeCode.String:

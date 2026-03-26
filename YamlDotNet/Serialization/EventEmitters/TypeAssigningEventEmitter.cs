@@ -129,7 +129,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
                         //Enum's are special cases, they fall in here, but get sent out as a string.
-                        if (eventInfo.Source.Type.IsEnum)
+                        if (eventInfo.Source.Type.IsEnum())
                         {
                             eventInfo.Tag = FailsafeSchema.Tags.Str;
                             eventInfo.RenderedValue = formatter.FormatEnum(value, typeInspector, enumNamingConvention);
