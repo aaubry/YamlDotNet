@@ -23,6 +23,9 @@ environment:
 
 install:
   - cmd: git submodule update --init
+  - ps: |
+      Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile 'dotnet-install.ps1'
+      .\dotnet-install.ps1 -Channel 10.0 -InstallDir "$env:ProgramFiles\dotnet"
   - cmd: |
       dotnet tool install --global GitVersion.Tool --version 6.5.1
       dotnet tool restore
@@ -45,6 +48,12 @@ artifacts:
 
   - path: YamlDotNet\bin\Release\net8.0
     name: Release-Net80
+
+  - path: YamlDotNet\bin\Release\net9.0
+    name: Release-Net90
+
+  - path: YamlDotNet\bin\Release\net10.0
+    name: Release-Net100
 
   - path: YamlDotNet\bin\*.nupkg
   - path: YamlDotNet\bin\*.snupkg

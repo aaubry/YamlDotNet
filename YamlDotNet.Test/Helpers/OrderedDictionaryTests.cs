@@ -22,7 +22,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Test.Helpers
 {
@@ -31,7 +30,7 @@ namespace YamlDotNet.Test.Helpers
         [Fact]
         public void OrderOfElementsIsMainted()
         {
-            var dict = (IDictionary<int, string>)new OrderedDictionary<int, string>
+            var dict = (IDictionary<int, string>)new YamlDotNet.Helpers.OrderedDictionary<int, string>
             {
                 { 3, "First" },
                 { 2, "Temporary" },
@@ -52,7 +51,7 @@ namespace YamlDotNet.Test.Helpers
         [Fact]
         public void KeysContainsWorks()
         {
-            var dict = new OrderedDictionary<int, string>
+            var dict = new YamlDotNet.Helpers.OrderedDictionary<int, string>
             {
                 { 3, "First item" },
                 { 2, "Second item" },
@@ -69,7 +68,7 @@ namespace YamlDotNet.Test.Helpers
         [Fact]
         public void ValuesContainsWorks()
         {
-            var dict = new OrderedDictionary<int, string>
+            var dict = new YamlDotNet.Helpers.OrderedDictionary<int, string>
             {
                 { 3, "First item" },
                 { 2, "Second item" },
@@ -86,7 +85,7 @@ namespace YamlDotNet.Test.Helpers
         [Fact]
         public void CanInsertAndRemoveAtIndex()
         {
-            var dict = new OrderedDictionary<int, string>
+            var dict = new YamlDotNet.Helpers.OrderedDictionary<int, string>
             {
                 { 3, "First" },
                 { 2, "Temporary" },
