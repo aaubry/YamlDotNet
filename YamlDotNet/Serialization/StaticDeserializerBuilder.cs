@@ -61,6 +61,7 @@ namespace YamlDotNet.Serialization
         private bool attemptUnknownTypeDeserialization;
         private bool enforceNullability;
         private bool caseInsensitivePropertyMatching;
+        private int? maximumRecursion;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -441,15 +442,38 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IValueDeserializer BuildValueDeserializer()
         {
-            return new AliasValueDeserializer(
-                new NodeValueDeserializer(
+            IValueDeserializer valueDeserializer = new NodeValueDeserializer(
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
                     enumNamingConvention,
                     BuildTypeInspector()
-                )
-            );
+                );
+
+            if (maximumRecursion != null)
+            {
+                valueDeserializer = new MaximumRecursionValueDeserializer(valueDeserializer, maximumRecursion.Value);
+            }
+
+            return new AliasValueDeserializer(valueDeserializer);
+        }
+
+        /// <summary>
+        /// Sets the maximum recursion that is allowed while deserializing.
+        /// </summary>
+        /// <remarks>
+        /// Setting this limit is strongly recommended when parsing untrusted input since
+        /// deeply nested objects will lead to a stack overflow.
+        /// </remarks>
+        public StaticDeserializerBuilder WithMaximumRecursion(int maximumRecursion)
+        {
+            if (maximumRecursion <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumRecursion), $"The maximum recursion specified ({maximumRecursion}) is invalid. It should be a positive integer.");
+            }
+
+            this.maximumRecursion = maximumRecursion;
+            return this;
         }
     }
 }
