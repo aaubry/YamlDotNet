@@ -405,7 +405,7 @@ namespace YamlDotNet.Serialization
         {
             if (tag.IsEmpty)
             {
-                throw new ArgumentException("Non-specific tags cannot be maped");
+                throw new ArgumentException("Non-specific tags cannot be mapped");
             }
 
             if (type == null)
@@ -451,7 +451,7 @@ namespace YamlDotNet.Serialization
         {
             if (tag.IsEmpty)
             {
-                throw new ArgumentException("Non-specific tags cannot be maped");
+                throw new ArgumentException("Non-specific tags cannot be mapped");
             }
 
             if (!tagMappings.Remove(tag))
