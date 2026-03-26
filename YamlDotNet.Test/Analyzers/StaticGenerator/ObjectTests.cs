@@ -191,6 +191,24 @@ SomeDictionary:
             Assert.Equal("d", dictionary["c"]);
         }
 
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void RequiredMembersWork()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"Name: hello
+Value: 42
+";
+            var actual = deserializer.Deserialize<RequiredMemberClass>(yaml);
+            Assert.Equal("hello", actual.Name);
+            Assert.Equal(42, actual.Value);
+
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            var actualYaml = serializer.Serialize(actual);
+            Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
+        }
+#endif
+
 #if NET6_0_OR_GREATER
         [Fact]
         public void EnumDeserializationUsesEnumMemberAttribute()
@@ -532,4 +550,13 @@ prop2:
     {
         public string Value { get; set; }
     }
+
+#if NET8_0_OR_GREATER
+    [YamlSerializable]
+    public class RequiredMemberClass
+    {
+        public required string Name { get; set; }
+        public required int Value { get; set; }
+    }
+#endif
 }

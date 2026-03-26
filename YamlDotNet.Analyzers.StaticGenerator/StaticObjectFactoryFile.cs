@@ -57,7 +57,31 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 }
                 else
                 {
-                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}();");
+                    var fullName = classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty);
+                    var requiredMembers = new System.Collections.Generic.List<string>();
+                    foreach (var prop in classObject.PropertySymbols)
+                    {
+                        if (prop.IsRequired)
+                        {
+                            requiredMembers.Add($"{prop.Name} = default!");
+                        }
+                    }
+                    foreach (var field in classObject.FieldSymbols)
+                    {
+                        if (field.IsRequired)
+                        {
+                            requiredMembers.Add($"{field.Name} = default!");
+                        }
+                    }
+                    if (requiredMembers.Count > 0)
+                    {
+                        var initializer = string.Join(", ", requiredMembers);
+                        Write($"if (type == typeof({fullName})) return new {fullName}() {{ {initializer} }};");
+                    }
+                    else
+                    {
+                        Write($"if (type == typeof({fullName})) return new {fullName}();");
+                    }
                 }
                 //always support a list and dictionary of the type
                 Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return new System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>();");
