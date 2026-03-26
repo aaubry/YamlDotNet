@@ -951,6 +951,48 @@ y:
         }
 
         [Fact]
+        public void CanSerializeNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new { MyType = (Type)null });
+            yaml.Should().Contain("MyType:");
+        }
+
+        [Fact]
+        public void CanSerializeNonNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new { MyType = typeof(string) });
+            yaml.Should().Contain("MyType: System.String");
+        }
+
+        [Fact]
+        public void NullTypeRoundTrips()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var obj = new ClassWithTypeProperty { MyType = null };
+            var yaml = serializer.Serialize(obj);
+            var result = deserializer.Deserialize<ClassWithTypeProperty>(yaml);
+
+            result.MyType.Should().BeNull();
+        }
+
+        [Fact]
+        public void NonNullTypeRoundTrips()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var obj = new ClassWithTypeProperty { MyType = typeof(int) };
+            var yaml = serializer.Serialize(obj);
+            var result = deserializer.Deserialize<ClassWithTypeProperty>(yaml);
+
+            result.MyType.Should().Be(typeof(int));
+        }
+
+        [Fact]
         public void SerializationOfNumericsAsJsonRountTrip()
         {
             var serializer = new SerializerBuilder().JsonCompatible().Build();
