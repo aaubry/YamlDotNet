@@ -135,7 +135,27 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     }
                     else
                     {
-                        value = typeConverter.ChangeType(scalar.Value, expectedType, enumNamingConvention, typeInspector);
+                        // Try to parse using a static Parse(string, IFormatProvider) method.
+                        // This handles types implementing IParsable<T> (.NET 7+) such as
+                        // TimeSpan, DateTimeOffset, Guid, IPAddress, and others.
+                        // This is especially important for the static/AOT deserialization
+                        // path where the typeConverter is a NullTypeConverter.
+                        var parseMethod = underlyingType.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider));
+                        if (parseMethod != null)
+                        {
+                            try
+                            {
+                                value = parseMethod.Invoke(null, new object[] { scalar.Value, CultureInfo.InvariantCulture });
+                            }
+                            catch (System.Reflection.TargetInvocationException ex) when (ex.InnerException != null)
+                            {
+                                throw ex.InnerException;
+                            }
+                        }
+                        else
+                        {
+                            value = typeConverter.ChangeType(scalar.Value, expectedType, enumNamingConvention, typeInspector);
+                        }
                     }
                     break;
             }
