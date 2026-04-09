@@ -38,15 +38,24 @@ namespace YamlDotNet.Serialization.Converters
             return typeof(Type).IsAssignableFrom(type);
         }
 
-        public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
+        public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
             return Type.GetType(value, throwOnError: true)!; // Will throw instead of returning null
         }
 
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var systemType = (Type)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Any, true, false));
+                return;
+            }
+            var systemType = (Type)value;
             emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, systemType.AssemblyQualifiedName!, ScalarStyle.Any, true, false));
         }
     }
