@@ -485,7 +485,7 @@ namespace YamlDotNet.Serialization
         /// Sets the maximum recursion that is allowed while building the object graph.
         /// </summary>
         /// <remarks>
-        /// Setting this limit is stringly recommended when parsing untrusted input since
+        /// Setting this limit is strongly recommended when parsing untrusted input since
         /// deeply nested objects will lead to a stack overflow.
         /// </remarks>
         public DeserializerBuilder WithMaximumRecursion(int maximumRecursion)
