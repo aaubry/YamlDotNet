@@ -240,7 +240,7 @@ b: &number 1
             var deserializer = new DeserializerBuilder()
                 .WithAttemptingUnquotedStringTypeDeserialization().Build();
 
-            var yaml = $"Value: {expected}";
+            var yaml = FormattableString.Invariant($"Value: {expected}");
 
             // It needs explicitly specifying maximum precision for value roundtrip. 
             if (expected is float floatValue)
@@ -254,6 +254,7 @@ b: &number 1
 
             var resultDict = deserializer.Deserialize<IDictionary<string, object>>(yaml);
             Assert.True(resultDict.ContainsKey("Value"));
+            Assert.Equal(expected.GetType(), resultDict["Value"].GetType());
             Assert.Equal(expected, resultDict["Value"]);
         }
 
