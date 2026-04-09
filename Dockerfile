@@ -40,13 +40,11 @@ COPY . .
 RUN dotnet build -c Release --framework net47 YamlDotNet/YamlDotNet.csproj -o /output/net47
 RUN dotnet build -c Release --framework netstandard2.0 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.0
 RUN dotnet build -c Release --framework netstandard2.1 YamlDotNet/YamlDotNet.csproj -o /output/netstandard2.1
-RUN dotnet build -c Release --framework net6.0 YamlDotNet/YamlDotNet.csproj -o /output/net6.0
 RUN dotnet build -c Release --framework net8.0 YamlDotNet/YamlDotNet.csproj -o /output/net8.0
 
 RUN dotnet pack -c Release YamlDotNet/YamlDotNet.csproj -o /output/package /p:Version=$PACKAGE_VERSION
 
 RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net8.0 --logger:"trx;LogFileName=/output/tests-net8.0.trx" --logger:"console;Verbosity=detailed"
-RUN dotnet test -c Release YamlDotNet.Test/YamlDotNet.Test.csproj --framework net6.0 --logger:"trx;LogFileName=/output/tests-net6.0.trx" --logger:"console;Verbosity=detailed"
 
 FROM alpine
 VOLUME /output
