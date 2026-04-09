@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using FluentAssertions;
@@ -241,17 +242,15 @@ b: &number 1
 
             var yaml = $"Value: {expected}";
 
-#if NETFRAMEWORK
             // It needs explicitly specifying maximum precision for value roundtrip. 
             if (expected is float floatValue)
             {
-                yaml = $"Value: {floatValue:G9}";
+                yaml = $"Value: {floatValue.ToString("G9", CultureInfo.InvariantCulture)}";
             }
             if (expected is double doubleValue)
             {
-                yaml = $"Value: {doubleValue:G17}";
+                yaml = $"Value: {doubleValue.ToString("G17", CultureInfo.InvariantCulture)}";
             }
-#endif
 
             var resultDict = deserializer.Deserialize<IDictionary<string, object>>(yaml);
             Assert.True(resultDict.ContainsKey("Value"));

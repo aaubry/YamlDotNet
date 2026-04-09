@@ -39,18 +39,17 @@ namespace YamlDotNet.Test.Spec
         private static readonly List<string> ignoredSuites = new List<string>
         {
             //TODO: research why these are ignored
-            "26DV", "27NA", "2AUY", "2JQS", "2LFX", "2SXE", "2XXW", "33X3", "35KP", "36F6", "3GZX", "3MYT", "3R3P", "3UYS", "4ABK",
-            "4CQQ", "4FJ6", "4GC6", "4MUZ", "4Q9F", "4QFQ", "4UYU", "4V8U", "4ZYM", "52DL", "565N", "57H4", "5BVJ", "5GBF", "5MUD",
-            "5TYM", "5WE3", "6BFJ", "6CK3", "6FWR", "6HB6", "6JQW", "6JWB", "6KGN", "6LVF", "6M2F", "6PBE", "6SLA", "6WLZ", "6XDY",
-            "6ZKB", "735Y", "74H7", "753E", "77H8", "7BMT", "7BUB", "7FWL", "7T8X", "7TMG", "7W2P", "7Z25", "7ZZ5", "87E4", "8CWC",
-            "8G76", "8KB6", "8MK2", "8UDB", "8XYN", "93WF", "96L6", "98YD", "9BXH", "9DXL", "9KAX", "9MMW", "9SA2", "9SHH", "9U5K",
-            "9WXW", "9YRD", "A6F9", "AVM7", "BEC7", "BU8L", "C2DT", "C4HZ", "CC74", "CN3R", "CPZ3", "CUP7", "D83L", "DBG4", "DFF7",
-            "DK3J", "E76Z", "EHF6", "EX5H", "F2C7", "F3CP", "F6MC", "F8F9", "FH7J", "FP8R", "FRK4", "FTA2", "G4RS", "G5U8", "H3Z8",
-            "HMK4", "HMQ5", "HS5T", "HWV9", "J3BT", "J7PZ", "J9HZ", "JDH8", "JHB9", "JS2J", "JTV5", "K3WX", "K54U", "K858", "KK5P",
-            "KSS4", "KZN9", "L94M", "LE5A", "LP6E", "LQZ7", "M29M", "M5C3", "M7A3", "M7NX", "M9B4", "MJS9", "MYW6", "MZX3", "NAT4",
-            "NB6Z", "NHX8", "NJ66", "NP9H", "P2AD", "P76L", "PRH3", "PUW8", "PW8X", "Q88A", "Q8AD", "QT73", "R4YG", "R52L", "RTP8",
-            "RZP5", "RZT7", "S3PD", "S4JQ", "S4T7", "S7BG", "SKE5", "SSW6", "T4YY", "T5N4", "U3C3", "U3XV", "U9NS", "UGM3", "UT92",
-            "V55R", "W42U", "W4TN", "W5VH", "WZ62", "X38W", "X8DW", "XLQ9", "XV9V", "XW4D", "Y2GN", "Z67P", "Z9M4", "ZH7C", "ZWK4",
+            "26DV", "2AUY", "2JQS", "2LFX", "2SXE", "2XXW", "33X3", "35KP", "36F6", "3GZX", "3R3P", "3UYS", "4ABK", "4CQQ", "4GC6",
+            "4QFQ", "4UYU", "4ZYM", "52DL", "565N", "57H4", "5BVJ", "5GBF", "5MUD", "5TYM", "5WE3", "6BFJ", "6CK3", "6FWR", "6HB6",
+            "6JQW", "6JWB", "6KGN", "6LVF", "6M2F", "6PBE", "6SLA", "6WLZ", "6XDY", "6ZKB", "735Y", "74H7", "753E", "7BMT", "7BUB",
+            "7FWL", "7T8X", "7W2P", "7Z25", "87E4", "8G76", "8KB6", "8MK2", "8UDB", "8XYN", "98YD", "9BXH", "9DXL", "9KAX", "9MMW",
+            "9SA2", "9SHH", "9WXW", "9YRD", "A6F9", "AVM7", "BEC7", "BU8L", "C2DT", "C4HZ", "CC74", "CN3R", "CPZ3", "CUP7", "D83L",
+            "DBG4", "DFF7", "E76Z", "EHF6", "EX5H", "F2C7", "F8F9", "FH7J", "FRK4", "FTA2", "G4RS", "H3Z8", "HMK4", "HMQ5", "HS5T",
+            "HWV9", "J3BT", "J7PZ", "JHB9", "JS2J", "JTV5", "K3WX", "K54U", "K858", "KK5P", "KSS4", "L94M", "LE5A", "LP6E", "LQZ7",
+            "M29M", "M5C3", "M7A3", "M9B4", "MJS9", "MYW6", "MZX3", "NAT4", "NB6Z", "NHX8", "NP9H", "P2AD", "P76L", "PRH3", "PUW8",
+            "PW8X", "Q88A", "Q8AD", "QT73", "R4YG", "RTP8", "RZP5", "RZT7", "S3PD", "S4JQ", "S4T7", "SKE5", "SSW6", "T4YY", "T5N4",
+            "U3C3", "U3XV", "U9NS", "UGM3", "UT92", "V55R", "W42U", "W4TN", "W5VH", "WZ62", "X38W", "XLQ9", "XV9V", "XW4D", "Y2GN",
+            "Z67P", "Z9M4", "ZH7C", "ZWK4",
 
             "L383", "NKF9", // We don't do multiple yaml documents in a single file
             "4WA9", // we lose whether the source yaml used folding text so we know it will fail. If B3HG passes, then we're good.
