@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization.Converters
     /// To use this converter, call WithTypeConverter(new DateTimeOffsetConverter()) on the
     /// <seealso cref="DeserializerBuilder"/> or <seealso cref="SerializerBuilder"/>.
     /// </summary>
-    public class DateTimeOffsetConverter : IYamlTypeConverter
+    public class DateTimeOffsetConverter : ScalarConverterBase<DateTimeOffset>
     {
         private readonly IFormatProvider provider;
         private readonly ScalarStyle style;
@@ -60,16 +60,6 @@ namespace YamlDotNet.Serialization.Converters
         }
 
         /// <summary>
-        /// Gets a value indicating whether the current converter supports converting the specified type.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> to check.</param>
-        /// <returns>Returns <c>True</c>, if the current converter supports; otherwise returns <c>False</c>.</returns>
-        public bool Accepts(Type type)
-        {
-            return type == typeof(DateTimeOffset);
-        }
-
-        /// <summary>
         /// Reads an object's state from a YAML parser.
         /// </summary>
         /// <param name="parser"><see cref="IParser"/> instance.</param>
@@ -77,9 +67,9 @@ namespace YamlDotNet.Serialization.Converters
         /// <param name="rootDeserializer">The deserializer to use to deserialize complex types.</param>
         /// <returns>Returns the <see cref="DateTime"/> instance converted.</returns>
         /// <remarks>On deserializing, all formats in the list are used for conversion.</remarks>
-        public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
+        public override object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
-            var value = parser.Consume<Scalar>().Value;
+            var value = ConsumeScalarValue(parser);
             var result = DateTimeOffset.ParseExact(value, formats, provider, dateStyle);
 
             return result;
@@ -93,12 +83,12 @@ namespace YamlDotNet.Serialization.Converters
         /// <param name="type"><see cref="Type"/> to convert.</param>
         /// <param name="serializer">A serializer to serializer complext objects.</param>
         /// <remarks>On serializing, the first format in the list is used.</remarks>
-        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
+        public override void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
             var dt = (DateTimeOffset)value!;
-            var formatted = dt.ToString(formats.First(), this.provider); // Always take the first format of the list.
+            var formatted = dt.ToString(formats.First(), this.provider);
 
-            emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, formatted, style, true, false));
+            EmitScalar(emitter, formatted, style);
         }
     }
 }
