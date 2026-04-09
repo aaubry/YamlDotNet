@@ -121,10 +121,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 var e = exception;
                 while (e != null)
                 {
-                    write(exception.Message, true);
-                    write(exception.StackTrace, true);
+                    write(e.Message, true);
+                    write(e.StackTrace, true);
                     write("======", true);
-                    e = exception.InnerException;
+                    e = e.InnerException;
                 }
                 write("*/", true);
             }

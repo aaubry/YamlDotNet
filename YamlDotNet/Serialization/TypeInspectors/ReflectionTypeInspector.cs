@@ -55,13 +55,16 @@ namespace YamlDotNet.Serialization.TypeInspectors
             var result = enumValue.ToString();
 #if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
             var type = enumValue.GetType();
-            var enumMembers = type.GetMember(result);
-            if (enumMembers.Length > 0)
+            if (!string.IsNullOrEmpty(result))
             {
-                var attribute = enumMembers[0].GetCustomAttribute<EnumMemberAttribute>();
-                if (attribute?.Value != null)
+                var enumMembers = type.GetMember(result);
+                if (enumMembers.Length > 0)
                 {
-                    result = attribute.Value;
+                    var attribute = enumMembers[0].GetCustomAttribute<EnumMemberAttribute>();
+                    if (attribute?.Value != null)
+                    {
+                        result = attribute.Value;
+                    }
                 }
             }
 #endif

@@ -161,9 +161,9 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarLongBase60Number()
         {
-            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:6_2:10"));
+            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:5_2:10"));
 
-            result.Should().Be(77744246530L);
+            result.Should().Be(77744245930L);
         }
 
         [Theory]
@@ -948,6 +948,48 @@ y:
             var result = Deserializer.Deserialize<Example>(UsingReaderFor(writer));
 
             result.MyString.Should().BeNull();
+        }
+
+        [Fact]
+        public void CanSerializeNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new { MyType = (Type)null });
+            yaml.Should().Contain("MyType:");
+        }
+
+        [Fact]
+        public void CanSerializeNonNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new { MyType = typeof(string) });
+            yaml.Should().Contain("MyType: System.String");
+        }
+
+        [Fact]
+        public void NullTypeRoundTrips()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var obj = new ClassWithTypeProperty { MyType = null };
+            var yaml = serializer.Serialize(obj);
+            var result = deserializer.Deserialize<ClassWithTypeProperty>(yaml);
+
+            result.MyType.Should().BeNull();
+        }
+
+        [Fact]
+        public void NonNullTypeRoundTrips()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var obj = new ClassWithTypeProperty { MyType = typeof(int) };
+            var yaml = serializer.Serialize(obj);
+            var result = deserializer.Deserialize<ClassWithTypeProperty>(yaml);
+
+            result.MyType.Should().Be(typeof(int));
         }
 
         [Fact]

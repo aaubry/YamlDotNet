@@ -61,6 +61,7 @@ namespace YamlDotNet.Serialization
         private bool attemptUnknownTypeDeserialization;
         private bool enforceNullability;
         private bool caseInsensitivePropertyMatching;
+        private int? maximumRecursion;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -85,6 +86,8 @@ namespace YamlDotNet.Serialization
             typeInspectorFactories.Add(typeof(CachedTypeInspector), inner => new CachedTypeInspector(inner));
             typeInspectorFactories.Add(typeof(NamingConventionTypeInspector), inner => namingConvention is NullNamingConvention ? inner : new NamingConventionTypeInspector(inner, namingConvention));
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
+
+            typeConverter = new NullTypeConverter();
 
             nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
@@ -118,8 +121,6 @@ namespace YamlDotNet.Serialization
                 { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
-
-            typeConverter = new NullTypeConverter();
         }
 
         protected override StaticDeserializerBuilder Self { get { return this; } }
@@ -354,7 +355,7 @@ namespace YamlDotNet.Serialization
         {
             if (tag.IsEmpty)
             {
-                throw new ArgumentException("Non-specific tags cannot be maped");
+                throw new ArgumentException("Non-specific tags cannot be mapped");
             }
 
             if (type == null)
@@ -397,7 +398,7 @@ namespace YamlDotNet.Serialization
         {
             if (tag.IsEmpty)
             {
-                throw new ArgumentException("Non-specific tags cannot be maped");
+                throw new ArgumentException("Non-specific tags cannot be mapped");
             }
 
             if (!tagMappings.Remove(tag))
@@ -441,15 +442,38 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IValueDeserializer BuildValueDeserializer()
         {
-            return new AliasValueDeserializer(
-                new NodeValueDeserializer(
+            IValueDeserializer valueDeserializer = new NodeValueDeserializer(
                     nodeDeserializerFactories.BuildComponentList(),
                     nodeTypeResolverFactories.BuildComponentList(),
                     typeConverter,
                     enumNamingConvention,
                     BuildTypeInspector()
-                )
-            );
+                );
+
+            if (maximumRecursion != null)
+            {
+                valueDeserializer = new MaximumRecursionValueDeserializer(valueDeserializer, maximumRecursion.Value);
+            }
+
+            return new AliasValueDeserializer(valueDeserializer);
+        }
+
+        /// <summary>
+        /// Sets the maximum recursion that is allowed while deserializing.
+        /// </summary>
+        /// <remarks>
+        /// Setting this limit is strongly recommended when parsing untrusted input since
+        /// deeply nested objects will lead to a stack overflow.
+        /// </remarks>
+        public StaticDeserializerBuilder WithMaximumRecursion(int maximumRecursion)
+        {
+            if (maximumRecursion <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumRecursion), $"The maximum recursion specified ({maximumRecursion}) is invalid. It should be a positive integer.");
+            }
+
+            this.maximumRecursion = maximumRecursion;
+            return this;
         }
     }
 }
