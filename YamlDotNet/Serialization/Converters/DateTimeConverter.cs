@@ -65,6 +65,10 @@ namespace YamlDotNet.Serialization.Converters
         public override object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = ConsumeScalarValue(parser);
+            if (string.IsNullOrEmpty(value))
+            {
+                return null!;
+            }
             var style = this.kind == DateTimeKind.Local ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal;
 
             var dt = DateTime.ParseExact(value, this.formats, this.provider, style);
@@ -82,7 +86,12 @@ namespace YamlDotNet.Serialization.Converters
         /// <remarks>On serializing, the first format in the list is used.</remarks>
         public override void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var dt = (DateTime)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
+                return;
+            }
+            var dt = (DateTime)value;
             var adjusted = this.kind == DateTimeKind.Local ? dt.ToLocalTime() : dt.ToUniversalTime();
             var formatted = adjusted.ToString(this.formats.First(), this.provider);
 

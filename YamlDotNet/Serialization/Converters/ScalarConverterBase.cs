@@ -35,7 +35,7 @@ namespace YamlDotNet.Serialization.Converters
         /// <inheritdoc/>
         public bool Accepts(Type type)
         {
-            return type == typeof(T);
+            return type == typeof(T) || Nullable.GetUnderlyingType(type) == typeof(T);
         }
 
         /// <inheritdoc/>

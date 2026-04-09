@@ -191,6 +191,24 @@ SomeDictionary:
             Assert.Equal("d", dictionary["c"]);
         }
 
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void RequiredMembersWork()
+        {
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var yaml = @"Name: hello
+Value: 42
+";
+            var actual = deserializer.Deserialize<RequiredMemberClass>(yaml);
+            Assert.Equal("hello", actual.Name);
+            Assert.Equal(42, actual.Value);
+
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            var actualYaml = serializer.Serialize(actual);
+            Assert.Equal(yaml.NormalizeNewLines().TrimNewLines(), actualYaml.NormalizeNewLines().TrimNewLines());
+        }
+#endif
+
 #if NET6_0_OR_GREATER
         [Fact]
         public void EnumDeserializationUsesEnumMemberAttribute()
@@ -399,6 +417,16 @@ prop2:
             Assert.Equal("value2", ((List<string>)actual.TestValue)[1]);
         }
 
+        [Fact]
+        public void UnregisteredTypeThrowsDescriptiveException()
+        {
+            var context = new StaticContext();
+            var factory = context.GetFactory();
+            var ex = Assert.Throws<InvalidOperationException>(() => factory.Create(typeof(UnregisteredType)));
+            Assert.Contains("is not registered in the YamlDotNet static context", ex.Message);
+            Assert.Contains("YamlSerializable", ex.Message);
+        }
+
         [YamlSerializable]
         public class TestState
         {
@@ -516,4 +544,19 @@ prop2:
     {
         object TestValue { get; }
     }
+
+    // Not decorated with [YamlSerializable] — intentionally unregistered
+    public class UnregisteredType
+    {
+        public string Value { get; set; }
+    }
+
+#if NET8_0_OR_GREATER
+    [YamlSerializable]
+    public class RequiredMemberClass
+    {
+        public required string Name { get; set; }
+        public required int Value { get; set; }
+    }
+#endif
 }

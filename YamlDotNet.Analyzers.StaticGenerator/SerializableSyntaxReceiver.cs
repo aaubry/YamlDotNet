@@ -172,6 +172,11 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, true));
                 CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[1]);
             }
+            else if (typeName.StartsWith("System.Collections.Generic.OrderedDictionary"))
+            {
+                Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, true));
+                CheckForSupportedGeneric(((INamedTypeSymbol)type).TypeArguments[1]);
+            }
             else if (typeName.StartsWith("System.Collections.Generic.List"))
             {
                 Classes.Add(sanitizedTypeName, new ClassObject(sanitizedTypeName, (INamedTypeSymbol)type, isList: true));
