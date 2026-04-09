@@ -71,7 +71,7 @@ namespace YamlDotNet.Serialization.Converters
         /// <param name="emitter"><see cref="IEmitter"/> instance.</param>
         /// <param name="value">Value to write.</param>
         /// <param name="type"><see cref="Type"/> to convert.</param>
-        /// <param name="serializer">A serializer to serializer complext objects.</param>
+        /// <param name="serializer">A serializer to serialize complex objects.</param>
         /// <remarks>On serializing, the first format in the list is used.</remarks>
         public override void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {

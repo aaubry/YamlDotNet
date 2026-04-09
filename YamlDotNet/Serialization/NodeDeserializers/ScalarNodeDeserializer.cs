@@ -122,7 +122,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     break;
 
                 case TypeCode.DateTime:
-                    // TODO: This is probably incorrect. Use the correct regular expression.
+                    // DateTime.Parse with InvariantCulture handles standard YAML datetime values
+                    // when the target type is explicitly DateTime.
                     value = DateTime.Parse(scalar.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
                     break;
 
@@ -242,7 +243,8 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 {
                     case 2:
                     case 8:
-                        // TODO: how to incorporate the numberFormat?
+                        // Binary and octal parsing is inherently locale-independent;
+                        // Convert.ToUInt64 does not accept an IFormatProvider for these bases.
                         result = Convert.ToUInt64(numberBuilder.ToString(), numberBase);
                         break;
 
@@ -266,8 +268,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 {
                     result *= 60;
 
-                    // TODO: verify that chunks after the first are non-negative and less than 60
-                    result += ulong.Parse(chunks[chunkIndex].Replace("_", ""), CultureInfo.InvariantCulture);
+                    var chunkValue = ulong.Parse(chunks[chunkIndex].Replace("_", ""), CultureInfo.InvariantCulture);
+
+                    // Sexagesimal digits after the first must be in the range [0, 59]
+                    if (chunkIndex > 0 && chunkValue >= 60)
+                    {
+                        throw new FormatException($"Invalid sexagesimal (base-60) digit: '{chunks[chunkIndex]}'. Digits after the first must be less than 60.");
+                    }
+
+                    result += chunkValue;
                 }
             }
 

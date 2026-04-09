@@ -611,6 +611,45 @@ Property: test-property";
             public required string Field = string.Empty;
             public required string Property { get; set; } = string.Empty;
         }
+
+        [Fact]
+        public void WithRequiredMemberSet_ThrowsWhenBothMissing_ListsBothNames()
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithEnforceRequiredMembers()
+                .IgnoreUnmatchedProperties()
+                .Build();
+            var yaml = "UnrelatedKey: irrelevant";
+            var ex = Assert.Throws<YamlException>(() =>
+            {
+                deserializer.Deserialize<RequiredMemberClass>(yaml);
+            });
+            Assert.Contains("Field", ex.Message);
+            Assert.Contains("Property", ex.Message);
+        }
+
+        [Fact]
+        public void WithRequiredMemberSet_ThrowsWithDescriptiveMessage()
+        {
+            var deserializer = new DeserializerBuilder().WithEnforceRequiredMembers().Build();
+            var yaml = "Property: test";
+            var ex = Assert.Throws<YamlException>(() =>
+            {
+                deserializer.Deserialize<RequiredMemberClass>(yaml);
+            });
+            Assert.Contains("Missing properties", ex.Message);
+            Assert.Contains("Field", ex.Message);
+        }
+
+        [Fact]
+        public void WithoutEnforceRequiredMembers_DoesNotThrowWhenMissing()
+        {
+            // When enforcement is NOT enabled, missing required members should not throw
+            var deserializer = new DeserializerBuilder().Build();
+            var yaml = "Property: test";
+            var actual = deserializer.Deserialize<RequiredMemberClass>(yaml);
+            Assert.Equal("test", actual.Property);
+        }
 #endif
 
 #if NET6_0_OR_GREATER

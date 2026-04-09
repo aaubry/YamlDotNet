@@ -153,8 +153,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (enforceRequiredProperties)
             {
-                //TODO: Get properties marked as required on the object
-                //TODO: Compare those properties agains the consumedObjectProperties, throw if any are missing.
                 var properties = typeInspector.GetProperties(implementationType, value);
                 var missingPropertyNames = new List<string>();
                 foreach (var property in properties)

@@ -161,9 +161,9 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarLongBase60Number()
         {
-            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:6_2:10"));
+            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:5_2:10"));
 
-            result.Should().Be(77744246530L);
+            result.Should().Be(77744245930L);
         }
 
         [Theory]
