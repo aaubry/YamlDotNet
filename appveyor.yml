@@ -8,18 +8,6 @@ environment:
   # Required by GitVersion.Tool to avoid moving/normalizing HEAD in the CI clone,
   # which can otherwise cause incorrect version calculations in AppVeyor builds.
   IGNORE_NORMALISATION_GIT_HEAD_MOVE: "1"
-  NUGET_API_KEY:
-    secure: 04W5fV6ITDiUyvVpQDAVFB1/jsSt1ORIeqYitigD3Hin2fm/boMNROmewVSVE+S0
-  GITHUB_TOKEN:
-    secure: N4MRu0GLcYz2HJ9uKinaX9ojAxWjBC1e60UaCw/HiUjol5Fsy0+kOw4vr101nbwCM7K50L3i0rMzQsO+P4KV6E0zxoQ04rasfAsppeCxC4m2H882WZVILMoc1q86SjMK
-  TWITTER_CONSUMER_API_KEY:
-    secure: o4jM6NnXqtI3/Bzef2xpcTAOuPn/WwO+khiWvrbletk=
-  TWITTER_CONSUMER_API_SECRET:
-    secure: a4TQjB1vp0lRFZ7aA7RamHAhkHlPlMqdvsaZvzGs/pPkR+YfuGQ7AKlknD26HIE0xGUTi8M1wqffQUKJL1knHg==
-  TWITTER_ACCESS_TOKEN:
-    secure: TfgxKzf9AAbDuJmuYnnzjYKhHcxyYv7Z+AnFRzlQc5CcIJ3h52YZAokQGF3n3K8r21V1DxeKHc/qWG1yZs4NKg==
-  TWITTER_ACCESS_TOKEN_SECRET:
-    secure: aMvxmavbq8tylMDe8QGEdemNMPzrd7i6982i/iVydNYHhUvzV7lw5AJsiEpfRyzt
 
 install:
   - cmd: git submodule update --init
