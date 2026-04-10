@@ -11,7 +11,7 @@ environment:
   NUGET_API_KEY:
     secure: 04W5fV6ITDiUyvVpQDAVFB1/jsSt1ORIeqYitigD3Hin2fm/boMNROmewVSVE+S0
   GITHUB_TOKEN:
-    secure: ulVa56sjSUcOy/08/Qn88LsGVfndWBizu5gRdVTvsGu/ju1fKUe8XCZPvUvypvWH
+    secure: N4MRu0GLcYz2HJ9uKinaX9ojAxWjBC1e60UaCw/HiUjol5Fsy0+kOw4vr101nbwCM7K50L3i0rMzQsO+P4KV6E0zxoQ04rasfAsppeCxC4m2H882WZVILMoc1q86SjMK
   TWITTER_CONSUMER_API_KEY:
     secure: o4jM6NnXqtI3/Bzef2xpcTAOuPn/WwO+khiWvrbletk=
   TWITTER_CONSUMER_API_SECRET:
