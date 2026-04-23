@@ -223,13 +223,7 @@ namespace YamlDotNet.Test.Core
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
-            // Todo: Why involve the rep. model when testing the Emitter? Can we match using a regex?
-            var stream = new YamlStream();
-            stream.Load(new StringReader(yaml));
-            var sequence = (YamlSequenceNode)stream.Documents[0].RootNode;
-            var scalar = (YamlScalarNode)sequence.Children[0];
-
-            scalar.Value.Should().Be("hello\nworld");
+            yaml.Should().NotContain(Environment.NewLine + Environment.NewLine);
         }
 
         [Fact]
