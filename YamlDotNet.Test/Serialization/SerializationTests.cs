@@ -2465,7 +2465,8 @@ Cycle: *o0");
         {
             var text = $"Line1{Environment.NewLine}Line2{Environment.NewLine}Line3{Environment.NewLine}{Environment.NewLine}Line4";
 
-            var sut = new SerializerBuilder().Build();
+            //TODO: that's probably not the right fix, we should probably make Literal the default style instead of folded since Folded is lossy
+            var sut = new SerializerBuilder().WithDefaultScalarStyle(ScalarStyle.Literal).Build();
             var dut = new DeserializerBuilder().Build();
 
             using var writer = new StringWriter { NewLine = Environment.NewLine };

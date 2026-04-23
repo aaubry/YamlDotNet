@@ -1308,20 +1308,6 @@ namespace YamlDotNet.Core
                     {
                         continue;
                     }
-
-                    if (!previousBreak && !leadingSpaces && breakCharacter == '\n')
-                    {
-                        var k = 0;
-                        while (i + k < value.Length && IsBreak(value[i + k], out _))
-                        {
-                            ++k;
-                        }
-                        if (i + k < value.Length && !(IsBlank(value[i + k]) || IsBreak(value[i + k], out _)))
-                        {
-                            WriteBreak();
-                        }
-                    }
-
                     WriteBreak(breakCharacter);
                     isIndentation = true;
                     previousBreak = true;

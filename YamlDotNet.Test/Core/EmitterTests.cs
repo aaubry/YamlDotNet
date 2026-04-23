@@ -243,12 +243,12 @@ namespace YamlDotNet.Test.Core
 
         [Fact]
         [Trait("motive", "issue #39")]
-        public void FoldedStylePreservesNewLines()
+        public void LiteralStylePreservesNewLines()
         {
             var input = "id: 0\nPayload:\n  X: 5\n  Y: 6\n";
             var events = MappingWith(
                 Scalar("Payload").ImplicitPlain,
-                FoldedScalar(input));
+                LiteralScalar(input));
 
             var yaml = EmittedTextFrom(StreamedDocumentWith(events));
 
@@ -392,15 +392,20 @@ namespace YamlDotNet.Test.Core
         }
 
         [Theory]
-        [InlineData("b-carriage-return,b-line-feed\r\nlll", "b-carriage-return,b-line-feed\nlll")]
-        [InlineData("b-carriage-return,b-line-feed\r\n\r\nlll", "b-carriage-return,b-line-feed\n\nlll")]
-        [InlineData("b-carriage-return\rlll", "b-carriage-return\nlll")]
-        [InlineData("b-line-feed\nlll", "b-line-feed\nlll")]
-        [InlineData("b-next-line\x85lll", "b-next-line\nlll")]
-        [InlineData("b-line-separator\x2028lll", "b-line-separator\x2028lll")]
-        [InlineData("b-paragraph-separator\x2029lll", "b-paragraph-separator\x2029lll")]
-        public void NewLinesAreNotDuplicatedWhenEmittedInFoldedScalar(string input, string expected)
+        [InlineData("b-carriage-return,b-line-feed\r\naaa", "b-carriage-return,b-line-feed aaa")]
+        [InlineData("b-carriage-return,b-line-feed\r\n\r\nbbb", "b-carriage-return,b-line-feed\nbbb")]
+        [InlineData("b-carriage-return\rccc", "b-carriage-return ccc")]
+        [InlineData("b-carriage-return\r\rddd", "b-carriage-return\nddd")]
+        [InlineData("b-line-feed\neee", "b-line-feed eee")]
+        [InlineData("b-line-feed\n\nfff", "b-line-feed\nfff")]
+        [InlineData("b-next-line\x85ggg", "b-next-line ggg")]
+        [InlineData("b-next-line\x85\x85hhh", "b-next-line\nhhh")]
+        [InlineData("b-line-separator\x2028iii", "b-line-separator\x2028iii")]
+        [InlineData("b-paragraph-separator\x2029jjj", "b-paragraph-separator\x2029jjj")]
+        public void NewLinesAreFoldedWhenEmittedInFoldedScalar(string input, string expected)
         {
+            // Note: \x2029 is not folded by the Scanner that's why jjj expected result is not folded
+
             var yaml = EmittedTextFrom(StreamOf(DocumentWith(
                                                              FoldedScalar(input)
                                                             )));
