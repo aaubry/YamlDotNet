@@ -3,5 +3,5 @@
 	url = https://github.com/aaubry/BuildUtils.UnityPrerequisites.git
 [submodule "yaml-test-suite"]
 	path = YamlDotNet.Test/yaml-test-suite
-	url = https://github.com/yaml/yaml-test-suite
+	url = https://github.com/samuelcadieux/yaml-test-suite.git
 	branch = data-2022-01-17
