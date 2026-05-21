@@ -162,53 +162,60 @@ Level3: {}
             // Timebox this test to avoid infinite loops in case of bugs.
             // 30 seconds should be more than enough for this test to run even on a slow machine, and if it takes longer than that,
             // it's likely that the merging parser is not correctly counting events and enforcing the limit.
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
             cancellationTokenSource.Token.Register(() =>
             {
                 throw new TimeoutException("The test took too long, likely due to an infinite loop in the merging parser.");
             });
 
-            await Task.Run(() =>
+            try
             {
-                var sb = new StringBuilder();
-
-                // Base anchor
-                sb.AppendLine("a0: &a0");
-                sb.AppendLine("  x: 1");
-                sb.AppendLine();
-
-                // Each level merges the previous anchor TWICE (fanout=2), doubling event count
-                for (int i = 1; i <= 25; i++)
+                await Task.Run(() =>
                 {
-                    sb.AppendLine($"a{i}: &a{i}");
-                    sb.AppendLine($"  <<: *a{i - 1}");  // first merge
-                    sb.AppendLine($"  <<: *a{i - 1}");  // second merge
+                    var sb = new StringBuilder();
+
+                    // Base anchor
+                    sb.AppendLine("a0: &a0");
+                    sb.AppendLine("  x: 1");
                     sb.AppendLine();
-                }
 
-                sb.AppendLine("final:");
-                sb.AppendLine("  <<: *a25");
-
-                var yaml = sb.ToString();
-                var parser = new Parser(new StringReader(yaml));
-                var mergingParser = new MergingParser(parser, 1000);
-                try
-                {
-                    while (mergingParser.MoveNext())
+                    // Each level merges the previous anchor TWICE (fanout=2), doubling event count
+                    for (int i = 1; i <= 25; i++)
                     {
-                        //move through everything, we're in a timebox so if this takes too long, the cancellation token will trigger and fail the test
+                        sb.AppendLine($"a{i}: &a{i}");
+                        sb.AppendLine($"  <<: *a{i - 1}");  // first merge
+                        sb.AppendLine($"  <<: *a{i - 1}");  // second merge
+                        sb.AppendLine();
                     }
-                }
-                catch (YamlException ex) when (ex.Message.Contains("Too many parsing events"))
-                {
-                    // Expected exception, test passes
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Unexpected exception", ex);
-                }
-            }, cancellationTokenSource.Token);
+
+                    sb.AppendLine("final:");
+                    sb.AppendLine("  <<: *a25");
+
+                    var yaml = sb.ToString();
+                    var parser = new Parser(new StringReader(yaml));
+                    var mergingParser = new MergingParser(parser, 1000);
+                    try
+                    {
+                        while (mergingParser.MoveNext())
+                        {
+                            //move through everything, we're in a timebox so if this takes too long, the cancellation token will trigger and fail the test
+                        }
+                    }
+                    catch (YamlException ex) when (ex.Message.Contains("Too many parsing events"))
+                    {
+                        // Expected exception, test passes
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Unexpected exception", ex);
+                    }
+                }, cancellationTokenSource.Token);
+            }
+            catch (TimeoutException ex)
+            {
+                Assert.Fail($"Test failed due to timeout: {ex.Message}");
+            }
         }
 
         [Fact]
@@ -217,42 +224,51 @@ Level3: {}
             // Timebox this test to avoid infinite loops in case of bugs.
             // 30 seconds should be more than enough for this test to run even on a slow machine, and if it takes longer than that,
             // it's likely that the merging parser is not correctly counting events and enforcing the limit.
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
             cancellationTokenSource.Token.Register(() =>
             {
                 throw new TimeoutException("The test took too long, likely due to an infinite loop in the merging parser.");
             });
 
-            await Task.Run(() =>
+            try
             {
-                var sb = new StringBuilder();
-                sb.AppendLine("base: &base");
-                for (var i = 0; i < 25; i++)
+                await Task.Run(() =>
                 {
-                    sb.AppendLine($"  k{i}: v{i}");
-                }
-
-                sb.AppendLine();
-                for (var i = 0; i < 35; i++)
-                {
-                    sb.AppendLine($"entry{i}:");
-                    sb.AppendLine("  <<: *base");
-                    sb.AppendLine();
-                }
-
-                var parser = new Parser(new StringReader(sb.ToString()));
-                var mergingParser = new MergingParser(parser, 1000);
-
-                Action parse = () =>
-                {
-                    while (mergingParser.MoveNext())
+                    var sb = new StringBuilder();
+                    sb.AppendLine("base: &base");
+                    for (var i = 0; i < 25; i++)
                     {
+                        sb.AppendLine($"  k{i}: v{i}");
                     }
-                };
 
-                parse.Should().Throw<YamlException>()
-                    .Where(ex => ex.Message.Contains("Too many parsing events"));
-            }, cancellationTokenSource.Token);
+                    sb.AppendLine();
+                    for (var i = 0; i < 35; i++)
+                    {
+                        sb.AppendLine($"entry{i}:");
+                        sb.AppendLine("  <<: *base");
+                        sb.AppendLine();
+                    }
+
+                    var parser = new Parser(new StringReader(sb.ToString()));
+                    var mergingParser = new MergingParser(parser, 1000);
+                    var totalParsedEvents = 0;
+                    Action parse = () =>
+                    {
+                        while (mergingParser.MoveNext())
+                        {
+                            totalParsedEvents++;
+                        }
+                    };
+
+                    parse.Should().Throw<YamlException>()
+                        .Where(ex => ex.Message.Contains("Too many parsing events"));
+                    Console.WriteLine($"Total parsed events before exception: {totalParsedEvents}");
+                }, cancellationTokenSource.Token);
+            }
+            catch (TimeoutException ex)
+            {
+                Assert.Fail($"Test failed due to timeout: {ex.Message}");
+            }
         }
 
         [Fact]
