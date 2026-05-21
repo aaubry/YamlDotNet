@@ -94,7 +94,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public override object? Parse(string value, Type expectedType)
         {
-            var parsableInspector = typeInspectors.Where(i => i.HasParseMethod(expectedType)).FirstOrDefault();
+            var parsableInspector = typeInspectors.FirstOrDefault(i => i.HasParseMethod(expectedType));
 
             if (parsableInspector == null)
             {

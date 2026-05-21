@@ -78,7 +78,8 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public override bool HasParseMethod(Type type)
         {
-            return hasParseMethodCache.GetOrAdd(type, t => innerTypeDescriptor.HasParseMethod(t));
+            return hasParseMethodCache.GetOrAdd(type, static (t, typeDescriptor) =>
+                typeDescriptor.HasParseMethod(t), innerTypeDescriptor);
         }
 
         public override object? Parse(string value, Type expectedType) => innerTypeDescriptor.Parse(value, expectedType);

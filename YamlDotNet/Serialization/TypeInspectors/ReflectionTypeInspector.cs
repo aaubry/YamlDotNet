@@ -71,7 +71,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
             return result!;
         }
 
-        public override bool HasParseMethod(Type type) => type.GetMethod("Parse", [typeof(string)]) != null;
+        public override bool HasParseMethod(Type type) => type.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, [typeof(string)], null) != null;
 
         public override object? Parse(string value, Type expectedType)
         {
