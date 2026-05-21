@@ -155,6 +155,45 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("return value.ToString();");
             UnIndent(); Write("}");
 
+            Write("public bool HasParseMethod(Type type)");
+            Write("{"); Indent();
+            foreach (var o in syntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                if (classObject.ModuleSymbol.GetMembers("Parse").OfType<IMethodSymbol>().Any(m => m.IsStatic && m.Parameters.Length == 1 && m.Parameters[0].Type.SpecialType == SpecialType.System_String))
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
+                    Write("{"); Indent();
+                    Write("return true;");
+                    UnIndent(); Write("}");
+                }
+            }
+            Write("return false;");
+            UnIndent(); Write("}");
+
+            Write("public object Parse(string value, Type expectedType)");
+            Write("{"); Indent();
+            foreach (var o in syntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                if (classObject.ModuleSymbol
+                        .GetMembers("Parse")
+                        .OfType<IMethodSymbol>()
+                        .Any(m => m.DeclaredAccessibility == Accessibility.Public &&
+                                m.IsStatic &&
+                                m.Parameters.Length == 1 &&
+                                m.Parameters[0].Type.SpecialType == SpecialType.System_String &&
+                                SymbolEqualityComparer.Default.Equals(m.ReturnType, classObject.ModuleSymbol)))
+                {
+                    Write($"if (expectedType == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
+                    Write("{"); Indent();
+                    Write($"return {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}.Parse(value);");
+                    UnIndent(); Write("}");
+                }
+            }
+            Write("throw new InvalidOperationException($\"Type '{expectedType.FullName}' does not have a static Parse method.\");");
+            UnIndent(); Write("}");
+
             UnIndent(); Write("}");
         }
 

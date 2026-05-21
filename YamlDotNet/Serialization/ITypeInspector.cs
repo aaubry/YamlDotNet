@@ -66,5 +66,19 @@ namespace YamlDotNet.Serialization
         /// <param name="enumValue"></param>
         /// <returns></returns>
         string GetEnumValue(object enumValue);
+
+        /// <summary>
+        /// Indicates whether the specified type has a static Parse method that can be used to convert a string to an instance of that type.
+        /// </summary>
+        /// <param name="type">The type to check for a static Parse method.</param>
+        /// <returns>True if the type has a static Parse method; otherwise, false.</returns>
+        bool HasParseMethod(Type type);
+
+        /// <summary> Converts a string to an instance of the specified type using a static Parse method.
+        /// </summary>
+        /// <param name="value">The string value to convert.</param>
+        /// <param name="expectedType">The type to convert the string to.</param>
+        /// <returns>An instance of the specified type.</returns>
+        object? Parse(string value, Type expectedType);
     }
 }

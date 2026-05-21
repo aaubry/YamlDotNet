@@ -147,17 +147,9 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         // TimeSpan, DateTimeOffset, Guid, IPAddress, and others.
                         // This is especially important for the static/AOT deserialization
                         // path where the typeConverter is a NullTypeConverter.
-                        var parseMethod = underlyingType.GetPublicStaticMethod("Parse", typeof(string), typeof(IFormatProvider));
-                        if (parseMethod != null)
+                        if (typeInspector.HasParseMethod(underlyingType))
                         {
-                            try
-                            {
-                                value = parseMethod.Invoke(null, new object[] { scalar.Value, CultureInfo.InvariantCulture });
-                            }
-                            catch (System.Reflection.TargetInvocationException ex) when (ex.InnerException != null)
-                            {
-                                throw ex.InnerException;
-                            }
+                            value = typeInspector.Parse(scalar.Value, underlyingType);
                         }
                         else
                         {
