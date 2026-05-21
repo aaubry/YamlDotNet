@@ -73,5 +73,9 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             return property;
         }
+
+        public abstract bool HasParseMethod(Type type);
+
+        public abstract object? Parse(string value, Type expectedType);
     }
 }

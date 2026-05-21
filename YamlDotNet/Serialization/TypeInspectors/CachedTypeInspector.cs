@@ -36,6 +36,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
         private readonly ConcurrentDictionary<Type, List<IPropertyDescriptor>> cache = new ConcurrentDictionary<Type, List<IPropertyDescriptor>>();
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, string>> enumNameCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, string>>();
         private readonly ConcurrentDictionary<object, string> enumValueCache = new ConcurrentDictionary<object, string>();
+        private readonly ConcurrentDictionary<Type, bool> hasParseMethodCache = new ConcurrentDictionary<Type, bool>();
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
@@ -74,5 +75,12 @@ namespace YamlDotNet.Serialization.TypeInspectors
             },
             (container, innerTypeDescriptor));
         }
+
+        public override bool HasParseMethod(Type type)
+        {
+            return hasParseMethodCache.GetOrAdd(type, t => innerTypeDescriptor.HasParseMethod(t));
+        }
+
+        public override object? Parse(string value, Type expectedType) => innerTypeDescriptor.Parse(value, expectedType);
     }
 }

@@ -32,6 +32,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core7AoTCompileTest.Model;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.Callbacks;
+using YamlDotNet.Serialization.NamingConventions;
 
 string yaml = string.Create(CultureInfo.InvariantCulture, $@"MyBool: true
 hi: 1
@@ -106,6 +107,7 @@ var input = new StringReader(yaml);
 
 var aotContext = new YamlDotNet.Core7AoTCompileTest.StaticContext();
 var deserializer = new StaticDeserializerBuilder(aotContext)
+    .WithNamingConvention(UnderscoredNamingConvention.Instance)
     .Build();
 
 var x = deserializer.Deserialize<PrimitiveTypes>(input);
@@ -189,16 +191,17 @@ Console.WriteLine("==============");
 Console.WriteLine("Serialized:");
 
 var serializer = new StaticSerializerBuilder(aotContext)
+    .WithNamingConvention(UnderscoredNamingConvention.Instance)
     .Build();
 
 var output = serializer.Serialize(x);
 Console.WriteLine(output);
 Console.WriteLine("============== Done with the primary object");
 
-yaml = @"- myArray:
+yaml = @"- my_array:
   - 1
   - 2
-- myArray:
+- my_array:
   - 3
   - 4
 ";
