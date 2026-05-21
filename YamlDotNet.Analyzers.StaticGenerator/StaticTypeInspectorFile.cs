@@ -176,7 +176,14 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             foreach (var o in syntaxReceiver.Classes)
             {
                 var classObject = o.Value;
-                if (classObject.ModuleSymbol.GetMembers("Parse").OfType<IMethodSymbol>().Any(m => m.IsStatic && m.Parameters.Length == 1 && m.Parameters[0].Type.SpecialType == SpecialType.System_String))
+                if (classObject.ModuleSymbol
+                        .GetMembers("Parse")
+                        .OfType<IMethodSymbol>()
+                        .Any(m => m.DeclaredAccessibility == Accessibility.Public &&
+                                m.IsStatic &&
+                                m.Parameters.Length == 1 &&
+                                m.Parameters[0].Type.SpecialType == SpecialType.System_String &&
+                                SymbolEqualityComparer.Default.Equals(m.ReturnType, classObject.ModuleSymbol)))
                 {
                     Write($"if (expectedType == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
                     Write("{"); Indent();
