@@ -25,7 +25,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using RuntimeSerialization = System.Runtime.Serialization;
 using YamlDotNet.Serialization.Callbacks;
+using System.Runtime.CompilerServices;
 
 namespace YamlDotNet.Serialization.ObjectFactories
 {
@@ -108,6 +110,14 @@ namespace YamlDotNet.Serialization.ObjectFactories
             try
             {
                 return Activator.CreateInstance(type, settings.AllowPrivateConstructors)!;
+            }
+            catch (MissingMethodException) when (settings.UnstableAttemptUninitializedInstance && !type.IsAbstract)
+            {
+#if NET5_0_OR_GREATER
+                return RuntimeHelpers.GetUninitializedObject(type);
+#else
+                return RuntimeSerialization.FormatterServices.GetUninitializedObject(type);
+#endif
             }
             catch (Exception err)
             {

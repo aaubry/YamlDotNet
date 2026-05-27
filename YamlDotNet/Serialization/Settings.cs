@@ -27,5 +27,10 @@ namespace YamlDotNet.Serialization
         /// If true then private, parameterless constructors will be invoked if a public one is not available.
         /// </summary>
         public bool AllowPrivateConstructors { get; set; }
+
+        /// <summary>
+        /// If true then constructors with positional properties will attempt to invoke if a public one is not available.
+        /// </summary>
+        public bool UnstableAttemptUninitializedInstance { get; set; }
     }
 }
