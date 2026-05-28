@@ -768,7 +768,7 @@ year_of_birth: 1983
 car:
   name: Mercedes
   year: 2018";
-            var actual = deserializer.Deserialize<PersonWithCardRecord>(yaml);
+            var actual = deserializer.Deserialize<PersonRecordWithCarRecord>(yaml);
             Assert.Equal("Jack", actual.Name);
             Assert.Equal(1983, actual.YearOfBirth);
             Assert.Equal("Mercedes", actual.Car.Name);
@@ -778,9 +778,8 @@ car:
         public record class PersonRecordClass(string Name, int Age);
         public record struct PersonRecordStruct(string Name, int Age);
 
-        public record PersonWithCardRecord(string Name, int YearOfBirth, CarRecord Car);
+        public record PersonRecordWithCarRecord(string Name, int YearOfBirth, CarRecord Car);
         public record CarRecord(string Name, int Year);
-
 #endif
 
 #nullable enable

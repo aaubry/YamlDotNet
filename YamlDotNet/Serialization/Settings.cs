@@ -29,7 +29,7 @@ namespace YamlDotNet.Serialization
         public bool AllowPrivateConstructors { get; set; }
 
         /// <summary>
-        /// If true then constructors with positional properties will attempt to invoke if a public one is not available.
+        /// If true then will attempt to create an uninitialized instance during deserialization, possibly allowing certain type, such as <c>record</c>s with positional properties.
         /// </summary>
         public bool UnstableAttemptUninitializedInstance { get; set; }
     }
