@@ -484,11 +484,15 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Sets the maximum recursion that is allowed while building the object graph.
+        /// Sets the maximum recursion that is allowed while building the object graph. Must be > 0. Default is 152.
         /// </summary>
         /// <remarks>
         /// Setting this limit is strongly recommended when parsing untrusted input since
-        /// deeply nested objects will lead to a stack overflow.
+        /// deeply nested objects will lead to a stack overflow. When using the default configuration
+        /// on Windows the maximum you should allow is ~152 as anything over that will lead to a stack overflow
+        /// when the max recursion exception is thrown. Linux OS allows for ~475 and the exception will be
+        /// thrown correctly without causing a stack overflow. This does not take into account the depth of
+        /// your application call stack. This is if YamlDotNet is called from the top of the stack.
         /// </remarks>
         public DeserializerBuilder WithMaximumRecursion(int maximumRecursion)
         {
