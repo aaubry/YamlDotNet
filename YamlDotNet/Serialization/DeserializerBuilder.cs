@@ -129,7 +129,7 @@ namespace YamlDotNet.Serialization
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
 
-            maximumRecursion = 475;
+            maximumRecursion = 152;
         }
 
         protected override DeserializerBuilder Self { get { return this; } }

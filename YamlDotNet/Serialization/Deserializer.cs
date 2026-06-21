@@ -113,9 +113,8 @@ namespace YamlDotNet.Serialization
         /// </summary>
         /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>
         /// <param name="type">The static type of the object to deserialize.</param>
-        /// <param name="maximumRecursion">The maximum recursion level allowed during deserialization.</param>
         /// <returns>Returns the deserialized object.</returns>
-        public object? Deserialize(IParser parser, Type type, int maximumRecursion)
+        public object? Deserialize(IParser parser, Type type)
         {
             if (parser == null)
             {
@@ -135,7 +134,6 @@ namespace YamlDotNet.Serialization
             if (!parser.Accept<DocumentEnd>(out var _) && !parser.Accept<StreamEnd>(out var _))
             {
                 using var state = new SerializerState();
-                state.Get(() => new RecursionLevel(maximumRecursion));
                 result = valueDeserializer.DeserializeValue(parser, type, state, valueDeserializer);
                 state.OnDeserialization();
             }
@@ -152,13 +150,5 @@ namespace YamlDotNet.Serialization
 
             return result;
         }
-
-        /// <summary>
-        /// Deserializes an object of the specified type.
-        /// </summary>
-        /// <param name="parser">The <see cref="IParser" /> from where to deserialize the object.</param>
-        /// <param name="type">The static type of the object to deserialize.</param>
-        /// <returns>Returns the deserialized object.</returns>
-        public object? Deserialize(IParser parser, Type type) => Deserialize(parser, type, 475);
     }
 }
