@@ -128,6 +128,8 @@ namespace YamlDotNet.Serialization
                 { typeof(PreventUnknownTagsNodeTypeResolver), _ => new PreventUnknownTagsNodeTypeResolver() },
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
+
+            maximumRecursion = 475;
         }
 
         protected override DeserializerBuilder Self { get { return this; } }

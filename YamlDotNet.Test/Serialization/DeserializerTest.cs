@@ -37,6 +37,23 @@ namespace YamlDotNet.Test.Serialization
     public class DeserializerTest
     {
         [Fact]
+        public void DeserializeDefaultMaximumRecursionLevelReachedExceptionIsThrown()
+        {
+            var yaml = new string('[', 100_000);              // deeply nested flow sequences
+            try
+            {
+                new Deserializer().Deserialize<object>(yaml);    // throws MaximumRecursionLevelReachedException
+            }
+            catch (MaximumRecursionLevelReachedException exception)
+            {
+                Console.WriteLine("Maximum recursion level reached {0}", exception);
+                return;
+            }
+
+            throw new Exception("Expected MaximumRecursionLevelReachedException was not thrown.");
+        }
+
+        [Fact]
         public void Deserialize_YamlWithInterfaceTypeAndMapping_ReturnsModel()
         {
             var yaml = @"
