@@ -23,7 +23,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using FluentAssertions;
 using Xunit;
@@ -36,6 +38,13 @@ namespace YamlDotNet.Test.Serialization
 {
     public class DeserializerTest
     {
+        [Fact]
+        public void DeserializeDefaultMaximumRecursionLevelReachedExceptionIsThrown()
+        {
+            var yaml = new string('[', 100_000);              // deeply nested flow sequences
+            Assert.Throws<MaximumRecursionLevelReachedException>(() => new Deserializer().Deserialize(yaml));
+        }
+
         [Fact]
         public void Deserialize_YamlWithInterfaceTypeAndMapping_ReturnsModel()
         {
