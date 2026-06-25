@@ -161,10 +161,7 @@ namespace YamlDotNet.RepresentationModel
         /// </param>
         protected virtual void VisitChildren(YamlDocument document)
         {
-            if (document.RootNode != null)
-            {
-                document.RootNode.Accept(this);
-            }
+            document.RootNode?.Accept(this);
         }
 
         /// <summary>

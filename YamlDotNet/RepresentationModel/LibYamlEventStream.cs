@@ -66,7 +66,7 @@ namespace YamlDotNet.RepresentationModel
                             textWriter.Write(" ---");
                         }
                         break;
-                    case MappingEnd _:
+                    case MappingEnd:
                         textWriter.Write("-MAP");
                         break;
                     case MappingStart mappingStart:
@@ -99,17 +99,17 @@ namespace YamlDotNet.RepresentationModel
                             }
                         }
                         break;
-                    case SequenceEnd _:
+                    case SequenceEnd:
                         textWriter.Write("-SEQ");
                         break;
                     case SequenceStart sequenceStart:
                         textWriter.Write("+SEQ");
                         WriteAnchorAndTag(textWriter, sequenceStart);
                         break;
-                    case StreamEnd _:
+                    case StreamEnd:
                         textWriter.Write("-STR");
                         break;
-                    case StreamStart _:
+                    case StreamStart:
                         textWriter.Write("+STR");
                         break;
                 }
