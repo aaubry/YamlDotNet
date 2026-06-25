@@ -251,7 +251,7 @@ b: &number 1
 
             var yaml = FormattableString.Invariant($"Value: {expected}");
 
-            // It needs explicitly specifying maximum precision for value roundtrip. 
+            // It needs explicitly specifying maximum precision for value roundtrip.
             if (expected is float floatValue)
             {
                 yaml = $"Value: {floatValue.ToString("G9", CultureInfo.InvariantCulture)}";
@@ -703,6 +703,92 @@ Property: test-property";
             NullValue = 3
 
         }
+#endif
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void RecordClassWithPositionalProperties()
+        {
+            var deserializer = new DeserializerBuilder()
+                .EnableUnstableAttemptUninitializedInstance()
+                .Build();
+            var yaml = @"
+Name: Jack
+Age: 43";
+            var actual = deserializer.Deserialize<PersonRecordClass>(yaml);
+            Assert.Equal("Jack", actual.Name);
+            Assert.Equal(43, actual.Age);
+        }
+
+        [Fact]
+        public void RecordStructWithPositionalProperties()
+        {
+            var deserializer = new DeserializerBuilder()
+                .EnableUnstableAttemptUninitializedInstance()
+                .Build();
+            var yaml = @"
+Name: Jack
+Age: 43";
+            var actual = deserializer.Deserialize<PersonRecordStruct>(yaml);
+            Assert.Equal("Jack", actual.Name);
+            Assert.Equal(43, actual.Age);
+        }
+
+        [Fact]
+        public void RecordClassWithPositionalPropertiesWithNamingConvention()
+        {
+            var deserializer = new DeserializerBuilder()
+                .EnableUnstableAttemptUninitializedInstance()
+                .WithNamingConvention(LowerCaseNamingConvention.Instance)
+                .Build();
+            var yaml = @"
+name: Jack
+age: 43";
+            var actual = deserializer.Deserialize<PersonRecordClass>(yaml);
+            Assert.Equal("Jack", actual.Name);
+            Assert.Equal(43, actual.Age);
+        }
+
+        [Fact]
+        public void RecordStructWithPositionalPropertiesWithNamingConvention()
+        {
+            var deserializer = new DeserializerBuilder()
+                .EnableUnstableAttemptUninitializedInstance()
+                .WithNamingConvention(LowerCaseNamingConvention.Instance)
+                .Build();
+            var yaml = @"
+name: Jack
+age: 43";
+            var actual = deserializer.Deserialize<PersonRecordStruct>(yaml);
+            Assert.Equal("Jack", actual.Name);
+            Assert.Equal(43, actual.Age);
+        }
+
+        [Fact]
+        public void NestedRecordClassWithPositionalPropertiesWithNamingConvention()
+        {
+            var deserializer = new DeserializerBuilder()
+                .EnableUnstableAttemptUninitializedInstance()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build();
+            var yaml = @"
+name: Jack
+year_of_birth: 1983
+car:
+  name: Mercedes
+  year: 2018";
+            var actual = deserializer.Deserialize<PersonRecordWithCarRecord>(yaml);
+            Assert.Equal("Jack", actual.Name);
+            Assert.Equal(1983, actual.YearOfBirth);
+            Assert.Equal("Mercedes", actual.Car.Name);
+            Assert.Equal(2018, actual.Car.Year);
+        }
+
+        public record class PersonRecordClass(string Name, int Age);
+        public record struct PersonRecordStruct(string Name, int Age);
+
+        public record PersonRecordWithCarRecord(string Name, int YearOfBirth, CarRecord Car);
+        public record CarRecord(string Name, int Year);
 #endif
 
 #nullable enable
