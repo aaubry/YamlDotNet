@@ -390,6 +390,73 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void JsonCommentsAreReturnedWhenRequested()
+        {
+            var sut = new Scanner(Yaml.ReaderForText(@"
+                    // Top comment
+                    - first // Comment on first item
+                    - second
+                    // Bottom comment
+                "), skipComments: false);
+            sut.JsonComments = true;
+            AssertSequenceOfTokensFrom(sut,
+                StreamStart,
+                StandaloneComment("Top comment"),
+                BlockSequenceStart,
+                BlockEntry,
+                PlainScalar("first"),
+                InlineComment("Comment on first item"),
+                BlockEntry,
+                PlainScalar("second"),
+                StandaloneComment("Bottom comment"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void JsonCommentsAreCorrectlyMarked()
+        {
+            var sut = new Scanner(Yaml.ReaderForText(@"
+                - first // Comment on first item
+            "), skipComments: false);
+            sut.JsonComments = true;
+
+            while (sut.MoveNext())
+            {
+                if (sut.Current is Comment comment)
+                {
+                    Assert.Equal(8, comment.Start.Index);
+                    Assert.Equal(32, comment.End.Index);
+
+                    return;
+                }
+            }
+
+            Assert.Fail("Did not find a comment");
+        }
+
+        [Fact]
+        public void JsonCommentsAreOmittedUnlessRequested()
+        {
+            var sut = Yaml.ScannerForText(@"
+                    // Top comment
+                    - first // Comment on first item
+                    - second
+                    // Bottom comment
+                ");
+            sut.JsonComments = true;
+            AssertSequenceOfTokensFrom(sut,
+                StreamStart,
+                BlockSequenceStart,
+                BlockEntry,
+                PlainScalar("first"),
+                BlockEntry,
+                PlainScalar("second"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
         public void MarksOnDoubleQuotedScalarsAreCorrect()
         {
             var scanner = Yaml.ScannerForText(@"
