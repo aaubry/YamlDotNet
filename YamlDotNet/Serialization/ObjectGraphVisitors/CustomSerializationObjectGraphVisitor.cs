@@ -20,8 +20,10 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Utilities;
 
@@ -31,6 +33,18 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     {
         private readonly TypeConverterCache typeConverters;
         private readonly ObjectSerializer nestedObjectSerializer;
+
+        private static readonly ConcurrentDictionary<Type, MethodInfo?> ImplicitToStringCache = new();
+
+        private static MethodInfo? FindImplicitToStringOperator(Type type) =>
+            ImplicitToStringCache.GetOrAdd(type, t =>
+                t.GetPublicStaticMethods()
+                 .FirstOrDefault(m =>
+                     m.IsSpecialName
+                     && m.Name == "op_Implicit"
+                     && m.ReturnType == typeof(string)
+                     && m.GetParameters() is { Length: 1 } p
+                     && p[0].ParameterType.IsAssignableFrom(t)));
 
         public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
             : base(nextVisitor)
@@ -68,6 +82,14 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
                 return false;
             }
 #pragma warning restore
+
+            var implicitToString = FindImplicitToStringOperator(value.Type);
+            if (implicitToString != null && value.Value != null)
+            {
+                var str = (string)implicitToString.Invoke(null, [value.Value])!;
+                nestedObjectSerializer(str, typeof(string));
+                return false;
+            }
 
             return base.Enter(propertyDescriptor, value, context, serializer);
         }
