@@ -68,6 +68,8 @@ namespace YamlDotNet.Serialization
             get { return baseDescriptor.CanWrite; }
         }
 
+        public Func<Exception, object, string, string>? ExceptionHandler { get; set; }
+
         public void Write(object target, object? value)
         {
             baseDescriptor.Write(target, value);
@@ -80,7 +82,23 @@ namespace YamlDotNet.Serialization
 
         public IObjectDescriptor Read(object target)
         {
-            return baseDescriptor.Read(target);
+            if (ExceptionHandler == null)
+            {
+                return baseDescriptor.Read(target);
+            }
+
+            try
+            {
+                return baseDescriptor.Read(target);
+            }
+            catch (Exception e)
+            {
+                return new ObjectDescriptor(
+                    ExceptionHandler(e, target, Name),
+                    typeof(string),
+                    typeof(string),
+                    ScalarStyle.Any);
+            }
         }
     }
 }
