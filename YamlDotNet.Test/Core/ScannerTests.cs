@@ -390,6 +390,89 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void JsonCommentsAreReturnedWhenRequested()
+        {
+            AssertSequenceOfTokensFrom(new Scanner(Yaml.ReaderForText(@"
+                    // Top comment
+                    - first // Comment on first item
+                    - second /* First comment on second item */ /* Second comment on second item */
+                    /*
+                     * Bottom comment
+                     */
+                "), skipComments: false, allowJsonComments: true, maxKeySize: 1024),
+                StreamStart,
+                StandaloneComment("Top comment"),
+                BlockSequenceStart,
+                BlockEntry,
+                PlainScalar("first"),
+                InlineComment("Comment on first item"),
+                BlockEntry,
+                PlainScalar("second"),
+                InlineComment("First comment on second item "),
+                InlineComment("Second comment on second item "),
+                StandaloneComment("\n * Bottom comment\n "),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void JsonCommentsAreCorrectlyMarked()
+        {
+            var sut = new Scanner(Yaml.ReaderForText(@"
+                /*
+                 * Comment before first item
+                 */
+                - first // Comment on first item
+            "), skipComments: false, allowJsonComments: true, maxKeySize: 1024);
+
+
+            while (sut.MoveNext())
+            {
+                if (sut.Current is Comment comment)
+                {
+                    Assert.Equal(0, comment.Start.Index);
+                    Assert.Equal(35, comment.End.Index);
+
+                    break;
+                }
+            }
+
+            while (sut.MoveNext())
+            {
+                if (sut.Current is Comment comment)
+                {
+                    Assert.Equal(44, comment.Start.Index);
+                    Assert.Equal(68, comment.End.Index);
+
+                    return;
+                }
+            }
+
+            Assert.Fail("Did not find the comments");
+        }
+
+        [Fact]
+        public void JsonCommentsAreOmittedUnlessRequested()
+        {
+            AssertSequenceOfTokensFrom(new Scanner(Yaml.ReaderForText(@"
+                    // Top comment
+                    - first // Comment on first item
+                    - second /* First comment on second item */ /* Second comment on second item */
+                    /*
+                     * Bottom comment
+                     */
+                "), skipComments: true, allowJsonComments: true, maxKeySize: 1024),
+                StreamStart,
+                BlockSequenceStart,
+                BlockEntry,
+                PlainScalar("first"),
+                BlockEntry,
+                PlainScalar("second"),
+                BlockEnd,
+                StreamEnd);
+        }
+
+        [Fact]
         public void MarksOnDoubleQuotedScalarsAreCorrect()
         {
             var scanner = Yaml.ScannerForText(@"
