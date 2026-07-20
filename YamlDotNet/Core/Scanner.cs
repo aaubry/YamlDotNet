@@ -26,6 +26,7 @@ using System.IO;
 using System.Text;
 using YamlDotNet.Core.ObjectPool;
 using YamlDotNet.Core.Tokens;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {
@@ -2243,6 +2244,13 @@ namespace YamlDotNet.Core
                         {
                             tokens.Enqueue(new Error("While scanning a plain scalar value, found invalid mapping.", cursor.Mark(), cursor.Mark()));
                         }
+                        break;
+                    }
+
+                    // Check for a comment that may end a JSON-style literal.
+
+                    if (AllowJsonComments && flowLevel > 0 && CheckJsonComment() && JsonHelper.IsJsonLiteral(value))
+                    {
                         break;
                     }
 

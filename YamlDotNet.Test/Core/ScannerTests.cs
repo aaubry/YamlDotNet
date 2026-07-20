@@ -473,6 +473,74 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void JsonCommentsAreAllowedAfterValues()
+        {
+            AssertSequenceOfTokensFrom(new Scanner(Yaml.ReaderForText(@"
+                {
+                    comma: 1,// comment after comma
+                    singleQuotes: '1'// comment after single-quoted string
+                    doubleQuotes: ""1""// comment after double-quoted string
+                    object: {}//comment after object
+                    array: []//comment after array
+                    null: null//comment after null
+                    false: false//comment after false
+                    true: true//comment after true
+                    positiveNumber: 123.4e5//comment after positive number
+                    negativeNumber: -123.4E-5//comment after negative number
+                }
+                "), skipComments: false, allowJsonComments: true, maxKeySize: 1024),
+                StreamStart,
+                FlowMappingStart,
+                Key,
+                PlainScalar("comma"),
+                Value,
+                PlainScalar("1"),
+                FlowEntry,
+                InlineComment("comment after comma"),
+                Key,
+                PlainScalar("singleQuotes"),
+                Value,
+                SingleQuotedScalar("1"),
+                InlineComment("comment after single-quoted string"),
+                PlainScalar("doubleQuotes"),
+                Value,
+                DoubleQuotedScalar("1"),
+                InlineComment("comment after double-quoted string"),
+                PlainScalar("object"),
+                Value,
+                FlowMappingStart,
+                FlowMappingEnd,
+                InlineComment("comment after object"),
+                PlainScalar("array"),
+                Value,
+                FlowSequenceStart,
+                FlowSequenceEnd,
+                InlineComment("comment after array"),
+                PlainScalar("null"),
+                Value,
+                PlainScalar("null"),
+                InlineComment("comment after null"),
+                PlainScalar("false"),
+                Value,
+                PlainScalar("false"),
+                InlineComment("comment after false"),
+                PlainScalar("true"),
+                Value,
+                PlainScalar("true"),
+                InlineComment("comment after true"),
+                PlainScalar("positiveNumber"),
+                Value,
+                PlainScalar("123.4e5"),
+                InlineComment("comment after positive number"),
+                PlainScalar("negativeNumber"),
+                Value,
+                PlainScalar("-123.4E-5"),
+                InlineComment("comment after negative number"),
+                FlowMappingEnd,
+                StreamEnd);
+        }
+
+        [Fact]
         public void MarksOnDoubleQuotedScalarsAreCorrect()
         {
             var scanner = Yaml.ScannerForText(@"
