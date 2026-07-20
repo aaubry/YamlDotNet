@@ -728,12 +728,14 @@ namespace YamlDotNet.Core
 
             if (!SkipComments)
             {
+                var end = cursor.Mark();
                 var isInline = previous != null
                     && previous.End.Line == start.Line
                     && previous.End.Column != 1
-                    && !(previous is StreamStart);
+                    && !(previous is StreamStart)
+                    && (!isMultilineComment || start.Line == end.Line && analyzer.IsBreakOrZero());
 
-                tokens.Enqueue(new Comment(text.ToString(), isInline, start, cursor.Mark()));
+                tokens.Enqueue(new Comment(text.ToString(), isInline, start, end));
             }
             return true;
         }

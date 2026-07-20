@@ -408,7 +408,7 @@ namespace YamlDotNet.Test.Core
                 InlineComment("Comment on first item"),
                 BlockEntry,
                 PlainScalar("second"),
-                InlineComment("First comment on second item "),
+                StandaloneComment("First comment on second item "),
                 InlineComment("Second comment on second item "),
                 StandaloneComment("\n * Bottom comment\n "),
                 BlockEnd,
@@ -536,6 +536,53 @@ namespace YamlDotNet.Test.Core
                 Value,
                 PlainScalar("-123.4E-5"),
                 InlineComment("comment after negative number"),
+                FlowMappingEnd,
+                StreamEnd);
+        }
+
+        [Fact]
+        public void MultilineJsonCommentsAreMarkedAsStandalone()
+        {
+            AssertSequenceOfTokensFrom(new Scanner(Yaml.ReaderForText(@"
+                {
+                    /*
+                     * Top comment.
+                     */
+                    /*0*/ /*1*/""foo""/*2*/ /*3*/:/*4*/ /*5*/false/*6*/ /*7*/,// 8
+                    // Middle comment.
+                    /*9*/""bar""/*10*/:/*11*/true/*12*/
+                    /*
+                     * Bottom comment.
+                     */
+                }
+                "), skipComments: false, allowJsonComments: true, maxKeySize: 1024),
+                StreamStart,
+                FlowMappingStart,
+                StandaloneComment("\n     * Top comment.\n     "),
+                StandaloneComment("0"),
+                StandaloneComment("1"),
+                Key,
+                DoubleQuotedScalar("foo"),
+                StandaloneComment("2"),
+                StandaloneComment("3"),
+                Value,
+                StandaloneComment("4"),
+                StandaloneComment("5"),
+                PlainScalar("false"),
+                StandaloneComment("6"),
+                StandaloneComment("7"),
+                FlowEntry,
+                InlineComment("8"),
+                StandaloneComment("Middle comment."),
+                StandaloneComment("9"),
+                Key,
+                DoubleQuotedScalar("bar"),
+                StandaloneComment("10"),
+                Value,
+                StandaloneComment("11"),
+                PlainScalar("true"),
+                InlineComment("12"),
+                StandaloneComment("\n     * Bottom comment.\n     "),
                 FlowMappingEnd,
                 StreamEnd);
         }
