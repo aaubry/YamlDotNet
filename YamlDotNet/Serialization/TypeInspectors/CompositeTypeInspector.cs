@@ -103,5 +103,22 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             return parsableInspector.Parse(value, expectedType);
         }
+
+        public override bool HasImplicitStringConversion(Type type)
+        {
+            return typeInspectors.Any(i => i.HasImplicitStringConversion(type));
+        }
+
+        public override string ConvertToString(object value)
+        {
+            var convertibleInspector = typeInspectors.FirstOrDefault(i => i.HasImplicitStringConversion(value.GetType()));
+
+            if (convertibleInspector == null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), $"No inspector with an implicit string conversion for type {value.GetType().FullName} was found.");
+            }
+
+            return convertibleInspector.ConvertToString(value);
+        }
     }
 }

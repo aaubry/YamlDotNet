@@ -19,11 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.Utilities;
 
@@ -33,24 +29,14 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
     {
         private readonly TypeConverterCache typeConverters;
         private readonly ObjectSerializer nestedObjectSerializer;
+        private readonly ITypeInspector typeInspector;
 
-        private static readonly ConcurrentDictionary<Type, MethodInfo?> ImplicitToStringCache = new();
-
-        private static MethodInfo? FindImplicitToStringOperator(Type type) =>
-            ImplicitToStringCache.GetOrAdd(type, t =>
-                t.GetPublicStaticMethods()
-                 .FirstOrDefault(m =>
-                     m.IsSpecialName
-                     && m.Name == "op_Implicit"
-                     && m.ReturnType == typeof(string)
-                     && m.GetParameters() is { Length: 1 } p
-                     && p[0].ParameterType.IsAssignableFrom(t)));
-
-        public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
+        public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer, ITypeInspector typeInspector)
             : base(nextVisitor)
         {
             this.typeConverters = new TypeConverterCache(typeConverters);
             this.nestedObjectSerializer = nestedObjectSerializer;
+            this.typeInspector = typeInspector;
         }
 
         public override bool Enter(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IEmitter context, ObjectSerializer serializer)
@@ -83,10 +69,9 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
             }
 #pragma warning restore
 
-            var implicitToString = FindImplicitToStringOperator(value.Type);
-            if (implicitToString != null && value.Value != null)
+            if (value.Value != null && typeInspector.HasImplicitStringConversion(value.Value.GetType()))
             {
-                var str = (string)implicitToString.Invoke(null, [value.Value])!;
+                var str = typeInspector.ConvertToString(value.Value);
                 nestedObjectSerializer(str, typeof(string));
                 return false;
             }

@@ -50,5 +50,9 @@ namespace YamlDotNet.Serialization.TypeInspectors
         public override bool HasParseMethod(Type type) => this.innerTypeDescriptor.HasParseMethod(type);
 
         public override object? Parse(string value, Type expectedType) => this.innerTypeDescriptor.Parse(value, expectedType);
+
+        public override bool HasImplicitStringConversion(Type type) => this.innerTypeDescriptor.HasImplicitStringConversion(type);
+
+        public override string ConvertToString(object value) => this.innerTypeDescriptor.ConvertToString(value);
     }
 }

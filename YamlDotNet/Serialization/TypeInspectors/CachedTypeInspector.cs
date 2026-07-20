@@ -37,6 +37,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, string>> enumNameCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, string>>();
         private readonly ConcurrentDictionary<object, string> enumValueCache = new ConcurrentDictionary<object, string>();
         private readonly ConcurrentDictionary<Type, bool> hasParseMethodCache = new ConcurrentDictionary<Type, bool>();
+        private readonly ConcurrentDictionary<Type, bool> hasImplicitStringConversionCache = new ConcurrentDictionary<Type, bool>();
 
         public CachedTypeInspector(ITypeInspector innerTypeDescriptor)
         {
@@ -83,5 +84,13 @@ namespace YamlDotNet.Serialization.TypeInspectors
         }
 
         public override object? Parse(string value, Type expectedType) => innerTypeDescriptor.Parse(value, expectedType);
+
+        public override bool HasImplicitStringConversion(Type type)
+        {
+            return hasImplicitStringConversionCache.GetOrAdd(type, static (t, typeDescriptor) =>
+                typeDescriptor.HasImplicitStringConversion(t), innerTypeDescriptor);
+        }
+
+        public override string ConvertToString(object value) => innerTypeDescriptor.ConvertToString(value);
     }
 }

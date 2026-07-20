@@ -80,5 +80,19 @@ namespace YamlDotNet.Serialization
         /// <param name="expectedType">The type to convert the string to.</param>
         /// <returns>An instance of the specified type.</returns>
         object? Parse(string value, Type expectedType);
+
+        /// <summary>
+        /// Indicates whether the specified type declares a public static implicit conversion operator to <see cref="string"/>.
+        /// </summary>
+        /// <param name="type">The type to check for an implicit string conversion operator.</param>
+        /// <returns>True if the type has an implicit string conversion operator; otherwise, false.</returns>
+        bool HasImplicitStringConversion(Type type);
+
+        /// <summary>
+        /// Converts the specified value to a string using its public static implicit conversion operator.
+        /// </summary>
+        /// <param name="value">The value to convert. Its runtime type must declare an implicit string conversion operator.</param>
+        /// <returns>The value converted to a string.</returns>
+        string ConvertToString(object value);
     }
 }

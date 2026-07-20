@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -31,6 +32,18 @@ namespace YamlDotNet.Serialization.TypeInspectors
 {
     public abstract class ReflectionTypeInspector : TypeInspectorSkeleton
     {
+        private static readonly ConcurrentDictionary<Type, MethodInfo?> ImplicitStringConversionCache = new();
+
+        private static MethodInfo? FindImplicitStringConversion(Type type) =>
+            ImplicitStringConversionCache.GetOrAdd(type, static t =>
+                t.GetPublicStaticMethods()
+                 .FirstOrDefault(m =>
+                     m.IsSpecialName
+                     && m.Name == "op_Implicit"
+                     && m.ReturnType == typeof(string)
+                     && m.GetParameters() is { Length: 1 } p
+                     && p[0].ParameterType.IsAssignableFrom(t)));
+
         public override string GetEnumName(Type enumType, string name)
         {
 #if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
@@ -83,6 +96,21 @@ namespace YamlDotNet.Serialization.TypeInspectors
             }
 
             return method.Invoke(null, new object[] { value });
+        }
+
+        public override bool HasImplicitStringConversion(Type type) => FindImplicitStringConversion(type) != null;
+
+        public override string ConvertToString(object value)
+        {
+            var type = value.GetType();
+            var method = FindImplicitStringConversion(type);
+
+            if (method == null)
+            {
+                throw new InvalidOperationException($"Type '{type.FullName}' does not have an implicit string conversion operator.");
+            }
+
+            return (string)method.Invoke(null, new object[] { value })!;
         }
     }
 }

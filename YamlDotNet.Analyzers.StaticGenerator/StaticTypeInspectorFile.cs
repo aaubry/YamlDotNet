@@ -194,8 +194,51 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("throw new InvalidOperationException($\"Type '{expectedType.FullName}' does not have a static Parse method.\");");
             UnIndent(); Write("}");
 
+            Write("public bool HasImplicitStringConversion(Type type)");
+            Write("{"); Indent();
+            foreach (var o in syntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                if (HasImplicitStringConversion(classObject.ModuleSymbol))
+                {
+                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}))");
+                    Write("{"); Indent();
+                    Write("return true;");
+                    UnIndent(); Write("}");
+                }
+            }
+            Write("return false;");
+            UnIndent(); Write("}");
+
+            Write("public string ConvertToString(object value)");
+            Write("{"); Indent();
+            Write("var type = value.GetType();");
+            foreach (var o in syntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                if (HasImplicitStringConversion(classObject.ModuleSymbol))
+                {
+                    var typeName = classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty);
+                    Write($"if (type == typeof({typeName}))");
+                    Write("{"); Indent();
+                    Write($"return (string)({typeName})value;");
+                    UnIndent(); Write("}");
+                }
+            }
+            Write("throw new InvalidOperationException($\"Type '{type.FullName}' does not have an implicit string conversion operator.\");");
+            UnIndent(); Write("}");
+
             UnIndent(); Write("}");
         }
+
+        private static bool HasImplicitStringConversion(ITypeSymbol type) =>
+            type.GetMembers("op_Implicit")
+                .OfType<IMethodSymbol>()
+                .Any(m => m.MethodKind == MethodKind.Conversion &&
+                        m.IsStatic &&
+                        m.DeclaredAccessibility == Accessibility.Public &&
+                        m.ReturnType.SpecialType == SpecialType.System_String &&
+                        m.Parameters.Length == 1);
 
         private void WritePropertyDescriptor(string name, ITypeSymbol type, bool isReadonly, ImmutableArray<AttributeData> attributes, bool isRequired, char finalChar)
         {

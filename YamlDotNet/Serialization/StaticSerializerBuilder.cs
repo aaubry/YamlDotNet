@@ -79,7 +79,7 @@ namespace YamlDotNet.Serialization
             {
                 {
                     typeof(CustomSerializationObjectGraphVisitor),
-                    args => new CustomSerializationObjectGraphVisitor(args.InnerVisitor, args.TypeConverters, args.NestedObjectSerializer)
+                    args => new CustomSerializationObjectGraphVisitor(args.InnerVisitor, args.TypeConverters, args.NestedObjectSerializer, BuildTypeInspector())
                 },
                 {
                     typeof(AnchorAssigningObjectGraphVisitor),
