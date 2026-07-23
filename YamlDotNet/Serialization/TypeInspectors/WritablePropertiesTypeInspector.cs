@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -65,6 +66,7 @@ namespace YamlDotNet.Serialization.TypeInspectors
         {
             private readonly PropertyInfo propertyInfo;
             private readonly ITypeResolver typeResolver;
+            private ConcurrentDictionary<Type, Attribute?>? customAttributeCache;
 
             public ReflectionPropertyDescriptor(PropertyInfo propertyInfo, ITypeResolver typeResolver)
             {
@@ -95,8 +97,16 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
             public T? GetCustomAttribute<T>() where T : Attribute
             {
-                var attributes = propertyInfo.GetAllCustomAttributes<T>();
-                return (T?)attributes.FirstOrDefault();
+                // See ReadablePropertiesTypeInspector.ReflectionPropertyDescriptor.GetCustomAttribute
+                // for why the reflection result is cached per descriptor.
+                var cache = customAttributeCache ??= new ConcurrentDictionary<Type, Attribute?>();
+                if (!cache.TryGetValue(typeof(T), out var attribute))
+                {
+                    attribute = (T?)propertyInfo.GetAllCustomAttributes<T>().FirstOrDefault();
+                    cache[typeof(T)] = attribute;
+                }
+
+                return (T?)attribute;
             }
 
             public IObjectDescriptor Read(object target)
