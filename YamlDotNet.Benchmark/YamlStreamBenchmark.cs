@@ -24,7 +24,6 @@ using YamlDotNet.RepresentationModel;
 
 namespace YamlDotNet.Benchmark;
 
-[MemoryDiagnoser]
 public class YamlStreamBenchmark
 {
     private string yamlString = "";

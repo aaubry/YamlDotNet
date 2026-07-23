@@ -19,16 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System.IO.Compression;
 using System.Text;
 using BenchmarkDotNet.Attributes;
-using FastSerialization;
-using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 
 namespace YamlDotNet.Benchmark;
 
-[MemoryDiagnoser]
 public class BigFileBenchmark
 {
     private string yamlString = "";
