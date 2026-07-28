@@ -176,6 +176,11 @@ namespace YamlDotNet.Serialization.EventEmitters
                         {
                             suggestedStyle = ScalarStyle.DoubleQuoted;
                         }
+                        else if (ResolvesToNull(eventInfo.RenderedValue))
+                        {
+                            // A plain null token would deserialize back to null, losing the string (#493).
+                            suggestedStyle = ScalarStyle.DoubleQuoted;
+                        }
                         else
                         {
                             suggestedStyle = defaultScalarStyle;
@@ -242,5 +247,9 @@ namespace YamlDotNet.Serialization.EventEmitters
 
             return isSpecialStringValue_Regex?.IsMatch(value) ?? false;
         }
+
+        // Mirrors the plain tokens NullNodeDeserializer resolves to null (empty is already quoted).
+        private static bool ResolvesToNull(string value)
+            => value == "~" || value == "null" || value == "Null" || value == "NULL";
     }
 }

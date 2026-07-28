@@ -2506,6 +2506,51 @@ Cycle: *o0");
             Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
         }
 
+        [Theory]
+        [InlineData("~")]
+        [InlineData("null")]
+        [InlineData("Null")]
+        [InlineData("NULL")]
+        public void StringsThatResolveToNullAreQuotedByDefault(string input)
+        {
+            // Without quoting these round-trip back to null even for a string target (#493).
+            var yaml = Serializer.Serialize(input);
+            Assert.Equal($"\"{input}\"{Environment.NewLine}", yaml);
+            Assert.Equal(input, Deserializer.Deserialize<string>(yaml));
+        }
+
+        [Theory]
+        [InlineData("nUll")]
+        [InlineData("nul")]
+        [InlineData("nullish")]
+        [InlineData("hello")]
+        public void StringsThatOnlyResembleNullAreNotQuoted(string input)
+        {
+            var yaml = Serializer.Serialize(input);
+            Assert.Equal($"{input}{Environment.NewLine}", yaml);
+            Assert.Equal(input, Deserializer.Deserialize<string>(yaml));
+        }
+
+        [Fact]
+        public void ActualNullStillSerializesAsBareNull()
+        {
+            string value = null;
+            var yaml = Serializer.Serialize(value);
+            Assert.Null(Deserializer.Deserialize<string>(yaml));
+        }
+
+        [Theory]
+        [InlineData("~")]
+        [InlineData("null")]
+        [InlineData("Null")]
+        [InlineData("NULL")]
+        public void NullTokenDictionaryValuesRoundtripAsStrings(string input)
+        {
+            var data = new Dictionary<string, string> { { "k", input } };
+            var result = DoRoundtripFromObjectTo<Dictionary<string, string>>(data);
+            Assert.Equal(input, result["k"]);
+        }
+
         public static IEnumerable<object[]> Yaml1_1SpecialStringsData = new[]
         {
             "-.inf", "-.Inf", "-.INF", "-0", "-0100_200", "-0b101", "-0x30", "-190:20:30", "-23", "-3.14",
