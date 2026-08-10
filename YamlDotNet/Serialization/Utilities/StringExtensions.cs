@@ -32,6 +32,11 @@ namespace YamlDotNet.Serialization.Utilities
     {
         private static string ToCamelOrPascalCase(string str, Func<char, char> firstLetterTransform)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
             var text = Regex.Replace(str, "([_\\-])(?<char>[a-z])", match => match.Groups["char"].Value.ToUpperInvariant(), RegexOptions.IgnoreCase);
             return firstLetterTransform(text[0]) + text.Substring(1);
         }
@@ -70,6 +75,11 @@ namespace YamlDotNet.Serialization.Utilities
         /// <returns>Converted string</returns>
         public static string FromCamelCase(this string str, string separator)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
             // Ensure first letter is always lowercase
             str = char.ToLower(str[0], CultureInfo.InvariantCulture) + str.Substring(1);
 
