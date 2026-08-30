@@ -355,9 +355,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
         private object? AttemptUnknownTypeDeserialization(Scalar value)
         {
-            if (value.Style == ScalarStyle.SingleQuoted ||
-                value.Style == ScalarStyle.DoubleQuoted ||
-                value.Style == ScalarStyle.Folded)
+            if (value.Style != ScalarStyle.Plain)
             {
                 return value.Value;
             }

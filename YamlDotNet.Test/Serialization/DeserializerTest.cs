@@ -161,6 +161,20 @@ X:
             Assert.Equal(string.Empty, result.Value);
         }
 
+        [Theory]
+        [InlineData("Value: |-\n", "")]
+        [InlineData("Value: |-\n  true\n", "true")]
+        [InlineData("Value: |-\n  null\n", "null")]
+        [InlineData("Value: |-\n  42\n", "42")]
+        public void LiteralScalarsArentTypeInferred(string yaml, string expected)
+        {
+            var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+            var result = deserializer.Deserialize<IDictionary<string, object>>(yaml);
+
+            var actual = Assert.IsType<string>(result["Value"]);
+            Assert.Equal(expected, actual);
+        }
+
         [Fact]
         public void KeyAnchorIsHandledWithTypeDeserialization()
         {
