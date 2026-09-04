@@ -39,7 +39,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             Write("public override object Create(Type type)");
             Write("{"); Indent();
-            foreach (var o in syntaxReceiver.Classes.Where(c => !c.Value.IsArray && c.Value.HasParameterlessConstructor))
+            foreach (var o in syntaxReceiver.Classes.Where(c => !c.Value.IsArray))
             {
                 var classObject = o.Value;
                 if (o.Value.IsListOverride)
