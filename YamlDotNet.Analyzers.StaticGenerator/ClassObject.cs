@@ -21,12 +21,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace YamlDotNet.Analyzers.StaticGenerator
 {
     public class ClassObject
     {
+        public bool HasParameterlessConstructor { get; }
         public List<IFieldSymbol> FieldSymbols { get; }
         public string FullName { get; }
         public string GuidSuffix { get; }
@@ -51,6 +53,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             bool isListOverride = false,
             bool isDictionaryOverride = false)
         {
+            HasParameterlessConstructor = moduleSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.InstanceConstructors.Any(c => c.Parameters.Length == 0);
             FieldSymbols = new List<IFieldSymbol>();
             PropertySymbols = new List<IPropertySymbol>();
             FullName = moduleSymbol.GetFullName() ?? string.Empty;
