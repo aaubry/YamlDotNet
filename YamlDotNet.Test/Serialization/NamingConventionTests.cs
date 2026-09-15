@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
 using YamlDotNet.Serialization;
@@ -75,6 +76,22 @@ namespace YamlDotNet.Test.Serialization
         public void AppliesLowerCaseConvention(string expectedName, string input)
         {
             ShouldApplyConventionGiven(input, expectedName, LowerCaseNamingConvention.Instance);
+        }
+
+        public static IEnumerable<object[]> AllNamingConventions()
+        {
+            yield return new object[] { CamelCaseNamingConvention.Instance };
+            yield return new object[] { PascalCaseNamingConvention.Instance };
+            yield return new object[] { HyphenatedNamingConvention.Instance };
+            yield return new object[] { UnderscoredNamingConvention.Instance };
+            yield return new object[] { LowerCaseNamingConvention.Instance };
+        }
+
+        [Theory]
+        [MemberData(nameof(AllNamingConventions))]
+        public void ApplyingConventionToEmptyStringReturnsEmptyString(INamingConvention convention)
+        {
+            convention.Apply(string.Empty).Should().Be(string.Empty);
         }
 
         private void ShouldApplyConventionGiven(string input, string expectedName, INamingConvention convention)
