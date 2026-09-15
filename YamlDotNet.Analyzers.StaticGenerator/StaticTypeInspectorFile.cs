@@ -65,7 +65,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 }
                 foreach (var property in classObject.PropertySymbols)
                 {
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ',');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null || property.SetMethod.IsInitOnly, property.GetAttributes(), property.IsRequired, ',');
                 }
                 UnIndent(); Write("};");
                 UnIndent(); Write("}");
@@ -91,7 +91,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 foreach (var property in classObject.PropertySymbols)
                 {
                     Write($"if (name == \"{property.Name}\") return ", false);
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ';');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null || property.SetMethod.IsInitOnly, property.GetAttributes(), property.IsRequired, ';');
                 }
                 Write("if (caseInsensitivePropertyMatching)");
                 Write("{"); Indent();
@@ -103,7 +103,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 foreach (var property in classObject.PropertySymbols)
                 {
                     Write($"if (name.Equals(\"{property.Name}\", System.StringComparison.OrdinalIgnoreCase)) return ");
-                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null, property.GetAttributes(), property.IsRequired, ';');
+                    WritePropertyDescriptor(property.Name, property.Type, property.SetMethod == null || property.SetMethod.IsInitOnly, property.GetAttributes(), property.IsRequired, ';');
                 }
 
                 UnIndent(); Write("}");

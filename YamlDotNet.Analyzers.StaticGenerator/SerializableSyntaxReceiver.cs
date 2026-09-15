@@ -106,7 +106,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
                     if (member is IPropertySymbol propertySymbol)
                     {
-                        if (!classObject.PropertySymbols.ContainsName(propertySymbol))
+                        if (!propertySymbol.IsIndexer && !classObject.PropertySymbols.ContainsName(propertySymbol))
                         {
                             classObject.PropertySymbols.Add(propertySymbol);
                             CheckForSupportedGeneric(propertySymbol.Type);
