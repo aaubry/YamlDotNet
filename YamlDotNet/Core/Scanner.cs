@@ -26,6 +26,7 @@ using System.IO;
 using System.Text;
 using YamlDotNet.Core.ObjectPool;
 using YamlDotNet.Core.Tokens;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Core
 {
@@ -102,6 +103,11 @@ namespace YamlDotNet.Core
             get; private set;
         }
 
+        internal bool AllowJsonComments
+        {
+            get; private set;
+        }
+
         /// <summary>
         /// Gets the current token.
         /// </summary>
@@ -132,6 +138,12 @@ namespace YamlDotNet.Core
             cursor = new Cursor();
             SkipComments = skipComments;
             this.maxKeySize = maxKeySize;
+        }
+
+        internal Scanner(TextReader input, bool skipComments, bool allowJsonComments, int maxKeySize)
+            : this(input, skipComments, maxKeySize)
+        {
+            AllowJsonComments = allowJsonComments;
         }
 
         /// <summary>
@@ -508,7 +520,10 @@ namespace YamlDotNet.Core
             // The last rule is more restrictive than the specification requires.
 
 
-            var isInvalidPlainScalarCharacter = analyzer.IsWhiteBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
+            var isInvalidPlainScalarCharacter =
+                analyzer.IsWhiteBreakOrZero() ||
+                analyzer.Check("-?:,[]{}#&*!|>'\"%@`") ||
+                AllowJsonComments && CheckJsonComment();
 
             var isPlainScalar =
                 !isInvalidPlainScalarCharacter ||
@@ -563,6 +578,16 @@ namespace YamlDotNet.Core
         private bool CheckWhiteSpace()
         {
             return analyzer.Check(' ') || ((flowLevel > 0 || !simpleKeyAllowed) && analyzer.Check('\t'));
+        }
+
+        private bool CheckComment()
+        {
+            return analyzer.Check('#') || AllowJsonComments && CheckJsonComment();
+        }
+
+        private bool CheckJsonComment()
+        {
+            return analyzer.Check('/') && analyzer.Check("/*", 1);
         }
 
         private void Skip()
@@ -636,36 +661,83 @@ namespace YamlDotNet.Core
 
         private void ProcessComment()
         {
-            if (analyzer.Check('#'))
+            // Only JSON comments can be stacked next to each other on a single line,
+            // so unless they are enabled, there's no need to check for a comment more than once.
+            while (ProcessNextComment() && AllowJsonComments) { }
+        }
+
+        private bool ProcessNextComment()
+        {
+            var isJsonComment = false;
+            var isMultilineComment = false;
+            var isComment =
+                analyzer.Check('#') ||
+                AllowJsonComments && analyzer.Check('/') &&
+                 (isJsonComment = (isMultilineComment = analyzer.Check('*', 1)) || analyzer.Check('/', 1));
+
+            if (!isComment)
             {
-                var start = cursor.Mark();
+                return false;
+            }
+            var start = cursor.Mark();
 
-                // Eat '#'
+            // Eat "#", "//", or "/*"
+            Skip();
+            if (isJsonComment)
+            {
                 Skip();
+            }
 
-                // Eat leading whitespace
-                while (analyzer.IsSpace())
+            // Eat leading whitespace
+            while (analyzer.IsSpace())
+            {
+                Skip();
+            }
+
+            using var textBuilder = StringBuilderPool.Rent();
+            var text = textBuilder.Builder;
+            if (isMultilineComment)
+            {
+                // Eat everything until "*/"
+                while (!analyzer.IsZero())
+                {
+                    if (analyzer.Check('*') && analyzer.Check('/', 1))
+                    {
+                        Skip();
+                        Skip();
+                        break;
+                    }
+                    text.Append(ReadCurrentCharacter());
+                }
+
+                // Eat any remaining whitespace in case another comment
+                // follows immediately after this one
+                while (CheckWhiteSpace())
                 {
                     Skip();
                 }
-
-                using var textBuilder = StringBuilderPool.Rent();
-                var text = textBuilder.Builder;
+            }
+            else
+            {
+                // Eat everything until the end of the line
                 while (!analyzer.IsBreakOrZero())
                 {
                     text.Append(ReadCurrentCharacter());
                 }
-
-                if (!SkipComments)
-                {
-                    var isInline = previous != null
-                        && previous.End.Line == start.Line
-                        && previous.End.Column != 1
-                        && !(previous is StreamStart);
-
-                    tokens.Enqueue(new Comment(text.ToString(), isInline, start, cursor.Mark()));
-                }
             }
+
+            if (!SkipComments)
+            {
+                var end = cursor.Mark();
+                var isInline = previous != null
+                    && previous.End.Line == start.Line
+                    && previous.End.Column != 1
+                    && !(previous is StreamStart)
+                    && (!isMultilineComment || start.Line == end.Line && analyzer.IsBreakOrZero());
+
+                tokens.Enqueue(new Comment(text.ToString(), isInline, start, end));
+            }
+            return true;
         }
 
         private void FetchStreamStart()
@@ -808,7 +880,7 @@ namespace YamlDotNet.Core
 
                 default:
                     // warning: skipping reserved directive line
-                    while (!analyzer.EndOfInput && !analyzer.Check('#') && !analyzer.IsBreak())
+                    while (!analyzer.EndOfInput && !CheckComment() && !analyzer.IsBreak())
                     {
                         Skip();
                     }
@@ -872,7 +944,7 @@ namespace YamlDotNet.Core
             else
             {
                 Token? errorToken = null;
-                while (!analyzer.EndOfInput && !analyzer.IsBreak() && !analyzer.Check('#'))
+                while (!analyzer.EndOfInput && !analyzer.IsBreak() && !CheckComment())
                 {
                     if (!analyzer.IsWhite())
                     {
@@ -2148,7 +2220,7 @@ namespace YamlDotNet.Core
 
                 // Check for a comment.
 
-                if (analyzer.Check('#'))
+                if (CheckComment())
                 {
                     if (indent < 0 && flowLevel == 0)
                     {
@@ -2174,6 +2246,13 @@ namespace YamlDotNet.Core
                         {
                             tokens.Enqueue(new Error("While scanning a plain scalar value, found invalid mapping.", cursor.Mark(), cursor.Mark()));
                         }
+                        break;
+                    }
+
+                    // Check for a comment that may end a JSON-style literal.
+
+                    if (AllowJsonComments && flowLevel > 0 && CheckJsonComment() && JsonHelper.IsJsonLiteral(value))
+                    {
                         break;
                     }
 
