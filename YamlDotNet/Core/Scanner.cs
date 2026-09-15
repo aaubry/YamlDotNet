@@ -102,6 +102,11 @@ namespace YamlDotNet.Core
             get; private set;
         }
 
+        public bool JsonComments
+        {
+            get; set; // Only way to set right now
+        }
+
         /// <summary>
         /// Gets the current token.
         /// </summary>
@@ -497,6 +502,7 @@ namespace YamlDotNet.Core
             //      '-', '?', ':', ',', '[', ']', '{', '}',
             //      '#', '&', '*', '!', '|', '>', '\'', '\"',
             //      '%', '@', '`'.
+            //      Need to also block "//" when JSON Comments are enabled
 
             // In the block context (and, for the '-' indicator, in the flow context
             // too), it may also start with the characters
@@ -508,7 +514,7 @@ namespace YamlDotNet.Core
             // The last rule is more restrictive than the specification requires.
 
 
-            var isInvalidPlainScalarCharacter = analyzer.IsWhiteBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`");
+            var isInvalidPlainScalarCharacter = analyzer.IsWhiteBreakOrZero() || analyzer.Check("-?:,[]{}#&*!|>'\"%@`") || CheckJsonComment();
 
             var isPlainScalar =
                 !isInvalidPlainScalarCharacter ||
@@ -558,6 +564,11 @@ namespace YamlDotNet.Core
             var end = cursor.Mark();
 
             throw new SyntaxErrorException(start, end, "While scanning for the next token, found character that cannot start any token.");
+        }
+
+        private bool CheckJsonComment()
+        {
+            return JsonComments && analyzer.Check('/') && analyzer.Check('/', 1);
         }
 
         private bool CheckWhiteSpace()
@@ -636,12 +647,22 @@ namespace YamlDotNet.Core
 
         private void ProcessComment()
         {
-            if (analyzer.Check('#'))
+            // Additional check for JSON-style comments (//) to support YAML with comments in JSON style
+            // See https://github.com/aaubry/YamlDotNet/issues/1052 and https://github.com/yaml/www.yaml.org/issues/196
+            bool isYamlComment = analyzer.Check('#');
+            bool isJsonComment = !isYamlComment && CheckJsonComment();
+
+            if (isYamlComment || isJsonComment)
             {
                 var start = cursor.Mark();
 
-                // Eat '#'
+                // Eat '#' or '//'
                 Skip();
+
+                if (isJsonComment)
+                {
+                    Skip();
+                }
 
                 // Eat leading whitespace
                 while (analyzer.IsSpace())
@@ -816,11 +837,11 @@ namespace YamlDotNet.Core
             }
 
             // Eat the rest of the line including any comments.
-
-            while (analyzer.IsWhite())
-            {
-                Skip();
-            }
+            SkipWhitespaces();
+            // while (analyzer.IsWhite())
+            // {
+            //     Skip();
+            // }
 
             ProcessComment();
 
@@ -969,7 +990,7 @@ namespace YamlDotNet.Core
             Token? token, errorToken = null;
             if (isSequenceToken)
             {
-                if (analyzer.Check('#'))
+                if (analyzer.Check('#') || CheckJsonComment())
                 {
                     errorToken = new Error("While scanning a flow sequence end, found invalid comment after ']'.", start, start);
                 }
@@ -1025,7 +1046,7 @@ namespace YamlDotNet.Core
             Skip();
 
             var end = cursor.Mark();
-            if (analyzer.Check('#'))
+            if (analyzer.Check('#') || CheckJsonComment())
             {
                 tokens.Enqueue(new Error("While scanning a flow entry, found invalid comment after comma.", start, end));
                 return;
@@ -1551,17 +1572,18 @@ namespace YamlDotNet.Core
 
             // Check if there is a comment without whitespace after block scalar indicator (yaml-test-suite: X4QW).
 
-            if (analyzer.Check('#'))
+            if (analyzer.Check('#') || CheckJsonComment())
             {
                 throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a block scalar, found a comment without whtespace after '>' indicator.");
             }
 
             // Eat whitespaces and comments to the end of the line.
 
-            while (analyzer.IsWhite())
-            {
-                Skip();
-            }
+            SkipWhitespaces();
+            // while (analyzer.IsWhite())
+            // {
+            //     Skip();
+            // }
 
             ProcessComment();
 
@@ -1787,7 +1809,7 @@ namespace YamlDotNet.Core
             tokens.Enqueue(scalar);
             // Check if there is a comment subsequently after double-quoted scalar without space.
 
-            if (!isSingleQuoted && analyzer.Check('#'))
+            if (!isSingleQuoted && (analyzer.Check('#') || CheckJsonComment()))
             {
                 var start = cursor.Mark();
                 tokens.Enqueue(new Error("While scanning a flow sequence end, found invalid comment after double-quoted scalar.", start, start));
@@ -2148,7 +2170,7 @@ namespace YamlDotNet.Core
 
                 // Check for a comment.
 
-                if (analyzer.Check('#'))
+                if (analyzer.Check('#') || CheckJsonComment())
                 {
                     if (indent < 0 && flowLevel == 0)
                     {
