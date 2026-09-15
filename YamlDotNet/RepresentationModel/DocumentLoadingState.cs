@@ -31,8 +31,16 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     internal class DocumentLoadingState
     {
+        public const int MaxReadDepthDefault = 100;
         private readonly Dictionary<AnchorName, YamlNode> anchors = [];
         private readonly List<YamlNode> nodesWithUnresolvedAliases = [];
+        private int currentDepth;
+        private readonly int maxDepth;
+
+        public DocumentLoadingState(int maxDepth)
+        {
+            this.maxDepth = maxDepth;
+        }
 
         /// <summary>
         /// Adds the specified node to the anchor list.
@@ -99,6 +107,28 @@ namespace YamlDotNet.RepresentationModel
             {
                 node.ResolveAliases(this);
             }
+        }
+
+        /// <summary>
+        /// Increment the depth of the current node nesting. It also tests to make sure the maximum depth is not exceeded.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void Nest()
+        {
+            currentDepth++;
+
+            if (maxDepth > 0 && currentDepth > maxDepth)
+            {
+                throw new InvalidOperationException("The maximum depth has been exceeded.");
+            }
+        }
+
+        /// <summary>
+        /// Decrement the depth of the current node nesting.
+        /// </summary>
+        public void Unnest()
+        {
+            currentDepth--;
         }
     }
 }

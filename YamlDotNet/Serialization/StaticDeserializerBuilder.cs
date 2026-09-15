@@ -122,7 +122,7 @@ namespace YamlDotNet.Serialization
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
 
-            maximumRecursion = 130;
+            maximumRecursion = 100;
         }
 
         protected override StaticDeserializerBuilder Self { get { return this; } }
@@ -461,7 +461,7 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
-        /// Sets the maximum recursion that is allowed while building the object graph. Must be > 0. Default is 130.
+        /// Sets the maximum recursion that is allowed while building the object graph. Must be > 0. Default is 100.
         /// </summary>
         /// <remarks>
         /// Setting this limit is strongly recommended when parsing untrusted input since
@@ -470,7 +470,7 @@ namespace YamlDotNet.Serialization
         /// when the max recursion exception is thrown. Linux OS allows for ~475 with .net 10 and the exception will be
         /// thrown correctly without causing a stack overflow. This does not take into account the depth of
         /// your application call stack. This is if YamlDotNet is called from the top of the stack. Windows with
-        /// .NET 8 only allows for ~130. On .NET 10 and Windows you can safely use ~152.
+        /// .NET 8 only allows for ~130. On .NET 10 and Windows you can safely use ~150.
         /// </remarks>
         public StaticDeserializerBuilder WithMaximumRecursion(int maximumRecursion)
         {

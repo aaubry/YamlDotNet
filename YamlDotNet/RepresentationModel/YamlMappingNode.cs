@@ -51,6 +51,11 @@ namespace YamlDotNet.RepresentationModel
         }
 
         /// <summary>
+        /// Gets or sets the maximum depth for reading the mapping node.
+        /// </summary>
+        public int MaxDepth { get; set; } = DocumentLoadingState.MaxReadDepthDefault;
+
+        /// <summary>
         /// Gets or sets the style of the node.
         /// </summary>
         /// <value>The style.</value>
@@ -381,7 +386,7 @@ namespace YamlDotNet.RepresentationModel
 
         void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
         {
-            Load(parser, new DocumentLoadingState());
+            Load(parser, new DocumentLoadingState(MaxDepth));
         }
 
         void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
