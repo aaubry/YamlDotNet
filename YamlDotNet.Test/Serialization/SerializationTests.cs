@@ -2720,6 +2720,60 @@ Null: true
             Assert.Equal(s, value);
         }
 
+        // The default serializer already quotes a leading/trailing space; a tab is equally
+        // significant but was left plain and lost (or threw) on read-back (#732, #493).
+        public static IEnumerable<object[]> LeadingOrTrailingTabStrings => new[]
+        {
+            new object[] { "\tx" },
+            new object[] { "x\t" },
+            new object[] { "\t" },
+            new object[] { "\t," },
+            new object[] { "\tx\ty" },
+            new object[] { "\thello" },
+            new object[] { " \t " },
+        };
+
+        [Theory]
+        [MemberData(nameof(LeadingOrTrailingTabStrings))]
+        public void LeadingOrTrailingTabRoundtripsWithDefaultSerializer(string value)
+        {
+            var yaml = new SerializerBuilder().Build().Serialize(value);
+            var result = new DeserializerBuilder().Build().Deserialize<string>(yaml);
+            Assert.Equal(value, result);
+        }
+
+        [Fact]
+        public void TabCommaListRoundtripsWithoutThrowing()
+        {
+            // #732: "- \t,\n" is emitted plain, then rejected by the parser as its own output.
+            var value = new List<string> { "\t," };
+            var yaml = new SerializerBuilder().Build().Serialize(value);
+            var result = new DeserializerBuilder().Build().Deserialize<List<string>>(yaml);
+            Assert.Equal(value, result);
+        }
+
+        [Fact]
+        public void InteriorTabStaysPlainAndRoundtrips()
+        {
+            // The fix must not over-reach: an interior tab is safe plain and must stay unquoted.
+            var yaml = new SerializerBuilder().Build().Serialize("x\ty");
+            Assert.DoesNotContain("'", yaml);
+            Assert.DoesNotContain("\"", yaml);
+            var result = new DeserializerBuilder().Build().Deserialize<string>(yaml);
+            Assert.Equal("x\ty", result);
+        }
+
+        [Fact]
+        public void LeadingTrailingSpaceStillRoundtripsUnchanged()
+        {
+            foreach (var value in new[] { " x", "x ", " " })
+            {
+                var yaml = new SerializerBuilder().Build().Serialize(value);
+                var result = new DeserializerBuilder().Build().Deserialize<string>(yaml);
+                Assert.Equal(value, result);
+            }
+        }
+
         [Flags]
         private enum TestEnumAsNumber
         {
