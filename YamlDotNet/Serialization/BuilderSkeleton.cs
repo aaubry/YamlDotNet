@@ -96,6 +96,16 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Calling this will attempt to create an uninitialized instance during deserialization, possibly allowing certain types.
+        /// </summary>
+        /// <remarks>This setting is UNSTABLE.</remarks>
+        public TBuilder EnableUnstableAttemptUninitializedInstance()
+        {
+            settings.UnstableAttemptUninitializedInstance = true;
+            return Self;
+        }
+
+        /// <summary>
         /// Sets the <see cref="INamingConvention" /> that will be used by the (de)serializer.
         /// </summary>
         public TBuilder WithNamingConvention(INamingConvention namingConvention)
