@@ -61,6 +61,7 @@ namespace YamlDotNet.Serialization
         private bool attemptUnknownTypeDeserialization;
         private bool enforceNullability;
         private bool caseInsensitivePropertyMatching;
+        private bool recreateObjectsWhenAlias;
         private int? maximumRecursion;
 
         /// <summary>
@@ -222,6 +223,16 @@ namespace YamlDotNet.Serialization
         public StaticDeserializerBuilder WithEnforceNullability()
         {
             enforceNullability = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Create objects with distinct references (like deep-clone) when expanding aliases.
+        /// </summary>
+        /// <returns></returns>
+        public StaticDeserializerBuilder WithRecreateObjectsWhenAlias()
+        {
+            recreateObjectsWhenAlias = true;
             return this;
         }
 
@@ -407,6 +418,7 @@ namespace YamlDotNet.Serialization
             {
                 throw new KeyNotFoundException($"Tag '{tag}' is not registered");
             }
+
             return this;
         }
 
@@ -457,7 +469,7 @@ namespace YamlDotNet.Serialization
                 valueDeserializer = new MaximumRecursionValueDeserializer(valueDeserializer, maximumRecursion.Value);
             }
 
-            return new AliasValueDeserializer(valueDeserializer);
+            return new AliasValueDeserializer(valueDeserializer, recreateObjectsWhenAlias);
         }
 
         /// <summary>
