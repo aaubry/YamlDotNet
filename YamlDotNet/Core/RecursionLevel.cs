@@ -43,11 +43,11 @@ namespace YamlDotNet.Core
         /// and throws <see cref="MaximumRecursionLevelReachedException"/>
         /// if <see cref="Maximum"/> is reached.
         /// </summary>
-        public void Increment()
+        public void Increment(in Mark start, in Mark end)
         {
             if (!TryIncrement())
             {
-                throw new MaximumRecursionLevelReachedException("Maximum level of recursion reached");
+                throw new MaximumRecursionLevelReachedException(start, end, "Maximum level of recursion reached");
             }
         }
 

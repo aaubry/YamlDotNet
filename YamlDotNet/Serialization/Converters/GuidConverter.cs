@@ -39,18 +39,27 @@ namespace YamlDotNet.Serialization.Converters
 
         public bool Accepts(Type type)
         {
-            return type == typeof(Guid);
+            return type == typeof(Guid) || type == typeof(Guid?);
         }
 
         public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             var value = parser.Consume<Scalar>().Value;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null!;
+            }
             return new Guid(value);
         }
 
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var guid = (Guid)value!;
+            if (value == null)
+            {
+                emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, "", ScalarStyle.Plain, true, false));
+                return;
+            }
+            var guid = (Guid)value;
             emitter.Emit(new Scalar(AnchorName.Empty, TagName.Empty, guid.ToString("D"), jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
         }
     }

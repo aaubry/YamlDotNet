@@ -36,7 +36,7 @@ namespace YamlDotNet.RepresentationModel
     /// </summary>
     public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IYamlConvertible
     {
-        private readonly OrderedDictionary<YamlNode, YamlNode> children = [];
+        private readonly Helpers.OrderedDictionary<YamlNode, YamlNode> children = [];
 
         /// <summary>
         /// Gets the children of the current node.
@@ -49,6 +49,11 @@ namespace YamlDotNet.RepresentationModel
                 return children;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the maximum depth for reading the mapping node.
+        /// </summary>
+        public int MaxDepth { get; set; } = DocumentLoadingState.MaxReadDepthDefault;
 
         /// <summary>
         /// Gets or sets the style of the node.
@@ -303,7 +308,7 @@ namespace YamlDotNet.RepresentationModel
         /// </summary>
         internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
         {
-            level.Increment();
+            level.Increment(Start, End);
             yield return this;
             foreach (var child in children)
             {
@@ -381,7 +386,7 @@ namespace YamlDotNet.RepresentationModel
 
         void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
         {
-            Load(parser, new DocumentLoadingState());
+            Load(parser, new DocumentLoadingState(MaxDepth));
         }
 
         void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)

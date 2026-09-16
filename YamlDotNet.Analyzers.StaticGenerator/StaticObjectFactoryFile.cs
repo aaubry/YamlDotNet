@@ -57,7 +57,31 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 }
                 else
                 {
-                    Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)})) return new {classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}();");
+                    var fullName = classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty);
+                    var requiredMembers = new System.Collections.Generic.List<string>();
+                    foreach (var prop in classObject.PropertySymbols)
+                    {
+                        if (prop.IsRequired)
+                        {
+                            requiredMembers.Add($"{prop.Name} = default!");
+                        }
+                    }
+                    foreach (var field in classObject.FieldSymbols)
+                    {
+                        if (field.IsRequired)
+                        {
+                            requiredMembers.Add($"{field.Name} = default!");
+                        }
+                    }
+                    if (requiredMembers.Count > 0)
+                    {
+                        var initializer = string.Join(", ", requiredMembers);
+                        Write($"if (type == typeof({fullName})) return new {fullName}() {{ {initializer} }};");
+                    }
+                    else
+                    {
+                        Write($"if (type == typeof({fullName})) return new {fullName}();");
+                    }
                 }
                 //always support a list and dictionary of the type
                 Write($"if (type == typeof(System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>)) return new System.Collections.Generic.List<{classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}>();");
@@ -65,7 +89,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
             // always support dictionary when deserializing object
             Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return new System.Collections.Generic.Dictionary<object, object>();");
-            Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            Write($"throw new InvalidOperationException($\"Type '{{type.FullName}}' is not registered in the YamlDotNet static context. Add [YamlSerializable(typeof({{type.Name}}))] to your static context class.\");");
             UnIndent(); Write("}");
 
             Write("public override Array CreateArray(Type type, int count)");
@@ -82,7 +106,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                     Write($"if (type == typeof({classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty)}[])) return new {classObject.ModuleSymbol.GetFullName(false).Replace("?", string.Empty)}[count];");
                 }
             }
-            Write($"throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            Write($"throw new InvalidOperationException($\"Type '{{type.FullName}}' is not registered in the YamlDotNet static context. Add [YamlSerializable(typeof({{type.Name}}))] to your static context class.\");");
             UnIndent(); Write("}");
 
             Write("public override bool IsDictionary(Type type)");
@@ -170,7 +194,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
             // always support dictionary object
             Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return typeof(object);");
-            Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            Write($"throw new InvalidOperationException($\"Type '{{type.FullName}}' is not registered in the YamlDotNet static context. Add [YamlSerializable(typeof({{type.Name}}))] to your static context class.\");");
             UnIndent(); Write("}");
 
             Write("public override Type GetValueType(Type type)");
@@ -211,7 +235,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             }
 
             Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return typeof(object);");
-            Write("throw new ArgumentOutOfRangeException(\"Unknown type: \" + type.ToString());");
+            Write($"throw new InvalidOperationException($\"Type '{{type.FullName}}' is not registered in the YamlDotNet static context. Add [YamlSerializable(typeof({{type.Name}}))] to your static context class.\");");
             UnIndent(); Write("}");
             WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
             WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);

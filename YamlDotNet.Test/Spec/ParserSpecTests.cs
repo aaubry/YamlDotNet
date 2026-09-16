@@ -39,17 +39,17 @@ namespace YamlDotNet.Test.Spec
 
         private static readonly List<string> ignoredSuites = new List<string>
         {
-            "L383" // this is a multi document test, yamldotnet does not support it.
+            // no known ignored cases as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
         private static readonly List<string> knownFalsePositives = new List<string>
         {
-            // no false-positives known as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
+            // no known false-positives as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
         private static readonly List<string> knownParserDesyncInErrorCases = new List<string>
         {
-            "C2SP" // this is supposed to error out, which it does, just not in the same spot.
+            // no known parser-desync error as of https://github.com/yaml/yaml-test-suite/releases/tag/data-2020-02-11
         };
 
         [Theory, ClassData(typeof(ParserSpecTestsData))]

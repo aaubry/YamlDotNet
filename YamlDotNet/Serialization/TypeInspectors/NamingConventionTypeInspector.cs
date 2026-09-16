@@ -57,5 +57,9 @@ namespace YamlDotNet.Serialization.TypeInspectors
                     return new PropertyDescriptor(p) { Name = namingConvention.Apply(p.Name) };
                 });
         }
+
+        public override bool HasParseMethod(Type type) => this.innerTypeDescriptor.HasParseMethod(type);
+
+        public override object? Parse(string value, Type expectedType) => this.innerTypeDescriptor.Parse(value, expectedType);
     }
 }

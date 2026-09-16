@@ -17,29 +17,22 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
     - name: Checkout the repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
         ref: ${{ github.event.inputs.ref }}
 
-# Make sure the required versions of dotnet core on the server
-    - name: Install dotnet 3.1
-      uses: actions/setup-dotnet@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
-        dotnet-version: 3.1.x
-
-    - name: Install dotnet 6.0
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
-
-    - name: Install dotnet 8.0
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
+        dotnet-version: |
+          8.0.x
+          10.0.x
 
     - name: Install GitVersion.Tool
-      run: dotnet tool install --global GitVersion.Tool
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 6.5.1
+        dotnet tool restore
 
     - name: Create draft release
       env:

@@ -34,6 +34,11 @@ namespace YamlDotNet.RepresentationModel
         private readonly List<YamlDocument> documents = [];
 
         /// <summary>
+        /// Gets or sets the maximum depth for reading the YAML stream.
+        /// </summary>
+        public int MaxDepth { get; set; } = DocumentLoadingState.MaxReadDepthDefault;
+
+        /// <summary>
         /// Gets the documents inside the stream.
         /// </summary>
         /// <value>The documents.</value>
@@ -98,7 +103,7 @@ namespace YamlDotNet.RepresentationModel
             parser.Consume<StreamStart>();
             while (!parser.TryConsume<StreamEnd>(out var _))
             {
-                var document = new YamlDocument(parser);
+                var document = new YamlDocument(parser, MaxDepth);
                 documents.Add(document);
             }
         }

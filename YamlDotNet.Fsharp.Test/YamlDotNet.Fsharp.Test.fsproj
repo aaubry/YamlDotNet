@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net6.0;net47</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net10.0;net8.0;net4.7</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Windows'))">net10.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>..\YamlDotNet.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

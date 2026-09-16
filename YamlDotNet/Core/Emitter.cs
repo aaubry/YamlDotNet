@@ -399,7 +399,7 @@ namespace YamlDotNet.Core
                     lineBreaks = true;
                 }
 
-                if (buffer.IsSpace())
+                if (buffer.IsWhite())
                 {
                     if (isFirst)
                     {

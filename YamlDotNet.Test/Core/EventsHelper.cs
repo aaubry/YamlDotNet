@@ -170,6 +170,7 @@ namespace YamlDotNet.Test.Core
             private string tag;
             private bool plainImplicit;
             private bool quotedImplicit;
+            private bool isKey;
 
             public ScalarBuilder(string text, ScalarStyle style, AnchorName anchor)
                 : this(text, style)
@@ -212,6 +213,15 @@ namespace YamlDotNet.Test.Core
                 }
             }
 
+            public ScalarBuilder IsKey
+            {
+                get
+                {
+                    isKey = true;
+                    return this;
+                }
+            }
+
             public static implicit operator Scalar(ScalarBuilder builder)
             {
                 return new Scalar(builder.anchor,
@@ -219,7 +229,10 @@ namespace YamlDotNet.Test.Core
                     builder.text,
                     builder.style,
                     builder.plainImplicit,
-                    builder.quotedImplicit);
+                    builder.quotedImplicit,
+                    default,
+                    default,
+                    builder.isKey);
             }
         }
 
@@ -311,7 +324,7 @@ namespace YamlDotNet.Test.Core
 
             foreach (var property in expected.GetType().GetTypeInfo().GetProperties())
             {
-                if (property.PropertyType == typeof(Mark) || !property.CanRead || property.Name == "IsKey")
+                if (property.PropertyType == typeof(Mark) || !property.CanRead)
                 {
                     continue;
                 }

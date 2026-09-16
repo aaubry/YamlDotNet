@@ -70,5 +70,9 @@ namespace YamlDotNet.Serialization
                 })
                 .OrderBy(p => p.Order);
         }
+
+        public override bool HasParseMethod(Type type) => this.innerTypeDescriptor.HasParseMethod(type);
+
+        public override object? Parse(string value, Type expectedType) => this.innerTypeDescriptor.Parse(value, expectedType);
     }
 }

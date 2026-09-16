@@ -290,6 +290,22 @@ stringWriter.ToString().NormalizeNewLines().TrimNewLines());
             Assert.Equal("-\"\" should be zero", nodes[2].ToString());
         }
 
+        [Fact]
+        public void RecursiveStackOverflow_StopAt100()
+        {
+            var untrustedYaml = new string('[', 101) + new string(']', 101);
+            var stream = new YamlStream();
+            Assert.Throws<InvalidOperationException>(() => stream.Load(new StringReader(untrustedYaml)));
+        }
+
+        [Fact]
+        public void RecursiveStackOverflow_Allow100()
+        {
+            var untrustedYaml = new string('[', 100) + new string(']', 100);
+            var stream = new YamlStream();
+            stream.Load(new StringReader(untrustedYaml));
+        }
+
         private void RoundtripTest(string yamlFileName)
         {
             var original = new YamlStream();

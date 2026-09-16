@@ -36,13 +36,25 @@ namespace YamlDotNet.Core
         private readonly IParser innerParser;
         private IEnumerator<LinkedListNode<ParsingEvent>> iterator;
         private bool merged;
+        private readonly int maxParsingEvents;
 
         public MergingParser(IParser innerParser)
+          : this(innerParser, 100_000)
         {
+        }
+
+        public MergingParser(IParser innerParser, int maxParsingEvents = 100_000)
+        {
+            if (maxParsingEvents <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxParsingEvents), "Max parsing events must be a positive integer.");
+            }
+
             events = new ParsingEventCollection();
             merged = false;
             iterator = events.GetEnumerator();
             this.innerParser = innerParser;
+            this.maxParsingEvents = maxParsingEvents;
         }
 
         public ParsingEvent? Current => iterator.Current?.Value;
@@ -64,7 +76,9 @@ namespace YamlDotNet.Core
         {
             while (innerParser.MoveNext())
             {
-                events.Add(innerParser.Current!);
+                var parsingEvent = innerParser.Current!;
+                events.Add(parsingEvent);
+                EnsureMaxParsingEventsNotExceeded(parsingEvent);
             }
 
             foreach (var node in events)
@@ -126,7 +140,7 @@ namespace YamlDotNet.Core
         {
             var mergedEvents = GetMappingEvents(anchorAlias.Value);
 
-            events.AddAfter(node, mergedEvents);
+            events.AddAfter(node, mergedEvents, EnsureMaxParsingEventsNotExceeded);
             events.MarkDeleted(anchorNode);
 
             return true;
@@ -165,6 +179,14 @@ namespace YamlDotNet.Core
                 .Select(cloner.Clone);
         }
 
+        private void EnsureMaxParsingEventsNotExceeded(ParsingEvent parsingEvent)
+        {
+            if (events.Count > maxParsingEvents)
+            {
+                throw new YamlException(parsingEvent.Start, parsingEvent.End, $"Too many parsing events. The configured limit of {maxParsingEvents} was exceeded to prevent excessive memory usage.");
+            }
+        }
+
         private sealed class ParsingEventCollection : IEnumerable<LinkedListNode<ParsingEvent>>
         {
             private readonly LinkedList<ParsingEvent> events;
@@ -178,11 +200,14 @@ namespace YamlDotNet.Core
                 references = [];
             }
 
-            public void AddAfter(LinkedListNode<ParsingEvent> node, IEnumerable<ParsingEvent> items)
+            public int Count => events.Count;
+
+            public void AddAfter(LinkedListNode<ParsingEvent> node, IEnumerable<ParsingEvent> items, Action<ParsingEvent> onItemAdded)
             {
                 foreach (var item in items)
                 {
                     node = events.AddAfter(node, item);
+                    onItemAdded(item);
                 }
             }
 

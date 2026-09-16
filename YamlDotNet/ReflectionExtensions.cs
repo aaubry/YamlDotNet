@@ -66,7 +66,7 @@ namespace YamlDotNet
             // Then check the interfaces
             return type.FindInterfaces(static (t, context) => IsGenericDefinitionOfType(t, context), openGenericType).FirstOrDefault();
 
-            static bool IsGenericDefinitionOfType(Type t, object? context)
+            static bool IsGenericDefinitionOfType(Type t, object context)
             {
                 return t.IsGenericType && t.GetGenericTypeDefinition() == (Type)context;
             }
@@ -220,8 +220,8 @@ namespace YamlDotNet
         }
 
 
-        private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod).IsStatic;
-        private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && (property.GetMethod ?? property.SetMethod).IsPublic;
+        private static readonly Func<PropertyInfo, bool> IsInstance = (PropertyInfo property) => !(property.GetMethod ?? property.SetMethod)!.IsStatic;
+        private static readonly Func<PropertyInfo, bool> IsInstancePublic = (PropertyInfo property) => IsInstance(property) && (property.GetMethod ?? property.SetMethod)!.IsPublic;
 
         public static IEnumerable<PropertyInfo> GetProperties(this Type type, bool includeNonPublic)
         {
@@ -278,7 +278,7 @@ namespace YamlDotNet
         public static MethodInfo? GetGetMethod(this PropertyInfo property, bool nonPublic)
         {
             var getter = property.GetMethod;
-            if (!nonPublic && !getter.IsPublic)
+            if (!nonPublic && getter != null && !getter.IsPublic)
             {
                 getter = null;
             }
@@ -308,7 +308,7 @@ namespace YamlDotNet
         public static bool AcceptsNull(this MemberInfo member)
         {
 #if NET8_0_OR_GREATER
-            var classAttributes = member.DeclaringType.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
+            var classAttributes = member.DeclaringType?.GetCustomAttributes(typeof(System.Runtime.CompilerServices.NullableContextAttribute), true);
             var defaultFlag = classAttributes.OfType<System.Runtime.CompilerServices.NullableContextAttribute>().FirstOrDefault()?.Flag ?? 0;
 
             // we have a nullable context on that type, only allow null if the NullableAttribute is on the member.
@@ -318,7 +318,7 @@ namespace YamlDotNet
 
             return result;
 #else
-            var classAttributes = member.DeclaringType.GetCustomAttributes(true);
+            var classAttributes = member.DeclaringType?.GetCustomAttributes(true);
             var classAttribute = classAttributes.FirstOrDefault(x => x.GetType().FullName == "System.Runtime.CompilerServices.NullableContextAttribute");
             var defaultFlag = 0;
             if (classAttribute != null)

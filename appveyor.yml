@@ -2,25 +2,21 @@ version: 0.0.{build}
 
 image: Visual Studio 2022
 
-test: off
+test: false
 
 environment:
-  NUGET_API_KEY:
-    secure: IqF+zcEvCdvPlKDJs34AyfG24p990HSJ2Tdh9ml1v57bzVLYgHSRvcNoW/daApfi
-  GITHUB_TOKEN:
-    secure: ulVa56sjSUcOy/08/Qn88LsGVfndWBizu5gRdVTvsGu/ju1fKUe8XCZPvUvypvWH
-  TWITTER_CONSUMER_API_KEY:
-    secure: o4jM6NnXqtI3/Bzef2xpcTAOuPn/WwO+khiWvrbletk=
-  TWITTER_CONSUMER_API_SECRET:
-    secure: a4TQjB1vp0lRFZ7aA7RamHAhkHlPlMqdvsaZvzGs/pPkR+YfuGQ7AKlknD26HIE0xGUTi8M1wqffQUKJL1knHg==
-  TWITTER_ACCESS_TOKEN:
-    secure: TfgxKzf9AAbDuJmuYnnzjYKhHcxyYv7Z+AnFRzlQc5CcIJ3h52YZAokQGF3n3K8r21V1DxeKHc/qWG1yZs4NKg==
-  TWITTER_ACCESS_TOKEN_SECRET:
-    secure: aMvxmavbq8tylMDe8QGEdemNMPzrd7i6982i/iVydNYHhUvzV7lw5AJsiEpfRyzt
+  # Required by GitVersion.Tool to avoid moving/normalizing HEAD in the CI clone,
+  # which can otherwise cause incorrect version calculations in AppVeyor builds.
+  IGNORE_NORMALISATION_GIT_HEAD_MOVE: "1"
 
 install:
   - cmd: git submodule update --init
-  - cmd: dotnet tool install --global GitVersion.Tool
+  - ps: |
+      Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile 'dotnet-install.ps1'
+      .\dotnet-install.ps1 -Channel 10.0 -InstallDir "$env:ProgramFiles\dotnet"
+  - cmd: |
+      dotnet tool install --global GitVersion.Tool --version 6.5.1
+      dotnet tool restore
 
 build_script:
   - cmd: .\build.cmd --appveyor
@@ -35,11 +31,12 @@ artifacts:
   - path: YamlDotNet\bin\Release\net47
     name: Release-Net47
 
-  - path: YamlDotNet\bin\Release\net6.0
-    name: Release-Net60
-
   - path: YamlDotNet\bin\Release\net8.0
     name: Release-Net80
 
+  - path: YamlDotNet\bin\Release\net10.0
+    name: Release-Net100
+
   - path: YamlDotNet\bin\*.nupkg
   - path: YamlDotNet\bin\*.snupkg
+

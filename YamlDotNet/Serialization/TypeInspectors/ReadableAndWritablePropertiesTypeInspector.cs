@@ -46,5 +46,9 @@ namespace YamlDotNet.Serialization.TypeInspectors
             return innerTypeDescriptor.GetProperties(type, container)
                 .Where(p => p.CanWrite);
         }
+
+        public override bool HasParseMethod(Type type) => this.innerTypeDescriptor.HasParseMethod(type);
+
+        public override object? Parse(string value, Type expectedType) => this.innerTypeDescriptor.Parse(value, expectedType);
     }
 }

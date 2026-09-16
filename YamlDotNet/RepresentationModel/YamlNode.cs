@@ -80,24 +80,32 @@ namespace YamlDotNet.RepresentationModel
         /// <returns>Returns the node that has been parsed.</returns>
         internal static YamlNode ParseNode(IParser parser, DocumentLoadingState state)
         {
-            if (parser.Accept<Scalar>(out var _))
+            state.Nest();
+            try
             {
-                return new YamlScalarNode(parser, state);
-            }
+                if (parser.Accept<Scalar>(out var _))
+                {
+                    return new YamlScalarNode(parser, state);
+                }
 
-            if (parser.Accept<SequenceStart>(out var _))
-            {
-                return new YamlSequenceNode(parser, state);
-            }
+                if (parser.Accept<SequenceStart>(out var _))
+                {
+                    return new YamlSequenceNode(parser, state);
+                }
 
-            if (parser.Accept<MappingStart>(out var _))
-            {
-                return new YamlMappingNode(parser, state);
-            }
+                if (parser.Accept<MappingStart>(out var _))
+                {
+                    return new YamlMappingNode(parser, state);
+                }
 
-            if (parser.TryConsume<AnchorAlias>(out var alias))
+                if (parser.TryConsume<AnchorAlias>(out var alias))
+                {
+                    return state.TryGetNode(alias.Value, out var node) ? node : new YamlAliasNode(alias.Value);
+                }
+            }
+            finally
             {
-                return state.TryGetNode(alias.Value, out var node) ? node : new YamlAliasNode(alias.Value);
+                state.Unnest();
             }
 
             throw new ArgumentException("The current event is of an unsupported type.", nameof(parser));

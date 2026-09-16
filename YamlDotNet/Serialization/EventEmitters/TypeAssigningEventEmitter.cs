@@ -129,7 +129,7 @@ namespace YamlDotNet.Serialization.EventEmitters
                     case TypeCode.UInt32:
                     case TypeCode.UInt64:
                         //Enum's are special cases, they fall in here, but get sent out as a string.
-                        if (eventInfo.Source.Type.IsEnum)
+                        if (eventInfo.Source.Type.IsEnum())
                         {
                             eventInfo.Tag = FailsafeSchema.Tags.Str;
                             eventInfo.RenderedValue = formatter.FormatEnum(value, typeInspector, enumNamingConvention);
@@ -174,6 +174,11 @@ namespace YamlDotNet.Serialization.EventEmitters
 
                         if (quoteNecessaryStrings && IsSpecialStringValue(eventInfo.RenderedValue))
                         {
+                            suggestedStyle = ScalarStyle.DoubleQuoted;
+                        }
+                        else if (ResolvesToNull(eventInfo.RenderedValue))
+                        {
+                            // A plain null token would deserialize back to null, losing the string (#493).
                             suggestedStyle = ScalarStyle.DoubleQuoted;
                         }
                         else
@@ -242,5 +247,9 @@ namespace YamlDotNet.Serialization.EventEmitters
 
             return isSpecialStringValue_Regex?.IsMatch(value) ?? false;
         }
+
+        // Mirrors the plain tokens NullNodeDeserializer resolves to null (empty is already quoted).
+        private static bool ResolvesToNull(string value)
+            => value == "~" || value == "null" || value == "Null" || value == "NULL";
     }
 }

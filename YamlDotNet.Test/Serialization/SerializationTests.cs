@@ -161,9 +161,9 @@ namespace YamlDotNet.Test.Serialization
         [Fact]
         public void DeserializeScalarLongBase60Number()
         {
-            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:6_2:10"));
+            var result = Deserializer.Deserialize<long>(UsingReaderFor("99_:_58:47:3:5_2:10"));
 
-            result.Should().Be(77744246530L);
+            result.Should().Be(77744245930L);
         }
 
         [Theory]
@@ -948,6 +948,48 @@ y:
             var result = Deserializer.Deserialize<Example>(UsingReaderFor(writer));
 
             result.MyString.Should().BeNull();
+        }
+
+        [Fact]
+        public void CanSerializeNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new { MyType = (Type)null });
+            yaml.Should().Contain("MyType:");
+        }
+
+        [Fact]
+        public void CanSerializeNonNullType()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(new { MyType = typeof(string) });
+            yaml.Should().Contain("MyType: System.String");
+        }
+
+        [Fact]
+        public void NullTypeRoundTrips()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var obj = new ClassWithTypeProperty { MyType = null };
+            var yaml = serializer.Serialize(obj);
+            var result = deserializer.Deserialize<ClassWithTypeProperty>(yaml);
+
+            result.MyType.Should().BeNull();
+        }
+
+        [Fact]
+        public void NonNullTypeRoundTrips()
+        {
+            var serializer = new SerializerBuilder().EnsureRoundtrip().Build();
+            var deserializer = new DeserializerBuilder().Build();
+
+            var obj = new ClassWithTypeProperty { MyType = typeof(int) };
+            var yaml = serializer.Serialize(obj);
+            var result = deserializer.Deserialize<ClassWithTypeProperty>(yaml);
+
+            result.MyType.Should().Be(typeof(int));
         }
 
         [Fact]
@@ -2464,6 +2506,51 @@ Cycle: *o0");
             Assert.Equal($"text: \"{input}\"{Environment.NewLine}", yaml);
         }
 
+        [Theory]
+        [InlineData("~")]
+        [InlineData("null")]
+        [InlineData("Null")]
+        [InlineData("NULL")]
+        public void StringsThatResolveToNullAreQuotedByDefault(string input)
+        {
+            // Without quoting these round-trip back to null even for a string target (#493).
+            var yaml = Serializer.Serialize(input);
+            Assert.Equal($"\"{input}\"{Environment.NewLine}", yaml);
+            Assert.Equal(input, Deserializer.Deserialize<string>(yaml));
+        }
+
+        [Theory]
+        [InlineData("nUll")]
+        [InlineData("nul")]
+        [InlineData("nullish")]
+        [InlineData("hello")]
+        public void StringsThatOnlyResembleNullAreNotQuoted(string input)
+        {
+            var yaml = Serializer.Serialize(input);
+            Assert.Equal($"{input}{Environment.NewLine}", yaml);
+            Assert.Equal(input, Deserializer.Deserialize<string>(yaml));
+        }
+
+        [Fact]
+        public void ActualNullStillSerializesAsBareNull()
+        {
+            string value = null;
+            var yaml = Serializer.Serialize(value);
+            Assert.Null(Deserializer.Deserialize<string>(yaml));
+        }
+
+        [Theory]
+        [InlineData("~")]
+        [InlineData("null")]
+        [InlineData("Null")]
+        [InlineData("NULL")]
+        public void NullTokenDictionaryValuesRoundtripAsStrings(string input)
+        {
+            var data = new Dictionary<string, string> { { "k", input } };
+            var result = DoRoundtripFromObjectTo<Dictionary<string, string>>(data);
+            Assert.Equal(input, result["k"]);
+        }
+
         public static IEnumerable<object[]> Yaml1_1SpecialStringsData = new[]
         {
             "-.inf", "-.Inf", "-.INF", "-0", "-0100_200", "-0b101", "-0x30", "-190:20:30", "-23", "-3.14",
@@ -2631,6 +2718,60 @@ Null: true
             var deserializer = new DeserializerBuilder().Build();
             var value = deserializer.Deserialize(yaml);
             Assert.Equal(s, value);
+        }
+
+        // The default serializer already quotes a leading/trailing space; a tab is equally
+        // significant but was left plain and lost (or threw) on read-back (#732, #493).
+        public static IEnumerable<object[]> LeadingOrTrailingTabStrings => new[]
+        {
+            new object[] { "\tx" },
+            new object[] { "x\t" },
+            new object[] { "\t" },
+            new object[] { "\t," },
+            new object[] { "\tx\ty" },
+            new object[] { "\thello" },
+            new object[] { " \t " },
+        };
+
+        [Theory]
+        [MemberData(nameof(LeadingOrTrailingTabStrings))]
+        public void LeadingOrTrailingTabRoundtripsWithDefaultSerializer(string value)
+        {
+            var yaml = new SerializerBuilder().Build().Serialize(value);
+            var result = new DeserializerBuilder().Build().Deserialize<string>(yaml);
+            Assert.Equal(value, result);
+        }
+
+        [Fact]
+        public void TabCommaListRoundtripsWithoutThrowing()
+        {
+            // #732: "- \t,\n" is emitted plain, then rejected by the parser as its own output.
+            var value = new List<string> { "\t," };
+            var yaml = new SerializerBuilder().Build().Serialize(value);
+            var result = new DeserializerBuilder().Build().Deserialize<List<string>>(yaml);
+            Assert.Equal(value, result);
+        }
+
+        [Fact]
+        public void InteriorTabStaysPlainAndRoundtrips()
+        {
+            // The fix must not over-reach: an interior tab is safe plain and must stay unquoted.
+            var yaml = new SerializerBuilder().Build().Serialize("x\ty");
+            Assert.DoesNotContain("'", yaml);
+            Assert.DoesNotContain("\"", yaml);
+            var result = new DeserializerBuilder().Build().Deserialize<string>(yaml);
+            Assert.Equal("x\ty", result);
+        }
+
+        [Fact]
+        public void LeadingTrailingSpaceStillRoundtripsUnchanged()
+        {
+            foreach (var value in new[] { " x", "x ", " " })
+            {
+                var yaml = new SerializerBuilder().Build().Serialize(value);
+                var result = new DeserializerBuilder().Build().Deserialize<string>(yaml);
+                Assert.Equal(value, result);
+            }
         }
 
         [Flags]

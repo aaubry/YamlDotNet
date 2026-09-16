@@ -86,5 +86,22 @@ namespace YamlDotNet.Serialization.TypeInspectors
             return typeInspectors
                 .SelectMany(i => i.GetProperties(type, container));
         }
+
+        public override bool HasParseMethod(Type type)
+        {
+            return typeInspectors.Any(i => i.HasParseMethod(type));
+        }
+
+        public override object? Parse(string value, Type expectedType)
+        {
+            var parsableInspector = typeInspectors.FirstOrDefault(i => i.HasParseMethod(expectedType));
+
+            if (parsableInspector == null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(expectedType), $"No inspector with a Parse method for type {expectedType.FullName} was found.");
+            }
+
+            return parsableInspector.Parse(value, expectedType);
+        }
     }
 }

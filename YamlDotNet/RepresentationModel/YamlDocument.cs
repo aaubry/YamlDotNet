@@ -58,9 +58,9 @@ namespace YamlDotNet.RepresentationModel
         /// <summary>
         /// Initializes a new instance of the <see cref="YamlDocument"/> class.
         /// </summary>
-        internal YamlDocument(IParser parser)
+        internal YamlDocument(IParser parser, int maxDepth)
         {
-            var state = new DocumentLoadingState();
+            var state = new DocumentLoadingState(maxDepth);
 
             parser.Consume<DocumentStart>();
 

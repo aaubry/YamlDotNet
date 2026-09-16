@@ -64,6 +64,7 @@ namespace YamlDotNet.Serialization
         private bool enforceNullability;
         private bool caseInsensitivePropertyMatching;
         private bool enforceRequiredProperties;
+        private int? maximumRecursion;
 
         /// <summary>
         /// Initializes a new <see cref="DeserializerBuilder" /> using the default component registrations.
@@ -89,6 +90,8 @@ namespace YamlDotNet.Serialization
             typeInspectorFactories.Add(typeof(YamlAttributesTypeInspector), inner => new YamlAttributesTypeInspector(inner));
             typeInspectorFactories.Add(typeof(YamlAttributeOverridesInspector), inner => overrides != null ? new YamlAttributeOverridesInspector(inner, overrides.Clone()) : inner);
             typeInspectorFactories.Add(typeof(ReadableAndWritablePropertiesTypeInspector), inner => new ReadableAndWritablePropertiesTypeInspector(inner));
+
+            typeConverter = new ReflectionTypeConverter();
 
             nodeDeserializerFactories = new LazyComponentRegistrationList<Nothing, INodeDeserializer>
             {
@@ -126,7 +129,7 @@ namespace YamlDotNet.Serialization
                 { typeof(DefaultContainersNodeTypeResolver), _ => new DefaultContainersNodeTypeResolver() }
             };
 
-            typeConverter = new ReflectionTypeConverter();
+            maximumRecursion = 100;
         }
 
         protected override DeserializerBuilder Self { get { return this; } }
@@ -405,7 +408,7 @@ namespace YamlDotNet.Serialization
         {
             if (tag.IsEmpty)
             {
-                throw new ArgumentException("Non-specific tags cannot be maped");
+                throw new ArgumentException("Non-specific tags cannot be mapped");
             }
 
             if (type == null)
@@ -451,7 +454,7 @@ namespace YamlDotNet.Serialization
         {
             if (tag.IsEmpty)
             {
-                throw new ArgumentException("Non-specific tags cannot be maped");
+                throw new ArgumentException("Non-specific tags cannot be mapped");
             }
 
             if (!tagMappings.Remove(tag))
@@ -481,6 +484,29 @@ namespace YamlDotNet.Serialization
         }
 
         /// <summary>
+        /// Sets the maximum recursion that is allowed while building the object graph. Must be > 0. Default is 100.
+        /// </summary>
+        /// <remarks>
+        /// Setting this limit is strongly recommended when parsing untrusted input since
+        /// deeply nested objects will lead to a stack overflow. When using the default configuration
+        /// on Windows the maximum you should allow is ~130 as anything over that will lead to a stack overflow
+        /// when the max recursion exception is thrown. Linux OS allows for ~475 with .net 10 and the exception will be
+        /// thrown correctly without causing a stack overflow. This does not take into account the depth of
+        /// your application call stack. This is if YamlDotNet is called from the top of the stack. Windows with
+        /// .NET 8 only allows for ~130. On .NET 10 and Windows you can safely use ~150.
+        /// </remarks>
+        public DeserializerBuilder WithMaximumRecursion(int maximumRecursion)
+        {
+            if (maximumRecursion <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumRecursion), $"The maximum recursion specified ({maximumRecursion}) is invalid. It should be a positive integer.");
+            }
+
+            this.maximumRecursion = maximumRecursion;
+            return this;
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Deserializer" /> according to the current configuration.
         /// </summary>
         public IDeserializer Build()
@@ -497,15 +523,20 @@ namespace YamlDotNet.Serialization
         /// </summary>
         public IValueDeserializer BuildValueDeserializer()
         {
-            return new AliasValueDeserializer(
-                new NodeValueDeserializer(
-                    nodeDeserializerFactories.BuildComponentList(),
-                    nodeTypeResolverFactories.BuildComponentList(),
-                    typeConverter,
-                    enumNamingConvention,
-                    BuildTypeInspector()
-                )
+            IValueDeserializer valueDeserializer = new NodeValueDeserializer(
+                nodeDeserializerFactories.BuildComponentList(),
+                nodeTypeResolverFactories.BuildComponentList(),
+                typeConverter,
+                enumNamingConvention,
+                BuildTypeInspector()
             );
+
+            if (maximumRecursion != null)
+            {
+                valueDeserializer = new MaximumRecursionValueDeserializer(valueDeserializer, maximumRecursion.Value);
+            }
+
+            return new AliasValueDeserializer(valueDeserializer);
         }
     }
 }

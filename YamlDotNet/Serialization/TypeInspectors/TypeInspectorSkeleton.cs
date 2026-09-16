@@ -38,21 +38,49 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
         public IPropertyDescriptor GetProperty(Type type, object? container, string name, [MaybeNullWhen(true)] bool ignoreUnmatched, bool caseInsensitivePropertyMatching)
         {
-            IEnumerable<IPropertyDescriptor> candidates;
+            // This runs once per YAML key during deserialization, so avoid the per-call LINQ closure
+            // and iterator that .Where(p => p.Name == name) allocated. When the property list is an
+            // IReadOnlyList (it is when it comes from CachedTypeInspector) the match scan is
+            // allocation-free. Semantics are unchanged: no match, single match, and ambiguous match
+            // are handled exactly as before.
+            var comparison = caseInsensitivePropertyMatching ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            var properties = GetProperties(type, container);
 
-            if (caseInsensitivePropertyMatching)
+            IPropertyDescriptor? match = null;
+
+            if (properties is IReadOnlyList<IPropertyDescriptor> list)
             {
-                candidates = GetProperties(type, container)
-                    .Where(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                for (var i = 0; i < list.Count; i++)
+                {
+                    var candidate = list[i];
+                    if (candidate.Name.Equals(name, comparison))
+                    {
+                        if (match != null)
+                        {
+                            throw MultipleMatchesException(type, container, name, comparison);
+                        }
+
+                        match = candidate;
+                    }
+                }
             }
             else
             {
-                candidates = GetProperties(type, container)
-                    .Where(p => p.Name == name);
+                foreach (var candidate in properties)
+                {
+                    if (candidate.Name.Equals(name, comparison))
+                    {
+                        if (match != null)
+                        {
+                            throw MultipleMatchesException(type, container, name, comparison);
+                        }
+
+                        match = candidate;
+                    }
+                }
             }
 
-            using var enumerator = candidates.GetEnumerator();
-            if (!enumerator.MoveNext())
+            if (match == null)
             {
                 if (ignoreUnmatched)
                 {
@@ -62,16 +90,22 @@ namespace YamlDotNet.Serialization.TypeInspectors
                 throw new SerializationException($"Property '{name}' not found on type '{type.FullName}'.");
             }
 
-            var property = enumerator.Current;
-
-            if (enumerator.MoveNext())
-            {
-                throw new SerializationException(
-                    $"Multiple properties with the name/alias '{name}' already exists on type '{type.FullName}', maybe you're misusing YamlAlias or maybe you are using the wrong naming convention? The matching properties are: {string.Join(", ", candidates.Select(p => p.Name).ToArray())}"
-                );
-            }
-
-            return property;
+            return match;
         }
+
+        private SerializationException MultipleMatchesException(Type type, object? container, string name, StringComparison comparison)
+        {
+            var matches = GetProperties(type, container)
+                .Where(p => p.Name.Equals(name, comparison))
+                .Select(p => p.Name);
+
+            return new SerializationException(
+                $"Multiple properties with the name/alias '{name}' already exists on type '{type.FullName}', maybe you're misusing YamlAlias or maybe you are using the wrong naming convention? The matching properties are: {string.Join(", ", matches.ToArray())}"
+            );
+        }
+
+        public abstract bool HasParseMethod(Type type);
+
+        public abstract object? Parse(string value, Type expectedType);
     }
 }

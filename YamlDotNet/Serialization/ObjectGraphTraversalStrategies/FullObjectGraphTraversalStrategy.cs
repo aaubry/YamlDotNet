@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using YamlDotNet.Core;
@@ -40,6 +41,11 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
         private readonly ITypeResolver typeResolver;
         private readonly INamingConvention namingConvention;
         private readonly IObjectFactory objectFactory;
+
+        // The key node emitted for a property is fully determined by the property's (immutable) name,
+        // so cache it per descriptor instead of allocating a fresh ObjectDescriptor for every property
+        // of every object during serialization.
+        private readonly ConcurrentDictionary<IPropertyDescriptor, ObjectDescriptor> keyNodeDescriptors = new ConcurrentDictionary<IPropertyDescriptor, ObjectDescriptor>();
 
         public FullObjectGraphTraversalStrategy(ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion,
             INamingConvention namingConvention, IObjectFactory objectFactory)
@@ -237,7 +243,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
             visitor.VisitMappingEnd(dictionary, context, serializer);
         }
 
-        private void TraverseList<TContext>(IPropertyDescriptor propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
+        private void TraverseList<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
             var itemType = objectFactory.GetValueType(value.Type);
 
@@ -269,7 +275,8 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
                 var propertyValue = propertyDescriptor.Read(source);
                 if (visitor.EnterMapping(propertyDescriptor, propertyValue, context, serializer))
                 {
-                    Traverse(null, propertyDescriptor.Name, new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string), ScalarStyle.Plain), visitor, context, path, serializer);
+                    var keyNode = keyNodeDescriptors.GetOrAdd(propertyDescriptor, static pd => new ObjectDescriptor(pd.Name, typeof(string), typeof(string), ScalarStyle.Plain));
+                    Traverse(null, propertyDescriptor.Name, keyNode, visitor, context, path, serializer);
                     Traverse(propertyDescriptor, propertyDescriptor.Name, propertyValue, visitor, context, path, serializer);
                 }
             }

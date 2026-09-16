@@ -610,4 +610,9 @@ namespace YamlDotNet.Test.Serialization
         public override string ToString() => $"{Public},{Internal},{Protected},{Private}";
     }
 #pragma warning restore IDE0044 // Add readonly modifier
+
+    public class ClassWithTypeProperty
+    {
+        public Type MyType { get; set; }
+    }
 }

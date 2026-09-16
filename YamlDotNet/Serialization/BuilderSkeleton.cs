@@ -55,7 +55,9 @@ namespace YamlDotNet.Serialization
             typeConverterFactories = new LazyComponentRegistrationList<Nothing, IYamlTypeConverter>
             {
                 { typeof(GuidConverter), _ => new GuidConverter(false) },
-                { typeof(SystemTypeConverter), _ => new SystemTypeConverter() }
+                { typeof(SystemTypeConverter), _ => new SystemTypeConverter() },
+                { typeof(TimeSpanConverter), _ => new TimeSpanConverter(false) },
+                { typeof(UriConverter), _ => new UriConverter(false) }
             };
 
             typeInspectorFactories = [];

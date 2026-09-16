@@ -153,8 +153,6 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             if (enforceRequiredProperties)
             {
-                //TODO: Get properties marked as required on the object
-                //TODO: Compare those properties agains the consumedObjectProperties, throw if any are missing.
                 var properties = typeInspector.GetProperties(implementationType, value);
                 var missingPropertyNames = new List<string>();
                 foreach (var property in properties)
@@ -176,7 +174,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             return true;
         }
 
-        public void NullCheck(object value, IPropertyDescriptor property, Scalar propertyName)
+        public void NullCheck(object? value, IPropertyDescriptor property, Scalar propertyName)
         {
             if (enforceNullability &&
                 value == null &&
