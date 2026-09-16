@@ -32,10 +32,12 @@ namespace YamlDotNet.Serialization.ValueDeserializers
     public sealed class AliasValueDeserializer : IValueDeserializer
     {
         private readonly IValueDeserializer innerDeserializer;
+        private readonly bool recreateObjectsWhenAlias;
 
-        public AliasValueDeserializer(IValueDeserializer innerDeserializer)
+        public AliasValueDeserializer(IValueDeserializer innerDeserializer, bool recreateObjectsWhenAlias)
         {
             this.innerDeserializer = innerDeserializer ?? throw new ArgumentNullException(nameof(innerDeserializer));
+            this.recreateObjectsWhenAlias = recreateObjectsWhenAlias;
         }
 
         private sealed class AliasState : Dictionary<AnchorName, IValuePromise>, IPostDeserializationCallback
@@ -64,7 +66,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 this.buffer = buffer;
             }
 
-            public object? DeserializerValue(IValueDeserializer innerDeserializer, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+            public object? RecreateObject(IValueDeserializer innerDeserializer, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
             {
                 buffer.Reset();
                 var value = innerDeserializer.DeserializeValue(buffer, expectedType, state, nestedObjectDeserializer);
@@ -132,7 +134,7 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
                 return valuePromise switch
                 {
-                    BufferPromise buffered => buffered.DeserializerValue(innerDeserializer, expectedType, state, nestedObjectDeserializer),
+                    BufferPromise buffered => buffered.RecreateObject(innerDeserializer, expectedType, state, nestedObjectDeserializer),
                     ValuePromise cached => cached.HasValue ? cached.Value : cached,
                     _ => throw new InvalidCastException("Unknown anchor implementation")
                 };
@@ -144,27 +146,39 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             }
 
             var anchor = nodeEvent.Anchor;
-            var start = parser.Current!.Start;
-            ParserAnchorBuffer buffer;
-            try
-            {
-                buffer = new ParserAnchorBuffer(anchor, parser);
-            }
-            catch (Exception exception)
-            {
-                throw new YamlException(start, parser.Current.End, "Failed to buffer yaml node", exception);
-            }
-
-            if (buffer.IsCycling)
+            if (!anchor.IsEmpty)
             {
                 var aliasState = state.Get<AliasState>();
                 if (!aliasState.ContainsKey(anchor))
                 {
                     aliasState[anchor] = new ValuePromise(new AnchorAlias(anchor));
                 }
+            }
 
-                var value = innerDeserializer.DeserializeValue(buffer, expectedType, state, nestedObjectDeserializer);
+            object? value;
+            ParserAnchorBuffer? buffer = null;
+            if (recreateObjectsWhenAlias)
+            {
+                var start = parser.Current.Start;
+                try
+                {
+                    buffer = new ParserAnchorBuffer(anchor, parser);
+                }
+                catch (Exception exception)
+                {
+                    throw new YamlException(start, parser.Current.End, "Failed to buffer yaml node", exception);
+                }
 
+                value = innerDeserializer.DeserializeValue(buffer, expectedType, state, nestedObjectDeserializer);
+            }
+            else
+            {
+                value = innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
+            }
+
+            if (buffer == null || buffer.IsCycling)
+            {
+                var aliasState = state.Get<AliasState>();
                 if (!aliasState.TryGetValue(anchor, out var valuePromise))
                 {
                     aliasState.Add(anchor, new ValuePromise(value));
@@ -177,16 +191,14 @@ namespace YamlDotNet.Serialization.ValueDeserializers
                 {
                     aliasState[anchor] = new ValuePromise(value);
                 }
-
-                return value;
             }
             else
             {
                 var aliasState = state.Get<AliasState>();
-                var buffered = new BufferPromise(buffer);
-                aliasState[anchor] = buffered;
-                return buffered.DeserializerValue(innerDeserializer, expectedType, state, nestedObjectDeserializer);
+                aliasState[anchor] = new BufferPromise(buffer);
             }
+
+            return value;
         }
     }
 }

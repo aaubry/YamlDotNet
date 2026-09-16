@@ -38,6 +38,7 @@ public class AnchorAliasNestedSequenceTest
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithRecreateObjectsWhenAlias()
             .Build();
         var executors = deserializer.Deserialize<List<Executor>>(Document);
         executors[0].Filters.Count.Should().Be(2);

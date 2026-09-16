@@ -34,6 +34,7 @@ public class AnchorAliasObjectReferenceTest
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithRecreateObjectsWhenAlias()
             .Build();
         var executors = deserializer.Deserialize<List<Executor>>(Document);
         ReferenceEquals(executors[0].Filters, executors[1].Filters).Should().BeFalse();

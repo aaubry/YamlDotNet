@@ -64,6 +64,7 @@ namespace YamlDotNet.Serialization
         private bool enforceNullability;
         private bool caseInsensitivePropertyMatching;
         private bool enforceRequiredProperties;
+        private bool recreateObjectsWhenAlias;
         private int? maximumRecursion;
 
         /// <summary>
@@ -368,6 +369,7 @@ namespace YamlDotNet.Serialization
             enforceNullability = true;
             return this;
         }
+
         /// <summary>
         /// Require that all members with the 'required' keyword be set by YAML.
         /// </summary>
@@ -375,6 +377,16 @@ namespace YamlDotNet.Serialization
         public DeserializerBuilder WithEnforceRequiredMembers()
         {
             enforceRequiredProperties = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Create objects with distinct references (like deep-clone) when expanding aliases.
+        /// </summary>
+        /// <returns></returns>
+        public DeserializerBuilder WithRecreateObjectsWhenAlias()
+        {
+            recreateObjectsWhenAlias = true;
             return this;
         }
 
@@ -461,6 +473,7 @@ namespace YamlDotNet.Serialization
             {
                 throw new KeyNotFoundException($"Tag '{tag}' is not registered");
             }
+
             return this;
         }
 
@@ -536,7 +549,7 @@ namespace YamlDotNet.Serialization
                 valueDeserializer = new MaximumRecursionValueDeserializer(valueDeserializer, maximumRecursion.Value);
             }
 
-            return new AliasValueDeserializer(valueDeserializer);
+            return new AliasValueDeserializer(valueDeserializer, recreateObjectsWhenAlias);
         }
     }
 }
