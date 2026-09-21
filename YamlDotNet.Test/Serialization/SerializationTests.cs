@@ -206,6 +206,14 @@ namespace YamlDotNet.Test.Serialization
         }
 
         [Fact]
+        public void SerializeNullableScalarUsingStaticType()
+        {
+            var result = Serializer.Serialize((object)(double?)60.0, typeof(double?));
+
+            result.TrimNewLines().Should().Be("60");
+        }
+
+        [Fact]
         public void SerializeCircularReference()
         {
             var obj = new CircularReference();
