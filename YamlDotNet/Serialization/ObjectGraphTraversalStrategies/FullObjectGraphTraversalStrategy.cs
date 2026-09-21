@@ -157,7 +157,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
                         var nullableUnderlyingType = Nullable.GetUnderlyingType(value.Type);
                         var optionUnderlyingType = nullableUnderlyingType ?? FsharpHelper.GetOptionUnderlyingType(value.Type);
-                        var optionValue = optionUnderlyingType != null ? FsharpHelper.GetValue(value) : null;
+                        var optionValue = nullableUnderlyingType == null && optionUnderlyingType != null ? FsharpHelper.GetValue(value) : null;
 
                         if (nullableUnderlyingType != null)
                         {
