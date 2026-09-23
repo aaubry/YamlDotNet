@@ -64,7 +64,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                     }
                     foreach (var property in classObject.PropertySymbols)
                     {
-                        if (property.SetMethod != null)
+                        if (property.SetMethod != null && !property.SetMethod.IsInitOnly)
                         {
                             Write(GetSetter(property.Name, property.Type));
                         }
