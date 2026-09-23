@@ -110,6 +110,31 @@ SomeDictionary:
         }
 
         [Fact]
+        public void NestedTypeNamesArePreservedInGeneratedContext()
+        {
+            var value = new FixtureModels.ConfigurationAndAttributes.PropertyNameModel
+            {
+                Name = "nested",
+                Kind = FixtureModels.ConfigurationAndAttributes.PropertyNameModel.ConfigurationKind.Second,
+                Kinds = new List<FixtureModels.ConfigurationAndAttributes.PropertyNameModel.ConfigurationKind>
+                {
+                    FixtureModels.ConfigurationAndAttributes.PropertyNameModel.ConfigurationKind.First,
+                    FixtureModels.ConfigurationAndAttributes.PropertyNameModel.ConfigurationKind.Second
+                }
+            };
+
+            var serializer = new StaticSerializerBuilder(new StaticContext()).Build();
+            var yaml = serializer.Serialize(value);
+
+            var deserializer = new StaticDeserializerBuilder(new StaticContext()).Build();
+            var actual = deserializer.Deserialize<FixtureModels.ConfigurationAndAttributes.PropertyNameModel>(yaml);
+
+            Assert.Equal(value.Name, actual.Name);
+            Assert.Equal(value.Kind, actual.Kind);
+            Assert.Equal(value.Kinds, actual.Kinds);
+        }
+
+        [Fact]
         public void EnumerablesAreTreatedAsLists() => ExecuteListOverrideTest<EnumerableClass>();
 
         [Fact]
@@ -559,4 +584,25 @@ prop2:
         public required int Value { get; set; }
     }
 #endif
+
+    public static class FixtureModels
+    {
+        public static class ConfigurationAndAttributes
+        {
+            [YamlSerializable]
+            public sealed class PropertyNameModel
+            {
+                public string Name { get; set; } = "name";
+                public ConfigurationKind Kind { get; set; }
+                public List<ConfigurationKind> Kinds { get; set; } = new List<ConfigurationKind>();
+
+                [YamlSerializable]
+                public enum ConfigurationKind
+                {
+                    First,
+                    Second
+                }
+            }
+        }
+    }
 }
