@@ -282,6 +282,38 @@ b: &number 1
         }
 
         [Theory]
+        [InlineData("123_456", 123456)]
+        [InlineData("123__456", 123456)]
+        [InlineData("+123_456", 123456)]
+        [InlineData("-123_456", -123456)]
+        [InlineData("123_456.75", 123456.75f)]
+        [InlineData("123_456.75e+1", 1234567.5f)]
+        [InlineData(".12_5", 0.125f)]
+        public void UnquotedStringTypeDeserialization_NumbersWithUnderscores(string yamlValue, object expected)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var result = deserializer.Deserialize<IDictionary<string, object>>($"Value: {yamlValue}");
+
+            Assert.Equal(expected.GetType(), result["Value"].GetType());
+            Assert.Equal(expected, result["Value"]);
+        }
+
+        [Theory]
+        [InlineData("12_foo")]
+        [InlineData("1e_2")]
+        public void UnquotedStringTypeDeserialization_NonNumericUnderscoresRemainStrings(string yamlValue)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var result = deserializer.Deserialize<IDictionary<string, object>>($"Value: {yamlValue}");
+
+            Assert.Equal(yamlValue, Assert.IsType<string>(result["Value"]));
+        }
+
+        [Theory]
         [InlineData(System.Byte.MinValue)]
         [InlineData(System.Byte.MaxValue)]
         [InlineData(System.Int16.MinValue)]
