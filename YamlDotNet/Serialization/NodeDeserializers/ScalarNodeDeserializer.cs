@@ -37,7 +37,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         private static readonly Regex BooleanFalseRegex = new Regex("^(false|n|no|off)$", RegexOptions.IgnoreCase | StandardRegexOptions.Compiled);
         private static readonly Regex HexNumberRegex = new Regex("^0x[0-9a-fA-F]+$", StandardRegexOptions.Compiled);
         private static readonly Regex OctalNumberRegex = new Regex("^0o[0-9a-fA-F]+$", StandardRegexOptions.Compiled);
-        private static readonly Regex FloatNumberRegex = new Regex(@"^[-+]?(\.[0-9][0-9_]*|[0-9][0-9_]*(\.[0-9_]*)?)([eE][-+]?[0-9][0-9_]*)?$", StandardRegexOptions.Compiled);
+        private static readonly Regex FloatNumberRegex = new Regex(@"^[-+]?(\.[0-9][0-9_]*|[0-9][0-9_]*(\.[0-9_]*)?)([eE][-+]?[0-9]+)?$", StandardRegexOptions.Compiled);
         private static readonly Regex InfinityRegex = new Regex(@"^[-+]?(\.inf|\.Inf|\.INF)$", StandardRegexOptions.Compiled);
         private static readonly Regex NotANumberRegex = new Regex(@"^(\.nan|\.NaN|\.NAN)$", StandardRegexOptions.Compiled);
 

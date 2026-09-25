@@ -303,6 +303,10 @@ b: &number 1
         [Theory]
         [InlineData("12_foo")]
         [InlineData("1e_2")]
+        [InlineData("1e2_")]
+        [InlineData("1e2__")]
+        [InlineData("1e2_3")]
+        [InlineData("1.2e+3_")]
         public void UnquotedStringTypeDeserialization_NonNumericUnderscoresRemainStrings(string yamlValue)
         {
             var deserializer = new DeserializerBuilder()
