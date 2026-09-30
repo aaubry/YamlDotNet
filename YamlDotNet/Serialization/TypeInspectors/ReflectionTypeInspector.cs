@@ -33,7 +33,6 @@ namespace YamlDotNet.Serialization.TypeInspectors
     {
         public override string GetEnumName(Type enumType, string name)
         {
-#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
             foreach (var enumMember in enumType.GetMembers())
             {
                 var attribute = enumMember.GetCustomAttribute<EnumMemberAttribute>();
@@ -42,7 +41,6 @@ namespace YamlDotNet.Serialization.TypeInspectors
                     return enumMember.Name;
                 }
             }
-#endif
             return name;
         }
         public override string GetEnumValue(object enumValue)
@@ -53,7 +51,6 @@ namespace YamlDotNet.Serialization.TypeInspectors
             }
 
             var result = enumValue.ToString();
-#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
             var type = enumValue.GetType();
             if (!string.IsNullOrEmpty(result))
             {
@@ -67,7 +64,6 @@ namespace YamlDotNet.Serialization.TypeInspectors
                     }
                 }
             }
-#endif
             return result!;
         }
 

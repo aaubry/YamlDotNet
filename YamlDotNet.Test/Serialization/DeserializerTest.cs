@@ -675,14 +675,31 @@ Property: test-property";
         }
 #endif
 
-#if NET6_0_OR_GREATER
-        [Fact]
-        public void EnumDeserializationUsesEnumMemberAttribute()
+        [Theory]
+        [InlineData("goodbye", EnumMemberedEnum.Hello)]
+        [InlineData("Hello", EnumMemberedEnum.Hello)]
+        [InlineData("No", EnumMemberedEnum.No)]
+        [InlineData("''", EnumMemberedEnum.EmptyValue)]
+        public void EnumDeserializationUsesEnumMemberAttribute(string yaml, EnumMemberedEnum expected)
         {
             var deserializer = new DeserializerBuilder().Build();
-            var yaml = "goodbye";
             var actual = deserializer.Deserialize<EnumMemberedEnum>(yaml);
-            Assert.Equal(EnumMemberedEnum.Hello, actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void EnumDeserializationUsesEnumMemberAttributeInSequence()
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            var actual = deserializer.Deserialize<EnumMemberedEnum[]>("- goodbye");
+            Assert.Equal(new[] { EnumMemberedEnum.Hello }, actual);
+        }
+
+        [Fact]
+        public void EnumDeserializationRejectsUnknownMember()
+        {
+            var deserializer = new DeserializerBuilder().Build();
+            Assert.Throws<YamlException>(() => deserializer.Deserialize<EnumMemberedEnum>("unknown-member"));
         }
 
         [Fact]
@@ -717,7 +734,6 @@ Property: test-property";
             NullValue = 3
 
         }
-#endif
 
 #nullable enable
         public class NullableDefaultClass
