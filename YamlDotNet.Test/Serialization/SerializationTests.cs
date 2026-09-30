@@ -1617,13 +1617,14 @@ y:
             Assert.Equal(expected, result);
         }
 
-#if NET6_0_OR_GREATER
-        [Fact]
-        public void EnumSerializationUsesEnumMemberAttribute()
+        [Theory]
+        [InlineData(EnumMemberedEnum.Hello, "goodbye")]
+        [InlineData(EnumMemberedEnum.No, "No")]
+        public void EnumSerializationUsesEnumMemberAttribute(EnumMemberedEnum value, string expected)
         {
             var serializer = new SerializerBuilder().Build();
-            var actual = serializer.Serialize(EnumMemberedEnum.Hello);
-            Assert.Equal("goodbye", actual.TrimNewLines());
+            var actual = serializer.Serialize(value);
+            Assert.Equal(expected, actual.TrimNewLines());
         }
 
         [Fact]
@@ -1644,6 +1645,8 @@ y:
 
         public enum EnumMemberedEnum
         {
+            No = 0,
+
             [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
             Hello = 1,
 
@@ -1653,7 +1656,6 @@ y:
             [System.Runtime.Serialization.EnumMember()]
             NullValue = 3
         }
-#endif
 
         public enum TestEnum
         {
