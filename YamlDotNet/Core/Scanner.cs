@@ -72,6 +72,7 @@ namespace YamlDotNet.Core
         private long indent = -1;
         private bool flowScalarFetched;
         private bool simpleKeyAllowed;
+        private long complexKeyColumn = -1;
         private int flowLevel;
         private int tokensParsed;
         private bool tokenAvailable;
@@ -1118,6 +1119,10 @@ namespace YamlDotNet.Core
 
             RemoveSimpleKey();
 
+            // Remember the column of the '?' so that the matching ':' can be told apart from an empty key.
+
+            complexKeyColumn = flowLevel == 0 ? cursor.LineOffset : -1;
+
             // Simple keys are allowed after '?' in the block context.
 
             simpleKeyAllowed = flowLevel == 0;
@@ -1185,13 +1190,17 @@ namespace YamlDotNet.Core
 
                     RollIndent(cursor.LineOffset, -1, false, cursor.Mark());
 
-                    // Check if we are dealing with empty key.
+                    // Check if we are dealing with empty key, i.e. a ':' that does not close a '?' key.
 
-                    if (cursor.LineOffset == 0 && simpleKey.LineOffset == 0)
+                    var isComplexKeyValue = complexKeyColumn == cursor.LineOffset;
+                    complexKeyColumn = -1;
+
+                    if (!isComplexKeyValue)
                     {
                         // Create the KEY token and insert it into the queue.
 
-                        tokens.Insert(tokens.Count, new Key(simpleKey.Mark, simpleKey.Mark));
+                        var keyMark = cursor.Mark();
+                        tokens.Insert(tokens.Count, new Key(keyMark, keyMark));
 
                         // A simple key cannot follow another simple key.
 

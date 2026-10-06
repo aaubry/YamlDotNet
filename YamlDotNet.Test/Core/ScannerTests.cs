@@ -548,6 +548,72 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void Empty_keys_in_nested_block_mapping_produce_key_tokens()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  : hello\n  abc: world"),
+                 StreamStart,
+                 BlockMappingStart,
+                 Key,
+                 PlainScalar("xyz"),
+                 Value,
+                 BlockMappingStart,
+                 Key,
+                 Value,
+                 PlainScalar("hello"),
+                 Key,
+                 PlainScalar("abc"),
+                 Value,
+                 PlainScalar("world"),
+                 BlockEnd,
+                 BlockEnd,
+                 StreamEnd);
+        }
+
+        [Fact]
+        public void Empty_keys_in_block_mapping_inside_sequence_produce_key_tokens()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("- first:\n    : Any\n  second: 1"),
+                 StreamStart,
+                 BlockSequenceStart,
+                 BlockEntry,
+                 BlockMappingStart,
+                 Key,
+                 PlainScalar("first"),
+                 Value,
+                 BlockMappingStart,
+                 Key,
+                 Value,
+                 PlainScalar("Any"),
+                 BlockEnd,
+                 Key,
+                 PlainScalar("second"),
+                 Value,
+                 PlainScalar("1"),
+                 BlockEnd,
+                 BlockEnd,
+                 StreamEnd);
+        }
+
+        [Fact]
+        public void Explicit_key_values_in_nested_block_do_not_produce_extra_key_tokens()
+        {
+            AssertSequenceOfTokensFrom(Yaml.ScannerForText("xyz:\n  ? abc\n  : world"),
+                 StreamStart,
+                 BlockMappingStart,
+                 Key,
+                 PlainScalar("xyz"),
+                 Value,
+                 BlockMappingStart,
+                 Key,
+                 PlainScalar("abc"),
+                 Value,
+                 PlainScalar("world"),
+                 BlockEnd,
+                 BlockEnd,
+                 StreamEnd);
+        }
+
+        [Fact]
         public void Utf16StringsAsUtf8SurrogatesWorkCorrectly()
         {
             AssertSequenceOfTokensFrom(Yaml.ScannerForText("Test: \"\\uD83D\\uDC4D\""),
