@@ -1489,9 +1489,10 @@ namespace YamlDotNet.Core
 
             var chomping = 0;
             var increment = 0;
-            var currentIndent = (long)0;
+            // -1 until the content indentation is known, either from an indentation indicator or
+            // auto-detected from the content. 0 is a valid indentation at the root of a document.
+            var currentIndent = (long)-1;
             var leadingBlank = false;
-            bool? isFirstLine = null;
 
             // Eat the indicator '|' or '>'.
 
@@ -1577,14 +1578,6 @@ namespace YamlDotNet.Core
             if (analyzer.IsBreak())
             {
                 SkipLine();
-                if (!isFirstLine.HasValue)
-                {
-                    isFirstLine = true;
-                }
-                else if (isFirstLine == true)
-                {
-                    isFirstLine = false;
-                }
             }
 
             var end = cursor.Mark();
@@ -1598,12 +1591,11 @@ namespace YamlDotNet.Core
 
             // Scan the leading line breaks and determine the indentation level if needed.
 
-            currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, isLiteral, ref end, ref isFirstLine);
-            isFirstLine = false;
+            currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, ref end);
 
             // Scan the block scalar content.
 
-            while (cursor.LineOffset == currentIndent && !analyzer.IsZero() && !IsDocumentEnd())
+            while (cursor.LineOffset == currentIndent && !analyzer.IsZero() && !IsDocumentIndicator())
             {
                 // We are at the beginning of a non-empty line.
 
@@ -1655,7 +1647,7 @@ namespace YamlDotNet.Core
 
                 // Eat the following indentation spaces and line breaks.
 
-                currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, isLiteral, ref end, ref isFirstLine);
+                currentIndent = ScanBlockScalarBreaks(currentIndent, trailingBreaks, ref end);
             }
 
             // Chomp the tail.
@@ -1680,10 +1672,11 @@ namespace YamlDotNet.Core
         /// indentation level if needed.
         /// </summary>
 
-        private long ScanBlockScalarBreaks(long currentIndent, StringBuilder breaks, bool isLiteral, ref Mark end, ref bool? isFirstLine)
+        private long ScanBlockScalarBreaks(long currentIndent, StringBuilder breaks, ref Mark end)
         {
             var maxIndent = (long)0;
-            var indentOfFirstLine = (long)-1;
+            var widestLineStart = cursor.Mark();
+            var widestLineEnd = widestLineStart;
 
             end = cursor.Mark();
 
@@ -1693,7 +1686,9 @@ namespace YamlDotNet.Core
             {
                 // Eat the indentation spaces.
 
-                while ((currentIndent == 0 || cursor.LineOffset < currentIndent) && analyzer.IsSpace())
+                var lineStart = cursor.Mark();
+
+                while ((currentIndent < 0 || cursor.LineOffset < currentIndent) && analyzer.IsSpace())
                 {
                     Skip();
                 }
@@ -1701,35 +1696,15 @@ namespace YamlDotNet.Core
                 if (cursor.LineOffset > maxIndent)
                 {
                     maxIndent = cursor.LineOffset;
+                    widestLineStart = lineStart;
+                    widestLineEnd = cursor.Mark();
                 }
 
                 // Have we find a non-empty line?
 
                 if (!analyzer.IsBreak())
                 {
-                    if (isLiteral && isFirstLine == true)
-                    {
-                        var localIndent = cursor.LineOffset;
-                        var i = 0;
-                        while (!analyzer.IsBreak(i) && analyzer.IsSpace(i))
-                        {
-                            ++i;
-                            ++localIndent;
-                        }
-
-                        if (analyzer.IsBreak(i) && localIndent > cursor.LineOffset)
-                        {
-                            isFirstLine = false;
-                            indentOfFirstLine = localIndent;
-                        }
-                    }
                     break;
-                }
-
-                if (isFirstLine == true)
-                {
-                    isFirstLine = false;
-                    indentOfFirstLine = cursor.LineOffset;
                 }
 
                 // Consume the line break.
@@ -1739,25 +1714,28 @@ namespace YamlDotNet.Core
                 end = cursor.Mark();
             }
 
-            // Check if first line after literal is all spaces and count of spaces is more than "1 + currentIndent".
+            // When the indentation is auto-detected, none of the leading empty lines may contain
+            // more spaces than the first non-empty line of the content (YAML 1.2.2, 8.1.1.1;
+            // yaml-test-suite: 5LLU, S98Z, W9L4). A line that is not indented past the parent
+            // node, or a document marker, ends the scalar instead of being its content, so the
+            // rule does not apply to it. At the root (indent == -1) content may start at column 0.
 
-            if (isLiteral && indentOfFirstLine > 1 && currentIndent < indentOfFirstLine - 1)
+            if (currentIndent < 0
+                && maxIndent > cursor.LineOffset
+                && cursor.LineOffset > indent
+                && !IsDocumentIndicator()
+                && !analyzer.IsZero())
             {
-                // W9L4
-                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found extra spaces in first line.");
-            }
-
-            if (!isLiteral && maxIndent > cursor.LineOffset && indentOfFirstLine > -1)
-            {
-                // S98Z
-                throw new SemanticErrorException(end, cursor.Mark(), "While scanning a literal block scalar, found more spaces in lines above first content line.");
+                throw new SemanticErrorException(widestLineStart, widestLineEnd, "While scanning a block scalar, found a leading empty line with more spaces than the first non-empty line.");
             }
 
             // Determine the indentation level if needed.
 
-            if (currentIndent == 0 && (cursor.LineOffset > 0 || indent > -1))
+            if (currentIndent < 0)
             {
-                currentIndent = Math.Max(maxIndent, Math.Max(indent + 1, 1));
+                // Content is indented past its parent. At the root (indent == -1) this allows
+                // content that starts at column 0.
+                currentIndent = Math.Max(maxIndent, indent + 1);
             }
 
             return currentIndent;

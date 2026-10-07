@@ -575,6 +575,134 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
+        // https://github.com/aaubry/YamlDotNet/issues/523
+        // https://github.com/aaubry/YamlDotNet/issues/535
+        // The scanner is fed the raw text: Yaml.ScannerForText trims trailing spaces, which are what is tested here.
+        // Leading empty lines of a block scalar may contain spaces, as long as they
+        // do not contain more spaces than the first non-empty line (YAML 1.2.2, 8.1.1.1).
+        [Theory]
+        [InlineData("|\n  \n  text\n", "\ntext\n")]
+        [InlineData("|\n \n  text\n", "\ntext\n")]
+        [InlineData("key: |+\n      \n      text\n", "\ntext\n")]
+        [InlineData("a:\n  b: |\n    \n    text\n", "\ntext\n")]
+        [InlineData("- |\n    \n    text\n", "\ntext\n")]
+        [InlineData("key: |\n \n  \n  text\n", "\n\ntext\n")]
+        [InlineData("key: >\n  \n  text\n", "\ntext\n")]
+        [InlineData("key: |-4\n        \n    text\n", "    \ntext")]
+        [InlineData("a:\n- b: |\n    \n    \n  c: d\n", "")]
+        [InlineData("a:\n  b: |\n     \n     \n  c: d\n", "")]
+        [InlineData("a:\n  b: |\n  c: d\n", "")]
+        [InlineData("a:\n  b: >\n\n  c: d\n", "")]
+        [InlineData("- example: |+\n    \n- next\n", "\n")]
+        [InlineData("|\n\ntext\n", "\ntext\n")]
+        [InlineData("a:\n  description: >\n    \n  operationId: x\n", "")]
+        public void Block_scalar_allows_leading_empty_lines_with_spaces(string yaml, string expected)
+        {
+            var scanner = new Scanner(new StringReader(yaml));
+            var values = new System.Collections.Generic.List<string>();
+            while (scanner.MoveNext())
+            {
+                if (scanner.Current is Scalar scalar && (scalar.Style == ScalarStyle.Literal || scalar.Style == ScalarStyle.Folded))
+                {
+                    values.Add(scalar.Value);
+                }
+            }
+
+            values.Should().Equal(expected);
+        }
+
+        [Theory]
+        [InlineData("|\n   \n  text\n")]
+        [InlineData("key: |\n  \n    \n  text\n")]
+        [InlineData("key: >\n    \n  text\n")]
+        [InlineData("|\n   \ntext\n")]
+        [InlineData(">\n   \ntext\n")]
+        [InlineData("---\n|\n   \ntext\n---\nnext\n")]
+        public void Block_scalar_rejects_leading_empty_line_with_more_spaces_than_content(string yaml)
+        {
+            var scanner = new Scanner(new StringReader(yaml));
+
+            Action act = () =>
+            {
+                while (scanner.MoveNext())
+                {
+                }
+            };
+
+            act.Should().Throw<SemanticErrorException>();
+        }
+
+        [Theory]
+        [InlineData("key: |\n    \n  text\n", 2)]
+        [InlineData("key: |\n \n    \n  \n  text\n", 3)]
+        [InlineData("---\n|\n   \ntext\n", 3)]
+        public void Block_scalar_error_points_at_the_over_indented_empty_line(string yaml, int expectedLine)
+        {
+            var scanner = new Scanner(new StringReader(yaml));
+
+            Action act = () =>
+            {
+                while (scanner.MoveNext())
+                {
+                }
+            };
+
+            act.Should().Throw<SemanticErrorException>()
+                .Which.Start.Line.Should().Be(expectedLine);
+        }
+
+        // At the root of a document the content of a block scalar may start at column 0. Its
+        // indentation is then 0, so spaces at the start of later lines are content, and a line
+        // made of spaces between content lines is not a leading empty line.
+        [Theory]
+        [InlineData("--- |\ntext\n   \nmore\n", "text\n   \nmore\n")]
+        [InlineData("--- >\ntext\n   \nmore\n", "text\n   \nmore\n")]
+        [InlineData("|\ntext\n   \nmore\n", "text\n   \nmore\n")]
+        [InlineData("--- |\r\ntext\r\n   \r\nmore\r\n", "text\n   \nmore\n")]
+        [InlineData("--- |\ntext\n  more\n", "text\n  more\n")]
+        [InlineData("--- >\ntext\n  more\n", "text\n  more\n")]
+        [InlineData("--- |+\ntext\n   \n", "text\n   \n")]
+        [InlineData("|2\n    \n  text\n", "  \ntext\n")]
+        public void Block_scalar_at_root_keeps_spaces_when_content_starts_at_column_0(string yaml, string expected)
+        {
+            var scanner = new Scanner(new StringReader(yaml));
+            var values = new System.Collections.Generic.List<string>();
+            while (scanner.MoveNext())
+            {
+                if (scanner.Current is Scalar scalar && (scalar.Style == ScalarStyle.Literal || scalar.Style == ScalarStyle.Folded))
+                {
+                    values.Add(scalar.Value);
+                }
+            }
+
+            values.Should().Equal(expected);
+        }
+
+        // A document marker at column 0 ends the content of a block scalar at the root of a
+        // document, even though content at the root may otherwise start at column 0.
+        [Theory]
+        [InlineData("--- |\ntext\n---\nnext\n", new[] { "---", "text\n", "---", "next" })]
+        [InlineData("---\n|\n\ntext\n---\nnext\n", new[] { "---", "\ntext\n", "---", "next" })]
+        [InlineData("|\n   \n---\nnext\n", new[] { "", "---", "next" })]
+        public void Block_scalar_at_root_ends_at_document_marker(string yaml, string[] expected)
+        {
+            var scanner = new Scanner(new StringReader(yaml));
+            var actual = new System.Collections.Generic.List<string>();
+            while (scanner.MoveNext())
+            {
+                if (scanner.Current is DocumentStart)
+                {
+                    actual.Add("---");
+                }
+                else if (scanner.Current is Scalar scalar)
+                {
+                    actual.Add(scalar.Value);
+                }
+            }
+
+            actual.Should().Equal(expected);
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;
