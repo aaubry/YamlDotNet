@@ -97,6 +97,8 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                 write("#pragma warning disable CS8603 // Possible null reference return", true);
                 write("#pragma warning disable CS8604 // Possible null reference argument", true);
                 write("#pragma warning disable CS8766 // Nullability of reference types", true);
+                write("#pragma warning disable CS0612 // Type or member is obsolete", true);
+                write("#pragma warning disable CS0618 // Type or member is obsolete", true);
 
                 write("using System;", true);
                 write("using System.Collections.Generic;", true);
