@@ -300,6 +300,23 @@ public class PrimitiveTypes
     public MyTestStruct StructProperty { get; set; }
 }
 
+[YamlSerializable]
+public class ObsoleteMembers
+{
+    [Obsolete]
+    public string? ObsoleteProperty { get; set; }
+
+    [Obsolete("Use something else")]
+    public string? ObsoletePropertyWithMessage { get; set; }
+}
+
+[YamlSerializable]
+[Obsolete]
+public class ObsoleteType
+{
+    public string? Text { get; set; }
+}
+
 public class InheritedBase
 {
     public string Inherited { get; set; }
