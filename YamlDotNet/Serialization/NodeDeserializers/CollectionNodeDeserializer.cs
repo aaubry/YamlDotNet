@@ -47,7 +47,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             IList? list;
             var canUpdate = true;
             Type itemType;
-            var genericCollectionType = expectedType.GetImplementationOfOpenGenericInterface((typeof(ICollection<>)));
+            var genericCollectionType = expectedType.GetImplementationOfOpenGenericInterface(typeof(ICollection<>));
             if (genericCollectionType != null)
             {
                 var genericArguments = genericCollectionType.GetGenericArguments();

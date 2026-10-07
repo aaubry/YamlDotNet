@@ -39,8 +39,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
         {
             if (objectFactory.IsDictionary(expectedType))
             {
-                var result = objectFactory.Create(expectedType) as IDictionary;
-                if (result == null)
+                if (objectFactory.Create(expectedType) is not IDictionary result)
                 {
                     value = null;
                     return false;

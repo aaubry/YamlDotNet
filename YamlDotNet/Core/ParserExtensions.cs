@@ -71,11 +71,7 @@ namespace YamlDotNet.Core
         {
             if (!parser.Accept<T>(out var required))
             {
-                var @event = parser.Current;
-                if (@event == null)
-                {
-                    throw new YamlException($"Expected '{typeof(T).Name}', got nothing.");
-                }
+                var @event = parser.Current ?? throw new YamlException($"Expected '{typeof(T).Name}', got nothing.");
                 throw new YamlException(@event.Start, @event.End, $"Expected '{typeof(T).Name}', got '{@event.GetType().Name}' (at {@event.Start}).");
             }
             return required;
@@ -197,8 +193,8 @@ namespace YamlDotNet.Core
                             parser.SkipThisAndNestedEvents();
 
                             break;
-                        case MappingStart _:
-                        case SequenceStart _:
+                        case MappingStart:
+                        case SequenceStart:
                             parser.SkipThisAndNestedEvents();
                             break;
                         default:
