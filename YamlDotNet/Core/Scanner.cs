@@ -35,6 +35,7 @@ namespace YamlDotNet.Core
     public class Scanner : IScanner
     {
         private const int MaxVersionNumberLength = 9;
+        private const int MaxBlankLookAhead = 1000;
 
         private static readonly SortedDictionary<char, char> SimpleEscapeCodes = new SortedDictionary<char, char>
         {
@@ -2239,7 +2240,10 @@ namespace YamlDotNet.Core
                     {
                         // Check for tab character that abuse indentation.
 
-                        if (hasLeadingBlanks && cursor.LineOffset < currentIndent && analyzer.IsTab())
+                        // A line that holds only blanks is an empty line, so a tab on it does
+                        // not act as indentation.
+
+                        if (hasLeadingBlanks && cursor.LineOffset < currentIndent && analyzer.IsTab() && !IsRestOfLineBlank())
                         {
                             throw new SyntaxErrorException(start, cursor.Mark(), "While scanning a plain scalar, found a tab character that violate indentation.");
                         }
@@ -2437,6 +2441,25 @@ namespace YamlDotNet.Core
             }
 
             return new TagDirective(handle, prefix, start, start);
+        }
+
+        /// <summary>
+        /// Checks whether the rest of the current line holds only spaces and tabs.
+        /// </summary>
+        private bool IsRestOfLineBlank()
+        {
+            for (var offset = 0; offset < MaxBlankLookAhead; ++offset)
+            {
+                if (analyzer.IsBreakOrZero(offset))
+                {
+                    return true;
+                }
+                if (!analyzer.IsWhite(offset))
+                {
+                    return false;
+                }
+            }
+            return false;
         }
 
         /// <summary>

@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.IO;
 using Xunit;
 using YamlDotNet.Core;
 
@@ -468,6 +469,31 @@ namespace YamlDotNet.Test.Core
                 MappingEnd,
                 DocumentEnd(Implicit),
                 StreamEnd);
+        }
+
+        [Theory]
+        [InlineData("foo: 1\n\t\nbar: 2\n")]
+        [InlineData("foo: 1\n \t \nbar: 2\n")]
+        public void TabOnBlankLineAfterPlainScalarIsNotIndentation(string yaml)
+        {
+            AssertSequenceOfEventsFrom(new Parser(new StringReader(yaml)),
+                StreamStart,
+                DocumentStart(Implicit),
+                BlockMappingStart,
+                PlainScalar("foo").IsKey,
+                PlainScalar("1"),
+                PlainScalar("bar").IsKey,
+                PlainScalar("2"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
+
+        [Fact]
+        public void TabIndentingContentAfterPlainScalarIsRejected()
+        {
+            var parser = new Parser(new StringReader("foo: 1\n\tbar: 2\n"));
+            Assert.Throws<SyntaxErrorException>(() => { while (parser.MoveNext()) { } });
         }
     }
 }
