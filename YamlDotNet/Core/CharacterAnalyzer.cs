@@ -125,14 +125,19 @@ namespace YamlDotNet.Core
             return Check('\t', offset);
         }
 
+        // The predicates below run for nearly every character the scanner reads. Each one peeks at
+        // the buffer once and compares against constants, rather than composing the smaller
+        // predicates (one peek each) and searching a string of candidates.
+
         public bool IsWhite(int offset = 0)
         {
-            return IsSpace(offset) || IsTab(offset);
+            var character = Buffer.Peek(offset);
+            return character == ' ' || character == '\t';
         }
 
         public bool IsBreak(int offset = 0)
         {
-            return Check("\r\n\x85\x2028\x2029", offset);
+            return IsBreakCharacter(Buffer.Peek(offset));
         }
 
         public bool IsCrLf(int offset = 0)
@@ -142,12 +147,19 @@ namespace YamlDotNet.Core
 
         public bool IsBreakOrZero(int offset = 0)
         {
-            return IsBreak(offset) || IsZero(offset);
+            var character = Buffer.Peek(offset);
+            return IsBreakCharacter(character) || character == '\0';
         }
 
         public bool IsWhiteBreakOrZero(int offset = 0)
         {
-            return IsWhite(offset) || IsBreakOrZero(offset);
+            var character = Buffer.Peek(offset);
+            return character == ' ' || character == '\t' || IsBreakCharacter(character) || character == '\0';
+        }
+
+        private static bool IsBreakCharacter(char character)
+        {
+            return character == '\r' || character == '\n' || character == '\x85' || character == '\x2028' || character == '\x2029';
         }
 
         public bool Check(char expected, int offset = 0)

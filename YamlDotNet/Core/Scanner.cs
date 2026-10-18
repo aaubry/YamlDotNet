@@ -2160,6 +2160,7 @@ namespace YamlDotNet.Core
                 var isAliasValue = analyzer.Check('*') && !(key.IsPossible && key.IsRequired);
 
                 // Consume non-blank characters.
+                var consumedNonBlank = false;
                 while (!analyzer.IsWhiteBreakOrZero())
                 {
                     // Check for indicators that may end a plain scalar.
@@ -2220,7 +2221,15 @@ namespace YamlDotNet.Core
                     // Copy the character.
 
                     value.Append(ReadCurrentCharacter());
+                    consumedNonBlank = true;
+                }
 
+                // The scalar ends after the last non-blank character. The cursor does not move
+                // between consuming that character and leaving the loop, so take the mark once
+                // here instead of after every character.
+
+                if (consumedNonBlank)
+                {
                     end = cursor.Mark();
                 }
 
