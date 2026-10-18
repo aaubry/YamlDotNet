@@ -59,7 +59,9 @@ namespace YamlDotNet.Core
         };
 
         private readonly Stack<long> indents = new Stack<long>();
-        private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>();
+        // Only a handful of tokens are queued at a time, except while a long single-line flow
+        // collection could still turn out to be a simple key; start small and let the queue grow.
+        private readonly InsertionQueue<Token> tokens = new InsertionQueue<Token>(16);
         private readonly Stack<SimpleKey> simpleKeys = new Stack<SimpleKey>();
         private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
 
