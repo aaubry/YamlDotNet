@@ -154,6 +154,33 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void LongFlowSequenceCanBeAnImplicitKey()
+        {
+            // Every token on the line stays queued until the ':' shows that the sequence is a key,
+            // so the scanner's token queue has to grow before the KEY token is inserted in front.
+            const int itemCount = 40;
+            var items = new string[itemCount];
+            var events = new YamlDotNet.Core.Events.ParsingEvent[itemCount + 9];
+            var index = 0;
+            events[index++] = StreamStart;
+            events[index++] = DocumentStart(Implicit);
+            events[index++] = BlockMappingStart;
+            events[index++] = FlowSequenceStart;
+            for (var i = 0; i < itemCount; i++)
+            {
+                items[i] = "item" + i;
+                events[index++] = PlainScalar(items[i]);
+            }
+            events[index++] = SequenceEnd;
+            events[index++] = PlainScalar("value");
+            events[index++] = MappingEnd;
+            events[index++] = DocumentEnd(Implicit);
+            events[index] = StreamEnd;
+
+            AssertSequenceOfEventsFrom(Yaml.ParserForText("[" + string.Join(", ", items) + "]: value"), events);
+        }
+
+        [Fact]
         public void VerifyTokensOnExample9()
         {
             AssertSequenceOfEventsFrom(Yaml.ParserForResource("09-flow-mapping.yaml"),

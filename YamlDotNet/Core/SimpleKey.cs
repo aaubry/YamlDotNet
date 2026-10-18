@@ -23,8 +23,6 @@ namespace YamlDotNet.Core
 {
     internal sealed class SimpleKey
     {
-        private readonly Cursor cursor;
-
         public bool IsPossible { get; private set; }
 
         public void MarkAsImpossible()
@@ -34,15 +32,18 @@ namespace YamlDotNet.Core
 
         public bool IsRequired { get; }
         public int TokenNumber { get; }
-        public long Index => cursor.Index;
-        public long Line => cursor.Line;
-        public long LineOffset => cursor.LineOffset;
 
-        public Mark Mark => cursor.Mark();
+        // The position is copied out of the scanner's cursor rather than kept in a Cursor of its
+        // own, which would cost a second allocation for every potential simple key.
+        public long Index { get; }
+        public long Line { get; }
+        public long LineOffset { get; }
+
+        public Mark Mark => new Mark(Index, Line, LineOffset + 1);
 
         public SimpleKey()
         {
-            cursor = new Cursor();
+            Line = 1;
         }
 
         public SimpleKey(bool isRequired, int tokenNumber, Cursor cursor)
@@ -50,7 +51,9 @@ namespace YamlDotNet.Core
             IsPossible = true;
             IsRequired = isRequired;
             TokenNumber = tokenNumber;
-            this.cursor = new Cursor(cursor);
+            Index = cursor.Index;
+            Line = cursor.Line;
+            LineOffset = cursor.LineOffset;
         }
     }
 }
