@@ -406,6 +406,52 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void VerifyTokenWithOverriddenPrimaryTagHandle()
+        {
+            AssertSequenceOfEventsFrom(Yaml.ParserForText(@"
+                %TAG ! tag:example.com,2000:
+                --- !foo
+                a: !!str b
+                --- !bar
+                c: d"),
+                StreamStart,
+                DocumentStart(Explicit, null,
+                    TagDirective("!", "tag:example.com,2000:"),
+                    TagDirective("!!", TagYaml)),
+                BlockMappingStart.T("tag:example.com,2000:foo").Explicit,
+                PlainScalar("a").IsKey,
+                PlainScalar("b").T(TagYaml + "str"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                DocumentStart(Explicit),
+                BlockMappingStart.T("!bar").Explicit,
+                PlainScalar("c").IsKey,
+                PlainScalar("d"),
+                MappingEnd,
+                DocumentEnd(Implicit),
+                StreamEnd);
+        }
+
+        [Fact]
+        public void TagHandleIsNotCarriedOverToTheNextDocumentInYaml12()
+        {
+            var parser = Yaml.ParserForText(@"
+                %TAG !e! tag:example.com,2000:
+                --- !e!foo
+                a: b
+                --- !e!bar
+                c: d");
+
+            var exception = Assert.Throws<SemanticErrorException>(() =>
+            {
+                while (parser.MoveNext())
+                {
+                }
+            });
+            Assert.Contains("undefined tag handle", exception.Message);
+        }
+
+        [Fact]
         public void VerifyTokenWithUrlEncodedTagContainingPlusSpaces()
         {
             AssertSequenceOfEventsFrom(Yaml.ParserForText("!(%20%20%20hello+you%20+) value"),

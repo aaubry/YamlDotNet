@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using YamlDotNet.Core.Tokens;
 using MappingStyle = YamlDotNet.Core.Events.MappingStyle;
@@ -36,7 +37,10 @@ namespace YamlDotNet.Core
     public class Parser : IParser
     {
         private readonly Stack<ParserState> states = new Stack<ParserState>();
-        private readonly TagDirectiveCollection tagDirectives = [];
+
+        // The tag directives in effect for the current document. Null means that only the default
+        // tag directives are in effect, which is the case unless a document declares %TAG directives.
+        private TagDirectiveCollection? tagDirectives;
         private ParserState state;
 
         private readonly IScanner scanner;
@@ -369,19 +373,48 @@ namespace YamlDotNet.Core
                 Skip();
             }
 
+            var hasOwnTagDirectives = tags.Count > 0;
             AddTagDirectives(tags, Constants.DefaultTagDirectives);
 
+            // A document with directives of its own replaces the tag directives in effect, while
+            // one without keeps those of the previous document. The default tag directives are
+            // always in effect, so a collection is only kept when the document declared %TAG
+            // directives.
             if (hasOwnDirectives)
             {
-                tagDirectives.Clear();
+                tagDirectives = hasOwnTagDirectives ? new TagDirectiveCollection(tags) : null;
             }
-
-            AddTagDirectives(tagDirectives, tags);
 
             return localVersion;
         }
 
-        private static void AddTagDirectives(TagDirectiveCollection directives, IEnumerable<TagDirective> source)
+        private bool TryGetTagDirective(string handle, [NotNullWhen(true)] out TagDirective? directive)
+        {
+            if (tagDirectives != null)
+            {
+                if (tagDirectives.Contains(handle))
+                {
+                    directive = tagDirectives[handle];
+                    return true;
+                }
+            }
+            else
+            {
+                foreach (var defaultDirective in Constants.DefaultTagDirectives)
+                {
+                    if (defaultDirective.Handle == handle)
+                    {
+                        directive = defaultDirective;
+                        return true;
+                    }
+                }
+            }
+
+            directive = null;
+            return false;
+        }
+
+        private static void AddTagDirectives(TagDirectiveCollection directives, TagDirective[] source)
         {
             foreach (var directive in source)
             {
@@ -491,9 +524,9 @@ namespace YamlDotNet.Core
                     {
                         tagName = new TagName(tag.Suffix);
                     }
-                    else if (tagDirectives.Contains(tag.Handle))
+                    else if (TryGetTagDirective(tag.Handle, out var tagDirective))
                     {
-                        tagName = new TagName(string.Concat(tagDirectives[tag.Handle].Prefix, tag.Suffix));
+                        tagName = new TagName(string.Concat(tagDirective.Prefix, tag.Suffix));
                     }
                     else
                     {
