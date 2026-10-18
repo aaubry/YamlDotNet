@@ -28,31 +28,49 @@ namespace YamlDotNet.Core.ObjectPool
     /// <summary>
     /// Pooling of StringBuilder instances.
     /// </summary>
+    /// <remarks>
+    /// The builders are cached per thread. The scanner rents and returns up to four builders for
+    /// every scalar it reads, and a cache that is only ever used by one thread serves that without
+    /// the interlocked operations that a pool shared between threads needs on every rent and return.
+    /// </remarks>
     [DebuggerStepThrough]
     internal static class StringBuilderPool
     {
-        private static readonly ObjectPool<StringBuilder> Pool = ObjectPool.Create(new StringBuilderPooledObjectPolicy
+        // Scanning a scalar keeps up to four builders rented at the same time.
+        private const int MaximumRetainedPerThread = 4;
+
+        private static readonly StringBuilderPooledObjectPolicy Policy = new StringBuilderPooledObjectPolicy
         {
             InitialCapacity = 16,
             MaximumRetainedCapacity = 1024
-        });
+        };
+
+        [ThreadStatic]
+        private static BuilderCache? ThreadCache;
 
         public static BuilderWrapper Rent()
         {
-            var builder = Pool.Get();
+            var builder = ThreadCache?.Pop() ?? Policy.Create();
             Debug.Assert(builder.Length == 0);
-            return new BuilderWrapper(builder, Pool);
+            return new BuilderWrapper(builder);
+        }
+
+        private static void Return(StringBuilder builder)
+        {
+            // The policy clears the builder, or rejects it when it has grown too large to keep.
+            if (Policy.Return(builder))
+            {
+                (ThreadCache ??= new BuilderCache()).Push(builder);
+            }
         }
 
         internal readonly struct BuilderWrapper : IDisposable
         {
             public readonly StringBuilder Builder;
-            private readonly ObjectPool<StringBuilder> pool;
 
-            public BuilderWrapper(StringBuilder builder, ObjectPool<StringBuilder> pool)
+            public BuilderWrapper(StringBuilder builder)
             {
                 Builder = builder;
-                this.pool = pool;
             }
 
             public override string ToString()
@@ -62,7 +80,33 @@ namespace YamlDotNet.Core.ObjectPool
 
             public void Dispose()
             {
-                pool.Return(Builder);
+                Return(Builder);
+            }
+        }
+
+        private sealed class BuilderCache
+        {
+            private readonly StringBuilder?[] builders = new StringBuilder?[MaximumRetainedPerThread];
+            private int count;
+
+            public StringBuilder? Pop()
+            {
+                if (count == 0)
+                {
+                    return null;
+                }
+
+                var builder = builders[--count];
+                builders[count] = null;
+                return builder;
+            }
+
+            public void Push(StringBuilder builder)
+            {
+                if (count < builders.Length)
+                {
+                    builders[count++] = builder;
+                }
             }
         }
     }
