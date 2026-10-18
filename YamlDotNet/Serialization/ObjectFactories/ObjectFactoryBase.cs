@@ -63,6 +63,16 @@ namespace YamlDotNet.Serialization.ObjectFactories
                 dictionary = adaptedDictionary as IDictionary;
                 return true;
             }
+
+            var genericReadOnlyDictionaryType = descriptor.Type.GetImplementationOfOpenGenericInterface(typeof(IReadOnlyDictionary<,>));
+            if (genericReadOnlyDictionaryType != null)
+            {
+                genericArguments = genericReadOnlyDictionaryType.GetGenericArguments();
+                var adaptedDictionary = Activator.CreateInstance(typeof(GenericReadOnlyDictionaryToNonGenericAdapter<,>).MakeGenericType(genericArguments), descriptor.Value)!;
+                dictionary = adaptedDictionary as IDictionary;
+                return true;
+            }
+
             genericArguments = null;
             dictionary = null;
             return false;

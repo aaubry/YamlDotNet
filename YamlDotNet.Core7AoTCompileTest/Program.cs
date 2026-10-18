@@ -240,6 +240,8 @@ Console.WriteLine("The next line should say goodbye");
 Console.WriteLine(serializer.Serialize(EnumMemberedEnum.Hello));
 Console.WriteLine("The next line should say hello");
 Console.WriteLine(deserializer.Deserialize<EnumMemberedEnum>("goodbye"));
+Console.WriteLine("The next line should say a: b");
+Console.Write(serializer.Serialize(new ReadOnlyOnlyDictionary(new Dictionary<string, string> { { "a", "b" } })));
 
 [YamlSerializable]
 public class MyArray
@@ -389,6 +391,30 @@ public struct MyTestNestedStruct
 {
     public float X;
     public float Y;
+}
+
+[YamlSerializable]
+public class ReadOnlyOnlyDictionary : IReadOnlyDictionary<string, string>
+{
+    private readonly Dictionary<string, string> inner;
+
+    public ReadOnlyOnlyDictionary() : this(new Dictionary<string, string>())
+    {
+    }
+
+    public ReadOnlyOnlyDictionary(Dictionary<string, string> inner)
+    {
+        this.inner = inner;
+    }
+
+    public string this[string key] => inner[key];
+    public IEnumerable<string> Keys => inner.Keys;
+    public IEnumerable<string> Values => inner.Values;
+    public int Count => inner.Count;
+    public bool ContainsKey(string key) => inner.ContainsKey(key);
+    public bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out string value) => inner.TryGetValue(key, out value);
+    public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => inner.GetEnumerator();
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 #pragma warning restore CS8604 // Possible null reference argument.

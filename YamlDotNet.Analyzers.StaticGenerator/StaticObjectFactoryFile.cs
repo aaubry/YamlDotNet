@@ -237,10 +237,60 @@ namespace YamlDotNet.Analyzers.StaticGenerator
             Write("if (type == typeof(System.Collections.Generic.Dictionary<object, object>)) return typeof(object);");
             Write($"throw new InvalidOperationException($\"Type '{{type.FullName}}' is not registered in the YamlDotNet static context. Add [YamlSerializable(typeof({{type.Name}}))] to your static context class.\");");
             UnIndent(); Write("}");
+            WriteGetDictionaryMethod(syntaxReceiver);
             WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserializing", (c) => c.OnDeserializingMethods);
             WriteExecuteMethod(syntaxReceiver, "ExecuteOnDeserialized", (c) => c.OnDeserializedMethods);
             WriteExecuteMethod(syntaxReceiver, "ExecuteOnSerializing", (c) => c.OnSerializingMethods);
             WriteExecuteMethod(syntaxReceiver, "ExecuteOnSerialized", (c) => c.OnSerializedMethods);
+            UnIndent(); Write("}");
+        }
+
+        private void WriteGetDictionaryMethod(SerializableSyntaxReceiver syntaxReceiver)
+        {
+            // Types that implement only IReadOnlyDictionary<,> are not an IDictionary,
+            // so the traversal needs them adapted to be written as a mapping.
+            var readOnlyDictionaries = new List<(string ClassName, string KeyType, string ValueType)>();
+            foreach (var o in syntaxReceiver.Classes)
+            {
+                var classObject = o.Value;
+                if (classObject.IsArray || classObject.IsList || classObject.IsListOverride || classObject.IsDictionary || classObject.IsDictionaryOverride)
+                {
+                    continue;
+                }
+
+                var interfaces = classObject.ModuleSymbol.AllInterfaces;
+                if (interfaces.Any(i => i.ToDisplayString() == "System.Collections.IDictionary"))
+                {
+                    continue;
+                }
+
+                var readOnlyDictionary = interfaces.FirstOrDefault(i => i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>");
+                if (readOnlyDictionary != null)
+                {
+                    readOnlyDictionaries.Add((
+                        classObject.ModuleSymbol.GetFullName().Replace("?", string.Empty),
+                        readOnlyDictionary.TypeArguments[0].GetFullName().Replace("?", string.Empty),
+                        readOnlyDictionary.TypeArguments[1].GetFullName().Replace("?", string.Empty)));
+                }
+            }
+
+            if (readOnlyDictionaries.Count == 0)
+            {
+                return;
+            }
+
+            Write("public override bool GetDictionary(YamlDotNet.Serialization.IObjectDescriptor descriptor, out System.Collections.IDictionary dictionary, out Type[] genericArguments)");
+            Write("{"); Indent();
+            foreach (var (className, keyType, valueType) in readOnlyDictionaries)
+            {
+                Write($"if (descriptor.Value is {className})");
+                Write("{"); Indent();
+                Write($"dictionary = AdaptReadOnlyDictionary<{keyType}, {valueType}>(({className})descriptor.Value);");
+                Write($"genericArguments = new Type[] {{ typeof({keyType}), typeof({valueType}) }};");
+                Write("return true;");
+                UnIndent(); Write("}");
+            }
+            Write("return base.GetDictionary(descriptor, out dictionary, out genericArguments);");
             UnIndent(); Write("}");
         }
 

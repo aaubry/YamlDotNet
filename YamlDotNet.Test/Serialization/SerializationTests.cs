@@ -1577,6 +1577,29 @@ y:
             writer.ToString().Should().Contain("new_key_here: new_value");
         }
 
+        [Fact]
+        public void SerializeGenericReadOnlyDictionary()
+        {
+            // A type that implements only IReadOnlyDictionary<,> must serialize as a
+            // mapping, the same as a regular dictionary, rather than as a sequence of
+            // key/value pairs. See https://github.com/aaubry/YamlDotNet/issues/606.
+            var readOnlyDictionary = new GenericTestReadOnlyDictionary<string, string>();
+            readOnlyDictionary.Add("key1", "value1");
+            readOnlyDictionary.Add("key2", "value2");
+
+            var serializer = new SerializerBuilder().Build();
+
+            var actual = serializer.Serialize(readOnlyDictionary);
+            var expected = serializer.Serialize(
+                new Dictionary<string, string>
+                {
+                    ["key1"] = "value1",
+                    ["key2"] = "value2",
+                });
+
+            actual.Should().Be(expected);
+        }
+
         [Theory, MemberData(nameof(SpecialFloats))]
         public void SpecialFloatsAreHandledCorrectly(FloatTestCase testCase)
         {

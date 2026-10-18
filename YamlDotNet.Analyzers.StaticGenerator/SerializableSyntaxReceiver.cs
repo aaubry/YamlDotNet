@@ -104,7 +104,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
                         continue;
                     }
 
-                    if (member is IPropertySymbol propertySymbol)
+                    if (member is IPropertySymbol propertySymbol && !propertySymbol.IsIndexer)
                     {
                         if (!classObject.PropertySymbols.ContainsName(propertySymbol))
                         {

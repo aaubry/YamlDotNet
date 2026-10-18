@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using YamlDotNet.Helpers;
 
 namespace YamlDotNet.Serialization.ObjectFactories
 {
@@ -110,16 +112,26 @@ namespace YamlDotNet.Serialization.ObjectFactories
 
         /// <summary>
         /// The static implementation of yamldotnet doesn't support generating types, so we will return null's and false since we can't do anything.
+        /// The generated factory overrides this for registered types that implement only <see cref="IReadOnlyDictionary{TKey, TValue}"/>.
         /// </summary>
         /// <param name="descriptor"></param>
         /// <param name="dictionary"></param>
         /// <param name="genericArguments"></param>
         /// <returns></returns>
-        public bool GetDictionary(IObjectDescriptor descriptor, out IDictionary? dictionary, out Type[]? genericArguments)
+        public virtual bool GetDictionary(IObjectDescriptor descriptor, out IDictionary? dictionary, out Type[]? genericArguments)
         {
             dictionary = null;
             genericArguments = null;
             return false;
+        }
+
+        /// <summary>
+        /// Wraps a read-only dictionary so that it can be traversed as a mapping.
+        /// </summary>
+        protected static IDictionary AdaptReadOnlyDictionary<TKey, TValue>(IReadOnlyDictionary<TKey, TValue> dictionary)
+            where TKey : notnull
+        {
+            return new GenericReadOnlyDictionaryToNonGenericAdapter<TKey, TValue>(dictionary);
         }
 
         public abstract void ExecuteOnDeserializing(object value);
