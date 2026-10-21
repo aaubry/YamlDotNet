@@ -29,6 +29,12 @@ namespace YamlDotNet.Serialization
     /// </summary>
     public abstract class StaticContext
     {
+        private const string MissingGeneratedImplementationMessage =
+            "Static source generation has not been applied to this StaticContext. " +
+            "Ensure the context is a top-level partial class marked with [YamlStaticContext], " +
+            "register at least one type with [YamlSerializable(typeof(...))], and reference " +
+            "the YamlDotNet.Analyzers.StaticGenerator package as an analyzer.";
+
         /// <summary>
         /// Gets whether the type is known to the context
         /// </summary>
@@ -36,7 +42,7 @@ namespace YamlDotNet.Serialization
         /// <returns></returns>
         public virtual bool IsKnownType(Type type)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(MissingGeneratedImplementationMessage);
         }
 
         /// <summary>
@@ -45,7 +51,7 @@ namespace YamlDotNet.Serialization
         /// <returns></returns>
         public virtual ITypeResolver GetTypeResolver()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(MissingGeneratedImplementationMessage);
         }
 
         /// <summary>
@@ -54,7 +60,7 @@ namespace YamlDotNet.Serialization
         /// <returns></returns>
         public virtual StaticObjectFactory GetFactory()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(MissingGeneratedImplementationMessage);
         }
 
         /// <summary>
@@ -63,7 +69,7 @@ namespace YamlDotNet.Serialization
         /// <returns></returns>
         public virtual ITypeInspector GetTypeInspector()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(MissingGeneratedImplementationMessage);
         }
     }
 }
