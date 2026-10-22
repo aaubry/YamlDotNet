@@ -39,7 +39,7 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
-            Write("public class StaticTypeInspector : YamlDotNet.Serialization.ITypeInspector");
+            Write("class StaticTypeInspector : YamlDotNet.Serialization.ITypeInspector");
             Write("{"); Indent();
 
             Write("private readonly YamlDotNet.Serialization.ITypeResolver _typeResolver;");
