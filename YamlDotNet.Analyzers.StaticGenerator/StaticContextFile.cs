@@ -32,7 +32,10 @@ namespace YamlDotNet.Analyzers.StaticGenerator
 
         public override void Write(SerializableSyntaxReceiver syntaxReceiver)
         {
-            Write($"public partial class {syntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
+            // A user-declared context supplies its own accessibility through its other partial part.
+            // Without one the generator declares the whole class itself, and keeps it public.
+            var accessibility = syntaxReceiver.YamlStaticContextType == null ? "public " : string.Empty;
+            Write($"{accessibility}partial class {syntaxReceiver.YamlStaticContextType?.Name ?? "StaticContext"} : YamlDotNet.Serialization.StaticContext");
             Write("{"); Indent();
             Write("private readonly YamlDotNet.Serialization.ObjectFactories.StaticObjectFactory _objectFactory;");
             Write("private readonly YamlDotNet.Serialization.ITypeResolver _typeResolver;");

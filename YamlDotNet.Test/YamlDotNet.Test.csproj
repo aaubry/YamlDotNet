@@ -14,6 +14,7 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="FakeItEasy" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +26,16 @@
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <!-- The generator is not strong named, so this signed assembly cannot reference it.
+       ContextAccessibilityTests loads the copy in generator/ by path instead. -->
+  <Target Name="CopyStaticGeneratorForTests" AfterTargets="ResolveProjectReferences">
+    <ItemGroup>
+      <None Include="@(Analyzer->WithMetadataValue('Filename', 'YamlDotNet.Analyzers.StaticGenerator'))"
+            Link="generator\%(Filename)%(Extension)"
+            CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <EmbeddedResource Include="files\*.yaml;files\*.template" />
