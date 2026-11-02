@@ -18,7 +18,6 @@ _ReSharper.*
 packages
 packages/*
 !packages/repositories.config
-.vscode
 
 *.nuspec.tmp
 README.html
@@ -36,3 +35,5 @@ BenchmarkDotNet.Artifacts*
 /tools/build/Properties/launchSettings.json
 /YamlDotNet.Unity
 *.meta
+config.bat
+node_modules
