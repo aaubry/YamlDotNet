@@ -116,6 +116,19 @@ System.Console.WriteLine($"{p.Name} is {p.Age} years old and lives at {h.Street}
 // George Washington is 89 years old and lives at 400 Mockingbird Lane in Louaryland, Hawidaho.
 ```
 
+### Rectangular arrays
+
+Zero-based multidimensional arrays use one nested YAML sequence per dimension,
+like jagged arrays. Deserializing a rectangular array requires equal row lengths;
+null rows and arrays with non-zero lower bounds are not supported. Empty sequences
+preserve only the dimensions visible in YAML: an `int[2, 0, 5]` becomes `[[], []]`,
+which deserializes as an `int[2, 0, 0]` because the final length is not represented.
+
+Aliases between rows inside a matrix copy the row's values into each position.
+A rectangular array has no separate CLR row objects: aliasing an internal row
+into a separate array-typed property is unsupported. Use jagged arrays when
+individual rows need their own identities.
+
 ## More information
 
 More information can be found in the [project's wiki](https://github.com/aaubry/YamlDotNet/wiki).

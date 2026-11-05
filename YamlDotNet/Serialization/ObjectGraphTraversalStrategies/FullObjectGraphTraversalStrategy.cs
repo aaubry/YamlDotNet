@@ -245,13 +245,19 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 
         private void TraverseList<TContext>(IPropertyDescriptor? propertyDescriptor, IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, TContext context, Stack<ObjectPathSegment> path, ObjectSerializer serializer)
         {
-            var itemType = objectFactory.GetValueType(value.Type);
+            var enumerable = (IEnumerable)value.NonNullValue();
+            if (enumerable is Array array && array.Rank > 1)
+            {
+                enumerable = new ArrayDimension(array);
+            }
+
+            var itemType = enumerable is ArrayDimension dimension ? dimension.ItemType : objectFactory.GetValueType(value.Type);
 
             visitor.VisitSequenceStart(value, itemType, context, serializer);
 
             var index = 0;
 
-            foreach (var item in (IEnumerable)value.NonNullValue())
+            foreach (var item in enumerable)
             {
                 Traverse(propertyDescriptor, index, GetObjectDescriptor(item, itemType), visitor, context, path, serializer);
                 ++index;
