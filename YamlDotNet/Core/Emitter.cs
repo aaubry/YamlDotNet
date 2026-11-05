@@ -1826,9 +1826,22 @@ namespace YamlDotNet.Core
             {
                 chompHint = "-";
             }
-            else if (value.Length >= 2 && analyzer.IsBreak(value.Length - 2))
+            else
             {
-                chompHint = "+";
+                // CRLF is one YAML line break. Look before the complete final
+                // break, not between its CR and LF, when choosing keep chomping.
+                var trailingBreakStart = value.Length - 1;
+                if (trailingBreakStart > 0 && analyzer.IsCrLf(trailingBreakStart - 1))
+                {
+                    --trailingBreakStart;
+                }
+
+                // A scalar containing only one break also needs keep: clip
+                // chomping discards its otherwise empty content.
+                if (trailingBreakStart == 0 || analyzer.IsBreak(trailingBreakStart - 1))
+                {
+                    chompHint = "+";
+                }
             }
 
             if (chompHint != null)
