@@ -45,6 +45,13 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
+            if (expectedType.GetArrayRank() > 1)
+            {
+                value = RectangularArrayDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer,
+                    enumNamingConvention, typeInspector);
+                return true;
+            }
+
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
             var items = new ArrayList();
