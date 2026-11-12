@@ -282,6 +282,62 @@ b: &number 1
         }
 
         [Theory]
+        [InlineData("123_456", 123456)]
+        [InlineData("123__456", 123456)]
+        [InlineData("+123_456", 123456)]
+        [InlineData("-123_456", -123456)]
+        [InlineData("123_456.75", 123456.75f)]
+        [InlineData("123_456.75e+1", 1234567.5f)]
+        [InlineData(".12_5", 0.125f)]
+        public void UnquotedStringTypeDeserialization_NumbersWithUnderscores(string yamlValue, object expected)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var result = deserializer.Deserialize<IDictionary<string, object>>($"Value: {yamlValue}");
+
+            Assert.Equal(expected.GetType(), result["Value"].GetType());
+            Assert.Equal(expected, result["Value"]);
+        }
+
+        [Theory]
+        [InlineData("1_0e999")]
+        [InlineData("-1_0e999")]
+        public void UnquotedStringTypeDeserialization_OverflowWithUnderscores(string yamlValue)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var result = deserializer.Deserialize<IDictionary<string, object>>($"Value: {yamlValue}");
+
+#if NETFRAMEWORK
+            // .NET Framework rejects floating point overflow, so preserve the original scalar.
+            Assert.Equal(yamlValue, Assert.IsType<string>(result["Value"]));
+#else
+            // Modern .NET parses floating point overflow as infinity.
+            Assert.Equal(yamlValue[0] == '-' ? double.NegativeInfinity : double.PositiveInfinity,
+                Assert.IsType<double>(result["Value"]));
+#endif
+        }
+
+        [Theory]
+        [InlineData("12_foo")]
+        [InlineData("1e_2")]
+        [InlineData("1e2_")]
+        [InlineData("1e2__")]
+        [InlineData("1e2_3")]
+        [InlineData("1.2e+3_")]
+        public void UnquotedStringTypeDeserialization_NonNumericUnderscoresRemainStrings(string yamlValue)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var result = deserializer.Deserialize<IDictionary<string, object>>($"Value: {yamlValue}");
+
+            Assert.Equal(yamlValue, Assert.IsType<string>(result["Value"]));
+        }
+
+        [Theory]
         [InlineData(System.Byte.MinValue)]
         [InlineData(System.Byte.MaxValue)]
         [InlineData(System.Int16.MinValue)]
