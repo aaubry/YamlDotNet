@@ -438,7 +438,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         else
                         {
                             //we couldn't parse it, default to string, It's probably too big
-                            result = v;
+                            result = value.Value;
                         }
                     }
                     else if (InfinityRegex.IsMatch(v)) //infinities

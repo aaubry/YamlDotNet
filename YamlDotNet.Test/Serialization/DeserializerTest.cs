@@ -301,6 +301,26 @@ b: &number 1
         }
 
         [Theory]
+        [InlineData("1_0e999")]
+        [InlineData("-1_0e999")]
+        public void UnquotedStringTypeDeserialization_OverflowWithUnderscores(string yamlValue)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization().Build();
+
+            var result = deserializer.Deserialize<IDictionary<string, object>>($"Value: {yamlValue}");
+
+#if NETFRAMEWORK
+            // .NET Framework rejects floating point overflow, so preserve the original scalar.
+            Assert.Equal(yamlValue, Assert.IsType<string>(result["Value"]));
+#else
+            // Modern .NET parses floating point overflow as infinity.
+            Assert.Equal(yamlValue[0] == '-' ? double.NegativeInfinity : double.PositiveInfinity,
+                Assert.IsType<double>(result["Value"]));
+#endif
+        }
+
+        [Theory]
         [InlineData("12_foo")]
         [InlineData("1e_2")]
         [InlineData("1e2_")]
