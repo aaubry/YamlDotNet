@@ -575,6 +575,22 @@ namespace YamlDotNet.Test.Core
                 StreamEnd);
         }
 
+        [Fact]
+        public void ReservedDirectiveEndingAtBufferBoundaryIsScanned()
+        {
+            // The input has no trailing line break and its length is exactly the
+            // capacity of the scanner's look-ahead buffer (1024 characters).
+            var yaml = "%FOO " + new string('x', 1019);
+
+            var scanner = new Scanner(new StringReader(yaml));
+
+            AssertPartialSequenceOfTokensFrom(scanner,
+                StreamStart,
+                StreamEnd);
+            scanner.Current.Start.Index.Should().Be(yaml.Length);
+            scanner.MoveNext().Should().BeFalse("Found extra tokens");
+        }
+
         private void AssertPartialSequenceOfTokensFrom(Scanner scanner, params Token[] tokens)
         {
             var tokenNumber = 1;

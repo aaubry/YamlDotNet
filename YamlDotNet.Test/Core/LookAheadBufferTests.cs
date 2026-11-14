@@ -198,6 +198,18 @@ namespace YamlDotNet.Test.Core
         }
 
         [Fact]
+        public void ShouldFindEndOfInputWhenInputLengthIsAMultipleOfCapacity()
+        {
+            var reader = new StringReader("abcd");
+            var buffer = CreateBuffer(reader, Capacity);
+
+            buffer.Peek(3);
+            buffer.Skip(4);
+
+            buffer.EndOfInput.Should().BeTrue();
+        }
+
+        [Fact]
         public void ShouldThrowWhenSkippingBeyondCurrentBuffer()
         {
             var reader = new StringReader(TestString);

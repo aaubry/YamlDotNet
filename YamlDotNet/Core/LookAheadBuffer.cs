@@ -74,7 +74,21 @@ namespace YamlDotNet.Core
         /// <summary>
         /// Gets a value indicating whether the end of the input reader has been reached.
         /// </summary>
-        public bool EndOfInput => endOfInput && count == 0;
+        public bool EndOfInput
+        {
+            get
+            {
+                // When the input length is a multiple of the block size, every read so far
+                // has filled its block, so the end of the input is only known after a read
+                // returns nothing. Try one before reporting that there is more input.
+                if (count == 0)
+                {
+                    FillBuffer();
+                }
+
+                return endOfInput && count == 0;
+            }
+        }
 
         /// <summary>
         /// Gets the index of the character for the specified offset.
