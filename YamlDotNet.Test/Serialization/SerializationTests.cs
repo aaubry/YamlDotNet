@@ -2810,6 +2810,17 @@ Null: true
             Assert.Contains(new KeyValuePair<int, HasNestedDictionary.Payload>(1, new HasNestedDictionary.Payload { I = 1 }), dct.Lookups);
         }
 
+        [Fact]
+        [Trait("motive", "issue #1060")]
+        public void RefStructPropertiesAreSkipped()
+        {
+            var serializer = new SerializerBuilder().Build();
+
+            Action action = () => serializer.Serialize(Encoding.ASCII);
+
+            action.Should().NotThrow();
+        }
+
         public class TestState
         {
             public int OnSerializedCallCount { get; set; }

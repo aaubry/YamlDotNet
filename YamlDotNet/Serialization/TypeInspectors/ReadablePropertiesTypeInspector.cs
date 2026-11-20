@@ -47,10 +47,21 @@ namespace YamlDotNet.Serialization.TypeInspectors
             this.includeNonPublicProperties = includeNonPublicProperties;
         }
 
+        private static bool IsByRefLike(Type type)
+        {
+#if NETFRAMEWORK || NETSTANDARD2_0
+            return type.IsValueType && type.CustomAttributes.Any(attribute =>
+                attribute.AttributeType.FullName == "System.Runtime.CompilerServices.IsByRefLikeAttribute");
+#else
+            return type.IsByRefLike;
+#endif
+        }
+
         private static bool IsValidProperty(PropertyInfo property)
         {
             return property.CanRead
-                && property.GetGetMethod(true)!.GetParameters().Length == 0;
+                && property.GetGetMethod(true)!.GetParameters().Length == 0
+                && !IsByRefLike(property.PropertyType);
         }
 
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
