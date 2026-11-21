@@ -83,14 +83,15 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             value = objectFactory.Create(implementationType);
             objectFactory.ExecuteOnDeserializing(value);
 
-            var consumedProperties = new HashSet<string>(StringComparer.Ordinal);
-            var consumedObjectProperties = new HashSet<string>(StringComparer.Ordinal);
+            // These sets are only needed for duplicate key checking and required property enforcement.
+            var consumedProperties = duplicateKeyChecking ? new HashSet<string>(StringComparer.Ordinal) : null;
+            var consumedObjectProperties = enforceRequiredProperties ? new HashSet<string>(StringComparer.Ordinal) : null;
             var mark = Mark.Empty;
 
             while (!parser.TryConsume<MappingEnd>(out var _))
             {
                 var propertyName = parser.Consume<Scalar>();
-                if (duplicateKeyChecking && !consumedProperties.Add(propertyName.Value))
+                if (consumedProperties != null && !consumedProperties.Add(propertyName.Value))
                 {
                     throw new YamlException(propertyName.Start, propertyName.End, $"Encountered duplicate key {propertyName.Value}");
                 }
@@ -102,7 +103,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                         parser.SkipThisAndNestedEvents();
                         continue;
                     }
-                    consumedObjectProperties.Add(property.Name);
+                    consumedObjectProperties?.Add(property.Name);
 
                     object? propertyValue;
                     if (property.ConverterType != null)
@@ -117,15 +118,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
                     if (propertyValue is IValuePromise propertyValuePromise)
                     {
-                        var valueRef = value;
-                        propertyValuePromise.ValueAvailable += v =>
-                        {
-                            var convertedValue = typeConverter.ChangeType(v, property.Type, enumNamingConvention, typeInspector);
-
-                            NullCheck(convertedValue, property, propertyName);
-
-                            property.Write(valueRef, convertedValue);
-                        };
+                        WriteWhenAvailable(propertyValuePromise, value, property, propertyName);
                     }
                     else
                     {
@@ -157,7 +150,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 var missingPropertyNames = new List<string>();
                 foreach (var property in properties)
                 {
-                    if (property.Required && !consumedObjectProperties.Contains(property.Name))
+                    if (property.Required && !consumedObjectProperties!.Contains(property.Name))
                     {
                         missingPropertyNames.Add(property.Name);
                     }
@@ -172,6 +165,20 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
             objectFactory.ExecuteOnDeserialized(value);
             return true;
+        }
+
+        // Kept separate from Deserialize so that the closure is only allocated when a promise is
+        // actually pending, not once per property.
+        private void WriteWhenAvailable(IValuePromise propertyValuePromise, object valueRef, IPropertyDescriptor property, Scalar propertyName)
+        {
+            propertyValuePromise.ValueAvailable += v =>
+            {
+                var convertedValue = typeConverter.ChangeType(v, property.Type, enumNamingConvention, typeInspector);
+
+                NullCheck(convertedValue, property, propertyName);
+
+                property.Write(valueRef, convertedValue);
+            };
         }
 
         public void NullCheck(object? value, IPropertyDescriptor property, Scalar propertyName)

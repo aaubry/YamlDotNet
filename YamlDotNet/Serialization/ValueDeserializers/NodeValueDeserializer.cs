@@ -55,12 +55,17 @@ namespace YamlDotNet.Serialization.ValueDeserializers
             var nodeType = GetTypeFromEvent(nodeEvent, expectedType);
             var rootDeserializer = new ObjectDeserializer(x => DeserializeValue(parser, x, state, nestedObjectDeserializer));
 
+            // The nested deserializer delegate does not depend on the node deserializer being tried,
+            // so create it once per node instead of once per node deserializer.
+            Func<IParser, Type, object?> nestedDeserializer = (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer);
+
             try
             {
-                foreach (var deserializer in deserializers)
+                var count = deserializers.Count;
+                for (var i = 0; i < count; i++)
                 {
-
-                    var result = deserializer.Deserialize(parser, nodeType, (r, t) => nestedObjectDeserializer.DeserializeValue(r, t, state, nestedObjectDeserializer), out var value, rootDeserializer);
+                    var deserializer = deserializers[i];
+                    var result = deserializer.Deserialize(parser, nodeType, nestedDeserializer, out var value, rootDeserializer);
                     if (result)
                     {
                         return typeConverter.ChangeType(value, expectedType, enumNamingConvention, typeInspector);
@@ -90,9 +95,10 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 
         private Type GetTypeFromEvent(NodeEvent? nodeEvent, Type currentType)
         {
-            foreach (var typeResolver in typeResolvers)
+            var count = typeResolvers.Count;
+            for (var i = 0; i < count; i++)
             {
-                if (typeResolver.Resolve(nodeEvent, ref currentType))
+                if (typeResolvers[i].Resolve(nodeEvent, ref currentType))
                 {
                     break;
                 }

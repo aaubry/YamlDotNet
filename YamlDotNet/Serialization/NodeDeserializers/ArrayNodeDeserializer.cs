@@ -45,6 +45,14 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                 return false;
             }
 
+            value = DeserializeArray(parser, expectedType, nestedObjectDeserializer);
+            return true;
+        }
+
+        // Kept separate from Deserialize so that the closure used by PromiseResolvedHandler is only
+        // allocated for arrays, not for every node that is offered to this deserializer.
+        private Array DeserializeArray(IParser parser, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer)
+        {
             var itemType = expectedType.GetElementType()!; // Arrays always have an element type
 
             var items = new ArrayList();
@@ -54,8 +62,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
             array = Array.CreateInstance(itemType, items.Count);
             items.CopyTo(array, 0);
 
-            value = array;
-            return true;
+            return array;
 
             void PromiseResolvedHandler(int index, object? value)
             {
