@@ -55,42 +55,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 
                 if (key is IValuePromise keyPromise)
                 {
-                    if (valuePromise == null)
-                    {
-                        // Key is pending, value is known
-                        keyPromise.ValueAvailable += v => result[v!] = value!;
-                    }
-                    else
-                    {
-                        // Both key and value are pending. We need to wait until both of them become available.
-                        var hasFirstPart = false;
-
-                        keyPromise.ValueAvailable += v =>
-                        {
-                            if (hasFirstPart)
-                            {
-                                TryAssign(result, v!, value!, property);
-                            }
-                            else
-                            {
-                                key = v!;
-                                hasFirstPart = true;
-                            }
-                        };
-
-                        valuePromise.ValueAvailable += v =>
-                        {
-                            if (hasFirstPart)
-                            {
-                                TryAssign(result, key, v!, property);
-                            }
-                            else
-                            {
-                                value = v;
-                                hasFirstPart = true;
-                            }
-                        };
-                    }
+                    AssignWhenAvailable(result, keyPromise, value, valuePromise, property);
                 }
                 else
                 {
@@ -107,9 +72,57 @@ namespace YamlDotNet.Serialization.NodeDeserializers
                     else
                     {
                         // Key is known, value is pending
-                        valuePromise.ValueAvailable += v => result[key!] = v!;
+                        AssignValueWhenAvailable(result, key, valuePromise);
                     }
                 }
+            }
+        }
+
+        // The promise handling below lives in separate methods so that the closures it needs are only
+        // allocated when a promise is pending, instead of once per entry on the common path.
+        private static void AssignValueWhenAvailable(IDictionary result, object key, IValuePromise valuePromise)
+        {
+            valuePromise.ValueAvailable += v => result[key!] = v!;
+        }
+
+        private void AssignWhenAvailable(IDictionary result, IValuePromise keyPromise, object? value, IValuePromise? valuePromise, MappingStart property)
+        {
+            object key = keyPromise;
+            if (valuePromise == null)
+            {
+                // Key is pending, value is known
+                keyPromise.ValueAvailable += v => result[v!] = value!;
+            }
+            else
+            {
+                // Both key and value are pending. We need to wait until both of them become available.
+                var hasFirstPart = false;
+
+                keyPromise.ValueAvailable += v =>
+                {
+                    if (hasFirstPart)
+                    {
+                        TryAssign(result, v!, value!, property);
+                    }
+                    else
+                    {
+                        key = v!;
+                        hasFirstPart = true;
+                    }
+                };
+
+                valuePromise.ValueAvailable += v =>
+                {
+                    if (hasFirstPart)
+                    {
+                        TryAssign(result, key, v!, property);
+                    }
+                    else
+                    {
+                        value = v;
+                        hasFirstPart = true;
+                    }
+                };
             }
         }
     }

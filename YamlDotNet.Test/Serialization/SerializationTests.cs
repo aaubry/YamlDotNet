@@ -2430,6 +2430,61 @@ Cycle: *o0");
             Assert.Same(obj, obj.Cycle);
         }
 
+        public class CycleCollectionsEntity
+        {
+            public Dictionary<string, CycleCollectionsEntity> Values { get; set; }
+            public Dictionary<CycleCollectionsEntity, string> Keys { get; set; }
+            public Dictionary<CycleCollectionsEntity, CycleCollectionsEntity> KeysAndValues { get; set; }
+            public CycleCollectionsEntity[] Array { get; set; }
+        }
+
+        [Fact]
+        public void DeserializeCycleInDictionaryValue()
+        {
+            var yaml = Yaml.Text(@"&o0
+Values:
+  self: *o0");
+            var obj = Deserializer.Deserialize<CycleCollectionsEntity>(yaml);
+
+            Assert.Same(obj, obj.Values["self"]);
+        }
+
+        [Fact]
+        public void DeserializeCycleInDictionaryKey()
+        {
+            var yaml = Yaml.Text(@"&o0
+Keys:
+  *o0 : self");
+            var obj = Deserializer.Deserialize<CycleCollectionsEntity>(yaml);
+
+            Assert.Equal("self", obj.Keys[obj]);
+        }
+
+        [Fact]
+        public void DeserializeCycleInDictionaryKeyAndValue()
+        {
+            var yaml = Yaml.Text(@"&o0
+KeysAndValues:
+  *o0 : *o0");
+            var obj = Deserializer.Deserialize<CycleCollectionsEntity>(yaml);
+
+            Assert.Same(obj, obj.KeysAndValues[obj]);
+        }
+
+        [Fact]
+        public void DeserializeCycleInArray()
+        {
+            var yaml = Yaml.Text(@"&o0
+Array:
+- *o0
+- *o0");
+            var obj = Deserializer.Deserialize<CycleCollectionsEntity>(yaml);
+
+            Assert.Equal(2, obj.Array.Length);
+            Assert.Same(obj, obj.Array[0]);
+            Assert.Same(obj, obj.Array[1]);
+        }
+
         public static IEnumerable<object[]> Depths => Enumerable.Range(1, 10).Select(i => new[] { (object)i });
 
         [Theory]
