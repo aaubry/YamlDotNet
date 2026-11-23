@@ -58,18 +58,21 @@ namespace YamlDotNet.Serialization.TypeInspectors
             if (!string.IsNullOrEmpty(result))
             {
                 var enumMembers = type.GetMember(result);
-                if (enumMembers.Length > 0)
-                {
-                    var attribute = enumMembers[0].GetCustomAttribute<EnumMemberAttribute>();
-                    if (attribute?.Value != null)
-                    {
-                        result = attribute.Value;
-                    }
-                }
+                result = enumMembers.Length > 0
+                    ? GetEnumMemberValue(type, result)
+                    : string.Join(", ", result.Split(',').Select(name => GetEnumMemberValue(type, name.Trim())));
             }
 #endif
             return result!;
         }
+
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+        private static string GetEnumMemberValue(Type type, string name)
+        {
+            var enumMember = type.GetMember(name).FirstOrDefault();
+            return enumMember?.GetCustomAttribute<EnumMemberAttribute>()?.Value ?? name;
+        }
+#endif
 
         public override bool HasParseMethod(Type type) => type.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, [typeof(string)], null) != null;
 

@@ -1642,6 +1642,22 @@ y:
             Assert.Equal("NullValue", actual.TrimNewLines());
         }
 
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttributesForFlagCombinations()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var actual = serializer.Serialize(EnumMemberedFlagsEnum.AAA | EnumMemberedFlagsEnum.BBB);
+            Assert.Equal("A, B", actual.TrimNewLines());
+        }
+
+        [Fact]
+        public void EnumSerializationUsesEnumMemberAttributeForNamedFlagCombination()
+        {
+            var serializer = new SerializerBuilder().Build();
+            var actual = serializer.Serialize(EnumMemberedNamedFlagsEnum.Both);
+            Assert.Equal("AB", actual.TrimNewLines());
+        }
+
         public enum EnumMemberedEnum
         {
             [System.Runtime.Serialization.EnumMember(Value = "goodbye")]
@@ -1652,6 +1668,29 @@ y:
 
             [System.Runtime.Serialization.EnumMember()]
             NullValue = 3
+        }
+
+        [Flags]
+        public enum EnumMemberedFlagsEnum
+        {
+            [System.Runtime.Serialization.EnumMember(Value = "A")]
+            AAA = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = "B")]
+            BBB = 2
+        }
+
+        [Flags]
+        public enum EnumMemberedNamedFlagsEnum
+        {
+            [System.Runtime.Serialization.EnumMember(Value = "A")]
+            AAA = 1,
+
+            [System.Runtime.Serialization.EnumMember(Value = "B")]
+            BBB = 2,
+
+            [System.Runtime.Serialization.EnumMember(Value = "AB")]
+            Both = AAA | BBB
         }
 #endif
 
