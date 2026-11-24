@@ -100,11 +100,37 @@ namespace YamlDotNet.RepresentationModel
         public void Load(IParser parser)
         {
             documents.Clear();
+            parser = new CommentSkippingParser(parser);
             parser.Consume<StreamStart>();
             while (!parser.TryConsume<StreamEnd>(out var _))
             {
                 var document = new YamlDocument(parser, MaxDepth);
                 documents.Add(document);
+            }
+        }
+
+        private sealed class CommentSkippingParser : IParser
+        {
+            private readonly IParser innerParser;
+
+            public CommentSkippingParser(IParser innerParser)
+            {
+                this.innerParser = innerParser;
+            }
+
+            public ParsingEvent? Current => innerParser.Current;
+
+            public bool MoveNext()
+            {
+                while (innerParser.MoveNext())
+                {
+                    if (innerParser.Current is not Comment)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
 

@@ -46,6 +46,88 @@ namespace YamlDotNet.Test.RepresentationModel
             Assert.Equal(YamlNodeType.Scalar, stream.Documents[0].RootNode.NodeType);
         }
 
+        [Fact]
+        public void LoadDocumentWithCommentsWhenCommentsAreNotSkipped_Issue_1004()
+        {
+            var yaml = @"
+        key1: value1
+        key2: value2
+        key3:
+          key4: value4
+          key5: value5
+        key6:
+          - item1
+          - item2
+          - item3
+
+        # comment
+        key7:
+          - key8: value8
+            key9: value9
+            key10: value10
+          - key11: key11
+            key12:
+              key13: value13
+              key14: value14";
+
+            var stream = new YamlStream();
+            stream.Load(new Parser(new Scanner(new StringReader(yaml), skipComments: false)));
+
+            var expected = new YamlMappingNode
+            {
+                { "key1", "value1" },
+                { "key2", "value2" },
+                { "key3", new YamlMappingNode
+                    {
+                        { "key4", "value4" },
+                        { "key5", "value5" }
+                    }
+                },
+                { "key6", new YamlSequenceNode("item1", "item2", "item3") },
+                { "key7", new YamlSequenceNode
+                    {
+                        new YamlMappingNode
+                        {
+                            { "key8", "value8" },
+                            { "key9", "value9" },
+                            { "key10", "value10" }
+                        },
+                        new YamlMappingNode
+                        {
+                            { "key11", "key11" },
+                            { "key12", new YamlMappingNode
+                                {
+                                    { "key13", "value13" },
+                                    { "key14", "value14" }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            Assert.Equal(expected, Assert.Single(stream.Documents).RootNode);
+        }
+
+        [Theory]
+        [InlineData("# leading\nkey: value\n# trailing")]
+        [InlineData("key: # inline\n  nested: value # inline\n# between\nother: value")]
+        [InlineData("items:\n  - first # inline\n  # between\n  - key: value # inline\n    other:\n      - nested # inline")]
+        [InlineData("{ key: value, # inline\n other: [one, # inline\n two] }")]
+        [InlineData("--- # inline\nkey: value\n... # inline\n# between\n---\n- item # inline")]
+        public void LoadIgnoresCommentsAtEveryLevelWhenCommentsAreNotSkipped(string yaml)
+        {
+            var expected = new YamlStream();
+            expected.Load(new StringReader(yaml));
+
+            var actual = new YamlStream();
+            actual.Load(new Parser(new Scanner(new StringReader(yaml), skipComments: false)));
+
+            Assert.Equal(
+                expected.Documents.Select(document => document.RootNode),
+                actual.Documents.Select(document => document.RootNode));
+        }
+
         [Theory]
         [InlineData("&a [*a]")]
         [InlineData("?\n  key: &id1\n    recursion: *id1\n: foo")]
